@@ -1,0 +1,8 @@
+# Ignore the dist folder
+dist/
+
+# Ignore node_modules
+node_modules
+
+# Ignore coverage folder
+coverage/
