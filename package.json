@@ -5,13 +5,19 @@
   "scripts": {
     "dev": "nodemon -w src/server -x tsx src/main.mts",
     "start": "NODE_ENV=production tsx src/main.mts",
-    "build": "vite build"
+    "build": "vite build",
+    "lint": "eslint '**/*.{js,mjs,cjs,ts}'",
+    "lint:fix": "eslint --fix '**/*.{js,mjs,cjs,ts}'"
   },
   "devDependencies": {
+    "@eslint/js": "^9.16.0",
     "@types/express": "^5.0.1",
     "@types/node": "^22.15.2",
+    "eslint": "^9.16.0",
+    "eslint-plugin-prettier": "^5.2.1",
     "nodemon": "^3.1.10",
-    "vite": "^6.3.3"
+    "vite": "^6.3.3",
+    "typescript-eslint": "^8.17.0"
   },
   "dependencies": {
     "express": "^5.1.0",
