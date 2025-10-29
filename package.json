@@ -1,7 +1,11 @@
 {
+  "engines": {
+    "node": ">=22.13.0"
+  },
   "name": "ssbno-statreg-api",
   "private": true,
   "version": "0.0.0",
+  "type": "module",
   "scripts": {
     "dev": "nodemon -w src/server -x tsx src/main.mts",
     "start": "NODE_ENV=production tsx src/main.mts",
@@ -10,19 +14,19 @@
     "lint:fix": "eslint --fix '**/*.{js,mjs,cjs,ts}'"
   },
   "devDependencies": {
-    "@eslint/js": "^9.16.0",
-    "@types/express": "^5.0.1",
-    "@types/node": "^22.15.2",
-    "eslint": "^9.16.0",
-    "eslint-plugin-prettier": "^5.2.1",
+    "@eslint/js": "^9.38.0",
+    "@types/express": "^5.0.5",
+    "@types/node": "^24.9.2",
+    "eslint": "^9.38.0",
+    "eslint-plugin-prettier": "^5.5.4",
     "nodemon": "^3.1.10",
-    "vite": "^6.3.3",
-    "typescript-eslint": "^8.17.0"
+    "typescript-eslint": "^8.46.2"
   },
   "dependencies": {
     "express": "^5.1.0",
-    "tsx": "^4.19.3",
-    "typescript": "^5.8.3",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.12",
     "vite-express": "*"
   }
 }
