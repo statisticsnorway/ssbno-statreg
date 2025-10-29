@@ -7,4 +7,5 @@ app.get('/', (_, res) => {
   res.send('Hello World!')
 })
 
-ViteExpress.listen(app, 3000, () => console.log('Server is listening on port 3000...'))
+const port = 8080
+ViteExpress.listen(app, port, () => console.log(`Server is listening on port ${port}...`))
