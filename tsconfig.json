@@ -1,19 +1,22 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
-    "useDefineForClassFields": true,
-    "module": "NodeNext",
-    "lib": ["ESNext", "DOM"],
-    "moduleResolution": "NodeNext",
-    "strict": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
+    "target": "ES2022",
+    "module": "ESNext",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "skipLibCheck": true,
     "esModuleInterop": true,
-    "noEmit": true,
+    "moduleResolution": "node",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    },
+    "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "skipLibCheck": true
+    "noFallthroughCasesInSwitch": true,
+    "isolatedModules": true,
+    "outDir": "dist",
+    "noEmit": false,
   },
   "include": ["src"]
 }
