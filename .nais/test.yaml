@@ -31,7 +31,7 @@ spec:
             - name: "pgaudit.log_parameter"
               value: "on"          
           databases:
-            - name: statreg-db
+            - name: statreg_db
   image: '{{ image }}' # Injected from the GitHub Action
   ingresses:
   - https://ssbno-statreg-api.intern.test.ssb.no
