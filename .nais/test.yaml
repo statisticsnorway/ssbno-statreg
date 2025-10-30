@@ -16,6 +16,13 @@ spec:
 #  env:
 #  - name: API_HOST
 #    value: https://i.qa.ssb.no
+  gcp:
+      sqlInstances:
+        - type: POSTGRES_17
+# See Nais docs: https://docs.ssb.cloud.nais.io/workloads/application/reference/application-spec/#gcpsqlinstancestier
+          tier: db-f1-micro # This tier MUST be increased for PROD!
+          databases:
+            - name: statreg-db
   image: '{{ image }}' # Injected from the GitHub Action
   ingresses:
   - https://ssbno-statreg-api.intern.test.ssb.no
