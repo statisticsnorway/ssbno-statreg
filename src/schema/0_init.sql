@@ -1,4 +1,4 @@
-create table statreg_db."DATABASECHANGELOG"
+create table statreg-db."DATABASECHANGELOG"
 (
     "ID"           VARCHAR(63)  not null,
     "AUTHOR"       VARCHAR(63)  not null,
@@ -13,7 +13,7 @@ create table statreg_db."DATABASECHANGELOG"
         primary key ("ID", "AUTHOR", "FILENAME")
 );
 
-create table statreg_db."REGIONALT_NIVA"
+create table statreg-db."REGIONALT_NIVA"
 (
     "ID"      NUMERIC(19)   not null
         constraint "SYS_C0023916"
@@ -23,7 +23,7 @@ create table statreg_db."REGIONALT_NIVA"
     "KODE"    VARCHAR(50)
 );
 
-create table statreg_db."SEKSJON"
+create table statreg-db."SEKSJON"
 (
     "ID"      NUMERIC(19)    not null
         constraint "SYS_C0023922"
@@ -35,15 +35,15 @@ create table statreg_db."SEKSJON"
 );
 
 create index "SYS_C0023924"
-    on statreg_db."SEKSJON" ("KODE");
+    on statreg-db."SEKSJON" ("KODE");
 
 create index "SYS_C0023925"
-    on statreg_db."SEKSJON" ("NAVN_EN");
+    on statreg-db."SEKSJON" ("NAVN_EN");
 
 create index "SYS_C0023923"
-    on statreg_db."SEKSJON" ("NAVN");
+    on statreg-db."SEKSJON" ("NAVN");
 
-create table statreg_db."DATABASECHANGELOGLOCK"
+create table statreg-db."DATABASECHANGELOGLOCK"
 (
     "ID"          NUMERIC(1) not null
         constraint "PK_DATABASECHANGELOGLOCK"
@@ -53,7 +53,7 @@ create table statreg_db."DATABASECHANGELOGLOCK"
     "LOCKEDBY"    VARCHAR(255)
 );
 
-create table statreg_db."AUDIT_LOG"
+create table statreg-db."AUDIT_LOG"
 (
     "ID"                       NUMERIC(19)   not null
         constraint "SYS_C0023865"
@@ -71,7 +71,7 @@ create table statreg_db."AUDIT_LOG"
     "PERSISTED_OBJECT_ID"      NUMERIC(19)
 );
 
-create table statreg_db."KALENDER_DATO"
+create table statreg-db."KALENDER_DATO"
 (
     "ID"        NUMERIC(19)    not null
         constraint "SYS_C0023875"
@@ -82,9 +82,9 @@ create table statreg_db."KALENDER_DATO"
 );
 
 create index "SYS_C0023876"
-    on statreg_db."KALENDER_DATO" ("DAG");
+    on statreg-db."KALENDER_DATO" ("DAG");
 
-create table statreg_db."KORTNAVN"
+create table statreg-db."KORTNAVN"
 (
     "ID"           NUMERIC(19)   not null
         constraint "SYS_C0023896"
@@ -95,7 +95,7 @@ create table statreg_db."KORTNAVN"
     "DATE_CREATED" TIMESTAMP(6) not null
 );
 
-create table statreg_db."STATISTIKK"
+create table statreg-db."STATISTIKK"
 (
     "ID"                     NUMERIC(19)    not null
         constraint "SYS_C0023938"
@@ -103,7 +103,7 @@ create table statreg_db."STATISTIKK"
     "VERSION"                NUMERIC(19)    not null,
     "KORTNAVN_ID"            NUMERIC(19)    not null
         constraint "FKFA5CB213C47AD723"
-            references statreg_db."KORTNAVN"
+            references statreg-db."KORTNAVN"
             on delete restrict,
     "DIR_FLYT"               VARCHAR(255),
     "TRIGGERORD"             VARCHAR(500),
@@ -113,7 +113,7 @@ create table statreg_db."STATISTIKK"
     "TRIGGERORD_EN"          VARCHAR(500),
     "EIERSEKSJON_ID"         NUMERIC(19)    not null
         constraint "FKFA5CB213B101B242"
-            references statreg_db."SEKSJON"
+            references statreg-db."SEKSJON"
             on delete restrict,
     "FORSTEGANGSPUBLISERING" TIMESTAMP(6),
     "ARSRAPPORTERING"        NUMERIC(1)     not null,
@@ -121,7 +121,7 @@ create table statreg_db."STATISTIKK"
     "GAMLE_EMNEKODER"        VARCHAR(255),
     "RELASJON_ID"            NUMERIC(19)
         constraint "FKFA5CB2137008A78"
-            references statreg_db."STATISTIKK"
+            references statreg-db."STATISTIKK"
             on delete restrict,
     "STATISTIKKNAVN"         VARCHAR(140) not null,
     "LAST_UPDATED"           TIMESTAMP(6)  not null,
@@ -131,15 +131,15 @@ create table statreg_db."STATISTIKK"
 );
 
 create index "SYS_C0023941"
-    on statreg_db."STATISTIKK" ("STATISTIKKNAVN");
+    on statreg-db."STATISTIKK" ("STATISTIKKNAVN");
 
 create index "SYS_C0023942"
-    on statreg_db."STATISTIKK" ("STATISTIKKNAVN_EN");
+    on statreg-db."STATISTIKK" ("STATISTIKKNAVN_EN");
 
 create index "SYS_C0023897"
-    on statreg_db."KORTNAVN" ("NAVN");
+    on statreg-db."KORTNAVN" ("NAVN");
 
-create table statreg_db."KONTAKT"
+create table statreg-db."KONTAKT"
 (
     "ID"           NUMERIC(19)    not null
         constraint "SYS_C0023890"
@@ -156,22 +156,22 @@ create table statreg_db."KONTAKT"
     "NAVN_EN"      VARCHAR(130)
 );
 
-create table statreg_db."STATISTIKK_KONTAKTER"
+create table statreg-db."STATISTIKK_KONTAKTER"
 (
     "STATISTIKK_ID" NUMERIC(19) not null
         constraint "FKF98634A1D978A9A3"
-            references statreg_db."STATISTIKK"
+            references statreg-db."STATISTIKK"
             on delete restrict,
     "KONTAKT_ID"    NUMERIC(19) not null
         constraint "FKF98634A159382591"
-            references statreg_db."KONTAKT"
+            references statreg-db."KONTAKT"
             on delete restrict,
     "KONTAKTER_IDX" NUMERIC(10),
     constraint "SYS_C0023946"
         primary key ("STATISTIKK_ID", "KONTAKT_ID")
 );
 
-create table statreg_db."FREKVENS"
+create table statreg-db."FREKVENS"
 (
     "ID"      NUMERIC(19)   not null
         constraint "SYS_C0023870"
@@ -181,7 +181,7 @@ create table statreg_db."FREKVENS"
     "KODE"    VARCHAR(50) not null
 );
 
-create table statreg_db."VARIANT"
+create table statreg-db."VARIANT"
 (
     "ID"            NUMERIC(19)    not null
         constraint "SYS_C0023958"
@@ -189,13 +189,13 @@ create table statreg_db."VARIANT"
     "VERSION"       NUMERIC(19)    not null,
     "FREKVENS_ID"   NUMERIC(19)    not null
         constraint "FKE1D1085B8B4EB03"
-            references statreg_db."FREKVENS"
+            references statreg-db."FREKVENS"
             on delete restrict,
     "LAST_UPDATED"  TIMESTAMP(6)  not null,
     "REVISJON"      VARCHAR(255) not null,
     "STATISTIKK_ID" NUMERIC(19)    not null
         constraint "FKE1D1085D978A9A3"
-            references statreg_db."STATISTIKK"
+            references statreg-db."STATISTIKK"
             on delete restrict,
     "DETALJNIVA_EN" VARCHAR(255),
     "DETALJNIVA"    VARCHAR(255),
@@ -203,7 +203,7 @@ create table statreg_db."VARIANT"
     "DATE_CREATED"  TIMESTAMP(6)  not null
 );
 
-create table statreg_db."PUBLISERING"
+create table statreg-db."PUBLISERING"
 (
     "ID"               NUMERIC(19)    not null
         constraint "SYS_C0023910"
@@ -217,7 +217,7 @@ create table statreg_db."PUBLISERING"
     "DESK_FLYT"        VARCHAR(255),
     "VARIANT_ID"       NUMERIC(19)    not null
         constraint "FKDB40A13C44A06F71"
-            references statreg_db."VARIANT"
+            references statreg-db."VARIANT"
             on delete restrict,
     "PERIODE_FRA"      TIMESTAMP(6)  not null,
     "ER_AVLYST"        NUMERIC(1)     not null,
@@ -226,15 +226,15 @@ create table statreg_db."PUBLISERING"
     "IMPORT_FLAG"      NUMERIC(1)
 );
 
-create table statreg_db."STATISTIKK_REGIONALE_NIVAER"
+create table statreg-db."STATISTIKK_REGIONALE_NIVAER"
 (
     "REGIONALT_NIVA_ID" NUMERIC(19) not null
         constraint "FKE4B2F5B83078425C"
-            references statreg_db."REGIONALT_NIVA"
+            references statreg-db."REGIONALT_NIVA"
             on delete restrict,
     "STATISTIKK_ID"     NUMERIC(19) not null
         constraint "FKE4B2F5B8D978A9A3"
-            references statreg_db."STATISTIKK"
+            references statreg-db."STATISTIKK"
             on delete restrict,
     constraint "SYS_C0023949"
         primary key ("STATISTIKK_ID", "REGIONALT_NIVA_ID")
