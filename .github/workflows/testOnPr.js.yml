@@ -22,4 +22,5 @@ jobs:
         cache: 'npm'
     - run: npm ci
     - run: npm run build --if-present
-    - run: npm run ci-test
+# TODO: Uncomment after tests have been implemented
+#    - run: npm run ci-test
