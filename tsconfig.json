@@ -2,9 +2,9 @@
   "compilerOptions": {
     "target": "ESNext",
     "useDefineForClassFields": true,
-    "module": "NodeNext",
+    "module": "ESNext",
     "lib": ["ESNext", "DOM"],
-    "moduleResolution": "NodeNext",
+    "moduleResolution": "bundler",
     "strict": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
@@ -15,6 +15,11 @@
     "noImplicitReturns": true,
     "skipLibCheck": true,
     "noUncheckedIndexedAccess": true, //added to boost typesafety
+    "baseUrl": "src",
+    "paths": {
+      "@types/*": ["types/*"],
+      "@controllers/*": ["controllers/*"]
+    }
   },
   "include": ["src"]
 }
