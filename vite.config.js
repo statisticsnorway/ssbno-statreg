@@ -4,7 +4,7 @@ import { builtinModules } from 'module'
 
 export default defineConfig({
   build: {
-    target: 'esnext',
+    target: 'ES2022',
     sourcemap: 'true',
     lib: {
       entry: 'src/main.mts',

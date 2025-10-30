@@ -6,7 +6,7 @@ export async function initializeLightship(): Promise<Lightship> {
   if (!lightship) {
     lightship = await createLightship({
       // eslint-disable-next-line no-undef
-      detectKubernetes: process.env.NODE_ENV == 'development' ? false : true,
+      detectKubernetes: process.env.NODE_ENV != 'development',
       port: 9000,
       shutdownDelay: 5000,
       gracefulShutdownTimeout: 30000,
