@@ -4,13 +4,9 @@ on:
     branches:
       - develop
   workflow_dispatch:
-  pull_request:
-    types:
-      - labeled  # remove when done testing 
 
 jobs:
   build_and_deploy:
-    if: (contains(fromJSON('["annesiri", "ssb-cgn", "Glenruben", "johnnadeluy", "Carl-OW"]'), github.actor))
     name: Build, push and deploy
     runs-on: ubuntu-latest
     environment: test
