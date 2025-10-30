@@ -1,13 +1,14 @@
 import globals from 'globals'
 import eslint from '@eslint/js'
+import { defineConfig, globalIgnores } from 'eslint/config'
 import tseslint from 'typescript-eslint'
 import tseslintParser from '@typescript-eslint/parser'
 import prettier from 'eslint-plugin-prettier'
 
-export default [
+export default defineConfig([
+  globalIgnores(['dist/', 'node_modules/']),
   {
     files: ['**/*.{js,mjs,cjs,ts}'],
-    ignores: ['dist/*', 'node_modules/*'],
     plugins: {
       prettier,
     },
@@ -21,4 +22,4 @@ export default [
       'prettier/prettier': ['warn'],
     },
   },
-]
+])
