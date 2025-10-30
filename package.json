@@ -11,7 +11,9 @@
     "start": "node dist/main.js",
     "build": "vite build",
     "lint": "eslint '**/*.{js,mjs,cjs,ts}'",
-    "lint:fix": "eslint --fix '**/*.{js,mjs,cjs,ts}'"
+    "lint:fix": "eslint --fix '**/*.{js,mjs,cjs,ts}'",
+    "test": "vitest",
+    "ci-test": "vitest run"
   },
   "devDependencies": {
     "@eslint/js": "^9.38.0",
@@ -20,7 +22,8 @@
     "eslint": "^9.38.0",
     "eslint-plugin-prettier": "^5.5.4",
     "nodemon": "^3.1.10",
-    "typescript-eslint": "^8.46.2"
+    "typescript-eslint": "^8.46.2",
+    "vitest": "^4.0.5"
   },
   "dependencies": {
     "express": "^5.1.0",
