@@ -9,7 +9,8 @@
     "build": "vite build",
     "lint": "eslint '**/*.{js,mjs,cjs,ts}'",
     "lint:fix": "eslint --fix '**/*.{js,mjs,cjs,ts}'",
-    "types:gen": "ts-node openapi/generate-types.ts"
+    "types:clean": "rm -rf src/types/*.d.ts",
+    "types:gen": "npm run types:clean && ts-node openapi/generate-types.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.16.0",
