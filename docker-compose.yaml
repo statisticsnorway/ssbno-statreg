@@ -1,0 +1,16 @@
+version: "3.9"
+services:
+  postgres:
+    image: postgres:16
+    container_name: statreg-pg
+    environment:
+      POSTGRES_USER: cob
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: "statreg-db"
+    ports:
+      - "5432:5432"
+    volumes:
+      - statreg-pgdata:/var/lib/postgresql/data
+      - ./statreg.sql:/docker-entrypoint-initdb.d/statreg.sql:ro
+volumes:
+  statreg-pgdata:
