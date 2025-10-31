@@ -1,5 +1,5 @@
 # Use a Node.js 22 base image for the builder stage
-FROM node:22.21.0-alpine AS builder
+FROM node:22.21.1-alpine AS builder
 
 # Set the working directory
 WORKDIR /app
@@ -23,7 +23,7 @@ RUN npm prune --production
 RUN mv dist/main.js main.mjs
 
 # Use a lightweight Node.js distroless base image for the final image
-FROM gcr.io/distroless/nodejs22-debian12
+FROM gcr.io/distroless/nodejs22-debian13@sha256:a25df3d96ed6551ed694b63fa31e6b62dd05085ca59700889a4732df81878fd3
 
 # Set the working directory
 WORKDIR /app
