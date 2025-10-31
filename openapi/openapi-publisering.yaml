@@ -1,0 +1,384 @@
+openapi: 3.0.4
+info:
+  title: Statistikkregisteret API
+  version: "1.0"
+  description: API and UI endpoints for statistics and publications used by Statistikkregisteret.
+
+paths:
+  /publisering/list:
+    get:
+      summary: List publications (UI)
+      description: Renders the HTML list view with optional filters and sorting. Mirrors `PubliseringController.list`.
+      operationId: publiseringListView
+      parameters:
+        - in: query
+          name: max
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+        - in: query
+          name: offset
+          schema: { type: integer, minimum: 0, default: 0 }
+        - in: query
+          name: sort
+          description: Field to sort by (default `tidspunkt`). When `statistikknavn`, sorting happens via nested association.
+          schema:
+            type: string
+            default: tidspunkt
+            enum: [tidspunkt, statistikknavn, dateCreated, id]
+        - in: query
+          name: order
+          schema:
+            type: string
+            default: asc
+            enum: [asc, desc]
+        - in: query
+          name: filter.seksjon
+          description: Filter by owner section code (e.g. "350")
+          schema: { type: string }
+        - in: query
+          name: filter.kortnavn
+          description: Filter by `kortnavn` (LIKE)
+          schema: { type: string }
+        - in: query
+          name: filter.initialer
+          description: Filter by contact initials (LIKE)
+          schema: { type: string }
+      responses:
+        '200':
+          description: HTML list view
+          content:
+            text/html: {}
+
+  /publisering/create:
+    get:
+      summary: Open create-publication form (UI)
+      description: Renders the HTML form to create a publication. Mirrors `PubliseringController.create`.
+      operationId: publiseringCreateForm
+      parameters:
+        - in: query
+          name: statistikkId
+          required: false
+          description: Statistikk ID the new publication belongs to (`params.statistikk.id`)
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: HTML form
+          content:
+            text/html: {}
+        '302':
+          description: Redirect (statistic not approved)
+          headers:
+            Location:
+              schema: { type: string }
+
+  /publisering/delete:
+    post:
+      summary: Delete a publication (UI action)
+      description: Deletes a publication and redirects. Mirrors `PubliseringController.delete` (POST).
+      operationId: publiseringDelete
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  description: Publisering ID to delete (`params.id`)
+                statistikk:
+                  type: integer
+                  description: Optional Statistikk ID for redirect (`params.statistikk`)
+              required: [id]
+      responses:
+        '303':
+          description: See Other — redirect after delete
+          headers:
+            Location:
+              schema: { type: string }
+        '302':
+          description: Redirect when not found or delete fails
+          headers:
+            Location:
+              schema: { type: string }
+  
+  /publisering/edit:
+    get:
+      summary: Open edit-publication form (UI)
+      description: Renders the HTML form to edit an existing publication. Mirrors `PubliseringController.edit`.
+      operationId: publiseringEditForm
+      parameters:
+        - in: query
+          name: id
+          required: true
+          description: Publisering ID to edit (`params.id`)
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: HTML form
+          content:
+            text/html: {}
+        '302':
+          description: Redirect (not found or not approved)
+          headers:
+            Location:
+              schema: { type: string }
+  
+  /publisering/update:
+    post:
+      summary: Update a publication (UI action)
+      description: Updates a publication and redirects. Mirrors `PubliseringController.update` (POST).
+      operationId: publiseringUpdate
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              additionalProperties: true
+              properties:
+                id:
+                  type: integer
+                  description: Publisering ID (`params.id`)
+                version:
+                  type: integer
+                  description: Optimistic locking version (`params.version`)
+                tidspunkt:
+                  type: string
+                  description: New publish timestamp (`params.tidspunkt`)
+                internKommentar:
+                  type: string
+                  description: Internal comment
+              required: [id]
+      responses:
+        '303':
+          description: See Other — redirect after successful update
+          headers:
+            Location:
+              schema: { type: string }
+        '200':
+          description: HTML edit view re-rendered with validation errors
+          content:
+            text/html: {}
+        '302':
+          description: Redirect when not found
+          headers:
+            Location:
+              schema: { type: string }
+  
+  /publisering/versjoner:
+    get:
+      summary: Show audit versions for a publication (UI)
+      description: Renders an HTML page grouping audit entries by version. Mirrors `PubliseringController.versjoner`.
+      operationId: publiseringVersionsView
+      parameters:
+        - in: query
+          name: id
+          required: true
+          description: Publisering ID (`params.id`)
+          schema: { type: integer }
+      responses:
+        '200':
+          description: HTML versions view
+          content:
+            text/html: {}
+        '302':
+          description: Redirect when not found
+          headers:
+            Location:
+              schema: { type: string }
+
+  /publisering/flytt:
+    get:
+      summary: Move publication to another variant (UI)
+      description: Shows a UI to move a publication to a different variant. Mirrors `PubliseringController.flytt`.
+      operationId: publiseringFlyttForm
+      parameters:
+        - in: query
+          name: id
+          required: true
+          description: Publisering ID to move (`params.id`)
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: HTML view with variant list
+          content:
+            text/html: {}
+        '302':
+          description: Redirect (not found)
+          headers:
+            Location:
+              schema: { type: string }
+
+  /publisering/lagreVariant:
+    post:
+      summary: Change the variant of a publication (UI action)
+      description: Assigns a different Variant to the publication and redirects. Mirrors `PubliseringController.lagreVariant` (POST).
+      operationId: publiseringSaveVariant
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  description: Publisering ID (`params.id`)
+                version:
+                  type: integer
+                  description: Optimistic locking version (`params.version`)
+                variant:
+                  type: integer
+                  description: Variant ID to assign (`params.variant`)
+              required: [id, variant]
+      responses:
+        '303':
+          description: See Other — redirect after success
+          headers:
+            Location:
+              schema: { type: string }
+        '200':
+          description: HTML flytt view re-rendered with errors
+          content:
+            text/html: {}
+        '302':
+          description: Redirect when not found
+          headers:
+            Location:
+              schema: { type: string }
+
+  /publisering/hentHelligdagerSperredeOgPubliseringer:
+    get:
+      summary: Get holidays and publication-day summaries
+      operationId: getHolidaysBlockedAndPublications
+      description: Returns holidays and per-day summaries of proposed/approved publication counts for one or more months.
+      parameters:
+        - in: query
+          name: mnd
+          description: Month (1–12)
+          schema: { type: integer, minimum: 1, maximum: 12 }
+        - in: query
+          name: ar
+          description: Year (e.g. 2025)
+          schema: { type: integer }
+        - in: query
+          name: antallMnd
+          description: Number of months to include starting from (mnd, ar). If omitted, returns only (mnd, ar).
+          schema: { type: integer, minimum: 1, maximum: 24 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  helligdager:
+                    type: array
+                    description: List of holiday date strings (format decided by server)
+                    items:
+                      type: string
+                  publiseringsTidspunktSummer:
+                    type: array
+                    description: List of tuples [dateString, level] where level describes load (e.g. "maks")
+                    items:
+                      type: array
+                      minItems: 2
+                      maxItems: 2
+                      items:
+                        oneOf:
+                          - type: string
+                          - type: string
+              examples:
+                example:
+                  value:
+                    helligdager:
+                      - "2025-12-25"
+                      - "2025-12-26"
+                      - "2026-01-01"
+                    publiseringsTidspunktSummer:
+                      - ["2025-06-03", "middels"]
+                      - ["2025-06-10", "maks"]
+
+  /publisering/avvisDesk:
+    post:
+      summary: Reject a publication in Desk (UI action, placeholder)
+      description: Mirrors `PubliseringController.avvisDesk`. Rejects a publication with an internal comment and redirects.
+      operationId: publiseringAvvisDesk
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  description: Publisering ID (`params.id`)
+                internKommentar:
+                  type: string
+                  description: Internal comment explaining the rejection (`params.internKommentar`)
+              required: [id, internKommentar]
+      responses:
+        '303':
+          description: See Other — redirect after action
+          headers:
+            Location:
+              description: Redirect target (typically `/publisering/list`)
+              schema: { type: string }
+        '200':
+          description: Re-rendered page with validation errors (e.g., missing comment)
+
+  /publisering/godkjennDesk:
+    post:
+      summary: Approve a publication in Desk (UI action, placeholder)
+      description: Mirrors `PubliseringController.godkjennDesk`. Approves a publication and redirects.
+      operationId: publiseringGodkjennDesk
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  description: Publisering ID (`params.id`)
+              required: [id]
+      responses:
+        '303':
+          description: See Other — redirect after action
+          headers:
+            Location:
+              schema: { type: string }
+
+  /publisering/listDesk:
+    get:
+      summary: List publications awaiting Desk (UI view, placeholder)
+      description: Mirrors `PubliseringController.listDesk`. Shows publications with `deskFlyt=FORSLAG`, not canceled.
+      operationId: publiseringListDesk
+      parameters:
+        - in: query
+          name: max
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+        - in: query
+          name: offset
+          schema: { type: integer, minimum: 0, default: 0 }
+        - in: query
+          name: sort
+          schema:
+            type: string
+            enum: [tidspunkt, statistikknavn, dateCreated, id]
+            default: tidspunkt
+        - in: query
+          name: order
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: asc
+      responses:
+        '200':
+          description: HTML list view

@@ -8,7 +8,8 @@
     "start": "NODE_ENV=production tsx src/main.mts",
     "build": "vite build",
     "lint": "eslint '**/*.{js,mjs,cjs,ts}'",
-    "lint:fix": "eslint --fix '**/*.{js,mjs,cjs,ts}'"
+    "lint:fix": "eslint --fix '**/*.{js,mjs,cjs,ts}'",
+    "types:gen": "ts-node openapi/generate-types.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.16.0",
@@ -24,6 +25,7 @@
   "dependencies": {
     "express": "^5.1.0",
     "express-openapi-validator": "^5.6.0",
+    "ts-node": "^10.9.2",
     "tsx": "^4.19.3",
     "typescript": "^5.8.3",
     "vite-express": "*"

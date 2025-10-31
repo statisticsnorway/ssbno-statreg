@@ -1,0 +1,129 @@
+openapi: 3.0.4
+info:
+  title: Statistikkregisteret API
+  version: "1.0"
+  description: API and UI endpoints for statistics and publications used by Statistikkregisteret.
+
+paths:
+  /statistics:
+    get:
+      summary: List all statistics (JSON)
+      operationId: listStatistics
+      description: Returns all active statistics and their non-discontinued variants.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatisticsResponse'
+              examples:
+                example:
+                  value:
+                    statistics:
+                      - id: 4110
+                        shortName: "lonnvare"
+                        name: "Lønn for ansatte i varehandel"
+                        nameEN: "Earnings in domestic trade and repair of goods"
+                        modifiedTime: "2019-08-26 12:42:22.056"
+                        status: "SA"
+                        variants:
+                          - id: 9114
+                            frekvens: "År"
+                            previousRelease: "2014-12-09 10:00:00.0"
+                            previousFrom: "2014-09-01 00:00:00.0"
+                            previousTo: "2014-09-01 00:00:00.0"
+                            nextRelease: ""
+                            nextReleaseId: ""
+                            upcomingReleases: []
+                      - id: 4156
+                        shortName: "kpi"
+                        name: "Konsumprisindeksen"
+                        nameEN: "Consumer price index"
+                        modifiedTime: "2021-01-05 09:31:46.087"
+                        status: "A"
+                        variants:
+                          - id: 8870
+                            frekvens: "Måned"
+                            previousRelease: "2024-12-10 08:00:00.0"
+                            previousFrom: "2024-11-01 00:00:00.0"
+                            previousTo: "2024-11-30 00:00:00.0"
+                            nextRelease: ""
+                            nextReleaseId: ""
+                            upcomingReleases:
+                              - id: 90001
+                                publishTime: "2025-03-01 08:00:00.0"
+                                periodFrom: "2024-01-01 00:00:00.0"
+                                periodTo: "2024-12-31 23:59:59.0"
+
+components:
+  schemas:
+    StatisticsResponse:
+      type: object
+      properties:
+        statistics:
+          type: array
+          items:
+            $ref: '#/components/schemas/StatisticItem'
+
+    StatisticItem:
+      type: object
+      properties:
+        id: { type: integer }
+        shortName: { type: string }
+        name: { type: string }
+        nameEN: { type: string }
+        modifiedTime: { type: string, description: 'lastUpdated as string' }
+        status:
+          type: string
+          enum: [A, IA, UT, SA]
+        variants:
+          type: array
+          description: Only non-discontinued variants (!erOpphort)
+          items:
+            $ref: '#/components/schemas/VariantItem'
+
+    VariantItem:
+      type: object
+      properties:
+        id: { type: integer }
+        frekvens:
+          type: string
+          description: Human-readable frequency (e.g., "År", "Måned")
+        previousRelease:
+          type: string
+          description: Timestamp of previous release, or empty string
+        previousFrom:
+          type: string
+          description: Period start of previous release, or empty string
+        previousTo:
+          type: string
+          description: Period end of previous release, or empty string
+        nextRelease:
+          type: string
+          description: Timestamp of next release, or empty string
+        nextReleaseId:
+          oneOf:
+            - type: integer
+            - type: string
+          description: Next release ID or empty string
+        upcomingReleases:
+          type: array
+          description: From getUpcomingReleases(...). Empty array if none.
+          items:
+            $ref: '#/components/schemas/UpcomingRelease'
+
+    UpcomingRelease:
+      type: object
+      description: Exact shape from getUpcomingReleases(...)
+      properties:
+        id: { type: integer }
+        publishTime:
+          type: string
+          description: release.tidspunkt.toString()
+        periodFrom:
+          type: string
+          description: release.periodeFra.toString()
+        periodTo:
+          type: string
+          description: release.periodeTil.toString()
