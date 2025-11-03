@@ -1,5 +1,5 @@
 # Use a Node.js 22 base image for the builder stage
-FROM node:22.21.1-alpine AS builder
+FROM node:24.11.0-alpine AS builder
 
 # Set the working directory
 WORKDIR /app
