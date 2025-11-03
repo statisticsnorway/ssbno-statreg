@@ -1,19 +1,11 @@
 {
   "restartable": "rs",
-  "ignore": [
-    ".git",
-    "node_modules/**/node_modules"
-  ],
+  "ignore": [".git", "node_modules/**/node_modules"],
   "verbose": false,
   "events": {},
-  "watch": [
-    "src",
-    "src/**"
-  ],
+  "watch": ["src", "src/**"],
   "env": {
-    "NODE_ENV": "development",
-    "BASE_URL": "https://www.qa.ssb.no",
-    "BASE_INTERN_URL": "https://i.qa.ssb.no"
+    "NODE_ENV": "development"
   },
   "ext": "mts,ts",
   "exec": "npm run build && npm run start"
