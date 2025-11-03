@@ -28,6 +28,7 @@
   "dependencies": {
     "express": "^5.1.0",
     "express-prom-bundle": "^8.0.0",
+    "helmet": "^8.1.0",
     "lightship": "^9.0.3",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3",

@@ -1,6 +1,7 @@
 import { initializeLightship } from '@/utils/lightship'
 import express from 'express'
 import promBundle from 'express-prom-bundle'
+import helmet from 'helmet'
 
 const metricsMiddleware = promBundle({
   includeMethod: true,
@@ -18,6 +19,7 @@ const metricsMiddleware = promBundle({
 })
 
 const app = express()
+app.use(helmet())
 app.use(metricsMiddleware)
 
 app.get('/', (_, res) => {
