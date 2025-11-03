@@ -33,13 +33,15 @@ spec:
   liveness:
     failureThreshold: 10
     initialDelay: 20
-    path: /live 
+    path: /live
+    periodSeconds: 5 
     port: 9000
     timeout: 1
   readiness:
     failureThreshold: 10
     initialDelay: 20
     path: /ready
+    periodSeconds: 5
     port: 9000
     timeout: 1
 status: {}
