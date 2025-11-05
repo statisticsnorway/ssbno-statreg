@@ -8,8 +8,6 @@ export async function initializeLightship(): Promise<Lightship> {
       // eslint-disable-next-line no-undef
       detectKubernetes: process.env.NODE_ENV !== 'development',
       port: 9000,
-      shutdownDelay: 5000,
-      gracefulShutdownTimeout: 30000,
     })
 
     // Graceful shutdown handler
