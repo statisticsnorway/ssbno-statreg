@@ -31,15 +31,15 @@ spec:
     path: /metrics
     port: "9000"
   liveness:
-    failureThreshold: 3
-    initialDelay: 10
+    failureThreshold: 10
+    initialDelay: 20
     path: /live
     periodSeconds: 30
     port: 9000
     timeout: 5
   readiness:
-    failureThreshold: 1
-    initialDelay: 5
+    failureThreshold: 10
+    initialDelay: 20
     path: /ready
     periodSeconds: 5
     port: 9000
