@@ -3,8 +3,7 @@ kind: Component
 metadata:
   name: ssbno-statreg-api
   description: |
-    Statreg API is a backend service that provides metadata of statistics, variants, and publications etc.
-  links:
+    Statreg API is a backend service for statistikkregisteret. It provides endpoints for fetching and managing statistics and publications, amongst other things.  links:
     - title: ssbno-statreg-api.intern.ssb.no
       url: https://ssbno-statreg-api.intern.ssb.no
   tags:
