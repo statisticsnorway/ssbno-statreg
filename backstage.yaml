@@ -1,0 +1,21 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: ssbno-statreg-api
+  description: |
+    Statreg API is a backend service for statistikkregisteret. It provides endpoints for fetching and managing statistics and publications, amongst other things.  links:
+    - title: ssbno-statreg-api.intern.ssb.no
+      url: https://ssbno-statreg-api.intern.ssb.no
+  tags:
+    - cloud
+    - nodejs
+    - node
+    - typescript
+    - vite
+  annotations:
+    github.com/project-slug: statisticsnorway/ssbno-statreg-api
+spec:
+  type: service
+  system: SSBNO
+  owner: ssbno-developers
+  lifecycle: production

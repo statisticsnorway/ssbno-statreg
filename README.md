@@ -1,6 +1,6 @@
 # ssbno-statreg-api
 ## Description
-WIP
+Statreg API is a backend service for statistikkregisteret. It provides endpoints for fetching and managing statistics and publications, amongst other things.
 
 ## DEV
 ```
