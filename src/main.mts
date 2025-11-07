@@ -2,6 +2,7 @@ import { initializeLightship } from '@/utils/lightship'
 import express from 'express'
 import promBundle from 'express-prom-bundle'
 import helmet from 'helmet'
+import routes from './routes/routes';
 
 const metricsMiddleware = promBundle({
   includeMethod: true,
@@ -21,6 +22,7 @@ const metricsMiddleware = promBundle({
 const app = express()
 app.use(helmet())
 app.use(metricsMiddleware)
+app.use('/', routes);
 
 app.get('/', (_, res) => {
   res.send('Hello World!')
@@ -30,13 +32,13 @@ const port = 8080
 const lightship = await initializeLightship()
 
 app
-.listen(port, () => {
-  lightship.signalReady()
-  if (process.env.NODE_ENV === 'development') {
-    const LOCAL_APP_URL = `http://localhost:${port}`
-    console.log(`Application running on: ${LOCAL_APP_URL}`)
-  }
-})
+  .listen(port, () => {
+    lightship.signalReady()
+    if (process.env.NODE_ENV === 'development') {
+      const LOCAL_APP_URL = `http://localhost:${port}`
+      console.log(`Application running on: ${LOCAL_APP_URL}`)
+    }
+  })
   .on('error', (err) => {
     console.log(err)
     console.log('Shutting down')

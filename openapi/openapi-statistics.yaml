@@ -1,0 +1,29 @@
+openapi: 3.1.0
+info:
+  title: Statistics API
+  version: 1.1.0
+  description: Minimal API for statistics, variants, publications, kortnavn, and sections.
+
+servers:
+  - url: https://ssb.no/statreg-api
+
+paths:
+  # ---------------------------
+  # Statistics
+  # ---------------------------
+  /statistics/:
+    get:
+      summary: List all statistics
+      responses:
+        '200':
+          description: A list of statistics
+    post:
+      summary: Create a new statistic
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {}
+      responses:
+        '201':
+          description: Statistic created

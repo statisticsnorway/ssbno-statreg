@@ -50,3 +50,11 @@ Then, run
 ```bash
 docker run -it -p 8080:8080 ssbno/statreg-api
 ```
+
+PostgreSQL db
+drop statreg.sql into schema folder
+docker-compose up -d
+
+Check table rows 
+docker exec -it statreg-pg psql -U cob -d "statreg-db" -c "
+SELECT table_schema, table_name, (xpath('/row/c/text()', query_to_xml(format('SELECT count(*) AS c FROM %I.%I', table_schema, table_name), false, true, '')))[1]::text::bigint AS row_count FROM information_schema.tables WHERE table_schema = 'statreg_data' AND table_type = 'BASE TABLE' ORDER BY table_name;"
