@@ -34,24 +34,23 @@ const lightship = await createLightship({
   port: 9000,
 })
 
-const server = app.listen(port, () => {
-  lightship.signalReady()
-  if (process.env.NODE_ENV === 'development') {
-    const LOCAL_APP_URL = `http://localhost:${port}`
-    console.log(`Application running on: ${LOCAL_APP_URL}`)
-  }
-})
+const server = app
+  .listen(port, () => {
+    lightship.signalReady()
+    if (process.env.NODE_ENV === 'development') {
+      const LOCAL_APP_URL = `http://localhost:${port}`
+      console.log(`Application running on: ${LOCAL_APP_URL}`)
+    }
+  })
+  .on('error', (err) => {
+    console.log(err)
+    lightship.shutdown()
+  })
 
 // Graceful shutdown handler
 lightship.registerShutdownHandler(() => {
   console.log('Graceful shutdown initiated...')
   server.close()
-})
-
-process.on('error', (err) => {
-  console.log(err)
-  console.log('Shutting down, from error: ' + JSON.stringify(err))
-  lightship.shutdown()
 })
 
 process.on('exit', (msg) => {
