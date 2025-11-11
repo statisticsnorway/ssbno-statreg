@@ -9,3 +9,6 @@ coverage/
 
 # Ignore database dump
 statreg.sql
+
+.env
+/generated/prisma

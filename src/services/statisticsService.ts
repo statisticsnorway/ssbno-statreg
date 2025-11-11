@@ -1,4 +1,4 @@
-import pool from '../utils/db';
+import pool from '../../prisma/db';
 import { Statistikk } from '../types/types';
 
 export async function getAllStatistics(): Promise<Statistikk[]> {

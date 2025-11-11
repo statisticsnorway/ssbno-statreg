@@ -2,7 +2,8 @@ import { initializeLightship } from '@/utils/lightship'
 import express from 'express'
 import promBundle from 'express-prom-bundle'
 import helmet from 'helmet'
-import routes from './routes/routes';
+import controllerRouter from '@/api/core/controllerRouter'
+
 
 const metricsMiddleware = promBundle({
   includeMethod: true,
@@ -22,7 +23,7 @@ const metricsMiddleware = promBundle({
 const app = express()
 app.use(helmet())
 app.use(metricsMiddleware)
-app.use('/', routes);
+app.use(controllerRouter)
 
 app.get('/', (_, res) => {
   res.send('Hello World!')

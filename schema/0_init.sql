@@ -240,3 +240,6 @@ create table statreg-db."STATISTIKK_REGIONALE_NIVAER"
         primary key ("STATISTIKK_ID", "REGIONALT_NIVA_ID")
 );
 
+
+
+
