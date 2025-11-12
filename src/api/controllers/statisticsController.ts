@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import * as statisticsService from '@/services/statisticsService'
+import * as statisticsService from '@/api/services/statisticsService'
 
 const router = Router()
 
