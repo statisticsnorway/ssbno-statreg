@@ -1,7 +1,7 @@
 import express from 'express'
 import helmet from 'helmet'
 import controllerRouter from './api/core/controllerRouter'
-import { startServer } from '../plugins/startServer'
+import { startServer } from '../plugins/expressServer'
 import { promBundleMetrics } from '../plugins/promBundle'
 
 const expressInstance = express()

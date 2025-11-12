@@ -27,7 +27,9 @@ export async function startServer(expressInstance: Express) {
   const server = expressInstance.listen(port, () => {
     lightshipInstance.signalReady()
     if (process.env.NODE_ENV === 'development') {
-      console.log(`Server running at http://localhost:${port}`)
+        console.log(`Server running:
+          • http://localhost:${port}
+          • http://localhost:${port}/statistics/`)
     }
   })
 

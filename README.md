@@ -5,6 +5,8 @@ Statreg API is a backend service for statistikkregisteret. It provides endpoints
 ## DEV
 ```
 npm install
+npm run build
+docker-compose upå
 npm run dev
 ```
 Go to http://localhost:8080 to see results.
@@ -35,7 +37,7 @@ Express middleware with popular prometheus metrics in one bundle. Exposes `/metr
 ## Prerequisites
 To get started, you first need to [install Colima and Docker CLI.](https://statistics-norway.atlassian.net/wiki/spaces/mimir/pages/4827381761/Bytte+fra+Docker+Desktop+til+Colima)
 
-## Build and run
+## Build and run docker
 Start Colima with the default configuration
 ```bash
 colima start
@@ -51,12 +53,12 @@ Then, run
 docker run -it -p 8080:8080 ssbno/statreg-api
 ```
 
-PostgreSQL db
-docker-compose down -v
-docker volume prune -f
+# test with local db
+get file schema/statreg.sql - rename docker-compose and sql file to use same user 
+npm install
+npm run build
 docker-compose up -d
+npm run dev
+http://localhost:8080/statisitcs 
 
 
-PRISMA
-npx prisma db pull --schema=prisma/schema.prisma
-npx prisma generate --schema=prisma/schema.prisma
