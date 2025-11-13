@@ -13,7 +13,7 @@ export default defineConfig([
       prettier,
     },
     languageOptions: {
-      globals: globals.browser,
+      globals: globals.node, // tells ESLint to allow process, __dirname, etc.
       parser: tseslintParser,
     },
     rules: {
