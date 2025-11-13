@@ -52,3 +52,9 @@ spec:
     periodSeconds: 30
     timeout: 5
 status: {}
+
+  accessPolicy:
+    inbound:
+      rules:
+        - application: keycloak
+          namespace: keycloak
