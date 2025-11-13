@@ -5,7 +5,14 @@ metadata:
     team: ssbno-developers
   name: ssbno-statreg-api
   namespace: ssbno
+
 spec:
+  accessPolicy:
+    inbound:
+      rules:
+        - application: keycloak
+          namespace: keycloak
+
   gcp:
       sqlInstances:
         - type: POSTGRES_17
@@ -23,6 +30,7 @@ spec:
           databases:
             - name: statreg-db
   image: '{{ image }}' # Injected from the GitHub Action
+
   ingresses:
   - https://ssbno-statreg-api.intern.test.ssb.no
   port: 8080
@@ -30,6 +38,7 @@ spec:
     enabled: true
     path: /metrics
     port: "9000"
+ 
   liveness:
     path: /live
     port: 9000
@@ -52,9 +61,3 @@ spec:
     periodSeconds: 30
     timeout: 5
 status: {}
-
-  accessPolicy:
-    inbound:
-      rules:
-        - application: keycloak
-          namespace: keycloak
