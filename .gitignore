@@ -8,6 +8,4 @@ node_modules
 coverage/
 
 # Ignore database dump
-schema/*
 statreg.sql
-.env
