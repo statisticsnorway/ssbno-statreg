@@ -2,6 +2,10 @@ import { createLightship } from 'lightship'
 import express from 'express'
 import promBundle from 'express-prom-bundle'
 import helmet from 'helmet'
+import process from 'node:process'
+
+// import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '../generated/prisma/client.js'
 
 const metricsMiddleware = promBundle({
   includeMethod: true,
@@ -32,10 +36,18 @@ app.get('/', (_, res) => {
   res.send('Hello World!')
 })
 
+const prisma = new PrismaClient()
+// await prisma.$connect()
+
+app.get('/statistics', async (_, res) => {
+  const allStatistics = await prisma.statistikk.findMany()
+  console.log(JSON.stringify(allStatistics, null, 2))
+  res.send(allStatistics)
+})
+
 const port = 8080
 
 const lightship = await createLightship({
-  // eslint-disable-next-line no-undef
   detectKubernetes: process.env.NODE_ENV !== 'development',
   port: 9000,
 })
@@ -54,8 +66,9 @@ const server = app
   })
 
 // Graceful shutdown handler
-lightship.registerShutdownHandler(() => {
+lightship.registerShutdownHandler(async () => {
   console.log('Graceful shutdown initiated...')
+  await prisma.$disconnect()
   server.close()
 })
 
