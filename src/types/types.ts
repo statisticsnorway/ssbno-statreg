@@ -1,4 +1,5 @@
 
+// will be changed to new types later.
 export interface AuditLog {
   id: bigint
   property_name?: string
