@@ -8,29 +8,22 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
-model FREKVENS {
+model Frekvens {
   id      Decimal   @id(map: "sys_c0023870") @db.Decimal(19, 0)
   version Decimal   @db.Decimal(19, 0)
   navn    String    @db.VarChar(50)
   kode    String    @db.VarChar(50)
-  VARIANT VARIANT[]
-
-  @@ignore
+  variant Variant[]
 }
 
-/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
-model KALENDER_DATO {
+model Kalender_dato {
   id        Decimal  @id(map: "sys_c0023875") @db.Decimal(19, 0)
   version   Decimal  @db.Decimal(19, 0)
   kommentar String   @db.VarChar(255)
   dag       DateTime @db.Timestamp(6)
-
-  @@ignore
 }
 
-/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
-model KONTAKT {
+model Kontakt {
   id                   Decimal                @id(map: "sys_c0023890") @db.Decimal(19, 0)
   version              Decimal                @db.Decimal(19, 0)
   initialer            String?                @db.VarChar(3)
@@ -42,25 +35,20 @@ model KONTAKT {
   date_created         DateTime               @db.Timestamp(6)
   inaktiv              Decimal?               @db.Decimal(1, 0)
   navn_en              String?                @db.VarChar(130)
-  STATISTIKK_KONTAKTER STATISTIKK_KONTAKTER[]
-
-  @@ignore
+  statistikk_kontakter Statistikk_kontakter[]
 }
 
-/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
-model KORTNAVN {
+model Kortnavn {
   id           Decimal      @id(map: "sys_c0023896") @db.Decimal(19, 0)
   version      Decimal      @db.Decimal(19, 0)
   navn         String       @db.VarChar(20)
   last_updated DateTime     @db.Timestamp(6)
   date_created DateTime     @db.Timestamp(6)
-  STATISTIKK   STATISTIKK[]
-
-  @@ignore
+  statistikk   Statistikk[]
 }
 
 /// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
-model PUBLISERING {
+model Publisering {
   id               Decimal  @id(map: "sys_c0023910") @db.Decimal(19, 0)
   version          Decimal  @db.Decimal(19, 0)
   tidspunkt        DateTime @db.Timestamp(6)
@@ -75,36 +63,29 @@ model PUBLISERING {
   date_created     DateTime @db.Timestamp(6)
   datotype         String   @db.VarChar(255)
   import_flag      Decimal? @db.Decimal(1, 0)
-  VARIANT          VARIANT  @relation(fields: [variant_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fkdb40a13c44a06f71")
+  variant          Variant  @relation(fields: [variant_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fkdb40a13c44a06f71")
 
-  @@ignore
 }
 
-/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
-model REGIONALT_NIVA {
+model Regionalt_niva {
   id                          Decimal                       @id(map: "sys_c0023916") @db.Decimal(19, 0)
   version                     Decimal                       @db.Decimal(19, 0)
   navn                        String                        @db.VarChar(40)
   kode                        String?                       @db.VarChar(50)
-  STATISTIKK_REGIONALE_NIVAER STATISTIKK_REGIONALE_NIVAER[]
-
-  @@ignore
+  statistikk_regionale_nivaer Statistikk_regionale_nivaer[]
 }
 
-/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
-model SEKSJON {
+model Seksjon {
   id         Decimal      @id(map: "sys_c0023922") @db.Decimal(19, 0)
   version    Decimal      @db.Decimal(19, 0)
   navn       String       @db.VarChar(100)
   kode       String       @db.VarChar(3)
   navn_en    String       @db.VarChar(100)
-  STATISTIKK STATISTIKK[]
+  statistikk Statistikk[]
 
-  @@ignore
 }
 
-/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
-model STATISTIKK {
+model Statistikk {
   id                          Decimal                       @id(map: "sys_c0023938") @db.Decimal(19, 0)
   version                     Decimal                       @db.Decimal(19, 0)
   kortnavn_id                 Decimal                       @db.Decimal(19, 0)
@@ -125,42 +106,37 @@ model STATISTIKK {
   intern_kommentar            String                        @db.VarChar(255)
   statistikknavn_en           String?                       @db.VarChar(140)
   date_created                DateTime                      @db.Timestamp(6)
-  STATISTIKK                  STATISTIKK?                   @relation("STATISTIKKToSTATISTIKK", fields: [relasjon_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fkfa5cb2137008a78")
-  other_STATISTIKK            STATISTIKK[]                  @relation("STATISTIKKToSTATISTIKK")
-  SEKSJON                     SEKSJON                       @relation(fields: [eierseksjon_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fkfa5cb213b101b242")
-  KORTNAVN                    KORTNAVN                      @relation(fields: [kortnavn_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fkfa5cb213c47ad723")
-  STATISTIKK_KONTAKTER        STATISTIKK_KONTAKTER[]
-  STATISTIKK_REGIONALE_NIVAER STATISTIKK_REGIONALE_NIVAER[]
-  VARIANT                     VARIANT[]
+  statistikk                  Statistikk?                   @relation("STATISTIKKToSTATISTIKK", fields: [relasjon_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fkfa5cb2137008a78")
+  other_statistikk            Statistikk[]                  @relation("STATISTIKKToSTATISTIKK")
+  seksjon                     Seksjon                       @relation(fields: [eierseksjon_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fkfa5cb213b101b242")
+  kortnavn                    Kortnavn                      @relation(fields: [kortnavn_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fkfa5cb213c47ad723")
+  statistikk_kontakter        Statistikk_kontakter[]
+  statistikk_regionale_nivaer Statistikk_regionale_nivaer[]
+  variant                     Variant[]
 
-  @@ignore
 }
 
-/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
-model STATISTIKK_KONTAKTER {
+model Statistikk_kontakter {
   statistikk_id Decimal    @db.Decimal(19, 0)
   kontakt_id    Decimal    @db.Decimal(19, 0)
   kontakter_idx Decimal?   @db.Decimal(10, 0)
-  kontakt       kontakt    @relation(fields: [kontakt_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fkf98634a159382591")
-  STATISTIKK    STATISTIKK @relation(fields: [statistikk_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fkf98634a1d978a9a3")
+  kontakt       Kontakt    @relation(fields: [kontakt_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fkf98634a159382591")
+  statistikk    Statistikk @relation(fields: [statistikk_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fkf98634a1d978a9a3")
 
   @@id([statistikk_id, kontakt_id], map: "sys_c0023946")
-  @@ignore
 }
 
-/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
-model STATISTIKK_REGIONALE_NIVAER {
+model Statistikk_regionale_nivaer {
   regionalt_niva_id Decimal        @db.Decimal(19, 0)
   statistikk_id     Decimal        @db.Decimal(19, 0)
-  REGIONALT_NIVA    REGIONALT_NIVA @relation(fields: [regionalt_niva_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fke4b2f5b83078425c")
-  STATISTIKK        STATISTIKK     @relation(fields: [statistikk_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fke4b2f5b8d978a9a3")
+  regionalt_niva    Regionalt_niva @relation(fields: [regionalt_niva_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fke4b2f5b83078425c")
+  statistikk        Statistikk     @relation(fields: [statistikk_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fke4b2f5b8d978a9a3")
 
   @@id([statistikk_id, regionalt_niva_id], map: "sys_c0023949")
-  @@ignore
 }
 
 /// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
-model VARIANT {
+model Variant {
   id            Decimal       @id(map: "sys_c0023958") @db.Decimal(19, 0)
   version       Decimal       @db.Decimal(19, 0)
   frekvens_id   Decimal       @db.Decimal(19, 0)
@@ -171,9 +147,7 @@ model VARIANT {
   detaljniva    String?       @db.VarChar(255)
   er_opphort    Decimal       @db.Decimal(1, 0)
   date_created  DateTime      @db.Timestamp(6)
-  PUBLISERING   PUBLISERING[]
-  frekvens      frekvens      @relation(fields: [frekvens_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fke1d1085b8b4eb03")
-  STATISTIKK    STATISTIKK    @relation(fields: [statistikk_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fke1d1085d978a9a3")
-
-  @@ignore
+  publisering   Publisering[]
+  frekvens      Frekvens      @relation(fields: [frekvens_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fke1d1085b8b4eb03")
+  statistikk    Statistikk    @relation(fields: [statistikk_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fke1d1085d978a9a3")
 }

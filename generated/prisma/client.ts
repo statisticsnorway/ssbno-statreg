@@ -29,8 +29,8 @@ export * from "./enums.js"
  * @example
  * ```
  * const prisma = new PrismaClient()
- * // Fetch zero or more Users
- * const users = await prisma.user.findMany()
+ * // Fetch zero or more Frekvens
+ * const frekvens = await prisma.frekvens.findMany()
  * ```
  * 
  * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client).
@@ -44,4 +44,58 @@ export { Prisma }
 path.join(__dirname, "libquery_engine-darwin-arm64.dylib.node")
 path.join(process.cwd(), "generated/prisma/libquery_engine-darwin-arm64.dylib.node")
 
-
+/**
+ * Model Frekvens
+ * 
+ */
+export type Frekvens = Prisma.FrekvensModel
+/**
+ * Model Kalender_dato
+ * 
+ */
+export type Kalender_dato = Prisma.Kalender_datoModel
+/**
+ * Model Kontakt
+ * 
+ */
+export type Kontakt = Prisma.KontaktModel
+/**
+ * Model Kortnavn
+ * 
+ */
+export type Kortnavn = Prisma.KortnavnModel
+/**
+ * Model Publisering
+ * The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+ */
+export type Publisering = Prisma.PubliseringModel
+/**
+ * Model Regionalt_niva
+ * 
+ */
+export type Regionalt_niva = Prisma.Regionalt_nivaModel
+/**
+ * Model Seksjon
+ * 
+ */
+export type Seksjon = Prisma.SeksjonModel
+/**
+ * Model Statistikk
+ * 
+ */
+export type Statistikk = Prisma.StatistikkModel
+/**
+ * Model Statistikk_kontakter
+ * 
+ */
+export type Statistikk_kontakter = Prisma.Statistikk_kontakterModel
+/**
+ * Model Statistikk_regionale_nivaer
+ * 
+ */
+export type Statistikk_regionale_nivaer = Prisma.Statistikk_regionale_nivaerModel
+/**
+ * Model Variant
+ * The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+ */
+export type Variant = Prisma.VariantModel

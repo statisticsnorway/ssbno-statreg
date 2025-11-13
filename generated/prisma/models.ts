@@ -8,4 +8,15 @@
  *
  * 🟢 You can import this file directly.
  */
+export type * from './models/Frekvens.js'
+export type * from './models/Kalender_dato.js'
+export type * from './models/Kontakt.js'
+export type * from './models/Kortnavn.js'
+export type * from './models/Publisering.js'
+export type * from './models/Regionalt_niva.js'
+export type * from './models/Seksjon.js'
+export type * from './models/Statistikk.js'
+export type * from './models/Statistikk_kontakter.js'
+export type * from './models/Statistikk_regionale_nivaer.js'
+export type * from './models/Variant.js'
 export type * from './commonInputTypes.js'

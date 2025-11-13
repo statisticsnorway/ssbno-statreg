@@ -49,7 +49,17 @@ export const AnyNull = runtime.objectEnumValues.instances.AnyNull
 
 
 export const ModelName = {
-
+  Frekvens: 'Frekvens',
+  Kalender_dato: 'Kalender_dato',
+  Kontakt: 'Kontakt',
+  Kortnavn: 'Kortnavn',
+  Publisering: 'Publisering',
+  Regionalt_niva: 'Regionalt_niva',
+  Seksjon: 'Seksjon',
+  Statistikk: 'Statistikk',
+  Statistikk_kontakter: 'Statistikk_kontakter',
+  Statistikk_regionale_nivaer: 'Statistikk_regionale_nivaer',
+  Variant: 'Variant'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -66,4 +76,176 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 } as const)
 
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
+
+
+export const FrekvensScalarFieldEnum = {
+  id: 'id',
+  version: 'version',
+  navn: 'navn',
+  kode: 'kode'
+} as const
+
+export type FrekvensScalarFieldEnum = (typeof FrekvensScalarFieldEnum)[keyof typeof FrekvensScalarFieldEnum]
+
+
+export const Kalender_datoScalarFieldEnum = {
+  id: 'id',
+  version: 'version',
+  kommentar: 'kommentar',
+  dag: 'dag'
+} as const
+
+export type Kalender_datoScalarFieldEnum = (typeof Kalender_datoScalarFieldEnum)[keyof typeof Kalender_datoScalarFieldEnum]
+
+
+export const KontaktScalarFieldEnum = {
+  id: 'id',
+  version: 'version',
+  initialer: 'initialer',
+  mobil: 'mobil',
+  navn: 'navn',
+  last_updated: 'last_updated',
+  telefon: 'telefon',
+  epost: 'epost',
+  date_created: 'date_created',
+  inaktiv: 'inaktiv',
+  navn_en: 'navn_en'
+} as const
+
+export type KontaktScalarFieldEnum = (typeof KontaktScalarFieldEnum)[keyof typeof KontaktScalarFieldEnum]
+
+
+export const KortnavnScalarFieldEnum = {
+  id: 'id',
+  version: 'version',
+  navn: 'navn',
+  last_updated: 'last_updated',
+  date_created: 'date_created'
+} as const
+
+export type KortnavnScalarFieldEnum = (typeof KortnavnScalarFieldEnum)[keyof typeof KortnavnScalarFieldEnum]
+
+
+export const PubliseringScalarFieldEnum = {
+  id: 'id',
+  version: 'version',
+  tidspunkt: 'tidspunkt',
+  er_endret: 'er_endret',
+  last_updated: 'last_updated',
+  intern_kommentar: 'intern_kommentar',
+  periode_til: 'periode_til',
+  desk_flyt: 'desk_flyt',
+  variant_id: 'variant_id',
+  periode_fra: 'periode_fra',
+  er_avlyst: 'er_avlyst',
+  date_created: 'date_created',
+  datotype: 'datotype',
+  import_flag: 'import_flag'
+} as const
+
+export type PubliseringScalarFieldEnum = (typeof PubliseringScalarFieldEnum)[keyof typeof PubliseringScalarFieldEnum]
+
+
+export const Regionalt_nivaScalarFieldEnum = {
+  id: 'id',
+  version: 'version',
+  navn: 'navn',
+  kode: 'kode'
+} as const
+
+export type Regionalt_nivaScalarFieldEnum = (typeof Regionalt_nivaScalarFieldEnum)[keyof typeof Regionalt_nivaScalarFieldEnum]
+
+
+export const SeksjonScalarFieldEnum = {
+  id: 'id',
+  version: 'version',
+  navn: 'navn',
+  kode: 'kode',
+  navn_en: 'navn_en'
+} as const
+
+export type SeksjonScalarFieldEnum = (typeof SeksjonScalarFieldEnum)[keyof typeof SeksjonScalarFieldEnum]
+
+
+export const StatistikkScalarFieldEnum = {
+  id: 'id',
+  version: 'version',
+  kortnavn_id: 'kortnavn_id',
+  dir_flyt: 'dir_flyt',
+  triggerord: 'triggerord',
+  prioritet: 'prioritet',
+  desk_flyt: 'desk_flyt',
+  sprak: 'sprak',
+  triggerord_en: 'triggerord_en',
+  eierseksjon_id: 'eierseksjon_id',
+  forstegangspublisering: 'forstegangspublisering',
+  arsrapportering: 'arsrapportering',
+  status: 'status',
+  gamle_emnekoder: 'gamle_emnekoder',
+  relasjon_id: 'relasjon_id',
+  statistikknavn: 'statistikknavn',
+  last_updated: 'last_updated',
+  intern_kommentar: 'intern_kommentar',
+  statistikknavn_en: 'statistikknavn_en',
+  date_created: 'date_created'
+} as const
+
+export type StatistikkScalarFieldEnum = (typeof StatistikkScalarFieldEnum)[keyof typeof StatistikkScalarFieldEnum]
+
+
+export const Statistikk_kontakterScalarFieldEnum = {
+  statistikk_id: 'statistikk_id',
+  kontakt_id: 'kontakt_id',
+  kontakter_idx: 'kontakter_idx'
+} as const
+
+export type Statistikk_kontakterScalarFieldEnum = (typeof Statistikk_kontakterScalarFieldEnum)[keyof typeof Statistikk_kontakterScalarFieldEnum]
+
+
+export const Statistikk_regionale_nivaerScalarFieldEnum = {
+  regionalt_niva_id: 'regionalt_niva_id',
+  statistikk_id: 'statistikk_id'
+} as const
+
+export type Statistikk_regionale_nivaerScalarFieldEnum = (typeof Statistikk_regionale_nivaerScalarFieldEnum)[keyof typeof Statistikk_regionale_nivaerScalarFieldEnum]
+
+
+export const VariantScalarFieldEnum = {
+  id: 'id',
+  version: 'version',
+  frekvens_id: 'frekvens_id',
+  last_updated: 'last_updated',
+  revisjon: 'revisjon',
+  statistikk_id: 'statistikk_id',
+  detaljniva_en: 'detaljniva_en',
+  detaljniva: 'detaljniva',
+  er_opphort: 'er_opphort',
+  date_created: 'date_created'
+} as const
+
+export type VariantScalarFieldEnum = (typeof VariantScalarFieldEnum)[keyof typeof VariantScalarFieldEnum]
+
+
+export const SortOrder = {
+  asc: 'asc',
+  desc: 'desc'
+} as const
+
+export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const QueryMode = {
+  default: 'default',
+  insensitive: 'insensitive'
+} as const
+
+export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
+export const NullsOrder = {
+  first: 'first',
+  last: 'last'
+} as const
+
+export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
 
