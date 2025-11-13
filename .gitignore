@@ -6,6 +6,3 @@ node_modules
 
 # Ignore coverage folder
 coverage/
-
-# Ignore database dump
-statreg.sql

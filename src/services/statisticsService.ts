@@ -4,7 +4,7 @@ import type { Statistikk } from '../types/types'
 export async function getAllStatistics(): Promise<Statistikk[]> {
   const query = `
     SELECT *
-    FROM statreg_data.statistikk
+    FROM statreg_data."STATISTIKK"
     ORDER BY id;
   `
   try {

@@ -54,11 +54,7 @@ docker run -it -p 8080:8080 ssbno/statreg-api
 ```
 
 # test with local db
-get file schema/statreg.sql - rename docker-compose and sql file to use same user 
-npm install
-npm run build
 docker-compose up -d
 npm run dev
+
 http://localhost:8080/statisitcs 
-
-
