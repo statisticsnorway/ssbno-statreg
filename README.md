@@ -5,6 +5,7 @@ Statreg API is a backend service for statistikkregisteret. It provides endpoints
 ## DEV
 ```
 npm install
+npm run generate
 npm run dev
 ```
 Go to http://localhost:8080 to see results.

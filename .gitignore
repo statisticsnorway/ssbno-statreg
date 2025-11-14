@@ -7,5 +7,9 @@ node_modules
 # Ignore coverage folder
 coverage/
 
+# Ignore generate folder, you should make your own. 
+# Use npm run generate
+generated/
+
 # Do not commit your .env file, please
 .env
