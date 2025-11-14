@@ -12,6 +12,7 @@
     "start": "node dist/main.js",
     "build": "pkgroll",
     "generate": "prisma generate",
+    "db:deploy": "npx prisma migrate deploy && npx prisma generate",
     "lint": "eslint '**/*.{js,mjs,cjs,ts}'",
     "lint:fix": "eslint --fix '**/*.{js,mjs,cjs,ts}'",
     "test": "tsx --test 'test/**.test.ts' 'src/**.test.ts'",

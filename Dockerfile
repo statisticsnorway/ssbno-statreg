@@ -13,17 +13,11 @@ RUN npm install
 # Copy the application source code
 COPY . .
 
-# Generate Prisma client
-RUN npm run generate
-
 # Build the application
 RUN npm run build
 
 # Prune devDependencies to keep only production dependencies
 RUN npm prune --production
-
-# Rename the built main.js to main.mjs
-RUN mv dist/main.js main.mjs
 
 ENV NODE_ENV=development
 
@@ -31,7 +25,5 @@ ENV NODE_ENV=development
 EXPOSE 9000
 EXPOSE 8080
 
-RUN chmod +x entrypoint.sh
-
 # Command to start the application
-ENTRYPOINT [ "./entrypoint.sh" ]
+CMD [ "sh", "-c", "npm run db:deploy && npm run start" ]
