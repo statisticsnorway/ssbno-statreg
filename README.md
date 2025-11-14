@@ -55,7 +55,7 @@ docker run -it -p 8080:8080 ssbno/statreg-api
 
 ### Database
 
-We use PostgreSQL, provided by Nais in our live environments. Locally you can set up your own Postgres db in one of many ways - run `npx prisma dev` for the easiest, quickest alternative or install PostgreSQL with either postgres.app, Homebrew or your package manager of choise.
+We use PostgreSQL, provided by Nais in our live environments. Locally you can set up your own Postgres db in one of many ways - run `npx prisma dev` for the easiest, quickest alternative or install PostgreSQL [from either the website](https://www.postgresql.org/download/), postgres.app, Homebrew or your package manager of choice.
 
 ### Prisma
 
@@ -65,4 +65,4 @@ In short though, Prisma handles schema changes with Migrations, which are increm
 
 When you are happy with your updated schema, you can run `npx prisma migrate dev --name name-of-changeset`. This applies previous changes in schema, generates a new migration with the supplied name, applies all unapplied migrations and triggers generation of a new Prisma Client.
 
-There are many fun pitfalls and ways of messing up both your local db and production data using prisma, so make sure you know what you are doing, and be ready to roll back changes.
+There are many fun pitfalls and ways of messing up both your local db and production data using prisma, so educate yourself, make sure you know what you are doing, and be ready to roll back changes.
