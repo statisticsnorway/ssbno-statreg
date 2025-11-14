@@ -32,10 +32,10 @@ Help secure Express apps by setting HTTP response headers.
 Express middleware with popular prometheus metrics in one bundle. Exposes `/metrics` endpoint.
 
 ## Docker
-## Prerequisites
+### Prerequisites
 To get started, you first need to [install Colima and Docker CLI.](https://statistics-norway.atlassian.net/wiki/spaces/mimir/pages/4827381761/Bytte+fra+Docker+Desktop+til+Colima)
 
-## Build and run
+### Build and run
 Start Colima with the default configuration
 ```bash
 colima start
@@ -50,3 +50,19 @@ Then, run
 ```bash
 docker run -it -p 8080:8080 ssbno/statreg-api
 ```
+
+## Persistence
+
+### Database
+
+We use PostgreSQL, provided by Nais in our live environments. Locally you can set up your own Postgres db in one of many ways - run `npx prisma dev` for the easiest, quickest alternative or install PostgreSQL with either postgres.app, Homebrew or your package manager of choise.
+
+### Prisma
+
+We use Prisma both as our ORM and as our schema migration tool in this project. We strongly recommend reading [this article](https://www.prisma.io/docs/getting-started/setup-prisma/add-to-existing-project/relational-databases/evolve-your-schema-typescript-postgresql) before touching the schema if you have not used Prisma before. 
+
+In short though, Prisma handles schema changes with Migrations, which are incremental change sets applied to the database. Applied migrations are recorded in the database. Migrations are generated with the Prisma CLI, checked into the codebase and _never_ manually changed. After having made changes to your schema, you can push these changes to your local db with `npx prisma db push`. Note that this does not update your migrations, but you can do this as many times as you like until the desired state is achieved. (sidenote: this may cause data loss locally)
+
+When you are happy with your updated schema, you can run `npx prisma migrate dev --name name-of-changeset`. This applies previous changes in schema, generates a new migration with the supplied name, applies all unapplied migrations and triggers generation of a new Prisma Client.
+
+There are many fun pitfalls and ways of messing up both your local db and production data using prisma, so make sure you know what you are doing, and be ready to roll back changes.
