@@ -3,6 +3,7 @@ import express from 'express'
 import promBundle from 'express-prom-bundle'
 import helmet from 'helmet'
 import process from 'node:process'
+import * as dotenv from 'dotenv'
 
 // import { PrismaClient } from '@prisma/client'
 import { PrismaClient } from '../generated/prisma/client.js'
@@ -30,8 +31,9 @@ app.get('/', (_, res) => {
   res.send('Hello World!')
 })
 
+dotenv.config()
 const prisma = new PrismaClient()
-// await prisma.$connect()
+await prisma.$connect()
 
 app.get('/statistics', async (_, res) => {
   const allStatistics = await prisma.statistikk.findMany()
