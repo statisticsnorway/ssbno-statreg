@@ -19,8 +19,6 @@ RUN npm run build
 # Prune devDependencies to keep only production dependencies
 RUN npm prune --production
 
-ENV NODE_ENV=development
-
 # Expose the ports your application will use
 EXPOSE 9000
 EXPOSE 8080
