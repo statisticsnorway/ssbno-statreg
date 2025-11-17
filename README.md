@@ -6,7 +6,7 @@ Statreg API is a backend service for statistikkregisteret. It provides endpoints
 ```
 npm install
 npm run build
-docker-compose upå
+docker-compose up
 npm run dev
 ```
 Go to http://localhost:8080 to see results.
