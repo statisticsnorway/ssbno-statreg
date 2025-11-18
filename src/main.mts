@@ -22,6 +22,12 @@ const app = express()
 app.use(helmet())
 app.use(metricsMiddleware)
 
+app.get('/statistics', (_, res) => {
+  res.send('Hello Statistics!!')
+})
+app.get('/secret', (_, res) => {
+  res.send('Very secret message!')
+})
 app.get('/', (_, res) => {
   res.send('Hello World!')
 })
