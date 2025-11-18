@@ -36,7 +36,7 @@ const prisma = new PrismaClient()
 await prisma.$connect()
 
 app.get('/statistics', async (_, res) => {
-  const allStatistics = await prisma.statistikk.findMany()
+  const allStatistics = await prisma.statistic.findMany()
   console.log(JSON.stringify(allStatistics, null, 2))
   res.send(allStatistics)
 })
