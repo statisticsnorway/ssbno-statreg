@@ -1,0 +1,317 @@
+openapi: 3.1.0
+info:
+  description: "API for managing statistics, variants, publications, kortnavn, and\
+    \ sections."
+  title: Statistics API
+  version: 1.1.0
+servers:
+- url: https://ssb.no/statreg-api
+paths:
+  /statistics:
+    get:
+      operationId: statisticsGET
+      responses:
+        "200":
+          description: List of statistics
+      summary: List all statistics
+      x-eov-operation-handler: controllers/DefaultController
+    post:
+      operationId: statisticsPOST
+      requestBody:
+        content:
+          application/json:
+            schema: {}
+        required: true
+      responses:
+        "201":
+          description: Statistic created
+      summary: Create a statistic
+      x-eov-operation-handler: controllers/DefaultController
+  /statistics/{id}:
+    get:
+      operationId: statisticsIdGET
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/statistic"
+          description: Statistic details
+      summary: Get a statistic
+      x-eov-operation-handler: controllers/DefaultController
+    put:
+      operationId: statisticsIdPUT
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema: {}
+        required: true
+      responses:
+        "200":
+          description: Statistic updated
+      summary: Update a statistic
+      x-eov-operation-handler: controllers/DefaultController
+  /statistics/variants:
+    get:
+      operationId: statisticsVariantsGET
+      responses:
+        "200":
+          description: List of variants under all statistics
+      summary: List all variants under all statistics
+      x-eov-operation-handler: controllers/DefaultController
+  /statistics/kortnavn:
+    get:
+      operationId: statisticsKortnavnGET
+      responses:
+        "200":
+          description: List of kortnavn under all statistics
+      summary: List all kortnavn under all statistics
+      x-eov-operation-handler: controllers/DefaultController
+  /variants:
+    get:
+      operationId: variantsGET
+      responses:
+        "200":
+          description: List of variants
+      summary: List all variants
+      x-eov-operation-handler: controllers/DefaultController
+    post:
+      operationId: variantsPOST
+      requestBody:
+        content:
+          application/json:
+            schema: {}
+        required: true
+      responses:
+        "201":
+          description: Variant created
+      summary: Create a variant
+      x-eov-operation-handler: controllers/DefaultController
+  /variants/{id}:
+    get:
+      operationId: variantsIdGET
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          description: Variant details
+      summary: Get a variant
+      x-eov-operation-handler: controllers/DefaultController
+    put:
+      operationId: variantsIdPUT
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema: {}
+        required: true
+      responses:
+        "200":
+          description: Variant updated
+      summary: Update a variant
+      x-eov-operation-handler: controllers/DefaultController
+  /publisering:
+    get:
+      operationId: publiseringGET
+      responses:
+        "200":
+          description: List of publications
+      summary: List all publications
+      x-eov-operation-handler: controllers/DefaultController
+    post:
+      operationId: publiseringPOST
+      requestBody:
+        content:
+          application/json:
+            schema: {}
+        required: true
+      responses:
+        "201":
+          description: Publication created
+      summary: Create a publication
+      x-eov-operation-handler: controllers/DefaultController
+  /publisering/{id}:
+    get:
+      operationId: publiseringIdGET
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          description: Publication details
+      summary: Get a publication
+      x-eov-operation-handler: controllers/DefaultController
+    put:
+      operationId: publiseringIdPUT
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema: {}
+        required: true
+      responses:
+        "200":
+          description: Publication updated
+      summary: Update a publication
+      x-eov-operation-handler: controllers/DefaultController
+  /publisering/variant/{variantId}:
+    get:
+      operationId: publiseringVariantVariantIdGET
+      parameters:
+      - explode: false
+        in: path
+        name: variantId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          description: Publications linked to the variant
+      summary: List publications for a variant
+      x-eov-operation-handler: controllers/DefaultController
+  /publisering/kalenderHelligOgSperredeDager:
+    get:
+      operationId: publiseringKalenderHelligOgSperredeDagerGET
+      parameters:
+      - explode: false
+        in: path
+        name: variantId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          description: Publications linked to the variant
+      summary: List publications for a variant
+      x-eov-operation-handler: controllers/DefaultController
+  /kortnavn:
+    get:
+      operationId: kortnavnGET
+      responses:
+        "200":
+          description: List of kortnavn
+      summary: List all kortnavn
+      x-eov-operation-handler: controllers/DefaultController
+    post:
+      operationId: kortnavnPOST
+      requestBody:
+        content:
+          application/json:
+            schema: {}
+        required: true
+      responses:
+        "201":
+          description: Kortnavn created
+      summary: Create a kortnavn
+      x-eov-operation-handler: controllers/DefaultController
+  /kortnavn/{name}:
+    get:
+      operationId: kortnavnNameGET
+      parameters:
+      - explode: false
+        in: path
+        name: name
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          description: Statistics under the kortnavn
+      summary: Get statistics under a kortnavn
+      x-eov-operation-handler: controllers/DefaultController
+    put:
+      operationId: kortnavnNamePUT
+      parameters:
+      - explode: false
+        in: path
+        name: name
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema: {}
+        required: true
+      responses:
+        "200":
+          description: Kortnavn updated
+      summary: Update a kortnavn
+      x-eov-operation-handler: controllers/DefaultController
+  /seksjoner:
+    get:
+      operationId: seksjonerGET
+      responses:
+        "200":
+          description: List of sections
+      summary: List all sections
+      x-eov-operation-handler: controllers/DefaultController
+  /seksjoner/{kode}:
+    get:
+      operationId: seksjonerKodeGET
+      parameters:
+      - explode: false
+        in: path
+        name: kode
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          description: Statistics belonging to the section
+      summary: List statistics owned by a section
+      x-eov-operation-handler: controllers/DefaultController
+components:
+  schemas:
+    statistic:
+      example:
+        myproperty: 0
+      properties:
+        myproperty:
+          type: integer

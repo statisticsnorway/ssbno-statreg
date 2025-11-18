@@ -1,0 +1,264 @@
+openapi: 3.1.0
+info:
+  title: Statistics API
+  version: 1.1.0
+  description: API for managing statistics, variants, publications, kortnavn, and sections.
+
+servers:
+  - url: https://ssb.no/statreg-api
+
+components:
+  schemas:
+    statistic:
+      type: object
+      properties:
+        myproperty:
+          type: integer
+paths:
+  /statistics:
+    get:
+      summary: List all statistics
+      responses:
+        '200':
+          description: List of statistics
+    post:
+      summary: Create a statistic
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {}
+      responses:
+        '201':
+          description: Statistic created
+
+  /statistics/{id}:
+    get:
+      summary: Get a statistic
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Statistic details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/statistic'
+    put:
+      summary: Update a statistic
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {}
+      responses:
+        '200':
+          description: Statistic updated
+
+  /statistics/variants:
+    get:
+      summary: List all variants under all statistics
+      responses:
+        '200':
+          description: List of variants under all statistics
+
+  /statistics/kortnavn:
+    get:
+      summary: List all kortnavn under all statistics
+      responses:
+        '200':
+          description: List of kortnavn under all statistics
+
+  /variants:
+    get:
+      summary: List all variants
+      responses:
+        '200':
+          description: List of variants
+    post:
+      summary: Create a variant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {}
+      responses:
+        '201':
+          description: Variant created
+
+  /variants/{id}:
+    get:
+      summary: Get a variant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Variant details
+    put:
+      summary: Update a variant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {}
+      responses:
+        '200':
+          description: Variant updated
+
+  /publisering:
+    get:
+      summary: List all publications
+      responses:
+        '200':
+          description: List of publications
+    post:
+      summary: Create a publication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {}
+      responses:
+        '201':
+          description: Publication created
+
+  /publisering/{id}:
+    get:
+      summary: Get a publication
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Publication details
+    put:
+      summary: Update a publication
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {}
+      responses:
+        '200':
+          description: Publication updated
+
+  /publisering/variant/{variantId}:
+    get:
+      summary: List publications for a variant
+      parameters:
+        - name: variantId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Publications linked to the variant
+
+  /publisering/kalenderHelligOgSperredeDager:
+    get:
+      summary: List publications for a variant
+      parameters:
+        - name: variantId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Publications linked to the variant
+
+  /kortnavn:
+    get:
+      summary: List all kortnavn
+      responses:
+        '200':
+          description: List of kortnavn
+    post:
+      summary: Create a kortnavn
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {}
+      responses:
+        '201':
+          description: Kortnavn created
+
+  /kortnavn/{name}:
+    get:
+      summary: Get statistics under a kortnavn
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Statistics under the kortnavn
+    put:
+      summary: Update a kortnavn
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {}
+      responses:
+        '200':
+          description: Kortnavn updated
+
+  /seksjoner:
+    get:
+      summary: List all sections
+      responses:
+        '200':
+          description: List of sections
+
+  /seksjoner/{kode}:
+    get:
+      summary: List statistics owned by a section
+      parameters:
+        - name: kode
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Statistics belonging to the section

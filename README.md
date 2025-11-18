@@ -50,3 +50,19 @@ Then, run
 ```bash
 docker run -it -p 8080:8080 ssbno/statreg-api
 ```
+
+## Build servers and clients from OpenAPI spec
+
+examples from <https://openapi-generator.tech/docs/generators>
+
+```sh
+docker run --rm -v ${PWD}:/local openapitools/openapi-generator-cli:v7.17.0  generate -i /local/openapi/openapi_draft.yaml -g nodejs-express-server -o /local/generated/nodejs-express-server
+```
+
+```sh
+docker run --rm -v ${PWD}:/local openapitools/openapi-generator-cli:v7.17.0  generate -i /local/openapi/openapi_draft.yaml -g graphql-nodejs-express-server -o /local/generated/graphql-nodejs-express-server
+```
+
+```sh
+docker run --rm -v ${PWD}:/local openapitools/openapi-generator-cli:v7.17.0  generate -i /local/openapi/openapi_draft.yaml -g typescript-fetch -o /local/generated/typescript-fetch-client
+```
