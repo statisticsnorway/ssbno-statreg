@@ -2,6 +2,8 @@ import { initializeLightship } from '@/utils/lightship'
 import express from 'express'
 import promBundle from 'express-prom-bundle'
 import helmet from 'helmet'
+import swaggerUi from 'swagger-ui-express'
+import swaggerDocument from '../openapi/openapi'
 
 const metricsMiddleware = promBundle({
   includeMethod: true,
@@ -26,7 +28,16 @@ app.get('/', (_, res) => {
   res.send('Hello World!')
 })
 
-const port = 8080
+const openapiDocument = YAML.load('.openapi/openapi.yaml');
+// Serve spec directly
+app.get('/openapi.json', (req, res) => {
+  res.json(openapiDocument);
+});
+
+// Serve Swagger UI
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
+const port = 8081
 const lightship = await initializeLightship()
 
 app

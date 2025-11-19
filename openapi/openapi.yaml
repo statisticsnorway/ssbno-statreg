@@ -1,0 +1,208 @@
+openapi: 3.1.0
+info:
+  title: Statreg API
+  version: 1.1.0
+  description: API for managing publications, statistics and metadata for Statistics Norway
+
+servers:
+  - url: https://ssb.no/statreg-api
+
+paths:
+  /statistics:
+    get:
+      summary: List all statistics
+      responses:
+        '200':
+          description: List of statistics
+    post:
+      summary: Create a new statistic
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {}
+      responses:
+        '201':
+          description: Statistic details
+
+  /statistics/{id}:
+    get:
+      summary: Get a statistic
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Statistic details
+    put:
+      summary: Update a statistic
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {}
+      responses:
+        '200':
+          description: Statistic details
+
+  /statistics/{id}/variants:
+    # GET: Separate endpoint or included in GET on a spesific statistic??
+    get:
+      summary: List all variants for a spesific statistic
+      responses:
+        '200':
+          description: List of variants for a spesific statistic
+    post:
+      summary: Create a variant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {}
+      responses:
+        '201':
+          description: Variant created
+    delete: # Skal vi kunne dette eller bare en put med en "slettet" variabel?
+
+
+  /statistics/{id}/versions:
+    get:
+      summary: List all versions with changes and comment
+      responses:
+        '200':
+          description: List of versions
+
+  # Should these be on /variants/ or under a spesific statistic?
+  /variants/{id}:
+    get:
+      summary: Get a variant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Variant details
+    put:
+      summary: Update a variant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {}
+      responses:
+        '200':
+          description: Variant details
+
+  /releases:
+    get:
+      summary: List all releases
+      responses:
+        '200':
+          description: List of releases
+    post:
+      summary: Create a new release
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {}
+      responses:
+        '201':
+          description: Release details
+
+  /releases/{id}:
+    get:
+      summary: Get a releases
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Release details
+    put:
+      summary: Update a release
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {}
+      responses:
+        '200':
+          description: Release details
+    delete: # Skal vi kunne dette eller bare en put med en "slettet" variabel?
+
+  /releases/{id}/versions:
+    get:
+      summary: List all versions on q release with change and comment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of versions
+
+  /nonReleasingDays:
+    get:
+      summary: List with all non releasing days
+      parameters:
+        - name: variantId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List with all non releasing days
+    put:
+      summary: Update list with non releasing days
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {}
+      responses:
+        '200':
+          description: Updated list
+
+  /shortnames:
+    get:
+      summary: List all shortnames, both in use and previously used
+      responses:
+        '200':
+          description: List of shortnames
