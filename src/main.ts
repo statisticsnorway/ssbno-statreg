@@ -56,7 +56,7 @@ const server = app
 // Graceful shutdown handler
 lightship.registerShutdownHandler(async () => {
   console.log('Graceful shutdown initiated...')
-  await prisma.$disconnect()
+  // await prisma.$disconnect()
   server.close()
 })
 
