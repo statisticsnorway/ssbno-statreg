@@ -5,13 +5,6 @@ metadata:
     team: ssbno-developers
   name: ssbno-statreg-api
   namespace: ssbno
-spec:
-  login:
-    provider: openid
-    enforce:
-      enabled: true
-      excludePaths:
-        - /statistics
 
   gcp:
       sqlInstances:
