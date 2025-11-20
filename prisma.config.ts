@@ -10,7 +10,6 @@ export default defineConfig({
   migrations: {
     path: 'prisma/migrations',
   },
-  engine: 'classic',
   datasource: {
     url: env<Env>('NAIS_DATABASE_MYAPP_MYDB_URL'),
   },

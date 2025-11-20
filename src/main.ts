@@ -5,8 +5,14 @@ import helmet from 'helmet'
 import process from 'node:process'
 import * as dotenv from 'dotenv'
 
-// import { PrismaClient } from '@prisma/client'
-import { PrismaClient } from '../generated/prisma/client.js'
+import { PrismaPg } from '@prisma/adapter-pg'
+import { PrismaClient } from './generated/prisma/client.js'
+
+dotenv.config()
+
+const adapter = new PrismaPg({
+  connectionString: process.env.NAIS_DATABASE_MYAPP_MYDB_URL!,
+})
 
 const metricsMiddleware = promBundle({
   includeMethod: true,
@@ -27,8 +33,9 @@ const app = express()
 app.use(helmet())
 app.use(metricsMiddleware)
 
-app.get('/statistics', (_, res) => {
-  res.send('Hello Statistics!!')
+app.get('/statistics', async (_, res) => {
+  const stats = await prisma.statistikk.findMany()
+  res.send(stats)
 })
 app.get('/secret', (_, res) => {
   res.send('Very secret message!')
@@ -37,8 +44,8 @@ app.get('/', (_, res) => {
   res.send('Hello World!')
 })
 
-dotenv.config()
-const prisma = new PrismaClient()
+// const prisma = new PrismaClient({ adapter })
+const prisma = new PrismaClient({ adapter })
 await prisma.$connect()
 
 app.get('/statistics', async (_, res) => {
