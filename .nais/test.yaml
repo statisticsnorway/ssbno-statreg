@@ -5,6 +5,7 @@ metadata:
     team: ssbno-developers
   name: ssbno-statreg-api
   namespace: ssbno
+spec:
 
   gcp:
       sqlInstances:
