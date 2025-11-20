@@ -6,6 +6,7 @@ metadata:
   name: ssbno-statreg-api
   namespace: ssbno
 spec:
+
   gcp:
       sqlInstances:
         - type: POSTGRES_17
