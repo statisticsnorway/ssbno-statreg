@@ -2,6 +2,7 @@ import { createLightship } from 'lightship'
 import express from 'express'
 import promBundle from 'express-prom-bundle'
 import helmet from 'helmet'
+import process from 'node:process'
 
 const metricsMiddleware = promBundle({
   includeMethod: true,
@@ -35,7 +36,6 @@ app.get('/', (_, res) => {
 const port = 8080
 
 const lightship = await createLightship({
-  // eslint-disable-next-line no-undef
   detectKubernetes: process.env.NODE_ENV !== 'development',
   port: 9000,
 })
@@ -54,8 +54,9 @@ const server = app
   })
 
 // Graceful shutdown handler
-lightship.registerShutdownHandler(() => {
+lightship.registerShutdownHandler(async () => {
   console.log('Graceful shutdown initiated...')
+  // await prisma.$disconnect()
   server.close()
 })
 

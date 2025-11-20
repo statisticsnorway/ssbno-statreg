@@ -6,7 +6,7 @@ import tseslintParser from '@typescript-eslint/parser'
 import prettier from 'eslint-plugin-prettier'
 
 export default defineConfig([
-  globalIgnores(['dist/', 'node_modules/']),
+  globalIgnores(['dist/', 'node_modules/', 'generated/']),
   {
     files: ['**/*.{js,mjs,cjs,ts}'],
     plugins: {
