@@ -6,7 +6,11 @@ metadata:
   name: ssbno-statreg-api
   namespace: ssbno
 spec:
-
+  login:
+    enforce:
+      enabled: true
+      excludePaths:
+        - /secret
   gcp:
       sqlInstances:
         - type: POSTGRES_17
