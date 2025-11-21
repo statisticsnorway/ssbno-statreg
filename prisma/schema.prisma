@@ -5,7 +5,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  schemas  = ["statreg"]
 }
 
 model Frekvens {
@@ -15,7 +14,6 @@ model Frekvens {
   kode    String    @db.VarChar(50)
   variant Variant[]
 
-  @@schema("statreg")
 }
 
 model Kalender_dato {
@@ -24,7 +22,6 @@ model Kalender_dato {
   kommentar String   @db.VarChar(255)
   dag       DateTime @db.Timestamp(6)
 
-  @@schema("statreg")
 }
 
 model Kontakt {
@@ -41,7 +38,6 @@ model Kontakt {
   navn_en              String?                @db.VarChar(130)
   statistikk_kontakter Statistikk_kontakter[]
 
-  @@schema("statreg")
 }
 
 model Kortnavn {
@@ -52,7 +48,6 @@ model Kortnavn {
   date_created DateTime     @db.Timestamp(6)
   statistikk   Statistikk[]
 
-  @@schema("statreg")
 }
 
 /// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
@@ -73,7 +68,6 @@ model Publisering {
   import_flag      Decimal? @db.Decimal(1, 0)
   variant          Variant  @relation(fields: [variant_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fkdb40a13c44a06f71")
 
-  @@schema("statreg")
 }
 
 model Regionalt_niva {
@@ -83,7 +77,6 @@ model Regionalt_niva {
   kode                        String?                       @db.VarChar(50)
   statistikk_regionale_nivaer Statistikk_regionale_nivaer[]
 
-  @@schema("statreg")
 }
 
 model Seksjon {
@@ -94,7 +87,6 @@ model Seksjon {
   navn_en    String       @db.VarChar(100)
   statistikk Statistikk[]
 
-  @@schema("statreg")
 }
 
 model Statistikk {
@@ -126,7 +118,6 @@ model Statistikk {
   statistikk_regionale_nivaer Statistikk_regionale_nivaer[]
   variant                     Variant[]
 
-  @@schema("statreg")
 }
 
 model Statistikk_kontakter {
@@ -137,7 +128,6 @@ model Statistikk_kontakter {
   statistikk    Statistikk @relation(fields: [statistikk_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fkf98634a1d978a9a3")
 
   @@id([statistikk_id, kontakt_id], map: "sys_c0023946")
-  @@schema("statreg")
 }
 
 model Statistikk_regionale_nivaer {
@@ -147,7 +137,6 @@ model Statistikk_regionale_nivaer {
   statistikk        Statistikk     @relation(fields: [statistikk_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fke4b2f5b8d978a9a3")
 
   @@id([statistikk_id, regionalt_niva_id], map: "sys_c0023949")
-  @@schema("statreg")
 }
 
 /// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
@@ -166,5 +155,4 @@ model Variant {
   frekvens      Frekvens      @relation(fields: [frekvens_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fke1d1085b8b4eb03")
   statistikk    Statistikk    @relation(fields: [statistikk_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fke1d1085d978a9a3")
 
-  @@schema("statreg")
 }
