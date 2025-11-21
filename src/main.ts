@@ -4,7 +4,8 @@ import promBundle from 'express-prom-bundle'
 import helmet from 'helmet'
 import process from 'node:process'
 import swaggerUi from 'swagger-ui-express'
-import swaggerDocument from '../openapi/openapi'
+import fs from 'fs'
+import YAML from 'yaml'
 
 const metricsMiddleware = promBundle({
   includeMethod: true,
@@ -25,14 +26,10 @@ const app = express()
 app.use(helmet())
 app.use(metricsMiddleware)
 
-const openapiDocument = YAML.load('.openapi/openapi.yaml')
-// Serve spec directly
-app.get('/openapi.json', (req, res) => {
-  res.json(openapiDocument)
-})
+const file = fs.readFileSync('./openapi/openapi.yaml', 'utf8')
+const swaggerDocument = YAML.parse(file)
 
-// Serve Swagger UI
-app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
 app.get('/statistics', (_, res) => {
   res.send('Hello Statistics!!')

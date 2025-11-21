@@ -7,15 +7,31 @@ info:
 servers:
   - url: https://ssb.no/statreg-api
 
+tags: 
+  - name: statistics
+    description: Statistics information and manipulation
+  - name: releases
+    description: Releases endpoints
+  - name: variants
+    description: Variants endpoints
+  - name: shortnames
+    description: Listing all shortnames
+  - name: nonReleasingDays
+    description: Information about which days not allowed for publishing
+
 paths:
   /statistics:
     get:
       summary: List all statistics
+      tags: 
+        - statistics
       responses:
         '200':
           description: List of statistics
     post:
       summary: Create a new statistic
+      tags: 
+        - statistics
       requestBody:
         required: true
         content:
@@ -28,6 +44,8 @@ paths:
   /statistics/{id}:
     get:
       summary: Get a statistic
+      tags: 
+        - statistics
       parameters:
         - name: id
           in: path
@@ -39,6 +57,8 @@ paths:
           description: Statistic details
     put:
       summary: Update a statistic
+      tags: 
+        - statistics
       parameters:
         - name: id
           in: path
@@ -58,11 +78,15 @@ paths:
     # GET: Separate endpoint or included in GET on a spesific statistic??
     get:
       summary: List all variants for a spesific statistic
+      tags: 
+        - statistics
       responses:
         '200':
           description: List of variants for a spesific statistic
     post:
       summary: Create a variant
+      tags: 
+        - statistics
       requestBody:
         required: true
         content:
@@ -72,11 +96,14 @@ paths:
         '201':
           description: Variant created
     delete: # Skal vi kunne dette eller bare en put med en "slettet" variabel?
-
+      tags: 
+        - statistics
 
   /statistics/{id}/versions:
     get:
       summary: List all versions with changes and comment
+      tags: 
+        - statistics
       responses:
         '200':
           description: List of versions
@@ -85,6 +112,8 @@ paths:
   /variants/{id}:
     get:
       summary: Get a variant
+      tags: 
+        - variants
       parameters:
         - name: id
           in: path
@@ -96,6 +125,8 @@ paths:
           description: Variant details
     put:
       summary: Update a variant
+      tags: 
+        - variants
       parameters:
         - name: id
           in: path
@@ -114,11 +145,15 @@ paths:
   /releases:
     get:
       summary: List all releases
+      tags: 
+        - releases
       responses:
         '200':
           description: List of releases
     post:
       summary: Create a new release
+      tags: 
+        - releases
       requestBody:
         required: true
         content:
@@ -131,6 +166,8 @@ paths:
   /releases/{id}:
     get:
       summary: Get a releases
+      tags: 
+        - releases
       parameters:
         - name: id
           in: path
@@ -142,6 +179,8 @@ paths:
           description: Release details
     put:
       summary: Update a release
+      tags: 
+        - releases
       parameters:
         - name: id
           in: path
@@ -157,10 +196,14 @@ paths:
         '200':
           description: Release details
     delete: # Skal vi kunne dette eller bare en put med en "slettet" variabel?
+      tags: 
+        - releases
 
   /releases/{id}/versions:
     get:
       summary: List all versions on q release with change and comment
+      tags: 
+        - releases
       parameters:
         - name: id
           in: path
@@ -174,6 +217,8 @@ paths:
   /nonReleasingDays:
     get:
       summary: List with all non releasing days
+      tags: 
+        - nonReleasingDays
       parameters:
         - name: variantId
           in: path
@@ -185,6 +230,8 @@ paths:
           description: List with all non releasing days
     put:
       summary: Update list with non releasing days
+      tags: 
+        - nonReleasingDays
       parameters:
         - name: id
           in: path
@@ -203,6 +250,8 @@ paths:
   /shortnames:
     get:
       summary: List all shortnames, both in use and previously used
+      tags: 
+        - shortnames
       responses:
         '200':
           description: List of shortnames
