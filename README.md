@@ -56,7 +56,7 @@ docker run -it -p 8080:8080 ssbno/statreg-api
 
 ### Database
 
-We use PostgreSQL, provided by Nais in our live environments. Locally you can set up your own Postgres db in one of many ways - run `npx prisma dev` for the easiest, quickest alternative or install PostgreSQL [from either the website](https://www.postgresql.org/download/), postgres.app, Homebrew or your package manager of choice.
+We use PostgreSQL, provided by Nais in our live environments. Locally you can set up your own Postgres db in one of many ways - install PostgreSQL [from either the website](https://www.postgresql.org/download/), Homebrew or your package manager of choice. If you are on a mac, postgres.app is recommended and makes setup very easy and quick.
 
 ### Prisma
 
