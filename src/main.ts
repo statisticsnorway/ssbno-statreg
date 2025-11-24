@@ -3,6 +3,7 @@ import express from 'express'
 import promBundle from 'express-prom-bundle'
 import helmet from 'helmet'
 import process from 'node:process'
+import { getDepartmentsFromKlass, departments } from './services/klassService'
 
 const metricsMiddleware = promBundle({
   includeMethod: true,
@@ -23,8 +24,16 @@ const app = express()
 app.use(helmet())
 app.use(metricsMiddleware)
 
+// Initialize variables from datasources
+// TODO: Avgjøre om vi henter på oppstart eller på request
+getDepartmentsFromKlass()
+
 app.get('/statistics', (_, res) => {
   res.send('Hello Statistics!!')
+})
+// Dummy endpoint for testing purposes
+app.get('/departments', async (_, res) => {
+  res.json(departments)
 })
 app.get('/secret', (_, res) => {
   res.send('Very secret message!')
