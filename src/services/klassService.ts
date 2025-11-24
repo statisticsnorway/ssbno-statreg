@@ -4,6 +4,7 @@ import { KlassClassification } from '@/types/klass'
 export let departments: Department[] = []
 
 // TODO: Legg til feilhåndtering
+// TODO: Enhetstester
 export async function getDepartmentsFromKlass() {
   try {
     // TODO: dynamically set url from env
