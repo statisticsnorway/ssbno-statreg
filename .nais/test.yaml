@@ -6,6 +6,9 @@ metadata:
   name: ssbno-statreg-api
   namespace: ssbno
 spec:
+  envFrom:
+    - secret: ssbno-statreg-api-client-id
+    - secret: ssbno-statreg-api-client-secret
   login:
     enforce:
       enabled: true
