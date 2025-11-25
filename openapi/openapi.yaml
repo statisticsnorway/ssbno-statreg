@@ -12,17 +12,13 @@ tags:
     description: Statistics information and manipulation
   - name: releases
     description: Releases endpoints
-  - name: variants
-    description: Variants endpoints
-  - name: shortnames
-    description: Listing all shortnames
-  - name: nonReleasingDays
-    description: Information about which days not allowed for publishing
+  - name: calendar
+    description: Helpers for calendar view and days that are blocked
 
 paths:
   /statistics:
     get:
-      summary: List all statistics
+      summary: List of all statistics
       tags: 
         - statistics
       responses:
@@ -43,7 +39,7 @@ paths:
 
   /statistics/{shortname}:
     get:
-      summary: Get a statistic
+      summary: Get a statistic by its shortname
       tags: 
         - statistics
       parameters:
@@ -54,7 +50,7 @@ paths:
             type: string
       responses:
         '200':
-          description: Statistic details
+          description: Statistic details with all its variants
     put:
       summary: Update a statistic
       tags: 
@@ -72,7 +68,7 @@ paths:
             schema: {}
       responses:
         '200':
-          description: Statistic details
+          description: Statistic details with all its variants
 
   /statistics/{shortname}/variants:
     post:
@@ -86,13 +82,13 @@ paths:
             schema: {}
       responses:
         '201':
-          description: Variant created
+          description: Variant details
   /statistics/{shortname}/variants/{id}:
     put:
       tags: 
         - statistics
 
-  /statistics/{id}/versions:
+  /statistics/{shortname}/versions:
     get:
       summary: List all versions with changes and comment
       tags: 
@@ -103,7 +99,7 @@ paths:
 
   /releases:
     get:
-      summary: List all releases
+      summary: List all releases. TBD; Pagination and filtering in backend or frontend
       tags: 
         - releases
       responses:
@@ -124,7 +120,7 @@ paths:
 
   /releases/{id}:
     get:
-      summary: Get a releases
+      summary: Get a release
       tags: 
         - releases
       parameters:
@@ -154,13 +150,10 @@ paths:
       responses:
         '200':
           description: Release details
-    delete: # Skal vi kunne dette eller bare en put med en "slettet" variabel?
-      tags: 
-        - releases
 
   /releases/{id}/versions:
     get:
-      summary: List all versions on q release with change and comment
+      summary: List all versions on a release with change and comment
       tags: 
         - releases
       parameters:
@@ -173,30 +166,32 @@ paths:
         '200':
           description: List of versions
 
-  /nonReleasingDays:
+  /calendar:
     get:
-      summary: List with all non releasing days
+      summary: List all days within date range with number of releases, statuses, nonreleaseing days and reasons with defult parameters
       tags: 
-        - nonReleasingDays
-      parameters:
-        - name: variantId
-          in: path
-          required: true
-          schema:
-            type: string
+        - calendar
+
+  /calendar/{fromdate}-{todate}:
+    get:
+      summary: List all days within date range with number of releases, statuses, nonreleaseing days and reasons
+      tags: 
+        - calendar
+
+  /calendar/blocked-release-days:
+    get:
+      summary: List with all manually added blocked days
+      tags: 
+        - calendar
       responses:
         '200':
-          description: List with all non releasing days
-    put:
-      summary: Update list with non releasing days
+          description: List with blocked days
+  
+  /calendar/blocked-release-day:
+    post:
+      summary: Add a manually blocked day
       tags: 
-        - nonReleasingDays
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
+        - calendar
       requestBody:
         required: true
         content:
@@ -204,13 +199,19 @@ paths:
             schema: {}
       responses:
         '200':
-          description: Updated list
-
-  /shortnames:
-    get:
-      summary: List all shortnames, both in use and previously used
+          description: Updated list with blocked days
+  
+  /calendar/blocked-release-day/{id}:
+    delete:
+      summary: Delete a manually blocked day
       tags: 
-        - shortnames
+        - calendar
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
       responses:
         '200':
-          description: List of shortnames
+          description: Updated list
