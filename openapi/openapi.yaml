@@ -187,11 +187,17 @@ paths:
         '200':
           description: List with blocked days
   
-  /calendar/blocked-release-day:
+  /calendar/blocked-release-days/{date}:
     post:
       summary: Add a manually blocked day
       tags: 
         - calendar
+      parameters:
+        - name: date
+          in: path
+          required: true
+          schema:
+            type: string
       requestBody:
         required: true
         content:
@@ -200,14 +206,12 @@ paths:
       responses:
         '200':
           description: Updated list with blocked days
-  
-  /calendar/blocked-release-day/{id}:
     delete:
       summary: Delete a manually blocked day
       tags: 
         - calendar
       parameters:
-        - name: id
+        - name: date
           in: path
           required: true
           schema:
