@@ -29,24 +29,20 @@ const metricsMiddleware = promBundle({
   },
 })
 
+// const prisma = new PrismaClient({ adapter })
+const prisma = new PrismaClient({ adapter })
+await prisma.$connect()
+
 const app = express()
 app.use(helmet())
 app.use(metricsMiddleware)
 
-app.get('/statistics', async (_, res) => {
-  const stats = await prisma.statistikk.findMany()
-  res.send(stats)
-})
 app.get('/secret', (_, res) => {
   res.send('Very secret message!')
 })
 app.get('/', (_, res) => {
   res.send('Hello World!')
 })
-
-// const prisma = new PrismaClient({ adapter })
-const prisma = new PrismaClient({ adapter })
-await prisma.$connect()
 
 app.get('/statistics', async (_, res) => {
   const allStatistics = await prisma.statistic.findMany()
