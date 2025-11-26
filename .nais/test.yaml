@@ -9,6 +9,7 @@ spec:
   envFrom:
     - secret: ssbno-statreg-api
   login:
+    provider: openid
     enforce:
       enabled: true
       excludePaths:
