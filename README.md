@@ -3,11 +3,20 @@
 Statreg API is a backend service for statistikkregisteret. It provides endpoints for fetching and managing statistics and publications, amongst other things.
 
 ## DEV
+
+### First run, database baseline setup
 ```
 npm install
 npm run generate
+npx prisma db push
 npm run dev
 ```
+
+### Subsequent application startups
+```
+npm run dev
+```
+
 Go to http://localhost:8080 to see results.
 
 ## Eslint & Prettier
