@@ -29,7 +29,6 @@ const metricsMiddleware = promBundle({
   },
 })
 
-// const prisma = new PrismaClient({ adapter })
 const prisma = new PrismaClient({ adapter })
 await prisma.$connect()
 
