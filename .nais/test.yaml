@@ -20,7 +20,7 @@ spec:
         - /secret
     
   envFrom:
-  - secret: ssbno-statreg-api
+  - secret: login-config-ssbno-statreg-api
   
   accessPolicy:
     outbound:
