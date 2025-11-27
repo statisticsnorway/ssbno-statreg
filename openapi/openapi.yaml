@@ -3,11 +3,10 @@ info:
   title: Statreg API
   version: 1.1.0
   description: API for managing publications, statistics and metadata for Statistics Norway
-
 servers:
   - url: https://ssb.no/statreg-api
 
-tags: 
+tags:
   - name: statistics
     description: Statistics information and manipulation
   - name: releases
@@ -15,35 +14,132 @@ tags:
   - name: calendar
     description: Helpers for calendar view and days that are blocked
 
+components:
+  schemas:
+    Statistic_listing:
+      type: object
+      properties:
+        version: { type: string }
+        shortname_id: { type: string }
+        search_phrases: { type: string, nullable: true }
+        desk_appoval_status: { type: string, nullable: true }
+        language: { type: string }
+        search_phrases_en: { type: string, nullable: true }
+        division_id: { type: string }
+        first_release: { type: string, format: date-time, nullable: true }
+        yearly_reporting: { type: boolean }
+        status: { type: string }
+        name: { type: string }
+        name_en: { type: string, nullable: true }
+
+    Statistic_details:
+      type: object
+      properties:
+        version: { type: string }
+        shortname_id: { type: string }
+        search_phrases: { type: string, nullable: true }
+        desk_appoval_status: { type: string, nullable: true }
+        language: { type: string }
+        search_phrases_en: { type: string, nullable: true }
+        division_id: { type: string }
+        first_release: { type: string, format: date-time, nullable: true }
+        yearly_reporting: { type: boolean }
+        status: { type: string }
+        previous_topic_codes: { type: string, nullable: true }
+        relation_id: { type: string, nullable: true }
+        name: { type: string }
+        last_updated: { type: string, format: date-time }
+        comment: { type: string }
+        name_en: { type: string, nullable: true }
+        date_created: { type: string, format: date-time }
+        variants:
+          type: array
+          items: { $ref: '#/components/schemas/Variant' }
+        contact_ids:
+          type: array
+          items: {type: string }
+        statistic_region_level_ids:
+          type: array
+          items: { type: string }
+    
+    Variant:
+      type: object
+      properties:
+        id: { type: string }
+        version: { type: string }
+        last_updated: { type: string, format: date-time }
+        detaljniva_en: { type: string, nullable: true }
+        detaljniva: { type: string, nullable: true }
+        date_created: { type: string, format: date-time }
+        cancelled: { type: boolean }
+        freq_id: { type: string }
+        revision: { type: string }
+    
+    Release:
+      type: object
+      properties:
+        id: { type: string }
+        version: { type: string }
+        publish_time: { type: string, format: date-time }
+        has_versions: { type: boolean }
+        last_updated: { type: string, format: date-time }
+        comment: { type: string }
+        period_to: { type: string, format: date-time }
+        desk_appoval_status: { type: string, nullable: true }
+        variant_id: { type: string }
+        period_from: { type: string, format: date-time }
+        cancelled: { type: boolean }
+        date_created: { type: string, format: date-time }
+        release_date_precision: { type: string }
+        import_flag: { type: boolean, nullable: true }
+
+    Calender_date:
+      type: object
+      properties:
+        date: { type: string, format: date-time }
+        is_blocked: { type: boolean }
+        blocked_comment: { type: string, nullable: true }
+        number_releases: { type: number }
+
+    Blocked_release_date:
+      type: object
+      properties:
+        date: { type: string, format: date-time }
+        blocked_comment: { type: string }
+
 paths:
   /statistics:
     get:
       summary: List of all statistics
-      tags: 
-        - statistics
+      tags: [statistics]
       responses:
         '200':
           description: List of statistics
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Statistic_listing' }
     post:
       summary: Create a new statistic
-      tags: 
-        - statistics
+      tags: [statistics]
       requestBody:
         required: true
         content:
           application/json:
-            schema: {}
+            schema: { $ref: '#/components/schemas/Statistic_details' }
       responses:
         '201':
           description: Statistic details
-
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Statistic_details' }
   /statistics/{shortname}:
     get:
       summary: Get a statistic by its shortname
-      tags: 
-        - statistics
+      tags: [statistics]
       parameters:
-        - name: id
+        - name: shortname
           in: path
           required: true
           schema:
@@ -51,12 +147,14 @@ paths:
       responses:
         '200':
           description: Statistic details with all its variants
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Statistic_details' }
     put:
       summary: Update a statistic
-      tags: 
-        - statistics
+      tags: [statistics]
       parameters:
-        - name: id
+        - name: shortname
           in: path
           required: true
           schema:
@@ -65,64 +163,101 @@ paths:
         required: true
         content:
           application/json:
-            schema: {}
+            schema: { $ref: '#/components/schemas/Statistic_details' }
       responses:
         '200':
           description: Statistic details with all its variants
-
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Statistic_details' }
   /statistics/{shortname}/variants:
     post:
       summary: Create a variant
-      tags: 
-        - statistics
+      tags: [statistics]
       requestBody:
         required: true
         content:
           application/json:
-            schema: {}
+            schema: { $ref: '#/components/schemas/Variant' }
       responses:
         '201':
           description: Variant details
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Variant' }
   /statistics/{shortname}/variants/{id}:
     put:
-      tags: 
-        - statistics
-
+      summary: Update a variant
+      tags: [statistics]
+      parameters:
+        - name: shortname
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Variant' }
+      responses:
+        '200':
+          description: Variant details
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Variant' }
   /statistics/{shortname}/versions:
     get:
       summary: List all versions with changes and comment
-      tags: 
-        - statistics
+      tags: [statistics]
       responses:
         '200':
           description: List of versions
-
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    version: { type: string }
+                    comment: { type: string }
+                    last_updated: { type: string, format: date-time }
   /releases:
     get:
       summary: List all releases. TBD; Pagination and filtering in backend or frontend
-      tags: 
-        - releases
+      tags: [releases]
       responses:
         '200':
           description: List of releases
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Release' }
     post:
       summary: Create a new release
-      tags: 
-        - releases
+      tags: [releases]
       requestBody:
         required: true
         content:
           application/json:
-            schema: {}
+            schema: { $ref: '#/components/schemas/Release' }
       responses:
         '201':
           description: Release details
-
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Release' }
   /releases/{id}:
     get:
       summary: Get a release
-      tags: 
-        - releases
+      tags: [releases]
       parameters:
         - name: id
           in: path
@@ -132,10 +267,12 @@ paths:
       responses:
         '200':
           description: Release details
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Release' }
     put:
       summary: Update a release
-      tags: 
-        - releases
+      tags: [releases]
       parameters:
         - name: id
           in: path
@@ -146,16 +283,17 @@ paths:
         required: true
         content:
           application/json:
-            schema: {}
+            schema: { $ref: '#/components/schemas/Release' }
       responses:
         '200':
           description: Release details
-
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Release' }
   /releases/{id}/versions:
     get:
       summary: List all versions on a release with change and comment
-      tags: 
-        - releases
+      tags: [releases]
       parameters:
         - name: id
           in: path
@@ -165,57 +303,108 @@ paths:
       responses:
         '200':
           description: List of versions
-
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    version: { type: string }
+                    comment: { type: string }
+                    last_updated: { type: string, format: date-time }
   /calendar:
     get:
       summary: List all days within date range with number of releases, statuses, nonreleaseing days and reasons with defult parameters
-      tags: 
-        - calendar
-
+      tags: [calendar]
+      responses:
+        '200':
+          description: List of days
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Calender_date' }
   /calendar/{fromdate}-{todate}:
     get:
       summary: List all days within date range with number of releases, statuses, nonreleaseing days and reasons
-      tags: 
-        - calendar
-
+      tags: [calendar]
+      parameters:
+        - name: fromdate
+          in: path
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: todate
+          in: path
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: List of days in range
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Calender_date' }
   /calendar/blocked-release-days:
     get:
       summary: List with all manually added blocked days
-      tags: 
-        - calendar
+      tags: [calendar]
       responses:
         '200':
           description: List with blocked days
-  
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Blocked_release_date' }
   /calendar/blocked-release-days/{date}:
     post:
       summary: Add a manually blocked day
-      tags: 
-        - calendar
+      tags: [calendar]
       parameters:
         - name: date
           in: path
           required: true
           schema:
             type: string
+            format: date
       requestBody:
         required: true
         content:
           application/json:
-            schema: {}
+            schema: 
+              type: object
+              properties:
+                blocked_comment:
+                  type: string
       responses:
         '200':
           description: Updated list with blocked days
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Blocked_release_date' }
     delete:
       summary: Delete a manually blocked day
-      tags: 
-        - calendar
+      tags: [calendar]
       parameters:
         - name: date
           in: path
           required: true
           schema:
             type: string
+            format: date
       responses:
         '200':
           description: Updated list
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Blocked_release_date' }
