@@ -23,12 +23,6 @@ spec:
   - secret: ssbno-statreg-api
   
   accessPolicy:
-    inbound:
-      rules:
-      - application: keycloak
-        namespace: keycloak
-      - application: keycloak-play
-        namespace: keycloak
     outbound:
       external:
       - host: auth.test.ssb.no
