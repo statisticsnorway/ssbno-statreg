@@ -5,19 +5,33 @@ metadata:
     team: ssbno-developers
   name: ssbno-statreg-api
   namespace: ssbno
+
 spec:
-  envFrom:
-    - secret: ssbno-statreg-api
+  ingresses:
+  - https://ssbno-statreg-api.intern.test.ssb.no 
+  image: '{{ image }}' # Injected from the GitHub Action
+  port: 8080
+
   login:
     provider: openid
     enforce:
       enabled: true
       excludePaths:
         - /secret
+    
+  envFrom:
+  - secret: ssbno-statreg-api
+  
+  accessPolicy:
+    outbound:
+      external:
+      - host: auth.test.ssb.no
+    
+
   gcp:
       sqlInstances:
         - type: POSTGRES_17
-# See Nais docs: https://docs.ssb.cloud.nais.io/workloads/application/reference/application-spec/#gcpsqlinstancestier
+          # See Nais docs: https://docs.ssb.cloud.nais.io/workloads/application/reference/application-spec/#gcpsqlinstancestier
           tier: db-f1-micro # This tier MUST be increased for PROD! No SLA unless custom!
           diskAutoresize: true
           diskAutoresizeLimit: 50
@@ -30,10 +44,7 @@ spec:
               value: "on"          
           databases:
             - name: statreg-db
-  image: '{{ image }}' # Injected from the GitHub Action
-  ingresses:
-  - https://ssbno-statreg-api.intern.test.ssb.no
-  port: 8080
+
   prometheus:
     enabled: true
     path: /metrics
