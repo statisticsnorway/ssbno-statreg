@@ -18,6 +18,11 @@
     "test": "tsx --test 'test/**.test.ts' 'src/**.test.ts'",
     "ci-test": "tsx --test 'test/**.test.ts' 'src/**.test.ts'"
   },
+  "overrides": {
+    "hono": "^4.10.3",
+    "valibot": "^1.2.0",
+    "body-parser": "^2.2.1"
+  },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
     "@types/express": "^5.0.5",
