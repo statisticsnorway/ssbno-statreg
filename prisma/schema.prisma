@@ -134,7 +134,6 @@ model Statistic_region_level {
   @@id([statistic_id, region_level_id], map: "sys_c0023949")
 }
 
-/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
 model Variant {
   id                 Decimal   @id(map: "sys_c0023958") @db.Decimal(19, 0)
   version            Decimal   @db.Decimal(19, 0)
