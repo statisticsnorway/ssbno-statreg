@@ -4,8 +4,18 @@ import promBundle from 'express-prom-bundle'
 import helmet from 'helmet'
 import process from 'node:process'
 import swaggerUi from 'swagger-ui-express'
-import fs from 'fs'
+import fs from 'node:fs'
 import YAML from 'yaml'
+import * as dotenv from 'dotenv'
+
+import { PrismaPg } from '@prisma/adapter-pg'
+import { PrismaClient } from './generated/prisma/client.js'
+
+dotenv.config()
+
+const adapter = new PrismaPg({
+  connectionString: process.env.NAIS_DATABASE_MYAPP_MYDB_URL!,
+})
 
 const metricsMiddleware = promBundle({
   includeMethod: true,
@@ -22,6 +32,9 @@ const metricsMiddleware = promBundle({
   },
 })
 
+const prisma = new PrismaClient({ adapter })
+await prisma.$connect()
+
 const app = express()
 app.use(helmet())
 app.use(metricsMiddleware)
@@ -31,14 +44,17 @@ const swaggerDocument = YAML.parse(file)
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
-app.get('/statistics', (_, res) => {
-  res.send('Hello Statistics!!')
-})
 app.get('/secret', (_, res) => {
   res.send('Very secret message!')
 })
 app.get('/', (_, res) => {
   res.send('Hello World!')
+})
+
+app.get('/statistics', async (_, res) => {
+  const allStatistics = await prisma.statistic.findMany()
+  console.log(JSON.stringify(allStatistics, null, 2))
+  res.send(allStatistics)
 })
 
 const port = 8080
@@ -64,7 +80,7 @@ const server = app
 // Graceful shutdown handler
 lightship.registerShutdownHandler(async () => {
   console.log('Graceful shutdown initiated...')
-  // await prisma.$disconnect()
+  await prisma.$disconnect()
   server.close()
 })
 
