@@ -13,11 +13,14 @@ jobs:
       - uses: actions/checkout@v5
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v6
+        env:
+          # placeholder URL, needed to generate client and build application
+          NAIS_DATABASE_MYAPP_MYDB_URL: postgresql://user@localhost:5432/statreg_db
         with:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
       - run: npm ci
-      - run: npm run generate
+      - run: npm run generated
       - run: npm run build --if-present
       - run: npm run ci-test
       - run: npm run lint
