@@ -48,7 +48,6 @@ model Shortname {
   @@map("Shortname")
 }
 
-/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
 model Release {
   id                     Decimal  @id(map: "sys_c0023910") @db.Decimal(19, 0)
   version                Decimal  @db.Decimal(19, 0)
@@ -78,9 +77,9 @@ model Region_level {
 model Division {
   id         Decimal     @id(map: "sys_c0023922") @db.Decimal(19, 0)
   version    Decimal     @db.Decimal(19, 0)
-  navn       String      @db.VarChar(100)
   code       String      @db.VarChar(3)
   name_en    String      @db.VarChar(100)
+  name       String      @db.VarChar(100)
   statistics Statistic[]
 }
 
@@ -140,13 +139,13 @@ model Variant {
   id                 Decimal   @id(map: "sys_c0023958") @db.Decimal(19, 0)
   version            Decimal   @db.Decimal(19, 0)
   last_updated       DateTime  @db.Timestamp(6)
-  level_of_detail_en String?   @db.VarChar(255)
-  level_of_detail    String?   @db.VarChar(255)
   date_created       DateTime  @db.Timestamp(6)
   cancelled          Boolean
   freq_id            Decimal   @db.Decimal(19, 0)
   revision           String    @db.VarChar(255)
   statistic_id       Decimal   @db.Decimal(19, 0)
+  level_of_detail    String?   @db.VarChar(255)
+  level_of_detail_en String?   @db.VarChar(255)
   releases           Release[]
   frequency          Frequency @relation(fields: [freq_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fke1d1085b8b4eb03")
   statistic          Statistic @relation(fields: [statistic_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fke1d1085d978a9a3")
