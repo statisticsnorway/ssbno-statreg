@@ -6,7 +6,7 @@ import YAML from 'yaml'
 import controllerRouter from './api/core/controllerRouter'
 import { startServer } from '../plugins/expressServer'
 import { promBundleMetrics } from '../plugins/promBundle'
-import { setupPrisma } from '../plugins/prisma'
+import { prisma } from './lib/prisma'
 import * as dotenv from 'dotenv'
 
 dotenv.config()
@@ -21,7 +21,7 @@ expressInstance.get('/secret', (_, res) => {
   res.send('Very secret message!')
 })
 
-const prisma = await setupPrisma()
+await prisma.$connect()
 
 const file = fs.readFileSync('./openapi/openapi.yaml', 'utf8')
 const swaggerDocument = YAML.parse(file)
