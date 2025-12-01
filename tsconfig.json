@@ -19,5 +19,5 @@
     "noEmit": false,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src", "generated"]
+  "include": ["src"]
 }

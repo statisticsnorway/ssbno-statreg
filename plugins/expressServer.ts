@@ -1,8 +1,9 @@
 import { createLightship } from 'lightship'
 import type express from 'express' // ← use the default import type
 import process from 'node:process'
+import { PrismaClient } from '@prisma/client'
 
-export async function startServer(app: express.Express) {
+export async function startServer(app: express.Express, prisma: PrismaClient) {
   const port = Number(process.env.PORT) || 8080
 
   const lightship = await createLightship({
@@ -24,8 +25,9 @@ export async function startServer(app: express.Express) {
       lightship.shutdown()
     })
 
-  lightship.registerShutdownHandler(() => {
+  lightship.registerShutdownHandler(async () => {
     console.log('Graceful shutdown initiated...')
+    await prisma.$disconnect()
     server.close()
   })
 

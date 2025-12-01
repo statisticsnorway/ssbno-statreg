@@ -14,6 +14,9 @@ RUN npm install
 # Copy the application source code
 COPY . .
 
+# Generate the Prisma client libraries
+RUN npm run generate
+
 # Build the application
 RUN npm run build
 
@@ -25,5 +28,4 @@ EXPOSE 9000
 EXPOSE 8080
 
 # Command to start the application
-# CMD [ "sh", "-c", "npm run db:deploy && npm run start" ]
-CMD [ "sh", "-c", "npm run start" ]
+CMD [ "sh", "-c", "npm run db:deploy && npm run start" ]
