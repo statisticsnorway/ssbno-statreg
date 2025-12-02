@@ -1,7 +1,7 @@
 import { createLightship } from 'lightship'
 import type express from 'express' // ← use the default import type
 import process from 'node:process'
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@/generated/prisma/client'
 
 export async function startServer(app: express.Express, prisma: PrismaClient) {
   const port = Number(process.env.PORT) || 8080
