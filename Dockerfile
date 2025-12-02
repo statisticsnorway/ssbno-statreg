@@ -14,6 +14,9 @@ RUN npm install
 # Copy the application source code
 COPY . .
 
+# Set temporary placeholder database URL for building
+ENV NAIS_DATABASE_MYAPP_MYDB_URL=postgresql://placeholder@localhost:5432/statreg_db
+
 # Generate the Prisma client libraries
 RUN npm run generate
 
