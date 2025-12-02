@@ -2,7 +2,7 @@ import 'dotenv/config'
 import { defineConfig, env } from 'prisma/config'
 
 type Env = {
-  NAIS_DATABASE_MYAPP_MYDB_URL: string
+  NAIS_DATABASE_SSBNO_STATREG_API_STATREG_DB_URL: string
 }
 
 export default defineConfig({
@@ -11,6 +11,6 @@ export default defineConfig({
     path: 'prisma/migrations',
   },
   datasource: {
-    url: env<Env>('NAIS_DATABASE_MYAPP_MYDB_URL'),
+    url: env<Env>('NAIS_DATABASE_SSBNO_STATREG_API_STATREG_DB_URL'),
   },
 })
