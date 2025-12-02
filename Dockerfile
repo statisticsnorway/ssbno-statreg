@@ -1,6 +1,6 @@
 # Use a Node.js 22 base image. We can not use distroless because Vite commands depend on having a shell, as well as other OS functions available. 
 # We want this because we need to run npm commands on startup, inside the container. 
-FROM node:22.21.1-alpine
+FROM node:23.11.1-alpine
 
 # Set the working directory
 WORKDIR /app
