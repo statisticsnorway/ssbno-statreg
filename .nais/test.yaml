@@ -18,11 +18,16 @@ spec:
       enabled: true
       excludePaths:
         - /secret
+        - /api-docs
     
   envFrom:
   - secret: login-config-ssbno-statreg-api
   
   accessPolicy:
+    inbound:
+      rules:
+      - application: keycloak
+        namespace: keycloak
     outbound:
       external:
       - host: auth.test.ssb.no
