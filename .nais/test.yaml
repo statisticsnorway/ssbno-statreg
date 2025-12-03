@@ -18,6 +18,7 @@ spec:
       enabled: true
       excludePaths:
         - /secret
+        - /api-docs
     
   envFrom:
   - secret: login-config-ssbno-statreg-api
