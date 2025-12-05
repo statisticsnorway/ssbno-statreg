@@ -16,7 +16,6 @@ spec:
   - secret: login-config-ssbno-statreg-api
 
   accessPolicy:
-  outbound:
     external:
     - host: auth.test.ssb.no
 
