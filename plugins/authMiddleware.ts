@@ -1,4 +1,5 @@
 import type { Request, Response, NextFunction } from 'express'
+import { Buffer } from 'buffer'
 
 export function extractJwt(req: Request, res: Response, next: NextFunction) {
   const auth = req.headers.authorization
