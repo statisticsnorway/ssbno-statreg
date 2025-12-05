@@ -31,10 +31,11 @@ expressInstance.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocumen
 
 startServer(expressInstance, prisma)
 
-
-// Debug endpoint to test JWT
-expressInstance.get('/whoami', (req: Request, res: Response) => {
-  return res.json({
-    jwt: (req as any).jwt,
+//jwt debug endpoint (temporary)
+expressInstance.get('/auth/me', (req, res) => {
+  res.json({
+    token: (req as any).token,
+    claims: (req as any).jwt
   })
 })
+
