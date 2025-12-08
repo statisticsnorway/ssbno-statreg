@@ -2,7 +2,6 @@ import { Department } from '@/types/department'
 import { KlassClassification } from '@/types/klassClassification'
 import process from 'node:process'
 
-// TODO: Enhetstester
 export async function getDepartmentsFromKlass(): Promise<Department[]> {
   let departments: Department[] = []
   try {
