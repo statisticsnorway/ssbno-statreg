@@ -1,0 +1,221 @@
+openapi: 3.1.0
+info:
+  title: Statreg API
+  version: 1.1.0
+  description: API for managing publications, statistics and metadata for Statistics Norway
+
+servers:
+  - url: https://ssb.no/statreg-api
+
+tags: 
+  - name: statistics
+    description: Statistics information and manipulation
+  - name: releases
+    description: Releases endpoints
+  - name: calendar
+    description: Helpers for calendar view and days that are blocked
+
+paths:
+  /statistics:
+    get:
+      summary: List of all statistics
+      tags: 
+        - statistics
+      responses:
+        '200':
+          description: List of statistics
+    post:
+      summary: Create a new statistic
+      tags: 
+        - statistics
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {}
+      responses:
+        '201':
+          description: Statistic details
+
+  /statistics/{shortname}:
+    get:
+      summary: Get a statistic by its shortname
+      tags: 
+        - statistics
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Statistic details with all its variants
+    put:
+      summary: Update a statistic
+      tags: 
+        - statistics
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {}
+      responses:
+        '200':
+          description: Statistic details with all its variants
+
+  /statistics/{shortname}/variants:
+    post:
+      summary: Create a variant
+      tags: 
+        - statistics
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {}
+      responses:
+        '201':
+          description: Variant details
+  /statistics/{shortname}/variants/{id}:
+    put:
+      tags: 
+        - statistics
+
+  /statistics/{shortname}/versions:
+    get:
+      summary: List all versions with changes and comment
+      tags: 
+        - statistics
+      responses:
+        '200':
+          description: List of versions
+
+  /releases:
+    get:
+      summary: List all releases. TBD; Pagination and filtering in backend or frontend
+      tags: 
+        - releases
+      responses:
+        '200':
+          description: List of releases
+    post:
+      summary: Create a new release
+      tags: 
+        - releases
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {}
+      responses:
+        '201':
+          description: Release details
+
+  /releases/{id}:
+    get:
+      summary: Get a release
+      tags: 
+        - releases
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Release details
+    put:
+      summary: Update a release
+      tags: 
+        - releases
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {}
+      responses:
+        '200':
+          description: Release details
+
+  /releases/{id}/versions:
+    get:
+      summary: List all versions on a release with change and comment
+      tags: 
+        - releases
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of versions
+
+  /calendar:
+    get:
+      summary: List all days within date range with number of releases, statuses, nonreleaseing days and reasons with defult parameters
+      tags: 
+        - calendar
+
+  /calendar/{fromdate}-{todate}:
+    get:
+      summary: List all days within date range with number of releases, statuses, nonreleaseing days and reasons
+      tags: 
+        - calendar
+
+  /calendar/blocked-release-days:
+    get:
+      summary: List with all manually added blocked days
+      tags: 
+        - calendar
+      responses:
+        '200':
+          description: List with blocked days
+  
+  /calendar/blocked-release-days/{date}:
+    post:
+      summary: Add a manually blocked day
+      tags: 
+        - calendar
+      parameters:
+        - name: date
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {}
+      responses:
+        '200':
+          description: Updated list with blocked days
+    delete:
+      summary: Delete a manually blocked day
+      tags: 
+        - calendar
+      parameters:
+        - name: date
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Updated list
