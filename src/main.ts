@@ -35,7 +35,7 @@ startServer(expressInstance, prisma)
 expressInstance.get('/auth/me', (req, res) => {
   res.json({
     token: (req as any).token,
-    claims: (req as any).jwt
+    claims: (req as any).jwt,
   })
 })
 
