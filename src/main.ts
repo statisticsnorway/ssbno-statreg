@@ -8,6 +8,7 @@ import { startServer } from '../plugins/expressServer'
 import { promBundleMetrics } from '../plugins/promBundle'
 import { prisma } from './lib/prisma'
 import * as dotenv from 'dotenv'
+import { getDepartmentsFromKlass } from './services/klassService'
 
 dotenv.config()
 
@@ -26,5 +27,8 @@ await prisma.$connect()
 const file = fs.readFileSync('./openapi/openapi.yaml', 'utf8')
 const swaggerDocument = YAML.parse(file)
 expressInstance.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
+
+// Initialize department and divisions from klass in memory
+export const DEPARTMENTS = await getDepartmentsFromKlass()
 
 startServer(expressInstance, prisma)
