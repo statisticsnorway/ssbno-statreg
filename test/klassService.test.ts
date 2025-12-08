@@ -14,7 +14,7 @@ function setPayload(next: object) {
 beforeEach(() => {
   delete process.env.DATA_BASE_URL
 
-  fetchMock = mock.method(global, 'fetch', async () => {
+  fetchMock = mock.method(globalThis as unknown as { fetch: typeof fetch }, 'fetch', async () => {
     return {
       json: async () => payload,
     }
@@ -79,7 +79,7 @@ describe('getDepartmentsFromKlass ', async () => {
   })
 
   test('catches and logs on fetch errors', async () => {
-    fetchMock = mock.method(global, 'fetch', async () => {
+    fetchMock = mock.method(globalThis as unknown as { fetch: typeof fetch }, 'fetch', async () => {
       throw new Error('my error message')
     })
     const departments = await getDepartmentsFromKlass()
