@@ -12,6 +12,14 @@ spec:
   image: '{{ image }}' # Injected from the GitHub Action
   port: 8080
 
+  envFrom:
+  - secret: login-config-ssbno-statreg-api
+
+  accessPolicy:
+    outbound:
+      external:
+      - host: auth.test.ssb.no
+
   login:
     provider: openid
     enforce:
@@ -19,19 +27,6 @@ spec:
       excludePaths:
         - /secret
         - /api-docs
-    
-  envFrom:
-  - secret: login-config-ssbno-statreg-api
-  
-  accessPolicy:
-    inbound:
-      rules:
-      - application: keycloak
-        namespace: keycloak
-    outbound:
-      external:
-      - host: auth.test.ssb.no
-    
 
   gcp:
       sqlInstances:
@@ -54,6 +49,7 @@ spec:
     enabled: true
     path: /metrics
     port: "9000"
+  
   liveness:
     path: /live
     port: 9000
@@ -61,6 +57,7 @@ spec:
     initialDelay: 10
     periodSeconds: 30
     timeout: 5
+  
   readiness:
     path: /ready
     port: 9000
@@ -68,6 +65,7 @@ spec:
     initialDelay: 5
     periodSeconds: 5
     timeout: 5
+  
   startup:
     path: /live
     port: 9000
