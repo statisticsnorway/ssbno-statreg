@@ -39,8 +39,8 @@ describe('getDepartmentsFromKlass ', async () => {
     assert.deepEqual(departments, mockDepartments)
   })
 
-  test('uses DATA_BASE_URL env var when present', async () => {
-    process.env.DATA_BASE_URL = 'https://example.test'
+  test('uses KLASS_BASE_URL env var when present', async () => {
+    process.env.KLASS_BASE_URL = 'https://example.test'
     setPayload({ classificationItems: [] })
 
     const departments = await getDepartmentsFromKlass()
