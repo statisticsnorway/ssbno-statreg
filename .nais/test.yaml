@@ -31,7 +31,7 @@ spec:
       excludePaths:
         - /secret
         - /api-docs
-  
+
   gcp:
       sqlInstances:
         - type: POSTGRES_17
