@@ -38,4 +38,3 @@ expressInstance.get('/auth/me', (req, res) => {
     claims: (req as any).jwt,
   })
 })
-
