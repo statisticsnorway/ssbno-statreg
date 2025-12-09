@@ -2,6 +2,13 @@ import { Department } from '@/types/department'
 import { KlassClassification } from '@/types/klassClassification'
 import process from 'node:process'
 
+export let DEPARTMENTS: Department[]
+
+export async function initializeDepartments() {
+  DEPARTMENTS = await getDepartmentsFromKlass()
+  console.log(JSON.stringify(DEPARTMENTS))
+}
+
 export async function getDepartmentsFromKlass(): Promise<Department[]> {
   let departments: Department[] = []
   try {
