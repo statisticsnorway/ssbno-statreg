@@ -32,17 +32,12 @@ export type HttpMethod =
   | "PUT"
   | "DELETE"
   | "PATCH"
-  | "OPTIONS"
-  | "HEAD"
-
-
 
 //AUTHPOLICY
 export const authPolicy: AuthPolicy = {
     "/": { GET: false },
     "/docs/*": { GET: false }
 }
-
 
 // Policy type: route -> method -> boolean
 export type AuthPolicy = {
