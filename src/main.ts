@@ -29,19 +29,21 @@ const swaggerDocument = YAML.parse(file)
 expressInstance.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
 //AuthPolicy/AuthMiddleware - Routes defined before this line is public by default - be careful
-expressInstance.use(authMiddleware) 
+expressInstance.use(authMiddleware)
 
 //Endpoint Controller
 expressInstance.use(controllerRouter)
 
 //Test endpoints - Remove when initial testing is done
 expressInstance.get('/', (_: Request, res: Response) => res.send('STATREG-API-V1'))
-expressInstance.get('/secret', (_, res) => { res.send('Very secret message!') })
-expressInstance.get('/auth/me', (req, res) => { res.json({ token: (req as any).token, claims: (req as any).jwt, }) })
+expressInstance.get('/secret', (_, res) => {
+  res.send('Very secret message!')
+})
+expressInstance.get('/auth/me', (req, res) => {
+  res.json({ token: (req as any).token, claims: (req as any).jwt })
+})
 
 //Initialization
 await prisma.$connect()
 initializeDepartments()
 startServer(expressInstance, prisma)
-
-

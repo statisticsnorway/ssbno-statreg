@@ -26,12 +26,7 @@
  */
 
 // Allowed HTTP methods (extend if needed)
-export type HttpMethod =
-  | 'GET'
-  | 'POST'
-  | 'PUT'
-  | 'DELETE'
-  | 'PATCH'
+export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
 
 //AUTHPOLICY
 export const authPolicy: AuthPolicy = {

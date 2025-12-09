@@ -26,9 +26,7 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction) 
   let payload
 
   try {
-    payload = JSON.parse(
-      Buffer.from(token.split('.')[1], 'base64').toString('utf8')
-    )
+    payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString('utf8'))
   } catch {
     return res.status(400).json({ error: 'Invalid JWT format.' })
   }
