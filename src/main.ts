@@ -9,6 +9,7 @@ import { promBundleMetrics } from '../plugins/promBundle'
 import { extractJwt } from '../plugins/authMiddleware'
 import { prisma } from './lib/prisma'
 import * as dotenv from 'dotenv'
+import { initializeDepartments } from './services/klassService'
 
 dotenv.config()
 
@@ -28,6 +29,8 @@ await prisma.$connect()
 const file = fs.readFileSync('./openapi/openapi.yaml', 'utf8')
 const swaggerDocument = YAML.parse(file)
 expressInstance.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
+
+initializeDepartments()
 
 startServer(expressInstance, prisma)
 
