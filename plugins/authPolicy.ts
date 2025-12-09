@@ -1,5 +1,5 @@
 /**
- * ACCESS POLICY
+ * ACCESS POLICY DOCS
  *
  * All routes are PROTECTED by default.
  * Nothing is public unless you explicitly set it to false here.
@@ -27,16 +27,16 @@
 
 // Allowed HTTP methods (extend if needed)
 export type HttpMethod =
-  | "GET"
-  | "POST"
-  | "PUT"
-  | "DELETE"
-  | "PATCH"
+  | 'GET'
+  | 'POST'
+  | 'PUT'
+  | 'DELETE'
+  | 'PATCH'
 
 //AUTHPOLICY
 export const authPolicy: AuthPolicy = {
-    "/": { GET: false },
-    "/docs/*": { GET: false }
+  '/': { GET: false },
+  '/docs/*': { GET: false },
 }
 
 // Policy type: route -> method -> boolean

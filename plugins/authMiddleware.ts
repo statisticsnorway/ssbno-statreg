@@ -1,6 +1,6 @@
-import type { Request, Response, NextFunction } from "express"
-import { Buffer } from "buffer"
-import { authPolicy, HttpMethod } from "./authPolicy"
+import type { Request, Response, NextFunction } from 'express'
+import { Buffer } from 'buffer'
+import { authPolicy, HttpMethod } from './authPolicy'
 //AuthMiddleware enforces AuthPolicy
 
 export function authMiddleware(req: Request, res: Response, next: NextFunction) {
@@ -9,7 +9,7 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction) 
 
   const routeConfig = authPolicy[routePath]
 
-  // Secure default:
+  // Secure by default:
   // If route not listed OR method not listed → authentication required
   const requiresAuth = !routeConfig || routeConfig[method] !== false
 
@@ -18,8 +18,8 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction) 
   }
 
   const auth = req.headers.authorization
-  if (!auth || !auth.startsWith("Bearer ")) {
-    return res.status(401).send("You are not authenticated.\nMissing Bearer token.")
+  if (!auth || !auth.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'You are not authenticated.\nMissing Bearer token.' })
   }
 
   const token = auth.substring(7)
@@ -27,10 +27,10 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction) 
 
   try {
     payload = JSON.parse(
-      Buffer.from(token.split(".")[1], "base64").toString("utf8")
+      Buffer.from(token.split('.')[1], 'base64').toString('utf8')
     )
   } catch {
-    return res.status(400).send("Invalid JWT format.")
+    return res.status(400).json({ error: 'Invalid JWT format.' })
   }
 
   ;(req as any).jwt = payload
