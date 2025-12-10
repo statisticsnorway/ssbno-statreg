@@ -23,6 +23,7 @@ spec:
     outbound:
       external:
       - host: auth.test.ssb.no
+      - host: data.qa.ssb.no
 
   login:
     provider: openid
