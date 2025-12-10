@@ -7,6 +7,9 @@
   "version": "0.0.0",
   "type": "module",
   "exports": "./dist/main.js",
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
   "scripts": {
     "dev": "nodemon --config nodemon.json",
     "start": "node dist/main.js",
