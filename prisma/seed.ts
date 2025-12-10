@@ -55,7 +55,183 @@ async function main() {
       date_created: '2010-11-05T09:02:23.626Z',
     },
   })
-  console.log('Created from seed: \n' + JSON.stringify(stat1, null, 2))
+
+  console.log('Created stat from seed: \n' + JSON.stringify(stat1, null, 2))
+  const stat2 = await prisma.statistic.upsert({
+    where: { id: '4000' },
+    update: {},
+    create: {
+      id: '4000',
+      version: '1',
+      shortname: {
+        create: {
+          id: '6000',
+          version: 0,
+          name: 'befolk',
+          last_updated: '2015-01-01T00:00:00.000Z',
+          date_created: '2015-01-01T00:00:00.000Z',
+        },
+      },
+      dir_appoval_status: 'GODKJENT',
+      search_phrases: 'befolkning, demografi, fødsler, dødsfall, migrasjon',
+      priority: 0,
+      desk_appoval_status: 'GODKJENT',
+      language: 'nb',
+      search_phrases_en: 'population, demography, births, deaths, migration',
+      division: {
+        create: {
+          id: '80000',
+          version: '1',
+          name: 'Seksjon for befolkningsstatistikk',
+          code: '101',
+          name_en: 'Division for Population Statistics',
+        },
+      },
+      first_release: '1900-01-01T00:00:00.000Z',
+      yearly_reporting: true,
+      status: 'SA',
+      legacy_topic_codes: '02.01.01',
+      name: 'Befolkning og demografi',
+      last_updated: '2023-01-01T10:00:00.000Z',
+      comment: 'omfatter befolkningsstørrelse og sammensetning',
+      name_en: 'Population and demography',
+      date_created: '2015-01-01T00:00:00.000Z',
+    },
+  })
+
+  console.log('Created stat from seed: \n' + JSON.stringify(stat2, null, 2))
+
+  const stat3 = await prisma.statistic.upsert({
+    where: { id: '4100' },
+    update: {},
+    create: {
+      id: '4100',
+      version: '1',
+      shortname: {
+        create: {
+          id: '6101',
+          version: 0,
+          name: 'handel',
+          last_updated: '2016-06-01T00:00:00.000Z',
+          date_created: '2016-06-01T00:00:00.000Z',
+        },
+      },
+      dir_appoval_status: 'GODKJENT',
+      search_phrases: 'utenrikshandel, import, eksport, varestrøm',
+      priority: 0,
+      desk_appoval_status: 'GODKJENT',
+      language: 'nb',
+      search_phrases_en: 'foreign trade, import, export, goods flow',
+      division: {
+        create: {
+          id: '80010',
+          version: '1',
+          name: 'Seksjon for utenriks- og næringsstatistikk',
+          code: '102',
+          name_en: 'Division for Trade and Business Statistics',
+        },
+      },
+      first_release: '1950-01-01T00:00:00.000Z',
+      yearly_reporting: false,
+      status: 'SA',
+      legacy_topic_codes: '03.02.05',
+      name: 'Utenrikshandel og varestrøm',
+      last_updated: '2024-05-10T12:00:00.000Z',
+      comment: 'omhandler import og eksport av varer',
+      name_en: 'Foreign trade and goods flow',
+      date_created: '2016-06-01T00:00:00.000Z',
+    },
+  })
+
+  console.log('Created stat from seed: \n' + JSON.stringify(stat3, null, 2))
+
+  const stat4 = await prisma.statistic.upsert({
+    where: { id: '4200' },
+    update: {},
+    create: {
+      id: '4200',
+      version: '1',
+      shortname: {
+        create: {
+          id: '6200',
+          version: 0,
+          name: 'syssel',
+          last_updated: '2018-03-01T00:00:00.000Z',
+          date_created: '2018-03-01T00:00:00.000Z',
+        },
+      },
+      dir_appoval_status: 'GODKJENT',
+      search_phrases: 'arbeid, sysselsetting, arbeidsledighet, sysselsettingsgrad',
+      priority: 0,
+      desk_appoval_status: 'GODKJENT',
+      language: 'nb',
+      search_phrases_en: 'employment, labor force, unemployment, employment rate',
+      division: {
+        create: {
+          id: '80020',
+          version: '1',
+          name: 'Seksjon for arbeids- og lønnsstatistikk',
+          code: '103',
+          name_en: 'Division for Labour and Wage Statistics',
+        },
+      },
+      first_release: '1960-01-01T00:00:00.000Z',
+      yearly_reporting: true,
+      status: 'SA',
+      legacy_topic_codes: '04.01.01',
+      name: 'Sysselsetting og arbeidsledighet',
+      last_updated: '2022-11-01T09:00:00.000Z',
+      comment: 'dekker sysselsettingsnivå og ledighetstall',
+      name_en: 'Employment and unemployment',
+      date_created: '2018-03-01T00:00:00.000Z',
+    },
+  })
+
+  console.log('Created stat from seed: \n' + JSON.stringify(stat4, null, 2))
+
+  const stat5 = await prisma.statistic.upsert({
+    where: { id: '4300' },
+    update: {},
+    create: {
+      id: '4300',
+      version: '1',
+      shortname: {
+        create: {
+          id: '6300',
+          version: 0,
+          name: 'helse',
+          last_updated: '2019-07-01T00:00:00.000Z',
+          date_created: '2019-07-01T00:00:00.000Z',
+        },
+      },
+      dir_appoval_status: 'GODKJENT',
+      search_phrases: 'helse, sykdom, helsetjenester, forekomst',
+      priority: 0,
+      desk_appoval_status: 'GODKJENT',
+      language: 'nb',
+      search_phrases_en: 'health, disease, health services, prevalence',
+      division: {
+        create: {
+          id: '80030',
+          version: '1',
+          name: 'Seksjon for helse- og omsorgsstatistikk',
+          code: '104',
+          name_en: 'Division for Health and Care Statistics',
+        },
+      },
+      first_release: '1970-01-01T00:00:00.000Z',
+      yearly_reporting: true,
+      status: 'SA',
+      legacy_topic_codes: '05.01.01',
+      name: 'Helse og helsetjenester',
+      last_updated: '2021-09-01T08:30:00.000Z',
+      comment: 'statistikk over befolkningens helse og tjenestebruk',
+      name_en: 'Health and health services',
+      date_created: '2019-07-01T00:00:00.000Z',
+    },
+  })
+
+  console.log('Created stat from seed: \n' + JSON.stringify(stat5, null, 2))
 
   const freq1 = await prisma.frequency.upsert({
     where: { id: '234' },
@@ -67,8 +243,28 @@ async function main() {
       version: 1,
     },
   })
+  const freq2 = await prisma.frequency.upsert({
+    where: { id: '235' },
+    update: {},
+    create: {
+      id: '235',
+      code: 'Y',
+      name: 'Year',
+      version: 1,
+    },
+  })
+  const freq3 = await prisma.frequency.upsert({
+    where: { id: '236' },
+    update: {},
+    create: {
+      id: '236',
+      code: 'M',
+      name: 'Month',
+      version: 1,
+    },
+  })
 
-  console.log('Created from seed: \n' + freq1)
+  console.log('Created frequency from seed: \n' + freq1 + freq2 + freq3)
 }
 
 await main()
