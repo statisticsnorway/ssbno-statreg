@@ -34,7 +34,7 @@ export const authPolicy: AuthPolicy = {
   '/docs/*': { GET: false },
 }
 
-// Policy type: route -> method -> boolean
+// Policy type
 export type AuthPolicy = {
   [route: string]: Partial<Record<HttpMethod, boolean>>
 }

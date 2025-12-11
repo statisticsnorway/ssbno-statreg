@@ -10,6 +10,10 @@ import { authMiddleware } from '../plugins/authMiddleware'
 import { prisma } from './lib/prisma'
 import * as dotenv from 'dotenv'
 import { initializeDepartments } from './services/klassService'
+import process from 'process'
+
+//Auth switch - to allow authMiddleware in npm run dev change "dev" to "devv"
+const DEVELOPMENT_MODE = process.env.npm_lifecycle_event === 'dev'
 
 //dotenv
 dotenv.config()
@@ -29,16 +33,21 @@ const swaggerDocument = YAML.parse(file)
 expressInstance.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
 //AuthPolicy/AuthMiddleware - Routes defined before this line is public by default - be careful
-expressInstance.use(authMiddleware)
+expressInstance.use((req, res, next) => {
+  if (DEVELOPMENT_MODE) return next()
+  return authMiddleware(req, res, next)
+})
 
 //Endpoint Controller
 expressInstance.use(controllerRouter)
 
 //Test endpoints - Remove when initial testing is done
+//'/'
 expressInstance.get('/', (_: Request, res: Response) => res.send('STATREG-API-V1'))
 expressInstance.get('/secret', (_, res) => {
   res.send('Very secret message!')
 })
+//'auth/me'
 expressInstance.get('/auth/me', (req, res) => {
   res.json({ token: (req as any).token, claims: (req as any).jwt })
 })
