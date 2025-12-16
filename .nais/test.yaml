@@ -18,6 +18,12 @@ spec:
   env:
     - name: KLASS_BASE_URL
       value: https://data.qa.ssb.no
+    - name: KEYCLOAK_REALM_ISSUER
+      value: https://auth.test.ssb.no/realms/ssb
+    - name: KEYCLOAK_JWKS_URI
+      value: https://auth.test.ssb.no/realms/ssb/protocol/openid-connect/certs
+    - name: KEYCLOAK_TOKEN_AUDIENCE
+      value: oauth2-proxy-ssbno-statreg-api
 
   accessPolicy:
     outbound:

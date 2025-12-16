@@ -13,7 +13,7 @@ export default defineConfig([
       prettier,
     },
     languageOptions: {
-      globals: globals.browser,
+      globals: globals.node,
       parser: tseslintParser,
     },
     rules: {
