@@ -12,6 +12,8 @@ const adapter = new PrismaPg({
 
 const prisma = await new PrismaClient({ adapter })
 
+// This error can be ignored, Prisma looks for a main function here.
+// eslint-disable-next-line no-unused-vars
 async function main() {
   const freq1 = await prisma.frequency.upsert({
     where: { id: '1' },
@@ -319,12 +321,13 @@ async function main() {
 
   console.log('Created stat from seed: \n' + JSON.stringify(stat5, null, 2))
 
-await main()
-  .then(async () => {
-    await prisma.$disconnect()
-  })
-  .catch(async (e) => {
-    console.error(e)
-    await prisma.$disconnect()
-    process.exit(1)
-  })
+  await main()
+    .then(async () => {
+      await prisma.$disconnect()
+    })
+    .catch(async (e) => {
+      console.error(e)
+      await prisma.$disconnect()
+      process.exit(1)
+    })
+}
