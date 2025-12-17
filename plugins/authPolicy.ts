@@ -28,13 +28,28 @@
 // Allowed HTTP methods (extend if needed)
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
 
-//AUTHPOLICY
+// Policy type
+export type AuthPolicy = {
+  [route: string]: Partial<Record<HttpMethod, boolean>>
+}
+
+// AUTHPOLICY
 export const authPolicy: AuthPolicy = {
   '/': { GET: false },
   '/docs/*': { GET: false },
 }
 
-// Policy type
-export type AuthPolicy = {
-  [route: string]: Partial<Record<HttpMethod, boolean>>
+// Determines whether authentication is required for the given route and HTTP method
+export function requiresAuthPolicy(routePath: string, method: HttpMethod): boolean {
+  const policyForRoute = authPolicy[routePath]
+
+  if (!policyForRoute) {
+    return true
+  }
+
+  if (policyForRoute[method] === false) {
+    return false
+  }
+
+  return true
 }
