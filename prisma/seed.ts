@@ -4,6 +4,7 @@ import process from 'node:process'
 
 import { PrismaClient } from '../src/generated/prisma/client.js'
 import { Env } from '../prisma.config.js'
+// import { connect } from 'node:http2'
 
 const adapter = new PrismaPg({
   connectionString: env<Env>('NAIS_DATABASE_SSBNO_STATREG_API_STATREG_DB_URL'),
@@ -12,6 +13,39 @@ const adapter = new PrismaPg({
 const prisma = await new PrismaClient({ adapter })
 
 async function main() {
+  const freq1 = await prisma.frequency.upsert({
+    where: { id: '1' },
+    update: {},
+    create: {
+      id: '1',
+      code: 'W',
+      name: 'Week',
+      version: 1,
+    },
+  })
+  const freq2 = await prisma.frequency.upsert({
+    where: { id: '2' },
+    update: {},
+    create: {
+      id: '2',
+      code: 'Y',
+      name: 'Year',
+      version: 1,
+    },
+  })
+  const freq3 = await prisma.frequency.upsert({
+    where: { id: '3' },
+    update: {},
+    create: {
+      id: '3',
+      code: 'M',
+      name: 'Month',
+      version: 1,
+    },
+  })
+
+  console.log('Created frequency from seed: \n' + freq1 + freq2 + freq3)
+
   const stat1 = await prisma.statistic.upsert({
     where: { id: '3663' },
     update: {},
@@ -56,7 +90,59 @@ async function main() {
     },
   })
 
+  const variant1 = await prisma.variant.upsert({
+    where: { id: 207611 },
+    update: {},
+    create: {
+      id: '207611',
+      version: 1,
+      last_updated: '2025-06-20T10:39:51.621Z',
+      revision: 'I',
+      level_of_detail: null,
+      level_of_detail_en: null,
+      cancelled: false,
+      date_created: '2025-06-20T10:39:51.621Z',
+      frequency: {
+        connect: {
+          id: '1',
+        },
+      },
+      statistic: {
+        connect: {
+          id: '3663',
+        },
+      },
+    },
+  })
+
+  const release1 = await prisma.release.upsert({
+    where: { id: '210444' },
+    update: {},
+    create: {
+      id: '210444',
+      version: 2,
+      publish_time: '2026-01-26T08:00:00Z',
+      has_versions: true,
+      last_updated: '2025-10-28T08:57:35.498Z',
+      comment: 'Desken melder for fag. 3mnd.',
+      period_from: '2025-01-01T00:00:00Z',
+      period_to: '2025-12-31T00:00:00Z',
+      desk_appoval_status: 'GODKJENT',
+      cancelled: false,
+      date_created: '2025-10-28T08:40:32.352Z',
+      release_date_precision: 'dag',
+      variant: {
+        connect: { id: '207611' },
+      },
+    },
+  })
+
+  console.log('Created variant from seed: \n' + JSON.stringify(variant1, null, 2))
+
   console.log('Created stat from seed: \n' + JSON.stringify(stat1, null, 2))
+
+  console.log('Created release from seed: \n' + JSON.stringify(release1, null, 2))
+
   const stat2 = await prisma.statistic.upsert({
     where: { id: '4000' },
     update: {},
@@ -233,40 +319,6 @@ async function main() {
 
   console.log('Created stat from seed: \n' + JSON.stringify(stat5, null, 2))
 
-  const freq1 = await prisma.frequency.upsert({
-    where: { id: '234' },
-    update: {},
-    create: {
-      id: '234',
-      code: 'W',
-      name: 'Week',
-      version: 1,
-    },
-  })
-  const freq2 = await prisma.frequency.upsert({
-    where: { id: '235' },
-    update: {},
-    create: {
-      id: '235',
-      code: 'Y',
-      name: 'Year',
-      version: 1,
-    },
-  })
-  const freq3 = await prisma.frequency.upsert({
-    where: { id: '236' },
-    update: {},
-    create: {
-      id: '236',
-      code: 'M',
-      name: 'Month',
-      version: 1,
-    },
-  })
-
-  console.log('Created frequency from seed: \n' + freq1 + freq2 + freq3)
-}
-
 await main()
   .then(async () => {
     await prisma.$disconnect()
@@ -276,72 +328,3 @@ await main()
     await prisma.$disconnect()
     process.exit(1)
   })
-
-/* 
-  {
-    "id": "3673",
-    "version": "16",
-    "kortnavn_id": "3672",
-    "dir_flyt": "GODKJENT",
-    "triggerord": "CNG (komprimert naturgass), LNG (nedkjølt naturgass), rørgass",
-    "prioritet": "0",
-    "desk_flyt": "GODKJENT",
-    "sprak": "nb",
-    "triggerord_en": "CNG (compressed natural gas), LNG (liquified natural gas), piped gas",
-    "eierseksjon_id": "3661",
-    "forstegangspublisering": "2003-01-01T00:00:00.000Z",
-    "arsrapportering": "0",
-    "status": "SA",
-    "gamle_emnekoder": "01.03.10",
-    "relasjon_id": "81988",
-    "statistikknavn": "Naturgass, innenlands forbruk ",
-    "last_updated": "2020-06-12T09:16:47.978Z",
-    "intern_kommentar": "videreføres av energibalanse",
-    "statistikknavn_en": "Natural gas, domestic use",
-    "date_created": "2010-11-05T09:02:25.829Z"
-  },
-  {
-    "id": "3678",
-    "version": "14",
-    "kortnavn_id": "3677",
-    "dir_flyt": "GODKJENT",
-    "triggerord": "energikilder, elektrisitet, stasjonær energibruk, mobil energibruk",
-    "prioritet": "0",
-    "desk_flyt": "GODKJENT",
-    "sprak": "nb",
-    "triggerord_en": "energy sources, electricity, stationary energy consumption, mobile energy consumption",
-    "eierseksjon_id": "3661",
-    "forstegangspublisering": "2005-01-01T00:00:00.000Z",
-    "arsrapportering": "0",
-    "status": "UT",
-    "gamle_emnekoder": "01.03.10",
-    "relasjon_id": null,
-    "statistikknavn": "Energibruk i kommunene (opphørt)",
-    "last_updated": "2019-09-06T13:22:47.690Z",
-    "intern_kommentar": "ny kontakt",
-    "statistikknavn_en": "Energy use by municipality (discontinued)",
-    "date_created": "2010-11-05T09:02:26.314Z"
-  },
-  {
-    "id": "3683",
-    "version": "13",
-    "kortnavn_id": "3682",
-    "dir_flyt": "GODKJENT",
-    "triggerord": "energi, næringsbygg, yrkesbygg, elektrisk kraft, fyringsolje, gass, ved og pellets, oppvarmingsutstyr (for eksempel sentralvarme, fjernvarme, varmepumpe)",
-    "prioritet": "0",
-    "desk_flyt": "GODKJENT",
-    "sprak": "nb",
-    "triggerord_en": "industrial buildings, non-residential buildings, electric power, heating oil, gas, wood and pellets, heating equipment (for example central heating, district heating, heat pump)",
-    "eierseksjon_id": "3661",
-    "forstegangspublisering": "2008-01-01T00:00:00.000Z",
-    "arsrapportering": "0",
-    "status": "IA",
-    "gamle_emnekoder": "01.03.10",
-    "relasjon_id": null,
-    "statistikknavn": "Energibruk i tjenesteytende næringer (opphørt)",
-    "last_updated": "2019-09-06T13:27:38.105Z",
-    "intern_kommentar": "ny kontakt",
-    "statistikknavn_en": "Energy consumption in service industries (discontinued)",
-    "date_created": "2010-11-05T09:02:26.986Z"
-  } 
-    */
