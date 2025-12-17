@@ -35,7 +35,7 @@ export type AuthPolicy = {
 
 // AUTHPOLICY
 export const authPolicy: AuthPolicy = {
-  // '/': { GET: false },
+  '/': { GET: false },
   '/docs/*': { GET: false },
 }
 
