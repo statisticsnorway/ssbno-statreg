@@ -25,6 +25,7 @@ export async function authMiddleware(req: Request, res: Response, next: NextFunc
     return next()
   }
 
+  // Fail fast if a protected endpoint is called without a Bearer token
   const auth = req.headers.authorization
   if (!auth || !auth.startsWith('Bearer ')) {
     return res.status(401).json({
@@ -32,6 +33,7 @@ export async function authMiddleware(req: Request, res: Response, next: NextFunc
     })
   }
 
+  // The Authorization header contains text like "Bearer <token>"; remove the "Bearer " part and keep the token
   const token = auth.substring(7)
 
   try {
