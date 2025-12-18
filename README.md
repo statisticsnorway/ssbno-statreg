@@ -9,6 +9,7 @@ Statreg API is a backend service for statistikkregisteret. It provides endpoints
 npm install
 npm run generate
 npx prisma db push
+npm run seed
 npm run dev
 ```
 
