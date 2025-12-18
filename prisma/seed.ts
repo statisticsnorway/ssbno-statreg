@@ -538,11 +538,11 @@ async function main() {
 
   console.log('Created variant from seed: \n' + JSON.stringify(variant5b, null, 2))
 
-  const release1 = await prisma.release.upsert({
-    where: { id: '210444' },
+  const release1a = await prisma.release.upsert({
+    where: { id: '6601' },
     update: {},
     create: {
-      id: '210444',
+      id: '6601',
       version: 2,
       publish_time: '2026-01-26T08:00:00Z',
       has_versions: true,
@@ -560,7 +560,203 @@ async function main() {
     },
   })
 
-  console.log('Created release from seed: \n' + JSON.stringify(release1, null, 2))
+  console.log('Created release from seed: \n' + JSON.stringify(release1a, null, 2))
+
+  const release1b = await prisma.release.upsert({
+    where: { id: '6602' },
+    update: {},
+    create: {
+      id: '6602',
+      version: 2,
+      publish_time: '2026-01-26T08:00:00Z',
+      has_versions: true,
+      last_updated: '2025-10-28T08:57:35.498Z',
+      comment: 'Desken melder for fag. 3mnd.',
+      period_from: '2025-01-01T00:00:00Z',
+      period_to: '2025-12-31T00:00:00Z',
+      desk_appoval_status: 'GODKJENT',
+      cancelled: false,
+      date_created: '2025-10-28T08:40:32.352Z',
+      release_date_precision: 'dag',
+      variant: {
+        connect: { id: '9001' },
+      },
+    },
+  })
+
+  console.log('Created release from seed: \n' + JSON.stringify(release1b, null, 2))
+
+  const release1c = await prisma.release.upsert({
+    where: { id: '6603' },
+    update: {},
+    create: {
+      id: '6603',
+      version: 2,
+      publish_time: '2026-01-26T08:00:00Z',
+      has_versions: true,
+      last_updated: '2025-10-28T08:57:35.498Z',
+      comment: 'Desken melder for fag. 3mnd.',
+      period_from: '2025-01-01T00:00:00Z',
+      period_to: '2025-12-31T00:00:00Z',
+      desk_appoval_status: 'GODKJENT',
+      cancelled: false,
+      date_created: '2025-10-28T08:40:32.352Z',
+      release_date_precision: 'dag',
+      variant: {
+        connect: { id: '9001' },
+      },
+    },
+  })
+
+  console.log('Created release from seed: \n' + JSON.stringify(release1c, null, 2))
+
+  const release2a = await prisma.release.upsert({
+    where: { id: '6611' },
+    update: {},
+    create: {
+      id: '6611',
+      version: 2,
+      publish_time: '2026-01-26T08:00:00Z',
+      has_versions: true,
+      last_updated: '2025-10-28T08:57:35.498Z',
+      comment: 'Desken melder for fag. 3mnd.',
+      period_from: '2025-01-01T00:00:00Z',
+      period_to: '2025-12-31T00:00:00Z',
+      desk_appoval_status: 'GODKJENT',
+      cancelled: false,
+      date_created: '2025-10-28T08:40:32.352Z',
+      release_date_precision: 'dag',
+      variant: {
+        connect: { id: '9002' },
+      },
+    },
+  })
+
+  console.log('Created release from seed: \n' + JSON.stringify(release2a, null, 2))
+
+  const release2b = await prisma.release.upsert({
+    where: { id: '6612' },
+    update: {},
+    create: {
+      id: '6612',
+      version: 2,
+      publish_time: '2026-01-23T08:00:00Z',
+      has_versions: true,
+      last_updated: '2025-10-28T08:57:35.498Z',
+      comment: 'Desken melder for fag. 3mnd.',
+      period_from: '2025-01-01T00:00:00Z',
+      period_to: '2025-12-31T00:00:00Z',
+      desk_appoval_status: 'GODKJENT',
+      cancelled: false,
+      date_created: '2025-10-28T08:40:32.352Z',
+      release_date_precision: 'dag',
+      variant: {
+        connect: { id: '9002' },
+      },
+    },
+  })
+
+  console.log('Created release from seed: \n' + JSON.stringify(release2b, null, 2))
+
+  const release2c = await prisma.release.upsert({
+    where: { id: '6613' },
+    update: {},
+    create: {
+      id: '6613',
+      version: 2,
+      publish_time: '2026-03-26T08:00:00Z',
+      has_versions: true,
+      last_updated: '2025-10-28T08:57:35.498Z',
+      comment: 'Desken melder for fag. 3mnd.',
+      period_from: '2025-01-01T00:00:00Z',
+      period_to: '2025-12-31T00:00:00Z',
+      desk_appoval_status: 'GODKJENT',
+      cancelled: false,
+      date_created: '2025-10-28T08:40:32.352Z',
+      release_date_precision: 'dag',
+      variant: {
+        connect: { id: '9002' },
+      },
+    },
+  })
+
+  console.log('Created release from seed: \n' + JSON.stringify(release2c, null, 2))
+
+  const release3a = await prisma.release.upsert({
+    where: { id: '6621' },
+    update: {},
+    create: {
+      id: '6621',
+      version: 2,
+      publish_time: '2026-05-26T08:00:00Z',
+      has_versions: true,
+      last_updated: '2025-10-28T08:57:35.498Z',
+      comment: 'Desken melder for fag. 3mnd.',
+      period_from: '2025-01-01T00:00:00Z',
+      period_to: '2025-12-31T00:00:00Z',
+      desk_appoval_status: 'GODKJENT',
+      cancelled: false,
+      date_created: '2025-10-28T08:40:32.352Z',
+      release_date_precision: 'dag',
+      variant: {
+        connect: { id: '9014' },
+      },
+    },
+  })
+
+  console.log('Created release from seed: \n' + JSON.stringify(release3a, null, 2))
+
+  const calendar_date1 = await prisma.calender_date.upsert({
+    where: { id: 11001 },
+    update: {},
+    create: {
+      id: 11001,
+      version: 0,
+      comment: 'Første dag etter feriestengt uke',
+      day: '2026-07-20T00:00:00Z',
+    },
+  })
+
+  console.log('Created calendar_date from seed: \n' + JSON.stringify(calendar_date1, null, 2))
+
+  const calendar_date2 = await prisma.calender_date.upsert({
+    where: { id: 11002 },
+    update: {},
+    create: {
+      id: 11002,
+      version: 0,
+      comment: 'Første dag etter påske',
+      day: '2026-04-22T00:00:00Z',
+    },
+  })
+
+  console.log('Created calendar_date from seed: \n' + JSON.stringify(calendar_date2, null, 2))
+
+  const calendar_date3 = await prisma.calender_date.upsert({
+    where: { id: 11003 },
+    update: {},
+    create: {
+      id: 11003,
+      version: 0,
+      comment: 'Julaften',
+      day: '2026-12-24T00:00:00Z',
+    },
+  })
+
+  console.log('Created calendar_date from seed: \n' + JSON.stringify(calendar_date3, null, 2))
+
+  const calendar_date4 = await prisma.calender_date.upsert({
+    where: { id: 11004 },
+    update: {},
+    create: {
+      id: 11004,
+      version: 0,
+      comment: 'Nyttårsaften',
+      day: '2026-12-31T00:00:00Z',
+    },
+  })
+
+  console.log('Created calendar_date from seed: \n' + JSON.stringify(calendar_date4, null, 2))
 }
 
 await main()
