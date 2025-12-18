@@ -759,6 +759,71 @@ async function main() {
   console.log('Created calendar_date from seed: \n' + JSON.stringify(calendar_date4, null, 2))
 }
 
+const region_level1 = await prisma.region_level.upsert({
+  where: { id: 7 },
+  update: {},
+  create: {
+    id: 7,
+    version: 136,
+    name: 'Kommune',
+    code: 'K',
+  },
+})
+
+console.log('Created region_level from seed: \n' + JSON.stringify(region_level1, null, 2))
+
+const region_level2 = await prisma.region_level.upsert({
+  where: { id: 8 },
+  update: {},
+  create: {
+    id: 8,
+    version: 239,
+    name: 'Fylke',
+    code: 'F',
+  },
+})
+
+console.log('Created region_level from seed: \n' + JSON.stringify(region_level2, null, 2))
+
+const region_level3 = await prisma.region_level.upsert({
+  where: { id: 9 },
+  update: {},
+  create: {
+    id: 9,
+    version: 47,
+    name: 'Landsdel',
+    code: 'LD',
+  },
+})
+
+console.log('Created region_level from seed: \n' + JSON.stringify(region_level3, null, 2))
+
+const region_level4 = await prisma.region_level.upsert({
+  where: { id: 10 },
+  update: {},
+  create: {
+    id: 10,
+    version: 489,
+    name: 'Land',
+    code: 'L',
+  },
+})
+
+console.log('Created region_level from seed: \n' + JSON.stringify(region_level4, null, 2))
+
+const region_level5 = await prisma.region_level.upsert({
+  where: { id: 11 },
+  update: {},
+  create: {
+    id: 11,
+    version: 25,
+    name: 'Bydel og krets',
+    code: 'BD',
+  },
+})
+
+console.log('Created region_level from seed: \n' + JSON.stringify(region_level5, null, 2))
+
 await main()
   .then(async () => {
     await prisma.$disconnect()
