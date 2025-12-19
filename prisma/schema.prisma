@@ -97,7 +97,7 @@ model Statistic {
   first_release           DateTime?                @db.Timestamp(6)
   yearly_reporting        Boolean
   status                  String                   @db.VarChar(255)
-  previous_topic_codes    String?                  @db.VarChar(255)
+  legacy_topic_codes      String?                  @db.VarChar(255)
   relation_id             Decimal?                 @db.Decimal(19, 0)
   name                    String                   @db.VarChar(140)
   last_updated            DateTime                 @db.Timestamp(6)
