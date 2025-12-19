@@ -28,11 +28,11 @@
     "body-parser": "^2.2.1"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.1",
+    "@eslint/js": "^9.39.2",
     "@types/express": "^5.0.5",
     "@types/node": "^24.10.1",
     "@types/swagger-ui-express": "^4.1.8",
-    "eslint": "^9.39.1",
+    "eslint": "^9.39.2",
     "eslint-plugin-prettier": "^5.5.4",
     "nodemon": "^3.1.11",
     "pkgroll": "^2.21.3",
