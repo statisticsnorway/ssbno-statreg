@@ -14,11 +14,12 @@ import { prisma } from './lib/prisma'
 import { initializeDepartments } from './services/klassService'
 
 dotenv.config()
+
 const DEVELOPMENT_MODE = process.env.npm_lifecycle_event === 'dev'
+
 const app = express()
 app.use(helmet())
 app.use(promBundleMetrics)
-// ---- PUBLIC ROUTES ----
 
 const file = fs.readFileSync('./openapi/openapi.yaml', 'utf8')
 const swaggerDocument = YAML.parse(file)
@@ -45,7 +46,7 @@ app.get('/auth/me', (req, res) => {
 })
 
 // Example: protected + authorized by "aud"
-app.get('/secret', requireAudience('statreg-admin'), (_req, res) => {
+app.get('/secret', requireAudience('oauth2-proxy-ssbno-statreg-api'), (_req, res) => {
   res.send('Very secret message!')
 })
 
