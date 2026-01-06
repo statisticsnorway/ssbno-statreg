@@ -1,18 +1,19 @@
-import { Router, type RequestHandler } from 'express'
 import { getAllStatistics, getStatisticByShortname } from '@/services/statisticsService'
+import { Router } from 'express'
+import { skipAuth } from '@/../plugins/authMiddleware'
 
-export default function statisticsController(requireAuth: RequestHandler) {
-  const router = Router()
+const router = Router()
 
-  router.get('/statistics/:shortname', async (req, res) => {
-    const data = getStatisticByShortname(req.params.shortname)
-    res.json(data)
-  })
+// Public: explicitly skips default auth
+router.get('/statistics/:shortname', skipAuth, async (req, res) => {
+  const data = getStatisticByShortname(req.params.shortname)
+  res.json(data)
+})
 
-  router.get('/statistics', requireAuth, async (_req, res) => {
-    const data = await getAllStatistics()
-    res.json(data)
-  })
+// Private: protected by controllerRouter default auth
+router.get('/statistics', async (_req, res) => {
+  const data = await getAllStatistics()
+  res.json(data)
+})
 
-  return router
-}
+export default router

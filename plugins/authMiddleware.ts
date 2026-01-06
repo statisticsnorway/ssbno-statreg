@@ -8,24 +8,20 @@ export type AuthContext = {
   email?: string
 }
 
-// Read Bearer token from Authorization header
 function getBearerToken(req: Request): string | null {
   const auth = req.headers.authorization
   if (!auth?.startsWith('Bearer ')) return null
   return auth.slice('Bearer '.length).trim()
 }
 
-// 401 response helper
 function unauthorized(res: Response, message: string) {
   return res.status(401).json({ error: message })
 }
 
-// 403 response helper
 function forbidden(res: Response, message: string) {
   return res.status(403).json({ error: message })
 }
 
-// Check JWT aud (string or string[])
 function hasAudience(claims: JWTPayload, required: string): boolean {
   const aud = claims.aud
   if (typeof aud === 'string') return aud === required
@@ -33,8 +29,14 @@ function hasAudience(claims: JWTPayload, required: string): boolean {
   return false
 }
 
-// Verify JWT and attach req.auth
-export function createAuthMiddleware(): RequestHandler {
+// Mark a route as public by setting a flag on req
+export const skipAuth: RequestHandler = (req, _res, next) => {
+  ;(req as any)._skipAuth = true
+  next()
+}
+
+// Auth middleware that respects skipAuth flag
+export function createRequireAuth(): RequestHandler {
   const issuer = process.env.KEYCLOAK_REALM_ISSUER
   const jwksUri = process.env.KEYCLOAK_JWKS_URI
   const audience = process.env.KEYCLOAK_TOKEN_AUDIENCE
@@ -48,6 +50,8 @@ export function createAuthMiddleware(): RequestHandler {
   const JWKS = createRemoteJWKSet(new URL(jwksUri))
 
   return async (req: Request, res: Response, next: NextFunction) => {
+    if ((req as any)._skipAuth) return next()
+
     const token = getBearerToken(req)
     if (!token) return unauthorized(res, 'Missing Bearer token')
 
@@ -72,7 +76,6 @@ export function createAuthMiddleware(): RequestHandler {
   }
 }
 
-// Require "role" via aud claim (temporary)
 export function requireAudience(requiredAudience: string): RequestHandler {
   return (req, res, next) => {
     if (!req.auth) return unauthorized(res, 'Not authenticated')
