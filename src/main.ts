@@ -1,4 +1,4 @@
-import express, { Request, Response } from 'express'
+import express, { Request, Response, type RequestHandler } from 'express'
 import helmet from 'helmet'
 import swaggerUi from 'swagger-ui-express'
 import fs from 'node:fs'
@@ -6,7 +6,7 @@ import YAML from 'yaml'
 import * as dotenv from 'dotenv'
 import process from 'process'
 
-import controllerRouter from './api/core/controllerRouter'
+import createControllerRouter from './api/core/controllerRouter'
 import { startServer } from '../plugins/expressServer'
 import { promBundleMetrics } from '../plugins/promBundle'
 import { createAuthMiddleware, requireAudience } from '../plugins/authMiddleware'
@@ -21,22 +21,22 @@ const app = express()
 app.use(helmet())
 app.use(promBundleMetrics)
 
+// Public: Swagger
 const file = fs.readFileSync('./openapi/openapi.yaml', 'utf8')
 const swaggerDocument = YAML.parse(file)
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
+// Public: root
 app.get('/', (_: Request, res: Response) => res.send('STATREG-API-V1'))
 
-// ---- AUTH (everything below is protected by default) ----
-if (!DEVELOPMENT_MODE) {
-  app.use(createAuthMiddleware())
-}
+// Auth middleware used per route (dev mode bypasses it)
+const requireAuth: RequestHandler = DEVELOPMENT_MODE ? (_req, _res, next) => next() : createAuthMiddleware()
 
-// Protected: controller routes
-app.use(controllerRouter)
+// Controllers decide per endpoint if it is public or protected
+app.use(createControllerRouter(requireAuth))
 
-// Example protected endpoints
-app.get('/auth/me', (req, res) => {
+// Protected: show current auth context
+app.get('/auth/me', requireAuth, (req, res) => {
   res.json({
     token: req.auth?.token,
     claims: req.auth?.claims,
@@ -45,12 +45,11 @@ app.get('/auth/me', (req, res) => {
   })
 })
 
-// Example: protected + authorized by "aud"
-app.get('/secret', requireAudience('oauth2-proxy-ssbno-statreg-api'), (_req, res) => {
+// Protected + aud-based access (temporary)
+app.get('/secret', requireAuth, requireAudience('oauth2-proxy-ssbno-statreg-api'), (_req, res) => {
   res.send('Very secret message!')
 })
 
-// Initialization
 await prisma.$connect()
 initializeDepartments()
 startServer(app, prisma)

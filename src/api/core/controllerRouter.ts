@@ -1,7 +1,8 @@
-import { Router } from 'express'
+import { Router, type RequestHandler } from 'express'
 import statisticsController from '@/api/controllers/statisticsController'
 
-const controllerRouter = Router()
-controllerRouter.use(statisticsController)
-
-export default controllerRouter
+export default function createControllerRouter(requireAuth: RequestHandler) {
+  const controllerRouter = Router()
+  controllerRouter.use(statisticsController(requireAuth))
+  return controllerRouter
+}
