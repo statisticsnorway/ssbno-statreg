@@ -3,56 +3,53 @@ import helmet from 'helmet'
 import swaggerUi from 'swagger-ui-express'
 import fs from 'node:fs'
 import YAML from 'yaml'
+import * as dotenv from 'dotenv'
+import process from 'process'
+
 import controllerRouter from './api/core/controllerRouter'
 import { startServer } from '../plugins/expressServer'
 import { promBundleMetrics } from '../plugins/promBundle'
-import { authMiddleware } from '../plugins/authMiddleware'
+import { createAuthMiddleware, requireAudience } from '../plugins/authMiddleware'
 import { prisma } from './lib/prisma'
-import * as dotenv from 'dotenv'
 import { initializeDepartments } from './services/klassService'
-import process from 'process'
 
-//Auth switch - to allow authMiddleware in npm run dev change "dev" to "devv"
-const DEVELOPMENT_MODE = process.env.npm_lifecycle_event === 'dev'
-
-//dotenv
 dotenv.config()
+const DEVELOPMENT_MODE = process.env.npm_lifecycle_event === 'dev'
+const app = express()
+app.use(helmet())
+app.use(promBundleMetrics)
+// ---- PUBLIC ROUTES ----
 
-//Express
-const expressInstance = express()
-
-//Helmet
-expressInstance.use(helmet())
-
-//Prometheus
-expressInstance.use(promBundleMetrics)
-
-// Swagger - /docs
 const file = fs.readFileSync('./openapi/openapi.yaml', 'utf8')
 const swaggerDocument = YAML.parse(file)
-expressInstance.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
-//AuthPolicy/AuthMiddleware - Routes defined before this line is public by default - be careful
-expressInstance.use((req, res, next) => {
-  if (DEVELOPMENT_MODE) return next()
-  return authMiddleware(req, res, next)
+app.get('/', (_: Request, res: Response) => res.send('STATREG-API-V1'))
+
+// ---- AUTH (everything below is protected by default) ----
+if (!DEVELOPMENT_MODE) {
+  app.use(createAuthMiddleware())
+}
+
+// Protected: controller routes
+app.use(controllerRouter)
+
+// Example protected endpoints
+app.get('/auth/me', (req, res) => {
+  res.json({
+    token: req.auth?.token,
+    claims: req.auth?.claims,
+    username: req.auth?.username,
+    email: req.auth?.email,
+  })
 })
 
-//Endpoint Controller
-expressInstance.use(controllerRouter)
-
-//Test endpoints - Remove when initial testing is done
-//'/'
-expressInstance.get('/', (_: Request, res: Response) => res.send('STATREG-API-V1'))
-expressInstance.get('/secret', (_, res) => {
+// Example: protected + authorized by "aud"
+app.get('/secret', requireAudience('statreg-admin'), (_req, res) => {
   res.send('Very secret message!')
 })
-//'auth/me'
-expressInstance.get('/auth/me', (req, res) => {
-  res.json({ token: (req as any).token, claims: (req as any).jwt })
-})
 
-//Initialization
+// Initialization
 await prisma.$connect()
 initializeDepartments()
-startServer(expressInstance, prisma)
+startServer(app, prisma)
