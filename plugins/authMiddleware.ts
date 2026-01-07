@@ -1,27 +1,27 @@
 import type { Request, Response, NextFunction, RequestHandler } from 'express'
 import { createRemoteJWKSet, jwtVerify, type JWTPayload } from 'jose'
 
-export type AuthContext = {
-  token: string
-  claims: JWTPayload
-  username?: string
-  email?: string
+// Switch (ON by default)
+const AUTH_ENABLED = true
+
+// 401 helper
+function unauthorized(res: Response, message: string) {
+  return res.status(401).json({ error: message })
 }
 
+// 403 helper
+function forbidden(res: Response, message: string) {
+  return res.status(403).json({ error: message })
+}
+
+// Read Bearer token
 function getBearerToken(req: Request): string | null {
   const auth = req.headers.authorization
   if (!auth?.startsWith('Bearer ')) return null
   return auth.slice('Bearer '.length).trim()
 }
 
-function unauthorized(res: Response, message: string) {
-  return res.status(401).json({ error: message })
-}
-
-function forbidden(res: Response, message: string) {
-  return res.status(403).json({ error: message })
-}
-
+// Check aud claim
 function hasAudience(claims: JWTPayload, required: string): boolean {
   const aud = claims.aud
   if (typeof aud === 'string') return aud === required
@@ -29,14 +29,14 @@ function hasAudience(claims: JWTPayload, required: string): boolean {
   return false
 }
 
-// Mark a route as public by setting a flag on req
+// Skip auth for this request
 export const skipAuth: RequestHandler = (req, _res, next) => {
   ;(req as any)._skipAuth = true
   next()
 }
 
-// Auth middleware that respects skipAuth flag
-export function createRequireAuth(): RequestHandler {
+// Keycloak JWT auth middleware
+function keycloakJwtAuth(): RequestHandler {
   const issuer = process.env.KEYCLOAK_REALM_ISSUER
   const jwksUri = process.env.KEYCLOAK_JWKS_URI
   const audience = process.env.KEYCLOAK_TOKEN_AUDIENCE
@@ -76,10 +76,15 @@ export function createRequireAuth(): RequestHandler {
   }
 }
 
+// Require authentication (switch applied here)
+export const requireAuth: RequestHandler = AUTH_ENABLED ? keycloakJwtAuth() : (_req, _res, next) => next()
+
+// Require aud authorization
 export function requireAudience(requiredAudience: string): RequestHandler {
   return (req, res, next) => {
     if (!req.auth) return unauthorized(res, 'Not authenticated')
-    if (!hasAudience(req.auth.claims, requiredAudience)) return forbidden(res, 'Insufficient access')
+    const claims = req.auth.claims as JWTPayload
+    if (!hasAudience(claims, requiredAudience)) return forbidden(res, 'Insufficient access')
     return next()
   }
 }

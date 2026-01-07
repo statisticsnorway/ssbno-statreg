@@ -35,9 +35,9 @@ spec:
     provider: openid
     enforce:
       enabled: true
-      excludePaths:
-        - /secret
-        - /api-docs
+      # excludePaths:
+      #   - /secret
+      #   - /api-docs
 
   gcp:
       sqlInstances:

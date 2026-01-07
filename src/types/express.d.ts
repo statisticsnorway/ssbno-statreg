@@ -1,4 +1,11 @@
-import type { AuthContext } from '../../plugins/authMiddleware'
+// Declares the `auth` property on Express.Request object so TypeScript accepts 'req.auth'
+
+type AuthContext = {
+  token: string
+  claims: unknown
+  username?: string
+  email?: string
+}
 
 declare global {
   namespace Express {

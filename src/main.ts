@@ -1,42 +1,29 @@
-import express, { Request, Response, type RequestHandler } from 'express'
+import fs from 'node:fs'
+
+import express, { Request, Response } from 'express'
 import helmet from 'helmet'
 import swaggerUi from 'swagger-ui-express'
-import fs from 'node:fs'
 import YAML from 'yaml'
-import * as dotenv from 'dotenv'
-import process from 'process'
 
-import createControllerRouter from './api/core/controllerRouter'
+import { requireAuth } from '../plugins/authMiddleware'
 import { startServer } from '../plugins/expressServer'
 import { promBundleMetrics } from '../plugins/promBundle'
-import { createRequireAuth, requireAudience } from '../plugins/authMiddleware'
+
+import controllerRouter from './api/core/controllerRouter'
 import { prisma } from './lib/prisma'
 import { initializeDepartments } from './services/klassService'
 
-dotenv.config()
-
-const DEVELOPMENT_MODE = process.env.npm_lifecycle_event === 'dev'
-
 const app = express()
+
 app.use(helmet())
 app.use(promBundleMetrics)
 
-// Public: Swagger
-const file = fs.readFileSync('./openapi/openapi.yaml', 'utf8')
-const swaggerDocument = YAML.parse(file)
+const swaggerDocument = YAML.parse(fs.readFileSync('./openapi/openapi.yaml', 'utf8'))
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
-// Public: root
 app.get('/', (_: Request, res: Response) => res.send('STATREG-API-V1'))
 
-// Dev bypass or real auth
-const requireAuth: RequestHandler = DEVELOPMENT_MODE ? (_req, _res, next) => next() : createRequireAuth()
-
-// Private by default (controllers can opt-out with skipAuth on specific routes)
-app.use(createControllerRouter(requireAuth))
-
-// Private endpoint (because controllerRouter applies requireAuth)
-app.get('/auth/me', (req, res) => {
+app.get('/auth/me', requireAuth, (req, res) => {
   res.json({
     token: req.auth?.token,
     claims: req.auth?.claims,
@@ -45,10 +32,7 @@ app.get('/auth/me', (req, res) => {
   })
 })
 
-// Private + aud authorization
-app.get('/secret', requireAudience('oauth2-proxy-ssbno-statreg-api'), (_req, res) => {
-  res.send('Very secret message!')
-})
+app.use(controllerRouter(requireAuth))
 
 await prisma.$connect()
 initializeDepartments()
