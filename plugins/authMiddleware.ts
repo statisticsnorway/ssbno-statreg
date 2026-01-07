@@ -30,10 +30,8 @@ function hasAudience(claims: JWTPayload, required: string): boolean {
 }
 
 // Skip auth for this request
-export const skipAuth: RequestHandler = (req, _res, next) => {
-  ;(req as any)._skipAuth = true
-  next()
-}
+export const skipAuth: RequestHandler = (_req, _res, next) => next()
+;(skipAuth as any).__skipAuth = true
 
 // Keycloak JWT auth middleware
 function keycloakJwtAuth(): RequestHandler {
@@ -50,8 +48,6 @@ function keycloakJwtAuth(): RequestHandler {
   const JWKS = createRemoteJWKSet(new URL(jwksUri))
 
   return async (req: Request, res: Response, next: NextFunction) => {
-    if ((req as any)._skipAuth) return next()
-
     const token = getBearerToken(req)
     if (!token) return unauthorized(res, 'Missing Bearer token')
 
@@ -77,7 +73,9 @@ function keycloakJwtAuth(): RequestHandler {
 }
 
 // Require authentication (switch applied here)
-export const requireAuth: RequestHandler = AUTH_ENABLED ? keycloakJwtAuth() : (_req, _res, next) => next()
+export function requireAuth(): RequestHandler {
+  return AUTH_ENABLED ? keycloakJwtAuth() : (_req, _res, next) => next()
+}
 
 // Require aud authorization
 export function requireAudience(requiredAudience: string): RequestHandler {
