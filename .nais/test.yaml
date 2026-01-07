@@ -14,6 +14,7 @@ spec:
 
   envFrom:
   - secret: login-config-ssbno-statreg-api
+  - secret: statreg-api-secrets
 
   env:
     - name: KLASS_BASE_URL

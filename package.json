@@ -36,12 +36,12 @@
     "eslint-plugin-prettier": "^5.5.4",
     "nodemon": "^3.1.11",
     "pkgroll": "^2.21.3",
-    "prisma": "^7.0.1",
+    "prisma": "^7.2.0",
     "typescript-eslint": "^8.48.0"
   },
   "dependencies": {
-    "@prisma/adapter-pg": "^7.0.1",
-    "@prisma/client": "^7.0.1",
+    "@prisma/adapter-pg": "^7.2.0",
+    "@prisma/client": "^7.2.0",
     "express": "^5.1.0",
     "express-prom-bundle": "^8.0.0",
     "helmet": "^8.1.0",
