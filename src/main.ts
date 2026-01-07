@@ -9,7 +9,8 @@ import { promBundleMetrics } from '../plugins/promBundle'
 import controllerRouter from './api/core/controllerRouter'
 import { prisma } from './lib/prisma'
 import { initializeDepartments } from './services/klassService'
-
+import * as dotenv from 'dotenv'
+dotenv.config()
 const auth = requireAuth()
 const app = express()
 
