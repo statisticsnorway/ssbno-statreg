@@ -2,7 +2,7 @@
 # We want this because we need to run npm commands on startup, inside the container. 
 # In order to inspect the tag associated with this image hash (and verify the version of node), you can run this command
 # docker inspect --format='{{.RepoDigests}}' node@sha256:9632533eda8061fc1e9960cfb3f8762781c07a00ee7317f5dc0e13c05e15166f
-FROM node@sha256:9632533eda8061fc1e9960cfb3f8762781c07a00ee7317f5dc0e13c05e15166f
+FROM node@sha256:6d362f0df70431417ef79c30e47c0515ea9066d8be8011e859c6c3575514a027
 
 # Set the working directory
 WORKDIR /app
