@@ -77,7 +77,7 @@ export function requireAuth(): RequestHandler {
   return AUTH_ENABLED ? keycloakJwtAuth() : (_req, _res, next) => next()
 }
 
-// Require aud authorization
+// Require aud authorization - this function is the basis for group authorization
 export function requireAudience(requiredAudience: string): RequestHandler {
   return (req, res, next) => {
     if (!req.auth) return unauthorized(res, 'Not authenticated')

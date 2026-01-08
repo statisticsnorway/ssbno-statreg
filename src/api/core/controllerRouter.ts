@@ -3,7 +3,7 @@ import statisticsController from '@/api/controllers/statisticsController'
 
 const CONTROLLERS = [statisticsController] as const
 
-const ROUTE_METHODS = ['get', 'post', 'put', 'delete', 'patch', 'options', 'head', 'all'] as const
+const ROUTE_METHODS = ['get', 'post', 'put', 'delete'] as const
 
 function applyDefaultAuth(router: Router, requireAuth: RequestHandler) {
   for (const method of ROUTE_METHODS) {
