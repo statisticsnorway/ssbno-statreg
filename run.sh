@@ -9,6 +9,6 @@ openssl pkcs12 -password pass:$SSBNO_STATREG_API_SSL_PASSWORD -export -out /tmp/
 export STATREG_DB_URL_CONNECTION_STRING="postgresql://$NAIS_DATABASE_SSBNO_STATREG_API_STATREG_DB_USERNAME:$NAIS_DATABASE_SSBNO_STATREG_API_STATREG_DB_PASSWORD@$NAIS_DATABASE_SSBNO_STATREG_API_STATREG_DB_HOST:$NAIS_DATABASE_SSBNO_STATREG_API_STATREG_DB_PORT/$NAIS_DATABASE_SSBNO_STATREG_API_STATREG_DB_DATABASE?sslidentity=/tmp/client-identity.p12&sslpassword=$SSBNO_STATREG_API_SSL_PASSWORD&sslcert=$NAIS_DATABASE_SSBNO_STATREG_API_STATREG_DB_SSLROOTCERT"
 
 # npm run db:deploy
-npx prisma migrate deploy 
-npx prisma generate
+# npx prisma migrate deploy 
+# npx prisma generate
 exec npm run start
