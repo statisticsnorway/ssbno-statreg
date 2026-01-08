@@ -18,7 +18,7 @@ RUN npm ci
 COPY . .
 
 # Set temporary placeholder database URL for building
-ENV STATREG_DB_URL_CONNECTION_STRING=postgresql://placeholder@localhost:5432/statreg_d
+ENV STATREG_DB_URL_CONNECTION_STRING=postgresql://placeholder@localhost:5432/statreg_db
 
 # Generate the Prisma client libraries
 RUN npm run generate
