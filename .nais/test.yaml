@@ -30,9 +30,10 @@ spec:
     provider: openid
     enforce:
       enabled: true
-      excludePaths:
+      excludePaths: # added some paths here for debugging during development
         - /secret
         - /api-docs
+        - /statistics
 
   gcp:
       sqlInstances:
