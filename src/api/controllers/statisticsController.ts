@@ -1,17 +1,15 @@
+import type { Router } from 'express'
 import { getAllStatistics, getStatisticByShortname } from '@/services/statisticsService'
-import { Router } from 'express'
+import { skipAuth, requireAudience } from '@/../plugins/authMiddleware'
 
-const router = Router()
+export default function statisticsController(router: Router) {
+  router.get('/statistics/:shortname', skipAuth, async (req, res) => {
+    const data = getStatisticByShortname(req.params.shortname)
+    res.json(data)
+  })
 
-router.get('/statistics/:shortname', async (req, res) => {
-  const shortname = req.params.shortname
-  const data = getStatisticByShortname(shortname)
-  res.json(data)
-})
-
-router.get('/statistics', async (_req, res) => {
-  const data = await getAllStatistics()
-  res.json(data)
-})
-
-export default router
+  router.get('/statistics', requireAudience('oauth2-proxy-ssbno-statreg-api'), async (_req, res) => {
+    const data = await getAllStatistics()
+    res.json(data)
+  })
+}

@@ -16,8 +16,16 @@ spec:
   - secret: login-config-ssbno-statreg-api
 
   env:
+    - name: AUTH_ENABLED
+      value: true
     - name: KLASS_BASE_URL
       value: https://data.qa.ssb.no
+    - name: KEYCLOAK_REALM_ISSUER
+      value: https://auth.test.ssb.no/realms/ssb
+    - name: KEYCLOAK_JWKS_URI
+      value: https://auth.test.ssb.no/realms/ssb/protocol/openid-connect/certs
+    - name: KEYCLOAK_TOKEN_AUDIENCE
+      value: oauth2-proxy-ssbno-statreg-api
 
   accessPolicy:
     outbound:
@@ -30,8 +38,7 @@ spec:
     enforce:
       enabled: true
       excludePaths:
-        - /secret
-        - /api-docs
+        - /docs
 
   gcp:
       sqlInstances:

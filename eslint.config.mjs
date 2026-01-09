@@ -6,14 +6,14 @@ import tseslintParser from '@typescript-eslint/parser'
 import prettier from 'eslint-plugin-prettier'
 
 export default defineConfig([
-  globalIgnores(['dist/', 'node_modules/', 'src/generated/']),
+  globalIgnores(['dist/', 'node_modules/', 'src/generated/', '**/*.d.ts']),
   {
     files: ['**/*.{js,mjs,cjs,ts}'],
     plugins: {
       prettier,
     },
     languageOptions: {
-      globals: globals.browser,
+      globals: globals.node,
       parser: tseslintParser,
     },
     rules: {

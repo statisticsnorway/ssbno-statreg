@@ -6,7 +6,7 @@ export let DEPARTMENTS: Department[]
 
 export async function initializeDepartments() {
   DEPARTMENTS = await getDepartmentsFromKlass()
-  console.log(JSON.stringify(DEPARTMENTS))
+  //console.log(JSON.stringify(DEPARTMENTS))
 }
 
 export async function getDepartmentsFromKlass(): Promise<Department[]> {

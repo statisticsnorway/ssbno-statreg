@@ -42,6 +42,10 @@ Help secure Express apps by setting HTTP response headers.
 ## Prom bundle 
 Express middleware with popular prometheus metrics in one bundle. Exposes `/metrics` endpoint.
 
+## Auth switch
+set "AUTH_ENABLED": "false" in nodemon.json
+to turn of auth for local development
+
 ## Docker
 ### Prerequisites
 To get started, you first need to [install Colima and Docker CLI.](https://statistics-norway.atlassian.net/wiki/spaces/mimir/pages/4827381761/Bytte+fra+Docker+Desktop+til+Colima)
