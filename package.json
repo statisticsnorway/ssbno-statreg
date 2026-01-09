@@ -7,11 +7,15 @@
   "version": "0.0.0",
   "type": "module",
   "exports": "./dist/main.js",
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
   "scripts": {
     "dev": "nodemon --config nodemon.json",
     "start": "node dist/main.js",
     "build": "pkgroll",
     "generate": "prisma generate",
+    "seed": "prisma db seed",
     "db:deploy": "npx prisma migrate deploy && npx prisma generate",
     "lint": "eslint '**/*.{js,mjs,cjs,ts}'",
     "lint:fix": "eslint --fix '**/*.{js,mjs,cjs,ts}'",
