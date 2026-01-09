@@ -27,5 +27,16 @@ export default function controllerRouter(requireAuth: RequestHandler) {
     controller(router)
   }
 
+  router.use((req, res, next) => {
+    if (!ROUTE_METHODS.map((m) => m.toUpperCase()).includes(req.method)) {
+      return res.status(405).json({ error: 'Method Not Allowed' })
+    }
+    next()
+  })
+
+  router.use((_req, res) => {
+    res.status(404).json({ error: 'Not Found' })
+  })
+
   return router
 }

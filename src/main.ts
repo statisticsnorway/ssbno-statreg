@@ -24,7 +24,6 @@ app.get('/', (_: Request, res: Response) => res.send('STATREG-API-V1'))
 
 app.get('/auth/me', auth, (req, res) => {
   res.json({
-    token: req.auth?.token,
     claims: req.auth?.claims,
     username: req.auth?.username,
     email: req.auth?.email,

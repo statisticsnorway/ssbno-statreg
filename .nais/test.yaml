@@ -16,6 +16,8 @@ spec:
   - secret: login-config-ssbno-statreg-api
 
   env:
+    - name: AUTH_ENABLED
+      value: true
     - name: KLASS_BASE_URL
       value: https://data.qa.ssb.no
     - name: KEYCLOAK_REALM_ISSUER
@@ -35,9 +37,8 @@ spec:
     provider: openid
     enforce:
       enabled: true
-      # excludePaths:
-      #   - /secret
-      #   - /api-docs
+      excludePaths:
+        - /docs
 
   gcp:
       sqlInstances:
