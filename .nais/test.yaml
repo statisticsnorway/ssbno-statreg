@@ -17,7 +17,7 @@ spec:
 
   env:
     - name: AUTH_ENABLED
-      value: true
+      value: "true"
     - name: KLASS_BASE_URL
       value: https://data.qa.ssb.no
     - name: KEYCLOAK_REALM_ISSUER
