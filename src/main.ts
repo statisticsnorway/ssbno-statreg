@@ -1,43 +1,36 @@
+import fs from 'node:fs'
 import express, { Request, Response } from 'express'
 import helmet from 'helmet'
 import swaggerUi from 'swagger-ui-express'
-import fs from 'node:fs'
 import YAML from 'yaml'
-import controllerRouter from './api/core/controllerRouter'
+import { requireAuth } from '../plugins/authMiddleware'
 import { startServer } from '../plugins/expressServer'
 import { promBundleMetrics } from '../plugins/promBundle'
-import { extractJwt } from '../plugins/authMiddleware'
+import controllerRouter from './api/core/controllerRouter'
 import { prisma } from './lib/prisma'
-import * as dotenv from 'dotenv'
 import { initializeDepartments } from './services/klassService'
-
+import * as dotenv from 'dotenv'
 dotenv.config()
+const auth = requireAuth()
+const app = express()
 
-const expressInstance = express()
-expressInstance.use(helmet())
-expressInstance.use(promBundleMetrics)
-expressInstance.use(extractJwt)
-expressInstance.use(controllerRouter)
-// TODO: Remove when initial testing is done
-expressInstance.get('/', (_: Request, res: Response) => res.send('STATREG-API-V1'))
-expressInstance.get('/secret', (_, res) => {
-  res.send('Very secret message!')
-})
+app.use(helmet())
+app.use(promBundleMetrics)
 
-await prisma.$connect()
+const swaggerDocument = YAML.parse(fs.readFileSync('./openapi/openapi.yaml', 'utf8'))
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
-const file = fs.readFileSync('./openapi/openapi.yaml', 'utf8')
-const swaggerDocument = YAML.parse(file)
-expressInstance.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
+app.get('/', (_: Request, res: Response) => res.send('STATREG-API-V1'))
 
-initializeDepartments()
-
-startServer(expressInstance, prisma)
-
-//jwt debug endpoint (temporary)
-expressInstance.get('/auth/me', (req, res) => {
+app.get('/auth/me', auth, (req, res) => {
   res.json({
-    token: (req as any).token,
-    claims: (req as any).jwt,
+    claims: req.auth?.claims,
+    username: req.auth?.username,
+    email: req.auth?.email,
   })
 })
+app.use(controllerRouter(auth))
+
+await prisma.$connect()
+initializeDepartments()
+startServer(app, prisma)
