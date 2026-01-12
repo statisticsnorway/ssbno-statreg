@@ -86,6 +86,7 @@ export function requireAuth(): RequestHandler {
 // might not be needed at all later on if we get groups from keycloak dapla user info mapper
 export function requireAudience(requiredAudience: string): RequestHandler {
   if (!AUTH_ENABLED) return (_req, _res, next) => next()
+
   return (req, res, next) => {
     if (!req.auth) return unauthorized(res, 'Not authenticated')
     if (!hasAudience(req.auth.claims as JWTPayload, requiredAudience)) {

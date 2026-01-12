@@ -13,16 +13,6 @@ import {
 } from '../plugins/authMiddleware'
 import { JWTPayload } from 'jose'
 
-// let fetchMock: ReturnType<typeof mock.method>
-// let errorMock: ReturnType<typeof mock.method>
-// let payload: object // using object instead of KlassClassification to test invalid/partial payloads
-
-beforeEach(() => {
-  // delete process.env.DATA_BASE_URL
-})
-
-afterEach(() => {})
-
 describe('authMiddleWare ', async () => {
   describe('unauthorized ', async () => {
     test('set correct message and status', async () => {
