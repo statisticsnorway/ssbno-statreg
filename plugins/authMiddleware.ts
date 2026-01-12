@@ -1,7 +1,11 @@
 import type { Request, Response, NextFunction, RequestHandler } from 'express'
 import { createRemoteJWKSet, jwtVerify, type JWTPayload } from 'jose'
 
-const AUTH_ENABLED = process.env.AUTH_ENABLED !== 'false'
+export let AUTH_ENABLED = process.env.AUTH_ENABLED !== 'false'
+
+export function setAuthEnabled(enabled: boolean) {
+  AUTH_ENABLED = enabled
+}
 
 export function unauthorized(res: Response, message: string) {
   return res.status(401).json({ error: message })
@@ -82,7 +86,6 @@ export function requireAuth(): RequestHandler {
 // might not be needed at all later on if we get groups from keycloak dapla user info mapper
 export function requireAudience(requiredAudience: string): RequestHandler {
   if (!AUTH_ENABLED) return (_req, _res, next) => next()
-
   return (req, res, next) => {
     if (!req.auth) return unauthorized(res, 'Not authenticated')
     if (!hasAudience(req.auth.claims as JWTPayload, requiredAudience)) {

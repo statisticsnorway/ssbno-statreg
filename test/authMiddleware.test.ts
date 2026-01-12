@@ -7,9 +7,9 @@ import {
   getBearerToken,
   hasAudience,
   keycloakJwtAuth,
-  requireAudience,
   makeKeycloakJwtAuth,
-  VerifyJwt,
+  requireAudience,
+  setAuthEnabled,
 } from '../plugins/authMiddleware'
 import { JWTPayload } from 'jose'
 
@@ -108,10 +108,11 @@ describe('authMiddleWare ', async () => {
       })
       const handler = makeKeycloakJwtAuth(verify)
       const req = httpMocks.createRequest()
+
       await handler(req, res, next as any)
 
       assert.equal(res.statusCode, 401)
-      assert.equal(res.body?.message, 'Missing Bearer token')
+      assert.equal(res._getJSONData().error, 'Missing Bearer token')
       assert.equal(next.mock.callCount(), 0)
       assert.equal(verify.mock.callCount(), 0)
     })
@@ -121,11 +122,12 @@ describe('authMiddleWare ', async () => {
         throw new Error('bad token')
       })
       const handler = makeKeycloakJwtAuth(verify)
-      const req = httpMocks.createRequest({ authorization: 'Bearer tok' })
+      const req = httpMocks.createRequest({ headers: { authorization: 'Bearer token' } })
+
       await handler(req, res, next as any)
 
       assert.equal(res.statusCode, 401)
-      assert.equal(res.body?.message, 'Invalid or expired token')
+      assert.equal(res._getJSONData().error, 'Invalid or expired token')
       assert.equal(next.mock.callCount(), 0)
       assert.equal(verify.mock.callCount(), 1)
     })
@@ -134,27 +136,21 @@ describe('authMiddleWare ', async () => {
       const payload: JWTPayload = {
         preferred_username: 'anne',
         email: 'anne@example.com',
-        sub: '123',
         aud: 'my-api',
-        iss: 'https://issuer',
       }
       const verify = mock.fn(async () => payload)
       const handler = makeKeycloakJwtAuth(verify)
-      const req = httpMocks.createRequest({ authorization: 'Bearer good' })
+      const req = httpMocks.createRequest({ headers: { authorization: 'Bearer good' } })
 
       await handler(req, res, next as any)
 
-      // @ts-ignore
       assert.deepEqual(req.auth?.claims, payload)
-      // @ts-ignore
       assert.equal(req.auth?.username, 'anne')
-      // @ts-ignore
       assert.equal(req.auth?.email, 'anne@example.com')
-
       assert.equal((next as any).mock.callCount(), 1)
-      assert.equal(res.statusCode, undefined)
     })
 
+    // TODO: Check if claims not including email/username, should autorization fail or just ommit?
     test('omits username/email if not strings', async () => {
       const payload: JWTPayload = {
         preferred_username: 99 as any,
@@ -162,20 +158,17 @@ describe('authMiddleWare ', async () => {
       }
       const verify = mock.fn(async () => payload)
       const handler = makeKeycloakJwtAuth(verify)
-      const req = httpMocks.createRequest({ authorization: 'Bearer t' })
+      const req = httpMocks.createRequest({ headers: { authorization: 'Bearer t' } })
 
-      await handler(req, res, next)
+      await handler(req, res, next as any)
 
-      // @ts-ignore
       assert.deepEqual(req.auth?.claims, payload)
-      // @ts-ignore
       assert.equal(req.auth?.username, undefined)
-      // @ts-ignore
       assert.equal(req.auth?.email, undefined)
     })
   })
 
-  describe('keycloakJwtAuthFromEnv (wiring)', () => {
+  describe('keycloakJwtAuth ', () => {
     const OLD = { ...process.env }
 
     test('throws if env variables are missing', () => {
@@ -196,21 +189,88 @@ describe('authMiddleWare ', async () => {
     })
   })
 
-  // describe('requireAudience ', async () => {
-  //   //TODO: add tests for requireAudience
-  //   test('set correct message and status', async () => {
-  //     const response = unauthorized(httpMocks.createResponse(), 'You are unautorized')
-  //     assert.equal(response.statusCode, 401)
-  //     assert.equal((response as any)._getJSONData().error, 'You are unautorized')
-  //     assert.ok((response as any)._isEndCalled())
-  //   })
+  describe('requireAudience ', async () => {
+    const REQUIRED = 'ssbno.developers'
+    let res: MockResponse<any>
+    let next: ReturnType<typeof mock.fn>
 
-  //   test('returns next() without correct audiance if AUTH_ENABLED is false', async () => {
-  //     process.env.AUTH_ENABLED = 'false'
-  //     const handler = requireAudience('ssbno.developers')
-  //     assert.equal(handler, 401)
-  //   })
-  // })
+    beforeEach(() => {
+      res = createResponse()
+      next = mock.fn()
+      setAuthEnabled(true)
+    })
+
+    afterEach(() => {})
+
+    test('bypasses when AUTH_ENABLED=false and return next()', async () => {
+      setAuthEnabled(false)
+      const handler = requireAudience(REQUIRED)
+      const req = httpMocks.createRequest()
+
+      await handler(req, res, next as any)
+
+      assert.equal(next.mock.callCount(), 1)
+    })
+
+    test('returns 401 when not authenticated (no req.auth)', async () => {
+      const handler = requireAudience(REQUIRED)
+      const req = httpMocks.createRequest()
+
+      await handler(req, res, next as any)
+
+      assert.equal(res.statusCode, 401)
+      assert.equal(res._getJSONData().error, 'Not authenticated')
+      assert.equal(next.mock.callCount(), 0)
+    })
+
+    test('returns 403 when audience is missing (string aud)', async () => {
+      const handler = requireAudience(REQUIRED)
+      const claims: JWTPayload = { aud: 'another-api' }
+      const req = httpMocks.createRequest()
+      req.auth = { claims }
+
+      await handler(req, res, next as any)
+
+      assert.equal(res.statusCode, 403)
+      assert.equal(res._getJSONData().error, 'Insufficient access')
+      assert.equal(next.mock.callCount(), 0)
+    })
+
+    test('returns 403 when audience is missing (array aud)', async () => {
+      const handler = requireAudience(REQUIRED)
+      const claims: JWTPayload = { aud: ['service-a', 'service-b'] }
+      const req = httpMocks.createRequest()
+      req.auth = { claims }
+
+      await handler(req, res, next as any)
+
+      assert.equal(res.statusCode, 403)
+      assert.equal(res._getJSONData().error, 'Insufficient access')
+      assert.equal(next.mock.callCount(), 0)
+    })
+
+    test('calls next when audience matches (string aud)', async () => {
+      const handler = requireAudience(REQUIRED)
+      const claims: JWTPayload = { aud: REQUIRED }
+      const req = httpMocks.createRequest()
+      req.auth = { claims }
+
+      await handler(req, res, next as any)
+
+      assert.equal(next.mock.callCount(), 1)
+      assert.equal(res.statusCode, 200)
+    })
+
+    test('calls next when audience matches (array aud)', async () => {
+      const handler = requireAudience(REQUIRED)
+      const claims: JWTPayload = { aud: ['service-a', REQUIRED, 'service-b'] }
+      const req = httpMocks.createRequest()
+      req.auth = { claims }
+
+      await handler(req, res, next as any)
+
+      assert.equal(next.mock.callCount(), 1)
+      assert.equal(res.statusCode, 200)
+    })
+  })
 })
-
-////////////// MOCK DATA ////////////////////////////////
