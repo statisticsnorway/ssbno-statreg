@@ -4,16 +4,24 @@ Statreg API is a backend service for statistikkregisteret. It provides endpoints
 
 ## DEV
 
+### Prerequests
+* Install a postgresql database (see [Database](#Database))
+* Start the database application and "initialize databases" (or similar)
+* Create an .env file in repo root and set database connection string on the form:
+`NAIS_DATABASE_SSBNO_STATREG_API_STATREG_DB_URL="postgresql://<USERNAME>@localhost:5432/statreg_db"`
+
 ### First run, database baseline setup
 ```
 npm install
-npm run generate
-npx prisma db push
+npm db:deploy 
 npm run seed
 npm run dev
 ```
 
 ### Subsequent application startups
+If new migrations: `npm db:deploy`
+
+Then run
 ```
 npm run dev
 ```
@@ -70,7 +78,7 @@ docker run -it -p 8080:8080 ssbno/statreg-api
 
 ### Database
 
-We use PostgreSQL, provided by Nais in our live environments. Locally you can set up your own Postgres db in one of many ways - install PostgreSQL [from either the website](https://www.postgresql.org/download/), Homebrew or your package manager of choice. If you are on a mac, postgres.app is recommended and makes setup very easy and quick.
+We use PostgreSQL, provided by Nais in our live environments. Locally you can set up your own Postgres db in one of many ways - install PostgreSQL [from either the website](https://www.postgresql.org/download/), Homebrew or your package manager of choice. If you are on a mac, postgres.app is recommended and makes setup very easy and quick. 
 
 ### Prisma
 
