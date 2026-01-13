@@ -37,17 +37,18 @@ describe('authMiddleWare ', async () => {
       const token = getBearerToken(httpMocks.createRequest({ headers: { authorization: 'Bearer myBearerTokenValue' } }))
       assert.equal(token, 'myBearerTokenValue')
     })
-    // TODO: Fix code so this test passes
-    // test('returns token if for case-insensitively bearer', async () => {
-    //   const token = getBearerToken(httpMocks.createRequest({ headers: { authorization: 'bearer myBearerTokenValue' } }))
-    //   assert.equal(token, 'myBearerTokenValue')
-    // })
+    test('returns token if given Bearer authorization header, and check for case insentitivity and extra whitespaces', async () => {
+      const token = getBearerToken(
+        httpMocks.createRequest({ headers: { AUthorization: 'beareR  myBearerTokenValue' } })
+      )
+      assert.equal(token, 'myBearerTokenValue')
+    })
     test('returns null when missing authorization header', async () => {
       const token = getBearerToken(httpMocks.createRequest({ headers: {} }))
       assert.equal(token, null)
     })
-    test('returns null when authorization header not starting with "Bearer "', async () => {
-      const token = getBearerToken(httpMocks.createRequest({ headers: { authorization: 'myBearerTokenValue' } }))
+    test('returns null when authorization header not starting with "Bearer " (including one or more whitespace)', async () => {
+      const token = getBearerToken(httpMocks.createRequest({ headers: { authorization: 'bearermyBearerTokenValue' } }))
       assert.equal(token, null)
     })
   })
