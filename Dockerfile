@@ -4,8 +4,10 @@
 # docker inspect --format='{{.RepoDigests}}' node@sha256:9632533eda8061fc1e9960cfb3f8762781c07a00ee7317f5dc0e13c05e15166f
 FROM node@sha256:6d362f0df70431417ef79c30e47c0515ea9066d8be8011e859c6c3575514a027
 
-RUN apk update && apk add openssl
-RUN apk add --no-cache bash
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    openssl \
+    bash \
+ && rm -rf /var/lib/apt/lists/*
 
 # Set the working directory
 WORKDIR /app
