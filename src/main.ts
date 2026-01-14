@@ -9,13 +9,16 @@ import { promBundleMetrics } from '../plugins/promBundle'
 import controllerRouter from './api/core/controllerRouter'
 import { prisma } from './lib/prisma'
 import { initializeDepartments } from './services/klassService'
+import { devMiddleware } from '../plugins/devMiddleware'
 import * as dotenv from 'dotenv'
+
 dotenv.config()
 const auth = requireAuth()
 const app = express()
 
 app.use(helmet())
 app.use(promBundleMetrics)
+app.use(devMiddleware())
 
 const swaggerDocument = YAML.parse(fs.readFileSync('./openapi/openapi.yaml', 'utf8'))
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))

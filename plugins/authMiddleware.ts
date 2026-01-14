@@ -54,14 +54,14 @@ export function makeKeycloakJwtAuth(verifyJwt: VerifyJwt): RequestHandler {
 }
 
 export function keycloakJwtAuth(): RequestHandler {
-  const issuer = process.env.KEYCLOAK_REALM_ISSUER
-  const jwksUri = process.env.KEYCLOAK_JWKS_URI
-  const audience = process.env.KEYCLOAK_TOKEN_AUDIENCE
+  const dev = process.env.NODE_ENV === 'development'
+
+  const issuer = dev ? process.env.KEYCLOAK_PLAY_REALM_ISSUER : process.env.KEYCLOAK_REALM_ISSUER
+  const jwksUri = dev ? process.env.KEYCLOAK_PLAY_JWKS_URI : process.env.KEYCLOAK_JWKS_URI
+  const audience = dev ? process.env.KEYCLOAK_PLAY_TOKEN_AUDIENCE : process.env.KEYCLOAK_TOKEN_AUDIENCE
 
   if (!issuer || !jwksUri || !audience) {
-    throw new Error(
-      'Missing Keycloak OIDC configuration. Ensure KEYCLOAK_REALM_ISSUER, KEYCLOAK_JWKS_URI, and KEYCLOAK_TOKEN_AUDIENCE are set.'
-    )
+    throw new Error('Missing Keycloak OIDC configuration. Check your environment variables.')
   }
 
   const JWKS = createRemoteJWKSet(new URL(jwksUri))
