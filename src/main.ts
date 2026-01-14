@@ -4,12 +4,12 @@ import helmet from 'helmet'
 import swaggerUi from 'swagger-ui-express'
 import YAML from 'yaml'
 import { requireAuth } from '../plugins/authMiddleware'
+import { devMiddleware } from '../plugins/devMiddleware'
 import { startServer } from '../plugins/expressServer'
 import { promBundleMetrics } from '../plugins/promBundle'
 import controllerRouter from './api/core/controllerRouter'
 import { prisma } from './lib/prisma'
 import { initializeDepartments } from './services/klassService'
-import { devMiddleware } from '../plugins/devMiddleware'
 import * as dotenv from 'dotenv'
 
 dotenv.config()
