@@ -7,7 +7,7 @@ spec:
   cluster:
     audit:
       enabled: true
-    majorVersion: "18"
+    majorVersion: "17"
     resources:
       cpu: 200m
       diskSize: 2Gi
