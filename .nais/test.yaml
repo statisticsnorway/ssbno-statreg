@@ -41,8 +41,8 @@ spec:
         - /docs
 
   postgres:
-    clusterName: statreg-api-db
-    
+    clusterName: statreg-api-test-db
+
   gcp:
       sqlInstances:
         - type: POSTGRES_17
