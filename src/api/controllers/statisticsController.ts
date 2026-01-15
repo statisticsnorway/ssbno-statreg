@@ -8,7 +8,7 @@ export default function statisticsController(router: Router) {
     res.json(data)
   })
 
-  router.get('/statistics', requireAudience('oauth2-proxy-ssbno-statreg-api'), async (_req, res) => {
+  router.get('/statistics', requireAudience('ssbno-statreg-api-test'), async (_req, res) => {
     const data = await getAllStatistics()
     res.json(data)
   })
