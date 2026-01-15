@@ -2,6 +2,7 @@ apiVersion: data.nais.io/v1
 kind: Postgres
 metadata:
   name: statreg-api-db
+  namespace: ssbno
 spec:
   cluster:
     audit:
