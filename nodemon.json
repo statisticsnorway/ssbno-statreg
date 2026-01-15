@@ -12,15 +12,16 @@
   ],
   "env": {
     "AUTH_ENABLED": "true",
-    
+
     "NODE_ENV": "development",
-    
+
     "PORT": "8080",
-    
+
+    "KEYCLOAK_CLIENT_ID": "ssbno-statreg-api-test",
+    "KEYCLOAK_TOKEN_AUDIENCE": "ssbno-statreg-api-test",
     "KEYCLOAK_REALM_ISSUER": "https://auth.test.ssb.no/realms/ssb",
     "KEYCLOAK_JWKS_URI": "https://auth.test.ssb.no/realms/ssb/protocol/openid-connect/certs",
-    "KEYCLOAK_TOKEN_AUDIENCE": "ssbno-statreg-api-test",
-    
+
     "KEYCLOAK_PLAY_CLIENT_ID": "ssbno-statreg-api-dev",
     "KEYCLOAK_PLAY_REALM_ISSUER": "https://auth-play.test.ssb.no/realms/ssb",
     "KEYCLOAK_PLAY_JWKS_URI": "https://auth-play.test.ssb.no/realms/ssb/protocol/openid-connect/certs"
