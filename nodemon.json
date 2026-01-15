@@ -21,9 +21,9 @@
     "KEYCLOAK_JWKS_URI": "https://auth.test.ssb.no/realms/ssb/protocol/openid-connect/certs",
     "KEYCLOAK_TOKEN_AUDIENCE": "ssbno-statreg-api-test",
     
+    "KEYCLOAK_PLAY_CLIENT_ID": "ssbno-statreg-api-dev",
     "KEYCLOAK_PLAY_REALM_ISSUER": "https://auth-play.test.ssb.no/realms/ssb",
     "KEYCLOAK_PLAY_JWKS_URI": "https://auth-play.test.ssb.no/realms/ssb/protocol/openid-connect/certs",
-    "KEYCLOAK_PLAY_TOKEN_AUDIENCE": "ssbno-statreg-api-dev"
   },
   "ext": "mts,ts",
   "exec": "tsx src/main.ts"
