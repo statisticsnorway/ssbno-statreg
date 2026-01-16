@@ -33,5 +33,5 @@ EXPOSE 9000
 EXPOSE 8080
 
 # Command to start the application
-CMD [ "sh", "-c", "npm run db:deploy && npm run seed && npm run start" ]
-# CMD [ "sh", "-c", "npm run start" ]
+# CMD [ "sh", "-c", "npm run db:deploy && npm run seed && npm run start" ]
+CMD [ "sh", "-c", "npm run start" ]
