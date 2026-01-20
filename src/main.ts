@@ -16,6 +16,7 @@ const app = express()
 
 app.use(helmet())
 app.use(promBundleMetrics)
+app.use(express.json())
 
 const swaggerDocument = YAML.parse(fs.readFileSync('./openapi/openapi.yaml', 'utf8'))
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
