@@ -10,6 +10,7 @@ export default function calendarController(router: Router) {
       const { blocked_comment } = req.body
       const date = req.params.date
       const result = await createBlockedReleaseDay(date, blocked_comment)
+      //TODO: Should return list of blocked days, not just added block day
       res.json(result)
     }
   )
