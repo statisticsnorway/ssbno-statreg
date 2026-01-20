@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 export async function createBlockedReleaseDay(date: string, blocked_comment: string): Promise<Calender_date> {
   const highestId = (await prisma.calender_date.findFirst({ orderBy: { id: 'desc' } }))?.id
   const incrementId = Number(highestId) + 1
+  //TODO: Need to check for existing date in database
   return prisma.calender_date.create({
     data: {
       //TODO: Id should autoincrement
