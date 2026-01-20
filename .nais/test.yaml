@@ -16,6 +16,8 @@ spec:
   - secret: login-config-ssbno-statreg-api
 
   env:
+    - name: NODE_ENV
+      value: production
     - name: AUTH_ENABLED
       value: "true"
     - name: KLASS_BASE_URL

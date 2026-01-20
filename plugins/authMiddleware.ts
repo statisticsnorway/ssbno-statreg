@@ -1,11 +1,7 @@
 import type { Request, Response, NextFunction, RequestHandler } from 'express'
 import { createRemoteJWKSet, jwtVerify, type JWTPayload } from 'jose'
 
-export let AUTH_ENABLED = process.env.AUTH_ENABLED !== 'false'
-
-export function setAuthEnabled(enabled: boolean) {
-  AUTH_ENABLED = enabled
-}
+const AUTH_ENABLED = process.env.AUTH_ENABLED !== 'false'
 
 export function unauthorized(res: Response, message: string) {
   return res.status(401).json({ error: message })
@@ -31,21 +27,26 @@ export function hasAudience(claims: JWTPayload, required: string): boolean {
 export const skipAuth: RequestHandler = (_req, _res, next) => next()
 ;(skipAuth as any).__skipAuth = true
 
-// eslint-disable-next-line no-unused-vars
-export type VerifyJwt = (token: string) => Promise<JWTPayload>
+function createKeycloakAuthMiddleware(issuer: string, jwksUri: string, audience: string): RequestHandler {
+  const JWKS = createRemoteJWKSet(new URL(jwksUri))
 
-export function makeKeycloakJwtAuth(verifyJwt: VerifyJwt): RequestHandler {
   return async (req: Request, res: Response, next: NextFunction) => {
     const token = getBearerToken(req)
     if (!token) return unauthorized(res, 'Missing Bearer token')
 
     try {
-      const payload = await verifyJwt(token)
+      const { payload } = await jwtVerify(token, JWKS, {
+        issuer,
+        audience,
+        algorithms: ['RS256'],
+      })
+
       req.auth = {
         claims: payload,
         username: typeof payload.preferred_username === 'string' ? payload.preferred_username : undefined,
         email: typeof payload.email === 'string' ? payload.email : undefined,
       }
+
       return next()
     } catch {
       return unauthorized(res, 'Invalid or expired token')
@@ -53,39 +54,33 @@ export function makeKeycloakJwtAuth(verifyJwt: VerifyJwt): RequestHandler {
   }
 }
 
-export function keycloakJwtAuth(): RequestHandler {
-  const dev = process.env.NODE_ENV === 'development'
+export function keycloakAuth(): RequestHandler {
+  const isDev = process.env.NODE_ENV === 'development'
 
-  const issuer = dev ? process.env.KEYCLOAK_PLAY_REALM_ISSUER : process.env.KEYCLOAK_REALM_ISSUER
-  const jwksUri = dev ? process.env.KEYCLOAK_PLAY_JWKS_URI : process.env.KEYCLOAK_JWKS_URI
-  const audience = dev ? process.env.KEYCLOAK_PLAY_TOKEN_AUDIENCE : process.env.KEYCLOAK_TOKEN_AUDIENCE
+  const issuer = isDev ? process.env.KEYCLOAK_PLAY_REALM_ISSUER : process.env.KEYCLOAK_REALM_ISSUER
+
+  const jwksUri = isDev ? process.env.KEYCLOAK_PLAY_JWKS_URI : process.env.KEYCLOAK_JWKS_URI
+
+  const audience = isDev ? process.env.KEYCLOAK_PLAY_TOKEN_AUDIENCE : process.env.KEYCLOAK_TOKEN_AUDIENCE
 
   if (!issuer || !jwksUri || !audience) {
-    throw new Error('Missing Keycloak OIDC configuration. Check your environment variables.')
+    if (isDev) {
+      console.warn('[auth] Keycloak PLAY configuration missing; auth is skipped in development mode')
+      return skipAuth
+    }
+
+    throw new Error('Missing Keycloak OIDC configuration in production environment')
   }
 
-  const JWKS = createRemoteJWKSet(new URL(jwksUri))
-
-  const verifyJwt: VerifyJwt = async (token: string) => {
-    const { payload } = await jwtVerify(token, JWKS, {
-      issuer,
-      audience,
-      algorithms: ['RS256'],
-    })
-    return payload
-  }
-
-  return makeKeycloakJwtAuth(verifyJwt)
+  return createKeycloakAuthMiddleware(issuer, jwksUri, audience)
 }
 
 export function requireAuth(): RequestHandler {
-  return AUTH_ENABLED ? keycloakJwtAuth() : (_req, _res, next) => next()
+  return AUTH_ENABLED ? keycloakAuth() : skipAuth
 }
 
-// Require aud authorization - this function is the basis for group authorization with entra id later
-// might not be needed at all later on if we get groups from keycloak dapla user info mapper
 export function requireAudience(requiredAudience: string): RequestHandler {
-  if (!AUTH_ENABLED) return (_req, _res, next) => next()
+  if (!AUTH_ENABLED) return skipAuth
 
   return (req, res, next) => {
     if (!req.auth) return unauthorized(res, 'Not authenticated')
