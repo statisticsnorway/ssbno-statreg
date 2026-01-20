@@ -1,7 +1,8 @@
 import { Router, type RequestHandler } from 'express'
 import statisticsController from '@/api/controllers/statisticsController'
+import releasesController from '../controllers/releasesController'
 
-const CONTROLLERS = [statisticsController]
+const CONTROLLERS = [statisticsController, releasesController]
 
 const ROUTE_METHODS = ['get', 'post', 'put', 'delete'] as const
 
