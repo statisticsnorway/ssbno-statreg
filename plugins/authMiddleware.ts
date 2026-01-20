@@ -1,8 +1,6 @@
 import type { Request, Response, NextFunction, RequestHandler } from 'express'
 import { createRemoteJWKSet, jwtVerify, type JWTPayload } from 'jose'
 
-const AUTH_ENABLED = process.env.AUTH_ENABLED !== 'false'
-
 export function unauthorized(res: Response, message: string) {
   return res.status(401).json({ error: message })
 }
@@ -76,11 +74,11 @@ export function keycloakAuth(): RequestHandler {
 }
 
 export function requireAuth(): RequestHandler {
-  return AUTH_ENABLED ? keycloakAuth() : skipAuth
+  return process.env.AUTH_ENABLED === 'false' ? skipAuth : keycloakAuth()
 }
 
 export function requireAudience(requiredAudience: string): RequestHandler {
-  if (!AUTH_ENABLED) return skipAuth
+  if (process.env.AUTH_ENABLED === 'false') return skipAuth
 
   return (req, res, next) => {
     if (!req.auth) return unauthorized(res, 'Not authenticated')
