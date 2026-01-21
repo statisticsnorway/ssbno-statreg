@@ -2,7 +2,6 @@ set -e
 
 # Generate p12-file for ssl, see prisma docs: https://www.prisma.io/docs/orm/overview/databases/postgresql#configuring-an-ssl-connection
 # example: openssl pkcs12 -export -out client-identity.p12 -inkey client-key.pem -in client-cert.pem
-umask 0777 # Sets file permissions, must be readable
 openssl pkcs12 \
   -export \
   -out /tmp/client-identity.p12 \
@@ -10,6 +9,7 @@ openssl pkcs12 \
   -in "$NAIS_DATABASE_SSBNO_STATREG_API_STATREG_DB_SSLCERT" \
   -passout pass:"$SSBNO_STATREG_API_SSL_PASSWORD"
 
+chmod 644 /tmp/client-identity.p12
 
 # Building connection string from scratch
 # example: postgresql://USER:PASSWORD@HOST:PORT/DATABASE?sslidentity=client-identity.p12&sslpassword=mypassword&sslcert=rootca.cert
