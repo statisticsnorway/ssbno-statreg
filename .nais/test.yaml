@@ -20,6 +20,8 @@ spec:
       value: production
     - name: AUTH_ENABLED
       value: "true"
+    - name: KEYCLOAK_CLIENT_ID
+      value: ssbno-statreg-api
     - name: KLASS_BASE_URL
       value: https://data.qa.ssb.no
     - name: KEYCLOAK_REALM_ISSUER
@@ -27,7 +29,7 @@ spec:
     - name: KEYCLOAK_JWKS_URI
       value: https://auth.test.ssb.no/realms/ssb/protocol/openid-connect/certs
     - name: KEYCLOAK_TOKEN_AUDIENCE
-      value: oauth2-proxy-ssbno-statreg-api
+      value: ssbno-statreg-api
 
   accessPolicy:
     outbound:

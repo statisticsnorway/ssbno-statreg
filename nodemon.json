@@ -17,16 +17,15 @@
 
     "PORT": "8080",
 
-    "KEYCLOAK_CLIENT_ID": "ssbno-statreg-api-test",
-    "KEYCLOAK_TOKEN_AUDIENCE": "ssbno-statreg-api-test",
+    "KEYCLOAK_CLIENT_ID": "oauth2-proxy-ssbno-statreg-api",
+    "KEYCLOAK_TOKEN_AUDIENCE": "oauth2-proxy-ssbno-statreg-api",
     "KEYCLOAK_REALM_ISSUER": "https://auth.test.ssb.no/realms/ssb",
     "KEYCLOAK_JWKS_URI": "https://auth.test.ssb.no/realms/ssb/protocol/openid-connect/certs",
 
-    "KEYCLOAK_PLAY_CLIENT_ID": "ssbno-statreg-api-dev",
+    "KEYCLOAK_PLAY_CLIENT_ID": "oauth2-proxy-ssbno-statreg-api",
+    "KEYCLOAK_PLAY_TOKEN_AUDIENCE": "oauth2-proxy-ssbno-statreg-api",
     "KEYCLOAK_PLAY_REALM_ISSUER": "https://auth-play.test.ssb.no/realms/ssb",
-    "KEYCLOAK_PLAY_JWKS_URI": "https://auth-play.test.ssb.no/realms/ssb/protocol/openid-connect/certs",
-    "KEYCLOAK_PLAY_TOKEN_AUDIENCE": "account"
-
+    "KEYCLOAK_PLAY_JWKS_URI": "https://auth-play.test.ssb.no/realms/ssb/protocol/openid-connect/certs"
   },
   "ext": "mts,ts",
   "exec": "tsx src/main.ts"

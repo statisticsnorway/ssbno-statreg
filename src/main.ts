@@ -4,7 +4,6 @@ import helmet from 'helmet'
 import swaggerUi from 'swagger-ui-express'
 import YAML from 'yaml'
 import { requireAuth } from '../plugins/authMiddleware'
-import { devMiddleware } from '../plugins/devMiddleware'
 import { startServer } from '../plugins/expressServer'
 import { promBundleMetrics } from '../plugins/promBundle'
 import controllerRouter from './api/core/controllerRouter'
@@ -18,7 +17,6 @@ const app = express()
 
 app.use(helmet())
 app.use(promBundleMetrics)
-app.use(devMiddleware())
 
 const swaggerDocument = YAML.parse(fs.readFileSync('./openapi/openapi.yaml', 'utf8'))
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
