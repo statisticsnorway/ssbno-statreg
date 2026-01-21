@@ -2,7 +2,7 @@ set -e
 
 # Generate p12-file for ssl, see prisma docs: https://www.prisma.io/docs/orm/overview/databases/postgresql#configuring-an-ssl-connection
 # example: openssl pkcs12 -export -out client-identity.p12 -inkey client-key.pem -in client-cert.pem
-
+umask 0777 # Sets file permissions, must be readable
 openssl pkcs12 \
   -export \
   -out /tmp/client-identity.p12 \
