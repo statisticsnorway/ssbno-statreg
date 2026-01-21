@@ -5,7 +5,7 @@ const CONTROLLERS = [statisticsController] as const
 
 const ROUTE_METHODS = ['get', 'post', 'put', 'delete'] as const
 
-function applyDefaultAuth(router: Router, requireAuth: RequestHandler) {
+function applyDefaultAuth(router: Router, requireAuthentication: RequestHandler) {
   for (const method of ROUTE_METHODS) {
     const original = router[method].bind(router)
 
@@ -13,15 +13,15 @@ function applyDefaultAuth(router: Router, requireAuth: RequestHandler) {
       const isPublicRoute = handlers.some((handler) => (handler as any).__skipAuth)
       const routeHandlers = handlers.filter((handler) => !(handler as any).__skipAuth)
 
-      return isPublicRoute ? original(path, ...routeHandlers) : original(path, requireAuth, ...routeHandlers)
+      return isPublicRoute ? original(path, ...routeHandlers) : original(path, requireAuthentication, ...routeHandlers)
     }) as Router[typeof method]
   }
 }
 
-export default function controllerRouter(requireAuth: RequestHandler) {
+export default function controllerRouter(requireAuthentication: RequestHandler) {
   const router = Router()
 
-  applyDefaultAuth(router, requireAuth)
+  applyDefaultAuth(router, requireAuthentication)
 
   for (const controller of CONTROLLERS) {
     controller(router)

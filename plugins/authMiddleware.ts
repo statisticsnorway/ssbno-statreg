@@ -62,29 +62,40 @@ export function keycloakAuth(): RequestHandler {
   const audience = isDev ? process.env.KEYCLOAK_PLAY_TOKEN_AUDIENCE : process.env.KEYCLOAK_TOKEN_AUDIENCE
 
   if (!issuer || !jwksUri || !audience) {
-    if (isDev) {
-      console.warn('[auth] Keycloak PLAY configuration missing; auth is skipped in development mode')
-      return skipAuth
-    }
-
-    throw new Error('Missing Keycloak OIDC configuration in production environment')
+    throw new Error('AUTH_ENABLED=true but Keycloak configuration is missing')
   }
 
   return createKeycloakAuthMiddleware(issuer, jwksUri, audience)
 }
 
-export function requireAuth(): RequestHandler {
+export function requireAuthentication(): RequestHandler {
   return process.env.AUTH_ENABLED === 'false' ? skipAuth : keycloakAuth()
 }
 
-export function requireAudience(requiredAudience: string): RequestHandler {
+export function requireUserAuthorization(requiredGroup: string): RequestHandler {
   if (process.env.AUTH_ENABLED === 'false') return skipAuth
 
   return (req, res, next) => {
-    if (!req.auth) return unauthorized(res, 'Not authenticated')
-    if (!hasAudience(req.auth.claims as JWTPayload, requiredAudience)) {
+    if (!req.auth) {
+      return unauthorized(res, 'Not authenticated')
+    }
+
+    const claims = req.auth.claims as JWTPayload & {
+      dapla?: {
+        groups?: string[]
+      }
+    }
+
+    const groups = claims.dapla?.groups
+
+    if (!Array.isArray(groups)) {
+      return forbidden(res, 'Missing authorization groups')
+    }
+
+    if (!groups.includes(requiredGroup)) {
       return forbidden(res, 'Insufficient access')
     }
+
     return next()
   }
 }

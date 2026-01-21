@@ -119,7 +119,7 @@ describe('authMiddleWare', async () => {
     })
   })
 
-  describe('requireAudience', async () => {
+  describe('requireUserAuthorization', async () => {
     const REQUIRED = 'ssbno.developers'
     let res: MockResponse<any>
     let next: ReturnType<typeof mock.fn>
@@ -132,9 +132,9 @@ describe('authMiddleWare', async () => {
     test('bypasses when AUTH_ENABLED=false and calls next()', async () => {
       process.env.AUTH_ENABLED = 'false'
 
-      const { requireAudience } = await import('../plugins/authMiddleware')
+      const { requireUserAuthorization } = await import('../plugins/authMiddleware')
 
-      const handler = requireAudience(REQUIRED)
+      const handler = requireUserAuthorization(REQUIRED)
       const req = httpMocks.createRequest()
 
       await handler(req, res, next as any)
@@ -145,9 +145,9 @@ describe('authMiddleWare', async () => {
     test('returns 401 when not authenticated', async () => {
       process.env.AUTH_ENABLED = 'true'
 
-      const { requireAudience } = await import('../plugins/authMiddleware')
+      const { requireUserAuthorization } = await import('../plugins/authMiddleware')
 
-      const handler = requireAudience(REQUIRED)
+      const handler = requireUserAuthorization(REQUIRED)
       const req = httpMocks.createRequest()
 
       await handler(req, res, next as any)
@@ -160,9 +160,9 @@ describe('authMiddleWare', async () => {
     test('returns 403 when audience is missing', async () => {
       process.env.AUTH_ENABLED = 'true'
 
-      const { requireAudience } = await import('../plugins/authMiddleware')
+      const { requireUserAuthorization } = await import('../plugins/authMiddleware')
 
-      const handler = requireAudience(REQUIRED)
+      const handler = requireUserAuthorization(REQUIRED)
       const req = httpMocks.createRequest()
       req.auth = { claims: { aud: 'another-api' } }
 
@@ -176,9 +176,9 @@ describe('authMiddleWare', async () => {
     test('calls next when audience matches', async () => {
       process.env.AUTH_ENABLED = 'true'
 
-      const { requireAudience } = await import('../plugins/authMiddleware')
+      const { requireUserAuthorization } = await import('../plugins/authMiddleware')
 
-      const handler = requireAudience(REQUIRED)
+      const handler = requireUserAuthorization(REQUIRED)
       const req = httpMocks.createRequest()
       req.auth = { claims: { aud: REQUIRED } }
 

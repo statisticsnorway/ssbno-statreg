@@ -3,7 +3,7 @@ import express, { Request, Response } from 'express'
 import helmet from 'helmet'
 import swaggerUi from 'swagger-ui-express'
 import YAML from 'yaml'
-import { requireAuth } from '../plugins/authMiddleware'
+import { requireAuthentication } from '../plugins/authMiddleware'
 import { startServer } from '../plugins/expressServer'
 import { promBundleMetrics } from '../plugins/promBundle'
 import controllerRouter from './api/core/controllerRouter'
@@ -12,17 +12,13 @@ import { initializeDepartments } from './services/klassService'
 import * as dotenv from 'dotenv'
 
 dotenv.config()
-const auth = requireAuth()
+const auth = requireAuthentication()
 const app = express()
-
 app.use(helmet())
 app.use(promBundleMetrics)
-
 const swaggerDocument = YAML.parse(fs.readFileSync('./openapi/openapi.yaml', 'utf8'))
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
-
 app.get('/', (_: Request, res: Response) => res.send('STATREG-API-V1'))
-
 app.get('/auth/me', auth, (req, res) => {
   res.json({
     claims: req.auth?.claims,
@@ -31,7 +27,6 @@ app.get('/auth/me', auth, (req, res) => {
   })
 })
 app.use(controllerRouter(auth))
-
 await prisma.$connect()
 initializeDepartments()
 startServer(app, prisma)
