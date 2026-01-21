@@ -35,7 +35,7 @@ RUN npm prune --production
 
 COPY run.sh /app/run.sh
 RUN chmod +x /app/run.sh
-RUN chmod a+w /tmp/
+RUN chmod a+w /tmp
 
 # Expose the ports your application will use
 EXPOSE 9000
