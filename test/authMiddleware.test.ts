@@ -2,14 +2,14 @@ import { test, beforeEach, afterEach, describe, mock } from 'node:test'
 import assert from 'node:assert/strict'
 import httpMocks, { createResponse, MockResponse } from 'node-mocks-http'
 
-describe('authMiddleWare', async () => {
+describe('authMiddleWare', () => {
   const OLD_ENV = { ...process.env }
 
   afterEach(() => {
     process.env = { ...OLD_ENV }
   })
 
-  describe('unauthorized', async () => {
+  describe('unauthorized', () => {
     test('set correct message and status', async () => {
       const { unauthorized } = await import('../plugins/authMiddleware')
 
@@ -20,7 +20,7 @@ describe('authMiddleWare', async () => {
     })
   })
 
-  describe('forbidden', async () => {
+  describe('forbidden', () => {
     test('set correct message and status', async () => {
       const { forbidden } = await import('../plugins/authMiddleware')
 
@@ -31,61 +31,67 @@ describe('authMiddleWare', async () => {
     })
   })
 
-  describe('getBearerToken', async () => {
+  describe('getBearerToken', () => {
     test('returns token if given Bearer authorization header', async () => {
       const { getBearerToken } = await import('../plugins/authMiddleware')
 
-      const token = getBearerToken(httpMocks.createRequest({ headers: { authorization: 'Bearer myBearerTokenValue' } }))
+      const token = getBearerToken(
+        httpMocks.createRequest({
+          headers: { authorization: 'Bearer myBearerTokenValue' },
+        })
+      )
+
       assert.equal(token, 'myBearerTokenValue')
     })
 
     test('returns null when missing authorization header', async () => {
       const { getBearerToken } = await import('../plugins/authMiddleware')
 
-      const token = getBearerToken(httpMocks.createRequest({ headers: {} }))
+      const token = getBearerToken(httpMocks.createRequest())
       assert.equal(token, null)
     })
 
     test('returns null when authorization header not starting with "Bearer "', async () => {
       const { getBearerToken } = await import('../plugins/authMiddleware')
 
-      const token = getBearerToken(httpMocks.createRequest({ headers: { authorization: 'myBearerTokenValue' } }))
+      const token = getBearerToken(
+        httpMocks.createRequest({
+          headers: { authorization: 'myBearerTokenValue' },
+        })
+      )
+
       assert.equal(token, null)
     })
   })
 
-  describe('hasAudience', async () => {
+  describe('hasAudience', () => {
     test('returns true if token claims has required aud (string)', async () => {
       const { hasAudience } = await import('../plugins/authMiddleware')
 
-      const response = hasAudience({ aud: 'ssbno.developers' }, 'ssbno.developers')
-      assert.equal(response, true)
+      assert.equal(hasAudience({ aud: 'ssbno.developers' }, 'ssbno.developers'), true)
     })
 
     test('returns true if token claims has required aud (array)', async () => {
       const { hasAudience } = await import('../plugins/authMiddleware')
 
-      const response = hasAudience({ aud: ['ssbno.developers', 'ssb'] }, 'ssbno.developers')
-      assert.equal(response, true)
+      assert.equal(hasAudience({ aud: ['ssbno.developers', 'ssb'] }, 'ssbno.developers'), true)
     })
 
     test('returns false if token claims is missing aud', async () => {
       const { hasAudience } = await import('../plugins/authMiddleware')
 
-      const response = hasAudience({}, 'ssbno.developers')
-      assert.equal(response, false)
+      assert.equal(hasAudience({}, 'ssbno.developers'), false)
     })
 
     test('returns false if token claims is missing required aud', async () => {
       const { hasAudience } = await import('../plugins/authMiddleware')
 
-      const response = hasAudience({ aud: 'ssbno.developers' }, 'ssbno.users')
-      assert.equal(response, false)
+      assert.equal(hasAudience({ aud: 'ssbno.developers' }, 'ssbno.users'), false)
     })
   })
 
   describe('keycloakAuth', () => {
-    test('returns skipAuth in dev when env vars are missing', async () => {
+    test('throws when AUTH_ENABLED=true and dev env vars are missing', async () => {
       process.env.NODE_ENV = 'development'
       process.env.AUTH_ENABLED = 'true'
 
@@ -95,17 +101,10 @@ describe('authMiddleWare', async () => {
 
       const { keycloakAuth } = await import('../plugins/authMiddleware')
 
-      const handler = keycloakAuth()
-      const req = httpMocks.createRequest()
-      const res = createResponse()
-      const next = mock.fn()
-
-      await handler(req, res, next as any)
-
-      assert.equal(next.mock.callCount(), 1)
+      assert.throws(() => keycloakAuth(), /Keycloak configuration is missing/)
     })
 
-    test('throws in production when env vars are missing', async () => {
+    test('throws when AUTH_ENABLED=true and prod env vars are missing', async () => {
       process.env.NODE_ENV = 'production'
       process.env.AUTH_ENABLED = 'true'
 
@@ -115,12 +114,12 @@ describe('authMiddleWare', async () => {
 
       const { keycloakAuth } = await import('../plugins/authMiddleware')
 
-      assert.throws(() => keycloakAuth(), /Missing Keycloak OIDC configuration/)
+      assert.throws(() => keycloakAuth(), /Keycloak configuration is missing/)
     })
   })
 
-  describe('requireUserAuthorization', async () => {
-    const REQUIRED = 'ssbno.developers'
+  describe('requireUserAuthorization', () => {
+    const REQUIRED_GROUP = 'ssbno-developers'
     let res: MockResponse<any>
     let next: ReturnType<typeof mock.fn>
 
@@ -134,7 +133,7 @@ describe('authMiddleWare', async () => {
 
       const { requireUserAuthorization } = await import('../plugins/authMiddleware')
 
-      const handler = requireUserAuthorization(REQUIRED)
+      const handler = requireUserAuthorization(REQUIRED_GROUP)
       const req = httpMocks.createRequest()
 
       await handler(req, res, next as any)
@@ -147,7 +146,7 @@ describe('authMiddleWare', async () => {
 
       const { requireUserAuthorization } = await import('../plugins/authMiddleware')
 
-      const handler = requireUserAuthorization(REQUIRED)
+      const handler = requireUserAuthorization(REQUIRED_GROUP)
       const req = httpMocks.createRequest()
 
       await handler(req, res, next as any)
@@ -157,14 +156,37 @@ describe('authMiddleWare', async () => {
       assert.equal(next.mock.callCount(), 0)
     })
 
-    test('returns 403 when audience is missing', async () => {
+    test('returns 403 when dapla.groups is missing', async () => {
       process.env.AUTH_ENABLED = 'true'
 
       const { requireUserAuthorization } = await import('../plugins/authMiddleware')
 
-      const handler = requireUserAuthorization(REQUIRED)
+      const handler = requireUserAuthorization(REQUIRED_GROUP)
       const req = httpMocks.createRequest()
-      req.auth = { claims: { aud: 'another-api' } }
+      req.auth = { claims: {} }
+
+      await handler(req, res, next as any)
+
+      assert.equal(res.statusCode, 403)
+      assert.equal(res._getJSONData().error, 'Missing authorization groups')
+      assert.equal(next.mock.callCount(), 0)
+    })
+
+    test('returns 403 when required group is not present', async () => {
+      process.env.AUTH_ENABLED = 'true'
+
+      const { requireUserAuthorization } = await import('../plugins/authMiddleware')
+
+      const handler = requireUserAuthorization(REQUIRED_GROUP)
+      const req = httpMocks.createRequest()
+
+      req.auth = {
+        claims: {
+          dapla: {
+            groups: ['other-group'],
+          },
+        },
+      }
 
       await handler(req, res, next as any)
 
@@ -173,14 +195,21 @@ describe('authMiddleWare', async () => {
       assert.equal(next.mock.callCount(), 0)
     })
 
-    test('calls next when audience matches', async () => {
+    test('calls next when required group exists', async () => {
       process.env.AUTH_ENABLED = 'true'
 
       const { requireUserAuthorization } = await import('../plugins/authMiddleware')
 
-      const handler = requireUserAuthorization(REQUIRED)
+      const handler = requireUserAuthorization(REQUIRED_GROUP)
       const req = httpMocks.createRequest()
-      req.auth = { claims: { aud: REQUIRED } }
+
+      req.auth = {
+        claims: {
+          dapla: {
+            groups: ['ssbno-developers', 'another-group'],
+          },
+        },
+      }
 
       await handler(req, res, next as any)
 
