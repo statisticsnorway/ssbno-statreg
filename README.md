@@ -23,7 +23,7 @@ If new migrations: `npm db:deploy`
 
 Then run
 ```
-npm run dev
+npm run dev 
 ```
 
 Go to http://localhost:8080 to see results.
@@ -92,3 +92,15 @@ There are many fun pitfalls and ways of messing up both your local db and produc
 
 For local development, we can use a file named ".env" located in the root directory of the project. Currently we only use one environment variable from this file - see prisma.config.ts - and it should look something like this:  
 `NAIS_DATABASE_MYAPP_MYDB_URL="postgresql://<USERNAME>@localhost:5432/statreg_db"`
+
+
+### Local dev (with real user token from keycloak) 
+docker-compose up
+docker compose down -v
+User must variables in .env (required):
+KEYCLOAK_PLAY_CLIENT_ID=oauth2-proxy-ssbno-statreg-api
+KEYCLOAK_PLAY_CLIENT_SECRET= (this password is only for devs and stored in gcp secret manager) 
+KEYCLOAK_PLAY_WELL_KNOWN_URL=https://auth-play.test.ssb.no/realms/ssb/.well-known/openid-configuration
+documentation : https://statistics-norway.atlassian.net/wiki/spaces/mimir/pages/edit-v2/5222957098?draftShareId=bc3d3c53-dc4b-46d0-bec4-45b9ad7b6d61
+
+
