@@ -6,9 +6,8 @@ openssl pkcs12 \
   -export \
   -out /tmp/client-identity.p12 \
   -inkey "$NAIS_DATABASE_SSBNO_STATREG_API_STATREG_DB_SSLKEY" \
-  -legacy\
   -in "$NAIS_DATABASE_SSBNO_STATREG_API_STATREG_DB_SSLCERT" \
-  -passout pass:"$SSBNO_STATREG_API_SSL_PASSWORD"
+  -password pass:"$SSBNO_STATREG_API_SSL_PASSWORD"
 
 chmod 644 /tmp/client-identity.p12
 
