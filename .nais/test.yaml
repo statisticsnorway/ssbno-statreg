@@ -43,6 +43,9 @@ spec:
       excludePaths:
         - /docs
 
+  postgres:
+    clusterName: statreg-api-test-db
+
   gcp:
       sqlInstances:
         - type: POSTGRES_17

@@ -1,11 +1,13 @@
 import { Router, type RequestHandler } from 'express'
 import statisticsController from '@/api/controllers/statisticsController'
+import releasesController from '../controllers/releasesController'
+import calendarController from '../controllers/calendarController'
 
-const CONTROLLERS = [statisticsController] as const
+const CONTROLLERS = [statisticsController, releasesController, calendarController]
 
 const ROUTE_METHODS = ['get', 'post', 'put', 'delete'] as const
 
-function applyDefaultAuth(router: Router, requireAuth: RequestHandler) {
+function applyAuthByDefult(router: Router, requireAuth: RequestHandler) {
   for (const method of ROUTE_METHODS) {
     const original = router[method].bind(router)
 
@@ -18,12 +20,16 @@ function applyDefaultAuth(router: Router, requireAuth: RequestHandler) {
   }
 }
 
-export default function controllerRouter(requireAuth: RequestHandler) {
+export default function controllerRouter(
+  requireAuth: RequestHandler,
+  // eslint-disable-next-line no-unused-vars
+  controllers: ReadonlyArray<(router: Router) => void> = CONTROLLERS
+) {
   const router = Router()
 
-  applyDefaultAuth(router, requireAuth)
+  applyAuthByDefult(router, requireAuth)
 
-  for (const controller of CONTROLLERS) {
+  for (const controller of controllers) {
     controller(router)
   }
 

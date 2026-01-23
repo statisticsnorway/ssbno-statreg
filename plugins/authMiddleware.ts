@@ -1,23 +1,35 @@
 import type { Request, Response, NextFunction, RequestHandler } from 'express'
 import { createRemoteJWKSet, jwtVerify, type JWTPayload } from 'jose'
 
-const AUTH_ENABLED = process.env.AUTH_ENABLED !== 'false'
+export let AUTH_ENABLED = process.env.AUTH_ENABLED !== 'false'
 
-function unauthorized(res: Response, message: string) {
+export function setAuthEnabled(enabled: boolean) {
+  AUTH_ENABLED = enabled
+}
+
+export function unauthorized(res: Response, message: string) {
   return res.status(401).json({ error: message })
 }
 
-function forbidden(res: Response, message: string) {
+export function forbidden(res: Response, message: string) {
   return res.status(403).json({ error: message })
 }
 
-function getBearerToken(req: Request): string | null {
-  const auth = req.headers.authorization
-  if (!auth?.startsWith('Bearer ')) return null
-  return auth.slice('Bearer '.length).trim()
+export function getBearerToken(req: Request): string | null {
+  const auth = req.header('authorization')
+  if (!auth) return null
+
+  const firstSpaceIndex = auth.indexOf(' ')
+  if (firstSpaceIndex < 0) return null
+
+  const scheme = auth.slice(0, firstSpaceIndex).toLowerCase()
+  if (scheme !== 'bearer') return null
+
+  const token = auth.slice(firstSpaceIndex + 1).trim()
+  return token
 }
 
-function hasAudience(claims: JWTPayload, required: string): boolean {
+export function hasAudience(claims: JWTPayload, required: string): boolean {
   const aud = claims.aud
   if (typeof aud === 'string') return aud === required
   if (Array.isArray(aud)) return aud.includes(required)
@@ -27,7 +39,29 @@ function hasAudience(claims: JWTPayload, required: string): boolean {
 export const skipAuth: RequestHandler = (_req, _res, next) => next()
 ;(skipAuth as any).__skipAuth = true
 
-function keycloakJwtAuth(): RequestHandler {
+// eslint-disable-next-line no-unused-vars
+export type VerifyJwt = (token: string) => Promise<JWTPayload>
+
+export function makeKeycloakJwtAuth(verifyJwt: VerifyJwt): RequestHandler {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    const token = getBearerToken(req)
+    if (!token) return unauthorized(res, 'Missing Bearer token')
+
+    try {
+      const payload = await verifyJwt(token)
+      req.auth = {
+        claims: payload,
+        username: typeof payload.preferred_username === 'string' ? payload.preferred_username : undefined,
+        email: typeof payload.email === 'string' ? payload.email : undefined,
+      }
+      return next()
+    } catch {
+      return unauthorized(res, 'Invalid or expired token')
+    }
+  }
+}
+
+export function keycloakJwtAuth(): RequestHandler {
   const issuer = process.env.KEYCLOAK_REALM_ISSUER
   const jwksUri = process.env.KEYCLOAK_JWKS_URI
   const audience = process.env.KEYCLOAK_TOKEN_AUDIENCE
@@ -40,27 +74,16 @@ function keycloakJwtAuth(): RequestHandler {
 
   const JWKS = createRemoteJWKSet(new URL(jwksUri))
 
-  return async (req: Request, res: Response, next: NextFunction) => {
-    const token = getBearerToken(req)
-    if (!token) return unauthorized(res, 'Missing Bearer token')
-
-    try {
-      const { payload } = await jwtVerify(token, JWKS, {
-        issuer,
-        audience,
-        algorithms: ['RS256'],
-      })
-      // claims might need to be removed later - as it might not be needed in the future
-      req.auth = {
-        claims: payload,
-        username: typeof payload.preferred_username === 'string' ? payload.preferred_username : undefined,
-        email: typeof payload.email === 'string' ? payload.email : undefined,
-      }
-      return next()
-    } catch {
-      return unauthorized(res, 'Invalid or expired token')
-    }
+  const verifyJwt: VerifyJwt = async (token: string) => {
+    const { payload } = await jwtVerify(token, JWKS, {
+      issuer,
+      audience,
+      algorithms: ['RS256'],
+    })
+    return payload
   }
+
+  return makeKeycloakJwtAuth(verifyJwt)
 }
 
 export function requireAuth(): RequestHandler {

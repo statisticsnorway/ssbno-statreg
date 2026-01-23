@@ -14,21 +14,21 @@ jobs:
       contents: read
       id-token: write
     steps:
-    - uses: actions/checkout@v5
-    - name: Build and push image and SBOM to OCI registry
-      uses: nais/docker-build-push@v0
-      id: docker-build-push
-      with:
-        team: ssbno
-        tag: latest
-        identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
-        project_id: ${{ secrets.NAIS_MANAGEMENT_PROJECT_ID }}
-    - name: Deploy to Nais
-      uses: nais/deploy/actions/deploy@v2
-      env:
-        TEAM: ssbno
-        CLUSTER: test 
-        RESOURCE: .nais/test.yaml
-        VAR: image=${{ steps.docker-build-push.outputs.image }}
-        TELEMETRY: ${{ steps.docker-build-push.outputs.telemetry }}
-        DEPLOY_SERVER: deploy.ssb.cloud.nais.io:443
+      - uses: actions/checkout@v5
+      - name: Build and push image and SBOM to OCI registry
+        uses: nais/docker-build-push@v0
+        id: docker-build-push
+        with:
+          team: ssbno
+          tag: latest
+          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
+          project_id: ${{ secrets.NAIS_MANAGEMENT_PROJECT_ID }}
+      - name: Deploy to Nais
+        uses: nais/deploy/actions/deploy@v2
+        env:
+          TEAM: ssbno
+          CLUSTER: test
+          RESOURCE: .nais/test-postgres.yaml, .nais/test.yaml
+          VAR: image=${{ steps.docker-build-push.outputs.image }}
+          TELEMETRY: ${{ steps.docker-build-push.outputs.telemetry }}
+          DEPLOY_SERVER: deploy.ssb.cloud.nais.io:443
