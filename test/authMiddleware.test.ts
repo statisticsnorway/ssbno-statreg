@@ -64,37 +64,8 @@ describe('authMiddleWare', () => {
     })
   })
 
-  describe('hasAudience', () => {
-    test('returns true if token claims has required aud (string)', async () => {
-      const { hasAudience } = await import('../plugins/authMiddleware')
-
-      assert.equal(hasAudience({ aud: 'ssbno.developers' }, 'ssbno.developers'), true)
-    })
-
-    test('returns true if token claims has required aud (array)', async () => {
-      const { hasAudience } = await import('../plugins/authMiddleware')
-
-      assert.equal(hasAudience({ aud: ['ssbno.developers', 'ssb'] }, 'ssbno.developers'), true)
-    })
-
-    test('returns false if token claims is missing aud', async () => {
-      const { hasAudience } = await import('../plugins/authMiddleware')
-
-      assert.equal(hasAudience({}, 'ssbno.developers'), false)
-    })
-
-    test('returns false if token claims is missing required aud', async () => {
-      const { hasAudience } = await import('../plugins/authMiddleware')
-
-      assert.equal(hasAudience({ aud: 'ssbno.developers' }, 'ssbno.users'), false)
-    })
-  })
-
   describe('keycloakAuth', () => {
     test('throws when AUTH_ENABLED=true and dev env vars are missing', async () => {
-      process.env.NODE_ENV = 'development'
-      process.env.AUTH_ENABLED = 'true'
-
       delete process.env.KEYCLOAK_PLAY_REALM_ISSUER
       delete process.env.KEYCLOAK_PLAY_JWKS_URI
       delete process.env.KEYCLOAK_PLAY_TOKEN_AUDIENCE
@@ -118,7 +89,7 @@ describe('authMiddleWare', () => {
     })
   })
 
-  describe('requireUserAuthorization', () => {
+  describe('requireUserGroupAuthorization', () => {
     const REQUIRED_GROUP = 'ssbno-developers'
     let res: MockResponse<any>
     let next: ReturnType<typeof mock.fn>
@@ -131,9 +102,9 @@ describe('authMiddleWare', () => {
     test('bypasses when AUTH_ENABLED=false and calls next()', async () => {
       process.env.AUTH_ENABLED = 'false'
 
-      const { requireUserAuthorization } = await import('../plugins/authMiddleware')
+      const { requireUserGroupAuthorization } = await import('../plugins/authMiddleware')
 
-      const handler = requireUserAuthorization(REQUIRED_GROUP)
+      const handler = requireUserGroupAuthorization(REQUIRED_GROUP)
       const req = httpMocks.createRequest()
 
       await handler(req, res, next as any)
@@ -144,9 +115,9 @@ describe('authMiddleWare', () => {
     test('returns 401 when not authenticated', async () => {
       process.env.AUTH_ENABLED = 'true'
 
-      const { requireUserAuthorization } = await import('../plugins/authMiddleware')
+      const { requireUserGroupAuthorization } = await import('../plugins/authMiddleware')
 
-      const handler = requireUserAuthorization(REQUIRED_GROUP)
+      const handler = requireUserGroupAuthorization(REQUIRED_GROUP)
       const req = httpMocks.createRequest()
 
       await handler(req, res, next as any)
@@ -159,9 +130,9 @@ describe('authMiddleWare', () => {
     test('returns 403 when dapla.groups is missing', async () => {
       process.env.AUTH_ENABLED = 'true'
 
-      const { requireUserAuthorization } = await import('../plugins/authMiddleware')
+      const { requireUserGroupAuthorization } = await import('../plugins/authMiddleware')
 
-      const handler = requireUserAuthorization(REQUIRED_GROUP)
+      const handler = requireUserGroupAuthorization(REQUIRED_GROUP)
       const req = httpMocks.createRequest()
       req.auth = { claims: {} }
 
@@ -175,9 +146,9 @@ describe('authMiddleWare', () => {
     test('returns 403 when required group is not present', async () => {
       process.env.AUTH_ENABLED = 'true'
 
-      const { requireUserAuthorization } = await import('../plugins/authMiddleware')
+      const { requireUserGroupAuthorization } = await import('../plugins/authMiddleware')
 
-      const handler = requireUserAuthorization(REQUIRED_GROUP)
+      const handler = requireUserGroupAuthorization(REQUIRED_GROUP)
       const req = httpMocks.createRequest()
 
       req.auth = {
@@ -198,9 +169,9 @@ describe('authMiddleWare', () => {
     test('calls next when required group exists', async () => {
       process.env.AUTH_ENABLED = 'true'
 
-      const { requireUserAuthorization } = await import('../plugins/authMiddleware')
+      const { requireUserGroupAuthorization } = await import('../plugins/authMiddleware')
 
-      const handler = requireUserAuthorization(REQUIRED_GROUP)
+      const handler = requireUserGroupAuthorization(REQUIRED_GROUP)
       const req = httpMocks.createRequest()
 
       req.auth = {

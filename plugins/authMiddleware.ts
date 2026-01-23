@@ -15,13 +15,6 @@ export function getBearerToken(req: Request): string | null {
   return auth.slice('Bearer '.length).trim()
 }
 
-export function hasAudience(claims: JWTPayload, required: string): boolean {
-  const aud = claims.aud
-  if (typeof aud === 'string') return aud === required
-  if (Array.isArray(aud)) return aud.includes(required)
-  return false
-}
-
 export const skipAuth: RequestHandler = (_req, _res, next) => next()
 ;(skipAuth as any).__skipAuth = true
 
@@ -72,7 +65,7 @@ export function requireAuthentication(): RequestHandler {
   return process.env.AUTH_ENABLED === 'false' ? skipAuth : keycloakAuth()
 }
 
-export function requireUserAuthorization(requiredGroup: string): RequestHandler {
+export function requireUserGroupAuthorization(requiredGroup: string): RequestHandler {
   if (process.env.AUTH_ENABLED === 'false') return skipAuth
 
   return (req, res, next) => {
