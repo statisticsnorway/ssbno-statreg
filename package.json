@@ -16,7 +16,7 @@
     "build": "pkgroll",
     "generate": "prisma generate",
     "seed": "prisma db seed",
-    "db:deploy": "npx prisma migrate deploy && npx prisma generate",
+    "db:deploy": "prisma migrate deploy",
     "lint": "eslint '**/*.{js,mjs,cjs,ts}'",
     "lint:fix": "eslint --fix '**/*.{js,mjs,cjs,ts}'",
     "test": "tsx --test 'test/**.test.ts' 'src/**.test.ts'",
