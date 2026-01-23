@@ -18,6 +18,4 @@ export STATREG_DB_URL_CONNECTION_STRING="postgresql://$NAIS_DATABASE_SSBNO_STATR
 npm run db:deploy
 npm run seed
 
-# npx prisma migrate deploy 
-# npx prisma generate
 exec npm run start
