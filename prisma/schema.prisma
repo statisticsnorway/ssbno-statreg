@@ -16,7 +16,7 @@ model Frequency {
 }
 
 model Calender_date {
-  id      Decimal  @id(map: "sys_c0023875") @db.Decimal(19, 0)
+  id      BigInt   @id @default(autoincrement())
   version Decimal  @db.Decimal(19, 0)
   comment String   @db.VarChar(255)
   day     DateTime @db.Timestamp(6)
