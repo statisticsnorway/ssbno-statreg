@@ -707,52 +707,64 @@ async function main() {
   console.log('Created release from seed: \n' + JSON.stringify(release3a, null, 2))
 
   const calendar_date1 = await prisma.calender_date.upsert({
-    where: { id: 11001 },
-    update: {},
+    where: {
+      day: new Date('2026-07-20T00:00:00Z'),
+    },
+    update: {
+      comment: 'Første dag etter feriestengt uke',
+    },
     create: {
-      id: 11001,
       version: 0,
       comment: 'Første dag etter feriestengt uke',
-      day: '2026-07-20T00:00:00Z',
+      day: new Date('2026-07-20T00:00:00Z'),
     },
   })
 
   console.log('Created calendar_date from seed: \n' + JSON.stringify(calendar_date1, null, 2))
 
   const calendar_date2 = await prisma.calender_date.upsert({
-    where: { id: 11002 },
-    update: {},
+    where: {
+      day: new Date('2026-04-22T00:00:00Z'),
+    },
+    update: {
+      comment: 'Første dag etter påske',
+    },
     create: {
-      id: 11002,
       version: 0,
       comment: 'Første dag etter påske',
-      day: '2026-04-22T00:00:00Z',
+      day: new Date('2026-04-22T00:00:00Z'),
     },
   })
 
   console.log('Created calendar_date from seed: \n' + JSON.stringify(calendar_date2, null, 2))
 
   const calendar_date3 = await prisma.calender_date.upsert({
-    where: { id: 11003 },
-    update: {},
+    where: {
+      day: new Date('2026-12-24T00:00:00Z'),
+    },
+    update: {
+      comment: 'Julaften',
+    },
     create: {
-      id: 11003,
       version: 0,
       comment: 'Julaften',
-      day: '2026-12-24T00:00:00Z',
+      day: new Date('2026-12-24T00:00:00Z'),
     },
   })
 
   console.log('Created calendar_date from seed: \n' + JSON.stringify(calendar_date3, null, 2))
 
   const calendar_date4 = await prisma.calender_date.upsert({
-    where: { id: 11004 },
-    update: {},
+    where: {
+      day: new Date('2026-12-31T00:00:00Z'),
+    },
+    update: {
+      comment: 'Nyttårsaften',
+    },
     create: {
-      id: 11004,
       version: 0,
       comment: 'Nyttårsaften',
-      day: '2026-12-31T00:00:00Z',
+      day: new Date('2026-12-31T00:00:00Z'),
     },
   })
 
