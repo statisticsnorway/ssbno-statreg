@@ -188,4 +188,28 @@ describe('authMiddleWare', () => {
       assert.equal(res.statusCode, 200)
     })
   })
+
+  describe('createKeycloakAuthMiddleware (via keycloakAuth)', () => {
+    test('returns 401 when bearer token is missing', async () => {
+      process.env.NODE_ENV = 'production'
+      process.env.AUTH_ENABLED = 'true'
+      process.env.KEYCLOAK_REALM_ISSUER = 'issuer'
+      process.env.KEYCLOAK_JWKS_URI = 'https://jwks'
+      process.env.KEYCLOAK_TOKEN_AUDIENCE = 'audience'
+
+      const { keycloakAuth } = await import('../plugins/authMiddleware')
+
+      const handler = keycloakAuth()
+
+      const req = httpMocks.createRequest()
+      const res = httpMocks.createResponse()
+      const next = mock.fn()
+
+      await handler(req, res, next as any)
+
+      assert.equal(res.statusCode, 401)
+      assert.equal(res._getJSONData().error, 'Missing Bearer token')
+      assert.equal(next.mock.callCount(), 0)
+    })
+  })
 })
