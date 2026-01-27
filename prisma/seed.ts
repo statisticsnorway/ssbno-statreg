@@ -4,12 +4,16 @@ import process from 'node:process'
 
 import { PrismaClient } from '../src/generated/prisma/client.js'
 import { Env } from '../prisma.config.js'
+import * as fs from 'node:fs'
 // import { connect } from 'node:http2'
 
 const adapter = new PrismaPg({
   connectionString: env<Env>('STATREG_DB_URL_CONNECTION_STRING'),
   ssl: {
     rejectUnauthorized: false,
+    ca: fs.readFileSync('/var/run/secrets/nais.io/sqlcertificate/root-cert.pem').toString(),
+    key: fs.readFileSync('/var/run/secrets/nais.io/sqlcertificate/key.pem').toString(),
+    cert: fs.readFileSync('/var/run/secrets/nais.io/sqlcertificate/cert.pem').toString(),
   },
 })
 
