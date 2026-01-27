@@ -8,10 +8,7 @@ FROM node:24-alpine
 
 RUN apk add \
     openssl \
-    bash \
-    # TODO: MAYBE REMOVE VIM
-    vim 
-
+    bash
 
 # Set the working directory
 WORKDIR /app
