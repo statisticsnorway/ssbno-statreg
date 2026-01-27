@@ -8,7 +8,7 @@ Statreg API is a backend service for statistikkregisteret. It provides endpoints
 * Install a postgresql database (see [Database](#Database))
 * Start the database application and "initialize databases" (or similar)
 * Create an .env file in repo root and set database connection string on the form:
-`NAIS_DATABASE_SSBNO_STATREG_API_STATREG_DB_URL="postgresql://<USERNAME>@localhost:5432/statreg_db"`
+`PGURL="postgresql://<USERNAME>@localhost:5432/statreg_db"`
 
 ### First run, database baseline setup
 ```
