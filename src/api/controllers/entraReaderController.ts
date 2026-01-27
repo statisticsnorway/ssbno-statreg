@@ -4,6 +4,7 @@ import { skipAuth } from 'plugins/authMiddleware'
 
 export default function entraReaderController(router: Router) {
   router.get('/entra/users/:email', skipAuth, async (req, res) => {
+    //remeber to remove skipAuth and add requireUserAuthentication
     const user = await fetchUserByEmail(req.params.email)
 
     if (!user) {
