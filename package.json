@@ -12,7 +12,7 @@
   },
   "scripts": {
     "dev": "nodemon --config nodemon.json",
-    "start": "node dist/main.js",
+    "start": "node dist/main.js --use-system-ca",
     "build": "pkgroll",
     "generate": "prisma generate",
     "seed": "prisma db seed",
