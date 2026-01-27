@@ -7,7 +7,7 @@ import { Env } from '../prisma.config.js'
 // import { connect } from 'node:http2'
 
 const adapter = new PrismaPg({
-  connectionString: env<Env>('NAIS_DATABASE_SSBNO_STATREG_API_STATREG_DB_URL'),
+  connectionString: env<Env>('PGURL'),
 })
 
 const prisma = await new PrismaClient({ adapter })
