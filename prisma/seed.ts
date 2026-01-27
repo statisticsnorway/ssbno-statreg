@@ -8,9 +8,12 @@ import { Env } from '../prisma.config.js'
 
 const adapter = new PrismaPg({
   connectionString: env<Env>('STATREG_DB_URL_CONNECTION_STRING'),
+  ssl: {
+    rejectUnauthorized: false,
+  },
 })
 
-const prisma = await new PrismaClient({ adapter })
+const prisma = new PrismaClient({ adapter })
 
 async function main() {
   const freq1 = await prisma.frequency.upsert({
