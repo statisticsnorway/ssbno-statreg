@@ -66,9 +66,9 @@ describe('authMiddleWare', () => {
 
   describe('keycloakAuth', () => {
     test('throws when AUTH_ENABLED=true and dev env vars are missing', async () => {
-      delete process.env.KEYCLOAK_PLAY_REALM_ISSUER
-      delete process.env.KEYCLOAK_PLAY_JWKS_URI
-      delete process.env.KEYCLOAK_PLAY_TOKEN_AUDIENCE
+      delete process.env.KEYCLOAK_REALM_ISSUER
+      delete process.env.KEYCLOAK_JWKS_URI
+      delete process.env.KEYCLOAK_TOKEN_AUDIENCE
 
       const { keycloakAuth } = await import('../plugins/authMiddleware')
 

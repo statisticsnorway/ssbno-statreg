@@ -46,13 +46,11 @@ export function createKeycloakAuthMiddleware(issuer: string, jwksUri: string, au
 }
 
 export function keycloakAuth(): RequestHandler {
-  const isDev = process.env.NODE_ENV === 'development'
+  const issuer = process.env.KEYCLOAK_REALM_ISSUER
 
-  const issuer = isDev ? process.env.KEYCLOAK_PLAY_REALM_ISSUER : process.env.KEYCLOAK_REALM_ISSUER
+  const jwksUri = process.env.KEYCLOAK_JWKS_URI
 
-  const jwksUri = isDev ? process.env.KEYCLOAK_PLAY_JWKS_URI : process.env.KEYCLOAK_JWKS_URI
-
-  const audience = isDev ? process.env.KEYCLOAK_PLAY_TOKEN_AUDIENCE : process.env.KEYCLOAK_TOKEN_AUDIENCE
+  const audience = process.env.KEYCLOAK_TOKEN_AUDIENCE
 
   if (!issuer || !jwksUri || !audience) {
     throw new Error('AUTH_ENABLED=true but Keycloak configuration is missing')

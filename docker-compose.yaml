@@ -27,9 +27,9 @@ services:
     ports:
       - "8080:8080"
     command: >
-      --openid.client-id=${KEYCLOAK_PLAY_CLIENT_ID}
-      --openid.client-secret=${KEYCLOAK_PLAY_CLIENT_SECRET}
-      --openid.well-known-url=${KEYCLOAK_PLAY_WELL_KNOWN_URL}
+      --openid.client-id=${KEYCLOAK_CLIENT_ID}
+      --openid.client-secret=${KEYCLOAK_CLIENT_SECRET}
+      --openid.well-known-url=${KEYCLOAK_WELL_KNOWN_URL}
       --ingress=http://localhost:8080
       --bind-address=0.0.0.0:8080
       --upstream-host=app:8080

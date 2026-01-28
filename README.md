@@ -3,6 +3,7 @@
 Statreg API is a backend service for statistikkregisteret. It provides endpoints for fetching and managing statistics and publications, amongst other things.
 
 ## DEV
+AUTH_ENABLED can be configured in nodemon.json
 
 ### Prerequests
 * Install a postgresql database (see [Database](#Database))
@@ -95,13 +96,15 @@ For local development, we can use a file named ".env" located in the root direct
 
 
 ### Local dev (with real user token from keycloak) 
+AUTH_ENABLED can be configured in nodemon.json
+
 docker-compose up
 docker compose down -v
 
 User must variables in .env (required):
-KEYCLOAK_PLAY_CLIENT_ID=oauth2-proxy-ssbno-statreg-api
-KEYCLOAK_PLAY_CLIENT_SECRET= (this password is only for devs and stored in gcp secret manager) 
-KEYCLOAK_PLAY_WELL_KNOWN_URL=https://auth-play.test.ssb.no/realms/ssb/.well-known/openid-configuration
+KEYCLOAK_CLIENT_ID=oauth2-proxy-ssbno-statreg-api
+KEYCLOAK_CLIENT_SECRET= (this password is only for devs and stored in gcp secret manager) 
+KEYCLOAK_WELL_KNOWN_URL=https://auth-play.test.ssb.no/realms/ssb/.well-known/openid-configuration
 
 Password stored in GCP: https://console.cloud.google.com/security/secret-manager?project=ssbno-t-lf
 Technical Documentation: https://statistics-norway.atlassian.net/wiki/spaces/mimir/pages/edit-v2/5222957098?draftShareId=bc3d3c53-dc4b-46d0-bec4-45b9ad7b6d61
