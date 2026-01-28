@@ -15,7 +15,7 @@ chmod 644 /tmp/client-identity.p12
 # example: postgresql://USER:PASSWORD@HOST:PORT/DATABASE?sslidentity=client-identity.p12&sslpassword=mypassword&sslcert=rootca.cert
 export STATREG_DB_URL_CONNECTION_STRING="postgresql://$NAIS_DATABASE_SSBNO_STATREG_API_STATREG_DB_USERNAME:$NAIS_DATABASE_SSBNO_STATREG_API_STATREG_DB_PASSWORD@$NAIS_DATABASE_SSBNO_STATREG_API_STATREG_DB_HOST:$NAIS_DATABASE_SSBNO_STATREG_API_STATREG_DB_PORT/$NAIS_DATABASE_SSBNO_STATREG_API_STATREG_DB_DATABASE?sslidentity=/tmp/client-identity.p12&sslpassword=$SSBNO_STATREG_API_SSL_PASSWORD&sslcert=$NAIS_DATABASE_SSBNO_STATREG_API_STATREG_DB_SSLROOTCERT&sslmode=require"
 
-# npm run db:deploy
-# npm run seed
+npm run db:deploy
+npm run seed
 
 exec npm run start
