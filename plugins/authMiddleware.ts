@@ -18,7 +18,7 @@ export function getBearerToken(req: Request): string | null {
 export const skipAuth: RequestHandler = (_req, _res, next) => next()
 ;(skipAuth as any).__skipAuth = true
 
-function createKeycloakAuthMiddleware(issuer: string, jwksUri: string, audience: string): RequestHandler {
+export function createKeycloakAuthMiddleware(issuer: string, jwksUri: string, audience: string): RequestHandler {
   const JWKS = createRemoteJWKSet(new URL(jwksUri))
 
   return async (req: Request, res: Response, next: NextFunction) => {
