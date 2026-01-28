@@ -7,10 +7,10 @@ import * as fs from 'node:fs'
 const adapter = new PrismaPg({
   connectionString: process.env.STATREG_DB_URL_CONNECTION_STRING!,
   ssl: {
-    rejectUnauthorized: false,
-    ca: fs.readFileSync('/var/run/secrets/nais.io/sqlcertificate/root-cert.pem').toString(),
-    key: fs.readFileSync('/var/run/secrets/nais.io/sqlcertificate/key.pem').toString(),
-    cert: fs.readFileSync('/var/run/secrets/nais.io/sqlcertificate/cert.pem').toString(),
+    rejectUnauthorized: true,
+    ca: fs.readFileSync('/var/run/secrets/nais.io/sqlcertificate/root-cert.pem', 'utf8'),
+    key: fs.readFileSync('/var/run/secrets/nais.io/sqlcertificate/key.pem', 'utf8'),
+    cert: fs.readFileSync('/var/run/secrets/nais.io/sqlcertificate/cert.pem', 'utf-8'),
   },
 })
 
