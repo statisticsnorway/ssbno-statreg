@@ -68,10 +68,10 @@ async function getAccessToken(): Promise<string> {
   return cachedToken
 }
 
-export async function fetchUserByEmail(initialsOrEmail: string): Promise<EntraUser | null> {
+export async function fetchUserByEmail(initials: string): Promise<EntraUser | null> {
   const token = await getAccessToken()
 
-  const email = initialsOrEmail.includes('@') ? initialsOrEmail : `${initialsOrEmail}@${USER_DOMAIN}`
+  const email = `${initials}@${USER_DOMAIN}`
 
   const response = await fetch(
     `${GRAPH_BASE_URL}/users/${encodeURIComponent(email)}?$select=displayName,businessPhones,mail,userPrincipalName`,

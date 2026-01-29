@@ -96,7 +96,7 @@ For local development, we can use a file named ".env" located in the root direct
 ### Entra Reader 
 Connecteds to Azure entra ID via a new app resource that uses Oauth to authenticate
 We are able to read user info and get back, name and phone number and email, via endpoint for human and nonhuman users 
-the endpoint supports both full email or just email initals.
+the endpoint supports email initals as input.
 Works based on provision of:
 ENTRA_READER_AZURE_TENANT_ID
 ENTRA_READER_AZURE_CLIENT_ID
