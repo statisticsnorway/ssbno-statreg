@@ -100,6 +100,6 @@ http://localhost:8080/entra/users/...@ssb.no as logn as we use a valid ssb.no em
 this only works localy after adding  after adding, theese secrets to the .env
 ENTRA_READER_AZURE_TENANT_ID
 ENTRA_READER_AZURE_CLIENT_ID
-ENTRA_READER_AZURE_CLIENT_SECRET
+ENTRA_READER_AZURE_CLIENT_SECRET - stored in https://console.cloud.google.com/security/secret-manager/secret/ENTRA_READER_AZURE_CLIENT_SECRET/versions?project=ssbno-t-lf
 
 in test and production the variables will be supplied trough nais secret manager (envFrom - secret: statreg-api-secrets)
