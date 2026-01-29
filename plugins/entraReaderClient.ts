@@ -1,7 +1,7 @@
-// plugins/entraReaderClient.ts
 import { URLSearchParams } from 'node:url'
 
 const GRAPH_BASE_URL = 'https://graph.microsoft.com/v1.0'
+const USER_DOMAIN = 'ssb.no'
 
 type TokenResponse = {
   access_token: string
@@ -68,8 +68,10 @@ async function getAccessToken(): Promise<string> {
   return cachedToken
 }
 
-export async function fetchUserByEmail(email: string): Promise<EntraUser | null> {
+export async function fetchUserByEmail(initialsOrEmail: string): Promise<EntraUser | null> {
   const token = await getAccessToken()
+
+  const email = initialsOrEmail.includes('@') ? initialsOrEmail : `${initialsOrEmail}@${USER_DOMAIN}`
 
   const response = await fetch(
     `${GRAPH_BASE_URL}/users/${encodeURIComponent(email)}?$select=displayName,businessPhones,mail,userPrincipalName`,

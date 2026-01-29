@@ -94,14 +94,16 @@ For local development, we can use a file named ".env" located in the root direct
 `NAIS_DATABASE_MYAPP_MYDB_URL="postgresql://<USERNAME>@localhost:5432/statreg_db"`
 
 ### Entra Reader 
-Connecteds to Azure entr ID via a new app resource that uses Oauth to authenticate
-We are able to read user info and get back, name and phone number via endpoint
-http://localhost:8080/entra/users/...@ssb.no as logn as we use a valid ssb.no email in the query we get back the info.
-this only works localy after adding  after adding, theese secrets to the .env
+Connecteds to Azure entra ID via a new app resource that uses Oauth to authenticate
+We are able to read user info and get back, name and phone number and email, via endpoint for human and nonhuman users 
+the endpoint supports both full email or just email initals.
+Works based on provision of:
 ENTRA_READER_AZURE_TENANT_ID
 ENTRA_READER_AZURE_CLIENT_ID
 ENTRA_READER_AZURE_CLIENT_SECRET - stored in https://console.cloud.google.com/security/secret-manager/secret/ENTRA_READER_AZURE_CLIENT_SECRET/versions?project=ssbno-t-lf
-
 The other variables can be found here - https://portal.azure.com/?l=en.en-us#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/Overview/appId/f20f3383-d147-4039-a95b-6370cc94723b/isMSAApp~/false
-
+Single or multiple users:
+GET /entra/users/iii
+GET /entra/users/iii,yyy,stud-uuu
+capped at 20 users per call, based on microsoft graph internal limits
 in test and production the variables will be supplied trough nais secret manager (envFrom - secret: statreg-api-secrets)
