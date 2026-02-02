@@ -1,15 +1,5 @@
-import { PrismaPg } from '@prisma/adapter-pg'
-import { env } from 'prisma/config'
 import process from 'node:process'
-
-import { PrismaClient } from '../src/generated/prisma/client.js'
-import { Env } from '../prisma.config.js'
-
-const adapter = new PrismaPg({
-  connectionString: env<Env>('STATREG_DB_URL_CONNECTION_STRING'),
-})
-
-const prisma = new PrismaClient({ adapter })
+import { prisma } from '../src/lib/prisma.js'
 
 async function main() {
   const freq1 = await prisma.frequency.upsert({

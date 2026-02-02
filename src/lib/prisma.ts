@@ -1,5 +1,5 @@
 import { PrismaPg } from '@prisma/adapter-pg'
-import { PrismaClient } from '../generated/prisma/client.js'
+import { PrismaClient } from '../generated/prisma'
 import process from 'node:process'
 import 'dotenv/config'
 
@@ -9,4 +9,4 @@ const adapter = new PrismaPg({
 
 const prisma = new PrismaClient({ adapter })
 
-export { prisma }
+export { prisma, PrismaClient }
