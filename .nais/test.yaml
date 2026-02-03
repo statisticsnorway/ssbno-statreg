@@ -19,6 +19,8 @@ spec:
 apiVersion: nais.io/v1alpha1
 kind: Application
 metadata:
+  annotations:
+    nais.io/read-only-file-system: "false" # Need to try this, in order to generate client identity on runtime
   labels:
     team: ssbno-developers
   name: ssbno-statreg-api
