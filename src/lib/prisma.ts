@@ -4,7 +4,7 @@ import process from 'node:process'
 import 'dotenv/config'
 
 const adapter = new PrismaPg({
-  connectionString: process.env.PGURL!,
+  connectionString: process.env.STATREG_DB_URL_CONNECTION_STRING!,
   ssl: {
     rejectUnauthorized: false,
   },

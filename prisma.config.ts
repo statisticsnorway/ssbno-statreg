@@ -2,7 +2,7 @@ import 'dotenv/config'
 import { defineConfig, env } from 'prisma/config'
 
 export type Env = {
-  PGURL: string
+  STATREG_DB_URL_CONNECTION_STRING: string
 }
 
 export default defineConfig({
@@ -12,6 +12,6 @@ export default defineConfig({
     seed: 'tsx prisma/seed.ts',
   },
   datasource: {
-    url: env<Env>('PGURL'),
+    url: env<Env>('STATREG_DB_URL_CONNECTION_STRING'),
   },
 })
