@@ -5,9 +5,13 @@ import 'dotenv/config'
 
 const adapter = new PrismaPg({
   connectionString: process.env.PGURL!,
-  ssl: {
-    rejectUnauthorized: false,
-  },
+  // SSL must be disabled for local development
+  ssl:
+    process.env.NODE_ENV === 'production'
+      ? {
+          rejectUnauthorized: false,
+        }
+      : undefined,
 })
 
 const prisma = new PrismaClient({ adapter })
