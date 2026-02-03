@@ -12,6 +12,6 @@ export default defineConfig({
     seed: 'tsx prisma/seed.ts',
   },
   datasource: {
-    url: env<Env>('PGURL') + '?sslmode=disable',
+    url: env<Env>('PGURL'),
   },
 })
