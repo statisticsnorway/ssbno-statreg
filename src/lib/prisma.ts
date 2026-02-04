@@ -7,11 +7,11 @@ const adapter = new PrismaPg({
   connectionString: process.env.PGURL!,
   // SSL settings need to be disabled for local development
   ssl:
-    process.env.NODE_ENV !== 'development'
-      ? {
+    process.env.NODE_ENV === 'development'
+      ? undefined
+      : {
           rejectUnauthorized: false,
-        }
-      : undefined,
+        },
 })
 const prisma = new PrismaClient({ adapter })
 
