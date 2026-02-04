@@ -7,8 +7,12 @@ Statreg API is a backend service for statistikkregisteret. It provides endpoints
 ### Prerequests
 * Install a postgresql database (see [Database](#Database))
 * Start the database application and "initialize databases" (or similar)
-* Create an .env file in repo root and set database connection string on the form:
-`PGURL="postgresql://<USERNAME>@localhost:5432/statreg_db"`
+* Create an .env file in repo root and set database connection string on the form. Include "NODE_ENV" in order to be able to run `npm run seed`. Since we can't use the nodemon "NODE_ENV" variable for that step, we'll have to define the variable ourselves:
+
+```
+PGURL="postgresql://<USERNAME>@localhost:5432/statreg_db" 
+NODE_ENV="development"
+```
 
 ### First run, database baseline setup
 ```
@@ -51,7 +55,7 @@ Help secure Express apps by setting HTTP response headers.
 Express middleware with popular prometheus metrics in one bundle. Exposes `/metrics` endpoint.
 
 ## Auth switch
-set "AUTH_ENABLED": "false" in nodemon.json
+set `"AUTH_ENABLED": "false"` in nodemon.json
 to turn of auth for local development
 
 ## Docker
@@ -91,4 +95,4 @@ When you are happy with your updated schema, you can run `npx prisma migrate dev
 There are many fun pitfalls and ways of messing up both your local db and production data using prisma, so educate yourself, make sure you know what you are doing, and be ready to roll back changes. Locally you can typically run `npx prisma migrate reset` and then `npm run seed` to bring your local database back to a working state.
 
 For local development, we can use a file named ".env" located in the root directory of the project. Currently we only use one environment variable from this file - see prisma.config.ts - and it should look something like this:  
-`NAIS_DATABASE_MYAPP_MYDB_URL="postgresql://<USERNAME>@localhost:5432/statreg_db"`
+`PGURL="postgresql://<USERNAME>@localhost:5432/statreg_db"`

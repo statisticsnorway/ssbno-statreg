@@ -5,13 +5,13 @@ import 'dotenv/config'
 
 const adapter = new PrismaPg({
   connectionString: process.env.PGURL!,
-  // SSL settings need to be disabled for local development, otherwise prisma db seed will fail,
-  // and the NAIS_CLUSTER_NAME is a default variable that is either test or prod
-  ssl: process.env.NAIS_CLUSER_NAME
-    ? {
-        rejectUnauthorized: false,
-      }
-    : undefined,
+  // SSL settings need to be disabled for local development
+  ssl:
+    process.env.NODE_ENV !== 'development'
+      ? {
+          rejectUnauthorized: false,
+        }
+      : undefined,
 })
 const prisma = new PrismaClient({ adapter })
 
