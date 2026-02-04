@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       # placeholder URL, needed to generate client and build application
-      NAIS_DATABASE_SSBNO_STATREG_API_STATREG_DB_URL: postgresql://user@localhost:5432/statreg_db
+      PGURL: postgresql://user@localhost:5432/statreg_db
     strategy:
       matrix:
         node-version: [22.x]

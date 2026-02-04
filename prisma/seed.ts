@@ -1,16 +1,5 @@
-import { PrismaPg } from '@prisma/adapter-pg'
-import { env } from 'prisma/config'
 import process from 'node:process'
-
-import { PrismaClient } from '../src/generated/prisma/client.js'
-import { Env } from '../prisma.config.js'
-// import { connect } from 'node:http2'
-
-const adapter = new PrismaPg({
-  connectionString: env<Env>('NAIS_DATABASE_SSBNO_STATREG_API_STATREG_DB_URL'),
-})
-
-const prisma = await new PrismaClient({ adapter })
+import { prisma } from '../src/lib/prisma'
 
 async function main() {
   const freq1 = await prisma.frequency.upsert({
