@@ -74,7 +74,7 @@ async function getAccessToken(): Promise<string> {
   return cachedToken
 }
 
-async function fetchUserByEmail(initials: string): Promise<EntraUser | null> {
+export async function fetchUserByEmail(initials: string): Promise<EntraUser | null> {
   const token = await getAccessToken()
 
   const email = `${initials}@${USER_DOMAIN}`
