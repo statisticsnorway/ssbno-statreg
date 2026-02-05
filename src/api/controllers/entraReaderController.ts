@@ -4,7 +4,7 @@ import { skipAuth } from 'plugins/authMiddleware'
 
 export default function entraReaderController(router: Router) {
   router.get('/entra/users/:ids', skipAuth, async (req, res) => {
-    // remember to remove skipAuth and add requireUserAuthentication
+    // TODO: remember to remove skipAuth and add requireUserAuthentication
     const ids = req.params.ids
       .split(',')
       .map((v) => v.trim())
