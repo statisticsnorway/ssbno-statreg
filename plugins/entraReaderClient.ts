@@ -21,6 +21,12 @@ export type EntraUser = {
   businessPhone: string | null
 }
 
+export type UserLookupItem = {
+  initials: string
+  user: EntraUser | null
+  error: string | null
+}
+
 let cachedToken: string | null = null
 let tokenExpiresAt = 0
 
@@ -68,7 +74,7 @@ async function getAccessToken(): Promise<string> {
   return cachedToken
 }
 
-export async function fetchUserByEmail(initials: string): Promise<EntraUser | null> {
+async function fetchUserByEmail(initials: string): Promise<EntraUser | null> {
   const token = await getAccessToken()
 
   const email = `${initials}@${USER_DOMAIN}`
@@ -97,4 +103,46 @@ export async function fetchUserByEmail(initials: string): Promise<EntraUser | nu
     email: user.mail ?? user.userPrincipalName ?? null,
     businessPhone: user.businessPhones?.[0] ?? null,
   }
+}
+
+export async function fetchUsersByInitials(idsParam: string) {
+  const initialsList = idsParam
+    .split(',')
+    .map((v) => v.trim())
+    .filter(Boolean)
+
+  const results: UserLookupItem[] = []
+
+  for (const initials of initialsList) {
+    try {
+      const user = await fetchUserByEmail(initials)
+
+      if (user) {
+        results.push({
+          initials,
+          user,
+          error: null,
+        })
+      } else {
+        results.push({
+          initials,
+          user: null,
+          error: 'User not found',
+        })
+      }
+    } catch {
+      results.push({
+        initials,
+        user: null,
+        error: 'Lookup failed',
+      })
+    }
+  }
+
+  if (results.length === 1) {
+    const item = results[0]
+    return item.user ?? item
+  }
+
+  return results
 }
