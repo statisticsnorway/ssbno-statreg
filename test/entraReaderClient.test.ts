@@ -180,7 +180,6 @@ describe('entraReaderClient', () => {
           email: 'admin@ssb.no',
           businessPhone: '123',
         },
-        error: null,
       },
       {
         initials: 'missing',

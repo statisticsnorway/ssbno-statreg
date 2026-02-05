@@ -24,7 +24,7 @@ export type EntraUser = {
 export type UserLookupItem = {
   initials: string
   user: EntraUser | null
-  error: string | null
+  error?: string | null
 }
 
 let cachedToken: string | null = null
@@ -135,7 +135,6 @@ export async function fetchUsersByInitials(idsParam: string | string[]) {
           return {
             initials,
             user,
-            error: null,
           }
         }
 
