@@ -24,6 +24,7 @@ app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 app.get('/', (_: Request, res: Response) => res.send('STATREG-API-V1'))
 
 app.get('/auth/me', auth, (req, res) => {
+  // For local testing, add requireUserAuthentication here
   res.json({
     claims: req.auth?.claims,
     username: req.auth?.username,
