@@ -29,6 +29,7 @@ export type UserLookupItem = {
 
 let cachedToken: string | null = null
 let tokenExpiresAt = 0
+let tokenPromise: Promise<string> | null = null
 
 async function getAccessToken(): Promise<string> {
   const tenantId = process.env.ENTRA_READER_AZURE_TENANT_ID
@@ -46,32 +47,44 @@ async function getAccessToken(): Promise<string> {
     return cachedToken
   }
 
-  const tokenUrl = `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/token`
-
-  const body = new URLSearchParams()
-  body.append('grant_type', 'client_credentials')
-  body.append('client_id', clientId)
-  body.append('client_secret', clientSecret)
-  body.append('scope', 'https://graph.microsoft.com/.default')
-
-  const response = await fetch(tokenUrl, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body,
-  })
-
-  if (!response.ok) {
-    throw new Error(`OAuth token request failed: ${response.status} ${await response.text()}`)
+  if (tokenPromise) {
+    return tokenPromise
   }
 
-  const json = (await response.json()) as TokenResponse
+  tokenPromise = (async () => {
+    const tokenUrl = `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/token`
 
-  cachedToken = json.access_token
-  tokenExpiresAt = now + (json.expires_in - 60) * 1000
+    const body = new URLSearchParams()
+    body.append('grant_type', 'client_credentials')
+    body.append('client_id', clientId)
+    body.append('client_secret', clientSecret)
+    body.append('scope', 'https://graph.microsoft.com/.default')
 
-  return cachedToken
+    const response = await fetch(tokenUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body,
+    })
+
+    if (!response.ok) {
+      throw new Error(`OAuth token request failed: ${response.status} ${await response.text()}`)
+    }
+
+    const json = (await response.json()) as TokenResponse
+
+    cachedToken = json.access_token
+    tokenExpiresAt = Date.now() + (json.expires_in - 60) * 1000
+
+    return cachedToken
+  })()
+
+  try {
+    return await tokenPromise
+  } finally {
+    tokenPromise = null
+  }
 }
 
 export async function fetchUserByEmail(initials: string): Promise<EntraUser | null> {
@@ -113,33 +126,33 @@ export async function fetchUsersByInitials(idsParam: string | string[]) {
         .map((v) => v.trim())
         .filter(Boolean)
 
-  const results: UserLookupItem[] = []
+  const results: UserLookupItem[] = await Promise.all(
+    initialsList.map(async (initials): Promise<UserLookupItem> => {
+      try {
+        const user = await fetchUserByEmail(initials)
 
-  for (const initials of initialsList) {
-    try {
-      const user = await fetchUserByEmail(initials)
+        if (user) {
+          return {
+            initials,
+            user,
+            error: null,
+          }
+        }
 
-      if (user) {
-        results.push({
-          initials,
-          user,
-          error: null,
-        })
-      } else {
-        results.push({
+        return {
           initials,
           user: null,
           error: 'User not found',
-        })
+        }
+      } catch {
+        return {
+          initials,
+          user: null,
+          error: 'Lookup failed',
+        }
       }
-    } catch {
-      results.push({
-        initials,
-        user: null,
-        error: 'Lookup failed',
-      })
-    }
-  }
+    })
+  )
 
   if (results.length === 1) {
     const item = results[0]
