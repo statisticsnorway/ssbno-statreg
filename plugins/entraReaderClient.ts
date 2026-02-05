@@ -105,11 +105,13 @@ export async function fetchUserByEmail(initials: string): Promise<EntraUser | nu
   }
 }
 
-export async function fetchUsersByInitials(idsParam: string) {
-  const initialsList = idsParam
-    .split(',')
-    .map((v) => v.trim())
-    .filter(Boolean)
+export async function fetchUsersByInitials(idsParam: string | string[]) {
+  const initialsList = Array.isArray(idsParam)
+    ? idsParam
+    : idsParam
+        .split(',')
+        .map((v) => v.trim())
+        .filter(Boolean)
 
   const results: UserLookupItem[] = []
 
