@@ -17,7 +17,7 @@ RUN npm ci
 COPY . .
 
 # Set temporary placeholder database URL for building
-ENV NAIS_DATABASE_SSBNO_STATREG_API_STATREG_DB_URL=postgresql://placeholder@localhost:5432/statreg_db
+ENV PGURL=postgresql://placeholder@localhost:5432/statreg_db
 
 # Generate the Prisma client libraries
 RUN npm run generate
@@ -33,5 +33,4 @@ EXPOSE 9000
 EXPOSE 8080
 
 # Command to start the application
-# CMD [ "sh", "-c", "npm run db:deploy && npm run start" ]
-CMD [ "sh", "-c", "npm run start" ]
+CMD [ "sh", "-c", "npm run db:deploy && npm run start" ]
