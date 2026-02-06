@@ -39,13 +39,13 @@
     "eslint-plugin-prettier": "^5.5.5",
     "node-mocks-http": "^1.17.2",
     "nodemon": "^3.1.11",
-    "pkgroll": "^2.21.5",
-    "prisma": "^7.2.0",
-    "typescript-eslint": "^8.53.0"
+    "pkgroll": "^2.23.0",
+    "prisma": "^7.3.0",
+    "typescript-eslint": "^8.54.0"
   },
   "dependencies": {
-    "@prisma/adapter-pg": "^7.2.0",
-    "@prisma/client": "^7.2.0",
+    "@prisma/adapter-pg": "^7.3.0",
+    "@prisma/client": "^7.3.0",
     "express": "^5.1.0",
     "express-prom-bundle": "^8.0.0",
     "helmet": "^8.1.0",
