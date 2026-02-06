@@ -1,0 +1,13 @@
+{
+  "generatorName": "typescript-fetch",
+  "inputSpec": "./openapi/openapi.yaml",
+  "outputDir": "src/generated",
+  "skipValidateSpec": "true",
+  "globalProperties": {
+    "models": "",
+    "apis": "false",
+    "supportingFiles": "false",
+    "modelDocs": "false",
+    "modelTests": "false"
+  }
+}

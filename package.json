@@ -20,7 +20,8 @@
     "lint": "eslint '**/*.{js,mjs,cjs,ts}'",
     "lint:fix": "eslint --fix '**/*.{js,mjs,cjs,ts}'",
     "test": "tsx --test 'test/**.test.ts' 'src/**.test.ts'",
-    "ci-test": "tsx --test 'test/**.test.ts' 'src/**.test.ts'"
+    "ci-test": "tsx --test 'test/**.test.ts' 'src/**.test.ts'",
+    "generate:types": "npx openapi-generator-cli generate -c openapi-generator.config.json"
   },
   "overrides": {
     "hono": "^4.10.3",
