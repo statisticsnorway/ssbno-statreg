@@ -23,9 +23,12 @@
     "ci-test": "tsx --test 'test/**.test.ts' 'src/**.test.ts'"
   },
   "overrides": {
-    "hono": "^4.10.3",
+    "hono": "^4.11.7",
     "valibot": "^1.2.0",
-    "body-parser": "^2.2.1"
+    "body-parser": "^2.2.1",
+    "fastify": "^5.7.4",
+    "qs": "^6.14.1",
+    "lodash": "^4.17.23"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
