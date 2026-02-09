@@ -21,8 +21,9 @@
     "lint:fix": "eslint --fix '**/*.{js,mjs,cjs,ts}'",
     "test": "tsx --test 'test/**.test.ts' 'src/**.test.ts'",
     "ci-test": "tsx --test 'test/**.test.ts' 'src/**.test.ts'",
-    "generate:types": "openapi-typescript ./openapi/openapi.yaml | prettier --parser typescript > src/types/api-types.ts",
-    "generate:types-index": "node src/scripts/generate-type-index.mjs"
+    "generate:api-types": "openapi-typescript ./openapi/openapi.yaml | prettier --parser typescript > src/types/api-types.ts",
+    "generate:types-index": "node src/scripts/generate-type-index.mjs",
+    "generate:types": "npm run generate:api-types && npm run generate:types-index"
   },
   "overrides": {
     "hono": "^4.11.7",
