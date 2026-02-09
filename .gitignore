@@ -9,7 +9,7 @@ coverage/
 
 # Ignore generate folder, you should make your own. 
 # Use npm run generate
-src/generated
+src/generated/
 
 # Do not commit your .env file, please
 .env
