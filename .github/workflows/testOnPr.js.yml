@@ -32,6 +32,6 @@ jobs:
       - name: Check if generated api-types is up to date
         run: |
           if git diff --exit-code ./src/types/api-types.d.ts; then
-            echo "Generate API types is outdated. Please run 'npm run generate:api-types' and commit the changes."
+            echo "Generated API types is outdated. Please run 'npm run generate:api-types' and commit the changes."
             exit 1
           fi
