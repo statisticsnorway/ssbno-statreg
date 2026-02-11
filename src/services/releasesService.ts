@@ -1,4 +1,4 @@
-import { Release } from '../types/index'
+import type { Release } from '../types/index'
 import { prisma } from '../lib/prisma'
 
 export async function getAllReleases(): Promise<Release[]> {
