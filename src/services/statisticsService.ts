@@ -1,7 +1,7 @@
-import { Statistic } from '@/generated/prisma/client'
+import type { StatisticListing } from '../types/index'
 import { prisma } from '../lib/prisma'
 
-export async function getAllStatistics(): Promise<Statistic[]> {
+export async function getAllStatistics(): Promise<StatisticListing[]> {
   const statistics = await prisma.statistic.findMany({
     omit: {
       id: true,
@@ -17,12 +17,13 @@ export async function getAllStatistics(): Promise<Statistic[]> {
     include: { shortname: { select: { name: true } }, division: { select: { name: true, name_en: true } } },
   })
 
+  // TODO: Examine if there is a better way to avoid "as string | undefined"
   return statistics.map((statistic) => {
-    const main_language = statistic.language // Either nb or nn
+    const main_language = statistic.language
     return {
-      version: statistic.version,
+      version: statistic.version.toString(),
       shortname: {
-        id: statistic.shortname_id,
+        id: statistic.shortname_id.toString(),
         name: statistic.shortname.name,
       },
       desk_appoval_status: statistic.desk_appoval_status,
@@ -32,15 +33,15 @@ export async function getAllStatistics(): Promise<Statistic[]> {
         name: [
           {
             language_code: main_language,
-            text: statistic.division.name,
+            text: statistic.division.name as string | undefined,
           },
           {
             language_code: 'en',
-            text: statistic.division.name_en,
+            text: statistic.division.name_en as string | undefined,
           },
         ],
       },
-      first_released_at: statistic.first_release,
+      first_released_at: statistic.first_release?.toISOString(),
       yearly_reporting: statistic.yearly_reporting,
       status: [
         {
@@ -51,11 +52,11 @@ export async function getAllStatistics(): Promise<Statistic[]> {
       name: [
         {
           language_code: main_language,
-          text: statistic.name,
+          text: statistic.name as string | undefined,
         },
         {
           language_code: 'en',
-          text: statistic.name_en,
+          text: statistic.name_en as string | undefined,
         },
       ],
     }
