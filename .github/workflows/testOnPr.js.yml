@@ -35,5 +35,5 @@ jobs:
             echo "❌ Generated API types are outdated. Please run 'npm run generate:api-types' and commit the changes."
             exit 1
             else
-            echo "✅ Generated API types are up-to-date-"
+            echo "✅ Generated API types are up-to-date."
           fi
