@@ -17,8 +17,6 @@ export async function getAllStatistics(): Promise<Statistic[]> {
     include: { shortname: { select: { name: true } }, division: { select: { name: true, name_en: true } } },
   })
 
-  console.log(statistics)
-
   return statistics.map((statistic) => {
     const main_language = statistic.language // Either nb or nn
     return {
