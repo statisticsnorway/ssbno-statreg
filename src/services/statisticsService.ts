@@ -22,6 +22,8 @@ export async function getAllStatistics({ start = 0, count = 10 }): Promise<Stati
     },
   })
 
+  if (!statistics?.length) return []
+
   return statistics.map((statistic) => {
     const main_language = statistic.language
     const lang_en = 'en'
