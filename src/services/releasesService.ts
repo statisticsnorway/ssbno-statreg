@@ -1,8 +1,11 @@
 import type { Release } from '../types/index'
 import { prisma } from '../lib/prisma'
 
-export async function getAllReleases(): Promise<Release[]> {
-  const releases = await prisma.release.findMany()
+export async function getAllReleases({ start = 0, count = 10 }): Promise<Release[]> {
+  const releases = await prisma.release.findMany({
+    skip: start,
+    take: count,
+  })
 
   return releases.map((release) => ({
     id: release.id.toString(),
