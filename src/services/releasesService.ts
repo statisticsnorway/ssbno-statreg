@@ -7,8 +7,6 @@ export async function getAllReleases({ start = 0, count = 10 }): Promise<Release
     take: count,
   })
 
-  if (!releases?.length) return []
-
   return releases.map((release) => ({
     id: release.id.toString(),
     version: release.version.toString(),

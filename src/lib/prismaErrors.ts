@@ -23,8 +23,6 @@ function getLastLineFromErrorMessage(message: string): string {
 }
 
 export function handleErrors(error: any, res: Response) {
-  if (res.headersSent) return res
-
   const knownErrorMessage = checkForKnownPrismaErrors(error)
   if (knownErrorMessage) {
     return res.status(400).json(knownErrorMessage)

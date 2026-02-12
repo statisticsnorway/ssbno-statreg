@@ -22,8 +22,6 @@ export async function getAllStatistics({ start = 0, count = 10 }): Promise<Stati
     },
   })
 
-  if (!statistics?.length) return []
-
   return statistics.map((statistic) => {
     const main_language = statistic.language
     const lang_en = 'en'
@@ -48,7 +46,7 @@ export async function getAllStatistics({ start = 0, count = 10 }): Promise<Stati
           },
         ],
       },
-      first_released_at: statistic.first_release?.toISOString(),
+      first_released_at: statistic.first_release ? statistic.first_release.toISOString() : null,
       yearly_reporting: statistic.yearly_reporting,
       status: [
         {
