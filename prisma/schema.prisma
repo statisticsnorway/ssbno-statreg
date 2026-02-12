@@ -10,24 +10,24 @@ datasource db {
 
 model Frequency {
   @@schema("statreg")
-  id      String    @id @default(uuid(7))
-  version Int       @db.Integer
-  name    String    @db.VarChar(50)
-  code    String    @db.VarChar(50) @unique
+  id      Int    @id @default(autoincrement())
+  version Int       
+  name    String    
+  code    String    @unique
   variant Variant[]
 }
 
 model Calender_date {
   @@schema("statreg")
-  id      String      @id @default(uuid(7))
-  version Int      @db.Integer
-  comment String   @db.VarChar(255)
+  id      Int      @id @default(autoincrement())
+  version Int
+  comment String
   day     DateTime @db.Timestamp(6) @unique
 }
 
 model Contact {
   @@schema("statreg")
-  id                 String      @id @default(uuid(7))
+  id                 Int      @id @default(autoincrement())
   version            Int      @db.Integer
   initials           String?  @db.VarChar(3)
   mobile             String?  @db.VarChar(30)
@@ -43,17 +43,17 @@ model Contact {
 
 model Shortname {
   @@schema("statreg")
-  id           String         @id @default(uuid(7))
-  version      Int         @db.Integer
-  name         String      @db.Text @unique
+  id           Int         @id @default(autoincrement())
+  version      Int
+  name         String      @unique
   last_updated DateTime    @db.Timestamp(6)
   date_created DateTime    @db.Timestamp(6)
-  statistics   Statistic[]
+  statistic   Statistic?
 }
 
 model Release {
   @@schema("statreg")
-  id                     String      @id @default(uuid(7))
+  id                     Int      @id @default(autoincrement())
   version                Int      @db.Integer
   publish_time           DateTime @db.Timestamp(6)
   has_versions           Boolean
@@ -61,60 +61,60 @@ model Release {
   comment                String   @db.VarChar(255)
   period_to              DateTime @db.Timestamp(6)
   desk_appoval_status    String?  @db.VarChar(255)
-  variant_id             String      @db.Text
+  variant_id             Int      @db.Integer
   period_from            DateTime @db.Timestamp(6)
   cancelled              Boolean  @default(false)
   date_created           DateTime @db.Timestamp(6)
   release_date_precision String   @db.VarChar(255)
   import_flag            Boolean?
-  variant                Variant  @relation(fields: [variant_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fkdb40a13c44a06f71")
+  variant                Variant  @relation(fields: [variant_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model Region_level {
   @@schema("statreg")
-  id                      String     @id @default(uuid(7))
-  version                 Int     @db.Integer
-  name                    String  @db.VarChar(40)
-  code                    String? @db.VarChar(50) @unique
+  id                      Int     @id @default(autoincrement())
+  version                 Int
+  name                    String
+  code                    String? @unique
   statistic_region_levels Statistic_region_level[]
 }
 
 model Division {
   @@schema("statreg")
-  id         String         @id @default(uuid(7))
-  version    Int         @db.Integer
-  code       String      @db.VarChar(3)
-  name_en    String      @db.VarChar(100)
-  name       String      @db.VarChar(100)
+  id         Int         @id @default(autoincrement())
+  version    Int         
+  code       String      @unique
+  name_en    String
+  name       String
   statistics Statistic[]
 }
 
 model Statistic {
   @@schema("statreg")
-  id                      String                      @id @default(uuid(7))
-  version                 Int                      @db.Integer
-  shortname_id            String      @db.Text
-  dir_appoval_status      String?                  @db.VarChar(255)
-  search_phrases          String?                  @db.VarChar(500)
-  priority                Int                      @db.Integer
-  desk_appoval_status     String?                  @db.VarChar(255)
-  language                String                   @db.VarChar(255)
-  search_phrases_en       String?                  @db.VarChar(500)
-  division_id             String      @db.Text
+  id                      Int                      @id @default(autoincrement())
+  version                 Int
+  shortname_id            Int                      @unique
+  dir_appoval_status      String?
+  search_phrases          String?
+  priority                Int
+  desk_appoval_status     String?
+  language                String
+  search_phrases_en       String?
+  division_id             Int
   first_release           DateTime?                @db.Timestamp(6)
   yearly_reporting        Boolean
-  status                  String                   @db.VarChar(255)
-  relation_id             String?      @db.Text
-  name                    String                   @db.VarChar(140)
+  status                  String
+  relation_id             Int?
+  name                    String
   last_updated            DateTime                 @db.Timestamp(6)
-  comment                 String                   @db.VarChar(255)
-  name_en                 String?                  @db.VarChar(140)
+  comment                 String
+  name_en                 String?
   date_created            DateTime                 @db.Timestamp(6)
-  legacy_topic_codes      String?                  @db.VarChar(255)
-  statistic               Statistic?               @relation("STATISTICToSTATISTIC", fields: [relation_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fkfa5cb2137008a78")
+  legacy_topic_codes      String?
+  statistic               Statistic?               @relation("STATISTICToSTATISTIC", fields: [relation_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   other_statistics        Statistic[]              @relation("STATISTICToSTATISTIC")
-  division                Division                 @relation(fields: [division_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fkfa5cb213b101b242")
-  shortname               Shortname                @relation(fields: [shortname_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fkfa5cb213c47ad723")
+  division                Division                 @relation(fields: [division_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  shortname               Shortname                @relation(fields: [shortname_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   contacts                Statistic_contacts[]
   statistic_region_levels Statistic_region_level[]
   variants                Variant[]
@@ -122,38 +122,39 @@ model Statistic {
 
 model Statistic_contacts {
   @@schema("statreg")
-  statistic_id String      @db.Text
-  contact_id   String      @db.Text
-  contacts_idx String?      @db.Text
-  contact      Contact   @relation(fields: [contact_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fkf98634a159382591")
-  statistic    Statistic @relation(fields: [statistic_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fkf98634a1d978a9a3")
+  statistic_id Int
+  contact_id   Int
+  contacts_idx Int?
+  contact      Contact   @relation(fields: [contact_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  statistic    Statistic @relation(fields: [statistic_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
-  @@id([statistic_id, contact_id], map: "sys_c0023946")
+  @@id([statistic_id, contact_id])
 }
 
 model Statistic_region_level {
   @@schema("statreg")
-  region_level_id String      @db.Text
-  statistic_id    String      @db.Text
-  region_level    Region_level @relation(fields: [region_level_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fke4b2f5b83078425c")
-  statistic       Statistic    @relation(fields: [statistic_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fke4b2f5b8d978a9a3")
+  region_level_id Int
+  statistic_id    Int
+  region_level    Region_level @relation(fields: [region_level_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  statistic       Statistic    @relation(fields: [statistic_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
-  @@id([statistic_id, region_level_id], map: "sys_c0023949")
+  @@id([statistic_id, region_level_id])
 }
 
+// Restriction: can not create two _Variant_ with both the same statistic AND the same frequency
 model Variant {
   @@schema("statreg")
-  id                 String       @id @default(uuid(7))
-  version            Int       @db.Integer
+  id                 Int       @id @default(autoincrement())
+  version            Int
   last_updated       DateTime  @db.Timestamp(6)
   date_created       DateTime  @db.Timestamp(6)
   cancelled          Boolean
-  freq_id            String      @db.Text
-  revision           String    @db.VarChar(255)
-  statistic_id       String      @db.Text
-  level_of_detail    String?   @db.VarChar(255)
-  level_of_detail_en String?   @db.VarChar(255)
+  freq_id            Int
+  revision           String
+  statistic_id       Int
+  level_of_detail    String?
+  level_of_detail_en String?
   releases           Release[]
-  frequency          Frequency @relation(fields: [freq_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fke1d1085b8b4eb03")
-  statistic          Statistic @relation(fields: [statistic_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fke1d1085d978a9a3")
+  frequency          Frequency @relation(fields: [freq_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  statistic          Statistic @relation(fields: [statistic_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }

@@ -39,10 +39,9 @@ async function main() {
   console.log('Created frequency from seed: \n' + JSON.stringify(freq3, null, 2))
 
   const shortname1 = await prisma.shortname.upsert({
-    where: { id: '101' },
+    where: { name: 'energ' },
     update: {},
     create: {
-      id: '101',
       version: 0,
       name: 'energ',
       last_updated: '2010-11-05T09:05:19.000Z',
@@ -51,10 +50,9 @@ async function main() {
   })
 
   const shortname2 = await prisma.shortname.upsert({
-    where: { id: '102' },
+    where: { name: 'befolk' },
     update: {},
     create: {
-      id: '102',
       version: 0,
       name: 'befolk',
       last_updated: '2015-01-01T00:00:00.000Z',
@@ -63,10 +61,9 @@ async function main() {
   })
 
   const shortname3 = await prisma.shortname.upsert({
-    where: { id: '103' },
+    where: { name: 'kpi' },
     update: {},
     create: {
-      id: '103',
       version: 0,
       name: 'kpi',
       last_updated: '2010-11-05T09:05:19.000Z',
@@ -74,10 +71,9 @@ async function main() {
     },
   })
   const shortname4 = await prisma.shortname.upsert({
-    where: { id: '104' },
+    where: { name: 'syssel' },
     update: {},
     create: {
-      id: '104',
       version: 0,
       name: 'syssel',
       last_updated: '2018-03-01T00:00:00.000Z',
@@ -86,10 +82,9 @@ async function main() {
   })
 
   const shortname5 = await prisma.shortname.upsert({
-    where: { id: '105' },
+    where: { name: 'helse' },
     update: {},
     create: {
-      id: '105',
       version: 0,
       name: 'helse',
       last_updated: '2019-07-01T00:00:00.000Z',
@@ -100,14 +95,13 @@ async function main() {
   console.log('Created shortnames from seed: \n' + shortname1 + shortname2 + shortname3 + shortname4 + shortname5)
 
   const stat1 = await prisma.statistic.upsert({
-    where: { id: '4001' },
+    where: { shortname_id: shortname1.id },
     update: {},
     create: {
-      id: '4001',
       version: 18,
       shortname: {
         connect: {
-          name: 'energ',
+          name: shortname1.name,
         },
       },
       dir_appoval_status: 'GODKJENT',
@@ -120,7 +114,6 @@ async function main() {
         'energy production, energy consumption, energy consumption by industry, energy consumption in households, energy goods (for example crude oil, petrol, natural gas), import, export, electricity prices, energy prices',
       division: {
         create: {
-          id: '76543',
           version: 1234,
           name: 'Seksjon for energi-, miljø- og transportstatistikk',
           code: '425',
@@ -142,13 +135,12 @@ async function main() {
   console.log('Created stat from seed: \n' + JSON.stringify(stat1, null, 2))
 
   const stat2 = await prisma.statistic.upsert({
-    where: { id: '4002' },
+    where: { shortname_id: shortname2.id },
     update: {},
     create: {
-      id: '4002',
       version: 1,
       shortname: {
-        connect: { name: 'befolk' },
+        connect: { name: shortname2.name },
       },
       dir_appoval_status: 'GODKJENT',
       search_phrases: 'befolkning, demografi, fødsler, dødsfall, migrasjon',
@@ -158,7 +150,7 @@ async function main() {
       search_phrases_en: 'population, demography, births, deaths, migration',
       division: {
         create: {
-          id: '80000',
+          id: 80000,
           version: 1,
           name: 'Seksjon for befolkningsstatistikk',
           code: '101',
@@ -180,13 +172,12 @@ async function main() {
   console.log('Created stat from seed: \n' + JSON.stringify(stat2, null, 2))
 
   const stat3 = await prisma.statistic.upsert({
-    where: { id: '4003' },
+    where: { shortname_id: shortname3.id },
     update: {},
     create: {
-      id: '4003',
       version: 1,
       shortname: {
-        connect: { name: 'kpi' },
+        connect: { name: shortname3.name },
       },
       dir_appoval_status: 'GODKJENT',
       search_phrases: 'utenrikshandel, import, eksport, varestrøm',
@@ -196,7 +187,7 @@ async function main() {
       search_phrases_en: 'foreign trade, import, export, goods flow',
       division: {
         create: {
-          id: '80010',
+          id: 80010,
           version: 1,
           name: 'Seksjon for utenriks- og næringsstatistikk',
           code: '102',
@@ -218,13 +209,12 @@ async function main() {
   console.log('Created stat from seed: \n' + JSON.stringify(stat3, null, 2))
 
   const stat4 = await prisma.statistic.upsert({
-    where: { id: '4004' },
+    where: { shortname_id: shortname4.id },
     update: {},
     create: {
-      id: '4004',
       version: 1,
       shortname: {
-        connect: { name: 'syssel' },
+        connect: { name: shortname4.name },
       },
       dir_appoval_status: 'GODKJENT',
       search_phrases: 'arbeid, sysselsetting, arbeidsledighet, sysselsettingsgrad',
@@ -234,7 +224,7 @@ async function main() {
       search_phrases_en: 'employment, labor force, unemployment, employment rate',
       division: {
         create: {
-          id: '80020',
+          id: 80020,
           version: 1,
           name: 'Seksjon for arbeids- og lønnsstatistikk',
           code: '103',
@@ -256,13 +246,12 @@ async function main() {
   console.log('Created stat from seed: \n' + JSON.stringify(stat4, null, 2))
 
   const stat5 = await prisma.statistic.upsert({
-    where: { id: '4005' },
+    where: { shortname_id: shortname5.id },
     update: {},
     create: {
-      id: '4005',
       version: 1,
       shortname: {
-        connect: { name: 'helse' },
+        connect: { name: shortname5.name },
       },
       dir_appoval_status: 'GODKJENT',
       search_phrases: 'helse, sykdom, helsetjenester, forekomst',
@@ -272,7 +261,7 @@ async function main() {
       search_phrases_en: 'health, disease, health services, prevalence',
       division: {
         create: {
-          id: '80030',
+          id: 80030,
           version: 1,
           name: 'Seksjon for helse- og omsorgsstatistikk',
           code: '104',
@@ -294,10 +283,9 @@ async function main() {
   console.log('Created stat from seed: \n' + JSON.stringify(stat5, null, 2))
 
   const variant1a = await prisma.variant.upsert({
-    where: { id: '9001' },
+    where: { id: 9001 },
     update: {},
     create: {
-      id: '9001',
       version: 1,
       last_updated: '2025-06-20T10:39:51.621Z',
       revision: 'I',
@@ -312,7 +300,7 @@ async function main() {
       },
       statistic: {
         connect: {
-          id: '4001',
+          id: stat1.id,
         },
       },
     },
@@ -321,10 +309,9 @@ async function main() {
   console.log('Created variant from seed: \n' + JSON.stringify(variant1a, null, 2))
 
   const variant1b = await prisma.variant.upsert({
-    where: { id: '9002' },
+    where: { statistic_id: stat1.id, freq_id: freq2.id },
     update: {},
     create: {
-      id: '9002',
       version: 1,
       last_updated: '2025-06-20T10:39:51.621Z',
       revision: 'I',
@@ -334,12 +321,12 @@ async function main() {
       date_created: '2025-06-20T10:39:51.621Z',
       frequency: {
         connect: {
-          code: 'Y',
+          code: freq2.code,
         },
       },
       statistic: {
         connect: {
-          id: '4001',
+          id: stat1.id,
         },
       },
     },
@@ -349,10 +336,10 @@ async function main() {
 
   // Added variants for statistics 4002, 4003, 4004, 4005
   const variant2a = await prisma.variant.upsert({
-    where: { id: '9003' },
+    where: { id: 9003 },
     update: {},
     create: {
-      id: '9003',
+      id: 9003,
       version: 1,
       last_updated: '2025-06-20T10:39:51.621Z',
       revision: 'I',
@@ -364,7 +351,7 @@ async function main() {
         connect: { code: 'M' },
       },
       statistic: {
-        connect: { id: '4002' },
+        connect: { id: 4002 },
       },
     },
   })
@@ -372,10 +359,10 @@ async function main() {
   console.log('Created variant from seed: \n' + JSON.stringify(variant2a, null, 2))
 
   const variant2b = await prisma.variant.upsert({
-    where: { id: '9013' },
+    where: { id: 9013 },
     update: {},
     create: {
-      id: '9013',
+      id: 9013,
       version: 1,
       last_updated: '2025-06-20T10:39:51.621Z',
       revision: 'I',
@@ -387,7 +374,7 @@ async function main() {
         connect: { code: 'W' },
       },
       statistic: {
-        connect: { id: '4002' },
+        connect: { id: 4002 },
       },
     },
   })
@@ -395,10 +382,10 @@ async function main() {
   console.log('Created variant from seed: \n' + JSON.stringify(variant2b, null, 2))
 
   const variant3a = await prisma.variant.upsert({
-    where: { id: '9004' },
+    where: { id: 9004 },
     update: {},
     create: {
-      id: '9004',
+      id: 9004,
       version: 1,
       last_updated: '2025-06-20T10:39:51.621Z',
       revision: 'I',
@@ -410,7 +397,7 @@ async function main() {
         connect: { code: 'W' },
       },
       statistic: {
-        connect: { id: '4003' },
+        connect: { id: 4003 },
       },
     },
   })
@@ -418,10 +405,10 @@ async function main() {
   console.log('Created variant from seed: \n' + JSON.stringify(variant3a, null, 2))
 
   const variant3b = await prisma.variant.upsert({
-    where: { id: '9014' },
+    where: { id: 9014 },
     update: {},
     create: {
-      id: '9014',
+      id: 9014,
       version: 1,
       last_updated: '2025-06-20T10:39:51.621Z',
       revision: 'I',
@@ -433,7 +420,7 @@ async function main() {
         connect: { code: 'Y' },
       },
       statistic: {
-        connect: { id: '4003' },
+        connect: { id: 4003 },
       },
     },
   })
@@ -441,10 +428,10 @@ async function main() {
   console.log('Created variant from seed: \n' + JSON.stringify(variant3b, null, 2))
 
   const variant4a = await prisma.variant.upsert({
-    where: { id: '9005' },
+    where: { id: 9005 },
     update: {},
     create: {
-      id: '9005',
+      id: 9005,
       version: 1,
       last_updated: '2025-06-20T10:39:51.621Z',
       revision: 'I',
@@ -456,7 +443,7 @@ async function main() {
         connect: { code: 'Y' },
       },
       statistic: {
-        connect: { id: '4004' },
+        connect: { id: 4004 },
       },
     },
   })
@@ -464,10 +451,10 @@ async function main() {
   console.log('Created variant from seed: \n' + JSON.stringify(variant4a, null, 2))
 
   const variant4b = await prisma.variant.upsert({
-    where: { id: '9015' },
+    where: { id: 9015 },
     update: {},
     create: {
-      id: '9015',
+      id: 9015,
       version: 1,
       last_updated: '2025-06-20T10:39:51.621Z',
       revision: 'I',
@@ -479,7 +466,7 @@ async function main() {
         connect: { code: 'Y' },
       },
       statistic: {
-        connect: { id: '4004' },
+        connect: { id: 4004 },
       },
     },
   })
@@ -487,10 +474,10 @@ async function main() {
   console.log('Created variant from seed: \n' + JSON.stringify(variant4b, null, 2))
 
   const variant5a = await prisma.variant.upsert({
-    where: { id: '9006' },
+    where: { id: 9006 },
     update: {},
     create: {
-      id: '9006',
+      id: 9006,
       version: 1,
       last_updated: '2025-06-20T10:39:51.621Z',
       revision: 'I',
@@ -502,7 +489,7 @@ async function main() {
         connect: { code: 'M' },
       },
       statistic: {
-        connect: { id: '4005' },
+        connect: { id: 4005 },
       },
     },
   })
@@ -510,10 +497,10 @@ async function main() {
   console.log('Created variant from seed: \n' + JSON.stringify(variant5a, null, 2))
 
   const variant5b = await prisma.variant.upsert({
-    where: { id: '9016' },
+    where: { id: 9016 },
     update: {},
     create: {
-      id: '9016',
+      id: 9016,
       version: 1,
       last_updated: '2025-06-20T10:39:51.621Z',
       revision: 'I',
@@ -525,7 +512,7 @@ async function main() {
         connect: { code: 'W' },
       },
       statistic: {
-        connect: { id: '4005' },
+        connect: { id: 4005 },
       },
     },
   })
@@ -533,10 +520,10 @@ async function main() {
   console.log('Created variant from seed: \n' + JSON.stringify(variant5b, null, 2))
 
   const release1a = await prisma.release.upsert({
-    where: { id: '6601' },
+    where: { id: 6601 },
     update: {},
     create: {
-      id: '6601',
+      id: 6601,
       version: 2,
       publish_time: '2026-01-26T08:00:00Z',
       has_versions: true,
@@ -549,7 +536,7 @@ async function main() {
       date_created: '2025-10-28T08:40:32.352Z',
       release_date_precision: 'dag',
       variant: {
-        connect: { id: '9001' },
+        connect: { id: 9001 },
       },
     },
   })
@@ -557,10 +544,10 @@ async function main() {
   console.log('Created release from seed: \n' + JSON.stringify(release1a, null, 2))
 
   const release1b = await prisma.release.upsert({
-    where: { id: '6602' },
+    where: { id: 6602 },
     update: {},
     create: {
-      id: '6602',
+      id: 6602,
       version: 2,
       publish_time: '2026-01-26T08:00:00Z',
       has_versions: true,
@@ -573,7 +560,7 @@ async function main() {
       date_created: '2025-10-28T08:40:32.352Z',
       release_date_precision: 'dag',
       variant: {
-        connect: { id: '9001' },
+        connect: { id: 9001 },
       },
     },
   })
@@ -581,10 +568,10 @@ async function main() {
   console.log('Created release from seed: \n' + JSON.stringify(release1b, null, 2))
 
   const release1c = await prisma.release.upsert({
-    where: { id: '6603' },
+    where: { id: 6603 },
     update: {},
     create: {
-      id: '6603',
+      id: 6603,
       version: 2,
       publish_time: '2026-01-26T08:00:00Z',
       has_versions: true,
@@ -597,7 +584,7 @@ async function main() {
       date_created: '2025-10-28T08:40:32.352Z',
       release_date_precision: 'dag',
       variant: {
-        connect: { id: '9001' },
+        connect: { id: 9001 },
       },
     },
   })
@@ -605,10 +592,10 @@ async function main() {
   console.log('Created release from seed: \n' + JSON.stringify(release1c, null, 2))
 
   const release2a = await prisma.release.upsert({
-    where: { id: '6611' },
+    where: { id: 6611 },
     update: {},
     create: {
-      id: '6611',
+      id: 6611,
       version: 2,
       publish_time: '2026-01-26T08:00:00Z',
       has_versions: true,
@@ -621,7 +608,7 @@ async function main() {
       date_created: '2025-10-28T08:40:32.352Z',
       release_date_precision: 'dag',
       variant: {
-        connect: { id: '9002' },
+        connect: { id: 9002 },
       },
     },
   })
@@ -629,10 +616,10 @@ async function main() {
   console.log('Created release from seed: \n' + JSON.stringify(release2a, null, 2))
 
   const release2b = await prisma.release.upsert({
-    where: { id: '6612' },
+    where: { id: 6612 },
     update: {},
     create: {
-      id: '6612',
+      id: 6612,
       version: 2,
       publish_time: '2026-01-23T08:00:00Z',
       has_versions: true,
@@ -645,7 +632,7 @@ async function main() {
       date_created: '2025-10-28T08:40:32.352Z',
       release_date_precision: 'dag',
       variant: {
-        connect: { id: '9002' },
+        connect: { id: 9002 },
       },
     },
   })
@@ -653,10 +640,10 @@ async function main() {
   console.log('Created release from seed: \n' + JSON.stringify(release2b, null, 2))
 
   const release2c = await prisma.release.upsert({
-    where: { id: '6613' },
+    where: { id: 6613 },
     update: {},
     create: {
-      id: '6613',
+      id: 6613,
       version: 2,
       publish_time: '2026-03-26T08:00:00Z',
       has_versions: true,
@@ -669,7 +656,7 @@ async function main() {
       date_created: '2025-10-28T08:40:32.352Z',
       release_date_precision: 'dag',
       variant: {
-        connect: { id: '9002' },
+        connect: { id: 9002 },
       },
     },
   })
@@ -677,10 +664,10 @@ async function main() {
   console.log('Created release from seed: \n' + JSON.stringify(release2c, null, 2))
 
   const release3a = await prisma.release.upsert({
-    where: { id: '6621' },
+    where: { id: 6621 },
     update: {},
     create: {
-      id: '6621',
+      id: 6621,
       version: 2,
       publish_time: '2026-05-26T08:00:00Z',
       has_versions: true,
@@ -693,7 +680,7 @@ async function main() {
       date_created: '2025-10-28T08:40:32.352Z',
       release_date_precision: 'dag',
       variant: {
-        connect: { id: '9014' },
+        connect: { id: 9014 },
       },
     },
   })
@@ -701,10 +688,10 @@ async function main() {
   console.log('Created release from seed: \n' + JSON.stringify(release3a, null, 2))
 
   const calendar_date1 = await prisma.calender_date.upsert({
-    where: { id: '11001' },
+    where: { id: 11001 },
     update: {},
     create: {
-      id: '11001',
+      id: 11001,
       version: 0,
       comment: 'Første dag etter feriestengt uke',
       day: '2026-07-20T00:00:00Z',
@@ -714,10 +701,10 @@ async function main() {
   console.log('Created calendar_date from seed: \n' + JSON.stringify(calendar_date1, null, 2))
 
   const calendar_date2 = await prisma.calender_date.upsert({
-    where: { id: '11002' },
+    where: { id: 11002 },
     update: {},
     create: {
-      id: '11002',
+      id: 11002,
       version: 0,
       comment: 'Første dag etter påske',
       day: '2026-04-22T00:00:00Z',
@@ -727,10 +714,10 @@ async function main() {
   console.log('Created calendar_date from seed: \n' + JSON.stringify(calendar_date2, null, 2))
 
   const calendar_date3 = await prisma.calender_date.upsert({
-    where: { id: '11003' },
+    where: { id: 11003 },
     update: {},
     create: {
-      id: '11003',
+      id: 11003,
       version: 0,
       comment: 'Julaften',
       day: '2026-12-24T00:00:00Z',
@@ -740,10 +727,10 @@ async function main() {
   console.log('Created calendar_date from seed: \n' + JSON.stringify(calendar_date3, null, 2))
 
   const calendar_date4 = await prisma.calender_date.upsert({
-    where: { id: '11004' },
+    where: { id: 11004 },
     update: {},
     create: {
-      id: '11004',
+      id: 11004,
       version: 0,
       comment: 'Nyttårsaften',
       day: '2026-12-31T00:00:00Z',
@@ -754,10 +741,10 @@ async function main() {
 }
 
 const region_level1 = await prisma.region_level.upsert({
-  where: { id: '7' },
+  where: { id: 7 },
   update: {},
   create: {
-    id: '7',
+    id: 7,
     version: 136,
     name: 'Kommune',
     code: 'K',
@@ -767,10 +754,10 @@ const region_level1 = await prisma.region_level.upsert({
 console.log('Created region_level from seed: \n' + JSON.stringify(region_level1, null, 2))
 
 const region_level2 = await prisma.region_level.upsert({
-  where: { id: '8' },
+  where: { id: 8 },
   update: {},
   create: {
-    id: '8',
+    id: 8,
     version: 239,
     name: 'Fylke',
     code: 'F',
@@ -780,10 +767,10 @@ const region_level2 = await prisma.region_level.upsert({
 console.log('Created region_level from seed: \n' + JSON.stringify(region_level2, null, 2))
 
 const region_level3 = await prisma.region_level.upsert({
-  where: { id: '9' },
+  where: { id: 9 },
   update: {},
   create: {
-    id: '9',
+    id: 9,
     version: 47,
     name: 'Landsdel',
     code: 'LD',
@@ -793,10 +780,10 @@ const region_level3 = await prisma.region_level.upsert({
 console.log('Created region_level from seed: \n' + JSON.stringify(region_level3, null, 2))
 
 const region_level4 = await prisma.region_level.upsert({
-  where: { id: '10' },
+  where: { id: 10 },
   update: {},
   create: {
-    id: '10',
+    id: 10,
     version: 489,
     name: 'Land',
     code: 'L',
@@ -806,10 +793,10 @@ const region_level4 = await prisma.region_level.upsert({
 console.log('Created region_level from seed: \n' + JSON.stringify(region_level4, null, 2))
 
 const region_level5 = await prisma.region_level.upsert({
-  where: { id: '11' },
+  where: { id: 11 },
   update: {},
   create: {
-    id: '11',
+    id: 11,
     version: 25,
     name: 'Bydel og krets',
     code: 'BD',
