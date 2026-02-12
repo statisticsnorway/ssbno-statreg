@@ -63,7 +63,7 @@ export async function getAllStatistics({ start = 0, count = 10 }): Promise<Stati
         },
         {
           language_code: lang_en,
-          text: statistic.name_en as string | undefined, // TODO: Avoid using "as" keyword
+          text: statistic.name_en,
         },
       ],
     }
