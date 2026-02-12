@@ -1,3 +1,21 @@
+apiVersion: data.nais.io/v1
+kind: Postgres
+metadata:
+  name: statreg-api-test-db
+  namespace: ssbno
+spec:
+  cluster:
+    audit:
+      enabled: true
+    majorVersion: "17"
+    resources:
+      cpu: 200m
+      diskSize: 2Gi
+      memory: 2Gi
+  database:
+    collation: nb_NO
+
+---
 apiVersion: nais.io/v1alpha1
 kind: Application
 metadata:
@@ -14,6 +32,7 @@ spec:
 
   envFrom:
   - secret: login-config-ssbno-statreg-api
+  - secret: statreg-api-secrets
 
   env:
     - name: NODE_ENV

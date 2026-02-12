@@ -8,8 +8,12 @@ AUTH_ENABLED can be configured in nodemon.json
 ### Prerequests
 * Install a postgresql database (see [Database](#Database))
 * Start the database application and "initialize databases" (or similar)
-* Create an .env file in repo root and set database connection string on the form:
-`NAIS_DATABASE_SSBNO_STATREG_API_STATREG_DB_URL="postgresql://<USERNAME>@localhost:5432/statreg_db"`
+* Create an .env file in repo root and set database connection string on the form. Include "NODE_ENV" in order to be able to run `npm run seed`. Since we can't use the nodemon "NODE_ENV" variable for that step, we'll have to define the variable ourselves:
+
+```
+PGURL="postgresql://<USERNAME>@localhost:5432/statreg_db" 
+NODE_ENV="development"
+```
 
 ### First run, database baseline setup
 ```
@@ -52,7 +56,7 @@ Help secure Express apps by setting HTTP response headers.
 Express middleware with popular prometheus metrics in one bundle. Exposes `/metrics` endpoint.
 
 ## Auth switch
-set "AUTH_ENABLED": "false" in nodemon.json
+set `"AUTH_ENABLED": "false"` in nodemon.json
 to turn of auth for local development
 
 ## Docker
@@ -92,7 +96,9 @@ When you are happy with your updated schema, you can run `npx prisma migrate dev
 There are many fun pitfalls and ways of messing up both your local db and production data using prisma, so educate yourself, make sure you know what you are doing, and be ready to roll back changes. Locally you can typically run `npx prisma migrate reset` and then `npm run seed` to bring your local database back to a working state.
 
 For local development, we can use a file named ".env" located in the root directory of the project. Currently we only use one environment variable from this file - see prisma.config.ts - and it should look something like this:  
+
 `NAIS_DATABASE_MYAPP_MYDB_URL="postgresql://<USERNAME>@localhost:5432/statreg_db"`
+<<<<<<< MIM-2504-local-dev
 
 
 ### Local dev (with real user token from keycloak) 
@@ -109,4 +115,29 @@ KEYCLOAK_WELL_KNOWN_URL=https://auth-play.test.ssb.no/realms/ssb/.well-known/ope
 Password stored in GCP: https://console.cloud.google.com/security/secret-manager?project=ssbno-t-lf
 Technical Documentation: https://statistics-norway.atlassian.net/wiki/spaces/mimir/pages/edit-v2/5222957098?draftShareId=bc3d3c53-dc4b-46d0-bec4-45b9ad7b6d61
 
+=======
+`PGURL="postgresql://<USERNAME>@localhost:5432/statreg_db"`
+
+
+### Entra Reader 
+Connects to Azure entra ID via a new app resource that uses Oauth to authenticate
+We are able to read user info and get back name, phone number and email, via endpoint for human and nonhuman users the endpoint supports email initials as input.
+
+We need these environment variable for this connection to work:
+```
+ENTRA_READER_AZURE_TENANT_ID
+ENTRA_READER_AZURE_CLIENT_ID
+ENTRA_READER_AZURE_CLIENT_SECRET
+```
+
+`ENTRA_READER_AZURE_CLIENT_SECRET` is stored in https://console.cloud.google.com/security/secret-manager/secret/ENTRA_READER_AZURE_CLIENT_SECRET/versions?project=ssbno-t-lf
+
+The other variables can be found here - https://portal.azure.com/?l=en.en-us#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/Overview/appId/f20f3383-d147-4039-a95b-6370cc94723b/isMSAApp~/false
+
+Single or multiple users are capped at 20 users per call, based on microsoft graph internal limits:
+* GET /entra/users/iii
+* GET /entra/users/iii,yyy,stud-uuu
+
+In test and production the variables will be supplied trough nais secret manager (envFrom - secret: statreg-api-secrets)
+>>>>>>> develop
 

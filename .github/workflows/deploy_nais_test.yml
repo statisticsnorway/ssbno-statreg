@@ -14,7 +14,7 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Build and push image and SBOM to OCI registry
         uses: nais/docker-build-push@v0
         id: docker-build-push
@@ -28,7 +28,7 @@ jobs:
         env:
           TEAM: ssbno
           CLUSTER: test
-          RESOURCE: .nais/test-postgres.yaml, .nais/test.yaml
+          RESOURCE: .nais/test.yaml
           VAR: image=${{ steps.docker-build-push.outputs.image }}
           TELEMETRY: ${{ steps.docker-build-push.outputs.telemetry }}
           DEPLOY_SERVER: deploy.ssb.cloud.nais.io:443
