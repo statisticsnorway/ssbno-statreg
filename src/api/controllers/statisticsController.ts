@@ -1,6 +1,7 @@
 import type { Router } from 'express'
 import { getAllStatistics, getStatisticByShortname } from '@/services/statisticsService'
 import { skipAuth } from '@/../plugins/authMiddleware'
+import { handleErrors } from '@/lib/prismaErrors'
 
 export default function statisticsController(router: Router) {
   router.get('/statistics/:shortname', skipAuth, async (req, res) => {
@@ -15,8 +16,7 @@ export default function statisticsController(router: Router) {
       const data = await getAllStatistics({ start, count })
       res.json(data)
     } catch (error) {
-      console.log(error)
-      res.status(400).json(error)
+      return handleErrors(error, res)
     }
   })
 }

@@ -1,5 +1,5 @@
-import type { StatisticListing } from '../types/index'
-import { prisma } from '../lib/prisma'
+import type { StatisticListing } from '@/types/index'
+import { prisma } from '@/lib/prisma'
 
 export async function getAllStatistics({ start = 0, count = 10 }): Promise<StatisticListing[]> {
   const statistics = await prisma.statistic.findMany({

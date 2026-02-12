@@ -1,5 +1,5 @@
-import type { Release } from '../types/index'
-import { prisma } from '../lib/prisma'
+import type { Release } from '@/types/index'
+import { prisma } from '@/lib/prisma'
 
 export async function getAllReleases({ start = 0, count = 10 }): Promise<Release[]> {
   const releases = await prisma.release.findMany({

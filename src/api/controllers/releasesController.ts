@@ -1,6 +1,7 @@
+import type { Router } from 'express'
 import { getAllReleases } from '@/services/releasesService'
-import { Router } from 'express'
 import { skipAuth } from 'plugins/authMiddleware'
+import { handleErrors } from '@/lib/prismaErrors'
 
 export default function releasesController(router: Router) {
   router.get('/releases', skipAuth, async (req, res) => {
@@ -10,8 +11,7 @@ export default function releasesController(router: Router) {
       const data = await getAllReleases({ start, count })
       res.json(data)
     } catch (error) {
-      console.log(error)
-      res.status(400).json(error)
+      return handleErrors(error, res)
     }
   })
 }
