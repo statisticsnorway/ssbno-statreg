@@ -12,11 +12,10 @@ AUTH_ENABLED can be configured in nodemon.json
 
 - Install a postgresql database (see [Database](#Database))
 - Start the database application and "initialize databases" (or similar)
-- Create an .env file in repo root and set database connection string on the form. Include "NODE_ENV" in order to be able to run `npm run seed`. Since we can't use the nodemon "NODE_ENV" variable for that step, we'll have to define the variable ourselves:
+- Copy the example env configuration file and fill in the secrets:
 
 ```
-PGURL="postgresql://<USERNAME>@localhost:5432/statreg_db"
-NODE_ENV="development"
+cp .env.example .env
 ```
 
 ### First run, database baseline setup
@@ -138,7 +137,7 @@ KEYCLOAK_WELL_KNOWN_URL=https://auth-play.test.ssb.no/realms/ssb/.well-known/ope
 
 Password stored in GCP: https://console.cloud.google.com/security/secret-manager?project=ssbno-t-lf
 
-Technical Documentation: https://statistics-norway.atlassian.net/wiki/spaces/mimir/pages/edit-v2/5222957098?draftShareId=bc3d3c53-dc4b-46d0-bec4-45b9ad7b6d61
+Technical Documentation: https://statistics-norway.atlassian.net/wiki/spaces/mimir/pages/5222957098/Local+dev+with+real+user+token+from+keycloak
 
 ### Entra Reader
 
