@@ -1,0 +1,43 @@
+services:
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+  app:
+    image: node:24
+    working_dir: /app
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: sh -c "npm install && npm run dev"
+    expose:
+      - "8080"
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: development
+      AUTH_ENABLED: "true"
+
+  wonderwall:
+    image: europe-north1-docker.pkg.dev/nais-io/nais/images/wonderwall:latest
+    depends_on:
+      - redis
+      - app
+    ports:
+      - "8080:8080"
+    command: >
+      --openid.client-id=${KEYCLOAK_CLIENT_ID}
+      --openid.client-secret=${KEYCLOAK_CLIENT_SECRET}
+      --openid.well-known-url=${KEYCLOAK_WELL_KNOWN_URL}
+      --ingress=http://localhost:8080
+      --bind-address=0.0.0.0:8080
+      --upstream-host=app:8080
+      --upstream-include-id-token
+      --redis.uri=redis://redis:6379
+      --cookie.secure=false
+      --auto-login
+      --log-level=debug
+    restart: on-failure
+    extra_hosts:
+      - localhost:host-gateway
