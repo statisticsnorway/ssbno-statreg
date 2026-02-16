@@ -12,12 +12,13 @@ AUTH_ENABLED can be configured in nodemon.json
 
 - Install a postgresql database (see [Database](#Database))
 - Start the database application and "initialize databases" (or similar)
-- Create an .env file in repo root and set database connection string on the form. Include "NODE_ENV" in order to be able to run `npm run seed`. Since we can't use the nodemon "NODE_ENV" variable for that step, we'll have to define the variable ourselves:
+- Copy the example env configuration file and fill in the secrets:
 
 ```
-PGURL="postgresql://<USERNAME>@localhost:5432/statreg_db"
-NODE_ENV="development"
+cp .env.example .env
 ```
+
+As to where to find the secrets go to [Local dev with keycloak](#local-dev-with-real-user-token-from-keycloak) and [Entra Reader](#entra-reader) for more information.
 
 ### First run, database baseline setup
 
@@ -118,8 +119,9 @@ There are many fun pitfalls and ways of messing up both your local db and produc
 
 For local development, we can use a file named ".env" located in the root directory of the project. Currently we only use one environment variable from this file - see prisma.config.ts - and it should look something like this:
 
-`NAIS_DATABASE_MYAPP_MYDB_URL="postgresql://<USERNAME>@localhost:5432/statreg_db"`
-`PGURL="postgresql://<USERNAME>@localhost:5432/statreg_db"`
+```
+PGURL="postgresql://<USERNAME>@localhost:5432/statreg_db"
+```
 
 ### Local dev (with real user token from keycloak)
 
@@ -129,12 +131,15 @@ docker-compose up
 docker compose down -v
 
 User must variables in .env (required):
+```
 KEYCLOAK_CLIENT_ID=oauth2-proxy-ssbno-statreg-api
 KEYCLOAK_CLIENT_SECRET= (this password is only for devs and stored in gcp secret manager)
 KEYCLOAK_WELL_KNOWN_URL=https://auth-play.test.ssb.no/realms/ssb/.well-known/openid-configuration
+```
 
 Password stored in GCP: https://console.cloud.google.com/security/secret-manager?project=ssbno-t-lf
-Technical Documentation: https://statistics-norway.atlassian.net/wiki/spaces/mimir/pages/edit-v2/5222957098?draftShareId=bc3d3c53-dc4b-46d0-bec4-45b9ad7b6d61
+
+Technical Documentation: https://statistics-norway.atlassian.net/wiki/spaces/mimir/pages/5222957098/Local+dev+with+real+user+token+from+keycloak
 
 ### Entra Reader
 
@@ -158,4 +163,4 @@ Single or multiple users are capped at 20 users per call, based on microsoft gra
 - GET /entra/users/iii
 - GET /entra/users/iii,yyy,stud-uuu
 
-In test and production the variables will be supplied trough nais secret manager (envFrom - secret: statreg-api-secrets)
+In test and production the variables will be supplied through nais secret manager (envFrom - secret: statreg-api-secrets)
