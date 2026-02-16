@@ -727,7 +727,7 @@ export interface components {
     }
     Translations: {
       language_code?: string
-      text?: string | null
+      text?: string
     }[]
     Variant: {
       readonly id?: string

@@ -18,13 +18,26 @@ export async function getAllStatistics({ start = 0, count = 10 }): Promise<Stati
     },
     include: {
       shortname: { select: { name: true } },
-      division: { select: { name: true, name_en: true } },
     },
   })
 
   return statistics.map((statistic) => {
     const main_language = statistic.language
     const lang_en = 'en'
+
+    const name = [
+      {
+        language_code: main_language,
+        text: statistic.name,
+      },
+    ]
+
+    if (statistic.name_en)
+      name.push({
+        language_code: lang_en,
+        text: statistic.name_en,
+      })
+
     return {
       version: statistic.version.toString(),
       shortname: {
@@ -33,19 +46,20 @@ export async function getAllStatistics({ start = 0, count = 10 }): Promise<Stati
       },
       desk_appoval_status: statistic.desk_appoval_status,
       main_language,
-      division: {
-        id: statistic.division_id,
-        name: [
-          {
-            language_code: main_language,
-            text: statistic.division.name,
-          },
-          {
-            language_code: lang_en,
-            text: statistic.division.name_en,
-          },
-        ],
-      },
+      // TODO: Fetch from KLASS; need to figure out how to find the correct department without a relation...
+      // division: {
+      //   id: statistic.division_id,
+      //   name: [
+      //     {
+      //       language_code: main_language,
+      //       text: statistic.division.name,
+      //     },
+      //     {
+      //       language_code: lang_en,
+      //       text: statistic.division.name_en,
+      //     },
+      //   ],
+      // },
       first_released_at: statistic.first_release ? statistic.first_release.toISOString() : null,
       yearly_reporting: statistic.yearly_reporting,
       status: [
@@ -54,16 +68,7 @@ export async function getAllStatistics({ start = 0, count = 10 }): Promise<Stati
           text: statistic.status,
         },
       ],
-      name: [
-        {
-          language_code: main_language,
-          text: statistic.name,
-        },
-        {
-          language_code: lang_en,
-          text: statistic.name_en,
-        },
-      ],
+      name,
     }
   })
 }

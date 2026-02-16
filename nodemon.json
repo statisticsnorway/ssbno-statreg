@@ -1,17 +1,10 @@
 {
   "restartable": "rs",
-  "ignore": [
-    ".git",
-    "node_modules/**/node_modules"
-  ],
+  "ignore": [".git", "node_modules/**/node_modules"],
   "verbose": false,
   "events": {},
-  "watch": [
-    "src",
-    "src/**"
-  ],
+  "watch": ["src", "src/**"],
   "env": {
-    "NODE_ENV": "development",
     "AUTH_ENABLED": "true",
     "PORT": "8080",
     "KEYCLOAK_REALM_ISSUER": "https://auth-play.test.ssb.no/realms/ssb",

@@ -138,7 +138,7 @@ components:
         type: object
         properties:
           language_code: { type: string }
-          text: { type: string, nullable: true }
+          text: { type: string }
 
     Variant:
       type: object
