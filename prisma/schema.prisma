@@ -28,16 +28,16 @@ model Calender_date {
 model Contact {
   @@schema("statreg")
   id                 Int      @id @default(autoincrement())
-  version            Int      @db.Integer
-  initials           String?  @db.VarChar(3)
-  mobile             String?  @db.VarChar(30)
-  name               String   @db.VarChar(130)
+  version            Int      
+  initials           String?  
+  mobile             String?  
+  name               String   
   last_updated       DateTime @db.Timestamp(6)
-  phone              String?  @db.VarChar(30)
-  email              String   @db.VarChar(100)
+  phone              String?  
+  email              String
   date_created       DateTime @db.Timestamp(6)
   inactiv            Boolean?
-  name_en            String?  @db.VarChar(130)
+  name_en            String?
   statistic_contacts Statistic_contacts[]
 }
 
@@ -54,18 +54,18 @@ model Shortname {
 model Release {
   @@schema("statreg")
   id                     Int      @id @default(autoincrement())
-  version                Int      @db.Integer
+  version                Int
   publish_time           DateTime @db.Timestamp(6)
   has_versions           Boolean
   last_updated           DateTime @db.Timestamp(6)
-  comment                String   @db.VarChar(255)
+  comment                String 
   period_to              DateTime @db.Timestamp(6)
-  desk_appoval_status    String?  @db.VarChar(255)
-  variant_id             Int      @db.Integer
+  desk_appoval_status    String? 
+  variant_id             Int
   period_from            DateTime @db.Timestamp(6)
   cancelled              Boolean  @default(false)
   date_created           DateTime @db.Timestamp(6)
-  release_date_precision String   @db.VarChar(255)
+  release_date_precision String
   import_flag            Boolean?
   variant                Variant  @relation(fields: [variant_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }

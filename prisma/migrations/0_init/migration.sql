@@ -25,15 +25,15 @@ CREATE TABLE "statreg"."Calender_date" (
 CREATE TABLE "statreg"."Contact" (
     "id" SERIAL NOT NULL,
     "version" INTEGER NOT NULL,
-    "initials" VARCHAR(3),
-    "mobile" VARCHAR(30),
-    "name" VARCHAR(130) NOT NULL,
+    "initials" TEXT,
+    "mobile" TEXT,
+    "name" TEXT NOT NULL,
     "last_updated" TIMESTAMP(6) NOT NULL,
-    "phone" VARCHAR(30),
-    "email" VARCHAR(100) NOT NULL,
+    "phone" TEXT,
+    "email" TEXT NOT NULL,
     "date_created" TIMESTAMP(6) NOT NULL,
     "inactiv" BOOLEAN,
-    "name_en" VARCHAR(130),
+    "name_en" TEXT,
 
     CONSTRAINT "Contact_pkey" PRIMARY KEY ("id")
 );
@@ -56,14 +56,14 @@ CREATE TABLE "statreg"."Release" (
     "publish_time" TIMESTAMP(6) NOT NULL,
     "has_versions" BOOLEAN NOT NULL,
     "last_updated" TIMESTAMP(6) NOT NULL,
-    "comment" VARCHAR(255) NOT NULL,
+    "comment" TEXT NOT NULL,
     "period_to" TIMESTAMP(6) NOT NULL,
-    "desk_appoval_status" VARCHAR(255),
+    "desk_appoval_status" TEXT,
     "variant_id" INTEGER NOT NULL,
     "period_from" TIMESTAMP(6) NOT NULL,
     "cancelled" BOOLEAN NOT NULL DEFAULT false,
     "date_created" TIMESTAMP(6) NOT NULL,
-    "release_date_precision" VARCHAR(255) NOT NULL,
+    "release_date_precision" TEXT NOT NULL,
     "import_flag" BOOLEAN,
 
     CONSTRAINT "Release_pkey" PRIMARY KEY ("id")
