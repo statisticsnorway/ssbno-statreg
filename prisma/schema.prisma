@@ -25,7 +25,7 @@ model Calender_date {
   day     DateTime @db.Timestamp(6) @unique
 }
 
-model Contact {
+model Contact_DoNotUse {
   @@schema("statreg")
   id                 Int      @id @default(autoincrement())
   version            Int      
@@ -79,7 +79,7 @@ model Region_level {
   statistic_region_levels Statistic_region_level[]
 }
 
-model Division {
+model Division_DoNotUse {
   @@schema("statreg")
   id         Int         @id @default(autoincrement())
   version    Int         
@@ -113,7 +113,7 @@ model Statistic {
   legacy_topic_codes      String?
   statistic               Statistic?               @relation("STATISTICToSTATISTIC", fields: [relation_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   other_statistics        Statistic[]              @relation("STATISTICToSTATISTIC")
-  division                Division                 @relation(fields: [division_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  division                Division_DoNotUse                 @relation(fields: [division_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   shortname               Shortname                @relation(fields: [shortname_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   contacts                Statistic_contacts[]
   statistic_region_levels Statistic_region_level[]
@@ -125,7 +125,7 @@ model Statistic_contacts {
   statistic_id Int
   contact_id   Int
   contacts_idx Int?
-  contact      Contact   @relation(fields: [contact_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  contact      Contact_DoNotUse   @relation(fields: [contact_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   statistic    Statistic @relation(fields: [statistic_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([statistic_id, contact_id])

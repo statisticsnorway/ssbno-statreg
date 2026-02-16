@@ -22,7 +22,7 @@ CREATE TABLE "statreg"."Calender_date" (
 );
 
 -- CreateTable
-CREATE TABLE "statreg"."Contact" (
+CREATE TABLE "statreg"."Contact_DoNotUse" (
     "id" SERIAL NOT NULL,
     "version" INTEGER NOT NULL,
     "initials" TEXT,
@@ -35,7 +35,7 @@ CREATE TABLE "statreg"."Contact" (
     "inactiv" BOOLEAN,
     "name_en" TEXT,
 
-    CONSTRAINT "Contact_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Contact_DoNotUse_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -80,14 +80,14 @@ CREATE TABLE "statreg"."Region_level" (
 );
 
 -- CreateTable
-CREATE TABLE "statreg"."Division" (
+CREATE TABLE "statreg"."Division_DoNotUse" (
     "id" SERIAL NOT NULL,
     "version" INTEGER NOT NULL,
     "code" TEXT NOT NULL,
     "name_en" TEXT NOT NULL,
     "name" TEXT NOT NULL,
 
-    CONSTRAINT "Division_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Division_DoNotUse_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -162,7 +162,7 @@ CREATE UNIQUE INDEX "Shortname_name_key" ON "statreg"."Shortname"("name");
 CREATE UNIQUE INDEX "Region_level_code_key" ON "statreg"."Region_level"("code");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Division_code_key" ON "statreg"."Division"("code");
+CREATE UNIQUE INDEX "Division_DoNotUse_code_key" ON "statreg"."Division_DoNotUse"("code");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Statistic_shortname_id_key" ON "statreg"."Statistic"("shortname_id");
@@ -174,13 +174,13 @@ ALTER TABLE "statreg"."Release" ADD CONSTRAINT "Release_variant_id_fkey" FOREIGN
 ALTER TABLE "statreg"."Statistic" ADD CONSTRAINT "Statistic_relation_id_fkey" FOREIGN KEY ("relation_id") REFERENCES "statreg"."Statistic"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE "statreg"."Statistic" ADD CONSTRAINT "Statistic_division_id_fkey" FOREIGN KEY ("division_id") REFERENCES "statreg"."Division"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+ALTER TABLE "statreg"."Statistic" ADD CONSTRAINT "Statistic_division_id_fkey" FOREIGN KEY ("division_id") REFERENCES "statreg"."Division_DoNotUse"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE "statreg"."Statistic" ADD CONSTRAINT "Statistic_shortname_id_fkey" FOREIGN KEY ("shortname_id") REFERENCES "statreg"."Shortname"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE "statreg"."Statistic_contacts" ADD CONSTRAINT "Statistic_contacts_contact_id_fkey" FOREIGN KEY ("contact_id") REFERENCES "statreg"."Contact"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+ALTER TABLE "statreg"."Statistic_contacts" ADD CONSTRAINT "Statistic_contacts_contact_id_fkey" FOREIGN KEY ("contact_id") REFERENCES "statreg"."Contact_DoNotUse"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE "statreg"."Statistic_contacts" ADD CONSTRAINT "Statistic_contacts_statistic_id_fkey" FOREIGN KEY ("statistic_id") REFERENCES "statreg"."Statistic"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
