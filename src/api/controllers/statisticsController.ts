@@ -5,7 +5,9 @@ import { handleErrors } from '@/lib/prismaErrors'
 
 export default function statisticsController(router: Router) {
   router.get('/statistics/:shortname', skipAuth, async (req, res) => {
-    const data = getStatisticByShortname(req.params?.shortname ?? '')
+    const data = getStatisticByShortname(
+      Array.isArray(req.params.shortname) ? req.params.shortname[0] : req.params.shortname
+    )
     res.json(data)
   })
 
