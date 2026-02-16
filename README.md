@@ -18,6 +18,8 @@ AUTH_ENABLED can be configured in nodemon.json
 cp .env.example .env
 ```
 
+As to where to find the secrets go to [Local dev with keycloak](#local-dev-with-real-user-token-from-keycloak) and [Entra Reader](#entra-reader) for more information.
+
 ### First run, database baseline setup
 
 ```
