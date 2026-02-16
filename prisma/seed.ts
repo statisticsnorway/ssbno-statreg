@@ -309,7 +309,7 @@ async function main() {
   console.log('Created variant from seed: \n' + JSON.stringify(variant1a, null, 2))
 
   const variant1b = await prisma.variant.upsert({
-    where: { statistic_id: stat1.id, freq_id: freq2.id },
+    where: { id: 1 },
     update: {},
     create: {
       version: 1,
@@ -339,7 +339,6 @@ async function main() {
     where: { id: 9003 },
     update: {},
     create: {
-      id: 9003,
       version: 1,
       last_updated: '2025-06-20T10:39:51.621Z',
       revision: 'I',
@@ -362,7 +361,6 @@ async function main() {
     where: { id: 9013 },
     update: {},
     create: {
-      id: 9013,
       version: 1,
       last_updated: '2025-06-20T10:39:51.621Z',
       revision: 'I',
@@ -385,7 +383,6 @@ async function main() {
     where: { id: 9004 },
     update: {},
     create: {
-      id: 9004,
       version: 1,
       last_updated: '2025-06-20T10:39:51.621Z',
       revision: 'I',
@@ -408,7 +405,6 @@ async function main() {
     where: { id: 9014 },
     update: {},
     create: {
-      id: 9014,
       version: 1,
       last_updated: '2025-06-20T10:39:51.621Z',
       revision: 'I',
@@ -431,7 +427,6 @@ async function main() {
     where: { id: 9005 },
     update: {},
     create: {
-      id: 9005,
       version: 1,
       last_updated: '2025-06-20T10:39:51.621Z',
       revision: 'I',
@@ -454,7 +449,6 @@ async function main() {
     where: { id: 9015 },
     update: {},
     create: {
-      id: 9015,
       version: 1,
       last_updated: '2025-06-20T10:39:51.621Z',
       revision: 'I',
@@ -477,7 +471,6 @@ async function main() {
     where: { id: 9006 },
     update: {},
     create: {
-      id: 9006,
       version: 1,
       last_updated: '2025-06-20T10:39:51.621Z',
       revision: 'I',
@@ -500,7 +493,6 @@ async function main() {
     where: { id: 9016 },
     update: {},
     create: {
-      id: 9016,
       version: 1,
       last_updated: '2025-06-20T10:39:51.621Z',
       revision: 'I',
@@ -523,7 +515,6 @@ async function main() {
     where: { id: 6601 },
     update: {},
     create: {
-      id: 6601,
       version: 2,
       publish_time: '2026-01-26T08:00:00Z',
       has_versions: true,
@@ -547,7 +538,6 @@ async function main() {
     where: { id: 6602 },
     update: {},
     create: {
-      id: 6602,
       version: 2,
       publish_time: '2026-01-26T08:00:00Z',
       has_versions: true,
@@ -571,7 +561,6 @@ async function main() {
     where: { id: 6603 },
     update: {},
     create: {
-      id: 6603,
       version: 2,
       publish_time: '2026-01-26T08:00:00Z',
       has_versions: true,
@@ -595,7 +584,6 @@ async function main() {
     where: { id: 6611 },
     update: {},
     create: {
-      id: 6611,
       version: 2,
       publish_time: '2026-01-26T08:00:00Z',
       has_versions: true,
@@ -619,7 +607,6 @@ async function main() {
     where: { id: 6612 },
     update: {},
     create: {
-      id: 6612,
       version: 2,
       publish_time: '2026-01-23T08:00:00Z',
       has_versions: true,
@@ -643,7 +630,6 @@ async function main() {
     where: { id: 6613 },
     update: {},
     create: {
-      id: 6613,
       version: 2,
       publish_time: '2026-03-26T08:00:00Z',
       has_versions: true,
@@ -667,7 +653,6 @@ async function main() {
     where: { id: 6621 },
     update: {},
     create: {
-      id: 6621,
       version: 2,
       publish_time: '2026-05-26T08:00:00Z',
       has_versions: true,
@@ -688,10 +673,9 @@ async function main() {
   console.log('Created release from seed: \n' + JSON.stringify(release3a, null, 2))
 
   const calendar_date1 = await prisma.calender_date.upsert({
-    where: { id: 11001 },
+    where: { day: '2026-07-20T00:00:00Z' },
     update: {},
     create: {
-      id: 11001,
       version: 0,
       comment: 'Første dag etter feriestengt uke',
       day: '2026-07-20T00:00:00Z',
@@ -701,10 +685,9 @@ async function main() {
   console.log('Created calendar_date from seed: \n' + JSON.stringify(calendar_date1, null, 2))
 
   const calendar_date2 = await prisma.calender_date.upsert({
-    where: { id: 11002 },
+    where: { day: '2026-04-22T00:00:00Z' },
     update: {},
     create: {
-      id: 11002,
       version: 0,
       comment: 'Første dag etter påske',
       day: '2026-04-22T00:00:00Z',
@@ -714,10 +697,9 @@ async function main() {
   console.log('Created calendar_date from seed: \n' + JSON.stringify(calendar_date2, null, 2))
 
   const calendar_date3 = await prisma.calender_date.upsert({
-    where: { id: 11003 },
+    where: { day: '2026-12-24T00:00:00Z' },
     update: {},
     create: {
-      id: 11003,
       version: 0,
       comment: 'Julaften',
       day: '2026-12-24T00:00:00Z',
@@ -727,10 +709,9 @@ async function main() {
   console.log('Created calendar_date from seed: \n' + JSON.stringify(calendar_date3, null, 2))
 
   const calendar_date4 = await prisma.calender_date.upsert({
-    where: { id: 11004 },
+    where: { day: '2026-12-31T00:00:00Z' },
     update: {},
     create: {
-      id: 11004,
       version: 0,
       comment: 'Nyttårsaften',
       day: '2026-12-31T00:00:00Z',
@@ -741,10 +722,9 @@ async function main() {
 }
 
 const region_level1 = await prisma.region_level.upsert({
-  where: { id: 7 },
+  where: { code: 'K' },
   update: {},
   create: {
-    id: 7,
     version: 136,
     name: 'Kommune',
     code: 'K',
@@ -754,10 +734,9 @@ const region_level1 = await prisma.region_level.upsert({
 console.log('Created region_level from seed: \n' + JSON.stringify(region_level1, null, 2))
 
 const region_level2 = await prisma.region_level.upsert({
-  where: { id: 8 },
+  where: { code: 'F' },
   update: {},
   create: {
-    id: 8,
     version: 239,
     name: 'Fylke',
     code: 'F',
@@ -767,10 +746,9 @@ const region_level2 = await prisma.region_level.upsert({
 console.log('Created region_level from seed: \n' + JSON.stringify(region_level2, null, 2))
 
 const region_level3 = await prisma.region_level.upsert({
-  where: { id: 9 },
+  where: { code: 'LD' },
   update: {},
   create: {
-    id: 9,
     version: 47,
     name: 'Landsdel',
     code: 'LD',
@@ -780,10 +758,9 @@ const region_level3 = await prisma.region_level.upsert({
 console.log('Created region_level from seed: \n' + JSON.stringify(region_level3, null, 2))
 
 const region_level4 = await prisma.region_level.upsert({
-  where: { id: 10 },
+  where: { code: 'L' },
   update: {},
   create: {
-    id: 10,
     version: 489,
     name: 'Land',
     code: 'L',
@@ -793,10 +770,9 @@ const region_level4 = await prisma.region_level.upsert({
 console.log('Created region_level from seed: \n' + JSON.stringify(region_level4, null, 2))
 
 const region_level5 = await prisma.region_level.upsert({
-  where: { id: 11 },
+  where: { code: 'BD' },
   update: {},
   create: {
-    id: 11,
     version: 25,
     name: 'Bydel og krets',
     code: 'BD',
