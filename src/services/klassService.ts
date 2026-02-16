@@ -4,9 +4,13 @@ import process from 'node:process'
 
 export let DEPARTMENTS: Department[]
 
+export function getDivisionFromCode(code: number) {
+  const divisions = DEPARTMENTS.map(({ divisions }) => divisions)
+  return divisions.flat().filter((division) => division.code === code)
+}
+
 export async function initializeDepartments() {
   DEPARTMENTS = await getDepartmentsFromKlass()
-  //console.log(JSON.stringify(DEPARTMENTS))
 }
 
 export async function getDepartmentsFromKlass(): Promise<Department[]> {

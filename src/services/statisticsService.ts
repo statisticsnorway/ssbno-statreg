@@ -1,5 +1,6 @@
 import type { StatisticListing } from '@/types/index'
 import { prisma } from '@/lib/prisma'
+import { getDivisionFromCode } from '@/services/klassService'
 
 export async function getAllStatistics({ start = 0, count = 10 }): Promise<StatisticListing[]> {
   const statistics = await prisma.statistic.findMany({
@@ -17,6 +18,7 @@ export async function getAllStatistics({ start = 0, count = 10 }): Promise<Stati
       legacy_topic_codes: true,
     },
     include: {
+      division: { select: { code: true } },
       shortname: { select: { name: true } },
     },
   })
@@ -38,6 +40,9 @@ export async function getAllStatistics({ start = 0, count = 10 }): Promise<Stati
         text: statistic.name_en,
       })
 
+    const divisionCode = statistic.division.code
+    const division = getDivisionFromCode(Number(statistic.division.code))
+
     return {
       version: statistic.version.toString(),
       shortname: {
@@ -46,20 +51,20 @@ export async function getAllStatistics({ start = 0, count = 10 }): Promise<Stati
       },
       desk_appoval_status: statistic.desk_appoval_status,
       main_language,
-      // TODO: Fetch from KLASS; need to figure out how to find the correct department without a relation...
-      // division: {
-      //   id: statistic.division_id,
-      //   name: [
-      //     {
-      //       language_code: main_language,
-      //       text: statistic.division.name,
-      //     },
-      //     {
-      //       language_code: lang_en,
-      //       text: statistic.division.name_en,
-      //     },
-      //   ],
-      // },
+      division: {
+        id: divisionCode,
+        name: [
+          {
+            language_code: main_language,
+            text: division[0]?.name,
+          },
+          // TODO: Fetch english; klass service does not support this atm
+          // {
+          //   language_code: lang_en,
+          //   text: statistic.division.name_en,
+          // },
+        ],
+      },
       first_released_at: statistic.first_release ? statistic.first_release.toISOString() : null,
       yearly_reporting: statistic.yearly_reporting,
       status: [
