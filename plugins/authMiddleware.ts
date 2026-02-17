@@ -10,9 +10,17 @@ export function forbidden(res: Response, message: string) {
 }
 
 export function getBearerToken(req: Request): string | null {
-  const auth = req.headers.authorization
-  if (!auth?.startsWith('Bearer ')) return null
-  return auth.slice('Bearer '.length).trim()
+  const auth = req.header('authorization')
+  if (!auth) return null
+
+  const firstSpaceIndex = auth.indexOf(' ')
+  if (firstSpaceIndex < 0) return null
+
+  const scheme = auth.slice(0, firstSpaceIndex).toLowerCase()
+  if (scheme !== 'bearer') return null
+
+  const token = auth.slice(firstSpaceIndex + 1).trim()
+  return token
 }
 
 export const skipAuth: RequestHandler = (_req, _res, next) => next()
