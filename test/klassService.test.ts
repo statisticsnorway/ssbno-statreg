@@ -28,13 +28,17 @@ describe('klassService ', async () => {
     errorMock.mock.restore()
   })
 
+  // TODO: Update tests in upcoming PR for MIM-2475
   describe('getDepartmentsFromKlass ', async () => {
     test('builds departments and divisions correct from KLASS response', async () => {
       setPayload(mockClassificationItems)
 
       const departments = await getDepartmentsFromKlass()
 
-      assert.equal(fetchMock.mock.calls[0].arguments[0], 'https://data.ssb.no/api/klass/v1/versions/3009.json')
+      assert.equal(
+        fetchMock.mock.calls[0].arguments[0],
+        'https://data.ssb.no/api/klass/v1/versions/3009.json?language=nb'
+      )
 
       assert.deepEqual(departments, mockDepartments)
     })
@@ -45,7 +49,10 @@ describe('klassService ', async () => {
 
       const departments = await getDepartmentsFromKlass()
 
-      assert.equal(fetchMock.mock.calls[0].arguments[0], 'https://example.test/api/klass/v1/versions/3009.json')
+      assert.equal(
+        fetchMock.mock.calls[0].arguments[0],
+        'https://example.test/api/klass/v1/versions/3009.json?language=nb'
+      )
       assert.deepEqual(departments, [])
     })
 
