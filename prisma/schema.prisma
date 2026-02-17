@@ -141,7 +141,6 @@ model Statistic_region_level {
   @@id([statistic_id, region_level_id])
 }
 
-// Restriction: can not create two _Variant_ with both the same statistic AND the same frequency
 model Variant {
   @@schema("statreg")
   id                 Int       @id @default(autoincrement())
