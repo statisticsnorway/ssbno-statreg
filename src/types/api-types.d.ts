@@ -660,21 +660,19 @@ export interface components {
       version?: string
       /** Format: date-time */
       published_at?: string
-      has_versions?: boolean
-      /** Format: date-time */
-      readonly updated_at?: string
-      comment?: string
       desk_appoval_status?: string | null
       variant_id?: string
       /** Format: date-time */
       period_to?: string
       /** Format: date-time */
       period_from?: string
-      cancelled?: boolean
-      /** Format: date-time */
-      readonly created_at?: string
-      release_date_precision?: string
-      import_flag?: boolean | null
+      statistic?: {
+        readonly shortname?: string
+        readonly name?: components['schemas']['Translations']
+      }
+      frequency?: {
+        readonly name?: components['schemas']['Translations']
+      }
     }
     Statistic_details: {
       version?: string

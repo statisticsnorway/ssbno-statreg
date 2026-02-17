@@ -7,6 +7,8 @@ export async function getAllReleases({ start = 0, count = 10 }): Promise<Release
     take: count,
   })
 
+  // TODO: Variant (frequency), Statistic and Division
+
   // TODO: Go over the openapi spec in a new PR for MIM-2475 and fix mapping accordingly
   return releases.map((release) => ({
     id: release.id.toString(),
