@@ -663,14 +663,21 @@ async function main() {
     },
   })
 
-  if (release1aCheck) {
+  if (!release1aCheck) {
     console.log('Created release from seed: \n' + JSON.stringify(release1a, null, 2))
   }
-  /* 
-  const release1b = await prisma.release.upsert({
-    where: { id: 6602 },
-    update: {},
-    create: {
+
+  const release1bCheck = await prisma.release.findFirst({
+    where: {
+      variant: {
+        id: variant1b.id,
+      },
+      publish_time: '2026-01-26T08:00:00Z',
+    },
+  })
+
+  const release1b = await prisma.release.create({
+    data: {
       version: 2,
       publish_time: '2026-01-26T08:00:00Z',
       has_versions: true,
@@ -683,17 +690,25 @@ async function main() {
       date_created: '2025-10-28T08:40:32.352Z',
       release_date_precision: 'dag',
       variant: {
-        connect: { id: 9001 },
+        connect: { id: variant1a.id },
       },
     },
   })
+  if (!release1bCheck) {
+    console.log('Created release from seed: \n' + JSON.stringify(release1b, null, 2))
+  }
 
-  console.log('Created release from seed: \n' + JSON.stringify(release1b, null, 2))
+  const release1cCheck = await prisma.release.findFirst({
+    where: {
+      variant: {
+        id: variant1a.id,
+      },
+      publish_time: '2026-01-26T08:00:00Z',
+    },
+  })
 
-  const release1c = await prisma.release.upsert({
-    where: { id: 6603 },
-    update: {},
-    create: {
+  const release1c = await prisma.release.create({
+    data: {
       version: 2,
       publish_time: '2026-01-26T08:00:00Z',
       has_versions: true,
@@ -706,12 +721,14 @@ async function main() {
       date_created: '2025-10-28T08:40:32.352Z',
       release_date_precision: 'dag',
       variant: {
-        connect: { id: 9001 },
+        connect: { id: variant1a.id },
       },
     },
   })
 
-  console.log('Created release from seed: \n' + JSON.stringify(release1c, null, 2))
+  if (!release1cCheck) {
+    console.log('Created release from seed: \n' + JSON.stringify(release1c, null, 2))
+  }
 
   const release2a = await prisma.release.upsert({
     where: { id: 6611 },
@@ -804,7 +821,7 @@ async function main() {
   })
 
   console.log('Created release from seed: \n' + JSON.stringify(release3a, null, 2))
- */
+
   const calendar_date1 = await prisma.calender_date.upsert({
     where: { day: '2026-07-20T00:00:00Z' },
     update: {},
