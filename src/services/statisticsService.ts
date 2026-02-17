@@ -1,6 +1,7 @@
 import type { StatisticListing } from '@/types/index'
 import { prisma } from '@/lib/prisma'
 import { getDivisionFromCode } from '@/services/klassService'
+import { getLocalizedName } from '@/lib/utils'
 
 export async function getAllStatistics({ start = 0, count = 10 }): Promise<StatisticListing[]> {
   const statistics = await prisma.statistic.findMany({
@@ -25,10 +26,11 @@ export async function getAllStatistics({ start = 0, count = 10 }): Promise<Stati
 
   return statistics.map((statistic) => {
     const main_language = statistic.language
+    const lang_en = 'en'
 
     const division_code = statistic.division.code
     const division = getDivisionFromCode(Number(division_code))
-    const division_en = getDivisionFromCode(Number(division_code), 'en')
+    const division_en = getDivisionFromCode(Number(division_code), lang_en)
 
     return {
       version: statistic.version.toString(),
@@ -40,17 +42,7 @@ export async function getAllStatistics({ start = 0, count = 10 }): Promise<Stati
       main_language,
       division: {
         id: division_code,
-        name: [
-          ...(division?.name ? [{ language_code: main_language, text: division.name }] : []),
-          ...(division_en?.name
-            ? [
-                {
-                  language_code: 'en',
-                  text: division_en.name,
-                },
-              ]
-            : []),
-        ],
+        name: [...getLocalizedName(main_language, division?.name), ...getLocalizedName(lang_en, division_en?.name)],
       },
       first_released_at: statistic.first_release ? statistic.first_release.toISOString() : null,
       yearly_reporting: statistic.yearly_reporting,
@@ -65,14 +57,7 @@ export async function getAllStatistics({ start = 0, count = 10 }): Promise<Stati
           language_code: main_language,
           text: statistic.name,
         },
-        ...(statistic.name_en
-          ? [
-              {
-                language_code: 'en',
-                text: statistic.name_en,
-              },
-            ]
-          : []),
+        ...getLocalizedName(lang_en, statistic.name_en),
       ],
     }
   })
