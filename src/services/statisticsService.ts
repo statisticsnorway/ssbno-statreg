@@ -18,7 +18,7 @@ export async function getAllStatistics({ start = 0, count = 10 }): Promise<Stati
       legacy_topic_codes: true,
     },
     include: {
-      division: { select: { code: true } },
+      division: { select: { code: true, name: true } },
       shortname: { select: { name: true } },
     },
   })
@@ -26,19 +26,6 @@ export async function getAllStatistics({ start = 0, count = 10 }): Promise<Stati
   return statistics.map((statistic) => {
     const main_language = statistic.language
     const lang_en = 'en'
-
-    const name = [
-      {
-        language_code: main_language,
-        text: statistic.name,
-      },
-    ]
-
-    if (statistic.name_en)
-      name.push({
-        language_code: lang_en,
-        text: statistic.name_en,
-      })
 
     const divisionCode = statistic.division.code
     const division = getDivisionFromCode(Number(statistic.division.code))
@@ -54,10 +41,7 @@ export async function getAllStatistics({ start = 0, count = 10 }): Promise<Stati
       division: {
         id: divisionCode,
         name: [
-          {
-            language_code: main_language,
-            text: division[0]?.name,
-          },
+          ...(division[0]?.name ? [{ language_code: main_language, text: division[0].name }] : []),
           // TODO: Fetch english; klass service does not support this atm
           // {
           //   language_code: lang_en,
@@ -73,7 +57,20 @@ export async function getAllStatistics({ start = 0, count = 10 }): Promise<Stati
           text: statistic.status,
         },
       ],
-      name,
+      name: [
+        {
+          language_code: main_language,
+          text: statistic.name,
+        },
+        ...(statistic.name_en
+          ? [
+              {
+                language_code: lang_en,
+                text: statistic.name_en,
+              },
+            ]
+          : []),
+      ],
     }
   })
 }
