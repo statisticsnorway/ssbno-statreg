@@ -296,28 +296,29 @@ async function main() {
     },
   })
 
-  if (!variant1acheck) {
-    const variant1a = await prisma.variant.create({
-      data: {
-        version: 1,
-        last_updated: '2025-06-20T10:39:51.621Z',
-        revision: 'I',
-        level_of_detail: null,
-        level_of_detail_en: null,
-        cancelled: false,
-        date_created: '2025-06-20T10:39:51.621Z',
-        frequency: {
-          connect: {
-            code: 'W',
-          },
-        },
-        statistic: {
-          connect: {
-            id: stat1.id,
-          },
+  const variant1a = await prisma.variant.create({
+    data: {
+      version: 1,
+      last_updated: '2025-06-20T10:39:51.621Z',
+      revision: 'I',
+      level_of_detail: null,
+      level_of_detail_en: null,
+      cancelled: false,
+      date_created: '2025-06-20T10:39:51.621Z',
+      frequency: {
+        connect: {
+          code: 'W',
         },
       },
-    })
+      statistic: {
+        connect: {
+          id: stat1.id,
+        },
+      },
+    },
+  })
+
+  if (!variant1acheck) {
     console.log('Created variant from seed: \n' + JSON.stringify(variant1a, null, 2))
   }
 
@@ -333,28 +334,29 @@ async function main() {
     },
   })
 
-  if (!variant1bcheck) {
-    const variant1b = await prisma.variant.create({
-      data: {
-        version: 1,
-        last_updated: '2025-06-20T10:39:51.621Z',
-        revision: 'I',
-        level_of_detail: null,
-        level_of_detail_en: null,
-        cancelled: false,
-        date_created: '2025-06-20T10:39:51.621Z',
-        frequency: {
-          connect: {
-            code: 'Y',
-          },
-        },
-        statistic: {
-          connect: {
-            id: stat1.id,
-          },
+  const variant1b = await prisma.variant.create({
+    data: {
+      version: 1,
+      last_updated: '2025-06-20T10:39:51.621Z',
+      revision: 'I',
+      level_of_detail: null,
+      level_of_detail_en: null,
+      cancelled: false,
+      date_created: '2025-06-20T10:39:51.621Z',
+      frequency: {
+        connect: {
+          code: 'Y',
         },
       },
-    })
+      statistic: {
+        connect: {
+          id: stat1.id,
+        },
+      },
+    },
+  })
+
+  if (!variant1bcheck) {
     console.log('Created variant from seed: \n' + JSON.stringify(variant1b, null, 2))
   }
 
@@ -371,24 +373,25 @@ async function main() {
     },
   })
 
-  if (!variant2acheck) {
-    const variant2a = await prisma.variant.create({
-      data: {
-        version: 1,
-        last_updated: '2025-06-20T10:39:51.621Z',
-        revision: 'I',
-        level_of_detail: null,
-        level_of_detail_en: null,
-        cancelled: false,
-        date_created: '2025-06-20T10:39:51.621Z',
-        frequency: {
-          connect: { code: 'M' },
-        },
-        statistic: {
-          connect: { id: 4002 },
-        },
+  const variant2a = await prisma.variant.create({
+    data: {
+      version: 1,
+      last_updated: '2025-06-20T10:39:51.621Z',
+      revision: 'I',
+      level_of_detail: null,
+      level_of_detail_en: null,
+      cancelled: false,
+      date_created: '2025-06-20T10:39:51.621Z',
+      frequency: {
+        connect: { code: 'M' },
       },
-    })
+      statistic: {
+        connect: { id: stat2.id },
+      },
+    },
+  })
+
+  if (!variant2acheck) {
     console.log('Created variant from seed: \n' + JSON.stringify(variant2a, null, 2))
   }
 
@@ -404,24 +407,25 @@ async function main() {
     },
   })
 
-  if (!variant2bcheck) {
-    const variant2b = await prisma.variant.create({
-      data: {
-        version: 1,
-        last_updated: '2025-06-20T10:39:51.621Z',
-        revision: 'I',
-        level_of_detail: null,
-        level_of_detail_en: null,
-        cancelled: false,
-        date_created: '2025-06-20T10:39:51.621Z',
-        frequency: {
-          connect: { code: 'W' },
-        },
-        statistic: {
-          connect: { id: 4002 },
-        },
+  const variant2b = await prisma.variant.create({
+    data: {
+      version: 1,
+      last_updated: '2025-06-20T10:39:51.621Z',
+      revision: 'I',
+      level_of_detail: null,
+      level_of_detail_en: null,
+      cancelled: false,
+      date_created: '2025-06-20T10:39:51.621Z',
+      frequency: {
+        connect: { code: 'W' },
       },
-    })
+      statistic: {
+        connect: { id: stat2.id },
+      },
+    },
+  })
+
+  if (!variant2bcheck) {
     console.log('Created variant from seed: \n' + JSON.stringify(variant2b, null, 2))
   }
 
@@ -437,24 +441,25 @@ async function main() {
     },
   })
 
-  if (!variant3acheck) {
-    const variant3a = await prisma.variant.create({
-      data: {
-        version: 1,
-        last_updated: '2025-06-20T10:39:51.621Z',
-        revision: 'I',
-        level_of_detail: null,
-        level_of_detail_en: null,
-        cancelled: false,
-        date_created: '2025-06-20T10:39:51.621Z',
-        frequency: {
-          connect: { code: 'W' },
-        },
-        statistic: {
-          connect: { id: stat3.id },
-        },
+  const variant3a = await prisma.variant.create({
+    data: {
+      version: 1,
+      last_updated: '2025-06-20T10:39:51.621Z',
+      revision: 'I',
+      level_of_detail: null,
+      level_of_detail_en: null,
+      cancelled: false,
+      date_created: '2025-06-20T10:39:51.621Z',
+      frequency: {
+        connect: { code: 'W' },
       },
-    })
+      statistic: {
+        connect: { id: stat3.id },
+      },
+    },
+  })
+
+  if (!variant3acheck) {
     console.log('Created variant from seed: \n' + JSON.stringify(variant3a, null, 2))
   }
 
@@ -470,24 +475,25 @@ async function main() {
     },
   })
 
-  if (!variant3bcheck) {
-    const variant3b = await prisma.variant.create({
-      data: {
-        version: 1,
-        last_updated: '2025-06-20T10:39:51.621Z',
-        revision: 'I',
-        level_of_detail: null,
-        level_of_detail_en: null,
-        cancelled: false,
-        date_created: '2025-06-20T10:39:51.621Z',
-        frequency: {
-          connect: { code: 'Y' },
-        },
-        statistic: {
-          connect: { id: stat3.id },
-        },
+  const variant3b = await prisma.variant.create({
+    data: {
+      version: 1,
+      last_updated: '2025-06-20T10:39:51.621Z',
+      revision: 'I',
+      level_of_detail: null,
+      level_of_detail_en: null,
+      cancelled: false,
+      date_created: '2025-06-20T10:39:51.621Z',
+      frequency: {
+        connect: { code: 'Y' },
       },
-    })
+      statistic: {
+        connect: { id: stat3.id },
+      },
+    },
+  })
+
+  if (!variant3bcheck) {
     console.log('Created variant from seed: \n' + JSON.stringify(variant3b, null, 2))
   }
 
@@ -503,24 +509,25 @@ async function main() {
     },
   })
 
-  if (!variant4acheck) {
-    const variant4a = await prisma.variant.create({
-      data: {
-        version: 1,
-        last_updated: '2025-06-20T10:39:51.621Z',
-        revision: 'I',
-        level_of_detail: null,
-        level_of_detail_en: null,
-        cancelled: false,
-        date_created: '2025-06-20T10:39:51.621Z',
-        frequency: {
-          connect: { code: 'Y' },
-        },
-        statistic: {
-          connect: { id: stat4.id },
-        },
+  const variant4a = await prisma.variant.create({
+    data: {
+      version: 1,
+      last_updated: '2025-06-20T10:39:51.621Z',
+      revision: 'I',
+      level_of_detail: null,
+      level_of_detail_en: null,
+      cancelled: false,
+      date_created: '2025-06-20T10:39:51.621Z',
+      frequency: {
+        connect: { code: 'Y' },
       },
-    })
+      statistic: {
+        connect: { id: stat4.id },
+      },
+    },
+  })
+
+  if (!variant4acheck) {
     console.log('Created variant from seed: \n' + JSON.stringify(variant4a, null, 2))
   }
 
@@ -536,24 +543,25 @@ async function main() {
     },
   })
 
-  if (!variant4bcheck) {
-    const variant4b = await prisma.variant.create({
-      data: {
-        version: 1,
-        last_updated: '2025-06-20T10:39:51.621Z',
-        revision: 'I',
-        level_of_detail: null,
-        level_of_detail_en: null,
-        cancelled: false,
-        date_created: '2025-06-20T10:39:51.621Z',
-        frequency: {
-          connect: { code: 'Y' },
-        },
-        statistic: {
-          connect: { id: stat4.id },
-        },
+  const variant4b = await prisma.variant.create({
+    data: {
+      version: 1,
+      last_updated: '2025-06-20T10:39:51.621Z',
+      revision: 'I',
+      level_of_detail: null,
+      level_of_detail_en: null,
+      cancelled: false,
+      date_created: '2025-06-20T10:39:51.621Z',
+      frequency: {
+        connect: { code: 'Y' },
       },
-    })
+      statistic: {
+        connect: { id: stat4.id },
+      },
+    },
+  })
+
+  if (!variant4bcheck) {
     console.log('Created variant from seed: \n' + JSON.stringify(variant4b, null, 2))
   }
 
@@ -569,24 +577,25 @@ async function main() {
     },
   })
 
-  if (!variant5acheck) {
-    const variant5a = await prisma.variant.create({
-      data: {
-        version: 1,
-        last_updated: '2025-06-20T10:39:51.621Z',
-        revision: 'I',
-        level_of_detail: null,
-        level_of_detail_en: null,
-        cancelled: false,
-        date_created: '2025-06-20T10:39:51.621Z',
-        frequency: {
-          connect: { code: 'M' },
-        },
-        statistic: {
-          connect: { id: stat5.id },
-        },
+  const variant5a = await prisma.variant.create({
+    data: {
+      version: 1,
+      last_updated: '2025-06-20T10:39:51.621Z',
+      revision: 'I',
+      level_of_detail: null,
+      level_of_detail_en: null,
+      cancelled: false,
+      date_created: '2025-06-20T10:39:51.621Z',
+      frequency: {
+        connect: { code: 'M' },
       },
-    })
+      statistic: {
+        connect: { id: stat5.id },
+      },
+    },
+  })
+
+  if (!variant5acheck) {
     console.log('Created variant from seed: \n' + JSON.stringify(variant5a, null, 2))
   }
 
@@ -602,33 +611,41 @@ async function main() {
     },
   })
 
-  if (!variant5bcheck) {
-    const variant5b = await prisma.variant.create({
-      data: {
-        version: 1,
-        last_updated: '2025-06-20T10:39:51.621Z',
-        revision: 'I',
-        level_of_detail: null,
-        level_of_detail_en: null,
-        cancelled: false,
-        date_created: '2025-06-20T10:39:51.621Z',
-        frequency: {
-          connect: { code: 'W' },
-        },
-        statistic: {
-          connect: { id: stat5.id },
-        },
+  const variant5b = await prisma.variant.create({
+    data: {
+      version: 1,
+      last_updated: '2025-06-20T10:39:51.621Z',
+      revision: 'I',
+      level_of_detail: null,
+      level_of_detail_en: null,
+      cancelled: false,
+      date_created: '2025-06-20T10:39:51.621Z',
+      frequency: {
+        connect: { code: 'W' },
       },
-    })
+      statistic: {
+        connect: { id: stat5.id },
+      },
+    },
+  })
+
+  if (!variant5bcheck) {
     console.log('Created variant from seed: \n' + JSON.stringify(variant5b, null, 2))
   }
 
   // RELEASES
 
-  const release1a = await prisma.release.upsert({
-    where: { id: 6601 },
-    update: {},
-    create: {
+  const release1aCheck = await prisma.release.findFirst({
+    where: {
+      variant: {
+        id: variant1a.id,
+      },
+      publish_time: '2026-01-26T08:00:00Z',
+    },
+  })
+
+  const release1a = await prisma.release.create({
+    data: {
       version: 2,
       publish_time: '2026-01-26T08:00:00Z',
       has_versions: true,
@@ -641,13 +658,15 @@ async function main() {
       date_created: '2025-10-28T08:40:32.352Z',
       release_date_precision: 'dag',
       variant: {
-        connect: { id: 9001 },
+        connect: { id: variant1a.id },
       },
     },
   })
 
-  console.log('Created release from seed: \n' + JSON.stringify(release1a, null, 2))
-
+  if (release1aCheck) {
+    console.log('Created release from seed: \n' + JSON.stringify(release1a, null, 2))
+  }
+  /* 
   const release1b = await prisma.release.upsert({
     where: { id: 6602 },
     update: {},
@@ -785,7 +804,7 @@ async function main() {
   })
 
   console.log('Created release from seed: \n' + JSON.stringify(release3a, null, 2))
-
+ */
   const calendar_date1 = await prisma.calender_date.upsert({
     where: { day: '2026-07-20T00:00:00Z' },
     update: {},
