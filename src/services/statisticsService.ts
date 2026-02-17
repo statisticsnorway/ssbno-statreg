@@ -25,10 +25,10 @@ export async function getAllStatistics({ start = 0, count = 10 }): Promise<Stati
 
   return statistics.map((statistic) => {
     const main_language = statistic.language
-    const lang_en = 'en'
 
-    const divisionCode = statistic.division.code
-    const division = getDivisionFromCode(Number(statistic.division.code))
+    const division_code = statistic.division.code
+    const division = getDivisionFromCode(Number(division_code))
+    const division_en = getDivisionFromCode(Number(division_code), 'en')
 
     return {
       version: statistic.version.toString(),
@@ -39,14 +39,17 @@ export async function getAllStatistics({ start = 0, count = 10 }): Promise<Stati
       desk_appoval_status: statistic.desk_appoval_status,
       main_language,
       division: {
-        id: divisionCode,
+        id: division_code,
         name: [
-          ...(division[0]?.name ? [{ language_code: main_language, text: division[0].name }] : []),
-          // TODO: Fetch english; klass service does not support this atm
-          // {
-          //   language_code: lang_en,
-          //   text: statistic.division.name_en,
-          // },
+          ...(division?.name ? [{ language_code: main_language, text: division.name }] : []),
+          ...(division_en?.name
+            ? [
+                {
+                  language_code: 'en',
+                  text: division_en.name,
+                },
+              ]
+            : []),
         ],
       },
       first_released_at: statistic.first_release ? statistic.first_release.toISOString() : null,
@@ -65,7 +68,7 @@ export async function getAllStatistics({ start = 0, count = 10 }): Promise<Stati
         ...(statistic.name_en
           ? [
               {
-                language_code: lang_en,
+                language_code: 'en',
                 text: statistic.name_en,
               },
             ]
