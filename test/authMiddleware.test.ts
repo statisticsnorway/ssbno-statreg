@@ -43,23 +43,24 @@ describe('authMiddleWare', () => {
 
       assert.equal(token, 'myBearerTokenValue')
     })
+    test('returns token if given Bearer authorization header, and check for case insentitivity and extra whitespaces', async () => {
+      const { getBearerToken } = await import('../plugins/authMiddleware')
 
+      const token = getBearerToken(
+        httpMocks.createRequest({ headers: { AUthorization: 'beareR  myBearerTokenValue' } })
+      )
+      assert.equal(token, 'myBearerTokenValue')
+    })
     test('returns null when missing authorization header', async () => {
       const { getBearerToken } = await import('../plugins/authMiddleware')
 
       const token = getBearerToken(httpMocks.createRequest())
       assert.equal(token, null)
     })
-
-    test('returns null when authorization header not starting with "Bearer "', async () => {
+    test('returns null when authorization header not starting with "Bearer " (including one or more whitespace)', async () => {
       const { getBearerToken } = await import('../plugins/authMiddleware')
 
-      const token = getBearerToken(
-        httpMocks.createRequest({
-          headers: { authorization: 'myBearerTokenValue' },
-        })
-      )
-
+      const token = getBearerToken(httpMocks.createRequest({ headers: { authorization: 'bearermyBearerTokenValue' } }))
       assert.equal(token, null)
     })
   })
