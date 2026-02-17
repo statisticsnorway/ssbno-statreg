@@ -730,10 +730,17 @@ async function main() {
     console.log('Created release from seed: \n' + JSON.stringify(release1c, null, 2))
   }
 
-  const release2a = await prisma.release.upsert({
-    where: { id: 6611 },
-    update: {},
-    create: {
+  const release2aCheck = await prisma.release.findFirst({
+    where: {
+      variant: {
+        id: variant2a.id,
+      },
+      publish_time: '2026-01-26T08:00:00Z',
+    },
+  })
+
+  const release2a = await prisma.release.create({
+    data: {
       version: 2,
       publish_time: '2026-01-26T08:00:00Z',
       has_versions: true,
@@ -746,17 +753,26 @@ async function main() {
       date_created: '2025-10-28T08:40:32.352Z',
       release_date_precision: 'dag',
       variant: {
-        connect: { id: 9002 },
+        connect: { id: variant2a.id },
       },
     },
   })
 
-  console.log('Created release from seed: \n' + JSON.stringify(release2a, null, 2))
+  if (!release2aCheck) {
+    console.log('Created release from seed: \n' + JSON.stringify(release2a, null, 2))
+  }
 
-  const release2b = await prisma.release.upsert({
-    where: { id: 6612 },
-    update: {},
-    create: {
+  const release2bCheck = await prisma.release.findFirst({
+    where: {
+      variant: {
+        id: variant2b.id,
+      },
+      publish_time: '2026-01-23T08:00:00Z',
+    },
+  })
+
+  const release2b = await prisma.release.create({
+    data: {
       version: 2,
       publish_time: '2026-01-23T08:00:00Z',
       has_versions: true,
@@ -769,17 +785,26 @@ async function main() {
       date_created: '2025-10-28T08:40:32.352Z',
       release_date_precision: 'dag',
       variant: {
-        connect: { id: 9002 },
+        connect: { id: variant2b.id },
       },
     },
   })
 
-  console.log('Created release from seed: \n' + JSON.stringify(release2b, null, 2))
+  if (!release2bCheck) {
+    console.log('Created release from seed: \n' + JSON.stringify(release2b, null, 2))
+  }
 
-  const release2c = await prisma.release.upsert({
-    where: { id: 6613 },
-    update: {},
-    create: {
+  const release2cCheck = await prisma.release.findFirst({
+    where: {
+      variant: {
+        id: variant2a.id,
+      },
+      publish_time: '2026-03-26T08:00:00Z',
+    },
+  })
+
+  const release2c = await prisma.release.create({
+    data: {
       version: 2,
       publish_time: '2026-03-26T08:00:00Z',
       has_versions: true,
@@ -792,17 +817,26 @@ async function main() {
       date_created: '2025-10-28T08:40:32.352Z',
       release_date_precision: 'dag',
       variant: {
-        connect: { id: 9002 },
+        connect: { id: variant2a.id },
       },
     },
   })
 
-  console.log('Created release from seed: \n' + JSON.stringify(release2c, null, 2))
+  if (!release2cCheck) {
+    console.log('Created release from seed: \n' + JSON.stringify(release2c, null, 2))
+  }
 
-  const release3a = await prisma.release.upsert({
-    where: { id: 6621 },
-    update: {},
-    create: {
+  const release3aCheck = await prisma.release.findFirst({
+    where: {
+      variant: {
+        id: variant3a.id,
+      },
+      publish_time: '2026-05-26T08:00:00Z',
+    },
+  })
+
+  const release3a = await prisma.release.create({
+    data: {
       version: 2,
       publish_time: '2026-05-26T08:00:00Z',
       has_versions: true,
@@ -815,12 +849,14 @@ async function main() {
       date_created: '2025-10-28T08:40:32.352Z',
       release_date_precision: 'dag',
       variant: {
-        connect: { id: 9014 },
+        connect: { id: variant3a.id },
       },
     },
   })
 
-  console.log('Created release from seed: \n' + JSON.stringify(release3a, null, 2))
+  if (!release3aCheck) {
+    console.log('Created release from seed: \n' + JSON.stringify(release3a, null, 2))
+  }
 
   const calendar_date1 = await prisma.calender_date.upsert({
     where: { day: '2026-07-20T00:00:00Z' },
