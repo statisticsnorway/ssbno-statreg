@@ -19,7 +19,7 @@ export async function getAllStatistics({ start = 0, count = 10 }): Promise<Stati
       legacy_topic_codes: true,
     },
     include: {
-      division: { select: { code: true, name: true } },
+      division: { select: { code: true } },
       shortname: { select: { name: true } },
     },
   })
