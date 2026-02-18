@@ -94,6 +94,39 @@ async function main() {
 
   console.log('Created shortnames from seed: \n' + shortname1 + shortname2 + shortname3 + shortname4 + shortname5)
 
+  const responsiblePerson1 = await prisma.responsiblePerson.upsert({
+    where: { email: 'alice@ssb.no' },
+    update: {},
+    create: {
+      email: 'alice@ssb.no',
+      username: 'abc',
+    },
+  })
+
+  console.log('Created responsiblePerson1: \n' + JSON.stringify(responsiblePerson1, null, 2))
+
+  const responsiblePerson2 = await prisma.responsiblePerson.upsert({
+    where: { email: 'bob@ssb.no' },
+    update: {},
+    create: {
+      email: 'bob@ssb.no',
+      username: 'bcd',
+    },
+  })
+
+  console.log('Created responsiblePerson2: \n' + JSON.stringify(responsiblePerson2, null, 2))
+
+  const responsiblePerson3 = await prisma.responsiblePerson.upsert({
+    where: { email: 'carol@ssb.no' },
+    update: {},
+    create: {
+      email: 'carol@ssb.no',
+      username: 'cde',
+    },
+  })
+
+  console.log('Created responsiblePerson3: \n' + JSON.stringify(responsiblePerson3, null, 2))
+
   const stat1 = await prisma.statistic.upsert({
     where: { shortname_id: shortname1.id },
     update: {},
@@ -102,6 +135,11 @@ async function main() {
       shortname: {
         connect: {
           name: shortname1.name,
+        },
+      },
+      responsiblePersons: {
+        connect: {
+          email: responsiblePerson1.email,
         },
       },
       dir_appoval_status: 'GODKJENT',
@@ -142,6 +180,11 @@ async function main() {
       shortname: {
         connect: { name: shortname2.name },
       },
+      responsiblePersons: {
+        connect: {
+          email: responsiblePerson2.email,
+        },
+      },
       dir_appoval_status: 'GODKJENT',
       search_phrases: 'befolkning, demografi, fødsler, dødsfall, migrasjon',
       priority: 0,
@@ -178,6 +221,11 @@ async function main() {
       version: 1,
       shortname: {
         connect: { name: shortname3.name },
+      },
+      responsiblePersons: {
+        connect: {
+          email: responsiblePerson1.email,
+        },
       },
       dir_appoval_status: 'GODKJENT',
       search_phrases: 'utenrikshandel, import, eksport, varestrøm',
@@ -216,6 +264,11 @@ async function main() {
       shortname: {
         connect: { name: shortname4.name },
       },
+      responsiblePersons: {
+        connect: {
+          email: responsiblePerson3.email,
+        },
+      },
       dir_appoval_status: 'GODKJENT',
       search_phrases: 'arbeid, sysselsetting, arbeidsledighet, sysselsettingsgrad',
       priority: 0,
@@ -252,6 +305,11 @@ async function main() {
       version: 1,
       shortname: {
         connect: { name: shortname5.name },
+      },
+      responsiblePersons: {
+        connect: {
+          email: responsiblePerson2.email,
+        },
       },
       dir_appoval_status: 'GODKJENT',
       search_phrases: 'helse, sykdom, helsetjenester, forekomst',
