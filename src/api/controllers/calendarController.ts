@@ -1,11 +1,11 @@
 import { createBlockedReleaseDay } from '@/services/calendarService'
 import { Router } from 'express'
-import { requireAudience } from 'plugins/authMiddleware'
+import { requireUserGroupAuthorization } from 'plugins/authMiddleware'
 
 export default function calendarController(router: Router) {
   router.post(
     '/calendar/blocked-release-days/:date',
-    requireAudience('oauth2-proxy-ssbno-statreg-api'),
+    requireUserGroupAuthorization('ssbno-developers'),
     async (req, res) => {
       const { blocked_comment } = req.body
       const date = req.params.date

@@ -35,8 +35,12 @@ spec:
   - secret: statreg-api-secrets
 
   env:
+    - name: NODE_ENV
+      value: production
     - name: AUTH_ENABLED
       value: "true"
+    - name: KEYCLOAK_CLIENT_ID
+      value: ssbno-statreg-api
     - name: KLASS_BASE_URL
       value: https://data.qa.ssb.no
     - name: KEYCLOAK_REALM_ISSUER

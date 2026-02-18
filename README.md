@@ -1,31 +1,40 @@
 # ssbno-statreg-api
+
 ## Description
+
 Statreg API is a backend service for statistikkregisteret. It provides endpoints for fetching and managing statistics and publications, amongst other things.
 
 ## DEV
 
+AUTH_ENABLED can be configured in nodemon.json
+
 ### Prerequests
-* Install a postgresql database (see [Database](#Database))
-* Start the database application and "initialize databases" (or similar)
-* Create an .env file in repo root and set database connection string on the form. Include "NODE_ENV" in order to be able to run `npm run seed`. Since we can't use the nodemon "NODE_ENV" variable for that step, we'll have to define the variable ourselves:
+
+- Install a postgresql database (see [Database](#Database))
+- Start the database application and "initialize databases" (or similar)
+- Copy the example env configuration file and fill in the secrets:
 
 ```
-PGURL="postgresql://<USERNAME>@localhost:5432/statreg_db" 
-NODE_ENV="development"
+cp .env.example .env
 ```
+
+As to where to find the secrets go to [Local dev with keycloak](#local-dev-with-real-user-token-from-keycloak) and [Entra Reader](#entra-reader) for more information.
 
 ### First run, database baseline setup
+
 ```
 npm install
-npm db:deploy 
+npm db:deploy
 npm run seed
 npm run dev
 ```
 
 ### Subsequent application startups
+
 If new migrations: `npm db:deploy`
 
 Then run
+
 ```
 npm run dev
 ```
@@ -33,47 +42,61 @@ npm run dev
 Go to http://localhost:8080 to see results.
 
 ## Eslint & Prettier
+
 To check for linting and formatting errors/warnings run:
+
 ```
 npm run lint
 ```
 
 To automatically fix linting and formatting errors/warnings run:
+
 ```
 npm run lint:fix
 ```
+
 Keep in mind that not all types of linting/formatting errors and warnings can be fixed automatically.
 
 ## Lightship
+
 Abstracts readiness, liveness and startup checks and graceful shutdown of Node.js services running in Kubernetes.
 Providing graceful shutdown. Enable `/live` and `/ready` endpoints on port `:9000`.
 
 ## Helmet
+
 Help secure Express apps by setting HTTP response headers.
 
-## Prom bundle 
+## Prom bundle
+
 Express middleware with popular prometheus metrics in one bundle. Exposes `/metrics` endpoint.
 
 ## Auth switch
+
 set `"AUTH_ENABLED": "false"` in nodemon.json
 to turn of auth for local development
 
 ## Docker
+
 ### Prerequisites
+
 To get started, you first need to [install Colima and Docker CLI.](https://statistics-norway.atlassian.net/wiki/spaces/mimir/pages/4827381761/Bytte+fra+Docker+Desktop+til+Colima)
 
 ### Build and run
+
 Start Colima with the default configuration
+
 ```bash
 colima start
 ```
 
 Build the application
+
 ```bash
 docker build -t ssbno/statreg-api .
 ```
 
 Then, run
+
 ```bash
 docker run -it -p 8080:8080 ssbno/statreg-api
 ```
@@ -82,7 +105,7 @@ docker run -it -p 8080:8080 ssbno/statreg-api
 
 ### Database
 
-We use PostgreSQL, provided by Nais in our live environments. Locally you can set up your own Postgres db in one of many ways - install PostgreSQL [from either the website](https://www.postgresql.org/download/), Homebrew or your package manager of choice. If you are on a mac, postgres.app is recommended and makes setup very easy and quick. 
+We use PostgreSQL, provided by Nais in our live environments. Locally you can set up your own Postgres db in one of many ways - install PostgreSQL [from either the website](https://www.postgresql.org/download/), Homebrew or your package manager of choice. If you are on a mac, postgres.app is recommended and makes setup very easy and quick.
 
 ### Prisma
 
@@ -94,17 +117,39 @@ When you are happy with your updated schema, you can run `npx prisma migrate dev
 
 There are many fun pitfalls and ways of messing up both your local db and production data using prisma, so educate yourself, make sure you know what you are doing, and be ready to roll back changes. Locally you can typically run `npx prisma migrate reset` and then `npm run seed` to bring your local database back to a working state.
 
-For local development, we can use a file named ".env" located in the root directory of the project. Currently we only use one environment variable from this file - see prisma.config.ts - and it should look something like this:  
+For local development, we can use a file named ".env" located in the root directory of the project. Currently we only use one environment variable from this file - see prisma.config.ts - and it should look something like this:
 
-`NAIS_DATABASE_MYAPP_MYDB_URL="postgresql://<USERNAME>@localhost:5432/statreg_db"`
-`PGURL="postgresql://<USERNAME>@localhost:5432/statreg_db"`
+```
+PGURL="postgresql://<USERNAME>@localhost:5432/statreg_db"
+```
 
+### Local dev (with real user token from keycloak)
 
-### Entra Reader 
+AUTH_ENABLED can be configured in nodemon.json
+
+```
+docker-compose up
+docker compose down -v
+```
+
+User must variables in .env (required):
+```
+KEYCLOAK_CLIENT_ID=oauth2-proxy-ssbno-statreg-api
+KEYCLOAK_CLIENT_SECRET= (this password is only for devs and stored in gcp secret manager)
+KEYCLOAK_WELL_KNOWN_URL=https://auth-play.test.ssb.no/realms/ssb/.well-known/openid-configuration
+```
+
+Password stored in GCP: https://console.cloud.google.com/security/secret-manager?project=ssbno-t-lf
+
+Technical Documentation: https://statistics-norway.atlassian.net/wiki/spaces/mimir/pages/5222957098/Local+dev+with+real+user+token+from+keycloak
+
+### Entra Reader
+
 Connects to Azure entra ID via a new app resource that uses Oauth to authenticate
 We are able to read user info and get back name, phone number and email, via endpoint for human and nonhuman users the endpoint supports email initials as input.
 
 We need these environment variable for this connection to work:
+
 ```
 ENTRA_READER_AZURE_TENANT_ID
 ENTRA_READER_AZURE_CLIENT_ID
@@ -116,8 +161,8 @@ ENTRA_READER_AZURE_CLIENT_SECRET
 The other variables can be found here - https://portal.azure.com/?l=en.en-us#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/Overview/appId/f20f3383-d147-4039-a95b-6370cc94723b/isMSAApp~/false
 
 Single or multiple users are capped at 20 users per call, based on microsoft graph internal limits:
-* GET /entra/users/iii
-* GET /entra/users/iii,yyy,stud-uuu
 
-In test and production the variables will be supplied trough nais secret manager (envFrom - secret: statreg-api-secrets)
+- GET /entra/users/iii
+- GET /entra/users/iii,yyy,stud-uuu
 
+In test and production the variables will be supplied through nais secret manager (envFrom - secret: statreg-api-secrets)

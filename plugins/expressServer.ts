@@ -1,5 +1,5 @@
 import { createLightship } from 'lightship'
-import type express from 'express' // ← use the default import type
+import type express from 'express'
 import process from 'node:process'
 import { PrismaClient } from '@/generated/prisma/client'
 
