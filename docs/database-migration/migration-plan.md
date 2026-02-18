@@ -5,10 +5,10 @@ Here you'll find the migration plan and scripts used to migrate data from the le
 ## Step by step plan
 
 ### Download tables from old database
-1. Manually update an existing json file with metadata for all tables that includes the number of table name, rows, the highest and lowest ids etc. The data needed is easily extracted from "statistics" tab in SQL Developer in VS Code.
-2. Download all tables "as is" from old database to csv files. This is easily done manually from "Data" tab in SQL Developer in VS Code.
-3. Take a backup of the CSV files if a backup of the old database doesn't already exist, and store them in a secure location.
-4. Verify all CSV files against the json validation files using a script, checking the number of rows and the highest and lowest ids.
+1. Manually update `tableStatsExample.json` with metadata for all tables that includes the table name, number of rows, the highest and lowest ids etc. Run provided `generate-stats.sql` in SQL Developer -> SQL Worksheet to generate data.
+2. Download all tables "as is" from old database to json files. This is easily done manually from "Data" tab in SQL Developer in VS Code. (Due to inline linebreak in some cells csv makes too many rows and is unreliable)
+3. Take a backup of the json files if a backup of the old database doesn't already exist, and store them in a secure location.
+4. Verify all json files running `json-validation.sh`, checking the number of rows and the highest and lowest ids.
 
 ### Data manipulation
 5. Using script to rename columns according to new schema
