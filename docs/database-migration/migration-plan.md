@@ -1,33 +1,32 @@
 # Database migration plan
 
-Plan and scripts needed to move data from old oracle database to postgresql on NAIS.
+Here you'll find the migration plan and scripts used to migrate data from the legacy Oracle database to PostgreSQL on NAIS.
 
 ## Step by step plan
 
-### Download
-1. Make a json file per table for data validation, containing: number of rows, highest and lowest id (using script)
-2. Download all tables "as is" from old database to csv files (using script)
-3. Take backup of csv files (Neccessary or do we have backup of old database already? If backup: to where?)
-4. Verify all csv files against json validation files (number of rows, highest and lowest id using script)
+### Download tables from old database
+1. Manually update an existing json file with metadata for all tables that includes the number of table name, rows, the highest and lowest ids etc. The data needed is easily extracted from "statistics" tab in SQL Developer in VS Code.
+2. Download all tables "as is" from old database to csv files. This is easily done manually from "Data" tab in SQL Developer in VS Code.
+3. Take a backup of the CSV files if a backup of the old database doesn't already exist, and store them in a secure location.
+4. Verify all CSV files against the json validation files using a script, checking the number of rows and the highest and lowest ids.
 
 ### Data manipulation
-5. Rename columns according to new table names (using script)
-6. Change release time with correct timezone (using script)
+5. Using script to rename columns according to new schema
+6. Update relevant dates for Releases to include the correct local timezone using a script.
 
-### Prepare Postgresql to recieve data
-7. Remove some constraints. As few as possible, but some constrains are impossible to keep (ie. statistic-to-statistic relation) (prisma migration?)
+### Prepare PostgreSQL to receive data
+7. Remove any constraints that can't be preserved (identified in advance), such as Statistic-to-Statistic relations. (prisma migration?)
 
-### Load data to Postgresql
+### Load data to PostgreSQL
 8. Load data from csv files, one table at a time (using script)
-9. Make sure columns that should be dropped is not making errors or is imported
-10. Verify each table after load against json validation files (number of rows, highest and lowest id using script)
+9. After data loading, verify each table against the json validation files using a script. Check the number of rows and the highest and lowest ids.
 
-### Post migration steps in Postgres
-11. Reinsert constraints removed earlier (prisma migration?)
-12. Set serial counter correct for all tables to ensure autoincrement works (prisma migration sql?)
+### Post migration steps in PostgreSQL
+10. Reapply the constraints that were removed during data load for PostgreSQL. (prisma migration?)
+11. Set the correct serial counter for all tables to ensure that autoincrement works. (prisma migration sql?)
 
-### Migrate data to new data columns in Postgres
-13. Add migration to fill division code on statistics derived from existing division relation (prisma migration sql?)
-14. Change or set approval status if this property is changed
-15. Add migration to fill contact on new form derived from existing contacts (prisma migration sql?)
-16. Drop tables no longer needed (ie. division/contacts) (prisma migration sql?)
+### Migrate data to new data columns in PostgreSQL
+12. Add a migration to fill the new Division code column in the Statistics table, deriving data from the existing Division relation. (prisma migration sql?)
+13. Optional: Update the approval status field(s) for Releases and Statistics if new statuses should be applied or we get any new status column.
+14. Add a migration to fill the new ResponsiblePerson table, deriving data from the existing Contact relation. (prisma migration sql?)
+15. Drop legacy tables that are no longer needed e.g. Division and Contacts. (prisma migration sql?)
