@@ -40,6 +40,7 @@ export async function getAllReleases({ start = 0, count = 10 }): Promise<Release
 
   return releases.map((release) => {
     const { statistic } = release.variant
+    const lang_en = 'en'
 
     return {
       id: release.id,
@@ -50,12 +51,15 @@ export async function getAllReleases({ start = 0, count = 10 }): Promise<Release
       frequency: {
         name: [
           ...getLocalizedName('nb', release.variant.frequency.name),
-          ...getLocalizedName('en', release.variant.frequency.name_en),
+          ...getLocalizedName(lang_en, release.variant.frequency.name_en),
         ],
       },
       statistic: {
         shortname: statistic.shortname.name,
-        name: [...getLocalizedName(statistic.language, statistic.name), ...getLocalizedName('en', statistic.name_en)],
+        name: [
+          ...getLocalizedName(statistic.language, statistic.name),
+          ...getLocalizedName(lang_en, statistic.name_en),
+        ],
       },
     }
   })
