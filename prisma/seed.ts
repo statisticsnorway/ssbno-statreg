@@ -187,15 +187,7 @@ async function main() {
       desk_appoval_status: 'GODKJENT',
       language: 'nb',
       search_phrases_en: 'population, demography, births, deaths, migration',
-      division: {
-        create: {
-          id: 80000,
-          version: 1,
-          name: 'Seksjon for befolkningsstatistikk',
-          code: '101',
-          name_en: 'Division for Population Statistics',
-        },
-      },
+      division_code: '101',
       first_release: '1900-01-01T00:00:00.000Z',
       yearly_reporting: true,
       status: 'SA',
