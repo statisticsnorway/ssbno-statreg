@@ -1,12 +1,11 @@
 import type { ReleaseListing } from '@/types/index'
-import { getLocalizedName } from '@/lib/utils'
+import { getLocalizedName, dateToISOString } from '@/lib/utils'
 import { prisma } from '@/lib/prisma'
 
 export async function getAllReleases({ start = 0, count = 10 }): Promise<ReleaseListing[]> {
   const releases = await prisma.release.findMany({
     skip: start,
     take: count,
-    orderBy: { publish_time: 'desc' }, // TODO: Should we already make this a req.query option or leave it for filtering later?
     select: {
       id: true,
       version: true,
@@ -43,12 +42,11 @@ export async function getAllReleases({ start = 0, count = 10 }): Promise<Release
 
     return {
       id: release.id,
-      published_at: release.publish_time.toISOString(),
+      published_at: dateToISOString(release.publish_time),
       desk_approval_status: release.desk_appoval_status,
-      period_to: release.period_to.toISOString(),
-      period_from: release.period_from.toISOString(),
-      // TODO: There's only en names for frequency names in the database. Double check
-      frequency: { name: [...getLocalizedName('en', release.variant?.frequency?.name)] },
+      period_to: dateToISOString(release.period_to),
+      period_from: dateToISOString(release.period_from),
+      frequency: { name: [...getLocalizedName('nb', ''), ...getLocalizedName('en', release.variant?.frequency?.name)] },
       statistic: {
         shortname: statistic?.shortname?.name,
         name: [

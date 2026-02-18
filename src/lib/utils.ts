@@ -3,4 +3,7 @@ export function getLocalizedName(language_code: string, text: string | undefined
   return text ? [{ language_code, text }] : []
 }
 
-// TODO: Add utils for toISOString()
+export function dateToISOString(date: Date | null) {
+  if (!date) return ''
+  return Number.isNaN(date.getTime()) ? '' : date.toISOString()
+}
