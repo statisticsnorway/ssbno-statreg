@@ -18,6 +18,7 @@ export async function getAllReleases({ start = 0, count = 10 }): Promise<Release
           frequency: {
             select: {
               name: true,
+              name_en: true,
             },
           },
           statistic: {
@@ -46,14 +47,15 @@ export async function getAllReleases({ start = 0, count = 10 }): Promise<Release
       desk_approval_status: release.desk_appoval_status,
       period_to: dateToISOString(release.period_to),
       period_from: dateToISOString(release.period_from),
-      // TODO: Update once we get the correct format for frequency
-      frequency: { name: [...getLocalizedName('nb', ''), ...getLocalizedName('en', release.variant?.frequency?.name)] },
-      statistic: {
-        shortname: statistic?.shortname?.name,
+      frequency: {
         name: [
-          ...getLocalizedName(statistic?.language ?? 'nb', statistic?.name),
-          ...getLocalizedName('en', statistic?.name_en),
+          ...getLocalizedName('nb', release.variant.frequency.name),
+          ...getLocalizedName('en', release.variant.frequency.name_en),
         ],
+      },
+      statistic: {
+        shortname: statistic.shortname.name,
+        name: [...getLocalizedName(statistic.language, statistic.name), ...getLocalizedName('en', statistic.name_en)],
       },
     }
   })
