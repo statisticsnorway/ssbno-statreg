@@ -54,23 +54,35 @@ components:
         name: { $ref: '#/components/schemas/Translations' }
         code: { type: string }
 
+    # TODO: Remember to update detailed releases
     Release:
       type: object
       properties:
         id: { type: string, readOnly: true }
         version: { type: string }
-        published_at: { type: string, format: date-time }
-        # has_versions: { type: boolean }
-        # updated_at: { type: string, format: date-time, readOnly: true }
-        # comment: { type: string }
-        desk_appoval_status: { type: string, nullable: true }
+        publish_time: { type: string, format: date-time }
+        has_versions: { type: boolean }
+        updated_at: { type: string, format: date-time, readOnly: true }
+        comment: { type: string }
+        desk_approval_status: { type: string, nullable: true }
         variant_id: { type: string }
         period_to: { type: string, format: date-time }
         period_from: { type: string, format: date-time }
-        # cancelled: { type: boolean } # Unsure if needed or not
-        # created_at: { type: string, format: date-time, readOnly: true }
-        # release_date_precision: { type: string }
-        # import_flag: { type: boolean, nullable: true }
+        cancelled: { type: boolean }
+        created_at: { type: string, format: date-time, readOnly: true }
+        release_date_precision: { type: string }
+        import_flag: { type: boolean, nullable: true }
+
+    Releases_listing:
+      type: object
+      properties:
+        id: { type: string, readOnly: true }
+        version: { type: string }
+        publish_time: { type: string, format: date-time }
+        desk_approval_status: { type: string, nullable: true }
+        variant_id: { type: string }
+        period_to: { type: string, format: date-time }
+        period_from: { type: string, format: date-time }
         statistic: 
           type: object
           properties:

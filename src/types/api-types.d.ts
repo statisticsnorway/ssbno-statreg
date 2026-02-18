@@ -659,8 +659,29 @@ export interface components {
       readonly id?: string
       version?: string
       /** Format: date-time */
-      published_at?: string
-      desk_appoval_status?: string | null
+      publish_time?: string
+      has_versions?: boolean
+      /** Format: date-time */
+      readonly updated_at?: string
+      comment?: string
+      desk_approval_status?: string | null
+      variant_id?: string
+      /** Format: date-time */
+      period_to?: string
+      /** Format: date-time */
+      period_from?: string
+      cancelled?: boolean
+      /** Format: date-time */
+      readonly created_at?: string
+      release_date_precision?: string
+      import_flag?: boolean | null
+    }
+    Releases_listing: {
+      readonly id?: string
+      version?: string
+      /** Format: date-time */
+      publish_time?: string
+      desk_approval_status?: string | null
       variant_id?: string
       /** Format: date-time */
       period_to?: string
