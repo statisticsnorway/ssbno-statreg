@@ -6,6 +6,7 @@ export async function getAllReleases({ start = 0, count = 10 }): Promise<Release
   const releases = await prisma.release.findMany({
     skip: start,
     take: count,
+    orderBy: { publish_time: 'desc' },
     select: {
       id: true,
       version: true,
@@ -18,20 +19,22 @@ export async function getAllReleases({ start = 0, count = 10 }): Promise<Release
   })
 
   const variantIds = Array.from(new Set(releases.map((r) => r.variant_id).filter(Boolean)))
-  const variantsMap = new Map()
-  const variants = await prisma.variant.findMany({
-    where: { id: { in: variantIds } },
-    select: { id: true, statistic_id: true, frequency: { select: { name: true } } },
-  })
-  for (const v of variants) variantsMap.set(Number(v.id), v)
+  const variants = variantIds.length
+    ? await prisma.variant.findMany({
+        where: { id: { in: variantIds } },
+        select: { id: true, statistic_id: true, frequency: { select: { name: true } } },
+      })
+    : []
+  const variantsMap = new Map(variants.map((v) => [Number(v.id), v]))
 
   const statisticIds = Array.from(new Set(variants.map((v) => v.statistic_id).filter(Boolean)))
-  const statistics = await prisma.statistic.findMany({
-    where: { id: { in: statisticIds } },
-    select: { id: true, shortname: { select: { name: true } }, name: true, language: true, name_en: true },
-  })
-  const statisticsMap = new Map()
-  for (const s of statistics) statisticsMap.set(Number(s.id), s)
+  const statistics = statisticIds.length
+    ? await prisma.statistic.findMany({
+        where: { id: { in: statisticIds } },
+        select: { id: true, shortname: { select: { name: true } }, name: true, language: true, name_en: true },
+      })
+    : []
+  const statisticsMap = new Map(statistics.map((s) => [Number(s.id), s]))
 
   return releases.map((release) => {
     const variant = release.variant_id ? variantsMap.get(Number(release.variant_id)) : undefined
@@ -49,7 +52,7 @@ export async function getAllReleases({ start = 0, count = 10 }): Promise<Release
       statistic: {
         shortname: statistic?.shortname?.name,
         name: [
-          ...getLocalizedName(statistic?.language, statistic?.name),
+          ...getLocalizedName(statistic?.language ?? 'nb', statistic?.name),
           ...getLocalizedName('en', statistic?.name_en),
         ],
       },
