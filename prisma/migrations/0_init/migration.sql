@@ -39,6 +39,15 @@ CREATE TABLE "statreg"."Contact_DoNotUse" (
 );
 
 -- CreateTable
+CREATE TABLE "statreg"."ResponsiblePerson" (
+    "id" SERIAL NOT NULL,
+    "username" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+
+    CONSTRAINT "ResponsiblePerson_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "statreg"."Shortname" (
     "id" SERIAL NOT NULL,
     "version" INTEGER NOT NULL,
@@ -101,6 +110,7 @@ CREATE TABLE "statreg"."Statistic" (
     "desk_appoval_status" TEXT,
     "language" TEXT NOT NULL,
     "search_phrases_en" TEXT,
+    "division_code" TEXT,
     "division_id" INTEGER NOT NULL,
     "first_release" TIMESTAMP(6),
     "yearly_reporting" BOOLEAN NOT NULL,
@@ -149,11 +159,25 @@ CREATE TABLE "statreg"."Variant" (
     CONSTRAINT "Variant_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "statreg"."_ResponsiblePersonToStatistic" (
+    "A" INTEGER NOT NULL,
+    "B" INTEGER NOT NULL,
+
+    CONSTRAINT "_ResponsiblePersonToStatistic_AB_pkey" PRIMARY KEY ("A","B")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "Frequency_code_key" ON "statreg"."Frequency"("code");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Calender_date_day_key" ON "statreg"."Calender_date"("day");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "ResponsiblePerson_username_key" ON "statreg"."ResponsiblePerson"("username");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "ResponsiblePerson_email_key" ON "statreg"."ResponsiblePerson"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Shortname_name_key" ON "statreg"."Shortname"("name");
@@ -166,6 +190,9 @@ CREATE UNIQUE INDEX "Division_DoNotUse_code_key" ON "statreg"."Division_DoNotUse
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Statistic_shortname_id_key" ON "statreg"."Statistic"("shortname_id");
+
+-- CreateIndex
+CREATE INDEX "_ResponsiblePersonToStatistic_B_index" ON "statreg"."_ResponsiblePersonToStatistic"("B");
 
 -- AddForeignKey
 ALTER TABLE "statreg"."Release" ADD CONSTRAINT "Release_variant_id_fkey" FOREIGN KEY ("variant_id") REFERENCES "statreg"."Variant"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
@@ -196,4 +223,10 @@ ALTER TABLE "statreg"."Variant" ADD CONSTRAINT "Variant_freq_id_fkey" FOREIGN KE
 
 -- AddForeignKey
 ALTER TABLE "statreg"."Variant" ADD CONSTRAINT "Variant_statistic_id_fkey" FOREIGN KEY ("statistic_id") REFERENCES "statreg"."Statistic"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE "statreg"."_ResponsiblePersonToStatistic" ADD CONSTRAINT "_ResponsiblePersonToStatistic_A_fkey" FOREIGN KEY ("A") REFERENCES "statreg"."ResponsiblePerson"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "statreg"."_ResponsiblePersonToStatistic" ADD CONSTRAINT "_ResponsiblePersonToStatistic_B_fkey" FOREIGN KEY ("B") REFERENCES "statreg"."Statistic"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 

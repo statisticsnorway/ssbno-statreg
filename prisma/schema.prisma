@@ -41,6 +41,14 @@ model Contact_DoNotUse {
   statistic_contacts Statistic_contacts[]
 }
 
+model ResponsiblePerson {
+  @@schema("statreg")
+  id  Int         @id @default(autoincrement())
+  username String @unique
+  email String    @unique
+  statistics Statistic[]
+}
+
 model Shortname {
   @@schema("statreg")
   id           Int         @id @default(autoincrement())
@@ -100,6 +108,7 @@ model Statistic {
   desk_appoval_status     String?
   language                String
   search_phrases_en       String?
+  division_code           String?
   division_id             Int
   first_release           DateTime?                @db.Timestamp(6)
   yearly_reporting        Boolean
@@ -111,9 +120,10 @@ model Statistic {
   name_en                 String?
   date_created            DateTime                 @db.Timestamp(6)
   legacy_topic_codes      String?
+  responsiblePersons      ResponsiblePerson[]
   statistic               Statistic?               @relation("STATISTICToSTATISTIC", fields: [relation_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   other_statistics        Statistic[]              @relation("STATISTICToSTATISTIC")
-  division                Division_DoNotUse                 @relation(fields: [division_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  division                Division_DoNotUse?                 @relation(fields: [division_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   shortname               Shortname                @relation(fields: [shortname_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   contacts                Statistic_contacts[]
   statistic_region_levels Statistic_region_level[]
