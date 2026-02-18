@@ -28,7 +28,7 @@ export async function getAllStatistics({ start = 0, count = 10 }): Promise<Stati
     const main_language = statistic.language
     const lang_en = 'en'
 
-    const division_code = statistic.division.code
+    const division_code = statistic.division?.code
     const division = getDivisionFromCode(Number(division_code))
     const division_en = getDivisionFromCode(Number(division_code), lang_en)
 
