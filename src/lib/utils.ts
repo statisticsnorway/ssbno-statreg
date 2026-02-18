@@ -5,5 +5,6 @@ export function getLocalizedName(language_code: string, text: string | undefined
 
 export function dateToISOString(date: Date | null) {
   if (!date) return ''
+  // TODO: Might not be necessary to check is date is valid if we ensure that the new dates being created are valid
   return Number.isNaN(date.getTime()) ? '' : date.toISOString()
 }
