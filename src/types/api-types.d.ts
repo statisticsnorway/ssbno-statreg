@@ -665,7 +665,7 @@ export interface components {
       readonly updated_at?: string
       comment?: string
       desk_approval_status?: string | null
-      variant_id?: string
+      variant_id?: number
       /** Format: date-time */
       period_to?: string
       /** Format: date-time */
@@ -696,7 +696,7 @@ export interface components {
     Statistic_details: {
       version?: number
       shortname?: {
-        id?: string
+        id?: number
         name?: string
       }
       desk_appoval_status?: string | null
@@ -727,7 +727,7 @@ export interface components {
     Statistic_listing: {
       version?: number
       shortname?: {
-        id?: string
+        id?: number
         name?: string
       }
       desk_appoval_status?: string | null
