@@ -28,7 +28,6 @@ describe('klassService ', async () => {
     errorMock.mock.restore()
   })
 
-  // TODO: Update tests in upcoming PR for MIM-2475
   describe('getDepartmentsFromKlass ', async () => {
     test('builds departments and divisions correct from KLASS response', async () => {
       setPayload(mockClassificationItems)
@@ -41,6 +40,20 @@ describe('klassService ', async () => {
       )
 
       assert.deepEqual(departments, mockDepartments)
+    })
+
+    test('builds departments and divisions with en language from KLASS response', async () => {
+      setPayload(mockClassificationItemsEn)
+
+      const departments = await getDepartmentsFromKlass('en')
+      console.log(departments)
+
+      assert.equal(
+        fetchMock.mock.calls[0].arguments[0],
+        'https://data.ssb.no/api/klass/v1/versions/3009.json?language=en'
+      )
+
+      assert.deepEqual(departments, mockDepartmentsEn)
     })
 
     test('uses KLASS_BASE_URL env var when present', async () => {
@@ -102,33 +115,58 @@ describe('klassService ', async () => {
 ////////////// MOCK DATA ////////////////////////////////
 const mockClassificationItems = {
   classificationItems: [
-    { level: '1', code: '100', name: 'Dept A' },
-    { level: '2', code: '110', name: 'Div A1', parentCode: '100' },
-    { level: '2', code: '120', name: 'Div A2', parentCode: '100' },
-    { level: '1', code: '200', name: 'Dept B' },
-    { level: '2', code: '210', name: 'Div B1', parentCode: '200' },
+    { level: '1', code: '100', name: 'Avdeling A' },
+    { level: '2', code: '110', name: 'Seksjon A1', parentCode: '100' },
+    { level: '2', code: '120', name: 'Seksjon A2', parentCode: '100' },
+    { level: '1', code: '200', name: 'Avdeling B' },
+    { level: '2', code: '210', name: 'Seksjon B1', parentCode: '200' },
+  ],
+}
+const mockClassificationItemsEn = {
+  classificationItems: [
+    { level: '1', code: '100', name: 'Department A' },
+    { level: '2', code: '110', name: 'Division A1', parentCode: '100' },
+    { level: '2', code: '120', name: 'Division A2', parentCode: '100' },
+    { level: '1', code: '200', name: 'Department B' },
+    { level: '2', code: '210', name: 'Division B1', parentCode: '200' },
   ],
 }
 
 const mockInvalidClassificationItems = {
   classificationItems: [
-    { level: '1', code: '100', name: 'Dept A' },
-    { level: '2', code: '999', name: 'Div X', parentCode: '555' },
+    { level: '1', code: '100', name: 'Avdeling A' },
+    { level: '2', code: '999', name: 'Seksjon X', parentCode: '555' },
   ],
 }
 
 const mockDepartments = [
   {
     code: 100,
-    name: 'Dept A',
+    name: 'Avdeling A',
     divisions: [
-      { code: 110, name: 'Div A1' },
-      { code: 120, name: 'Div A2' },
+      { code: 110, name: 'Seksjon A1' },
+      { code: 120, name: 'Seksjon A2' },
     ],
   },
   {
     code: 200,
-    name: 'Dept B',
-    divisions: [{ code: 210, name: 'Div B1' }],
+    name: 'Avdeling B',
+    divisions: [{ code: 210, name: 'Seksjon B1' }],
+  },
+]
+
+const mockDepartmentsEn = [
+  {
+    code: 100,
+    name: 'Department A',
+    divisions: [
+      { code: 110, name: 'Division A1' },
+      { code: 120, name: 'Division A2' },
+    ],
+  },
+  {
+    code: 200,
+    name: 'Department B',
+    divisions: [{ code: 210, name: 'Division B1' }],
   },
 ]
