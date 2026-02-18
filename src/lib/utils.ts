@@ -4,5 +4,5 @@ export function getLocalizedName(language_code = 'nb', text: string | undefined 
 }
 
 export function dateToISOString(date: Date | null) {
-  return date ? date.toISOString() : ''
+  return date ? date.toISOString() : undefined
 }
