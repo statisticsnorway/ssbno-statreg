@@ -35,7 +35,7 @@ components:
           items:
             type: object
             properties:
-              release_id: { type: string, readOnly: true }
+              release_id: { type: integer, readOnly: true }
               statistic_shortname: { type: string, readOnly: true }
               statistic_name: { $ref: '#/components/schemas/Translations', readOnly: true }
 
@@ -50,16 +50,15 @@ components:
     Frequency:
       type: object
       properties:
-        id: { type: string, readOnly: true }
+        id: { type: integer, readOnly: true }
         name: { $ref: '#/components/schemas/Translations' }
         code: { type: string }
 
-    # TODO: Remember to update detailed releases
-    Release:
+    Release_details:
       type: object
       properties:
-        id: { type: string, readOnly: true }
-        version: { type: string }
+        id: { type: integer, readOnly: true }
+        version: { type: integer }
         publish_time: { type: string, format: date-time }
         has_versions: { type: boolean }
         updated_at: { type: string, format: date-time, readOnly: true }
@@ -73,14 +72,12 @@ components:
         release_date_precision: { type: string }
         import_flag: { type: boolean, nullable: true }
 
-    Releases_listing:
+    Release_listing:
       type: object
       properties:
-        id: { type: string, readOnly: true }
-        version: { type: string }
+        id: { type: integer, readOnly: true }
         publish_time: { type: string, format: date-time }
         desk_approval_status: { type: string, nullable: true }
-        variant_id: { type: string }
         period_to: { type: string, format: date-time }
         period_from: { type: string, format: date-time }
         statistic: 
@@ -96,7 +93,7 @@ components:
     Statistic_details:
       type: object
       properties:
-        version: { type: string }
+        version: { type: integer }
         shortname:
           type: object
           properties:
@@ -135,7 +132,7 @@ components:
     Statistic_listing:
       type: object
       properties:
-        version: { type: string }
+        version: { type: integer }
         shortname:
           type: object
           properties:
@@ -164,8 +161,8 @@ components:
     Variant:
       type: object
       properties:
-        id: { type: string, readOnly: true }
-        version: { type: string }
+        id: { type: integer, readOnly: true }
+        version: { type: integer }
         updated_at: { type: string, format: date-time, readOnly: true }
         level_of_detail: { $ref: '#/components/schemas/Translations', nullable: true }
         created_at: { type: string, format: date-time, readOnly: true }
@@ -303,7 +300,7 @@ paths:
             application/json:
               schema:
                 type: array
-                items: { $ref: '#/components/schemas/Release' }
+                items: { $ref: '#/components/schemas/Release_listing' }
     post:
       summary: Create a new release
       tags: [releases]
@@ -311,13 +308,13 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/Release' }
+            schema: { $ref: '#/components/schemas/Release_details' }
       responses:
         '201':
           description: Release details
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/Release' }
+              schema: { $ref: '#/components/schemas/Release_details' }
   /releases/{id}:
     get:
       summary: Get release by id
@@ -333,7 +330,7 @@ paths:
           description: Release details
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/Release' }
+              schema: { $ref: '#/components/schemas/Release_details' }
     put:
       summary: Update a release
       tags: [releases]
@@ -347,13 +344,13 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/Release' }
+            schema: { $ref: '#/components/schemas/Release_details' }
       responses:
         '200':
           description: Updated release details
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/Release' }
+              schema: { $ref: '#/components/schemas/Release_details' }
   /releases/{id}/versions:
     get:
       summary: List all versions on a release with change and comment. Response object TBD

@@ -33,9 +33,9 @@ export async function getAllStatistics({ start = 0, count = 10 }): Promise<Stati
     const division_en = getDivisionFromCode(Number(division_code), lang_en)
 
     return {
-      version: statistic.version.toString(),
+      version: statistic.version,
       shortname: {
-        id: statistic.shortname_id.toString(),
+        id: statistic.shortname_id,
         name: statistic.shortname.name,
       },
       desk_appoval_status: statistic.desk_appoval_status,
