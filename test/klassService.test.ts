@@ -46,7 +46,6 @@ describe('klassService ', async () => {
       setPayload(mockClassificationItemsEn)
 
       const departments = await getDepartmentsFromKlass('en')
-      console.log(departments)
 
       assert.equal(
         fetchMock.mock.calls[0].arguments[0],
