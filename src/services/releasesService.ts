@@ -39,7 +39,7 @@ export async function getAllReleases({ start = 0, count = 10 }): Promise<Release
   })
 
   return releases.map((release) => {
-    const { statistic } = release.variant
+    const { statistic, frequency } = release.variant ?? {}
     const lang_en = 'en'
 
     return {
@@ -49,10 +49,7 @@ export async function getAllReleases({ start = 0, count = 10 }): Promise<Release
       period_to: dateToISOString(release.period_to),
       period_from: dateToISOString(release.period_from),
       frequency: {
-        name: [
-          ...getLocalizedName('nb', release.variant.frequency.name),
-          ...getLocalizedName(lang_en, release.variant.frequency.name_en),
-        ],
+        name: [...getLocalizedName('nb', frequency.name), ...getLocalizedName(lang_en, frequency.name_en)],
       },
       statistic: {
         shortname: statistic.shortname.name,
