@@ -4,6 +4,8 @@ Here you'll find the migration plan and scripts used to migrate data from the le
 
 ## Step by step plan
 
+0. Connect VS code SQL Developer Extension to Orcale database to export data from
+
 ### Download tables from old database
 1. Manually update `tableStatsExample.json` with metadata for all tables that includes the table name, number of rows, the highest and lowest ids etc. Run provided `generate-stats.sql` in SQL Developer -> SQL Worksheet to generate data.
 2. Download all tables "as is" from old database to json files. This is easily done manually from "Data" tab in SQL Developer in VS Code. (Due to inline linebreak in some cells csv makes too many rows and is unreliable)
