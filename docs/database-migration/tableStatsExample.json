@@ -88,7 +88,7 @@
   "id_high_value": 207924
 },
 {
-  "old_table_name": "STATISTIKK_REIONALE_NIVAER",
+  "old_table_name": "STATISTIKK_REGIONALE_NIVAER",
   "new_table_name": "",
   "num_rows": 1090,
   "old_id_column_name": "STATISTIKK_ID",
