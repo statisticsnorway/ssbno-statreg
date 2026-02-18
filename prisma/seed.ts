@@ -150,14 +150,7 @@ async function main() {
       language: 'nb',
       search_phrases_en:
         'energy production, energy consumption, energy consumption by industry, energy consumption in households, energy goods (for example crude oil, petrol, natural gas), import, export, electricity prices, energy prices',
-      division: {
-        create: {
-          version: 1234,
-          name: 'Seksjon for energi-, miljø- og transportstatistikk',
-          code: '425',
-          name_en: 'Division for Energy, Environmental and Transport Statistics',
-        },
-      },
+      division_code: '425',
       first_release: '1976-01-01T00:00:00.000Z',
       yearly_reporting: false,
       status: 'SA',
@@ -233,15 +226,7 @@ async function main() {
       desk_appoval_status: 'GODKJENT',
       language: 'nb',
       search_phrases_en: 'foreign trade, import, export, goods flow',
-      division: {
-        create: {
-          id: 80010,
-          version: 1,
-          name: 'Seksjon for utenriks- og næringsstatistikk',
-          code: '102',
-          name_en: 'Division for Trade and Business Statistics',
-        },
-      },
+      division_code: '102',
       first_release: '1950-01-01T00:00:00.000Z',
       yearly_reporting: false,
       status: 'SA',
@@ -275,15 +260,7 @@ async function main() {
       desk_appoval_status: 'GODKJENT',
       language: 'nb',
       search_phrases_en: 'employment, labor force, unemployment, employment rate',
-      division: {
-        create: {
-          id: 80020,
-          version: 1,
-          name: 'Seksjon for arbeids- og lønnsstatistikk',
-          code: '103',
-          name_en: 'Division for Labour and Wage Statistics',
-        },
-      },
+      division_code: '103',
       first_release: '1960-01-01T00:00:00.000Z',
       yearly_reporting: true,
       status: 'SA',
@@ -317,15 +294,7 @@ async function main() {
       desk_appoval_status: 'GODKJENT',
       language: 'nb',
       search_phrases_en: 'health, disease, health services, prevalence',
-      division: {
-        create: {
-          id: 80030,
-          version: 1,
-          name: 'Seksjon for helse- og omsorgsstatistikk',
-          code: '104',
-          name_en: 'Division for Health and Care Statistics',
-        },
-      },
+      division_code: '104',
       first_release: '1970-01-01T00:00:00.000Z',
       yearly_reporting: true,
       status: 'SA',

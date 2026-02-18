@@ -109,7 +109,7 @@ model Statistic {
   language                String
   search_phrases_en       String?
   division_code           String?
-  division_id             Int
+  division_id             Int?
   first_release           DateTime?                @db.Timestamp(6)
   yearly_reporting        Boolean
   status                  String

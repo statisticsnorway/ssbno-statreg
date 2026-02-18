@@ -111,7 +111,7 @@ CREATE TABLE "statreg"."Statistic" (
     "language" TEXT NOT NULL,
     "search_phrases_en" TEXT,
     "division_code" TEXT,
-    "division_id" INTEGER NOT NULL,
+    "division_id" INTEGER,
     "first_release" TIMESTAMP(6),
     "yearly_reporting" BOOLEAN NOT NULL,
     "status" TEXT NOT NULL,
