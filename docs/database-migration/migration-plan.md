@@ -1,0 +1,32 @@
+# Database migration plan
+
+Here you'll find the migration plan and scripts used to migrate data from the legacy Oracle database to PostgreSQL on NAIS.
+
+## Step by step plan
+
+### Download tables from old database
+1. Manually update an existing json file with metadata for all tables that includes the number of table name, rows, the highest and lowest ids etc. The data needed is easily extracted from "statistics" tab in SQL Developer in VS Code.
+2. Download all tables "as is" from old database to csv files. This is easily done manually from "Data" tab in SQL Developer in VS Code.
+3. Take a backup of the CSV files if a backup of the old database doesn't already exist, and store them in a secure location.
+4. Verify all CSV files against the json validation files using a script, checking the number of rows and the highest and lowest ids.
+
+### Data manipulation
+5. Using script to rename columns according to new schema
+6. Update relevant dates for Releases to include the correct local timezone using a script.
+
+### Prepare PostgreSQL to receive data
+7. Remove any constraints that can't be preserved (identified in advance), such as Statistic-to-Statistic relations. (prisma migration?)
+
+### Load data to PostgreSQL
+8. Load data from csv files, one table at a time (using script)
+9. After data loading, verify each table against the json validation files using a script. Check the number of rows and the highest and lowest ids.
+
+### Post migration steps in PostgreSQL
+10. Reapply the constraints that were removed during data load for PostgreSQL. (prisma migration?)
+11. Set the correct serial counter for all tables to ensure that autoincrement works. (prisma migration sql?)
+
+### Migrate data to new data columns in PostgreSQL
+12. Add a migration to fill the new Division code column in the Statistics table, deriving data from the existing Division relation. (prisma migration sql?)
+13. Optional: Update the approval status field(s) for Releases and Statistics if new statuses should be applied or we get any new status column.
+14. Add a migration to fill the new ResponsiblePerson table, deriving data from the existing Contact relation. (prisma migration sql?)
+15. Drop legacy tables that are no longer needed e.g. Division and Contacts. (prisma migration sql?)
