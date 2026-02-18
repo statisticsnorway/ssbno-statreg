@@ -43,9 +43,9 @@ model Contact_DoNotUse {
 
 model ResponsiblePerson {
   @@schema("statreg")
-  id  Int         @id @default(autoincrement())
-  username String @unique
-  email String    @unique
+  id  Int          @id @default(autoincrement())
+  username String? @unique
+  email String     @unique
   statistics Statistic[]
 }
 

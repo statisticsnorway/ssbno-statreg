@@ -41,7 +41,7 @@ CREATE TABLE "statreg"."Contact_DoNotUse" (
 -- CreateTable
 CREATE TABLE "statreg"."ResponsiblePerson" (
     "id" SERIAL NOT NULL,
-    "username" TEXT NOT NULL,
+    "username" TEXT,
     "email" TEXT NOT NULL,
 
     CONSTRAINT "ResponsiblePerson_pkey" PRIMARY KEY ("id")
