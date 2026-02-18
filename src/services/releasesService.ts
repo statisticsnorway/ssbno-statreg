@@ -14,31 +14,32 @@ export async function getAllReleases({ start = 0, count = 10 }): Promise<Release
       desk_appoval_status: true,
       period_to: true,
       period_from: true,
-      variant_id: true,
+      variant: {
+        select: {
+          frequency: {
+            select: {
+              name: true,
+            },
+          },
+          statistic: {
+            select: {
+              language: true,
+              name: true,
+              name_en: true,
+              shortname: {
+                select: {
+                  name: true,
+                },
+              },
+            },
+          },
+        },
+      },
     },
   })
 
-  const variantIds = Array.from(new Set(releases.map((r) => r.variant_id).filter(Boolean)))
-  const variants = variantIds.length
-    ? await prisma.variant.findMany({
-        where: { id: { in: variantIds } },
-        select: { id: true, statistic_id: true, frequency: { select: { name: true } } },
-      })
-    : []
-  const variantsMap = new Map(variants.map((v) => [Number(v.id), v]))
-
-  const statisticIds = Array.from(new Set(variants.map((v) => v.statistic_id).filter(Boolean)))
-  const statistics = statisticIds.length
-    ? await prisma.statistic.findMany({
-        where: { id: { in: statisticIds } },
-        select: { id: true, shortname: { select: { name: true } }, name: true, language: true, name_en: true },
-      })
-    : []
-  const statisticsMap = new Map(statistics.map((s) => [Number(s.id), s]))
-
   return releases.map((release) => {
-    const variant = release.variant_id ? variantsMap.get(Number(release.variant_id)) : undefined
-    const statistic = variant?.statistic_id ? statisticsMap.get(Number(variant.statistic_id)) : undefined
+    const { statistic } = release.variant
 
     return {
       id: release.id.toString(),
@@ -48,7 +49,7 @@ export async function getAllReleases({ start = 0, count = 10 }): Promise<Release
       period_to: release.period_to.toISOString(),
       period_from: release.period_from.toISOString(),
       // TODO: There's only en names for frequency names in the database
-      frequency: { name: [...getLocalizedName('en', variant?.frequency?.name)] },
+      frequency: { name: [...getLocalizedName('en', release.variant?.frequency?.name)] },
       statistic: {
         shortname: statistic?.shortname?.name,
         name: [
