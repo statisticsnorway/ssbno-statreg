@@ -12,7 +12,8 @@ model Frequency {
   @@schema("statreg")
   id      Int    @id @default(autoincrement())
   version Int       
-  name    String    
+  name    String
+  name_en String    
   code    String    @unique
   variant Variant[]
 }

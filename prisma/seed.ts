@@ -7,7 +7,8 @@ async function main() {
     update: {},
     create: {
       code: 'W',
-      name: 'Week',
+      name_en: 'Week',
+      name: 'Uke',
       version: 1,
     },
   })
@@ -19,7 +20,8 @@ async function main() {
     update: {},
     create: {
       code: 'Y',
-      name: 'Year',
+      name_en: 'Year',
+      name: 'År',
       version: 1,
     },
   })
@@ -31,7 +33,8 @@ async function main() {
     update: {},
     create: {
       code: 'M',
-      name: 'Month',
+      name_en: 'Month',
+      name: 'Måned',
       version: 1,
     },
   })

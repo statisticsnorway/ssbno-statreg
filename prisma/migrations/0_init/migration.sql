@@ -6,6 +6,7 @@ CREATE TABLE "statreg"."Frequency" (
     "id" SERIAL NOT NULL,
     "version" INTEGER NOT NULL,
     "name" TEXT NOT NULL,
+    "name_en" TEXT NOT NULL,
     "code" TEXT NOT NULL,
 
     CONSTRAINT "Frequency_pkey" PRIMARY KEY ("id")
