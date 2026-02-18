@@ -19,7 +19,6 @@ export async function getAllStatistics({ start = 0, count = 10 }): Promise<Stati
       legacy_topic_codes: true,
     },
     include: {
-      division: { select: { code: true } },
       shortname: { select: { name: true } },
     },
   })
@@ -28,7 +27,7 @@ export async function getAllStatistics({ start = 0, count = 10 }): Promise<Stati
     const main_language = statistic.language
     const lang_en = 'en'
 
-    const division_code = Number(statistic.division?.code)
+    const division_code = Number(statistic.division_code)
     const division = getDivisionFromCode(division_code)
     const division_en = getDivisionFromCode(division_code, lang_en)
 
