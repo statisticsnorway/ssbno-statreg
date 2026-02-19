@@ -695,10 +695,7 @@ export interface components {
     }
     Statistic_details: {
       version?: number
-      shortname?: {
-        id?: number
-        name?: string
-      }
+      readonly shortname?: string
       desk_appoval_status?: string | null
       main_language?: string
       division?: {
@@ -726,10 +723,7 @@ export interface components {
     }
     Statistic_listing: {
       version?: number
-      shortname?: {
-        id?: number
-        name?: string
-      }
+      readonly shortname?: string
       desk_appoval_status?: string | null
       main_language?: string
       division?: {

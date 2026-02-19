@@ -94,11 +94,7 @@ components:
       type: object
       properties:
         version: { type: integer }
-        shortname:
-          type: object
-          properties:
-            id: { type: integer }
-            name: { type: string }
+        shortname: { type: string, readOnly: true }
         desk_appoval_status: { type: string, nullable: true }
         main_language: { type: string }
         division:
@@ -133,11 +129,7 @@ components:
       type: object
       properties:
         version: { type: integer }
-        shortname:
-          type: object
-          properties:
-            id: { type: integer }
-            name: { type: string }
+        shortname: { type: string, readOnly: true }
         desk_appoval_status: { type: string, nullable: true }
         main_language: { type: string }
         division:
