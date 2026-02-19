@@ -6,23 +6,11 @@ export async function getAllStatistics({ start = 0, count = 10 }): Promise<Stati
   const statistics = await prisma.statistic.findMany({
     skip: start,
     take: count,
-    omit: {
-      id: true,
-      desk_appoval_status: true,
-      dir_appoval_status: true,
-      division_code: true,
-      search_phrases: true,
-      search_phrases_en: true,
-      priority: true,
-      relation_id: true,
-      last_updated: true,
-      date_created: true,
-      legacy_topic_codes: true,
-      first_release: true,
-      yearly_reporting: true,
-      version: true,
-    },
-    include: {
+    select: {
+      language: true,
+      status: true,
+      name: true,
+      name_en: true,
       shortname: { select: { name: true } },
       responsiblePersons: { select: { username: true } },
     },
