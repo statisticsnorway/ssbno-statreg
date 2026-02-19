@@ -270,7 +270,7 @@ export interface paths {
             [name: string]: unknown
           }
           content: {
-            'application/json': components['schemas']['Release'][]
+            'application/json': components['schemas']['Release_listing'][]
           }
         }
       }
@@ -286,7 +286,7 @@ export interface paths {
       }
       requestBody: {
         content: {
-          'application/json': components['schemas']['Release']
+          'application/json': components['schemas']['Release_details']
         }
       }
       responses: {
@@ -296,7 +296,7 @@ export interface paths {
             [name: string]: unknown
           }
           content: {
-            'application/json': components['schemas']['Release']
+            'application/json': components['schemas']['Release_details']
           }
         }
       }
@@ -332,7 +332,7 @@ export interface paths {
             [name: string]: unknown
           }
           content: {
-            'application/json': components['schemas']['Release']
+            'application/json': components['schemas']['Release_details']
           }
         }
       }
@@ -349,7 +349,7 @@ export interface paths {
       }
       requestBody: {
         content: {
-          'application/json': components['schemas']['Release']
+          'application/json': components['schemas']['Release_details']
         }
       }
       responses: {
@@ -359,7 +359,7 @@ export interface paths {
             [name: string]: unknown
           }
           content: {
-            'application/json': components['schemas']['Release']
+            'application/json': components['schemas']['Release_details']
           }
         }
       }
@@ -637,7 +637,7 @@ export interface components {
       readonly is_blocked?: boolean
       readonly blocked_comment?: string | null
       releases?: {
-        readonly release_id?: string
+        readonly release_id?: number
         readonly statistic_shortname?: string
         readonly statistic_name?: components['schemas']['Translations']
       }[]
@@ -651,21 +651,21 @@ export interface components {
       readonly email?: string
     }
     Frequency: {
-      readonly id?: string
+      readonly id?: number
       name?: components['schemas']['Translations']
       code?: string
     }
-    Release: {
-      readonly id?: string
-      version?: string
+    Release_details: {
+      readonly id?: number
+      version?: number
       /** Format: date-time */
-      published_at?: string
+      publish_time?: string
       has_versions?: boolean
       /** Format: date-time */
       readonly updated_at?: string
       comment?: string
-      desk_appoval_status?: string | null
-      variant_id?: string
+      approval_status?: string | null
+      variant_id?: number
       /** Format: date-time */
       period_to?: string
       /** Format: date-time */
@@ -676,16 +676,30 @@ export interface components {
       release_date_precision?: string
       import_flag?: boolean | null
     }
-    Statistic_details: {
-      version?: string
-      shortname?: {
-        id?: string
-        name?: string
+    Release_listing: {
+      readonly id?: number
+      /** Format: date-time */
+      publish_time?: string
+      approval_status?: string | null
+      /** Format: date-time */
+      period_to?: string
+      /** Format: date-time */
+      period_from?: string
+      statistic?: {
+        readonly shortname?: string
+        readonly name?: components['schemas']['Translations']
       }
-      desk_appoval_status?: string | null
+      frequency?: {
+        readonly name?: components['schemas']['Translations']
+      }
+    }
+    Statistic_details: {
+      version?: number
+      readonly shortname?: string
+      approval_status?: string | null
       main_language?: string
       division?: {
-        id?: unknown
+        code?: unknown
         readonly name?: components['schemas']['Translations']
       }
       /** Format: date */
@@ -708,15 +722,12 @@ export interface components {
       statistic_region_levels?: components['schemas']['Translations'][]
     }
     Statistic_listing: {
-      version?: string
-      shortname?: {
-        id?: string
-        name?: string
-      }
-      desk_appoval_status?: string | null
+      version?: number
+      readonly shortname?: string
+      approval_status?: string | null
       main_language?: string
       division?: {
-        id?: unknown
+        code?: unknown
         name?: components['schemas']['Translations']
       }
       /** Format: date */
@@ -730,8 +741,8 @@ export interface components {
       text?: string
     }[]
     Variant: {
-      readonly id?: string
-      version?: string
+      readonly id?: number
+      version?: number
       /** Format: date-time */
       readonly updated_at?: string
       level_of_detail?: components['schemas']['Translations']
