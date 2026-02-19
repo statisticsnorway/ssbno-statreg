@@ -37,7 +37,7 @@ export async function getAllStatistics({ start = 0, count = 10 }): Promise<Stati
       desk_appoval_status: statistic.desk_appoval_status,
       main_language,
       division: {
-        id: division_code,
+        code: division_code,
         name: [...getLocalizedName(main_language, division?.name), ...getLocalizedName(lang_en, division_en?.name)],
       },
       first_released_at: dateToISOString(statistic.first_release),
