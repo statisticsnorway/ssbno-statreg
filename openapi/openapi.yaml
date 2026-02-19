@@ -100,7 +100,7 @@ components:
         division:
           type: object
           properties:
-            id: { type string }
+            code: { type string }
             name: { $ref: '#/components/schemas/Translations', readOnly: true }
         first_released_at: { type: string, format: date, nullable: true } # Sjekk om denne bør være string (angir vi bar år av og til??)
         yearly_reporting: { type: boolean }
@@ -135,7 +135,7 @@ components:
         division:
           type: object
           properties:
-            id: { type string }
+            code: { type string }
             name: { $ref: '#/components/schemas/Translations' }
         first_released_at: { type: string, format: date, nullable: true }
         yearly_reporting: { type: boolean }

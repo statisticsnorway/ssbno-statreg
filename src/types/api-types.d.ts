@@ -699,7 +699,7 @@ export interface components {
       desk_appoval_status?: string | null
       main_language?: string
       division?: {
-        id?: unknown
+        code?: unknown
         readonly name?: components['schemas']['Translations']
       }
       /** Format: date */
@@ -727,7 +727,7 @@ export interface components {
       desk_appoval_status?: string | null
       main_language?: string
       division?: {
-        id?: unknown
+        code?: unknown
         name?: components['schemas']['Translations']
       }
       /** Format: date */
