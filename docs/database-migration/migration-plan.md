@@ -2,6 +2,8 @@
 
 Here you'll find the migration plan and scripts used to migrate data from the legacy Oracle database to PostgreSQL on NAIS.
 
+All scripts are found under `src/scripts`
+
 ## Step by step plan
 
 0. Connect VS code SQL Developer Extension to Oracle database to export data from.
@@ -16,10 +18,12 @@ Here you'll find the migration plan and scripts used to migrate data from the le
 5. Remove any constraints that can't be preserved (identified in advance), such as Statistic-to-Statistic relations. (prisma migration?)
 
 ### Load data to PostgreSQL
-6. Copy json files (both data and validation metadata) from localhost into a tmp location in pod using kubectl exec
+6. Copy json files (both data and validation metadata) from localhost into a tmp location in pod using kubectl exec 
+TODO: Verify copilot suggestion: `kubectl cp ./data/myfile.json <pod-name>:/app/data/myfile.json`
 7. Load data from csv files, one table at a time using script. Mapping from old column names to new ones is handled in this operation.
 8. After data loading, verify each table against the json validation files using a script. Check the number of rows and the highest and lowest ids.
 9. Delete json files in pod
+10. Remove npm packages `stream-json`and `@types/stream-json` used for importing json
 
 ### Post migration steps in PostgreSQL
 10. Reapply the constraints that were removed during data load for PostgreSQL. (prisma migration?)
