@@ -45,7 +45,7 @@ export async function getAllReleases({ start = 0, count = 10 }): Promise<Release
     return {
       id: release.id,
       publish_time: dateToISOString(release.publish_time),
-      desk_approval_status: release.desk_appoval_status,
+      approval_status: release.desk_appoval_status,
       period_to: dateToISOString(release.period_to),
       period_from: dateToISOString(release.period_from),
       frequency: {

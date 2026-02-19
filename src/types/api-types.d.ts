@@ -664,7 +664,7 @@ export interface components {
       /** Format: date-time */
       readonly updated_at?: string
       comment?: string
-      desk_approval_status?: string | null
+      approval_status?: string | null
       variant_id?: number
       /** Format: date-time */
       period_to?: string
@@ -680,7 +680,7 @@ export interface components {
       readonly id?: number
       /** Format: date-time */
       publish_time?: string
-      desk_approval_status?: string | null
+      approval_status?: string | null
       /** Format: date-time */
       period_to?: string
       /** Format: date-time */
@@ -696,7 +696,7 @@ export interface components {
     Statistic_details: {
       version?: number
       readonly shortname?: string
-      desk_appoval_status?: string | null
+      approval_status?: string | null
       main_language?: string
       division?: {
         code?: unknown
@@ -724,7 +724,7 @@ export interface components {
     Statistic_listing: {
       version?: number
       readonly shortname?: string
-      desk_appoval_status?: string | null
+      approval_status?: string | null
       main_language?: string
       division?: {
         code?: unknown

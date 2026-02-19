@@ -34,7 +34,7 @@ export async function getAllStatistics({ start = 0, count = 10 }): Promise<Stati
     return {
       version: statistic.version,
       shortname: statistic.shortname.name,
-      desk_appoval_status: statistic.desk_appoval_status,
+      approval_status: statistic.desk_appoval_status,
       main_language,
       division: {
         code: division_code,
