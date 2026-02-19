@@ -4,7 +4,7 @@ Here you'll find the migration plan and scripts used to migrate data from the le
 
 ## Step by step plan
 
-0. Connect VS code SQL Developer Extension to Orcale database to export data from
+0. Connect VS code SQL Developer Extension to Oracle database to export data from.
 
 ### Download tables from old database
 1. Manually update `tableStatsExample.json` with metadata for all tables that includes the table name, number of rows, the highest and lowest ids etc. Run provided `generate-stats.sql` in SQL Developer -> SQL Worksheet to generate data.
@@ -12,16 +12,14 @@ Here you'll find the migration plan and scripts used to migrate data from the le
 3. Take a backup of the json files if a backup of the old database doesn't already exist, and store them in a secure location.
 4. Verify all json files running `json-validation.sh`, checking the number of rows and the highest and lowest ids.
 
-### Data manipulation
-5. Using script to rename columns according to new schema
-6. Update relevant dates for Releases to include the correct local timezone using a script.
-
 ### Prepare PostgreSQL to receive data
-7. Remove any constraints that can't be preserved (identified in advance), such as Statistic-to-Statistic relations. (prisma migration?)
+5. Remove any constraints that can't be preserved (identified in advance), such as Statistic-to-Statistic relations. (prisma migration?)
 
 ### Load data to PostgreSQL
-8. Load data from csv files, one table at a time (using script)
-9. After data loading, verify each table against the json validation files using a script. Check the number of rows and the highest and lowest ids.
+6. Copy json files (both data and validation metadata) from localhost into a tmp location in pod using kubectl exec
+7. Load data from csv files, one table at a time using script. Mapping from old column names to new ones is handled in this operation.
+8. After data loading, verify each table against the json validation files using a script. Check the number of rows and the highest and lowest ids.
+9. Delete json files in pod
 
 ### Post migration steps in PostgreSQL
 10. Reapply the constraints that were removed during data load for PostgreSQL. (prisma migration?)
