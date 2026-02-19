@@ -12,7 +12,7 @@ export async function getAllStatistics({ start = 0, count = 10 }): Promise<Stati
       name: true,
       name_en: true,
       shortname: { select: { name: true } },
-      responsiblePersons: { select: { username: true } },
+      responsiblePersons: { select: { username: true, email: true } },
     },
   })
 
@@ -25,7 +25,7 @@ export async function getAllStatistics({ start = 0, count = 10 }): Promise<Stati
       main_language,
       status: [...getLocalizedName(main_language, statistic.status)],
       name: [...getLocalizedName(main_language, statistic.name), ...getLocalizedName(lang_en, statistic.name_en)],
-      contacts: statistic.responsiblePersons.map(({ username }) => username),
+      contacts: statistic.responsiblePersons,
     }
   })
 }

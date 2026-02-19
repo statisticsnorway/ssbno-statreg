@@ -726,7 +726,10 @@ export interface components {
       main_language?: string
       status?: components['schemas']['Translations']
       name?: components['schemas']['Translations']
-      contacts?: (string | null)[]
+      contacts?: {
+        username?: string | null
+        email?: string
+      }[]
     }
     Translations: {
       language_code?: string
