@@ -82,6 +82,7 @@ spec:
               value: "on"          
           databases:
             - name: statreg-db
+          cascadingDelete: true
 
   prometheus:
     enabled: true
