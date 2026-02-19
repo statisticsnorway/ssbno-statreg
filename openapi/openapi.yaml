@@ -128,19 +128,13 @@ components:
     Statistic_listing:
       type: object
       properties:
-        version: { type: integer }
         shortname: { type: string, readOnly: true }
-        approval_status: { type: string, nullable: true }
         main_language: { type: string }
-        division:
-          type: object
-          properties:
-            code: { type string }
-            name: { $ref: '#/components/schemas/Translations' }
-        first_released_at: { type: string, format: date, nullable: true }
-        yearly_reporting: { type: boolean }
         status: { $ref: '#/components/schemas/Translations' }
         name: { $ref: '#/components/schemas/Translations' }
+        contacts:
+          type: array
+          items: { type: string, nullable: true }
 
     Translations:
       type: array

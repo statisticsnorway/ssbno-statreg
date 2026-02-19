@@ -1,7 +1,6 @@
 import type { StatisticListing } from '@/types/index'
 import { prisma } from '@/lib/prisma'
-import { getDivisionFromCode } from '@/services/klassService'
-import { getLocalizedName, dateToISOString } from '@/lib/utils'
+import { getLocalizedName } from '@/lib/utils'
 
 export async function getAllStatistics({ start = 0, count = 10 }): Promise<StatisticListing[]> {
   const statistics = await prisma.statistic.findMany({
@@ -9,7 +8,9 @@ export async function getAllStatistics({ start = 0, count = 10 }): Promise<Stati
     take: count,
     omit: {
       id: true,
+      desk_appoval_status: true,
       dir_appoval_status: true,
+      division_code: true,
       search_phrases: true,
       search_phrases_en: true,
       priority: true,
@@ -17,9 +18,13 @@ export async function getAllStatistics({ start = 0, count = 10 }): Promise<Stati
       last_updated: true,
       date_created: true,
       legacy_topic_codes: true,
+      first_release: true,
+      yearly_reporting: true,
+      version: true,
     },
     include: {
       shortname: { select: { name: true } },
+      responsiblePersons: { select: { username: true } },
     },
   })
 
@@ -27,23 +32,12 @@ export async function getAllStatistics({ start = 0, count = 10 }): Promise<Stati
     const main_language = statistic.language
     const lang_en = 'en'
 
-    const division_code = Number(statistic.division_code)
-    const division = getDivisionFromCode(division_code)
-    const division_en = getDivisionFromCode(division_code, lang_en)
-
     return {
-      version: statistic.version,
       shortname: statistic.shortname.name,
-      approval_status: statistic.desk_appoval_status,
       main_language,
-      division: {
-        code: division_code,
-        name: [...getLocalizedName(main_language, division?.name), ...getLocalizedName(lang_en, division_en?.name)],
-      },
-      first_released_at: dateToISOString(statistic.first_release),
-      yearly_reporting: statistic.yearly_reporting,
       status: [...getLocalizedName(main_language, statistic.status)],
       name: [...getLocalizedName(main_language, statistic.name), ...getLocalizedName(lang_en, statistic.name_en)],
+      contacts: statistic.responsiblePersons.map(({ username }) => username),
     }
   })
 }

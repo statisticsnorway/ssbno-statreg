@@ -722,19 +722,11 @@ export interface components {
       statistic_region_levels?: components['schemas']['Translations'][]
     }
     Statistic_listing: {
-      version?: number
       readonly shortname?: string
-      approval_status?: string | null
       main_language?: string
-      division?: {
-        code?: unknown
-        name?: components['schemas']['Translations']
-      }
-      /** Format: date */
-      first_released_at?: string | null
-      yearly_reporting?: boolean
       status?: components['schemas']['Translations']
       name?: components['schemas']['Translations']
+      contacts?: (string | null)[]
     }
     Translations: {
       language_code?: string
