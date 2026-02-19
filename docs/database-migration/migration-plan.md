@@ -20,10 +20,11 @@ All scripts are found under `src/scripts`
 ### Load data to PostgreSQL
 6. Copy json files (both data and validation metadata) from localhost into a tmp location in pod using kubectl exec 
 TODO: Verify copilot suggestion: `kubectl cp ./data/myfile.json <pod-name>:/app/data/myfile.json`
-7. Load data from csv files, one table at a time using script. Mapping from old column names to new ones is handled in this operation.
+7. Run script `import-data-to-postgres.ts` to load data from json files to PostgreSQL by running command in pod:
+`npm exec tsx ./src/scripts/import-data-to-postgres.ts ~/Documents/STATREG_TABLES_JSON`
 8. After data loading, verify each table against the json validation files using a script. Check the number of rows and the highest and lowest ids.
 9. Delete json files in pod
-10. Remove npm packages `stream-json`and `@types/stream-json` used for importing json
+10. Remove npm packages `JSONStream` only used for importing json
 
 ### Post migration steps in PostgreSQL
 10. Reapply the constraints that were removed during data load for PostgreSQL. (prisma migration?)
