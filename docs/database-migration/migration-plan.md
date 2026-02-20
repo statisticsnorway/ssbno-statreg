@@ -14,24 +14,18 @@ All scripts are found under `src/scripts`
 3. Take a backup of the json files if a backup of the old database doesn't already exist, and store them in a secure location.
 4. Verify all json files running `json-validation.sh`, checking the number of rows and the highest and lowest ids.
 
-### Prepare PostgreSQL to receive data
-5. Remove any constraints that can't be preserved (identified in advance), such as Statistic-to-Statistic relations. (prisma migration?)
-
 ### Load data to PostgreSQL
-6. Copy json files (both data and validation metadata) from localhost into a tmp location in pod using kubectl exec 
-TODO: Verify copilot suggestion: `kubectl cp ./data/myfile.json <pod-name>:/app/data/myfile.json`
-7. Run script `import-data-to-postgres.ts` to load data from json files to PostgreSQL by running command in pod:
-`npm exec tsx ./src/scripts/import-data-to-postgres.ts ~/Documents/STATREG_TABLES_JSON`
+6. Copy json files (both data and validation metadata) from localhost into a tmp location in pod using kubectl exec: `kubectl cp ./data/myfile.json <pod-name>:/app/data/myfile.json` (TODO: Verify copilot command suggestion)
+7. Run script `import-data-to-postgres.ts` to delete all existing data in database, load data from json files to PostgreSQL by running command in pod:
+`npm exec tsx ./src/scripts/import-data-to-postgres.ts ~/Documents/STATREG_TABLES_JSON`. The script also:
+ ** set the correct serial counter for all tables to ensure that autoincrement works.
+ ** transforms dates to correct format and timezone
 8. After data loading, verify each table against the json validation files using a script. Check the number of rows and the highest and lowest ids.
 9. Delete json files in pod
 10. Remove npm packages `JSONStream` only used for importing json
 
-### Post migration steps in PostgreSQL
-10. Reapply the constraints that were removed during data load for PostgreSQL. (prisma migration?)
-11. Set the correct serial counter for all tables to ensure that autoincrement works. (prisma migration sql?)
-
 ### Migrate data to new data columns in PostgreSQL
-12. Add a migration to fill the new Division code column in the Statistics table, deriving data from the existing Division relation. (prisma migration sql?)
+12. Add script to fill the new Division code column in the Statistics table, deriving data from the existing Division relation. (prisma migration sql?)
 13. Optional: Update the approval status field(s) for Releases and Statistics if new statuses should be applied or we get any new status column.
-14. Add a migration to fill the new ResponsiblePerson table, deriving data from the existing Contact relation. (prisma migration sql?)
+14. Add script to fill the new ResponsiblePerson table, deriving data from the existing Contact relation. (prisma migration sql?)
 15. Drop legacy tables that are no longer needed e.g. Division and Contacts. (prisma migration sql?)

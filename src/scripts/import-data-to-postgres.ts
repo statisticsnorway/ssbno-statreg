@@ -70,7 +70,7 @@ function toBool(value: any): boolean | undefined {
   return undefined
 }
 
-// TODO: Verify this becomes correct with database running in UTC (not Oslo time as my machine)
+// TODO: Fix correct date formatting (I think this logic is wrong)
 function parseOsloDate(value: string): Date | undefined {
   if (!value) return undefined
 
