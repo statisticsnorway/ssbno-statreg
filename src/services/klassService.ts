@@ -5,6 +5,7 @@ import process from 'node:process'
 export let DEPARTMENTS_NB: Department[]
 export let DEPARTMENTS_EN: Department[]
 
+//. TODO: Enhetstest try AI
 export function getDivisionFromCode(code: number, language?: string) {
   const departments = language === 'en' ? DEPARTMENTS_EN : DEPARTMENTS_NB
   return departments.flatMap(({ divisions }) => divisions).find((division) => division.code === code)

@@ -45,7 +45,7 @@ describe('klassService ', async () => {
     test('builds departments and divisions with en language from KLASS response', async () => {
       setPayload(mockClassificationItemsEn)
 
-      const departments = await getDepartmentsFromKlass('en')
+      const departments = await getDepartmentsFromKlass('en') // TODO: url check is enough
 
       assert.equal(
         fetchMock.mock.calls[0].arguments[0],
