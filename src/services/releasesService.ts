@@ -1,8 +1,10 @@
 import type { ReleaseListing } from '@/types/index'
 import { getLocalizedName, dateToISOString } from '@/lib/utils'
-import { prisma } from '@/lib/prisma'
+import { type PrismaClient } from '@/generated/prisma/client'
 
-export async function getAllReleases({ start = 0, count = 10 }): Promise<ReleaseListing[]> {
+export type ReleasePrisma = Pick<PrismaClient, 'release'>
+
+export async function getAllReleases({ start = 0, count = 10 }, prisma: ReleasePrisma): Promise<ReleaseListing[]> {
   const releases = await prisma.release.findMany({
     skip: start,
     take: count,

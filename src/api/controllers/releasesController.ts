@@ -2,13 +2,14 @@ import type { Router } from 'express'
 import { getAllReleases } from '@/services/releasesService'
 import { skipAuth } from 'plugins/authMiddleware'
 import { handleErrors } from '@/lib/prismaErrors'
+import { prisma } from '@/lib/prisma'
 
 export default function releasesController(router: Router) {
   router.get('/releases', skipAuth, async (req, res) => {
     try {
       const start = req.query?.start ? Number(req.query.start) : undefined
       const count = req.query?.count ? Number(req.query.count) : undefined
-      const data = await getAllReleases({ start, count })
+      const data = await getAllReleases({ start, count }, prisma)
       res.json(data)
     } catch (error) {
       return handleErrors(error, res)
