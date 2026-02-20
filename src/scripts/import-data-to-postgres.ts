@@ -37,6 +37,20 @@ async function deleteAllData() {
   console.log('✔ All tables emptied')
 }
 
+async function resetSequence(table: string, idColumn = 'id', schema = 'statreg') {
+  const qualifiedTable = `"${schema}"."${table}"`
+
+  const sql = `
+    SELECT setval(
+      pg_get_serial_sequence('${qualifiedTable}', '${idColumn}')::regclass,
+      COALESCE((SELECT MAX(${idColumn})::bigint FROM ${qualifiedTable}), 0),
+      true
+    );
+  `
+  await prisma.$executeRawUnsafe(sql)
+  console.log(`🔧 Sequence reset for ${schema}.${table}`)
+}
+
 function ensureFileExists(fullPath: string) {
   if (!fs.existsSync(fullPath)) {
     console.error(`ERROR: File not found: ${fullPath}`)
@@ -592,6 +606,26 @@ async function importAuditLog(folder: string) {
 }
 
 // ============================================================================
+// RESET/UPDATE all sequences
+// ============================================================================
+
+async function resetAllSequences() {
+  console.log('\n▶ Resetting PostgreSQL sequences...')
+
+  await resetSequence('Frequency')
+  await resetSequence('Calender_date')
+  await resetSequence('Contact_DoNotUse')
+  await resetSequence('Shortname')
+  await resetSequence('Division_DoNotUse')
+  await resetSequence('Region_level')
+  await resetSequence('Statistic')
+  await resetSequence('Variant')
+  await resetSequence('Release')
+
+  console.log('✔ All sequences updated\n')
+}
+
+// ============================================================================
 // MAIN (explicit dependency-friendly order)
 // Parents before children to satisfy FKs.
 // ============================================================================
@@ -618,6 +652,8 @@ async function main() {
   // await importAuditLog(folder);      // AUDIT_LOG (raw SQL)
 
   console.log('\n🎉 All requested tables imported successfully (see notes about AUDIT_LOG).')
+
+  resetAllSequences()
 }
 
 main()
