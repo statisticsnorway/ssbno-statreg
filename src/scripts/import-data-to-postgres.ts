@@ -605,6 +605,7 @@ async function main() {
   // await importContact(folder) // KONTAKT
   // await importShortname(folder) // KORTNAVN
   // await importDivision(folder) // SEKSJON
+  // TODO: Herfra og ned må typer oppdateres og koden sjekkes
   await importRegionLevel(folder) // REGIONALT_NIVA
   // await importStatistic(folder) // STATISTIKK (needs shortname/division)
   // await importVariant(folder) // VARIANT (needs frequency + statistic)
