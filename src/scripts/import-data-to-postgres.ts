@@ -273,18 +273,19 @@ type ReleaseCreate = Parameters<(typeof prisma)['release']['createMany']>[0]['da
 
 function mapRelease(raw: any): ReleaseCreate {
   return {
+    id: Number(raw.id),
     version: Number(raw.version),
-    publish_time: parseOsloDate(raw.publish_time ?? raw.publiseringstidspunkt)!, // required
+    publish_time: parseOsloDate(raw.tidspunkt)!, // required
     has_versions: toBool(raw.has_versions ?? raw.har_versjoner) ?? false,
-    last_updated: parseOsloDate(raw.last_updated ?? raw.sist_oppdatert)!, // required
-    comment: String(raw.comment ?? raw.kommentar ?? ''),
-    period_to: parseOsloDate(raw.period_to ?? raw.periode_til)!, // required
-    variant_id: Number(raw.variant_id ?? raw.variantId), // FK → Variant
-    period_from: parseOsloDate(raw.period_from ?? raw.periode_fra)!, // required
-    cancelled: toBool(raw.cancelled ?? raw.avlyst) ?? false,
-    date_created: parseOsloDate(raw.date_created ?? raw.opprettet)!, // required
-    release_date_precision: String(raw.release_date_precision ?? raw.dato_presisjon ?? ''),
-    import_flag: toBool(raw.import_flag ?? raw.importert),
+    last_updated: parseOsloDate(raw.last_updated)!, // required
+    comment: String(raw.intern_kommentar),
+    period_to: parseOsloDate(raw.periode_til)!, // required
+    variant_id: Number(raw.variant_id), // FK → Variant
+    period_from: parseOsloDate(raw.periode_fra)!, // required
+    cancelled: toBool(raw.er_avlyst) ?? false,
+    date_created: parseOsloDate(raw.date_created)!, // required
+    release_date_precision: String(raw.datotype),
+    import_flag: toBool(raw.import_flag),
   } as ReleaseCreate
 }
 
@@ -316,6 +317,7 @@ type RegionLevelCreate = Parameters<(typeof prisma)['region_level']['createMany'
 
 function mapRegionLevel(raw: any): RegionLevelCreate {
   return {
+    id: Number(raw.id),
     version: Number(raw.version),
     name: String(raw.name ?? raw.navn ?? ''),
     code: raw.code ?? raw.kode ?? undefined, // unique, nullable
@@ -384,26 +386,27 @@ type StatisticCreate = Parameters<(typeof prisma)['statistic']['createMany']>[0]
 
 function mapStatistic(raw: any): StatisticCreate {
   return {
+    id: Number(raw.id),
     version: Number(raw.version),
-    shortname_id: Number(raw.shortname_id ?? raw.kortnavn_id), // unique + FK → Shortname
-    dir_appoval_status: raw.dir_appoval_status ?? raw.dir_approval_status ?? undefined,
-    search_phrases: raw.search_phrases ?? raw.sokefraser ?? undefined,
-    priority: Number(raw.priority ?? raw.prioritet ?? 0),
-    desk_appoval_status: raw.desk_appoval_status ?? raw.desk_approval_status ?? undefined,
-    language: String(raw.language ?? raw.sprak ?? 'no'),
-    search_phrases_en: raw.search_phrases_en ?? undefined,
-    division_code: raw.division_code ?? raw.seksjon_kode ?? undefined,
-    division_id: raw.division_id ? Number(raw.division_id) : undefined, // FK → Division_DoNotUse
-    first_release: parseOsloDate(raw.first_release ?? raw.forste_publisering),
-    yearly_reporting: toBool(raw.yearly_reporting ?? raw.arsrapportering) ?? false,
-    status: String(raw.status ?? ''),
-    relation_id: raw.relation_id ? Number(raw.relation_id) : undefined, // self-rel
-    name: String(raw.name ?? raw.navn ?? ''),
-    last_updated: parseOsloDate(raw.last_updated ?? raw.sist_oppdatert)!, // required
-    comment: String(raw.comment ?? raw.kommentar ?? ''),
-    name_en: raw.name_en ?? undefined,
-    date_created: parseOsloDate(raw.date_created ?? raw.opprettet)!, // required
-    legacy_topic_codes: raw.legacy_topic_codes ?? undefined,
+    shortname_id: Number(raw.kortnavn_id),
+    dir_appoval_status: raw.dir_flyt,
+    search_phrases: raw.triggerord,
+    priority: Number(raw.prioritet),
+    desk_appoval_status: raw.desk_flyt,
+    language: String(raw.sprak),
+    search_phrases_en: raw.triggerord_en,
+    division_code: '',
+    division_id: raw.eierseksjon_id, // FK → Division_DoNotUse
+    first_release: parseOsloDate(raw.forstegangspublisering),
+    yearly_reporting: toBool(raw.arsrapportering) ?? false,
+    status: String(raw.status),
+    relation_id: Number(raw.relation_id), // self-rel
+    name: raw.statistikknavn,
+    last_updated: parseOsloDate(raw.last_updated)!, // required
+    comment: String(raw.intern_kommentar),
+    name_en: raw.statistikknavn_en,
+    date_created: parseOsloDate(raw.date_created)!, // required
+    legacy_topic_codes: raw.gamle_emnekoder,
   } as StatisticCreate
 }
 
@@ -437,9 +440,9 @@ type StatisticContactsCreate = Parameters<
 
 function mapStatisticContacts(raw: any): StatisticContactsCreate {
   return {
-    statistic_id: Number(raw.statistikk_id ?? raw.statistic_id),
-    contact_id: Number(raw.kontakt_id ?? raw.contact_id),
-    contacts_idx: raw.contacts_idx !== undefined ? Number(raw.contacts_idx) : undefined,
+    statistic_id: Number(raw.statistikk_id),
+    contact_id: Number(raw.kontakt_id),
+    contacts_idx: raw.contacts_idx !== undefined ? Number(raw.kontakter_idx) : undefined,
   } as StatisticContactsCreate
 }
 
@@ -473,8 +476,8 @@ type StatisticRegionLevelCreate = Parameters<
 
 function mapStatisticRegionLevel(raw: any): StatisticRegionLevelCreate {
   return {
-    region_level_id: Number(raw.regionalt_niva_id ?? raw.region_level_id),
-    statistic_id: Number(raw.statistikk_id ?? raw.statistic_id),
+    region_level_id: Number(raw.regionalt_niva_id),
+    statistic_id: Number(raw.statistikk_id),
   } as StatisticRegionLevelCreate
 }
 
@@ -504,15 +507,16 @@ type VariantCreate = Parameters<(typeof prisma)['variant']['createMany']>[0]['da
 
 function mapVariant(raw: any): VariantCreate {
   return {
+    id: Number(raw.id),
     version: Number(raw.version),
-    last_updated: parseOsloDate(raw.last_updated ?? raw.sist_oppdatert)!, // required
-    date_created: parseOsloDate(raw.date_created ?? raw.opprettet)!, // required
-    cancelled: toBool(raw.cancelled ?? raw.avlyst) ?? false,
-    freq_id: Number(raw.freq_id ?? raw.frekvens_id), // FK → Frequency
-    revision: String(raw.revision ?? raw.revisjon ?? ''),
-    statistic_id: Number(raw.statistic_id ?? raw.statistikk_id), // FK → Statistic
-    level_of_detail: raw.level_of_detail ?? raw.detaljniva ?? undefined,
-    level_of_detail_en: raw.level_of_detail_en ?? undefined,
+    last_updated: parseOsloDate(raw.last_updated)!, // required
+    date_created: parseOsloDate(raw.date_created)!, // required
+    cancelled: toBool(raw.er_opphort) ?? false,
+    freq_id: Number(raw.frekvens_id), // FK → Frequency
+    revision: String(raw.revisjon),
+    statistic_id: Number(raw.statistikk_id), // FK → Statistic
+    level_of_detail: raw.detaljniva,
+    level_of_detail_en: raw.detaljniva_en,
   } as VariantCreate
 }
 
@@ -599,19 +603,18 @@ async function main() {
   }
 
   // Order chosen for FK safety:
-  // await deleteAllData()
-  // await importFrequency(folder) // FREKVENS
-  // await importCalenderDate(folder) // KALENDER_DATO (independent)
-  // await importContact(folder) // KONTAKT
-  // await importShortname(folder) // KORTNAVN
-  // await importDivision(folder) // SEKSJON
-  // TODO: Herfra og ned må typer oppdateres og koden sjekkes
+  await deleteAllData()
+  await importFrequency(folder) // FREKVENS
+  await importCalenderDate(folder) // KALENDER_DATO (independent)
+  await importContact(folder) // KONTAKT
+  await importShortname(folder) // KORTNAVN
+  await importDivision(folder) // SEKSJON
   await importRegionLevel(folder) // REGIONALT_NIVA
-  // await importStatistic(folder) // STATISTIKK (needs shortname/division)
-  // await importVariant(folder) // VARIANT (needs frequency + statistic)
-  // await importRelease(folder) // PUBLISERING (needs variant)
-  // await importStatisticContacts(folder) // STATISTIKK_KONTAKTER (needs statistic + contact)
-  // await importStatisticRegionLevel(folder) // STATISTIKK_REGIONALE_NIVAER (needs both)
+  await importStatistic(folder) // STATISTIKK (needs shortname/division)
+  await importVariant(folder) // VARIANT (needs frequency + statistic)
+  await importRelease(folder) // PUBLISERING (needs variant)
+  await importStatisticContacts(folder) // STATISTIKK_KONTAKTER (needs statistic + contact)
+  await importStatisticRegionLevel(folder) // STATISTIKK_REGIONALE_NIVAER (needs both)
   // await importAuditLog(folder);      // AUDIT_LOG (raw SQL)
 
   console.log('\n🎉 All requested tables imported successfully (see notes about AUDIT_LOG).')
