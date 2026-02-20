@@ -1,178 +1,233 @@
--- CreateTable
-CREATE TABLE "FREKVENS" (
-    "id" DECIMAL(19,0) NOT NULL,
-    "version" DECIMAL(19,0) NOT NULL,
-    "navn" VARCHAR(50) NOT NULL,
-    "kode" VARCHAR(50) NOT NULL,
+-- CreateSchema
+CREATE SCHEMA IF NOT EXISTS "statreg";
 
-    CONSTRAINT "sys_c0023870" PRIMARY KEY ("id")
+-- CreateTable
+CREATE TABLE "statreg"."Frequency" (
+    "id" SERIAL NOT NULL,
+    "version" INTEGER NOT NULL,
+    "name" TEXT NOT NULL,
+    "name_en" TEXT NOT NULL,
+    "code" TEXT NOT NULL,
+
+    CONSTRAINT "Frequency_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "KALENDER_DATO" (
-    "id" DECIMAL(19,0) NOT NULL,
-    "version" DECIMAL(19,0) NOT NULL,
-    "kommentar" VARCHAR(255) NOT NULL,
-    "dag" TIMESTAMP(6) NOT NULL,
+CREATE TABLE "statreg"."Calender_date" (
+    "id" SERIAL NOT NULL,
+    "version" INTEGER NOT NULL,
+    "comment" TEXT NOT NULL,
+    "day" TIMESTAMP(6) NOT NULL,
 
-    CONSTRAINT "sys_c0023875" PRIMARY KEY ("id")
+    CONSTRAINT "Calender_date_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "KONTAKT" (
-    "id" DECIMAL(19,0) NOT NULL,
-    "version" DECIMAL(19,0) NOT NULL,
-    "initialer" VARCHAR(3),
-    "mobil" VARCHAR(30),
-    "navn" VARCHAR(130) NOT NULL,
+CREATE TABLE "statreg"."Contact_DoNotUse" (
+    "id" SERIAL NOT NULL,
+    "version" INTEGER NOT NULL,
+    "initials" TEXT,
+    "mobile" TEXT,
+    "name" TEXT NOT NULL,
     "last_updated" TIMESTAMP(6) NOT NULL,
-    "telefon" VARCHAR(30),
-    "epost" VARCHAR(100) NOT NULL,
+    "phone" TEXT,
+    "email" TEXT NOT NULL,
     "date_created" TIMESTAMP(6) NOT NULL,
-    "inaktiv" DECIMAL(1,0),
-    "navn_en" VARCHAR(130),
+    "inactiv" BOOLEAN,
+    "name_en" TEXT,
 
-    CONSTRAINT "sys_c0023890" PRIMARY KEY ("id")
+    CONSTRAINT "Contact_DoNotUse_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "KORTNAVN" (
-    "id" DECIMAL(19,0) NOT NULL,
-    "version" DECIMAL(19,0) NOT NULL,
-    "navn" VARCHAR(20) NOT NULL,
+CREATE TABLE "statreg"."ResponsiblePerson" (
+    "id" SERIAL NOT NULL,
+    "username" TEXT,
+    "email" TEXT NOT NULL,
+
+    CONSTRAINT "ResponsiblePerson_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "statreg"."Shortname" (
+    "id" SERIAL NOT NULL,
+    "version" INTEGER NOT NULL,
+    "name" TEXT NOT NULL,
     "last_updated" TIMESTAMP(6) NOT NULL,
-    "date_created" TIMESTAMP(6) NOT NULL,
-
-    CONSTRAINT "sys_c0023896" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "PUBLISERING" (
-    "id" DECIMAL(19,0) NOT NULL,
-    "version" DECIMAL(19,0) NOT NULL,
-    "tidspunkt" TIMESTAMP(6) NOT NULL,
-    "er_endret" DECIMAL(1,0) NOT NULL,
-    "last_updated" TIMESTAMP(6) NOT NULL,
-    "intern_kommentar" VARCHAR(255) NOT NULL,
-    "periode_til" TIMESTAMP(6) NOT NULL,
-    "desk_flyt" VARCHAR(255),
-    "variant_id" DECIMAL(19,0) NOT NULL,
-    "periode_fra" TIMESTAMP(6) NOT NULL,
-    "er_avlyst" DECIMAL(1,0) NOT NULL,
-    "date_created" TIMESTAMP(6) NOT NULL,
-    "datotype" VARCHAR(255) NOT NULL,
-    "import_flag" DECIMAL(1,0),
-
-    CONSTRAINT "sys_c0023910" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "REGIONALT_NIVA" (
-    "id" DECIMAL(19,0) NOT NULL,
-    "version" DECIMAL(19,0) NOT NULL,
-    "navn" VARCHAR(40) NOT NULL,
-    "kode" VARCHAR(50),
-
-    CONSTRAINT "sys_c0023916" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "SEKSJON" (
-    "id" DECIMAL(19,0) NOT NULL,
-    "version" DECIMAL(19,0) NOT NULL,
-    "navn" VARCHAR(100) NOT NULL,
-    "kode" VARCHAR(3) NOT NULL,
-    "navn_en" VARCHAR(100) NOT NULL,
-
-    CONSTRAINT "sys_c0023922" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "STATISTIKK" (
-    "id" DECIMAL(19,0) NOT NULL,
-    "version" DECIMAL(19,0) NOT NULL,
-    "kortnavn_id" DECIMAL(19,0) NOT NULL,
-    "dir_flyt" VARCHAR(255),
-    "triggerord" VARCHAR(500),
-    "prioritet" DECIMAL(1,0) NOT NULL,
-    "desk_flyt" VARCHAR(255),
-    "sprak" VARCHAR(255) NOT NULL,
-    "triggerord_en" VARCHAR(500),
-    "eierseksjon_id" DECIMAL(19,0) NOT NULL,
-    "forstegangspublisering" TIMESTAMP(6),
-    "arsrapportering" DECIMAL(1,0) NOT NULL,
-    "status" VARCHAR(255) NOT NULL,
-    "gamle_emnekoder" VARCHAR(255),
-    "relasjon_id" DECIMAL(19,0),
-    "statistikknavn" VARCHAR(140) NOT NULL,
-    "last_updated" TIMESTAMP(6) NOT NULL,
-    "intern_kommentar" VARCHAR(255) NOT NULL,
-    "statistikknavn_en" VARCHAR(140),
     "date_created" TIMESTAMP(6) NOT NULL,
 
-    CONSTRAINT "sys_c0023938" PRIMARY KEY ("id")
+    CONSTRAINT "Shortname_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "STATISTIKK_KONTAKTER" (
-    "statistikk_id" DECIMAL(19,0) NOT NULL,
-    "kontakt_id" DECIMAL(19,0) NOT NULL,
-    "kontakter_idx" DECIMAL(10,0),
-
-    CONSTRAINT "sys_c0023946" PRIMARY KEY ("statistikk_id","kontakt_id")
-);
-
--- CreateTable
-CREATE TABLE "STATISTIKK_REGIONALE_NIVAER" (
-    "regionalt_niva_id" DECIMAL(19,0) NOT NULL,
-    "statistikk_id" DECIMAL(19,0) NOT NULL,
-
-    CONSTRAINT "sys_c0023949" PRIMARY KEY ("statistikk_id","regionalt_niva_id")
-);
-
--- CreateTable
-CREATE TABLE "VARIANT" (
-    "id" DECIMAL(19,0) NOT NULL,
-    "version" DECIMAL(19,0) NOT NULL,
-    "frekvens_id" DECIMAL(19,0) NOT NULL,
+CREATE TABLE "statreg"."Release" (
+    "id" SERIAL NOT NULL,
+    "version" INTEGER NOT NULL,
+    "publish_time" TIMESTAMP(6) NOT NULL,
+    "has_versions" BOOLEAN NOT NULL,
     "last_updated" TIMESTAMP(6) NOT NULL,
-    "revisjon" VARCHAR(255) NOT NULL,
-    "statistikk_id" DECIMAL(19,0) NOT NULL,
-    "detaljniva_en" VARCHAR(255),
-    "detaljniva" VARCHAR(255),
-    "er_opphort" DECIMAL(1,0) NOT NULL,
+    "comment" TEXT NOT NULL,
+    "period_to" TIMESTAMP(6) NOT NULL,
+    "desk_appoval_status" TEXT,
+    "variant_id" INTEGER NOT NULL,
+    "period_from" TIMESTAMP(6) NOT NULL,
+    "cancelled" BOOLEAN NOT NULL DEFAULT false,
     "date_created" TIMESTAMP(6) NOT NULL,
+    "release_date_precision" TEXT NOT NULL,
+    "import_flag" BOOLEAN,
 
-    CONSTRAINT "sys_c0023958" PRIMARY KEY ("id")
+    CONSTRAINT "Release_pkey" PRIMARY KEY ("id")
 );
 
--- AddForeignKey
-ALTER TABLE "PUBLISERING" ADD CONSTRAINT "fkdb40a13c44a06f71" FOREIGN KEY ("variant_id") REFERENCES "VARIANT"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+-- CreateTable
+CREATE TABLE "statreg"."Region_level" (
+    "id" SERIAL NOT NULL,
+    "version" INTEGER NOT NULL,
+    "name" TEXT NOT NULL,
+    "code" TEXT,
+
+    CONSTRAINT "Region_level_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "statreg"."Division_DoNotUse" (
+    "id" SERIAL NOT NULL,
+    "version" INTEGER NOT NULL,
+    "code" TEXT NOT NULL,
+    "name_en" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+
+    CONSTRAINT "Division_DoNotUse_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "statreg"."Statistic" (
+    "id" SERIAL NOT NULL,
+    "version" INTEGER NOT NULL,
+    "shortname_id" INTEGER NOT NULL,
+    "dir_appoval_status" TEXT,
+    "search_phrases" TEXT,
+    "priority" INTEGER NOT NULL,
+    "desk_appoval_status" TEXT,
+    "language" TEXT NOT NULL,
+    "search_phrases_en" TEXT,
+    "division_code" TEXT,
+    "division_id" INTEGER,
+    "first_release" TIMESTAMP(6),
+    "yearly_reporting" BOOLEAN NOT NULL,
+    "status" TEXT NOT NULL,
+    "relation_id" INTEGER,
+    "name" TEXT NOT NULL,
+    "last_updated" TIMESTAMP(6) NOT NULL,
+    "comment" TEXT NOT NULL,
+    "name_en" TEXT,
+    "date_created" TIMESTAMP(6) NOT NULL,
+    "legacy_topic_codes" TEXT,
+
+    CONSTRAINT "Statistic_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "statreg"."Statistic_contacts" (
+    "statistic_id" INTEGER NOT NULL,
+    "contact_id" INTEGER NOT NULL,
+    "contacts_idx" INTEGER,
+
+    CONSTRAINT "Statistic_contacts_pkey" PRIMARY KEY ("statistic_id","contact_id")
+);
+
+-- CreateTable
+CREATE TABLE "statreg"."Statistic_region_level" (
+    "region_level_id" INTEGER NOT NULL,
+    "statistic_id" INTEGER NOT NULL,
+
+    CONSTRAINT "Statistic_region_level_pkey" PRIMARY KEY ("statistic_id","region_level_id")
+);
+
+-- CreateTable
+CREATE TABLE "statreg"."Variant" (
+    "id" SERIAL NOT NULL,
+    "version" INTEGER NOT NULL,
+    "last_updated" TIMESTAMP(6) NOT NULL,
+    "date_created" TIMESTAMP(6) NOT NULL,
+    "cancelled" BOOLEAN NOT NULL,
+    "freq_id" INTEGER NOT NULL,
+    "revision" TEXT NOT NULL,
+    "statistic_id" INTEGER NOT NULL,
+    "level_of_detail" TEXT,
+    "level_of_detail_en" TEXT,
+
+    CONSTRAINT "Variant_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "statreg"."_ResponsiblePersonToStatistic" (
+    "A" INTEGER NOT NULL,
+    "B" INTEGER NOT NULL,
+
+    CONSTRAINT "_ResponsiblePersonToStatistic_AB_pkey" PRIMARY KEY ("A","B")
+);
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Frequency_code_key" ON "statreg"."Frequency"("code");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Calender_date_day_key" ON "statreg"."Calender_date"("day");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "ResponsiblePerson_username_key" ON "statreg"."ResponsiblePerson"("username");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "ResponsiblePerson_email_key" ON "statreg"."ResponsiblePerson"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Shortname_name_key" ON "statreg"."Shortname"("name");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Region_level_code_key" ON "statreg"."Region_level"("code");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Division_DoNotUse_code_key" ON "statreg"."Division_DoNotUse"("code");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Statistic_shortname_id_key" ON "statreg"."Statistic"("shortname_id");
+
+-- CreateIndex
+CREATE INDEX "_ResponsiblePersonToStatistic_B_index" ON "statreg"."_ResponsiblePersonToStatistic"("B");
 
 -- AddForeignKey
-ALTER TABLE "STATISTIKK" ADD CONSTRAINT "fkfa5cb2137008a78" FOREIGN KEY ("relasjon_id") REFERENCES "STATISTIKK"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+ALTER TABLE "statreg"."Release" ADD CONSTRAINT "Release_variant_id_fkey" FOREIGN KEY ("variant_id") REFERENCES "statreg"."Variant"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE "STATISTIKK" ADD CONSTRAINT "fkfa5cb213b101b242" FOREIGN KEY ("eierseksjon_id") REFERENCES "SEKSJON"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+ALTER TABLE "statreg"."Statistic" ADD CONSTRAINT "Statistic_relation_id_fkey" FOREIGN KEY ("relation_id") REFERENCES "statreg"."Statistic"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE "STATISTIKK" ADD CONSTRAINT "fkfa5cb213c47ad723" FOREIGN KEY ("kortnavn_id") REFERENCES "KORTNAVN"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+ALTER TABLE "statreg"."Statistic" ADD CONSTRAINT "Statistic_division_id_fkey" FOREIGN KEY ("division_id") REFERENCES "statreg"."Division_DoNotUse"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE "STATISTIKK_KONTAKTER" ADD CONSTRAINT "fkf98634a159382591" FOREIGN KEY ("kontakt_id") REFERENCES "KONTAKT"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+ALTER TABLE "statreg"."Statistic" ADD CONSTRAINT "Statistic_shortname_id_fkey" FOREIGN KEY ("shortname_id") REFERENCES "statreg"."Shortname"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE "STATISTIKK_KONTAKTER" ADD CONSTRAINT "fkf98634a1d978a9a3" FOREIGN KEY ("statistikk_id") REFERENCES "STATISTIKK"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+ALTER TABLE "statreg"."Statistic_contacts" ADD CONSTRAINT "Statistic_contacts_contact_id_fkey" FOREIGN KEY ("contact_id") REFERENCES "statreg"."Contact_DoNotUse"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE "STATISTIKK_REGIONALE_NIVAER" ADD CONSTRAINT "fke4b2f5b83078425c" FOREIGN KEY ("regionalt_niva_id") REFERENCES "REGIONALT_NIVA"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+ALTER TABLE "statreg"."Statistic_contacts" ADD CONSTRAINT "Statistic_contacts_statistic_id_fkey" FOREIGN KEY ("statistic_id") REFERENCES "statreg"."Statistic"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE "STATISTIKK_REGIONALE_NIVAER" ADD CONSTRAINT "fke4b2f5b8d978a9a3" FOREIGN KEY ("statistikk_id") REFERENCES "STATISTIKK"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+ALTER TABLE "statreg"."Statistic_region_level" ADD CONSTRAINT "Statistic_region_level_region_level_id_fkey" FOREIGN KEY ("region_level_id") REFERENCES "statreg"."Region_level"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE "VARIANT" ADD CONSTRAINT "fke1d1085b8b4eb03" FOREIGN KEY ("frekvens_id") REFERENCES "FREKVENS"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+ALTER TABLE "statreg"."Statistic_region_level" ADD CONSTRAINT "Statistic_region_level_statistic_id_fkey" FOREIGN KEY ("statistic_id") REFERENCES "statreg"."Statistic"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE "VARIANT" ADD CONSTRAINT "fke1d1085d978a9a3" FOREIGN KEY ("statistikk_id") REFERENCES "STATISTIKK"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+ALTER TABLE "statreg"."Variant" ADD CONSTRAINT "Variant_freq_id_fkey" FOREIGN KEY ("freq_id") REFERENCES "statreg"."Frequency"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE "statreg"."Variant" ADD CONSTRAINT "Variant_statistic_id_fkey" FOREIGN KEY ("statistic_id") REFERENCES "statreg"."Statistic"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE "statreg"."_ResponsiblePersonToStatistic" ADD CONSTRAINT "_ResponsiblePersonToStatistic_A_fkey" FOREIGN KEY ("A") REFERENCES "statreg"."ResponsiblePerson"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "statreg"."_ResponsiblePersonToStatistic" ADD CONSTRAINT "_ResponsiblePersonToStatistic_B_fkey" FOREIGN KEY ("B") REFERENCES "statreg"."Statistic"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
