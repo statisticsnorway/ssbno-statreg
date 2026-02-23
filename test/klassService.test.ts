@@ -42,17 +42,13 @@ describe('klassService ', async () => {
       assert.deepEqual(departments, mockDepartments)
     })
 
-    test('builds departments and divisions with en language from KLASS response', async () => {
-      setPayload(mockClassificationItemsEn)
-
-      const departments = await getDepartmentsFromKlass('en') // TODO: url check is enough
+    test('fetch correct url for language when en is passed in getDepartmentFromClass', async () => {
+      await getDepartmentsFromKlass('en')
 
       assert.equal(
         fetchMock.mock.calls[0].arguments[0],
         'https://data.ssb.no/api/klass/v1/versions/3009.json?language=en'
       )
-
-      assert.deepEqual(departments, mockDepartmentsEn)
     })
 
     test('uses KLASS_BASE_URL env var when present', async () => {
