@@ -1,4 +1,4 @@
-import { beforeEach, describe, it, mock } from 'node:test'
+import { beforeEach, describe, test, mock } from 'node:test'
 import assert from 'node:assert'
 import { createBlockedReleaseDay } from '@/services/calendarService'
 import { dateToISOString } from '@/lib/utils'
@@ -13,56 +13,124 @@ function setListReturn(next: { comment: string; day: Date }[]) {
   listReturn = next
 }
 
-describe('createBlockedReleaseDay ', () => {
-  beforeEach(() => {
-    prismaMock = {
-      calender_date: {
-        create: mock.fn((args) => Promise.resolve({ ...args, id: 0 })),
-        findMany: mock.fn(() => Promise.resolve(listReturn)),
-      },
-    }
-  })
-
-  it('creates a blocked release day and returns mapped results', async () => {
-    const inputDate = '2026-12-24'
-    const inputComment = 'Julaften'
-    setListReturn(calendar_date_prisma_list)
-
-    const result = await createBlockedReleaseDay(inputDate, inputComment, prismaMock)
-
-    assert.strictEqual(prismaMock.calender_date.create.mock.callCount(), 1)
-    assert.deepStrictEqual(prismaMock.calender_date.create.mock.calls[0].arguments[0], {
-      data: {
-        version: 0,
-        comment: inputComment,
-        day: new Date(inputDate),
-      },
+describe('calendarService  ', () => {
+  describe('createBlockedReleaseDay() ', () => {
+    beforeEach(() => {
+      prismaMock = {
+        calender_date: {
+          create: mock.fn((args) => Promise.resolve({ ...args, id: 0 })),
+          findMany: mock.fn(() => Promise.resolve(listReturn)),
+        },
+      }
     })
-    assert.deepStrictEqual(result, calendar_date_result)
-  })
 
-  it('returns 400 if date already blocked (unique constraint violation)', async () => {
-    const inputDate = '2026-12-24'
-    const inputComment = 'Julaften'
-    prismaMock = {
-      calender_date: {
-        create: mock.fn(() =>
-          Promise.reject({
-            name: 'PrismaClientKnownRequestError',
-            code: 'P2002',
-            message: 'Unique constraint failed on the fields: (`day`)',
-          })
-        ),
-        findMany: mock.fn(() => Promise.resolve([])),
-      },
-    }
+    test('creates a blocked release day and returns mapped results', async () => {
+      const inputDate = '2026-12-24'
+      const inputComment = { blocked_comment: 'Julaften' }
+      setListReturn(calendar_date_prisma_list)
 
-    await assert.rejects(() => createBlockedReleaseDay(inputDate, inputComment, prismaMock), {
-      message: 'Unique constraint failed on the fields: (`day`)',
-      code: 'P2002',
+      const result = await createBlockedReleaseDay(prismaMock, inputDate, inputComment)
+
+      assert.strictEqual(prismaMock.calender_date.create.mock.callCount(), 1)
+      assert.deepStrictEqual(prismaMock.calender_date.create.mock.calls[0].arguments[0], {
+        data: {
+          version: 0,
+          comment: inputComment.blocked_comment,
+          day: new Date(inputDate),
+        },
+      })
+      assert.deepStrictEqual(result, calendar_date_result)
     })
-    assert.strictEqual(prismaMock.calender_date.create.mock.callCount(), 1)
-    assert.strictEqual(prismaMock.calender_date.findMany.mock.callCount(), 0)
+
+    test('returns 400 if date already blocked (unique constraint violation)', async () => {
+      const inputDate = '2026-12-24'
+      const inputComment = { blocked_comment: 'Julaften' }
+      prismaMock = {
+        calender_date: {
+          create: mock.fn(() =>
+            Promise.reject({
+              name: 'PrismaClientKnownRequestError',
+              code: 'P2002',
+              message: 'Unique constraint failed on the fields: (`day`)',
+            })
+          ),
+          findMany: mock.fn(() => Promise.resolve([])),
+        },
+      }
+
+      await assert.rejects(() => createBlockedReleaseDay(prismaMock, inputDate, inputComment), {
+        message: 'Unique constraint failed on the fields: (`day`)',
+        code: 'P2002',
+      })
+      assert.strictEqual(prismaMock.calender_date.create.mock.callCount(), 1)
+      assert.strictEqual(prismaMock.calender_date.findMany.mock.callCount(), 0)
+    })
+
+    test('returns 400 if blocked comment is "" ', async () => {
+      const inputDate = '2026-12-24'
+      const inputComment = { blocked_comment: '' }
+
+      await assert.rejects(() => createBlockedReleaseDay(prismaMock, inputDate, inputComment), {
+        statregError: 'Invalid body',
+      })
+      assert.strictEqual(prismaMock.calender_date.create.mock.callCount(), 0)
+      assert.strictEqual(prismaMock.calender_date.findMany.mock.callCount(), 0)
+    })
+
+    test('returns 400 if body have no blocked_comment property', async () => {
+      const inputDate = '2026-12-24'
+      const inputComment = {}
+
+      await assert.rejects(() => createBlockedReleaseDay(prismaMock, inputDate, inputComment), {
+        statregError: 'Invalid body',
+      })
+      assert.strictEqual(prismaMock.calender_date.create.mock.callCount(), 0)
+      assert.strictEqual(prismaMock.calender_date.findMany.mock.callCount(), 0)
+    })
+
+    test('returns 400 if missing date input', async () => {
+      const inputDate = ''
+      const inputComment = { blocked_comment: 'Julaften' }
+
+      await assert.rejects(() => createBlockedReleaseDay(prismaMock, inputDate, inputComment), {
+        statregError: 'Invalid date format in query parameter',
+      })
+      assert.strictEqual(prismaMock.calender_date.create.mock.callCount(), 0)
+      assert.strictEqual(prismaMock.calender_date.findMany.mock.callCount(), 0)
+    })
+
+    test('returns 400 for date input as list', async () => {
+      const inputDate = ['2026-12-24']
+      const inputComment = { blocked_comment: 'Julaften' }
+
+      await assert.rejects(() => createBlockedReleaseDay(prismaMock, inputDate, inputComment), {
+        statregError: 'Invalid date format in query parameter',
+      })
+      assert.strictEqual(prismaMock.calender_date.create.mock.callCount(), 0)
+      assert.strictEqual(prismaMock.calender_date.findMany.mock.callCount(), 0)
+    })
+
+    test('returns 400 for invalid date string format', async () => {
+      const inputDate = '24. des'
+      const inputComment = { blocked_comment: 'Julaften' }
+
+      await assert.rejects(() => createBlockedReleaseDay(prismaMock, inputDate, inputComment), {
+        statregError: 'Invalid date format in query parameter',
+      })
+      assert.strictEqual(prismaMock.calender_date.create.mock.callCount(), 0)
+      assert.strictEqual(prismaMock.calender_date.findMany.mock.callCount(), 0)
+    })
+
+    test('returns 400 if date parsing fails', async () => {
+      const inputDate = '9999-11-00'
+      const inputComment = { blocked_comment: 'Julaften' }
+
+      await assert.rejects(() => createBlockedReleaseDay(prismaMock, inputDate, inputComment), {
+        statregError: 'Invalid date format in query parameter',
+      })
+      assert.strictEqual(prismaMock.calender_date.create.mock.callCount(), 0)
+      assert.strictEqual(prismaMock.calender_date.findMany.mock.callCount(), 0)
+    })
   })
 })
 
