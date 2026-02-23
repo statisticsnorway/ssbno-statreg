@@ -1,6 +1,10 @@
 import { beforeEach, describe, it, mock } from 'node:test'
 import assert from 'node:assert'
 import { createBlockedReleaseDay } from '@/services/calendarService'
+import { dateToISOString } from '@/lib/utils'
+
+// Uncomment next line to run tests locally with UTC timezone (same as nais cluster)
+// process.env.TZ = 'UTC'
 
 let prismaMock: any
 let listReturn: object
@@ -67,11 +71,11 @@ describe('createBlockedReleaseDay ', () => {
 const calendar_date_result = [
   {
     blocked_comment: 'Julaften',
-    date: '2026-12-23T23:00:00.000Z',
+    date: dateToISOString(new Date('2026-12-24T00:00:00')),
   },
   {
     blocked_comment: 'Nyttårsaften',
-    date: '2026-12-30T23:00:00.000Z',
+    date: dateToISOString(new Date('2026-12-31T00:00:00')),
   },
 ]
 
