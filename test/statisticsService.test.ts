@@ -1,50 +1,45 @@
-import { describe, mock } from 'node:test'
-// import assert from 'node:assert/strict'
+import { describe, mock, it, beforeEach } from 'node:test'
+import assert from 'node:assert/strict'
 import { getAllStatistics } from '../src/services/statisticsService'
 
-describe('statisticService', async () => {
-  const prismaMock: any = {
-    statistic: {},
-  }
+let prismaMock: any
+let statisticsResult: object
 
-  const statisticsListingMockResults = mock.method(
-    prismaMock.statistic,
-    'findManyMock',
-    async () => mockStatisticFindManyFilteredResults
-  )
-
-  /* TODO: This function will only return:
-    {
-      shortname: '',
-      main_language: '',
-      status: [{ language_code: '', text: '' }],
-      name: [{ language_code: '', text: '' }, { language_code: '', text: '' })],
-      contacts: [{ username: '', email: '' }],
-    }
-    But maybe that's what we should be testing instead?
-    How can we mock prisma w/o having to pass "prismaMock" into the controller then?
-  */
-
-  const statisticsListing = await getAllStatistics({ start: 0, count: 1 })
-})
+function setStatisticsResult(next: object) {
+  statisticsResult = next
+}
 
 // Test input values; calls.arguments
 // 1. Test start validation, undefined -> default?
 // 2. Test count validation, undefined -> default?
+describe('statisticService', async () => {
+  beforeEach(() => {
+    prismaMock = {
+      statistic: {
+        findMany: mock.fn(() => Promise.resolve(statisticsResult)),
+      },
+    }
+  })
 
-//
-// 3.
+  it('getAllStatistics returns mocked data', async () => {
+    setStatisticsResult(mockStatistics)
+
+    const result = await getAllStatistics({ start: 1, count: 2 }, prismaMock)
+
+    assert.deepEqual(result, output)
+    assert.equal(prismaMock.statistic.findMany.mock.calls[0].arguments[0]['skip'], 1)
+    assert.equal(prismaMock.statistic.findMany.mock.calls[0].arguments[0]['take'], 2)
+  })
+})
 
 ////////////// MOCK DATA ////////////////////////////////
-const mockStatisticFindManyFilteredResults = [
+const mockStatistics = [
   {
     language: 'nb',
     status: 'SA',
     name: 'Energiregnskap og energibalanse',
     name_en: 'Energy account and energy balance',
-    shortname: {
-      name: 'energ',
-    },
+    shortname: { name: 'energ' },
     responsiblePersons: [
       {
         username: 'abc',
@@ -56,14 +51,36 @@ const mockStatisticFindManyFilteredResults = [
     language: 'nb',
     status: 'SA',
     name: 'Befolkning og demografi',
-    shortname: {
-      name: 'befolk',
-    },
+    name_en: 'Population and demography',
+    shortname: { name: 'befolk' },
     responsiblePersons: [
       {
         username: 'bcd',
         email: 'bob@ssb.no',
       },
     ],
+  },
+]
+
+const output = [
+  {
+    shortname: 'energ',
+    main_language: 'nb',
+    status: [{ language_code: 'nb', text: 'SA' }],
+    name: [
+      { language_code: 'nb', text: 'Energiregnskap og energibalanse' },
+      { language_code: 'en', text: 'Energy account and energy balance' },
+    ],
+    contacts: [{ username: 'abc', email: 'alice@ssb.no' }],
+  },
+  {
+    shortname: 'befolk',
+    main_language: 'nb',
+    status: [{ language_code: 'nb', text: 'SA' }],
+    name: [
+      { language_code: 'nb', text: 'Befolkning og demografi' },
+      { language_code: 'en', text: 'Population and demography' },
+    ],
+    contacts: [{ username: 'bcd', email: 'bob@ssb.no' }],
   },
 ]

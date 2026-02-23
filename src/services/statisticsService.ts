@@ -1,8 +1,13 @@
 import type { StatisticListing } from '@/types/index'
-import { prisma } from '@/lib/prisma'
 import { getLocalizedName } from '@/lib/utils'
+import { type PrismaClient } from '@/generated/prisma/client'
 
-export async function getAllStatistics({ start = 0, count = 10 }): Promise<StatisticListing[]> {
+type StatisticPrisma = Pick<PrismaClient, 'statistic'>
+
+export async function getAllStatistics(
+  { start = 0, count = 10 },
+  prisma: StatisticPrisma
+): Promise<StatisticListing[]> {
   const statistics = await prisma.statistic.findMany({
     skip: start,
     take: count,
