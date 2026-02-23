@@ -1,3 +1,21 @@
+apiVersion: data.nais.io/v1
+kind: Postgres
+metadata:
+  name: statreg-api-test-db
+  namespace: ssbno
+spec:
+  cluster:
+    audit:
+      enabled: true
+    majorVersion: "17"
+    resources:
+      cpu: 200m
+      diskSize: 2Gi
+      memory: 2Gi
+  database:
+    collation: nb_NO
+
+---
 apiVersion: nais.io/v1alpha1
 kind: Application
 metadata:
@@ -14,10 +32,15 @@ spec:
 
   envFrom:
   - secret: login-config-ssbno-statreg-api
+  - secret: statreg-api-secrets
 
   env:
+    - name: NODE_ENV
+      value: production
     - name: AUTH_ENABLED
       value: "true"
+    - name: KEYCLOAK_CLIENT_ID
+      value: ssbno-statreg-api
     - name: KLASS_BASE_URL
       value: https://data.qa.ssb.no
     - name: KEYCLOAK_REALM_ISSUER
@@ -42,23 +65,6 @@ spec:
 
   postgres:
     clusterName: statreg-api-test-db
-
-  gcp:
-      sqlInstances:
-        - type: POSTGRES_17
-          # See Nais docs: https://docs.ssb.cloud.nais.io/workloads/application/reference/application-spec/#gcpsqlinstancestier
-          tier: db-f1-micro # This tier MUST be increased for PROD! No SLA unless custom!
-          diskAutoresize: true
-          diskAutoresizeLimit: 50
-          flags:
-            - name: "cloudsql.enable_pgaudit"
-              value: "on"
-            - name: "pgaudit.log"
-              value: "write"
-            - name: "pgaudit.log_parameter"
-              value: "on"          
-          databases:
-            - name: statreg-db
 
   prometheus:
     enabled: true

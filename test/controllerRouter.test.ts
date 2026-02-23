@@ -17,6 +17,11 @@ describe('controllerRouter integration testing: ', () => {
       router.get('/protected', (_req, res) => res.json({ ok: 'protected' }))
     }
 
+    const makeApp = () =>
+      express()
+        .disable('x-powered-by')
+        .use(controllerRouter(requireAuth, [fakeController]))
+
     beforeEach(() => {
       requireAuthCalls = []
       requireAuth = (req, _res, next) => {
@@ -26,7 +31,7 @@ describe('controllerRouter integration testing: ', () => {
     })
 
     test('calls requireAuth on protected routes and returns 200', async () => {
-      const app = express().use(controllerRouter(requireAuth, [fakeController]))
+      const app = makeApp()
       const res: MockResponse<any> = await invoke(app, 'GET', '/protected')
 
       assert.equal(res.statusCode, 200)
@@ -36,7 +41,7 @@ describe('controllerRouter integration testing: ', () => {
     })
 
     test('bypasses requireAuth on public routes', async () => {
-      const app = express().use(controllerRouter(requireAuth, [fakeController]))
+      const app = makeApp()
       const res: MockResponse<any> = await invoke(app, 'GET', '/public')
 
       assert.equal(res.statusCode, 200)
@@ -45,7 +50,7 @@ describe('controllerRouter integration testing: ', () => {
     })
 
     test('returns 405 for disallowed methods (e.g., PATCH)', async () => {
-      const app = express().use(controllerRouter(requireAuth, [fakeController]))
+      const app = makeApp()
       const res: MockResponse<any> = await invoke(app, 'PATCH', '/public')
 
       assert.equal(res.statusCode, 405)
@@ -53,7 +58,7 @@ describe('controllerRouter integration testing: ', () => {
     })
 
     test('returns 404 for unknown routes with allowed method', async () => {
-      const app = express().use(controllerRouter(requireAuth, [fakeController]))
+      const app = makeApp()
       const res: MockResponse<any> = await invoke(app, 'GET', '/unknown')
 
       assert.equal(res.statusCode, 404)

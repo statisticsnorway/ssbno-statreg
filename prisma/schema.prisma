@@ -5,148 +5,166 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  schemas = ["statreg"]
 }
 
 model Frequency {
-  id      Decimal   @id(map: "sys_c0023870") @db.Decimal(19, 0)
-  version Decimal   @db.Decimal(19, 0)
-  name    String    @db.VarChar(50)
-  code    String    @db.VarChar(50)
+  @@schema("statreg")
+  id      Int    @id @default(autoincrement())
+  version Int       
+  name    String
+  name_en String    
+  code    String    @unique
   variant Variant[]
 }
 
 model Calender_date {
-  id      BigInt   @id @default(autoincrement())
-  version Decimal  @db.Decimal(19, 0)
-  comment String   @db.VarChar(255)
-  day     DateTime @db.Date
-  @@unique([day])
+  @@schema("statreg")
+  id      Int      @id @default(autoincrement())
+  version Int
+  comment String
+  day     DateTime @db.Timestamp(6) @unique
 }
 
-model Contact {
-  id                 Decimal              @id(map: "sys_c0023890") @db.Decimal(19, 0)
-  version            Decimal              @db.Decimal(19, 0)
-  initials           String?              @db.VarChar(3)
-  mobile             String?              @db.VarChar(30)
-  name               String               @db.VarChar(130)
-  last_updated       DateTime             @db.Timestamp(6)
-  phone              String?              @db.VarChar(30)
-  email              String               @db.VarChar(100)
-  date_created       DateTime             @db.Timestamp(6)
+model Contact_DoNotUse {
+  @@schema("statreg")
+  id                 Int      @id @default(autoincrement())
+  version            Int      
+  initials           String?  
+  mobile             String?  
+  name               String   
+  last_updated       DateTime @db.Timestamp(6)
+  phone              String?  
+  email              String
+  date_created       DateTime @db.Timestamp(6)
   inactiv            Boolean?
-  name_en            String?              @db.VarChar(130)
+  name_en            String?
   statistic_contacts Statistic_contacts[]
 }
 
+model ResponsiblePerson {
+  @@schema("statreg")
+  id  Int          @id @default(autoincrement())
+  username String? @unique
+  email String     @unique
+  statistics Statistic[]
+}
+
 model Shortname {
-  id           Decimal     @id(map: "sys_c0023896") @db.Decimal(19, 0)
-  version      Decimal     @db.Decimal(19, 0)
-  name         String      @db.VarChar(20)
+  @@schema("statreg")
+  id           Int         @id @default(autoincrement())
+  version      Int
+  name         String      @unique
   last_updated DateTime    @db.Timestamp(6)
   date_created DateTime    @db.Timestamp(6)
-  statistics   Statistic[]
-
-  @@map("Shortname")
+  statistic   Statistic?
 }
 
 model Release {
-  id                     Decimal  @id(map: "sys_c0023910") @db.Decimal(19, 0)
-  version                Decimal  @db.Decimal(19, 0)
+  @@schema("statreg")
+  id                     Int      @id @default(autoincrement())
+  version                Int
   publish_time           DateTime @db.Timestamp(6)
   has_versions           Boolean
   last_updated           DateTime @db.Timestamp(6)
-  comment                String   @db.VarChar(255)
+  comment                String 
   period_to              DateTime @db.Timestamp(6)
-  desk_appoval_status    String?  @db.VarChar(255)
-  variant_id             Decimal  @db.Decimal(19, 0)
+  desk_appoval_status    String? 
+  variant_id             Int
   period_from            DateTime @db.Timestamp(6)
-  cancelled              Boolean
+  cancelled              Boolean  @default(false)
   date_created           DateTime @db.Timestamp(6)
-  release_date_precision String   @db.VarChar(255)
+  release_date_precision String
   import_flag            Boolean?
-  variant                Variant  @relation(fields: [variant_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fkdb40a13c44a06f71")
+  variant                Variant  @relation(fields: [variant_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model Region_level {
-  id                      Decimal                  @id(map: "sys_c0023916") @db.Decimal(19, 0)
-  version                 Decimal                  @db.Decimal(19, 0)
-  name                    String                   @db.VarChar(40)
-  code                    String?                  @db.VarChar(50)
+  @@schema("statreg")
+  id                      Int     @id @default(autoincrement())
+  version                 Int
+  name                    String
+  code                    String? @unique
   statistic_region_levels Statistic_region_level[]
 }
 
-model Division {
-  id         Decimal     @id(map: "sys_c0023922") @db.Decimal(19, 0)
-  version    Decimal     @db.Decimal(19, 0)
-  code       String      @db.VarChar(3)
-  name_en    String      @db.VarChar(100)
-  name       String      @db.VarChar(100)
+model Division_DoNotUse {
+  @@schema("statreg")
+  id         Int         @id @default(autoincrement())
+  version    Int         
+  code       String      @unique
+  name_en    String
+  name       String
   statistics Statistic[]
 }
 
 model Statistic {
-  id                      Decimal                  @id(map: "sys_c0023938") @db.Decimal(19, 0)
-  version                 Decimal                  @db.Decimal(19, 0)
-  shortname_id            Decimal                  @db.Decimal(19, 0)
-  dir_appoval_status      String?                  @db.VarChar(255)
-  search_phrases          String?                  @db.VarChar(500)
-  priority                Decimal                  @db.Decimal(1, 0)
-  desk_appoval_status     String?                  @db.VarChar(255)
-  language                String                   @db.VarChar(255)
-  search_phrases_en       String?                  @db.VarChar(500)
-  division_id             Decimal                  @db.Decimal(19, 0)
+  @@schema("statreg")
+  id                      Int                      @id @default(autoincrement())
+  version                 Int
+  shortname_id            Int                      @unique
+  dir_appoval_status      String?
+  search_phrases          String?
+  priority                Int
+  desk_appoval_status     String?
+  language                String
+  search_phrases_en       String?
+  division_code           String?
+  division_id             Int?
   first_release           DateTime?                @db.Timestamp(6)
   yearly_reporting        Boolean
-  status                  String                   @db.VarChar(255)
-  legacy_topic_codes      String?                  @db.VarChar(255)
-  relation_id             Decimal?                 @db.Decimal(19, 0)
-  name                    String                   @db.VarChar(140)
+  status                  String
+  relation_id             Int?
+  name                    String
   last_updated            DateTime                 @db.Timestamp(6)
-  comment                 String                   @db.VarChar(255)
-  name_en                 String?                  @db.VarChar(140)
+  comment                 String
+  name_en                 String?
   date_created            DateTime                 @db.Timestamp(6)
-  statistic               Statistic?               @relation("STATISTICToSTATISTIC", fields: [relation_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fkfa5cb2137008a78")
+  legacy_topic_codes      String?
+  responsiblePersons      ResponsiblePerson[]
+  statistic               Statistic?               @relation("STATISTICToSTATISTIC", fields: [relation_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   other_statistics        Statistic[]              @relation("STATISTICToSTATISTIC")
-  division                Division                 @relation(fields: [division_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fkfa5cb213b101b242")
-  shortname               Shortname                @relation(fields: [shortname_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fkfa5cb213c47ad723")
+  division                Division_DoNotUse?                 @relation(fields: [division_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  shortname               Shortname                @relation(fields: [shortname_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   contacts                Statistic_contacts[]
   statistic_region_levels Statistic_region_level[]
   variants                Variant[]
-
-  @@map("Statistic")
 }
 
 model Statistic_contacts {
-  statistic_id Decimal   @db.Decimal(19, 0)
-  contact_id   Decimal   @db.Decimal(19, 0)
-  contacts_idx Decimal?  @db.Decimal(10, 0)
-  contact      Contact   @relation(fields: [contact_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fkf98634a159382591")
-  statistic    Statistic @relation(fields: [statistic_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fkf98634a1d978a9a3")
+  @@schema("statreg")
+  statistic_id Int
+  contact_id   Int
+  contacts_idx Int?
+  contact      Contact_DoNotUse   @relation(fields: [contact_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  statistic    Statistic @relation(fields: [statistic_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
-  @@id([statistic_id, contact_id], map: "sys_c0023946")
+  @@id([statistic_id, contact_id])
 }
 
 model Statistic_region_level {
-  region_level_id Decimal      @db.Decimal(19, 0)
-  statistic_id    Decimal      @db.Decimal(19, 0)
-  region_level    Region_level @relation(fields: [region_level_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fke4b2f5b83078425c")
-  statistic       Statistic    @relation(fields: [statistic_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fke4b2f5b8d978a9a3")
+  @@schema("statreg")
+  region_level_id Int
+  statistic_id    Int
+  region_level    Region_level @relation(fields: [region_level_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  statistic       Statistic    @relation(fields: [statistic_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
-  @@id([statistic_id, region_level_id], map: "sys_c0023949")
+  @@id([statistic_id, region_level_id])
 }
 
 model Variant {
-  id                 Decimal   @id(map: "sys_c0023958") @db.Decimal(19, 0)
-  version            Decimal   @db.Decimal(19, 0)
+  @@schema("statreg")
+  id                 Int       @id @default(autoincrement())
+  version            Int
   last_updated       DateTime  @db.Timestamp(6)
   date_created       DateTime  @db.Timestamp(6)
   cancelled          Boolean
-  freq_id            Decimal   @db.Decimal(19, 0)
-  revision           String    @db.VarChar(255)
-  statistic_id       Decimal   @db.Decimal(19, 0)
-  level_of_detail    String?   @db.VarChar(255)
-  level_of_detail_en String?   @db.VarChar(255)
+  freq_id            Int
+  revision           String
+  statistic_id       Int
+  level_of_detail    String?
+  level_of_detail_en String?
   releases           Release[]
-  frequency          Frequency @relation(fields: [freq_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fke1d1085b8b4eb03")
-  statistic          Statistic @relation(fields: [statistic_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fke1d1085d978a9a3")
+  frequency          Frequency @relation(fields: [freq_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  statistic          Statistic @relation(fields: [statistic_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }

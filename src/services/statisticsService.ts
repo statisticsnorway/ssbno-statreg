@@ -1,8 +1,33 @@
-import { Statistic } from '@/generated/prisma/client'
-import { prisma } from '../lib/prisma'
+import type { StatisticListing } from '@/types/index'
+import { prisma } from '@/lib/prisma'
+import { getLocalizedName } from '@/lib/utils'
 
-export async function getAllStatistics(): Promise<Statistic[]> {
-  return prisma.statistic.findMany()
+export async function getAllStatistics({ start = 0, count = 10 }): Promise<StatisticListing[]> {
+  const statistics = await prisma.statistic.findMany({
+    skip: start,
+    take: count,
+    select: {
+      language: true,
+      status: true,
+      name: true,
+      name_en: true,
+      shortname: { select: { name: true } },
+      responsiblePersons: { select: { username: true, email: true } },
+    },
+  })
+
+  return statistics.map((statistic) => {
+    const main_language = statistic.language
+    const lang_en = 'en'
+
+    return {
+      shortname: statistic.shortname.name,
+      main_language,
+      status: [...getLocalizedName(main_language, statistic.status)],
+      name: [...getLocalizedName(main_language, statistic.name), ...getLocalizedName(lang_en, statistic.name_en)],
+      contacts: statistic.responsiblePersons,
+    }
+  })
 }
 
 export function getStatisticByShortname(shortname: string) {
