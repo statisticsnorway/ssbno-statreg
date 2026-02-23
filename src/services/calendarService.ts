@@ -18,7 +18,6 @@ export async function createBlockedReleaseDay(
   }
 
   const date = new Date(dateString) //TODO: Confirm correct date format. See JIRA issue MIM-2546
-  console.log(date)
   if (date.toString() === 'Invalid Date') {
     return Promise.reject({ statregError: 'Invalid date format in query parameter' })
   }
