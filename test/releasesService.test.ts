@@ -1,6 +1,48 @@
-import { describe, mock } from 'node:test'
+import { describe, it, mock, beforeEach } from 'node:test'
 import assert from 'node:assert/strict'
-import { getAllReleases, ReleasePrisma } from '../src/services/releasesService'
+import { getAllReleases } from '../src/services/releasesService'
+
+let prismaMock: any
+let releasesResult: object
+
+function setReleasesResult(next: object) {
+  releasesResult = next
+}
+
+describe('releasesService', async () => {
+  beforeEach(() => {
+    prismaMock = {
+      release: {
+        findMany: mock.fn(() => Promise.resolve(releasesResult)),
+      },
+    }
+  })
+
+  it('getAllReleases returns mocked data', async () => {
+    setReleasesResult(mockedReleases)
+
+    const result = await getAllReleases({ start: 1, count: 2 }, prismaMock)
+
+    assert.deepEqual(result, output)
+    assert.equal(prismaMock.release.findMany.mock.calls[0].arguments[0]['skip'], 1)
+    assert.equal(prismaMock.release.findMany.mock.calls[0].arguments[0]['take'], 2)
+  })
+
+  it('getAllReleases uses default start and count if not provided', async () => {
+    const result = await getAllReleases({}, prismaMock)
+
+    assert.deepEqual(result, output)
+    assert.equal(prismaMock.release.findMany.mock.calls[0].arguments[0]['skip'], 0)
+    assert.equal(prismaMock.release.findMany.mock.calls[0].arguments[0]['take'], 10)
+  })
+
+  it('getAllReleases returns empty list if no results', async () => {
+    setReleasesResult([])
+    const result = await getAllReleases({}, prismaMock)
+
+    assert.deepEqual(result, [])
+  })
+})
 
 ////////////// MOCK DATA ////////////////////////////////
 const mockedReleases = [
@@ -92,47 +134,3 @@ const output = [
     },
   },
 ]
-
-////////////// TESTS ////////////////////////////////
-
-describe('releasesService', async () => {
-  describe('getAllReleases returns mocked data', async () => {
-    const mockPrisma: ReleasePrisma = {
-      release: {
-        findMany: mock.fn(async () => mockedReleases),
-      },
-    }
-
-    const result = await getAllReleases({ start: 1, count: 2 }, mockPrisma)
-
-    assert.deepEqual(result, output)
-    assert.equal(mockPrisma.release.findMany.mock.calls[0].arguments[0]['skip'], 1)
-    assert.equal(mockPrisma.release.findMany.mock.calls[0].arguments[0]['take'], 2)
-  })
-
-  describe('getAllReleases uses default start and count if not provided', async () => {
-    const mockPrisma: ReleasePrisma = {
-      release: {
-        findMany: mock.fn(async () => mockedReleases),
-      },
-    }
-
-    const result = await getAllReleases({}, mockPrisma)
-
-    assert.deepEqual(result, output)
-    assert.equal(mockPrisma.release.findMany.mock.calls[0].arguments[0]['skip'], 0)
-    assert.equal(mockPrisma.release.findMany.mock.calls[0].arguments[0]['take'], 10)
-  })
-
-  describe('getAllReleases returns empty list if no results', async () => {
-    const mockPrisma: ReleasePrisma = {
-      release: {
-        findMany: mock.fn(async () => []),
-      },
-    }
-
-    const result = await getAllReleases({}, mockPrisma)
-
-    assert.deepEqual(result, [])
-  })
-})
