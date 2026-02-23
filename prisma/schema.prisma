@@ -168,3 +168,19 @@ model Variant {
   frequency          Frequency @relation(fields: [freq_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   statistic          Statistic @relation(fields: [statistic_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
+
+model AuditLogOld {
+  @@schema("statreg")
+  id                        Int       @id
+  property_name             String?
+  last_updated              DateTime
+  old_value                 String?
+  Actor                     String
+  uri                       String?
+  new_value                 String?
+  persisted_object_version  Int?
+  date_created              DateTime
+  class_name                String
+  event_name                String
+  persisted_object_id       Int
+}

@@ -161,6 +161,24 @@ CREATE TABLE "statreg"."Variant" (
 );
 
 -- CreateTable
+CREATE TABLE "statreg"."AuditLogOld" (
+    "id" INTEGER NOT NULL,
+    "property_name" TEXT,
+    "last_updated" TIMESTAMP(3) NOT NULL,
+    "old_value" TEXT,
+    "Actor" TEXT NOT NULL,
+    "uri" TEXT,
+    "new_value" TEXT,
+    "persisted_object_version" INTEGER,
+    "date_created" TIMESTAMP(3) NOT NULL,
+    "class_name" TEXT NOT NULL,
+    "event_name" TEXT NOT NULL,
+    "persisted_object_id" INTEGER NOT NULL,
+
+    CONSTRAINT "AuditLogOld_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "statreg"."_ResponsiblePersonToStatistic" (
     "A" INTEGER NOT NULL,
     "B" INTEGER NOT NULL,
