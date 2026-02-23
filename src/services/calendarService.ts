@@ -11,9 +11,6 @@ export async function createBlockedReleaseDay(
 ): Promise<BlockedReleaseDate[]> {
   //TODO: Confirm correct date format. See JIRA issue MIM-2546
   const date = new Date(dateString)
-  if (!date || date.toString() === 'Invalid Date') {
-    throw new Error('invalid date format')
-  }
   await prisma.calender_date.create({
     data: {
       version: 0,

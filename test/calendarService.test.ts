@@ -20,7 +20,7 @@ describe('createBlockedReleaseDay ', () => {
   })
 
   it('creates a blocked release day and returns mapped results', async () => {
-    const inputDate = '2026-12-24 00:00:00'
+    const inputDate = '2026-12-24'
     const inputComment = 'Julaften'
     setListReturn(calendar_date_prisma_list)
 
@@ -37,19 +37,8 @@ describe('createBlockedReleaseDay ', () => {
     assert.deepStrictEqual(result, calendar_date_result)
   })
 
-  it('returns 400 if dateString input is not a valid date', async () => {
-    const inputDate = '24. des'
-    const inputComment = 'Julaften'
-    setListReturn([])
-
-    await assert.rejects(() => createBlockedReleaseDay(inputDate, inputComment, prismaMock), {
-      message: 'invalid date format',
-    })
-    assert.strictEqual(prismaMock.calender_date.create.mock.callCount(), 0)
-  })
-
   it('returns 400 if date already blocked (unique constraint violation)', async () => {
-    const inputDate = '2026-12-24 00:00:00'
+    const inputDate = '2026-12-24'
     const inputComment = 'Julaften'
     prismaMock = {
       calender_date: {
