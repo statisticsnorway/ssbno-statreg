@@ -23,7 +23,7 @@ describe('releasesService', async () => {
 
     const result = await getAllReleases({ start: 1, count: 2 }, prismaMock)
 
-    assert.deepEqual(result, output)
+    assert.deepEqual(result, mockedReleasesPrismaResult)
     assert.equal(prismaMock.release.findMany.mock.calls[0].arguments[0]['skip'], 1)
     assert.equal(prismaMock.release.findMany.mock.calls[0].arguments[0]['take'], 2)
   })
@@ -31,13 +31,14 @@ describe('releasesService', async () => {
   test('getAllReleases uses default start and count if not provided', async () => {
     const result = await getAllReleases({}, prismaMock)
 
-    assert.deepEqual(result, output)
+    assert.deepEqual(result, mockedReleasesPrismaResult)
     assert.equal(prismaMock.release.findMany.mock.calls[0].arguments[0]['skip'], 0)
     assert.equal(prismaMock.release.findMany.mock.calls[0].arguments[0]['take'], 10)
   })
 
   test('getAllReleases returns empty list if no results', async () => {
     setReleasesResult([])
+
     const result = await getAllReleases({}, prismaMock)
 
     assert.deepEqual(result, [])
@@ -92,7 +93,7 @@ const mockedReleases = [
   },
 ]
 
-const output = [
+const mockedReleasesPrismaResult = [
   {
     id: 101,
     publish_time: '2024-10-15T08:00:00.000Z',

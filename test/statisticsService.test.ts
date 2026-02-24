@@ -9,9 +9,6 @@ function setStatisticsResult(next: object) {
   statisticsResult = next
 }
 
-// Test input values; calls.arguments
-// 1. Test start validation, undefined -> default?
-// 2. Test count validation, undefined -> default?
 describe('statisticService', async () => {
   beforeEach(() => {
     prismaMock = {
@@ -22,18 +19,34 @@ describe('statisticService', async () => {
   })
 
   test('getAllStatistics returns mocked data', async () => {
-    setStatisticsResult(mockStatistics)
+    setStatisticsResult(mockStatisticsPrismaResult)
 
     const result = await getAllStatistics({ start: 1, count: 2 }, prismaMock)
 
-    assert.deepEqual(result, output)
+    assert.deepEqual(result, mockedStatisticsResult)
     assert.equal(prismaMock.statistic.findMany.mock.calls[0].arguments[0]['skip'], 1)
     assert.equal(prismaMock.statistic.findMany.mock.calls[0].arguments[0]['take'], 2)
+  })
+
+  test('getAllStatistics uses default start and count if not provided', async () => {
+    const result = await getAllStatistics({}, prismaMock)
+
+    assert.deepEqual(result, mockedStatisticsResult)
+    assert.equal(prismaMock.statistic.findMany.mock.calls[0].arguments[0]['skip'], 0)
+    assert.equal(prismaMock.statistic.findMany.mock.calls[0].arguments[0]['take'], 10)
+  })
+
+  test('getAllStatistics returns empty list if no results', async () => {
+    setStatisticsResult([])
+
+    const result = await getAllStatistics({}, prismaMock)
+
+    assert.deepEqual(result, [])
   })
 })
 
 ////////////// MOCK DATA ////////////////////////////////
-const mockStatistics = [
+const mockStatisticsPrismaResult = [
   {
     language: 'nb',
     status: 'SA',
@@ -62,7 +75,7 @@ const mockStatistics = [
   },
 ]
 
-const output = [
+const mockedStatisticsResult = [
   {
     shortname: 'energ',
     main_language: 'nb',
