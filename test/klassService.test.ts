@@ -35,7 +35,7 @@ describe('klassService ', async () => {
       const departments = await getDepartmentsFromKlass()
 
       assert.equal(
-        fetchMock.mock.calls[0].arguments[0],
+        fetchMock.mock.calls[0]?.arguments[0],
         'https://data.ssb.no/api/klass/v1/versions/3009.json?language=nb'
       )
 
@@ -46,7 +46,7 @@ describe('klassService ', async () => {
       await getDepartmentsFromKlass('en')
 
       assert.equal(
-        fetchMock.mock.calls[0].arguments[0],
+        fetchMock.mock.calls[0]?.arguments[0],
         'https://data.ssb.no/api/klass/v1/versions/3009.json?language=en'
       )
     })
@@ -58,7 +58,7 @@ describe('klassService ', async () => {
       const departments = await getDepartmentsFromKlass()
 
       assert.equal(
-        fetchMock.mock.calls[0].arguments[0],
+        fetchMock.mock.calls[0]?.arguments[0],
         'https://example.test/api/klass/v1/versions/3009.json?language=nb'
       )
       assert.deepEqual(departments, [])
@@ -86,7 +86,7 @@ describe('klassService ', async () => {
       setPayload(mockInvalidClassificationItems)
 
       const departments = await getDepartmentsFromKlass()
-      const firstLogArg = errorMock.mock.calls[0].arguments[0]
+      const firstLogArg = errorMock.mock.calls[0]?.arguments[0]
 
       assert.equal(errorMock.mock.callCount(), 1)
       assert.equal((firstLogArg as Error).message, 'Unexpected object structure from klass API')
@@ -98,7 +98,7 @@ describe('klassService ', async () => {
         throw new Error('my error message')
       })
       const departments = await getDepartmentsFromKlass()
-      const firstLogArg = errorMock.mock.calls[0].arguments[0]
+      const firstLogArg = errorMock.mock.calls[0]?.arguments[0]
 
       assert.equal(errorMock.mock.callCount(), 1)
       assert.equal((firstLogArg as Error).message, 'my error message')
@@ -115,15 +115,6 @@ const mockClassificationItems = {
     { level: '2', code: '120', name: 'Seksjon A2', parentCode: '100' },
     { level: '1', code: '200', name: 'Avdeling B' },
     { level: '2', code: '210', name: 'Seksjon B1', parentCode: '200' },
-  ],
-}
-const mockClassificationItemsEn = {
-  classificationItems: [
-    { level: '1', code: '100', name: 'Department A' },
-    { level: '2', code: '110', name: 'Division A1', parentCode: '100' },
-    { level: '2', code: '120', name: 'Division A2', parentCode: '100' },
-    { level: '1', code: '200', name: 'Department B' },
-    { level: '2', code: '210', name: 'Division B1', parentCode: '200' },
   ],
 }
 
@@ -147,21 +138,5 @@ const mockDepartments = [
     code: 200,
     name: 'Avdeling B',
     divisions: [{ code: 210, name: 'Seksjon B1' }],
-  },
-]
-
-const mockDepartmentsEn = [
-  {
-    code: 100,
-    name: 'Department A',
-    divisions: [
-      { code: 110, name: 'Division A1' },
-      { code: 120, name: 'Division A2' },
-    ],
-  },
-  {
-    code: 200,
-    name: 'Department B',
-    divisions: [{ code: 210, name: 'Division B1' }],
   },
 ]
