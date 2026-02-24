@@ -1,22 +1,28 @@
 import { test, beforeEach, afterEach, mock, describe } from 'node:test'
 import assert from 'node:assert/strict'
-import { getDepartmentsFromKlass } from '../src/services/klassService'
+import {
+  setDepartmentsNb,
+  setDepartmentsEn,
+  getDepartmentsFromKlass,
+  getDivisionFromCode,
+} from '../src/services/klassService'
 import process from 'node:process'
 
 let fetchMock: ReturnType<typeof mock.method>
 let errorMock: ReturnType<typeof mock.method>
-let payload: object
+let classificationItems: object
 
-function setPayload(next: object) {
-  payload = next
+function setClassificationItems(next: object) {
+  classificationItems = next
 }
+
 describe('klassService ', async () => {
   beforeEach(() => {
-    delete process.env.DATA_BASE_URL
+    delete process.env.KLASS_BASE_URL
 
     fetchMock = mock.method(globalThis as unknown as { fetch: typeof fetch }, 'fetch', async () => {
       return {
-        json: async () => payload,
+        json: async () => classificationItems,
       }
     })
 
@@ -24,13 +30,12 @@ describe('klassService ', async () => {
   })
 
   afterEach(() => {
-    fetchMock.mock.restore()
-    errorMock.mock.restore()
+    mock.restoreAll()
   })
 
   describe('getDepartmentsFromKlass ', async () => {
     test('builds departments and divisions correct from KLASS response', async () => {
-      setPayload(mockClassificationItems)
+      setClassificationItems(mockClassificationItems)
 
       const departments = await getDepartmentsFromKlass()
 
@@ -53,7 +58,7 @@ describe('klassService ', async () => {
 
     test('uses KLASS_BASE_URL env var when present', async () => {
       process.env.KLASS_BASE_URL = 'https://example.test'
-      setPayload({ classificationItems: [] })
+      setClassificationItems({ classificationItems: [] })
 
       const departments = await getDepartmentsFromKlass()
 
@@ -65,7 +70,7 @@ describe('klassService ', async () => {
     })
 
     test('handles empty classificationItems gracefully', async () => {
-      setPayload({ classificationItems: [] })
+      setClassificationItems({ classificationItems: [] })
 
       const departments = await getDepartmentsFromKlass()
 
@@ -74,7 +79,7 @@ describe('klassService ', async () => {
     })
 
     test('handles missing classificationItems as empty', async () => {
-      setPayload({}) // key omitted
+      setClassificationItems({}) // key omitted
 
       const departments = await getDepartmentsFromKlass()
 
@@ -83,7 +88,7 @@ describe('klassService ', async () => {
     })
 
     test('logs error on unexpected object structure', async () => {
-      setPayload(mockInvalidClassificationItems)
+      setClassificationItems(mockInvalidClassificationItems)
 
       const departments = await getDepartmentsFromKlass()
       const firstLogArg = errorMock.mock.calls[0]?.arguments[0]
@@ -103,6 +108,44 @@ describe('klassService ', async () => {
       assert.equal(errorMock.mock.callCount(), 1)
       assert.equal((firstLogArg as Error).message, 'my error message')
       assert.deepEqual(departments, [])
+    })
+  })
+
+  describe('getDivisionFromCode', async () => {
+    beforeEach(() => {
+      setDepartmentsNb(mockDepartments)
+      setDepartmentsEn(mockDepartmentsEn)
+    })
+
+    test('returns the correct division for Norwegian when found', async () => {
+      const division = getDivisionFromCode(210)
+
+      assert.deepEqual(division, { code: 210, name: 'Seksjon B1' })
+    })
+
+    test('returns the correct division for English when found', async () => {
+      const division = getDivisionFromCode(110, 'en')
+
+      assert.deepEqual(division, { code: 110, name: 'Division A1' })
+    })
+
+    test('returns undefined when the division code does not exist', async () => {
+      const divisionNb = getDivisionFromCode(999)
+      const divisionEn = getDivisionFromCode(999, 'en')
+
+      assert.equal(divisionNb, undefined)
+      assert.equal(divisionEn, undefined)
+    })
+
+    test('returns undefined when departments is an empty array', async () => {
+      setDepartmentsNb([])
+      setDepartmentsEn([])
+
+      const divisionNb = getDivisionFromCode(999)
+      const divisionEn = getDivisionFromCode(999, 'en')
+
+      assert.equal(divisionNb, undefined)
+      assert.equal(divisionEn, undefined)
     })
   })
 })
@@ -138,5 +181,21 @@ const mockDepartments = [
     code: 200,
     name: 'Avdeling B',
     divisions: [{ code: 210, name: 'Seksjon B1' }],
+  },
+]
+
+const mockDepartmentsEn = [
+  {
+    code: 100,
+    name: 'Department A',
+    divisions: [
+      { code: 110, name: 'Division A1' },
+      { code: 120, name: 'Division A2' },
+    ],
+  },
+  {
+    code: 200,
+    name: 'Department B',
+    divisions: [{ code: 210, name: 'Division B1' }],
   },
 ]
