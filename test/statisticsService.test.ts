@@ -1,4 +1,4 @@
-import { describe, mock, it, beforeEach } from 'node:test'
+import { describe, mock, test, beforeEach } from 'node:test'
 import assert from 'node:assert/strict'
 import { getAllStatistics } from '../src/services/statisticsService'
 
@@ -21,7 +21,7 @@ describe('statisticService', async () => {
     }
   })
 
-  it('getAllStatistics returns mocked data', async () => {
+  test('getAllStatistics returns mocked data', async () => {
     setStatisticsResult(mockStatistics)
 
     const result = await getAllStatistics({ start: 1, count: 2 }, prismaMock)

@@ -1,4 +1,4 @@
-import { describe, it, mock, beforeEach } from 'node:test'
+import { describe, test, mock, beforeEach } from 'node:test'
 import assert from 'node:assert/strict'
 import { getAllReleases } from '../src/services/releasesService'
 
@@ -18,7 +18,7 @@ describe('releasesService', async () => {
     }
   })
 
-  it('getAllReleases returns mocked data', async () => {
+  test('getAllReleases returns mocked data', async () => {
     setReleasesResult(mockedReleases)
 
     const result = await getAllReleases({ start: 1, count: 2 }, prismaMock)
@@ -28,7 +28,7 @@ describe('releasesService', async () => {
     assert.equal(prismaMock.release.findMany.mock.calls[0].arguments[0]['take'], 2)
   })
 
-  it('getAllReleases uses default start and count if not provided', async () => {
+  test('getAllReleases uses default start and count if not provided', async () => {
     const result = await getAllReleases({}, prismaMock)
 
     assert.deepEqual(result, output)
@@ -36,7 +36,7 @@ describe('releasesService', async () => {
     assert.equal(prismaMock.release.findMany.mock.calls[0].arguments[0]['take'], 10)
   })
 
-  it('getAllReleases returns empty list if no results', async () => {
+  test('getAllReleases returns empty list if no results', async () => {
     setReleasesResult([])
     const result = await getAllReleases({}, prismaMock)
 
