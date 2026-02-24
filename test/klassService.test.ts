@@ -47,7 +47,7 @@ describe('klassService ', async () => {
       assert.deepEqual(departments, mockDepartments)
     })
 
-    test('fetch correct url for language when en is passed in getDepartmentFromClass', async () => {
+    test('fetch correct url when language "en" is passed in getDepartmentFromClass', async () => {
       await getDepartmentsFromKlass('en')
 
       assert.equal(
@@ -117,13 +117,13 @@ describe('klassService ', async () => {
       setDepartmentsEn(mockDepartmentsEn)
     })
 
-    test('returns the correct division for Norwegian when found', async () => {
+    test('returns the correct division for "nb" when found', async () => {
       const division = getDivisionFromCode(210)
 
       assert.deepEqual(division, { code: 210, name: 'Seksjon B1' })
     })
 
-    test('returns the correct division for English when found', async () => {
+    test('returns the correct division for "en" when found', async () => {
       const division = getDivisionFromCode(110, 'en')
 
       assert.deepEqual(division, { code: 110, name: 'Division A1' })

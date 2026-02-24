@@ -19,7 +19,7 @@ describe('releasesService', async () => {
   })
 
   test('getAllReleases returns mocked data', async () => {
-    setReleasesResult(mockedReleases)
+    setReleasesResult(mockedReleasesResult)
 
     const result = await getAllReleases({ start: 1, count: 2 }, prismaMock)
 
@@ -29,6 +29,8 @@ describe('releasesService', async () => {
   })
 
   test('getAllReleases uses default start and count if not provided', async () => {
+    setReleasesResult(mockedReleasesResult)
+
     const result = await getAllReleases({}, prismaMock)
 
     assert.deepEqual(result, mockedReleasesPrismaResult)
@@ -46,7 +48,50 @@ describe('releasesService', async () => {
 })
 
 ////////////// MOCK DATA ////////////////////////////////
-const mockedReleases = [
+const mockedReleasesPrismaResult = [
+  {
+    id: 101,
+    publish_time: '2024-10-15T08:00:00.000Z',
+    approval_status: 'APPROVED',
+    period_to: '2024-09-01T00:00:00.000Z',
+    period_from: '2024-08-01T00:00:00.000Z',
+    frequency: {
+      name: [
+        { language_code: 'nb', text: 'Måned' },
+        { language_code: 'en', text: 'Monthly' },
+      ],
+    },
+    statistic: {
+      shortname: 'KPI',
+      name: [
+        { language_code: 'nb', text: 'Konsumprisindeks' },
+        { language_code: 'en', text: 'Consumer Price Index' },
+      ],
+    },
+  },
+  {
+    id: 102,
+    publish_time: '2025-04-30T08:00:00.000Z',
+    approval_status: 'DRAFT',
+    period_to: '2024-12-31T00:00:00.000Z',
+    period_from: '2024-01-01T00:00:00.000Z',
+    frequency: {
+      name: [
+        { language_code: 'nb', text: 'År' },
+        { language_code: 'en', text: 'Year' },
+      ],
+    },
+    statistic: {
+      shortname: 'NR',
+      name: [
+        { language_code: 'nb', text: 'Nasjonalregnskap' },
+        { language_code: 'en', text: 'National Accounts' },
+      ],
+    },
+  },
+]
+
+const mockedReleasesResult = [
   {
     id: 101,
     version: 3,
@@ -89,49 +134,6 @@ const mockedReleases = [
           name: 'NR',
         },
       },
-    },
-  },
-]
-
-const mockedReleasesPrismaResult = [
-  {
-    id: 101,
-    publish_time: '2024-10-15T08:00:00.000Z',
-    approval_status: 'APPROVED',
-    period_to: '2024-09-01T00:00:00.000Z',
-    period_from: '2024-08-01T00:00:00.000Z',
-    frequency: {
-      name: [
-        { language_code: 'nb', text: 'Måned' },
-        { language_code: 'en', text: 'Monthly' },
-      ],
-    },
-    statistic: {
-      shortname: 'KPI',
-      name: [
-        { language_code: 'nb', text: 'Konsumprisindeks' },
-        { language_code: 'en', text: 'Consumer Price Index' },
-      ],
-    },
-  },
-  {
-    id: 102,
-    publish_time: '2025-04-30T08:00:00.000Z',
-    approval_status: 'DRAFT',
-    period_to: '2024-12-31T00:00:00.000Z',
-    period_from: '2024-01-01T00:00:00.000Z',
-    frequency: {
-      name: [
-        { language_code: 'nb', text: 'År' },
-        { language_code: 'en', text: 'Year' },
-      ],
-    },
-    statistic: {
-      shortname: 'NR',
-      name: [
-        { language_code: 'nb', text: 'Nasjonalregnskap' },
-        { language_code: 'en', text: 'National Accounts' },
-      ],
     },
   },
 ]

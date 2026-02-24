@@ -29,6 +29,8 @@ describe('statisticService', async () => {
   })
 
   test('getAllStatistics uses default start and count if not provided', async () => {
+    setStatisticsResult(mockStatisticsPrismaResult)
+
     const result = await getAllStatistics({}, prismaMock)
 
     assert.deepEqual(result, mockedStatisticsResult)
