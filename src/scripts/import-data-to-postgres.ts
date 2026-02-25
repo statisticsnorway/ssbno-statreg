@@ -70,7 +70,7 @@ function toBool(value: any): boolean | undefined {
   return undefined
 }
 
-// TODO: MIM-2546 may change date formatting
+// TODO: There's a bug so time is not with correct timezone, but MIM-2546 may change date formatting anyway so hence this is not fixed
 function parseOsloDate(value: string): Date | undefined {
   if (!value) return undefined
 
@@ -98,6 +98,7 @@ function parseOsloDate(value: string): Date | undefined {
   })
 
   const osloDate = new Date(localeString)
+  return osloDate
 }
 
 async function runImportStream<T extends Record<string, any>>(
@@ -550,53 +551,41 @@ async function importVariant(folder: string) {
 // 12) AUDIT_LOG -> NO Prisma model (raw SQL placeholder)
 //     file: AUDIT_LOG.json
 // ============================================================================
-async function importAuditLog(folder: string) {
+type AuditlogCreate = Parameters<(typeof prisma)['auditLogOld']['createMany']>[0]['data'] extends (infer U)[]
+  ? U
+  : never
+
+function mapAuditlog(raw: any): AuditlogCreate {
+  return {
+    id: Number(raw.id),
+    version: raw.version ? Number(raw.version) : 0,
+    last_updated: parseOsloDate(raw.last_updated)!, // required
+    date_created: parseOsloDate(raw.date_created)!, // required
+    cancelled: toBool(raw.er_opphort) ?? false,
+    freq_id: Number(raw.frekvens_id), // FK → Frequency
+    revision: String(raw.revisjon),
+    statistic_id: Number(raw.statistikk_id), // FK → Statistic
+    level_of_detail: raw.detaljniva,
+    level_of_detail_en: raw.detaljniva_en,
+  } as AuditlogCreate
+}
+
+async function importAuditlog(folder: string) {
   const file = path.join(folder, 'AUDIT_LOG.json')
   ensureFileExists(file)
-  console.log(`\n▶ Importing AUDIT_LOG (raw SQL) from ${file}`)
+  console.log(`\n▶ Importing AUDITLOG → Auditlog from ${file}`)
 
-  type Row = Record<string, any>
+  await runImportStream<AuditlogCreate>(
+    file,
+    (batch) =>
+      prisma.variant.createMany({
+        data: batch,
+        skipDuplicates: false,
+      }),
+    mapAuditlog
+  )
 
-  // TODO: define the exact column names in statreg."AUDIT_LOG"
-  const INSERT_SQL = `
-    insert into statreg."AUDIT_LOG" (/* col1, col2, ... */)
-    values (/* $1, $2, ... */)
-  ` as const
-
-  const batch: Row[] = []
-  let total = 0
-
-  await pipeline(fs.createReadStream(file), parser(), streamArray(), async function (source) {
-    for await (const { value } of source) {
-      // TODO: map JSON → array of parameter values in correct order
-      // const params = [ value.col1, value.col2, ... ];
-
-      // Placeholder: force you to fill columns before running
-      throw new Error(
-        'Please update importAuditLog(): set column names and params mapping for AUDIT_LOG, or comment out this importer.'
-      )
-
-      // batch.push(params);
-      // if (batch.length >= BATCH_SIZE) {
-      //   for (const p of batch) {
-      //     // Use $executeRaw with placeholders to avoid SQL injection
-      //     await prisma.$executeRawUnsafe(INSERT_SQL, ...p);
-      //   }
-      //   total += batch.length;
-      //   console.log(`Inserted ${batch.length} into AUDIT_LOG (total ${total})`);
-      //   batch.length = 0;
-      // }
-    }
-  })
-
-  if (batch.length > 0) {
-    // for (const p of batch) {
-    //   await prisma.$executeRawUnsafe(INSERT_SQL, ...p);
-    // }
-    // total += batch.length;
-  }
-
-  console.log(`✔ Done AUDIT_LOG (inserted ${total})`)
+  console.log(`✔ Done AUDIT_LOG`)
 }
 
 // ============================================================================
@@ -615,6 +604,7 @@ async function resetAllSequences() {
   await resetSequence('Statistic')
   await resetSequence('Variant')
   await resetSequence('Release')
+  await resetSequence('AuditLogOld')
 
   console.log('✔ All sequences updated\n')
 }
@@ -631,19 +621,19 @@ async function main() {
   }
 
   // Order chosen for FK safety:
-  await deleteAllData()
-  await importFrequency(folder) // FREKVENS
-  await importCalenderDate(folder) // KALENDER_DATO (independent)
-  await importContact(folder) // KONTAKT
-  await importShortname(folder) // KORTNAVN
-  await importDivision(folder) // SEKSJON
-  await importRegionLevel(folder) // REGIONALT_NIVA
-  await importStatistic(folder) // STATISTIKK (needs shortname/division)
-  await importVariant(folder) // VARIANT (needs frequency + statistic)
-  await importRelease(folder) // PUBLISERING (needs variant)
-  await importStatisticContacts(folder) // STATISTIKK_KONTAKTER (needs statistic + contact)
-  await importStatisticRegionLevel(folder) // STATISTIKK_REGIONALE_NIVAER (needs both)
-  // await importAuditLog(folder);      // AUDIT_LOG (raw SQL)
+  // await deleteAllData()
+  // await importFrequency(folder) // FREKVENS
+  // await importCalenderDate(folder) // KALENDER_DATO (independent)
+  // await importContact(folder) // KONTAKT
+  // await importShortname(folder) // KORTNAVN
+  // await importDivision(folder) // SEKSJON
+  // await importRegionLevel(folder) // REGIONALT_NIVA
+  // await importStatistic(folder) // STATISTIKK (needs shortname/division)
+  // await importVariant(folder) // VARIANT (needs frequency + statistic)
+  // await importRelease(folder) // PUBLISERING (needs variant)
+  // await importStatisticContacts(folder) // STATISTIKK_KONTAKTER (needs statistic + contact)
+  // await importStatisticRegionLevel(folder) // STATISTIKK_REGIONALE_NIVAER (needs both)
+  await importAuditlog(folder) // AUDIT_LOG (raw SQL)
 
   console.log('\n🎉 All requested tables imported successfully (see notes about AUDIT_LOG).')
 
