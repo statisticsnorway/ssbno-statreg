@@ -699,7 +699,7 @@ export interface components {
       approval_status?: string | null
       main_language?: string
       division?: {
-        code?: string
+        code?: string | null
         readonly name?: components['schemas']['Translations']
       }
       /** Format: date */
