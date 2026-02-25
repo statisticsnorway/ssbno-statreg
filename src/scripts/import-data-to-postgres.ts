@@ -650,6 +650,8 @@ main()
   .finally(async () => {
     try {
       await prisma.$disconnect?.()
-    } catch {}
+    } catch {
+      console.log('Import script failed')
+    }
   })
 ;``
