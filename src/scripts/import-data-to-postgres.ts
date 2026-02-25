@@ -558,15 +558,17 @@ type AuditlogCreate = Parameters<(typeof prisma)['auditLogOld']['createMany']>[0
 function mapAuditlog(raw: any): AuditlogCreate {
   return {
     id: Number(raw.id),
-    version: raw.version ? Number(raw.version) : 0,
-    last_updated: parseOsloDate(raw.last_updated)!, // required
-    date_created: parseOsloDate(raw.date_created)!, // required
-    cancelled: toBool(raw.er_opphort) ?? false,
-    freq_id: Number(raw.frekvens_id), // FK → Frequency
-    revision: String(raw.revisjon),
-    statistic_id: Number(raw.statistikk_id), // FK → Statistic
-    level_of_detail: raw.detaljniva,
-    level_of_detail_en: raw.detaljniva_en,
+    property_name: raw.property_name,
+    last_updated: parseOsloDate(raw.last_updated)!,
+    date_created: parseOsloDate(raw.date_created)!,
+    old_value: raw.old_value,
+    actor: raw.actor,
+    uri: raw.uri,
+    new_value: raw.new_value,
+    persisted_object_version: Number(raw.persisted_object_version),
+    class_name: raw.class_name,
+    event_name: raw.event_name,
+    persisted_object_id: Number(raw.persisted_object_id),
   } as AuditlogCreate
 }
 
@@ -578,7 +580,7 @@ async function importAuditlog(folder: string) {
   await runImportStream<AuditlogCreate>(
     file,
     (batch) =>
-      prisma.variant.createMany({
+      prisma.auditLogOld.createMany({
         data: batch,
         skipDuplicates: false,
       }),
@@ -621,18 +623,18 @@ async function main() {
   }
 
   // Order chosen for FK safety:
-  // await deleteAllData()
-  // await importFrequency(folder) // FREKVENS
-  // await importCalenderDate(folder) // KALENDER_DATO (independent)
-  // await importContact(folder) // KONTAKT
-  // await importShortname(folder) // KORTNAVN
-  // await importDivision(folder) // SEKSJON
-  // await importRegionLevel(folder) // REGIONALT_NIVA
-  // await importStatistic(folder) // STATISTIKK (needs shortname/division)
-  // await importVariant(folder) // VARIANT (needs frequency + statistic)
-  // await importRelease(folder) // PUBLISERING (needs variant)
-  // await importStatisticContacts(folder) // STATISTIKK_KONTAKTER (needs statistic + contact)
-  // await importStatisticRegionLevel(folder) // STATISTIKK_REGIONALE_NIVAER (needs both)
+  await deleteAllData()
+  await importFrequency(folder) // FREKVENS
+  await importCalenderDate(folder) // KALENDER_DATO (independent)
+  await importContact(folder) // KONTAKT
+  await importShortname(folder) // KORTNAVN
+  await importDivision(folder) // SEKSJON
+  await importRegionLevel(folder) // REGIONALT_NIVA
+  await importStatistic(folder) // STATISTIKK (needs shortname/division)
+  await importVariant(folder) // VARIANT (needs frequency + statistic)
+  await importRelease(folder) // PUBLISERING (needs variant)
+  await importStatisticContacts(folder) // STATISTIKK_KONTAKTER (needs statistic + contact)
+  await importStatisticRegionLevel(folder) // STATISTIKK_REGIONALE_NIVAER (needs both)
   await importAuditlog(folder) // AUDIT_LOG (raw SQL)
 
   console.log('\n🎉 All requested tables imported successfully (see notes about AUDIT_LOG).')
