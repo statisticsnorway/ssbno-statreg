@@ -100,7 +100,7 @@ components:
         division:
           type: object
           properties:
-            code: { type: string }
+            code: { type: string, nullable: true }
             name: { $ref: '#/components/schemas/Translations', readOnly: true }
         first_released_at: { type: string, format: date, nullable: true }
         yearly_reporting: { type: boolean }
