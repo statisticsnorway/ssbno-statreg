@@ -6,10 +6,14 @@ import { prisma } from '@/lib/prisma'
 
 export default function statisticsController(router: Router) {
   router.get('/statistics/:shortname', skipAuth, async (req, res) => {
-    const data = getStatisticByShortname(
-      Array.isArray(req.params.shortname) ? req.params.shortname[0] : req.params.shortname
-    )
-    res.json(data)
+    try {
+      const data = await getStatisticByShortname(
+        Array.isArray(req.params.shortname) ? req.params.shortname[0] : req.params.shortname
+      )
+      res.json(data)
+    } catch (error) {
+      return handleErrors(error, res)
+    }
   })
 
   router.get('/statistics', skipAuth, async (req, res) => {
