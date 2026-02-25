@@ -128,7 +128,7 @@ PGURL="postgresql://<USERNAME>@localhost:5432/statreg_db"
 AUTH_ENABLED can be configured in nodemon.json
 
 ```
-docker-compose up
+docker compose up
 docker compose down -v
 ```
 
