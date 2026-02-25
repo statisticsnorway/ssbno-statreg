@@ -100,16 +100,19 @@ components:
         division:
           type: object
           properties:
-            code: { type string }
+            code: { type: string }
             name: { $ref: '#/components/schemas/Translations', readOnly: true }
-        first_released_at: { type: string, format: date, nullable: true } # Sjekk om denne bør være string (angir vi bar år av og til??)
+        first_released_at: { type: string, format: date, nullable: true }
         yearly_reporting: { type: boolean }
-        status: { $ref: '#/components/schemas/Translations' }
+        status: 
+          type: object
+          properties:
+            code: { type: string }
         previous_topic_codes: { type: string, nullable: true }
         relation:
           type: object
           properties:
-            id: { type string }
+            shortname: { type: string }
             name: { $ref: '#/components/schemas/Translations', readOnly: true }
         name: { $ref: '#/components/schemas/Translations' }
         updated_at: { type: string, format: date-time, readOnly: true }
