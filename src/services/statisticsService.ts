@@ -36,19 +36,16 @@ export async function getStatisticByShortname(shortname: string): Promise<Statis
     where: { shortname: { name: shortname } },
     include: {
       shortname: { select: { name: true } },
-      division: { select: { code: true } },
       responsiblePersons: { select: { email: true } },
     },
   })
-
-  console.log('Fetched statistic:', JSON.stringify(statistic, null, 2))
 
   if (!statistic) throw new Error('Statistic not found')
 
   const main_language = statistic.language
   const lang_en = 'en'
 
-  const division_code = statistic.division?.code
+  const division_code = statistic.division_code
 
   return {
     version: statistic.version,
