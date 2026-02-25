@@ -166,7 +166,7 @@ CREATE TABLE "statreg"."AuditLogOld" (
     "property_name" TEXT,
     "last_updated" TIMESTAMP(3) NOT NULL,
     "old_value" TEXT,
-    "Actor" TEXT NOT NULL,
+    "actor" TEXT NOT NULL,
     "uri" TEXT,
     "new_value" TEXT,
     "persisted_object_version" INTEGER,

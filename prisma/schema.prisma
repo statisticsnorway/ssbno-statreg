@@ -175,7 +175,7 @@ model AuditLogOld {
   property_name             String?
   last_updated              DateTime
   old_value                 String?
-  Actor                     String
+  actor                     String
   uri                       String?
   new_value                 String?
   persisted_object_version  Int?
