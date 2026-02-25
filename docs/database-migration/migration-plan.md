@@ -28,7 +28,7 @@ Here you'll find the migration plan and scripts used to migrate data from the le
 11. Set the correct serial counter for all tables to ensure that autoincrement works. (prisma migration sql?)
 
 ### Migrate data to new data columns in PostgreSQL
-12. Add a migration to fill the new Division code column in the Statistics table, deriving data from the existing Division relation. (prisma migration sql?)
-13. Optional: Update the approval status field(s) for Releases and Statistics if new statuses should be applied or we get any new status column.
-14. Add a migration to fill the new ResponsiblePerson table, deriving data from the existing Contact relation. (prisma migration sql?)
-15. Drop legacy tables that are no longer needed e.g. Division and Contacts. (prisma migration sql?)
+12. Run script `addDivisionCodeToStatistic.ts` to fill in missing division codes by running: `npx tsx ./src/scripts/addDivisionCodeToStatistic.ts `
+13. Optional: Update the approval status field(s) for Releases and Statistics if new statuses should be applied or we get any new status column.No script generated since current migration supports existing data fields. Double check that this still applies before running migration.
+14. Run script `addResponsiblePersonFromOldContact.ts` to fill the new ResponsiblePerson table, deriving data from the existing Contact relation, by running: `npx tsx ./src/scripts/addResponsiblePersonFromOldContact.ts`
+15. Drop legacy tables that are no longer needed e.g. Division and Contacts. This can be done in a PR with an adjustment of Prisma schema a while after data migration
