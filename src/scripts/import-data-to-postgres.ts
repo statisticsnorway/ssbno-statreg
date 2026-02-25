@@ -70,7 +70,7 @@ function toBool(value: any): boolean | undefined {
   return undefined
 }
 
-// TODO: Fix correct date formatting (I think this logic is wrong)
+// TODO: MIM-2546 may change date formatting
 function parseOsloDate(value: string): Date | undefined {
   if (!value) return undefined
 
@@ -82,14 +82,14 @@ function parseOsloDate(value: string): Date | undefined {
   const [_, dd, mm, yyyy, HH, MM, SS] = match.map(Number)
 
   const year = yyyy
-  const month = mm - 1
+  const month = mm! - 1
   const day = dd
   const hour = HH
   const minute = MM
   const second = SS
 
   // 1. Create the naive UTC timestamp
-  const naiveUtc = Date.UTC(year, month, day, hour, minute, second)
+  const naiveUtc = Date.UTC(year!, month, day, hour, minute, second)
 
   // 2. Ask Intl API what the offset is in Europe/Oslo at that time
   const localeString = new Date(naiveUtc).toLocaleString('en-US', {
@@ -98,12 +98,6 @@ function parseOsloDate(value: string): Date | undefined {
   })
 
   const osloDate = new Date(localeString)
-
-  // 3. Compute the offset (difference between naiveUtc and real Oslo)
-  const offsetMs = naiveUtc - osloDate.getTime()
-
-  // 4. Subtract offset to get a REAL Oslo-local timestamp in UTC
-  return new Date(naiveUtc - offsetMs)
 }
 
 async function runImportStream<T extends Record<string, any>>(
