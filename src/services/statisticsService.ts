@@ -1,9 +1,14 @@
 import type { StatisticListing, StatisticDetails } from '@/types/index'
-import { prisma } from '@/lib/prisma'
 import { getLocalizedName, dateToISOString } from '@/lib/utils'
-import { getDivisionFromCode } from './klassService'
+import { type PrismaClient } from '@/generated/prisma/client'
+import { getDivisionFromCode } from '@/services/klassService'
 
-export async function getAllStatistics({ start = 0, count = 10 }): Promise<StatisticListing[]> {
+type StatisticPrisma = Pick<PrismaClient, 'statistic'>
+
+export async function getAllStatistics(
+  { start = 0, count = 10 },
+  prisma: StatisticPrisma
+): Promise<StatisticListing[]> {
   const statistics = await prisma.statistic.findMany({
     skip: start,
     take: count,
@@ -31,7 +36,7 @@ export async function getAllStatistics({ start = 0, count = 10 }): Promise<Stati
   })
 }
 
-export async function getStatisticByShortname(shortname: string): Promise<StatisticDetails> {
+export async function getStatisticByShortname(shortname: string, prisma: StatisticPrisma): Promise<StatisticDetails> {
   const statistic = await prisma.statistic.findFirst({
     where: { shortname: { name: shortname } },
     include: {
