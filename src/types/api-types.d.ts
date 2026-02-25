@@ -705,10 +705,12 @@ export interface components {
       /** Format: date */
       first_released_at?: string | null
       yearly_reporting?: boolean
-      status?: components['schemas']['Translations']
+      status?: {
+        code?: string
+      }
       previous_topic_codes?: string | null
       relation?: {
-        id?: unknown
+        shortname?: string
         readonly name?: components['schemas']['Translations']
       }
       name?: components['schemas']['Translations']
@@ -724,7 +726,9 @@ export interface components {
     Statistic_listing: {
       readonly shortname?: string
       main_language?: string
-      status?: components['schemas']['Translations']
+      status?: {
+        code?: string
+      }
       name?: components['schemas']['Translations']
       contacts?: {
         username?: string | null

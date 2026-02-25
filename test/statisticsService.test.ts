@@ -81,7 +81,7 @@ const mockedStatisticsResult = [
   {
     shortname: 'energ',
     main_language: 'nb',
-    status: [{ language_code: 'nb', text: 'SA' }],
+    status: { code: 'SA' },
     name: [
       { language_code: 'nb', text: 'Energiregnskap og energibalanse' },
       { language_code: 'en', text: 'Energy account and energy balance' },
@@ -91,7 +91,7 @@ const mockedStatisticsResult = [
   {
     shortname: 'befolk',
     main_language: 'nb',
-    status: [{ language_code: 'nb', text: 'SA' }],
+    status: { code: 'SA' },
     name: [
       { language_code: 'nb', text: 'Befolkning og demografi' },
       { language_code: 'en', text: 'Population and demography' },
