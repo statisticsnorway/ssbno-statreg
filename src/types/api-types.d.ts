@@ -726,7 +726,9 @@ export interface components {
     Statistic_listing: {
       readonly shortname?: string
       main_language?: string
-      status?: components['schemas']['Translations']
+      status?: {
+        code?: string
+      }
       name?: components['schemas']['Translations']
       contacts?: {
         username?: string | null

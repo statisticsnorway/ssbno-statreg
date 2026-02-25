@@ -133,7 +133,10 @@ components:
       properties:
         shortname: { type: string, readOnly: true }
         main_language: { type: string }
-        status: { $ref: '#/components/schemas/Translations' }
+        status:          
+          type: object
+          properties:
+            code: { type: string }
         name: { $ref: '#/components/schemas/Translations' }
         contacts:
           type: array

@@ -28,7 +28,9 @@ export async function getAllStatistics(
     return {
       shortname: statistic.shortname.name,
       main_language,
-      status: [...getLocalizedName(main_language, statistic.status)],
+      status: {
+        code: statistic.status,
+      },
       name: [...getLocalizedName(main_language, statistic.name), ...getLocalizedName(lang_en, statistic.name_en)],
       contacts: statistic.responsiblePersons,
     }
