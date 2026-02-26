@@ -1,8 +1,7 @@
 import type { StatisticListing, StatisticDetails } from '@/types/index'
-import { prisma } from '@/lib/prisma'
 import { getLocalizedName, dateToISOString } from '@/lib/utils'
-import { getDivisionFromCode } from './klassService'
 import { type PrismaClient } from '@/generated/prisma/client'
+import { getDivisionFromCode } from '@/services/klassService'
 
 type StatisticPrisma = Pick<PrismaClient, 'statistic'>
 
@@ -57,7 +56,7 @@ function parseStatisticVariants(variants) {
     ],
     created_at: dateToISOString(variant.date_created),
     cancelled: variant.cancelled,
-    freqency: {
+    frequency: {
       name: [...getLocalizedName('nb', variant.frequency.name), ...getLocalizedName('en', variant.frequency.name_en)],
     },
     revision: variant.revision,
