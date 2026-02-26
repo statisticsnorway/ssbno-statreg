@@ -30,7 +30,14 @@ export async function createBlockedReleaseDay(
     },
   })
 
-  const blockedDays = await prisma.calender_date.findMany({ select: { comment: true, day: true } })
+  const blockedDays = await prisma.calender_date.findMany({
+    where: {
+      day: {
+        gt: new Date(),
+      },
+    },
+    select: { comment: true, day: true },
+  })
 
   return blockedDays.map((blockedDay) => ({
     blocked_comment: blockedDay.comment,
