@@ -30,7 +30,7 @@ npm run dev
 
 If new migrations: `npm db:deploy`
 
-> Until the first data migration to test database is complete, we don't use migrations. If schema have changed the following sequence _should_ fix your database:
+> NB! Until the first data migration to test database is complete, we don't use migrations. If schema have changed the following sequence _should_ fix your database:
 ```
 npm run generate
 npx prisma migrate reset
@@ -44,7 +44,7 @@ For plain local development run:
 npm run dev
 ```
 
-Or to run with local authentication flow run docker composeß:
+Or to run with local authentication flow run docker compose:
 ```
 colima start
 docker compose up --watch

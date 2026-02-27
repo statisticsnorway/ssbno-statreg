@@ -24,7 +24,7 @@ Password stored in secret manager in GCP: https://console.cloud.google.com/secur
 To run local client:
 ```
 colima start
-docker compose up --watch
+docker compose up
 ```
 To stop local client: 
 ```
