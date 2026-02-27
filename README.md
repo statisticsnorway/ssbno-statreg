@@ -4,21 +4,18 @@
 
 Statreg API is a backend service for statistikkregisteret. It provides endpoints for fetching and managing statistics and publications, amongst other things.
 
-## DEV
+## Documentation
+Technical documentation are found in [docs](./docs/)-folder
 
-AUTH_ENABLED can be configured in nodemon.json
+## Getting started with development
+### Prerequests before first run
 
-### Prerequests
-
-- Install a postgresql database (see [Database](#Database))
+- Install a postgresql database (see [Database docs](./docs/database.md))
 - Start the database application and "initialize databases" (or similar)
-- Copy the example env configuration file and fill in the secrets:
+- Copy the example env configuration file: `cp .env.example .env`
+- Fill in placeholder variables and secrets.
 
-```
-cp .env.example .env
-```
-
-As to where to find the secrets go to [Local dev with keycloak](#local-dev-with-real-user-token-from-keycloak) and [Entra Reader](#entra-reader) for more information.
+As to where to find the secrets see docs for [Authentication and Authorization](./docs/auth.md) and [AD integration](./docs/ad-integration.md).
 
 ### First run, database baseline setup
 
@@ -33,17 +30,39 @@ npm run dev
 
 If new migrations: `npm db:deploy`
 
-Then run
+> NB! Until the first data migration to test database is complete, we don't use migrations. If schema have changed the following sequence _should_ fix your database:
+```
+npm run generate
+npx prisma migrate reset
+npx prisma dp push
+npm run seed
+```
+
+For plain local development run:
 
 ```
 npm run dev
 ```
 
-Go to http://localhost:8080 to see results.
+Or to run with local authentication flow run docker compose:
+```
+colima start
+docker compose up --watch
+```
+
+The app is now served on http://localhost:8080
+
+### Local authentication
+We are using keycloak for authentication. We have a docker compose setup to simulate production auth flow. 
+
+This setup is documented under [Authentication and authorization](./docs/auth.md).
+
+### Auth override
+Set `AUTH_ENABLED=false` in `.env` to bypass auth for local development
 
 ## Eslint & Prettier
 
-To check for linting and formatting errors/warnings run:
+We use eslint and prettier for type checking and code formatting. To check for linting and formatting errors/warnings run:
 
 ```
 npm run lint
@@ -57,111 +76,3 @@ npm run lint:fix
 
 Keep in mind that not all types of linting/formatting errors and warnings can be fixed automatically.
 
-## Lightship
-
-Abstracts readiness, liveness and startup checks and graceful shutdown of Node.js services running in Kubernetes.
-Providing graceful shutdown. Enable `/live` and `/ready` endpoints on port `:9000`.
-
-## Helmet
-
-Help secure Express apps by setting HTTP response headers.
-
-## Prom bundle
-
-Express middleware with popular prometheus metrics in one bundle. Exposes `/metrics` endpoint.
-
-## Auth switch
-
-set `AUTH_ENABLED=false` in .env to bypass auth for local development
-
-## Docker
-
-### Prerequisites
-
-To get started, you first need to [install Colima and Docker CLI.](https://statistics-norway.atlassian.net/wiki/spaces/mimir/pages/4827381761/Bytte+fra+Docker+Desktop+til+Colima)
-
-### Build and run
-
-Start Colima with the default configuration
-
-```bash
-colima start
-```
-
-Build the application
-
-```bash
-docker build -t ssbno/statreg-api .
-```
-
-Then, run
-
-```bash
-docker run -it -p 8080:8080 ssbno/statreg-api
-```
-
-## Persistence
-
-### Database
-
-We use PostgreSQL, provided by Nais in our live environments. Locally you can set up your own Postgres db in one of many ways - install PostgreSQL [from either the website](https://www.postgresql.org/download/), Homebrew or your package manager of choice. If you are on a mac, postgres.app is recommended and makes setup very easy and quick.
-
-### Prisma
-
-We use Prisma both as our ORM and as our schema migration tool in this project. We strongly recommend reading [this article](https://www.prisma.io/docs/getting-started/setup-prisma/add-to-existing-project/relational-databases/evolve-your-schema-typescript-postgresql) before touching the schema if you have not used Prisma before.
-
-In short though, Prisma handles schema changes with Migrations, which are incremental change sets applied to the database. Applied migrations are recorded in the database. Migrations are generated with the Prisma CLI, checked into the codebase and _never_ manually changed. After having made changes to your schema, you can push these changes to your local db with `npx prisma db push`. Note that this does not update your migrations, but you can do this as many times as you like until the desired state is achieved. (sidenote: this may cause data loss locally)
-
-When you are happy with your updated schema, you can run `npx prisma migrate dev --name name-of-changeset`. This applies previous changes in schema, generates a new migration with the supplied name, applies all unapplied migrations and triggers generation of a new Prisma Client.
-
-There are many fun pitfalls and ways of messing up both your local db and production data using prisma, so educate yourself, make sure you know what you are doing, and be ready to roll back changes. Locally you can typically run `npx prisma migrate reset` and then `npm run seed` to bring your local database back to a working state.
-
-For local development, we can use a file named ".env" located in the root directory of the project. Currently we only use one environment variable from this file - see prisma.config.ts - and it should look something like this:
-
-```
-PGURL="postgresql://<USERNAME>@localhost:5432/statreg_db"
-```
-
-### Local dev (with real user token from keycloak)
-
-AUTH_ENABLED can be configured in nodemon.json
-
-```
-docker-compose up
-docker compose down -v
-```
-
-User must variables in .env (required):
-```
-KEYCLOAK_CLIENT_ID=oauth2-proxy-ssbno-statreg-api
-KEYCLOAK_CLIENT_SECRET= (this password is only for devs and stored in gcp secret manager)
-KEYCLOAK_WELL_KNOWN_URL=https://auth-play.test.ssb.no/realms/ssb/.well-known/openid-configuration
-```
-
-Password stored in GCP: https://console.cloud.google.com/security/secret-manager?project=ssbno-t-lf
-
-Technical Documentation: https://statistics-norway.atlassian.net/wiki/spaces/mimir/pages/5222957098/Local+dev+with+real+user+token+from+keycloak
-
-### Entra Reader
-
-Connects to Azure entra ID via a new app resource that uses Oauth to authenticate
-We are able to read user info and get back name, phone number and email, via endpoint for human and nonhuman users the endpoint supports email initials as input.
-
-We need these environment variable for this connection to work:
-
-```
-ENTRA_READER_AZURE_TENANT_ID
-ENTRA_READER_AZURE_CLIENT_ID
-ENTRA_READER_AZURE_CLIENT_SECRET
-```
-
-`ENTRA_READER_AZURE_CLIENT_SECRET` is stored in https://console.cloud.google.com/security/secret-manager/secret/ENTRA_READER_AZURE_CLIENT_SECRET/versions?project=ssbno-t-lf
-
-The other variables can be found here - https://portal.azure.com/?l=en.en-us#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/Overview/appId/f20f3383-d147-4039-a95b-6370cc94723b/isMSAApp~/false
-
-Single or multiple users are capped at 20 users per call, based on microsoft graph internal limits:
-
-- GET /entra/users/iii
-- GET /entra/users/iii,yyy,stud-uuu
-
-In test and production the variables will be supplied through nais secret manager (envFrom - secret: statreg-api-secrets)
