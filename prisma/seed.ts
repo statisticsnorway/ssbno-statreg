@@ -886,7 +886,7 @@ async function main() {
     create: {
       version: 0,
       comment: 'Første dag etter feriestengt uke',
-      day: '2026-07-20T00:00:00Z',
+      day: new Date('2026-07-20T00:00:00Z'),
     },
   })
 
@@ -898,7 +898,7 @@ async function main() {
     create: {
       version: 0,
       comment: 'Første dag etter påske',
-      day: '2026-04-22T00:00:00Z',
+      day: new Date('2026-04-22T00:00:00Z'),
     },
   })
 
@@ -910,7 +910,7 @@ async function main() {
     create: {
       version: 0,
       comment: 'Julaften',
-      day: '2026-12-24T00:00:00Z',
+      day: new Date('2026-12-24T00:00:00Z'),
     },
   })
 
@@ -922,7 +922,7 @@ async function main() {
     create: {
       version: 0,
       comment: 'Nyttårsaften',
-      day: '2026-12-31T00:00:00Z',
+      day: new Date('2026-12-31T00:00:00Z'),
     },
   })
 
