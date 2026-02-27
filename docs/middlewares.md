@@ -1,3 +1,5 @@
+# Middlewares used in statreg api
+
 ## Lightship
 
 Abstracts readiness, liveness and startup checks and graceful shutdown of Node.js services running in Kubernetes.
@@ -13,4 +15,4 @@ Express middleware with popular prometheus metrics in one bundle. Exposes `/metr
 
 ## Auth middleware
 
-Our own middleware, described in auth.md
+Middleware to automatically handle authentication and authorization. Read more in [Authentication and authorization](auth.md).

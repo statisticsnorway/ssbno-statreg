@@ -1,20 +1,56 @@
+# Authentication and authorization
 
-### Local dev (with real user token from keycloak)
+Statreg-api uses [keycloak/wonderwall](https://psychic-broccoli-evke4lm.pages.github.io/how-to/auth-foran-applikasjon/) for authenication, and an auth middleware for authorization. 
 
-AUTH_ENABLED can be configured in nodemon.json
+There are 3 levels of authorization:
+* No authorization (endpoint is open to all). Specified with `skipAuth()` for endpoint in controller.
+* Authozied SSB user (default behavior).
+* Require certain dapla team memberchip. Specified with `requireUserGroupAuthorization(<dapla-team>)` for endpoint in controller.
 
-```
-docker-compose up
-docker compose down -v
-```
+## Local development with working authentication
+We have a docker compose setup to simulate production auth flow. 
 
-User must variables in .env (required):
+### Run locally with authentication flow
+In `.env` make sure `AUTH_ENABLED` is set to `true` and that the following variables are defined:
+
 ```
 KEYCLOAK_CLIENT_ID=oauth2-proxy-ssbno-statreg-api
 KEYCLOAK_CLIENT_SECRET= (this password is only for devs and stored in gcp secret manager)
 KEYCLOAK_WELL_KNOWN_URL=https://auth-play.test.ssb.no/realms/ssb/.well-known/openid-configuration
 ```
 
-Password stored in GCP: https://console.cloud.google.com/security/secret-manager?project=ssbno-t-lf
+Password stored in secret manager in GCP: https://console.cloud.google.com/security/secret-manager (remember that test secret is in test project, and prod secret in prod project)
 
-Technical Documentation: https://statistics-norway.atlassian.net/wiki/spaces/mimir/pages/5222957098/Local+dev+with+real+user+token+from+keycloak
+To run local client:
+```
+colima start
+docker compose up --watch
+```
+To stop local client: 
+```
+docker compose down -v
+```
+
+### Local Authentication Architecture (Wonderwall + Keycloak PLAY)
+When running `npm run dev` the app serves `src/main.ts` directly, with no OAuth2 flow or Bearer token injection. That means all endpoints that require authorization will fail (unless [overriding auth](../README.md#auth-override)). Overriding auth is fine for developing business logic, unit tests ie, but we also need a way to run the app _with_ authentication simulation as well. 
+
+The purpose of this setup is to enable production-equivalent local authentication without changing application auth logic, while keeping npm run dev token-free. This solution simulates NAIS test authentication exact, using the same middleware and token validation.
+And keycloak provides the SSO login page if unauthenticated
+
+#### Runtime Components (docker-compose.yaml)
+|Component|Responsibility|
+|---------|--------------|
+|Wonderwall [GitHub - nais/wonderwall: openid connect relying party as a sidecar/service](https://github.com/nais/wonderwall) |OAuth2 client, login redirects, token injection|
+|Keycloak PLAY|Identity provider (provides login if needed)|
+|Redis|Session store for Wonderwall|
+|statreg-api express app|The actual app including token validation + authorization|
+
+#### Authentication Flow (for docker-compose.yaml)
+1. Browser sends request to localhost:8080
+2. Wonderwall checks cookie: `io.nais.wonderwall.session`
+3. If missing or invalid: Redirects to Keycloak PLAY
+4. User login
+5. Keycloak redirects to: `/oauth2/callback`
+6. Wonderwall sets session cookie and stores session in Redis
+7. Injects Authorization: Bearer <ID token> and proxies request to statreg-api app. 
+8. For all subsequent requests step 4-6 is skipped.

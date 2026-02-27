@@ -1,11 +1,12 @@
+# Docker
 
-## Docker
+We use docker to create the image run in test and production environment. Docker image can be built and tested locally using colima.
 
-### Prerequisites
+## Prerequisites
 
 To get started, you first need to [install Colima and Docker CLI.](https://statistics-norway.atlassian.net/wiki/spaces/mimir/pages/4827381761/Bytte+fra+Docker+Desktop+til+Colima)
 
-### Build and run
+## Build and run
 
 Start Colima with the default configuration
 

@@ -1,8 +1,10 @@
+# AD Integration
 
-### Entra Reader
+We use AD to issue user info (name, phone number and email) for both human and nonhuman users based on AD username (initials) or email. 
 
-Connects to Azure entra ID via a new app resource that uses Oauth to authenticate
-We are able to read user info and get back name, phone number and email, via endpoint for human and nonhuman users the endpoint supports email initials as input.
+## Entra Reader
+
+Connects to Azure entra ID via a new app resource that uses Oauth to authenticate.
 
 We need these environment variable for this connection to work:
 
