@@ -5,7 +5,6 @@
   "events": {},
   "watch": ["src", "src/**"],
   "env": {
-    "AUTH_ENABLED": "true",
     "PORT": "8080",
     "KEYCLOAK_REALM_ISSUER": "https://auth-play.test.ssb.no/realms/ssb",
     "KEYCLOAK_JWKS_URI": "https://auth-play.test.ssb.no/realms/ssb/protocol/openid-connect/certs",

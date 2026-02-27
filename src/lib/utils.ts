@@ -6,3 +6,9 @@ export function getLocalizedName(language_code = 'nb', text: string | undefined 
 export function dateToISOString(date: Date | null) {
   return date ? date.toISOString() : undefined
 }
+
+export function sanitize(input: string): string {
+  if (typeof input !== 'string') return ''
+
+  return input.trim().replace(/[^a-zA-Z0-9æøåÆØÅ.,:;!?()/\-\s]/g, '')
+}

@@ -72,8 +72,7 @@ Express middleware with popular prometheus metrics in one bundle. Exposes `/metr
 
 ## Auth switch
 
-set `"AUTH_ENABLED": "false"` in nodemon.json
-to turn of auth for local development
+set `AUTH_ENABLED=false` in .env to bypass auth for local development
 
 ## Docker
 
