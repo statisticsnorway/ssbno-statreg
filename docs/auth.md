@@ -5,7 +5,7 @@ Statreg-api uses [keycloak/wonderwall](https://psychic-broccoli-evke4lm.pages.gi
 There are 3 levels of authorization:
 * No authorization (endpoint is open to all). Specified with `skipAuth()` for endpoint in controller.
 * Authozied SSB user (default behavior).
-* Require certain dapla team memberchip. Specified with `requireUserGroupAuthorization(<dapla-team>)` for endpoint in controller.
+* Require certain dapla team membership. Specified with `requireUserGroupAuthorization(<dapla-team>)` for endpoint in controller.
 
 ## Local development with working authentication
 We have a docker compose setup to simulate production auth flow. 
