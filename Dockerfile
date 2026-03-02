@@ -1,8 +1,10 @@
-# Use a Node 24 base image. We can not use distroless because Prisma commands depend on having a shell, as well as other OS functions available. 
+# Use a Node 24 slim base image. We can not use distroless because Prisma commands depend on having a shell, as well as other OS functions available. 
 # We want this because we need to run npm commands on startup, inside the container. 
 # In order to inspect the tag associated with this image hash (and verify the version of node), you can run this command
 # docker inspect --format='{{.RepoDigests}}' node@sha256:9632533eda8061fc1e9960cfb3f8762781c07a00ee7317f5dc0e13c05e15166f
-FROM node@sha256:a2f09f3ab9217c692a4e192ea272866ae43b59fabda1209101502bf40e0b9768
+FROM node@sha256:e07427bc8f075386eafa62c1ddab758815f1fd11dd8eaacb61919e8b09ab00b3
+
+RUN apt-get update -y && apt-get install -y openssl
 
 # Set the working directory
 WORKDIR /app

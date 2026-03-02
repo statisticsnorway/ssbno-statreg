@@ -23,11 +23,15 @@ function getLastLineFromErrorMessage(message: string): string {
 }
 
 export function handleErrors(error: any, res: Response) {
+  if (error.statregError) {
+    return res.status(400).json({ error: error.statregError })
+  }
+
   const knownErrorMessage = checkForKnownPrismaErrors(error)
   if (knownErrorMessage) {
     return res.status(400).json(knownErrorMessage)
   }
 
   console.error(error)
-  return res.status(500).json({ error: 'Internal server error' })
+  return res.status(400).json({ error: 'Something went wrong' })
 }

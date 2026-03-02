@@ -2,8 +2,16 @@ import { Department } from '@/types/department'
 import { KlassClassification } from '@/types/klassClassification'
 import process from 'node:process'
 
-export let DEPARTMENTS_NB: Department[]
-export let DEPARTMENTS_EN: Department[]
+export let DEPARTMENTS_NB: Department[] = []
+export let DEPARTMENTS_EN: Department[] = []
+
+export function setDepartmentsNb(departments: Department[]) {
+  DEPARTMENTS_NB = departments
+}
+
+export function setDepartmentsEn(departments: Department[]) {
+  DEPARTMENTS_EN = departments
+}
 
 export function getDivisionFromCode(code: number, language?: string) {
   const departments = language === 'en' ? DEPARTMENTS_EN : DEPARTMENTS_NB
@@ -11,8 +19,8 @@ export function getDivisionFromCode(code: number, language?: string) {
 }
 
 export async function initializeDepartments() {
-  DEPARTMENTS_NB = await getDepartmentsFromKlass()
-  DEPARTMENTS_EN = await getDepartmentsFromKlass('en')
+  setDepartmentsNb(await getDepartmentsFromKlass())
+  setDepartmentsEn(await getDepartmentsFromKlass('en'))
 }
 
 export async function getDepartmentsFromKlass(language = 'nb'): Promise<Department[]> {
