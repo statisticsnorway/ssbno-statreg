@@ -19,7 +19,8 @@ src/scripts/json-validation.sh ./docs/database-migration/tableStatsExample.json 
 ```
 
 ### Load data to PostgreSQL
-6. Skip steps 6, 8, 9, and 10 if you're only migrating to your local PostgeSQL database. Copy JSON files (both data and validation metadata) from localhost into a tmp location in pod on NAIS using kubectl exec (TODO: Verify copilot command suggestion):
+(Skip steps 6, 9, and 10 if you're only migrating to your local PostgeSQL database)
+6.  Copy JSON files (both data and validation metadata) from localhost into a tmp location in pod on NAIS using kubectl exec (TODO: Verify copilot command suggestion):
 ```
 kubectl cp ./data/myfile.json <pod-name>:/app/data/myfile.json
 ```
