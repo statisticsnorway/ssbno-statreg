@@ -24,7 +24,7 @@ src/scripts/json-validation.sh ./docs/database-migration/tableStatsExample.json 
 kubectl cp ./data/myfile.json <pod-name>:/app/data/myfile.json
 ```
 
-7. Run script `import-data-to-postgres.ts` to delete all existing data in database, load data from json files to PostgreSQL by running command in pod:
+7. Run script `import-data-to-postgres.ts` to delete all existing data in database, load data from JSON files to PostgreSQL by running command in pod:
 ```
 npm exec tsx ./src/scripts/import-data-to-postgres.ts ~/Documents/STATREG_TABLES_JSON
 ``` 
