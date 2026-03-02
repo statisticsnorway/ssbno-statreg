@@ -19,7 +19,7 @@ src/scripts/json-validation.sh ./docs/database-migration/tableStatsExample.json 
 ```
 
 ### Load data to PostgreSQL
-6. Skip this step if you're only migrating to your local PostgeSQL database. Copy JSON files (both data and validation metadata) from localhost into a tmp location in pod on NAIS using kubectl exec (TODO: Verify copilot command suggestion):
+6. Skip steps 6, 8, 9, and 10 if you're only migrating to your local PostgeSQL database. Copy JSON files (both data and validation metadata) from localhost into a tmp location in pod on NAIS using kubectl exec (TODO: Verify copilot command suggestion):
 ```
 kubectl cp ./data/myfile.json <pod-name>:/app/data/myfile.json
 ```
@@ -34,8 +34,8 @@ npm exec tsx ./src/scripts/import-data-to-postgres.ts ~/Documents/STATREG_TABLES
     * transforms dates to correct format and timezone.
 
 8. After data loading, verify each table against the JSON validation files using a script. Check the number of rows and the highest and lowest ids.
-9. Delete JSON files in pod
-10. Remove npm packages `JSONStream` only used for importing JSON
+9. Delete the copied JSON files in the pod
+10. Remove npm package `JSONStream` which only used for importing JSON
 
 ### Migrate data to new data columns in PostgreSQL
 12. Add script to fill the new Division code column in the Statistics table, deriving data from the existing Division relation. (prisma migration sql?)
