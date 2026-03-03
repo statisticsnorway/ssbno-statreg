@@ -265,6 +265,9 @@ async function main() {
       comment: 'dekker sysselsettingsnivå og ledighetstall',
       name_en: 'Employment and unemployment',
       date_created: '2018-03-01T00:00:00.000Z',
+      statistic: {
+        connect: { id: stat3.id },
+      },
     },
   })
 
@@ -299,6 +302,9 @@ async function main() {
       comment: 'statistikk over befolkningens helse og tjenestebruk',
       name_en: 'Health and health services',
       date_created: '2019-07-01T00:00:00.000Z',
+      statistic: {
+        connect: { id: stat3.id },
+      },
     },
   })
 
