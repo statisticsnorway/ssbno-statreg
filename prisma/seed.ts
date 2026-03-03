@@ -1,6 +1,5 @@
 import process from 'node:process'
 import { prisma } from '../src/lib/prisma'
-import { stat } from 'node:fs'
 
 async function main() {
   const freq1 = await prisma.frequency.upsert({
