@@ -122,6 +122,9 @@ export async function getStatisticByShortname(shortname: string, prisma: Statist
     created_at: dateToISOString(statistic.date_created),
     variants: parseStatisticVariants(statistic.variants),
     contacts: statistic.responsiblePersons,
-    statistic_region_levels: [], // TODO: Add to seed
+    statistic_region_levels:
+      statistic.statistic_region_levels?.map(({ region_level }) =>
+        getLocalizedName(main_language, region_level.name)
+      ) ?? [],
   }
 }
