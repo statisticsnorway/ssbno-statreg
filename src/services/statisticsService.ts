@@ -1,6 +1,6 @@
 import type { StatisticListing, StatisticDetails } from '@/types/index'
 import { getLocalizedName, dateToISOString } from '@/lib/utils'
-import { type PrismaClient, tuåe } from '@/generated/prisma/client'
+import { type PrismaClient } from '@/generated/prisma/client'
 import { getDivisionFromCode } from '@/services/klassService'
 
 type StatisticPrisma = Pick<PrismaClient, 'statistic'>
@@ -122,6 +122,9 @@ export async function getStatisticByShortname(shortname: string, prisma: Statist
     created_at: dateToISOString(statistic.date_created),
     variants: parseStatisticVariants(statistic.variants),
     contacts: statistic.responsiblePersons,
-    statistic_region_levels: [], // TODO: Add to seed
+    statistic_region_levels:
+      statistic.statistic_region_levels?.map(({ region_level }) =>
+        getLocalizedName(main_language, region_level.name)
+      ) ?? [],
   }
 }

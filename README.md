@@ -75,3 +75,4 @@ npm run lint:fix
 ```
 
 Keep in mind that not all types of linting/formatting errors and warnings can be fixed automatically.
+
