@@ -1022,7 +1022,7 @@ async function main() {
         id: region_level2.id,
       },
       statistic: {
-        id: stat2.id,
+        id: stat1.id,
       },
     },
   })
@@ -1030,7 +1030,7 @@ async function main() {
   const statistic_region_level2 = await prisma.statistic_region_level.create({
     data: {
       region_level: { connect: { id: region_level2.id } },
-      statistic: { connect: { id: stat2.id } },
+      statistic: { connect: { id: stat1.id } },
     },
   })
 
