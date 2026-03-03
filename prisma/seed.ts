@@ -1,5 +1,6 @@
 import process from 'node:process'
 import { prisma } from '../src/lib/prisma'
+import { stat } from 'node:fs'
 
 async function main() {
   const freq1 = await prisma.frequency.upsert({
@@ -994,60 +995,115 @@ async function main() {
 
   // STATISTIC REGION LEVEL
 
-  const statistic_region_level1 = await prisma.statistic_region_level.upsert({
-    where: { statistic_id_region_level_id: { statistic_id: stat1.id, region_level_id: region_level1.id } },
-    update: {},
-    create: {
+  const statistic_region_level1Check = await prisma.statistic_region_level.findFirst({
+    where: {
+      region_level: {
+        id: region_level1.id,
+      },
+      statistic: {
+        id: stat1.id,
+      },
+    },
+  })
+
+  const statistic_region_level1 = await prisma.statistic_region_level.create({
+    data: {
       region_level: { connect: { id: region_level1.id } },
       statistic: { connect: { id: stat1.id } },
     },
   })
 
-  console.log('Created statistic_region_level from seed: \n' + JSON.stringify(statistic_region_level1, null, 2))
+  if (!statistic_region_level1Check) {
+    console.log('Created statistic_region_level from seed: \n' + JSON.stringify(statistic_region_level1, null, 2))
+  }
 
-  const statistic_region_level2 = await prisma.statistic_region_level.upsert({
-    where: { statistic_id_region_level_id: { statistic_id: stat2.id, region_level_id: region_level2.id } },
-    update: {},
-    create: {
+  const statistic_region_level2Check = await prisma.statistic_region_level.findFirst({
+    where: {
+      region_level: {
+        id: region_level2.id,
+      },
+      statistic: {
+        id: stat2.id,
+      },
+    },
+  })
+
+  const statistic_region_level2 = await prisma.statistic_region_level.create({
+    data: {
       region_level: { connect: { id: region_level2.id } },
       statistic: { connect: { id: stat2.id } },
     },
   })
 
-  console.log('Created statistic_region_level from seed: \n' + JSON.stringify(statistic_region_level2, null, 2))
+  if (!statistic_region_level2Check) {
+    console.log('Created statistic_region_level from seed: \n' + JSON.stringify(statistic_region_level2, null, 2))
+  }
 
-  const statistic_region_level3 = await prisma.statistic_region_level.upsert({
-    where: { statistic_id_region_level_id: { statistic_id: stat3.id, region_level_id: region_level3.id } },
-    update: {},
-    create: {
-      region_level: { connect: { id: region_level2.id } },
+  const statistic_region_level3Check = await prisma.statistic_region_level.findFirst({
+    where: {
+      region_level: {
+        id: region_level3.id,
+      },
+      statistic: {
+        id: stat3.id,
+      },
+    },
+  })
+
+  const statistic_region_level3 = await prisma.statistic_region_level.create({
+    data: {
+      region_level: { connect: { id: region_level3.id } },
       statistic: { connect: { id: stat3.id } },
     },
   })
 
-  console.log('Created statistic_region_level from seed: \n' + JSON.stringify(statistic_region_level3, null, 2))
+  if (!statistic_region_level3Check) {
+    console.log('Created statistic_region_level from seed: \n' + JSON.stringify(statistic_region_level3, null, 2))
+  }
 
-  const statistic_region_level4 = await prisma.statistic_region_level.upsert({
-    where: { statistic_id_region_level_id: { statistic_id: stat4.id, region_level_id: region_level4.id } },
-    update: {},
-    create: {
-      region_level: { connect: { id: region_level1.id } },
+  const statistic_region_level4Check = await prisma.statistic_region_level.findFirst({
+    where: {
+      region_level: {
+        id: region_level4.id,
+      },
+      statistic: {
+        id: stat4.id,
+      },
+    },
+  })
+
+  const statistic_region_level4 = await prisma.statistic_region_level.create({
+    data: {
+      region_level: { connect: { id: region_level4.id } },
       statistic: { connect: { id: stat4.id } },
     },
   })
 
-  console.log('Created statistic_region_level from seed: \n' + JSON.stringify(statistic_region_level4, null, 2))
+  if (!statistic_region_level4Check) {
+    console.log('Created statistic_region_level from seed: \n' + JSON.stringify(statistic_region_level4, null, 2))
+  }
 
-  const statistic_region_level5 = await prisma.statistic_region_level.upsert({
-    where: { statistic_id_region_level_id: { statistic_id: stat5.id, region_level_id: region_level5.id } },
-    update: {},
-    create: {
+  const statistic_region_level5Check = await prisma.statistic_region_level.findFirst({
+    where: {
+      region_level: {
+        id: region_level5.id,
+      },
+      statistic: {
+        id: stat5.id,
+      },
+    },
+  })
+
+  const statistic_region_level5 = await prisma.statistic_region_level.create({
+    data: {
       region_level: { connect: { id: region_level5.id } },
       statistic: { connect: { id: stat5.id } },
     },
   })
 
-  console.log('Created statistic_region_level from seed: \n' + JSON.stringify(statistic_region_level5, null, 2))
+  if (!statistic_region_level5Check) {
+    console.log('Created statistic_region_level from seed: \n' + JSON.stringify(statistic_region_level5, null, 2))
+  }
 }
 
 await main()
