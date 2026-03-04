@@ -30,6 +30,7 @@ async function deleteAllData() {
   await prisma.contact_DoNotUse.deleteMany()
   await prisma.calender_date.deleteMany()
   await prisma.frequency.deleteMany()
+  await prisma.auditLogOld.deleteMany()
 
   // Optional: if you want to clear AUDIT_LOG manually:
   // await prisma.$executeRawUnsafe('DELETE FROM statreg."AUDIT_LOG"');
