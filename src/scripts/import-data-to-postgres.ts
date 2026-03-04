@@ -410,7 +410,7 @@ function mapStatistic(raw: any): StatisticCreate {
     first_release: parseOsloDate(raw.forstegangspublisering),
     yearly_reporting: toBool(raw.arsrapportering) ?? false,
     status: String(raw.status),
-    relation_id: Number(raw.relation_id), // self-rel
+    relation_id: Number(raw.relasjon_id), // self-rel
     name: raw.statistikknavn,
     last_updated: parseOsloDate(raw.last_updated)!, // required
     comment: String(raw.intern_kommentar),
