@@ -197,6 +197,9 @@ async function main() {
       comment: 'omfatter befolkningsstørrelse og sammensetning',
       name_en: 'Population and demography',
       date_created: '2015-01-01T00:00:00.000Z',
+      statistic: {
+        connect: { id: stat1.id },
+      },
     },
   })
 
@@ -299,6 +302,9 @@ async function main() {
       comment: 'statistikk over befolkningens helse og tjenestebruk',
       name_en: 'Health and health services',
       date_created: '2019-07-01T00:00:00.000Z',
+      statistic: {
+        connect: { id: stat3.id },
+      },
     },
   })
 
@@ -1005,14 +1011,14 @@ async function main() {
     },
   })
 
-  const statistic_region_level1 = await prisma.statistic_region_level.create({
-    data: {
-      region_level: { connect: { id: region_level1.id } },
-      statistic: { connect: { id: stat1.id } },
-    },
-  })
-
   if (!statistic_region_level1Check) {
+    const statistic_region_level1 = await prisma.statistic_region_level.create({
+      data: {
+        region_level: { connect: { id: region_level1.id } },
+        statistic: { connect: { id: stat1.id } },
+      },
+    })
+
     console.log('Created statistic_region_level from seed: \n' + JSON.stringify(statistic_region_level1, null, 2))
   }
 
@@ -1027,14 +1033,14 @@ async function main() {
     },
   })
 
-  const statistic_region_level2 = await prisma.statistic_region_level.create({
-    data: {
-      region_level: { connect: { id: region_level2.id } },
-      statistic: { connect: { id: stat1.id } },
-    },
-  })
-
   if (!statistic_region_level2Check) {
+    const statistic_region_level2 = await prisma.statistic_region_level.create({
+      data: {
+        region_level: { connect: { id: region_level2.id } },
+        statistic: { connect: { id: stat1.id } },
+      },
+    })
+
     console.log('Created statistic_region_level from seed: \n' + JSON.stringify(statistic_region_level2, null, 2))
   }
 
@@ -1049,14 +1055,14 @@ async function main() {
     },
   })
 
-  const statistic_region_level3 = await prisma.statistic_region_level.create({
-    data: {
-      region_level: { connect: { id: region_level3.id } },
-      statistic: { connect: { id: stat3.id } },
-    },
-  })
-
   if (!statistic_region_level3Check) {
+    const statistic_region_level3 = await prisma.statistic_region_level.create({
+      data: {
+        region_level: { connect: { id: region_level3.id } },
+        statistic: { connect: { id: stat3.id } },
+      },
+    })
+
     console.log('Created statistic_region_level from seed: \n' + JSON.stringify(statistic_region_level3, null, 2))
   }
 
@@ -1071,14 +1077,14 @@ async function main() {
     },
   })
 
-  const statistic_region_level4 = await prisma.statistic_region_level.create({
-    data: {
-      region_level: { connect: { id: region_level4.id } },
-      statistic: { connect: { id: stat4.id } },
-    },
-  })
-
   if (!statistic_region_level4Check) {
+    const statistic_region_level4 = await prisma.statistic_region_level.create({
+      data: {
+        region_level: { connect: { id: region_level4.id } },
+        statistic: { connect: { id: stat4.id } },
+      },
+    })
+
     console.log('Created statistic_region_level from seed: \n' + JSON.stringify(statistic_region_level4, null, 2))
   }
 
@@ -1093,14 +1099,14 @@ async function main() {
     },
   })
 
-  const statistic_region_level5 = await prisma.statistic_region_level.create({
-    data: {
-      region_level: { connect: { id: region_level5.id } },
-      statistic: { connect: { id: stat5.id } },
-    },
-  })
-
   if (!statistic_region_level5Check) {
+    const statistic_region_level5 = await prisma.statistic_region_level.create({
+      data: {
+        region_level: { connect: { id: region_level5.id } },
+        statistic: { connect: { id: stat5.id } },
+      },
+    })
+
     console.log('Created statistic_region_level from seed: \n' + JSON.stringify(statistic_region_level5, null, 2))
   }
 }
