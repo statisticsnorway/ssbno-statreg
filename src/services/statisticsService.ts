@@ -82,7 +82,7 @@ export async function getStatisticByShortname(shortname: string, prisma: Statist
     include: {
       shortname: { select: { name: true } },
       responsiblePersons: { select: { email: true, username: true } },
-      statistic: { select: { language: true, name: true, name_en: true, shortname: true } },
+      related_statistic: { select: { language: true, name: true, name_en: true, shortname: true } },
       statistic_region_levels: {
         select: { region_level: { select: { name: true } } },
       },
@@ -96,7 +96,7 @@ export async function getStatisticByShortname(shortname: string, prisma: Statist
   const lang_en = 'en'
 
   const division_code = statistic.division_code
-  const related_statistic = statistic.statistic
+  const related_statistic = statistic.related_statistic
 
   return {
     version: statistic.version,
