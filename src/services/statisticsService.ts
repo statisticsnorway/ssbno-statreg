@@ -1,9 +1,11 @@
 import type { StatisticListing, StatisticDetails } from '@/types/index'
 import { getLocalizedName, dateToISOString } from '@/lib/utils'
-import { type PrismaClient } from '@/generated/prisma/client'
+import type { PrismaClient, Prisma } from '@/generated/prisma/client'
 import { getDivisionFromCode } from '@/services/klassService'
 
 type StatisticPrisma = Pick<PrismaClient, 'statistic'>
+
+// Statistic listing
 
 export async function getAllStatistics(
   { start = 0, count = 10 },
@@ -38,20 +40,36 @@ export async function getAllStatistics(
   })
 }
 
-function parseStatisticVariants(variants) {
+// Statistic details
+
+const VariantSelect = {
+  omit: { id: true, statistic_id: true, freq_id: true },
+  include: {
+    frequency: { select: { name: true, name_en: true } },
+  },
+}
+
+function parseStatisticVariants(
+  variants: Prisma.VariantGetPayload<typeof VariantSelect>[] | undefined,
+  main_language: string,
+  lang_en: string
+) {
   if (!variants?.length) return
 
   return variants.map((variant) => ({
     version: variant.version,
     updated_at: dateToISOString(variant.last_updated),
     level_of_detail: [
-      ...getLocalizedName('nb', variant.level_of_detail),
-      ...getLocalizedName('en', variant.level_of_detail_en),
+      ...getLocalizedName(main_language, variant.level_of_detail),
+      ...getLocalizedName(lang_en, variant.level_of_detail_en),
     ],
     created_at: dateToISOString(variant.date_created),
     cancelled: variant.cancelled,
     frequency: {
-      name: [...getLocalizedName('nb', variant.frequency.name), ...getLocalizedName('en', variant.frequency.name_en)],
+      name: [
+        ...getLocalizedName(main_language, variant.frequency.name),
+        ...getLocalizedName(lang_en, variant.frequency.name_en),
+      ],
     },
     revision: variant.revision,
   }))
@@ -67,12 +85,7 @@ export async function getStatisticByShortname(shortname: string, prisma: Statist
       statistic_region_levels: {
         select: { region_level: { select: { name: true } } },
       },
-      variants: {
-        omit: { id: true, statistic_id: true, freq_id: true },
-        include: {
-          frequency: { select: { name: true, name_en: true } },
-        },
-      },
+      variants: VariantSelect,
     },
   })
 
@@ -113,7 +126,7 @@ export async function getStatisticByShortname(shortname: string, prisma: Statist
     updated_at: dateToISOString(statistic.last_updated),
     comment: statistic.comment,
     created_at: dateToISOString(statistic.date_created),
-    variants: parseStatisticVariants(statistic.variants),
+    variants: parseStatisticVariants(statistic.variants, main_language, lang_en),
     contacts: statistic.responsiblePersons,
     statistic_region_levels:
       statistic.statistic_region_levels?.map(({ region_level }) =>
