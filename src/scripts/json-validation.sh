@@ -1,3 +1,4 @@
+# Run script in command line using: src/scripts/json-validation.sh ./docs/database-migration/tableStatsExample.json ~/Documents/STATREG_TABLES_JSON
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
