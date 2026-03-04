@@ -45,14 +45,8 @@ function parseStatisticVariants(variants) {
     version: variant.version,
     updated_at: dateToISOString(variant.last_updated),
     level_of_detail: [
-      {
-        language_code: 'nb',
-        text: variant.level_of_detail,
-      },
-      {
-        language_code: 'en',
-        text: variant.level_of_detail_en,
-      },
+      ...getLocalizedName('nb', variant.level_of_detail),
+      ...getLocalizedName('en', variant.level_of_detail_en),
     ],
     created_at: dateToISOString(variant.date_created),
     cancelled: variant.cancelled,
@@ -108,7 +102,6 @@ export async function getStatisticByShortname(shortname: string, prisma: Statist
       code: statistic.status,
     },
     previous_topic_codes: statistic.legacy_topic_codes,
-    // TODO: Add to seed
     relation: {
       shortname: related_statistic?.shortname?.name,
       name: [
