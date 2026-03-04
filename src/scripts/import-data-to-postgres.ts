@@ -30,6 +30,7 @@ async function deleteAllData() {
   await prisma.contact_DoNotUse.deleteMany()
   await prisma.calender_date.deleteMany()
   await prisma.frequency.deleteMany()
+  await prisma.auditLogOld.deleteMany()
 
   // Optional: if you want to clear AUDIT_LOG manually:
   // await prisma.$executeRawUnsafe('DELETE FROM statreg."AUDIT_LOG"');
@@ -409,7 +410,7 @@ function mapStatistic(raw: any): StatisticCreate {
     first_release: parseOsloDate(raw.forstegangspublisering),
     yearly_reporting: toBool(raw.arsrapportering) ?? false,
     status: String(raw.status),
-    relation_id: Number(raw.relation_id), // self-rel
+    relation_id: Number(raw.relasjon_id), // self-rel
     name: raw.statistikknavn,
     last_updated: parseOsloDate(raw.last_updated)!, // required
     comment: String(raw.intern_kommentar),
