@@ -197,6 +197,9 @@ async function main() {
       comment: 'omfatter befolkningsstørrelse og sammensetning',
       name_en: 'Population and demography',
       date_created: '2015-01-01T00:00:00.000Z',
+      statistic: {
+        connect: { id: stat1.id },
+      },
     },
   })
 

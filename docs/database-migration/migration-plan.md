@@ -34,7 +34,7 @@ npm exec tsx ./src/scripts/import-data-to-postgres.ts ~/Documents/STATREG_TABLES
     * sets the correct serial counter for all tables to ensure that autoincrement works.
     * transforms dates to correct format and timezone.
 
-8. After data loading, verify each table against the JSON validation files using a script. Check the number of rows and the highest and lowest ids.
+8. Run script `validate-import.ts` to verify each table in postgreSQL against the json validation files using a script. Check the number of rows and the highest and lowest ids. Script runs in pod with command: `npx tsx ./src/scripts/validate-import.ts ./docs/database-migration/tableStatsExample.json`
 9. Delete the copied JSON files in the pod
 10. Remove npm package `JSONStream` which only used for importing JSON
 
