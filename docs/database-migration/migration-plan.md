@@ -11,7 +11,7 @@ All scripts are found under `src/scripts`
 ### Download tables from old database
 1. Manually update `tableStatsExample.json` with metadata for all tables that includes the table name, number of rows, the highest and lowest ids etc. Run the provided `generate-stats.sql` in SQL Developer -> SQL Worksheet to generate data.
 2. Download all tables "as is" from the old database to JSON files. This is easily done manually from the Data tab and Export as `.json` with SQL Developer in VS Code. Make sure that the JSON files are named after the table e.g. `AUDIT_LOG.json`.
-3. Take a backup of the JSON files and store them in a secure location(for prod data files).
+3. Take a backup of the JSON files and store them in a secure location (for prod data files).
 4. Verify all JSON files with `json-validation.sh` by running this command in the terminal:
 
 ```
