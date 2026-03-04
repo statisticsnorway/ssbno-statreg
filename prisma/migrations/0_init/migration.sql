@@ -116,7 +116,7 @@ CREATE TABLE "statreg"."Statistic" (
     "first_release" TIMESTAMP(6),
     "yearly_reporting" BOOLEAN NOT NULL,
     "status" TEXT NOT NULL,
-    "relation_id" INTEGER,
+    "related_statistic_id" INTEGER,
     "name" TEXT NOT NULL,
     "last_updated" TIMESTAMP(6) NOT NULL,
     "comment" TEXT NOT NULL,
@@ -217,7 +217,7 @@ CREATE INDEX "_ResponsiblePersonToStatistic_B_index" ON "statreg"."_ResponsibleP
 ALTER TABLE "statreg"."Release" ADD CONSTRAINT "Release_variant_id_fkey" FOREIGN KEY ("variant_id") REFERENCES "statreg"."Variant"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE "statreg"."Statistic" ADD CONSTRAINT "Statistic_relation_id_fkey" FOREIGN KEY ("relation_id") REFERENCES "statreg"."Statistic"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+ALTER TABLE "statreg"."Statistic" ADD CONSTRAINT "Statistic_related_statistic_id_fkey" FOREIGN KEY ("related_statistic_id") REFERENCES "statreg"."Statistic"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE "statreg"."Statistic" ADD CONSTRAINT "Statistic_division_id_fkey" FOREIGN KEY ("division_id") REFERENCES "statreg"."Division_DoNotUse"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
@@ -248,4 +248,3 @@ ALTER TABLE "statreg"."_ResponsiblePersonToStatistic" ADD CONSTRAINT "_Responsib
 
 -- AddForeignKey
 ALTER TABLE "statreg"."_ResponsiblePersonToStatistic" ADD CONSTRAINT "_ResponsiblePersonToStatistic_B_fkey" FOREIGN KEY ("B") REFERENCES "statreg"."Statistic"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-

@@ -51,4 +51,4 @@ npx tsx ./src/scripts/addDivisionCodeToStatistic.ts
 ```
 npx tsx ./src/scripts/addResponsiblePersonFromOldContact.ts
 ```
-15. Drop legacy tables that are no longer needed e.g. Division and Contacts. This can be done in a PR with an adjustment of Prisma schema a while after data migration
+15. Drop legacy tables that are no longer needed e.g. Division and Contacts. Drop assosiated columns with dropped tables as well. This can be done in a PR with an adjustment of Prisma schema a while after data migration.

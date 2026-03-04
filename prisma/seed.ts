@@ -170,7 +170,11 @@ async function main() {
 
   const stat2 = await prisma.statistic.upsert({
     where: { shortname_id: shortname2.id },
-    update: {},
+    update: {
+      related_statistic: {
+        connect: { id: stat1.id },
+      },
+    },
     create: {
       version: 1,
       shortname: {
@@ -197,7 +201,7 @@ async function main() {
       comment: 'omfatter befolkningsstørrelse og sammensetning',
       name_en: 'Population and demography',
       date_created: '2015-01-01T00:00:00.000Z',
-      statistic: {
+      related_statistic: {
         connect: { id: stat1.id },
       },
     },
@@ -275,7 +279,11 @@ async function main() {
 
   const stat5 = await prisma.statistic.upsert({
     where: { shortname_id: shortname5.id },
-    update: {},
+    update: {
+      related_statistic: {
+        connect: { id: stat3.id },
+      },
+    },
     create: {
       version: 1,
       shortname: {
@@ -302,7 +310,7 @@ async function main() {
       comment: 'statistikk over befolkningens helse og tjenestebruk',
       name_en: 'Health and health services',
       date_created: '2019-07-01T00:00:00.000Z',
-      statistic: {
+      related_statistic: {
         connect: { id: stat3.id },
       },
     },
