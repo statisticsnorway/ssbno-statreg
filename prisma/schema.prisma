@@ -114,7 +114,7 @@ model Statistic {
   first_release           DateTime?                @db.Timestamp(6)
   yearly_reporting        Boolean
   status                  String
-  relation_id             Int?
+  related_statistic_id    Int?
   name                    String
   last_updated            DateTime                 @db.Timestamp(6)
   comment                 String
@@ -122,8 +122,8 @@ model Statistic {
   date_created            DateTime                 @db.Timestamp(6)
   legacy_topic_codes      String?
   responsiblePersons      ResponsiblePerson[]
-  statistic               Statistic?               @relation("STATISTICToSTATISTIC", fields: [relation_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  other_statistics        Statistic[]              @relation("STATISTICToSTATISTIC")
+  related_statistic               Statistic?               @relation("STATISTICToSTATISTIC", fields: [related_statistic_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  incoming_statistic_relations        Statistic[]              @relation("STATISTICToSTATISTIC")
   division                Division_DoNotUse?                 @relation(fields: [division_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   shortname               Shortname                @relation(fields: [shortname_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   contacts                Statistic_contacts[]
