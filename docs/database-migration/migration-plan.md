@@ -47,7 +47,8 @@ npx tsx ./src/scripts/validate-import.ts ./docs/database-migration/tableStatsExa
 npx tsx ./src/scripts/addDivisionCodeToStatistic.ts
 ```
 13. Optional: Update the approval status field(s) for Releases and Statistics if new statuses should be applied or we get any new status column.No script generated since current migration supports existing data fields. Double check that this still applies before running migration.
-14. Run script `addResponsiblePersonFromOldContact.ts` to fill the new ResponsiblePerson table, deriving data from the existing Contact relation, by running: ```
+14. Run script `addResponsiblePersonFromOldContact.ts` to fill the new ResponsiblePerson table, deriving data from the existing Contact relation, by running: 
+```
 npx tsx ./src/scripts/addResponsiblePersonFromOldContact.ts
 ```
 15. Drop legacy tables that are no longer needed e.g. Division and Contacts. This can be done in a PR with an adjustment of Prisma schema a while after data migration
