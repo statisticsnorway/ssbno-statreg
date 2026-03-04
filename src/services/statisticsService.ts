@@ -2,6 +2,7 @@ import type { StatisticListing, StatisticDetails } from '@/types/index'
 import { getLocalizedName, dateToISOString } from '@/lib/utils'
 import type { PrismaClient, Prisma } from '@/generated/prisma/client'
 import { getDivisionFromCode } from '@/services/klassService'
+import { fetchUsersByInitials, type EntraUser } from '@/../plugins/entraReaderClient'
 
 type StatisticPrisma = Pick<PrismaClient, 'statistic'>
 
@@ -80,7 +81,7 @@ export async function getStatisticByShortname(shortname: string, prisma: Statist
     where: { shortname: { name: shortname } },
     include: {
       shortname: { select: { name: true } },
-      responsiblePersons: { select: { email: true } },
+      responsiblePersons: { select: { email: true, username: true } },
       statistic: { select: { language: true, name: true, name_en: true, shortname: true } },
       statistic_region_levels: {
         select: { region_level: { select: { name: true } } },
@@ -127,7 +128,15 @@ export async function getStatisticByShortname(shortname: string, prisma: Statist
     comment: statistic.comment,
     created_at: dateToISOString(statistic.date_created),
     variants: parseStatisticVariants(statistic.variants, main_language, lang_en),
-    contacts: statistic.responsiblePersons,
+    contacts: await Promise.all(
+      statistic.responsiblePersons?.map(async ({ username, email }) => {
+        const user = username ? await fetchUsersByInitials(username) : undefined
+        return {
+          name: (user as EntraUser)?.displayName,
+          email,
+        }
+      })
+    ),
     statistic_region_levels:
       statistic.statistic_region_levels?.map(({ region_level }) =>
         getLocalizedName(main_language, region_level.name)
