@@ -8,7 +8,7 @@ export default function statisticsController(router: Router) {
   router.get('/statistics/:shortname', skipAuth, async (req, res) => {
     try {
       const data = await getStatisticByShortname(
-        Array.isArray(req.params.shortname) ? req.params.shortname[0] : req.params.shortname,
+        Array.isArray(req.params.shortname) ? (req.params.shortname[0] as string) : (req.params.shortname as string),
         prisma
       )
       res.json(data)
