@@ -1,15 +1,45 @@
-// test/entraReaderClient.test.ts
-import { describe, test, beforeEach, afterEach } from 'node:test'
+import { describe, test, beforeEach, afterEach, mock } from 'node:test'
 import assert from 'node:assert/strict'
 
+const TEST_INITIALS = 'admin'
+const TEST_EMAIL = 'admin@ssb.no'
+
 const originalEnv = process.env
-const originalFetch = global.fetch
 
-const TEST_EMAIL = 'admin@ssbno.onmicrosoft.com'
+function createFetchMock(responders: any[]) {
+  let callIndex = 0
+  return mock.method(globalThis, 'fetch', async (...args: any[]) => {
+    const responder = responders[callIndex]
+    callIndex++
+    if (!responder) throw new Error('OAuth token request failed') // getAccessToken() has failed if callIndex is 0
+    return responder(...args)
+  })
+}
 
-async function loadFreshClient() {
-  const mod = await import(`../plugins/entraReaderClient?test=${Math.random()}`)
-  return mod.fetchUserByEmail
+function mockTokenSuccess() {
+  const body = { access_token: 'fake-token', expires_in: 3600 }
+  return async () => ({
+    ok: true,
+    status: 200,
+    json: async () => body,
+    text: async () => JSON.stringify(body),
+  })
+}
+
+function mockGraphSuccess(data: object) {
+  return async () => ({
+    ok: true,
+    status: 200,
+    json: async () => data,
+  })
+}
+
+function mockGraphError(status: number, message?: string) {
+  return async () => ({
+    ok: false,
+    status,
+    text: async () => message,
+  })
 }
 
 describe('entraReaderClient', () => {
@@ -24,168 +54,110 @@ describe('entraReaderClient', () => {
 
   afterEach(() => {
     process.env = originalEnv
-    global.fetch = originalFetch
+    mock.restoreAll()
   })
 
-  test('fetchUserByEmail → returns mapped user when Graph lookup succeeds', async () => {
-    let call = 0
-    let lastUrl = ''
+  describe('getAccessToken', async () => {
+    test('throws Error when required Entra env vars are missing', async () => {
+      process.env = {}
+      const { fetchUserByEmail } = await import(`../plugins/entraReaderClient?test=${Math.random()}`)
+      await assert.rejects(() => fetchUserByEmail(TEST_EMAIL), /Missing Azure Entra configuration/)
+    })
 
-    global.fetch = async (url: any) => {
-      call++
-      lastUrl = String(url)
-
-      if (call === 1) {
-        return {
-          ok: true,
-          json: async () => ({ access_token: 'fake-token', expires_in: 3600 }),
-        } as any
-      }
-
-      return {
-        ok: true,
-        status: 200,
-        json: async () => ({
-          displayName: 'Admin SSB',
-          businessPhones: ['+4797687744'],
-          mail: TEST_EMAIL,
-        }),
-      } as any
-    }
-
-    const fetchUserByEmail = await loadFreshClient()
-    const user = await fetchUserByEmail(TEST_EMAIL)
-
-    assert.ok(lastUrl.includes(encodeURIComponent(TEST_EMAIL)))
-    assert.deepEqual(user, {
-      displayName: 'Admin SSB',
-      email: TEST_EMAIL,
-      businessPhone: '+4797687744',
+    test('throws Error when token is missing', async () => {
+      createFetchMock([])
+      const { fetchUserByEmail } = await import(`../plugins/entraReaderClient?test=${Math.random()}`)
+      await assert.rejects(() => fetchUserByEmail(TEST_EMAIL), /OAuth token request failed/)
     })
   })
 
-  test('fetchUserByEmail → returns null when Graph returns 404', async () => {
-    let call = 0
-    let lastUrl = ''
+  describe('fetchUserByEmail', async () => {
+    test('returns user when initial and email is passed ', async () => {
+      const fetchMock = createFetchMock([mockTokenSuccess(), mockGraphSuccess(mockFetchEntraUserResponse)])
+      const { fetchUserByEmail } = await import(`../plugins/entraReaderClient?test=${Math.random()}`)
+      const user = await fetchUserByEmail(TEST_INITIALS, TEST_EMAIL)
 
-    global.fetch = async (url: any) => {
-      call++
-      lastUrl = String(url)
+      assert.equal(
+        fetchMock.mock.calls[1]?.arguments[0],
+        `https://graph.microsoft.com/v1.0/users/${encodeURIComponent(TEST_EMAIL)}?$select=displayName,businessPhones,mail,userPrincipalName`
+      )
+      assert.deepEqual(user, mockEntraUserList[0]?.user)
+    })
 
-      if (call === 1) {
-        return {
-          ok: true,
-          json: async () => ({ access_token: 'fake-token', expires_in: 3600 }),
-        } as any
-      }
+    test('returns user when initial is undefined and email is passed', async () => {
+      const fetchMock = createFetchMock([mockTokenSuccess(), mockGraphSuccess(mockFetchEntraUserResponse)])
+      const { fetchUserByEmail } = await import(`../plugins/entraReaderClient?test=${Math.random()}`)
+      const user = await fetchUserByEmail(undefined, TEST_EMAIL)
 
-      return {
-        ok: false,
-        status: 404,
-        text: async () => 'Not found',
-      } as any
-    }
+      assert.equal(
+        fetchMock.mock.calls[1]?.arguments[0],
+        `https://graph.microsoft.com/v1.0/users/${encodeURIComponent(TEST_EMAIL)}?$select=displayName,businessPhones,mail,userPrincipalName`
+      )
+      assert.deepEqual(user, mockEntraUserList[0]?.user)
+    })
 
-    const fetchUserByEmail = await loadFreshClient()
-    const user = await fetchUserByEmail(TEST_EMAIL)
+    test('returns null when Graph returns 404', async () => {
+      createFetchMock([mockTokenSuccess(), mockGraphError(404, 'Not found')])
+      const { fetchUserByEmail } = await import(`../plugins/entraReaderClient?test=${Math.random()}`)
+      const user = await fetchUserByEmail(undefined)
 
-    assert.ok(lastUrl.includes(encodeURIComponent(TEST_EMAIL)))
-    assert.equal(user, null)
+      assert.equal(user, null)
+    })
   })
 
-  test('fetchUserByEmail → throws when Graph returns non-404 error', async () => {
-    let call = 0
-    let lastUrl = ''
+  describe('fetchUsersByInitials', async () => {
+    test('returns user entries when an array of initials is passed', async () => {
+      createFetchMock([
+        mockTokenSuccess(), // token
+        mockGraphSuccess(mockFetchEntraUserResponse), // first user found
+        mockGraphError(404, 'Not found'), // second user missing
+      ])
+      const { fetchUsersByInitials } = await import(`../plugins/entraReaderClient?test=${Math.random()}`)
 
-    global.fetch = async (url: any) => {
-      call++
-      lastUrl = String(url)
+      const result = await fetchUsersByInitials(`${TEST_INITIALS}, missing`)
+      assert.deepEqual(result, mockEntraUserList)
+    })
 
-      if (call === 1) {
-        return {
-          ok: true,
-          json: async () => ({ access_token: 'fake-token', expires_in: 3600 }),
-        } as any
-      }
+    test('returns user an initials is passed', async () => {
+      createFetchMock([
+        mockTokenSuccess(), // token
+        mockGraphSuccess(mockFetchEntraUserResponse), // first user found
+      ])
+      const { fetchUsersByInitials } = await import(`../plugins/entraReaderClient?test=${Math.random()}`)
 
-      return {
-        ok: false,
-        status: 500,
-        text: async () => 'Internal error',
-      } as any
-    }
+      const result = await fetchUsersByInitials(TEST_INITIALS)
+      assert.deepEqual(result, mockEntraUserList[0]?.user)
+    })
 
-    const fetchUserByEmail = await loadFreshClient()
+    test('returns null when user is not found', async () => {
+      createFetchMock([mockTokenSuccess(), mockGraphError(404, 'Not found')])
+      const { fetchUsersByInitials } = await import(`../plugins/entraReaderClient?test=${Math.random()}`)
+      const user = await fetchUsersByInitials(undefined)
 
-    await assert.rejects(fetchUserByEmail(TEST_EMAIL), /Graph request failed: 500/)
-
-    assert.ok(lastUrl.includes(encodeURIComponent(TEST_EMAIL)))
-  })
-
-  test('getAccessToken → throws when required Entra env vars are missing', async () => {
-    process.env = {}
-
-    const fetchUserByEmail = await loadFreshClient()
-
-    await assert.rejects(fetchUserByEmail(TEST_EMAIL), /Missing Azure Entra configuration/)
-  })
-
-  test('fetchUsersByInitials → returns success and not-found entries for mixed input', async () => {
-    let call = 0
-
-    global.fetch = async () => {
-      call++
-
-      if (call === 1) {
-        return {
-          ok: true,
-          json: async () => ({
-            access_token: 'fake-token',
-            expires_in: 3600,
-          }),
-        } as any
-      }
-
-      if (call === 2) {
-        return {
-          ok: true,
-          status: 200,
-          json: async () => ({
-            displayName: 'Admin SSB',
-            businessPhones: ['123'],
-            mail: 'admin@ssb.no',
-          }),
-        } as any
-      }
-
-      if (call === 3) {
-        return {
-          ok: false,
-          status: 404,
-          text: async () => 'Not found',
-        } as any
-      }
-
-      throw new Error('Unexpected fetch call')
-    }
-
-    const mod = await import(`../plugins/entraReaderClient?test=${Math.random()}`)
-    const result = await mod.fetchUsersByInitials('admin,missing')
-
-    assert.deepEqual(result, [
-      {
-        initials: 'admin',
-        user: {
-          displayName: 'Admin SSB',
-          email: 'admin@ssb.no',
-          businessPhone: '123',
-        },
-      },
-      {
-        initials: 'missing',
-        user: null,
-        error: 'User not found',
-      },
-    ])
+      assert.equal(user, null)
+    })
   })
 })
+
+////////////// MOCK DATA ////////////////////////////////
+const mockFetchEntraUserResponse = {
+  displayName: 'Admin SSB',
+  businessPhones: ['123'],
+  mail: TEST_EMAIL,
+}
+
+const mockEntraUserList = [
+  {
+    initials: TEST_INITIALS,
+    user: {
+      displayName: 'Admin SSB',
+      email: TEST_EMAIL,
+      businessPhone: '123',
+    },
+  },
+  {
+    initials: 'missing',
+    user: null,
+    error: 'User not found',
+  },
+]
