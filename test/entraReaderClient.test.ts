@@ -63,6 +63,8 @@ describe('entraReaderClient', () => {
       const { fetchUserByEmail } = await import(`../plugins/entraReaderClient?test=${Math.random()}`)
       await assert.rejects(() => fetchUserByEmail(TEST_EMAIL), /Missing Azure Entra configuration/)
     })
+
+    // TODO: Add test when token fails
   })
 
   describe('fetchUserByEmail', async () => {

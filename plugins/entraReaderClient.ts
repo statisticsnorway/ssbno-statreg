@@ -120,6 +120,8 @@ export async function fetchUserByEmail(initials: string | undefined, email?: str
 }
 
 export async function fetchUsersByInitials(idsParam: string | string[]) {
+  if (!idsParam?.length) return null
+
   const initialsList = Array.isArray(idsParam)
     ? idsParam
     : idsParam
