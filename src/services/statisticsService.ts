@@ -2,7 +2,7 @@ import type { StatisticListing, StatisticDetails } from '@/types/index'
 import { getLocalizedName, dateToISOString } from '@/lib/utils'
 import type { PrismaClient, Prisma } from '@/generated/prisma/client'
 import { getDivisionFromCode } from '@/services/klassService'
-import { fetchUsersByInitials, type EntraUser } from '@/../plugins/entraReaderClient'
+import { fetchUserByEmail, type EntraUser } from '@/../plugins/entraReaderClient'
 
 type StatisticPrisma = Pick<PrismaClient, 'statistic'>
 
@@ -130,7 +130,7 @@ export async function getStatisticByShortname(shortname: string, prisma: Statist
     variants: parseStatisticVariants(statistic.variants, main_language, lang_en),
     contacts: await Promise.all(
       statistic.responsiblePersons?.map(async ({ username, email }) => {
-        const user = username ? await fetchUsersByInitials(username) : undefined
+        const user = username ? await fetchUserByEmail(username) : undefined
         return {
           name: (user as EntraUser)?.displayName,
           email,
