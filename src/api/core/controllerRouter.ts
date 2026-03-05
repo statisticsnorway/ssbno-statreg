@@ -2,9 +2,8 @@ import { Router, type RequestHandler } from 'express'
 import statisticsController from '@/api/controllers/statisticsController'
 import releasesController from '../controllers/releasesController'
 import calendarController from '../controllers/calendarController'
-import entraReaderController from '../controllers/entraReaderController'
 
-const CONTROLLERS = [statisticsController, releasesController, calendarController, entraReaderController]
+const CONTROLLERS = [statisticsController, releasesController, calendarController]
 
 const ROUTE_METHODS = ['get', 'post', 'put', 'delete'] as const
 const ALLOWED_METHODS = ROUTE_METHODS.map((m) => m.toUpperCase())
