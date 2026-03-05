@@ -9,7 +9,7 @@ const CONTROLLERS = [statisticsController, releasesController, calendarControlle
 const ROUTE_METHODS = ['get', 'post', 'put', 'delete'] as const
 const ALLOWED_METHODS = ROUTE_METHODS.map((m) => m.toUpperCase())
 
-function registerRoutesAndCollectMetadata(router: Router, publicPaths: Set<string>, knownPaths: Set<string>) {
+function registerRoutesAndCollectMetadata(router: Router, publicPaths: RegExp[], knownPaths: Set<string>) {
   for (const method of ROUTE_METHODS) {
     const original = router[method].bind(router)
 
@@ -17,9 +17,11 @@ function registerRoutesAndCollectMetadata(router: Router, publicPaths: Set<strin
       if (typeof path === 'string') knownPaths.add(path)
 
       const isPublicRoute = handlers.some((h) => (h as any).__skipAuth)
-      if (isPublicRoute && typeof path === 'string') publicPaths.add(path)
+      if (isPublicRoute && typeof path === 'string') {
+        const pattern = '^' + path.replace(/:[^/]+/g, '[^/]+') + '$'
+        publicPaths.push(new RegExp(pattern))
+      }
 
-      // remove skip marker from execution chain
       const routeHandlers = handlers.filter((h) => !(h as any).__skipAuth)
 
       return original(path, ...routeHandlers)
@@ -34,10 +36,9 @@ export default function controllerRouter(
 ) {
   const inner = Router()
 
-  const publicPaths = new Set<string>()
+  const publicPaths: RegExp[] = []
   const knownPaths = new Set<string>()
 
-  // patch only for collecting metadata + registering routes normally
   registerRoutesAndCollectMetadata(inner, publicPaths, knownPaths)
 
   for (const controller of controllers) {
@@ -46,15 +47,13 @@ export default function controllerRouter(
 
   const outer = Router()
 
-  // auth runs BEFORE routes
   outer.use((req, res, next) => {
-    if (publicPaths.has(req.path)) return next()
+    if (publicPaths.some((r) => r.test(req.path))) return next()
     return requireAuth(req, res, next)
   })
 
   outer.use(inner)
 
-  // decide 405 vs 404 only AFTER routing failed
   outer.use((req, res) => {
     if (!ALLOWED_METHODS.includes(req.method) && knownPaths.has(req.path)) {
       return res.status(405).json({ error: 'Method Not Allowed' })
