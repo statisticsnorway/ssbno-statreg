@@ -87,13 +87,14 @@ async function getAccessToken(): Promise<string> {
   }
 }
 
-export async function fetchUserByEmail(initials: string): Promise<EntraUser | null> {
+// Initials can be undefined for users such as informasjon@ssb.no, but initials should still be a required param while email is optional
+export async function fetchUserByEmail(initials: string | undefined, email?: string): Promise<EntraUser | null> {
   const token = await getAccessToken()
 
-  const email = `${initials}@${USER_DOMAIN}`
+  const userEmail = initials ? `${initials}@${USER_DOMAIN}` : (email as string)
 
   const response = await fetch(
-    `${GRAPH_BASE_URL}/users/${encodeURIComponent(email)}?$select=displayName,businessPhones,mail,userPrincipalName`,
+    `${GRAPH_BASE_URL}/users/${encodeURIComponent(userEmail)}?$select=displayName,businessPhones,mail,userPrincipalName`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -155,7 +156,7 @@ export async function fetchUsersByInitials(idsParam: string | string[]) {
 
   if (results.length === 1) {
     const item = results[0]
-    return item.user ?? item
+    return item?.user ?? item
   }
 
   return results
