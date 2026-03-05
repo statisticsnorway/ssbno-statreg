@@ -130,7 +130,7 @@ export async function getStatisticByShortname(shortname: string, prisma: Statist
     variants: parseStatisticVariants(statistic.variants, main_language, lang_en),
     contacts: await Promise.all(
       statistic.responsiblePersons?.map(async ({ username, email }) => {
-        const user = username ? await fetchUserByEmail(username) : undefined
+        const user = await fetchUserByEmail(username, email)
         return {
           name: (user as EntraUser)?.displayName,
           email,

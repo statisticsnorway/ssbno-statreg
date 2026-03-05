@@ -88,7 +88,7 @@ async function getAccessToken(): Promise<string> {
 }
 
 // Initials can be undefined for users such as informasjon@ssb.no, but initials should still be a required param while email is optional
-export async function fetchUserByEmail(initials: string | undefined, email?: string): Promise<EntraUser | null> {
+export async function fetchUserByEmail(initials: string | null, email?: string): Promise<EntraUser | null> {
   const token = await getAccessToken()
 
   const userEmail = initials ? `${initials}@${USER_DOMAIN}` : (email as string)
