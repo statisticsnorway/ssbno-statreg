@@ -6,9 +6,9 @@ const TEST_EMAIL = 'admin@ssb.no'
 
 const originalEnv = process.env
 
-function createFetchMock(responders) {
+function createFetchMock(responders: any[]) {
   let callIndex = 0
-  return mock.method(globalThis, 'fetch', async (...args) => {
+  return mock.method(globalThis, 'fetch', async (...args: any[]) => {
     const responder = responders[callIndex]
     callIndex++
     if (!responder) throw new Error('Unexpected fetch call ' + callIndex)
@@ -58,7 +58,7 @@ describe('entraReaderClient', () => {
   })
 
   describe('getAccessToken', async () => {
-    test('throws when required Entra env vars are missing', async () => {
+    test('throws Error when required Entra env vars are missing', async () => {
       process.env = {}
       const { fetchUserByEmail } = await import(`../plugins/entraReaderClient?test=${Math.random()}`)
       await assert.rejects(() => fetchUserByEmail(TEST_EMAIL), /Missing Azure Entra configuration/)
@@ -66,38 +66,41 @@ describe('entraReaderClient', () => {
   })
 
   describe('fetchUserByEmail', async () => {
-    test('returns mapped user when Graph lookup succeeds', async () => {
+    test('returns user when initial and email is passed ', async () => {
       const fetchMock = createFetchMock([mockTokenSuccess(), mockGraphSuccess(mockFetchEntraUserResponse)])
       const { fetchUserByEmail } = await import(`../plugins/entraReaderClient?test=${Math.random()}`)
-      const user = await fetchUserByEmail(TEST_INITIALS)
+      const user = await fetchUserByEmail(TEST_INITIALS, TEST_EMAIL)
 
       assert.equal(
-        fetchMock.mock.calls[1]?.arguments[0],
+        fetchMock.mock.calls[1]?.arguments[0], // first argument of fetch()
         `https://graph.microsoft.com/v1.0/users/${encodeURIComponent(TEST_EMAIL)}?$select=displayName,businessPhones,mail,userPrincipalName`
       )
       assert.deepEqual(user, mockEntraUserList[0]?.user)
     })
 
-    test('returns mapped user when Graph lookup succeeds using email', async () => {
+    test('returns user when initial is undefined and email is passed', async () => {
       const fetchMock = createFetchMock([mockTokenSuccess(), mockGraphSuccess(mockFetchEntraUserResponse)])
       const { fetchUserByEmail } = await import(`../plugins/entraReaderClient?test=${Math.random()}`)
       const user = await fetchUserByEmail(undefined, TEST_EMAIL)
 
       assert.equal(
-        fetchMock.mock.calls[1]?.arguments[0],
+        fetchMock.mock.calls[1]?.arguments[0], // first argument of fetch()
         `https://graph.microsoft.com/v1.0/users/${encodeURIComponent(TEST_EMAIL)}?$select=displayName,businessPhones,mail,userPrincipalName`
       )
       assert.deepEqual(user, mockEntraUserList[0]?.user)
     })
 
     test('returns null when Graph returns 404', async () => {
+      createFetchMock([mockTokenSuccess(), mockGraphError(404, 'Not found')])
       const { fetchUserByEmail } = await import(`../plugins/entraReaderClient?test=${Math.random()}`)
-      await assert.rejects(fetchUserByEmail(TEST_EMAIL), 'Error: OAuth token request failed: 404 Not found')
+      const user = await fetchUserByEmail(undefined)
+
+      assert.equal(user, null)
     })
   })
 
   describe('fetchUsersByInitials', async () => {
-    test('returns success and not-found entries for mixed input', async () => {
+    test('returns user entries when an array of initials is passed', async () => {
       createFetchMock([
         mockTokenSuccess(), // token
         mockGraphSuccess(mockFetchEntraUserResponse), // first user found
@@ -107,6 +110,14 @@ describe('entraReaderClient', () => {
 
       const result = await fetchUsersByInitials(`${TEST_INITIALS}, missing`)
       assert.deepEqual(result, mockEntraUserList)
+    })
+
+    test('returns null when user is not found', async () => {
+      createFetchMock([mockTokenSuccess(), mockGraphError(404, 'Not found')])
+      const { fetchUsersByInitials } = await import(`../plugins/entraReaderClient?test=${Math.random()}`)
+      const user = await fetchUsersByInitials(undefined)
+
+      assert.equal(user, null)
     })
   })
 })
