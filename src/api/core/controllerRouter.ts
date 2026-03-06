@@ -18,7 +18,7 @@ function registerRoutesAndCollectMetadata(router: Router, publicPaths: RegExp[],
 
       const isPublicRoute = handlers.some((h) => (h as any).__skipAuth)
       if (isPublicRoute && typeof path === 'string') {
-        const pattern = '^' + path.replace(/:[^/]+/g, '[^/]+') + '$'
+        const pattern = '^' + path.replace(/:[^/]+/g, '[^/]+') + '$' // Convert Express-style route params (e.g. /statistics/:shortname) into a regex, that matches the same URL structure (e.g. /statistics/boliger) for public route checks
         publicPaths.push(new RegExp(pattern))
       }
 
