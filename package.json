@@ -19,7 +19,7 @@
     "db:deploy": "prisma migrate deploy",
     "lint": "eslint '**/*.{js,mjs,cjs,ts}'",
     "lint:fix": "eslint --fix '**/*.{js,mjs,cjs,ts}'",
-    "test": "tsx --test 'test/**.test.ts' 'src/**.test.ts'",
+    "test": "tsx --test --experimental-test-module-mocks 'test/**.test.ts' 'src/**.test.ts' ",
     "ci-test": "tsx --test 'test/**.test.ts' 'src/**.test.ts'",
     "generate:api-types": "openapi-typescript ./openapi/openapi.yaml | prettier --parser typescript > src/types/api-types.d.ts"
   },
