@@ -2,6 +2,7 @@ import { PrismaPg } from '@prisma/adapter-pg'
 import { PrismaClient } from '../generated/prisma/client'
 import process from 'node:process'
 import 'dotenv/config'
+import { asyncLocalStorage } from './context'
 
 export type Snapshot = object & { id?: number; date_created?: Date }
 
@@ -46,9 +47,11 @@ const extendedPrisma = prisma.$extends({
         if (['Variant', 'Statistic', 'Release', 'Frequency', 'Calender_date'].includes(model)) {
           const start = new Date()
           const incoming = await query(args)
+          const store = asyncLocalStorage.getStore()
+          const actor = store?.auth?.username || 'unknown'
           await prisma.auditLogOld.create({
             data: {
-              actor: 'test1',
+              actor,
               class_name: model,
               last_updated: start,
               date_created: start,
@@ -69,9 +72,11 @@ const extendedPrisma = prisma.$extends({
           const start = new Date()
           const existing = await fetchCurrentSnapshot(args.where.id, model)
           const incoming = await query(args)
+          const store = asyncLocalStorage.getStore()
+          const actor = store?.auth?.username || 'unknown'
           await prisma.auditLogOld.create({
             data: {
-              actor: 'test2',
+              actor,
               class_name: model,
               old_value: JSON.stringify(existing),
               new_value: JSON.stringify(incoming),
