@@ -1,37 +1,14 @@
+import type { EntraUser, GraphUserResponse, TokenResponse } from '@/types/entra'
 import { URLSearchParams } from 'node:url'
 
-const GRAPH_BASE_URL = 'https://graph.microsoft.com/v1.0'
-const USER_DOMAIN = 'ssb.no'
-
-type TokenResponse = {
-  access_token: string
-  expires_in: number
-}
-
-type GraphUserResponse = {
-  displayName: string
-  businessPhones?: string[]
-  mail?: string
-  userPrincipalName?: string
-}
-
-export type EntraUser = {
-  displayName: string
-  email: string | null
-  businessPhone: string | null
-}
-
-export type UserLookupItem = {
-  initials: string
-  user: EntraUser | null
-  error?: string | null
-}
+export const GRAPH_BASE_URL = 'https://graph.microsoft.com/v1.0'
 
 let cachedToken: string | null = null
 let tokenExpiresAt = 0
 let tokenPromise: Promise<string> | null = null
 
-async function getAccessToken(): Promise<string> {
+// Missing unit tests
+export async function getAccessToken(): Promise<string> {
   const tenantId = process.env.ENTRA_READER_AZURE_TENANT_ID
   const clientId = process.env.ENTRA_READER_AZURE_CLIENT_ID
   const clientSecret = process.env.ENTRA_READER_AZURE_CLIENT_SECRET
@@ -87,12 +64,7 @@ async function getAccessToken(): Promise<string> {
   }
 }
 
-// Initials can be undefined for users such as informasjon@ssb.no, but initials should still be a required param while email is optional
-export async function fetchUserByEmail(initials: string | undefined, email?: string): Promise<EntraUser | null> {
-  const token = await getAccessToken()
-
-  const userEmail = initials ? `${initials}@${USER_DOMAIN}` : (email as string)
-
+export async function fetchUserByEmail(userEmail: string, token: string): Promise<EntraUser | null> {
   const response = await fetch(
     `${GRAPH_BASE_URL}/users/${encodeURIComponent(userEmail)}?$select=displayName,businessPhones,mail,userPrincipalName`,
     {
@@ -103,6 +75,7 @@ export async function fetchUserByEmail(initials: string | undefined, email?: str
   )
 
   if (response.status === 404) {
+    console.log(`Got 404 fetching user: ${userEmail}`)
     return null
   }
 
@@ -117,49 +90,4 @@ export async function fetchUserByEmail(initials: string | undefined, email?: str
     email: user.mail ?? user.userPrincipalName ?? null,
     businessPhone: user.businessPhones?.[0] ?? null,
   }
-}
-
-export async function fetchUsersByInitials(idsParam: string | string[]) {
-  if (!idsParam?.length) return null
-
-  const initialsList = Array.isArray(idsParam)
-    ? idsParam
-    : idsParam
-        .split(',')
-        .map((v) => v.trim())
-        .filter(Boolean)
-
-  const results: UserLookupItem[] = await Promise.all(
-    initialsList.map(async (initials): Promise<UserLookupItem> => {
-      try {
-        const user = await fetchUserByEmail(initials)
-
-        if (user) {
-          return {
-            initials,
-            user,
-          }
-        }
-
-        return {
-          initials,
-          user: null,
-          error: 'User not found',
-        }
-      } catch {
-        return {
-          initials,
-          user: null,
-          error: 'Lookup failed',
-        }
-      }
-    })
-  )
-
-  if (results.length === 1) {
-    const item = results[0]
-    return item?.user ?? item
-  }
-
-  return results
 }
