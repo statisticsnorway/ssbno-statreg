@@ -1,6 +1,5 @@
 import { describe, mock, test, before, beforeEach, afterEach } from 'node:test'
 import assert from 'node:assert/strict'
-import { getAllStatistics } from '@/services/statisticsService'
 
 let prismaMock: any
 let statisticsResult: object | null
@@ -9,20 +8,46 @@ function setStatisticsResult(next: object | null) {
   statisticsResult = next
 }
 
-describe('statisticService', async () => {
+describe('statisticService ', async () => {
+  const fetchUsersMock = mock.fn(async () => [
+    {
+      lookupEmail: 'bob@ssb.no',
+      user: {
+        displayName: 'Bob',
+        username: 'bcd',
+        email: 'bob@ssb.no',
+        businessPhone: '11223344',
+      },
+    },
+  ])
+  let getStatisticByShortname: Function
+  let getAllStatistics: Function
+
+  before(async () => {
+    // eslint-disable-next-line no-unused-vars
+    const entraUser = await import('@/services/entraUserService').then(({ fetchUsers: _, ...rest }) => rest)
+    mock.module('@/services/entraUserService', {
+      namedExports: {
+        fetchUsers: fetchUsersMock,
+        entraUser,
+      },
+    })
+    ;({ getAllStatistics, getStatisticByShortname } = await import('@/services/statisticsService'))
+  })
+  beforeEach(() => {
+    prismaMock = {
+      statistic: {
+        findMany: mock.fn(() => Promise.resolve(statisticsResult)),
+        findFirst: mock.fn(() => Promise.resolve(statisticsResult)),
+      },
+    }
+  })
+
+  afterEach(() => {
+    mock.restoreAll()
+  })
+
   describe('getAllStatistics ', async () => {
-    beforeEach(() => {
-      prismaMock = {
-        statistic: {
-          findMany: mock.fn(() => Promise.resolve(statisticsResult)),
-        },
-      }
-    })
-
-    afterEach(() => {
-      mock.restoreAll()
-    })
-
     test('getAllStatistics returns mocked data', async () => {
       setStatisticsResult(mockStatisticsPrismaResult)
 
@@ -53,47 +78,9 @@ describe('statisticService', async () => {
   })
 
   describe('getStatisticByShortname', async () => {
-    const fetchUsersMock = mock.fn(async () => [
-      {
-        lookupEmail: 'bob@ssb.no',
-        user: {
-          name: 'Bob',
-          username: 'bcd',
-          email: 'bob@ssb.no',
-          businessPhone: '11223344',
-        },
-      },
-    ])
-    let getStatisticByShortname: Function
-
-    before(async () => {
-      // eslint-disable-next-line no-unused-vars
-      const entraUser = await import('@/services/entraUserService').then(({ fetchUsers: _, ...rest }) => rest)
-      mock.module('@/services/entraUserService', {
-        namedExports: {
-          fetchUsers: fetchUsersMock,
-          entraUser,
-        },
-      })
-      ;({ getStatisticByShortname } = await import('@/services/statisticsService'))
-    })
-
-    beforeEach(async () => {
-      prismaMock = {
-        statistic: {
-          findFirst: mock.fn(() => Promise.resolve(statisticsResult)),
-        },
-      }
-    })
-
-    afterEach(() => {
-      mock.restoreAll()
-    })
-
     test('returns mocked data', async () => {
       setStatisticsResult(mockStatisticsDetailedPrismaResult)
 
-      fetchUsersMock.mock.mockImplementationOnce(() => Promise.reject('fail'))
       const result = await getStatisticByShortname('helse', prismaMock)
 
       assert.deepEqual(result, mockedStatisticDetailedResult)
