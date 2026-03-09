@@ -171,13 +171,13 @@ model Variant {
 
 model AuditLogOld {
   @@schema("statreg")
-  id                        Int       @id
-  property_name             String?
+  id                        Int       @id @default(autoincrement())
   last_updated              DateTime
+  property_name             String?
   old_value                 String?
+  new_value                 String?
   actor                     String
   uri                       String?
-  new_value                 String?
   persisted_object_version  Int?
   date_created              DateTime
   class_name                String

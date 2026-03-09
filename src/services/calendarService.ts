@@ -1,8 +1,8 @@
-import { PrismaClient } from '@/generated/prisma/client'
+import { ExtendedPrismaClient } from '@/lib/prisma'
 import { dateToISOString, sanitize } from '@/lib/utils'
 import { BlockedReleaseDate } from '@/types'
 
-export type CalendarDatePrisma = Pick<PrismaClient, 'calender_date'>
+export type CalendarDatePrisma = Pick<ExtendedPrismaClient, 'calender_date'>
 
 export async function createBlockedReleaseDay(
   prisma: CalendarDatePrisma,

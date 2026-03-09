@@ -162,7 +162,7 @@ CREATE TABLE "statreg"."Variant" (
 
 -- CreateTable
 CREATE TABLE "statreg"."AuditLogOld" (
-    "id" INTEGER NOT NULL,
+    "id" SERIAL NOT NULL,
     "property_name" TEXT,
     "last_updated" TIMESTAMP(3) NOT NULL,
     "old_value" TEXT,
