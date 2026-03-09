@@ -1,6 +1,6 @@
-import { describe, mock, test, beforeEach, afterEach } from 'node:test'
+import { describe, mock, test, before, beforeEach, afterEach } from 'node:test'
 import assert from 'node:assert/strict'
-import { getAllStatistics } from '../src/services/statisticsService'
+import { getAllStatistics } from '@/services/statisticsService'
 
 let prismaMock: any
 let statisticsResult: object | null
@@ -53,6 +53,31 @@ describe('statisticService', async () => {
   })
 
   describe('getStatisticByShortname', async () => {
+    const fetchUsersMock = mock.fn(async () => [
+      {
+        lookupEmail: 'bob@ssb.no',
+        user: {
+          name: 'Bob',
+          username: 'bcd',
+          email: 'bob@ssb.no',
+          businessPhone: '11223344',
+        },
+      },
+    ])
+    let getStatisticByShortname: Function
+
+    before(async () => {
+      // eslint-disable-next-line no-unused-vars
+      const entraUser = await import('@/services/entraUserService').then(({ fetchUsers: _, ...rest }) => rest)
+      mock.module('@/services/entraUserService', {
+        namedExports: {
+          fetchUsers: fetchUsersMock,
+          entraUser,
+        },
+      })
+      ;({ getStatisticByShortname } = await import('@/services/statisticsService'))
+    })
+
     beforeEach(async () => {
       prismaMock = {
         statistic: {
@@ -68,32 +93,28 @@ describe('statisticService', async () => {
     test('returns mocked data', async () => {
       setStatisticsResult(mockStatisticsDetailedPrismaResult)
 
-      // const klassService = await import('../src/services/klassService')
-      // mock.method(klassService, 'getDivisionFromCode', async () => ({
-      //   code: 102,
-      //   name: 'Seksjon B1',
-      // }))
-
-      // const entraReaderClient = await import('../plugins/entraReaderClient')
-      // mock.method(entraReaderClient, 'fetchUserByEmail', async () => ({
-      //   name: 'Test Bruker',
-      //   email: 'test@ssb.no',
-      // }))
-
-      const { getStatisticByShortname } = await import('../src/services/statisticsService')
-
+      fetchUsersMock.mock.mockImplementationOnce(() => Promise.reject('fail'))
       const result = await getStatisticByShortname('helse', prismaMock)
 
       assert.deepEqual(result, mockedStatisticDetailedResult)
     })
 
+    // test('returns mocked data', async () => {
+    //   getDivisionFromCode.mock.mockImplementation(() => undefined)
+
+    //   setStatisticsResult(mockStatisticsDetailedPrismaResult)
+
+    //   const result = await getStatisticByShortname('helse', prismaMock)
+
+    //   assert.deepEqual(result, mockedStatisticDetailedResult)
+    // })
+
     // division exits, division does not exist
 
     // person exists, person does not exist
 
-    test('returns mocked data', async () => {
+    test('throw Error when shortname is not found', async () => {
       setStatisticsResult(null)
-      const { getStatisticByShortname } = await import('../src/services/statisticsService')
       await assert.rejects(() => getStatisticByShortname('', prismaMock), /Shortname not found/)
     })
   })
@@ -156,8 +177,8 @@ const mockStatisticsDetailedPrismaResult = {
   },
   responsiblePersons: [
     {
-      email: 'bob@ssb.no',
       username: 'bcd',
+      email: 'bob@ssb.no',
     },
   ],
   related_statistic: {
@@ -286,6 +307,6 @@ const mockedStatisticDetailedResult = {
       revision: 'I',
     },
   ],
-  contacts: [{ email: 'bob@ssb.no' }],
+  contacts: [{ username: 'bcd', email: 'bob@ssb.no' }],
   statistic_region_levels: [[{ language_code: 'nb', text: 'Bydel og krets' }]],
 }
