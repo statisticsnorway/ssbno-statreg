@@ -1,11 +1,11 @@
 import { describe, mock, test, beforeEach, afterEach } from 'node:test'
 import assert from 'node:assert/strict'
-import { getAllStatistics, getStatisticByShortname } from '../src/services/statisticsService'
+import { getAllStatistics } from '../src/services/statisticsService'
 
 let prismaMock: any
-let statisticsResult: object
+let statisticsResult: object | null
 
-function setStatisticsResult(next: object) {
+function setStatisticsResult(next: object | null) {
   statisticsResult = next
 }
 
@@ -53,7 +53,7 @@ describe('statisticService', async () => {
   })
 
   describe('getStatisticByShortname', async () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       prismaMock = {
         statistic: {
           findFirst: mock.fn(() => Promise.resolve(statisticsResult)),
@@ -65,12 +65,36 @@ describe('statisticService', async () => {
       mock.restoreAll()
     })
 
-    test('getStatisticByShortname returns mocked data', async () => {
+    test('returns mocked data', async () => {
       setStatisticsResult(mockStatisticsDetailedPrismaResult)
 
-      const result = await getStatisticByShortname('energ', prismaMock)
+      // const klassService = await import('../src/services/klassService')
+      // mock.method(klassService, 'getDivisionFromCode', async () => ({
+      //   code: 102,
+      //   name: 'Seksjon B1',
+      // }))
+
+      // const entraReaderClient = await import('../plugins/entraReaderClient')
+      // mock.method(entraReaderClient, 'fetchUserByEmail', async () => ({
+      //   name: 'Test Bruker',
+      //   email: 'test@ssb.no',
+      // }))
+
+      const { getStatisticByShortname } = await import('../src/services/statisticsService')
+
+      const result = await getStatisticByShortname('helse', prismaMock)
 
       assert.deepEqual(result, mockedStatisticDetailedResult)
+    })
+
+    // division exits, division does not exist
+
+    // person exists, person does not exist
+
+    test('returns mocked data', async () => {
+      setStatisticsResult(null)
+      const { getStatisticByShortname } = await import('../src/services/statisticsService')
+      await assert.rejects(() => getStatisticByShortname('', prismaMock), /Shortname not found/)
     })
   })
 })
@@ -106,48 +130,52 @@ const mockStatisticsPrismaResult = [
 ]
 
 const mockStatisticsDetailedPrismaResult = {
-  id: 1,
-  version: 18,
-  shortname_id: 1,
+  id: 5,
+  version: 1,
+  shortname_id: 5,
   dir_appoval_status: 'GODKJENT',
-  search_phrases:
-    'energi, energiproduksjon, energibruk, energibruk etter næring, energiforbruk i husholdninger, energivarer (for eksempel råolje, bensin, naturgass), import, eksport, strømpriser, energipriser',
+  search_phrases: 'helse, sykdom, helsetjenester, forekomst',
   priority: 0,
   desk_appoval_status: 'GODKJENT',
   language: 'nb',
-  search_phrases_en:
-    'energy production, energy consumption, energy consumption by industry, energy consumption in households, energy goods (for example crude oil, petrol, natural gas), import, export, electricity prices, energy prices',
-  division_code: '425',
+  search_phrases_en: 'health, disease, health services, prevalence',
+  division_code: '104',
   division_id: null,
-  first_release: new Date('1976-01-01T00:00:00.000Z'),
-  yearly_reporting: false,
+  first_release: new Date('1970-01-01T00:00:00.000Z'),
+  yearly_reporting: true,
   status: 'SA',
-  related_statistic_id: null,
-  name: 'Energiregnskap og energibalanse',
-  last_updated: new Date('2020-06-12T09:24:15.569Z'),
-  comment: 'videreføres av energibalanse',
-  name_en: 'Energy account and energy balance',
-  date_created: new Date('2010-11-05T09:02:23.626Z'),
-  legacy_topic_codes: '01.03.10',
+  related_statistic_id: 3,
+  name: 'Helse og helsetjenester',
+  last_updated: new Date('2021-09-01T08:30:00.000Z'),
+  comment: 'statistikk over befolkningens helse og tjenestebruk',
+  name_en: 'Health and health services',
+  date_created: new Date('2019-07-01T00:00:00.000Z'),
+  legacy_topic_codes: '05.01.01',
   shortname: {
-    name: 'energ',
+    name: 'helse',
   },
   responsiblePersons: [
     {
-      username: 'abc',
-      email: 'alice@ssb.no',
+      email: 'bob@ssb.no',
+      username: 'bcd',
     },
   ],
-  related_statistic: null,
+  related_statistic: {
+    language: 'nb',
+    name: 'Utenrikshandel og varestrøm',
+    name_en: 'Foreign trade and goods flow',
+    shortname: {
+      id: 3,
+      version: 0,
+      name: 'kpi',
+      last_updated: new Date('2010-11-05T09:05:19.000Z'),
+      date_created: new Date('2010-11-05T09:05:19.000Z'),
+    },
+  },
   statistic_region_levels: [
     {
       region_level: {
-        name: 'Kommune',
-      },
-    },
-    {
-      region_level: {
-        name: 'Fylke',
+        name: 'Bydel og krets',
       },
     },
   ],
@@ -161,8 +189,8 @@ const mockStatisticsDetailedPrismaResult = {
       level_of_detail: null,
       level_of_detail_en: null,
       frequency: {
-        name: 'Uke',
-        name_en: 'Week',
+        name: 'Måned',
+        name_en: 'Month',
       },
     },
     {
@@ -174,8 +202,8 @@ const mockStatisticsDetailedPrismaResult = {
       level_of_detail: null,
       level_of_detail_en: null,
       frequency: {
-        name: 'År',
-        name_en: 'Year',
+        name: 'Uke',
+        name_en: 'Week',
       },
     },
   ],
@@ -205,43 +233,29 @@ const mockedStatisticsResult = [
 ]
 
 const mockedStatisticDetailedResult = {
-  version: 18,
-  shortname: 'energ',
+  version: 1,
+  shortname: 'helse',
   approval_status: 'GODKJENT',
   main_language: 'nb',
-  division: {
-    code: '425',
+  division: { code: '104', name: [] },
+  first_released_at: '1970-01-01T00:00:00.000Z',
+  yearly_reporting: true,
+  status: { code: 'SA' },
+  previous_topic_codes: '05.01.01',
+  relation: {
+    shortname: 'kpi',
     name: [
-      // Skip division test since it's covered by klassService.test.ts
-      // {
-      //   language_code: 'nb',
-      //   text: 'Seksjon for energi-, miljø- og transportstatistikk',
-      // },
+      { language_code: 'nb', text: 'Utenrikshandel og varestrøm' },
+      { language_code: 'en', text: 'Foreign trade and goods flow' },
     ],
   },
-  first_released_at: '1976-01-01T00:00:00.000Z',
-  yearly_reporting: false,
-  status: {
-    code: 'SA',
-  },
-  previous_topic_codes: '01.03.10',
-  relation: {
-    shortname: undefined,
-    name: [],
-  },
   name: [
-    {
-      language_code: 'nb',
-      text: 'Energiregnskap og energibalanse',
-    },
-    {
-      language_code: 'en',
-      text: 'Energy account and energy balance',
-    },
+    { language_code: 'nb', text: 'Helse og helsetjenester' },
+    { language_code: 'en', text: 'Health and health services' },
   ],
-  updated_at: '2020-06-12T09:24:15.569Z',
-  comment: 'videreføres av energibalanse',
-  created_at: '2010-11-05T09:02:23.626Z',
+  updated_at: '2021-09-01T08:30:00.000Z',
+  comment: 'statistikk over befolkningens helse og tjenestebruk',
+  created_at: '2019-07-01T00:00:00.000Z',
   variants: [
     {
       version: 1,
@@ -251,14 +265,8 @@ const mockedStatisticDetailedResult = {
       cancelled: false,
       frequency: {
         name: [
-          {
-            language_code: 'nb',
-            text: 'Uke',
-          },
-          {
-            language_code: 'en',
-            text: 'Week',
-          },
+          { language_code: 'nb', text: 'Måned' },
+          { language_code: 'en', text: 'Month' },
         ],
       },
       revision: 'I',
@@ -271,37 +279,13 @@ const mockedStatisticDetailedResult = {
       cancelled: false,
       frequency: {
         name: [
-          {
-            language_code: 'nb',
-            text: 'År',
-          },
-          {
-            language_code: 'en',
-            text: 'Year',
-          },
+          { language_code: 'nb', text: 'Uke' },
+          { language_code: 'en', text: 'Week' },
         ],
       },
       revision: 'I',
     },
   ],
-  contacts: [
-    {
-      name: undefined,
-      email: 'alice@ssb.no',
-    },
-  ],
-  statistic_region_levels: [
-    [
-      {
-        language_code: 'nb',
-        text: 'Kommune',
-      },
-    ],
-    [
-      {
-        language_code: 'nb',
-        text: 'Fylke',
-      },
-    ],
-  ],
+  contacts: [{ email: 'bob@ssb.no' }],
+  statistic_region_levels: [[{ language_code: 'nb', text: 'Bydel og krets' }]],
 }

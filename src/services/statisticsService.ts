@@ -90,7 +90,7 @@ export async function getStatisticByShortname(shortname: string, prisma: Statist
     },
   })
 
-  if (!statistic) throw new Error('Statistic not found')
+  if (!statistic) throw new Error('Shortname not found')
 
   const main_language = statistic.language
   const lang_en = 'en'
