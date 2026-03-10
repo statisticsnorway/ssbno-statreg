@@ -9,7 +9,7 @@ function setStatisticsResult(next: object | null) {
 }
 
 describe('statisticService ', async () => {
-  const fetchUsersMock = mock.fn(async () => [
+  const fetchUsersMock: any = mock.fn(async () => [
     {
       lookupEmail: 'bob@ssb.no',
       user: {
@@ -111,7 +111,7 @@ describe('statisticService ', async () => {
       assert.deepEqual(result, { ...mockedStatisticDetailedResult, division: { code: '105', name: [] } })
     })
 
-    test('returns undefined name when user is not found', async () => {
+    test('returns only email when user is not found', async () => {
       setStatisticsResult(mockStatisticsDetailedPrismaResult)
       fetchUsersMock.mock.mockImplementationOnce(async () => [
         { lookupEmail: 'bob@ssb.no', user: null, error: 'User not found' },

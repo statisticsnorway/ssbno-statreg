@@ -107,7 +107,7 @@ export async function getStatisticByShortname(shortname: string, prisma: Statist
       code: division_code,
       name: [
         ...getLocalizedName(main_language, getDivisionFromCode(Number(division_code))?.name),
-        ...getLocalizedName(lang_en, getDivisionFromCode(Number(division_code), 'en')?.name),
+        ...getLocalizedName(lang_en, getDivisionFromCode(Number(division_code), lang_en)?.name),
       ],
     },
     first_released_at: dateToISOString(statistic.first_release),
