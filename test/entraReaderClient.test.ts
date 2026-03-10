@@ -43,7 +43,7 @@ describe('entraReaderClient ', () => {
       ENTRA_READER_AZURE_CLIENT_SECRET: 'client-secret',
     }
 
-    fetchMock = mock.method(globalThis as unknown as { fetch: typeof fetch }, 'fetch', async () => {
+    fetchMock = mock.method(globalThis, 'fetch', async () => {
       return payload
     })
   })
@@ -174,7 +174,7 @@ describe('entraReaderClient ', () => {
       })
     })
 
-    test('returns user email from userPrinsipalName if email missing', async () => {
+    test('returns user email from userPrincipalName if email missing', async () => {
       payload = mockGraphSuccess({
         displayName: 'Admin SSB',
         userPrincipalName: 'admin.ssb@ssb.no',

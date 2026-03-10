@@ -80,7 +80,7 @@ components:
         approval_status: { type: string, nullable: true }
         period_to: { type: string, format: date-time }
         period_from: { type: string, format: date-time }
-        statistic: 
+        statistic:
           type: object
           properties:
             shortname: { type: string, readOnly: true }
@@ -104,7 +104,7 @@ components:
             name: { $ref: '#/components/schemas/Translations', readOnly: true }
         first_released_at: { type: string, format: date, nullable: true }
         yearly_reporting: { type: boolean }
-        status: 
+        status:
           type: object
           properties:
             code: { type: string }
@@ -133,7 +133,7 @@ components:
       properties:
         shortname: { type: string, readOnly: true }
         main_language: { type: string }
-        status:          
+        status:
           type: object
           properties:
             code: { type: string }
@@ -166,7 +166,7 @@ components:
         freqency:
           type: object
           properties:
-            id: { type string }
+            id: { type: string }
             name: { $ref: '#/components/schemas/Translations', readOnly: true }
         revision: { type: string }
 

@@ -1,4 +1,4 @@
-import test, { before, describe } from 'node:test'
+import { test, before, describe } from 'node:test'
 import assert from 'node:assert/strict'
 import { mock } from 'node:test'
 

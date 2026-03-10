@@ -749,7 +749,7 @@ export interface components {
       readonly created_at?: string
       cancelled?: boolean
       freqency?: {
-        id?: unknown
+        id?: string
         readonly name?: components['schemas']['Translations']
       }
       revision?: string
