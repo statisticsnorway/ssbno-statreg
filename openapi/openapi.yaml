@@ -160,13 +160,15 @@ components:
         id: { type: integer, readOnly: true }
         version: { type: integer }
         updated_at: { type: string, format: date-time, readOnly: true }
-        level_of_detail: { $ref: '#/components/schemas/Translations', nullable: true }
+        level_of_detail:
+          type: object 
+          properties:
+            name: { $ref: '#/components/schemas/Translations', nullable: true }
         created_at: { type: string, format: date-time, readOnly: true }
         cancelled: { type: boolean }
         freqency:
           type: object
           properties:
-            id: { type: string }
             name: { $ref: '#/components/schemas/Translations', readOnly: true }
         revision: { type: string }
 

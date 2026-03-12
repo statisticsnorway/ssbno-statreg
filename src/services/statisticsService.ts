@@ -5,6 +5,7 @@ import { getDivisionFromCode } from '@/services/klassService'
 import { fetchUsers } from '@/services/entraUserService'
 
 type StatisticPrisma = Pick<PrismaClient, 'statistic'>
+const lang_en = 'en'
 
 // Statistic listing
 
@@ -27,8 +28,6 @@ export async function getAllStatistics(
 
   return statistics.map((statistic) => {
     const main_language = statistic.language
-    const lang_en = 'en'
-
     return {
       shortname: statistic.shortname.name,
       main_language,
@@ -50,20 +49,22 @@ const VariantSelect = {
   },
 }
 
-function parseStatisticVariants(
+export function parseStatisticVariants(
   variants: Prisma.VariantGetPayload<typeof VariantSelect>[] | undefined,
   main_language: string,
   lang_en: string
 ) {
-  if (!variants?.length) return
+  if (!variants?.length) return []
 
   return variants.map((variant) => ({
     version: variant.version,
     updated_at: dateToISOString(variant.last_updated),
-    level_of_detail: [
-      ...getLocalizedName(main_language, variant.level_of_detail),
-      ...getLocalizedName(lang_en, variant.level_of_detail_en),
-    ],
+    level_of_detail: {
+      name: [
+        ...getLocalizedName(main_language, variant.level_of_detail),
+        ...getLocalizedName(lang_en, variant.level_of_detail_en),
+      ],
+    },
     created_at: dateToISOString(variant.date_created),
     cancelled: variant.cancelled,
     frequency: {
@@ -90,11 +91,9 @@ export async function getStatisticByShortname(shortname: string, prisma: Statist
     },
   })
 
-  if (!statistic) throw new Error('Shortname not found')
+  if (!statistic) return Promise.reject({ statregError: 'Shortname not found' })
 
   const main_language = statistic.language
-  const lang_en = 'en'
-
   const division_code = statistic.division_code
   const related_statistic = statistic.related_statistic
 

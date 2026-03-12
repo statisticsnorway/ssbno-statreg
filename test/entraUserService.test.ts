@@ -27,10 +27,10 @@ describe('entraUserService ', () => {
       ;({ fetchUsers } = await import('@/services/entraUserService'))
     })
 
-    test('returns null when users array is empty', async () => {
+    test('returns empty array when users array is empty', async () => {
       const result = await fetchUsers([])
 
-      assert.equal(result, null)
+      assert.deepStrictEqual(result, [])
       assert.equal(getAccessTokenMock.mock.callCount(), 0)
     })
 

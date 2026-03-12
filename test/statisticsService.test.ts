@@ -28,6 +28,7 @@ describe('statisticService ', async () => {
 
   let getStatisticByShortname: Function
   let getAllStatistics: Function
+  let parseStatisticVariants: Function
 
   before(async () => {
     // eslint-disable-next-line no-unused-vars
@@ -47,7 +48,8 @@ describe('statisticService ', async () => {
         klassService,
       },
     })
-    ;({ getAllStatistics, getStatisticByShortname } = await import('@/services/statisticsService'))
+    ;({ getAllStatistics, getStatisticByShortname, parseStatisticVariants } =
+      await import('@/services/statisticsService'))
   })
 
   beforeEach(async () => {
@@ -100,10 +102,10 @@ describe('statisticService ', async () => {
 
     test('throws Error when shortname is not found', async () => {
       setStatisticsResult(null)
-      await assert.rejects(() => getStatisticByShortname('', prismaMock), /Shortname not found/)
+      await assert.rejects(() => getStatisticByShortname('', prismaMock), { statregError: 'Shortname not found' })
     })
 
-    test('returns undefined name when division does not exist', async () => {
+    test('returns undefined division name when division does not exist', async () => {
       setStatisticsResult({ ...mockStatisticsDetailedPrismaResult, division_code: '105' })
 
       const result = await getStatisticByShortname('helse', prismaMock)
@@ -123,6 +125,26 @@ describe('statisticService ', async () => {
         ...mockedStatisticDetailedResult,
         contacts: [{ email: 'bob@ssb.no', name: undefined }],
       })
+    })
+
+    test('returns empty contact array when responsible persons is empty', async () => {
+      setStatisticsResult({ ...mockStatisticsDetailedPrismaResult, responsiblePersons: [] })
+      fetchUsersMock.mock.mockImplementationOnce(async () => [])
+
+      const result = await getStatisticByShortname('helse', prismaMock)
+
+      assert.deepEqual(result, {
+        ...mockedStatisticDetailedResult,
+        contacts: [],
+      })
+    })
+  })
+
+  // TODO: Add more tests for nb or en does not exist?
+  describe('parseStatisticVariants', async () => {
+    test('returns empty array when variants is empty', () => {
+      const result = parseStatisticVariants([], 'nb', 'en')
+      assert.deepEqual(result, [])
     })
   })
 })
@@ -294,7 +316,7 @@ const mockedStatisticDetailedResult = {
     {
       version: 1,
       updated_at: '2025-06-20T10:39:51.621Z',
-      level_of_detail: [],
+      level_of_detail: { name: [] },
       created_at: '2025-06-20T10:39:51.621Z',
       cancelled: false,
       frequency: {
@@ -308,7 +330,7 @@ const mockedStatisticDetailedResult = {
     {
       version: 1,
       updated_at: '2025-06-20T10:39:51.621Z',
-      level_of_detail: [],
+      level_of_detail: { name: [] },
       created_at: '2025-06-20T10:39:51.621Z',
       cancelled: false,
       frequency: {

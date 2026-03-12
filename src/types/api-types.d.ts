@@ -744,12 +744,13 @@ export interface components {
       version?: number
       /** Format: date-time */
       readonly updated_at?: string
-      level_of_detail?: components['schemas']['Translations']
+      level_of_detail?: {
+        name?: components['schemas']['Translations']
+      }
       /** Format: date-time */
       readonly created_at?: string
       cancelled?: boolean
       freqency?: {
-        id?: string
         readonly name?: components['schemas']['Translations']
       }
       revision?: string
