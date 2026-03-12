@@ -1,5 +1,5 @@
 import type { StatisticListing, StatisticDetails } from '@/types/index'
-import { getLocalizedName, dateToISOString } from '@/lib/utils'
+import { getLocalizedName, dateToISOString, sanitize } from '@/lib/utils'
 import type { PrismaClient, Prisma } from '@/generated/prisma/client'
 import { getDivisionFromCode } from '@/services/klassService'
 import { fetchUsers } from '@/services/entraUserService'
@@ -79,7 +79,7 @@ export function parseStatisticVariants(
 
 export async function getStatisticByShortname(shortname: string, prisma: StatisticPrisma): Promise<StatisticDetails> {
   const statistic = await prisma.statistic.findFirst({
-    where: { shortname: { name: shortname } },
+    where: { shortname: { name: sanitize(shortname) } },
     include: {
       shortname: { select: { name: true } },
       responsiblePersons: { select: { email: true, username: true } },
