@@ -63,7 +63,7 @@ spec:
       excludePaths:
         - /docs
         - /statistics
-        - /statistics/:shortname
+        - /statistics/*
         - /releases
 
   postgres:
