@@ -34,12 +34,12 @@ describe('entraUserService ', () => {
       assert.equal(getAccessTokenMock.mock.callCount(), 0)
     })
 
-    test('returns null when token retrieval fails', async () => {
+    test('returns original users when token retrieval fails', async () => {
       getAccessTokenMock.mock.mockImplementationOnce(() => null)
 
       const result = await fetchUsers([{ username: 'ola', email: 'ignored@test.com' }])
 
-      assert.equal(result, null)
+      assert.deepEqual(result, [{ username: 'ola', email: 'ignored@test.com' }])
       assert.equal(getAccessTokenMock.mock.callCount(), 1)
       assert.equal(fetchUserByEmailMock.mock.callCount(), 0)
     })

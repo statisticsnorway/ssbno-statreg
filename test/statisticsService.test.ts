@@ -123,7 +123,19 @@ describe('statisticService ', async () => {
 
       assert.deepEqual(result, {
         ...mockedStatisticDetailedResult,
-        contacts: [{ email: 'bob@ssb.no', name: undefined }],
+        contacts: [{ username: undefined, email: 'bob@ssb.no', name: undefined }],
+      })
+    })
+
+    test('returns username and email when failing to get token access for fetch users', async () => {
+      setStatisticsResult(mockStatisticsDetailedPrismaResult)
+      fetchUsersMock.mock.mockImplementationOnce(async () => [{ email: 'bob@ssb.no', username: 'bcd' }])
+
+      const result = await getStatisticByShortname('helse', prismaMock)
+
+      assert.deepEqual(result, {
+        ...mockedStatisticDetailedResult,
+        contacts: [{ username: 'bcd', email: 'bob@ssb.no', name: undefined }],
       })
     })
 
@@ -342,6 +354,6 @@ const mockedStatisticDetailedResult = {
       revision: 'I',
     },
   ],
-  contacts: [{ name: 'Bob', email: 'bob@ssb.no' }],
+  contacts: [{ username: undefined, name: 'Bob', email: 'bob@ssb.no' }],
   statistic_region_levels: [[{ language_code: 'nb', text: 'Bydel og krets' }]],
 }

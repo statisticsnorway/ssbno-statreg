@@ -3,6 +3,7 @@ import { getLocalizedName, dateToISOString, sanitize } from '@/lib/utils'
 import type { PrismaClient, Prisma } from '@/generated/prisma/client'
 import { getDivisionFromCode } from '@/services/klassService'
 import { fetchUsers } from '@/services/entraUserService'
+import type { UserLookupItem, Users } from '@/types/entra'
 
 type StatisticPrisma = Pick<PrismaClient, 'statistic'>
 const lang_en = 'en'
@@ -128,10 +129,16 @@ export async function getStatisticByShortname(shortname: string, prisma: Statist
     created_at: dateToISOString(statistic.date_created),
     variants: parseStatisticVariants(statistic.variants, main_language, lang_en),
     contacts: await fetchUsers(statistic.responsiblePersons).then((users) =>
-      users?.map(({ user, lookupEmail }) => ({
-        name: user?.displayName,
-        email: lookupEmail,
-      }))
+      users?.map((user) => {
+        const lookupUser = (user as UserLookupItem).user
+        const responsiblePerson = user as Users
+
+        return {
+          name: lookupUser?.displayName,
+          email: lookupUser?.email ?? (user as UserLookupItem).lookupEmail ?? responsiblePerson.email,
+          username: responsiblePerson.username as string | undefined,
+        }
+      })
     ),
     statistic_region_levels:
       statistic.statistic_region_levels?.map(({ region_level }) =>
