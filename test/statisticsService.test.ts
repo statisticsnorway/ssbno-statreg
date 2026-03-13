@@ -152,10 +152,49 @@ describe('statisticService ', async () => {
     })
   })
 
-  // TODO: Add more tests for nb or en does not exist?
   describe('parseStatisticVariants', async () => {
+    test('returns parsed variants array', () => {
+      const result = parseStatisticVariants(
+        [
+          {
+            version: 1,
+            last_updated: new Date('2025-06-20T10:39:51.621Z'),
+            date_created: new Date('2025-06-20T10:39:51.621Z'),
+            cancelled: false,
+            revision: 'I',
+            level_of_detail: 'Kommentar',
+            level_of_detail_en: null,
+            frequency: {
+              name: 'Måned',
+              name_en: 'Month',
+            },
+          },
+        ],
+        'nb',
+        'en'
+      )
+
+      assert.deepEqual(result, [
+        {
+          version: 1,
+          updated_at: '2025-06-20T10:39:51.621Z',
+          level_of_detail: { name: [{ language_code: 'nb', text: 'Kommentar' }] },
+          created_at: '2025-06-20T10:39:51.621Z',
+          cancelled: false,
+          frequency: {
+            name: [
+              { language_code: 'nb', text: 'Måned' },
+              { language_code: 'en', text: 'Month' },
+            ],
+          },
+          revision: 'I',
+        },
+      ])
+    })
+
     test('returns empty array when variants is empty', () => {
       const result = parseStatisticVariants([], 'nb', 'en')
+
       assert.deepEqual(result, [])
     })
   })

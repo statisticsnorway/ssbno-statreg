@@ -54,7 +54,7 @@ export function parseStatisticVariants(
   variants: Prisma.VariantGetPayload<typeof VariantSelect>[] | undefined,
   main_language: string,
   lang_en: string
-) {
+): StatisticDetails['variants'] {
   if (!variants?.length) return []
 
   return variants.map((variant) => ({

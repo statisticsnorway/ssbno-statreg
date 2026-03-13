@@ -721,7 +721,7 @@ export interface components {
       readonly created_at?: string
       variants?: components['schemas']['Variant'][]
       contacts?: {
-        username?: string
+        username?: string | null
         email?: string
         name?: string
       }[]
