@@ -123,7 +123,12 @@ components:
           items: { $ref: '#/components/schemas/Variant' }
         contacts:
           type: array
-          items: { $ref: '#/components/schemas/Contact' }
+          items: 
+            type: object
+            properties:
+              username: { type: string, nullable: true }
+              email: { type: string }
+              name: { type: string }
         statistic_region_levels:
           type: array
           items: { $ref: '#/components/schemas/Translations' }

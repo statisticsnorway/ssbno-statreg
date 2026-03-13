@@ -720,7 +720,11 @@ export interface components {
       /** Format: date-time */
       readonly created_at?: string
       variants?: components['schemas']['Variant'][]
-      contacts?: components['schemas']['Contact'][]
+      contacts?: {
+        username?: string
+        email?: string
+        name?: string
+      }[]
       statistic_region_levels?: components['schemas']['Translations'][]
     }
     Statistic_listing: {
