@@ -63,8 +63,9 @@ spec:
       excludePaths:
         - /docs
         - /statistics
-        - /statistics/*
+        - /statistics/**
         - /releases
+        - /releases/**
 
   postgres:
     clusterName: statreg-api-test-db
