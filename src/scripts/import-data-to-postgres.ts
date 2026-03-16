@@ -30,7 +30,7 @@ async function deleteAllData() {
   await prisma.contact_DoNotUse.deleteMany()
   await prisma.calender_date.deleteMany()
   await prisma.frequency.deleteMany()
-  await prisma.auditLogOld.deleteMany()
+  await prisma.auditLog.deleteMany()
 
   // Optional: if you want to clear AUDIT_LOG manually:
   // await prisma.$executeRawUnsafe('DELETE FROM statreg."AUDIT_LOG"');
@@ -552,7 +552,7 @@ async function importVariant(folder: string) {
 // 12) AUDIT_LOG -> NO Prisma model (raw SQL placeholder)
 //     file: AUDIT_LOG.json
 // ============================================================================
-type AuditlogCreate = Parameters<(typeof prisma)['auditLogOld']['createMany']>[0]['data'] extends (infer U)[]
+type AuditlogCreate = Parameters<(typeof prisma)['auditLog']['createMany']>[0]['data'] extends (infer U)[]
   ? U
   : never
 
@@ -581,7 +581,7 @@ async function importAuditlog(folder: string) {
   await runImportStream<AuditlogCreate>(
     file,
     (batch) =>
-      prisma.auditLogOld.createMany({
+      prisma.auditLog.createMany({
         data: batch,
         skipDuplicates: false,
       }),
@@ -607,7 +607,7 @@ async function resetAllSequences() {
   await resetSequence('Statistic')
   await resetSequence('Variant')
   await resetSequence('Release')
-  await resetSequence('AuditLogOld')
+  await resetSequence('AuditLog')
 
   console.log('✔ All sequences updated\n')
 }

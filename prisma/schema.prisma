@@ -169,7 +169,7 @@ model Variant {
   statistic          Statistic @relation(fields: [statistic_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
-model AuditLogOld {
+model AuditLog {
   @@schema("statreg")
   id                        Int       @id @default(autoincrement())
   last_updated              DateTime

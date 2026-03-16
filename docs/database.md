@@ -15,3 +15,7 @@ There are many fun pitfalls and ways of messing up both your local db and produc
 For local development database url is provided in a file named ".env" located in the root directory of the project. See example in [.env.example](../.env.example) in root folder.
 
 > NB! For initial development until database migration is done for test env we *do not* use migrations, but instead manipulate schema and init migration directly. Steps to resolve database schema changes are described in [README#Subsequent application startups](../README.md#subsequent-application-startups)
+
+### Audit logging
+
+We need to keep an audit trail of all creations and alterations on most of our data tables. We need to register who made the changes, when and what was changed. This is done with Prisma middleware, which interrupts each create, update and delete action.

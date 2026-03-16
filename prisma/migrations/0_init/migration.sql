@@ -161,21 +161,21 @@ CREATE TABLE "statreg"."Variant" (
 );
 
 -- CreateTable
-CREATE TABLE "statreg"."AuditLogOld" (
+CREATE TABLE "statreg"."AuditLog" (
     "id" SERIAL NOT NULL,
-    "property_name" TEXT,
     "last_updated" TIMESTAMP(3) NOT NULL,
+    "property_name" TEXT,
     "old_value" TEXT,
+    "new_value" TEXT,
     "actor" TEXT NOT NULL,
     "uri" TEXT,
-    "new_value" TEXT,
     "persisted_object_version" INTEGER,
     "date_created" TIMESTAMP(3) NOT NULL,
     "class_name" TEXT NOT NULL,
     "event_name" TEXT NOT NULL,
     "persisted_object_id" INTEGER NOT NULL,
 
-    CONSTRAINT "AuditLogOld_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "AuditLog_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -248,3 +248,4 @@ ALTER TABLE "statreg"."_ResponsiblePersonToStatistic" ADD CONSTRAINT "_Responsib
 
 -- AddForeignKey
 ALTER TABLE "statreg"."_ResponsiblePersonToStatistic" ADD CONSTRAINT "_ResponsiblePersonToStatistic_B_fkey" FOREIGN KEY ("B") REFERENCES "statreg"."Statistic"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+

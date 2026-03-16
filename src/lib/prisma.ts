@@ -46,7 +46,7 @@ const extendedPrisma = prisma.$extends({
           const incoming = await query(args)
           const store = asyncLocalStorage.getStore()
           const actor = store?.auth?.username || 'unknown'
-          await prisma.auditLogOld.create({
+          await prisma.auditLog.create({
             data: {
               actor,
               class_name: model,
@@ -64,9 +64,10 @@ const extendedPrisma = prisma.$extends({
           return await query(args)
         }
       },
-      async createMany() {
-        throw new Error('CreateMany is not supported by auditLog middleware!')
-      },
+      // TODO: re-enable blocking of createMany and similar function - we can not implement audit logging on these functions and they must be disabled in our project.
+      // async createMany() {
+      //   throw new Error('CreateMany is not supported by auditLog middleware!')
+      // },
       async update({ model, args, query }) {
         if (['Variant', 'Statistic', 'Release', 'Frequency', 'Calender_date'].includes(model)) {
           const start = new Date()
@@ -74,7 +75,7 @@ const extendedPrisma = prisma.$extends({
           const incoming = await query(args)
           const store = asyncLocalStorage.getStore()
           const actor = store?.auth?.username || 'unknown'
-          await prisma.auditLogOld.create({
+          await prisma.auditLog.create({
             data: {
               actor,
               class_name: model,
@@ -92,9 +93,9 @@ const extendedPrisma = prisma.$extends({
           return query(args)
         }
       },
-      async updateMany() {
-        throw new Error('UpdateMany is not supported by auditLog middleware!')
-      },
+      // async updateMany() {
+      //   throw new Error('UpdateMany is not supported by auditLog middleware!')
+      // },
       async delete({ model, args, query }) {
         if (['Variant', 'Statistic', 'Release', 'Frequency', 'Calender_date'].includes(model)) {
           const start = new Date()
@@ -102,7 +103,7 @@ const extendedPrisma = prisma.$extends({
           const incoming = await query(args)
           const store = asyncLocalStorage.getStore()
           const actor = store?.auth?.username || 'unknown'
-          await prisma.auditLogOld.create({
+          await prisma.auditLog.create({
             data: {
               actor,
               class_name: model,
@@ -120,9 +121,9 @@ const extendedPrisma = prisma.$extends({
           return query(args)
         }
       },
-      async deleteMany() {
-        throw new Error('DeleteMany is not supported by auditLog middleware!')
-      },
+      // async deleteMany() {
+      //   throw new Error('DeleteMany is not supported by auditLog middleware!')
+      // },
     },
   },
 })
