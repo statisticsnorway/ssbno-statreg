@@ -64,6 +64,9 @@ const extendedPrisma = prisma.$extends({
           return await query(args)
         }
       },
+      async createMany() {
+        throw new Error('CreateMany is not supported by auditLog middleware!')
+      },
       async update({ model, args, query }) {
         if (['Variant', 'Statistic', 'Release', 'Frequency', 'Calender_date'].includes(model)) {
           const start = new Date()
@@ -88,6 +91,37 @@ const extendedPrisma = prisma.$extends({
         } else {
           return query(args)
         }
+      },
+      async updateMany() {
+        throw new Error('UpdateMany is not supported by auditLog middleware!')
+      },
+      async delete({ model, args, query }) {
+        if (['Variant', 'Statistic', 'Release', 'Frequency', 'Calender_date'].includes(model)) {
+          const start = new Date()
+          const existing = await fetchCurrentSnapshot(args, model)
+          const incoming = await query(args)
+          const store = asyncLocalStorage.getStore()
+          const actor = store?.auth?.username || 'unknown'
+          await prisma.auditLogOld.create({
+            data: {
+              actor,
+              class_name: model,
+              old_value: JSON.stringify(existing),
+              new_value: JSON.stringify(incoming),
+              last_updated: start,
+              date_created: existing?.date_created ?? start,
+              persisted_object_id: (existing as { id?: number }).id || 0,
+              persisted_object_version: (existing as { version?: number }).version || 1,
+              event_name: 'delete',
+            },
+          })
+          return incoming
+        } else {
+          return query(args)
+        }
+      },
+      async deleteMany() {
+        throw new Error('DeleteMany is not supported by auditLog middleware!')
       },
     },
   },
