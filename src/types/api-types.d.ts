@@ -665,11 +665,14 @@ export interface components {
         readonly shortname?: string
         readonly name?: components['schemas']['Translations']
       }
-      frequency?: {
-        readonly name?: components['schemas']['Translations']
-      }
-      variant_revision?: {
-        readonly name?: components['schemas']['Translations']
+      variant?: {
+        readonly id?: number
+        frequency?: {
+          readonly name?: components['schemas']['Translations']
+        }
+        revision?: {
+          readonly name?: components['schemas']['Translations']
+        }
       }
       /** Format: date-time */
       period_to?: string
