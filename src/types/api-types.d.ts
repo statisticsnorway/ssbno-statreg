@@ -657,24 +657,26 @@ export interface components {
     }
     Release_details: {
       readonly id?: number
-      version?: number
       /** Format: date-time */
       publish_time?: string
       has_versions?: boolean
-      /** Format: date-time */
-      readonly updated_at?: string
-      comment?: string
       approval_status?: string | null
-      variant_id?: number
+      statistic?: {
+        readonly shortname?: string
+        readonly name?: components['schemas']['Translations']
+      }
+      frequency?: {
+        readonly name?: components['schemas']['Translations']
+      }
+      variant_revision?: {
+        readonly name?: components['schemas']['Translations']
+      }
       /** Format: date-time */
       period_to?: string
       /** Format: date-time */
       period_from?: string
       cancelled?: boolean
-      /** Format: date-time */
-      readonly created_at?: string
       release_date_precision?: string
-      import_flag?: boolean | null
     }
     Release_listing: {
       readonly id?: number

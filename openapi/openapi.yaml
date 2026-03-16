@@ -58,19 +58,26 @@ components:
       type: object
       properties:
         id: { type: integer, readOnly: true }
-        version: { type: integer }
         publish_time: { type: string, format: date-time }
         has_versions: { type: boolean }
-        updated_at: { type: string, format: date-time, readOnly: true }
-        comment: { type: string }
         approval_status: { type: string, nullable: true }
-        variant_id: { type: integer }
+        statistic:
+          type: object
+          properties:
+            shortname: { type: string, readOnly: true }
+            name: { $ref: '#/components/schemas/Translations', readOnly: true }
+        frequency:
+          type: object
+          properties:
+            name: { $ref: '#/components/schemas/Translations', readOnly: true }
+        variant_revision:
+          type: object
+          properties:
+            name: { $ref: '#/components/schemas/Translations', readOnly: true }
         period_to: { type: string, format: date-time }
         period_from: { type: string, format: date-time }
         cancelled: { type: boolean }
-        created_at: { type: string, format: date-time, readOnly: true }
         release_date_precision: { type: string }
-        import_flag: { type: boolean, nullable: true }
 
     Release_listing:
       type: object
