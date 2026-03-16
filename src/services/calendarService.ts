@@ -24,7 +24,6 @@ export async function createBlockedReleaseDay(
 
   await prisma.calender_date.create({
     data: {
-      version: 0,
       comment: blocked_comment,
       day: date,
     },

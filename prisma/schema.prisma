@@ -11,7 +11,7 @@ datasource db {
 model Frequency {
   @@schema("statreg")
   id      Int    @id @default(autoincrement())
-  version Int       
+  version Int    @default(1)   
   name    String
   name_en String    
   code    String    @unique
@@ -21,7 +21,7 @@ model Frequency {
 model Calender_date {
   @@schema("statreg")
   id      Int      @id @default(autoincrement())
-  version Int
+  version Int      @default(1)
   comment String
   day     DateTime @db.Timestamp(6) @unique
 }
@@ -29,7 +29,7 @@ model Calender_date {
 model Contact_DoNotUse {
   @@schema("statreg")
   id                 Int      @id @default(autoincrement())
-  version            Int      
+  version            Int      @default(1)
   initials           String?  
   mobile             String?  
   name               String   
@@ -53,7 +53,7 @@ model ResponsiblePerson {
 model Shortname {
   @@schema("statreg")
   id           Int         @id @default(autoincrement())
-  version      Int
+  version      Int         @default(1)
   name         String      @unique
   last_updated DateTime    @db.Timestamp(6)
   date_created DateTime    @db.Timestamp(6)
@@ -63,7 +63,7 @@ model Shortname {
 model Release {
   @@schema("statreg")
   id                     Int      @id @default(autoincrement())
-  version                Int
+  version                Int      @default(1)
   publish_time           DateTime @db.Timestamp(6)
   has_versions           Boolean
   last_updated           DateTime @db.Timestamp(6)
@@ -82,7 +82,7 @@ model Release {
 model Region_level {
   @@schema("statreg")
   id                      Int     @id @default(autoincrement())
-  version                 Int
+  version                 Int     @default(1)
   name                    String
   code                    String? @unique
   statistic_region_levels Statistic_region_level[]
@@ -91,7 +91,7 @@ model Region_level {
 model Division_DoNotUse {
   @@schema("statreg")
   id         Int         @id @default(autoincrement())
-  version    Int         
+  version    Int         @default(1)
   code       String      @unique
   name_en    String
   name       String
@@ -101,7 +101,7 @@ model Division_DoNotUse {
 model Statistic {
   @@schema("statreg")
   id                      Int                      @id @default(autoincrement())
-  version                 Int
+  version                 Int                      @default(1)
   shortname_id            Int                      @unique
   dir_appoval_status      String?
   search_phrases          String?
@@ -155,7 +155,7 @@ model Statistic_region_level {
 model Variant {
   @@schema("statreg")
   id                 Int       @id @default(autoincrement())
-  version            Int
+  version            Int       @default(1)
   last_updated       DateTime  @db.Timestamp(6)
   date_created       DateTime  @db.Timestamp(6)
   cancelled          Boolean

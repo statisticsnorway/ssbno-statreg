@@ -4,7 +4,7 @@ CREATE SCHEMA IF NOT EXISTS "statreg";
 -- CreateTable
 CREATE TABLE "statreg"."Frequency" (
     "id" SERIAL NOT NULL,
-    "version" INTEGER NOT NULL,
+    "version" INTEGER NOT NULL DEFAULT 1,
     "name" TEXT NOT NULL,
     "name_en" TEXT NOT NULL,
     "code" TEXT NOT NULL,
@@ -15,7 +15,7 @@ CREATE TABLE "statreg"."Frequency" (
 -- CreateTable
 CREATE TABLE "statreg"."Calender_date" (
     "id" SERIAL NOT NULL,
-    "version" INTEGER NOT NULL,
+    "version" INTEGER NOT NULL DEFAULT 1,
     "comment" TEXT NOT NULL,
     "day" TIMESTAMP(6) NOT NULL,
 
@@ -25,7 +25,7 @@ CREATE TABLE "statreg"."Calender_date" (
 -- CreateTable
 CREATE TABLE "statreg"."Contact_DoNotUse" (
     "id" SERIAL NOT NULL,
-    "version" INTEGER NOT NULL,
+    "version" INTEGER NOT NULL DEFAULT 1,
     "initials" TEXT,
     "mobile" TEXT,
     "name" TEXT NOT NULL,
@@ -51,7 +51,7 @@ CREATE TABLE "statreg"."ResponsiblePerson" (
 -- CreateTable
 CREATE TABLE "statreg"."Shortname" (
     "id" SERIAL NOT NULL,
-    "version" INTEGER NOT NULL,
+    "version" INTEGER NOT NULL DEFAULT 1,
     "name" TEXT NOT NULL,
     "last_updated" TIMESTAMP(6) NOT NULL,
     "date_created" TIMESTAMP(6) NOT NULL,
@@ -62,7 +62,7 @@ CREATE TABLE "statreg"."Shortname" (
 -- CreateTable
 CREATE TABLE "statreg"."Release" (
     "id" SERIAL NOT NULL,
-    "version" INTEGER NOT NULL,
+    "version" INTEGER NOT NULL DEFAULT 1,
     "publish_time" TIMESTAMP(6) NOT NULL,
     "has_versions" BOOLEAN NOT NULL,
     "last_updated" TIMESTAMP(6) NOT NULL,
@@ -82,7 +82,7 @@ CREATE TABLE "statreg"."Release" (
 -- CreateTable
 CREATE TABLE "statreg"."Region_level" (
     "id" SERIAL NOT NULL,
-    "version" INTEGER NOT NULL,
+    "version" INTEGER NOT NULL DEFAULT 1,
     "name" TEXT NOT NULL,
     "code" TEXT,
 
@@ -92,7 +92,7 @@ CREATE TABLE "statreg"."Region_level" (
 -- CreateTable
 CREATE TABLE "statreg"."Division_DoNotUse" (
     "id" SERIAL NOT NULL,
-    "version" INTEGER NOT NULL,
+    "version" INTEGER NOT NULL DEFAULT 1,
     "code" TEXT NOT NULL,
     "name_en" TEXT NOT NULL,
     "name" TEXT NOT NULL,
@@ -103,7 +103,7 @@ CREATE TABLE "statreg"."Division_DoNotUse" (
 -- CreateTable
 CREATE TABLE "statreg"."Statistic" (
     "id" SERIAL NOT NULL,
-    "version" INTEGER NOT NULL,
+    "version" INTEGER NOT NULL DEFAULT 1,
     "shortname_id" INTEGER NOT NULL,
     "dir_appoval_status" TEXT,
     "search_phrases" TEXT,
@@ -147,7 +147,7 @@ CREATE TABLE "statreg"."Statistic_region_level" (
 -- CreateTable
 CREATE TABLE "statreg"."Variant" (
     "id" SERIAL NOT NULL,
-    "version" INTEGER NOT NULL,
+    "version" INTEGER NOT NULL DEFAULT 1,
     "last_updated" TIMESTAMP(6) NOT NULL,
     "date_created" TIMESTAMP(6) NOT NULL,
     "cancelled" BOOLEAN NOT NULL,
