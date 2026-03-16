@@ -34,7 +34,6 @@ describe('calendarService  ', () => {
       assert.strictEqual(prismaMock.calender_date.create.mock.callCount(), 1)
       assert.deepStrictEqual(prismaMock.calender_date.create.mock.calls[0].arguments[0], {
         data: {
-          version: 0,
           comment: inputComment.blocked_comment,
           day: new Date(inputDate),
         },
