@@ -19,21 +19,18 @@ const adapter = new PrismaPg({
 
 const prisma = new PrismaClient({ adapter })
 
-const fetchCurrentSnapshot = async (
-  id: number,
-  model: 'Variant' | 'Statistic' | 'Release' | 'Frequency' | 'Calender_date'
-): Promise<Snapshot | null> => {
+const fetchCurrentSnapshot = async (args: { where: any }, model: string): Promise<Snapshot | null> => {
   switch (model) {
     case 'Variant':
-      return prisma.variant.findUnique({ where: { id } })
+      return prisma.variant.findUnique({ where: args.where })
     case 'Statistic':
-      return prisma.statistic.findUnique({ where: { id } })
+      return prisma.statistic.findUnique({ where: args.where })
     case 'Release':
-      return prisma.release.findUnique({ where: { id } })
+      return prisma.release.findUnique({ where: args.where })
     case 'Frequency':
-      return prisma.frequency.findUnique({ where: { id } })
+      return prisma.frequency.findUnique({ where: args.where })
     case 'Calender_date':
-      return prisma.calender_date.findUnique({ where: { id } })
+      return prisma.calender_date.findUnique({ where: args.where })
     default:
       return null
   }
@@ -58,19 +55,19 @@ const extendedPrisma = prisma.$extends({
               new_value: JSON.stringify(incoming),
               old_value: null,
               persisted_object_id: (incoming as { id?: number }).id || 0,
+              persisted_object_version: (incoming as { version?: number }).version || 1,
               event_name: 'create',
             },
           })
-          // console.log(`AUDIT LOG at ${start} performing CREATE on ${model}: ${JSON.stringify(args, null, 2)}`)
           return incoming
         } else {
-          return query(args)
+          return await query(args)
         }
       },
       async update({ model, args, query }) {
         if (['Variant', 'Statistic', 'Release', 'Frequency', 'Calender_date'].includes(model)) {
           const start = new Date()
-          const existing = await fetchCurrentSnapshot(args.where.id, model)
+          const existing = await fetchCurrentSnapshot(args, model)
           const incoming = await query(args)
           const store = asyncLocalStorage.getStore()
           const actor = store?.auth?.username || 'unknown'
@@ -83,6 +80,7 @@ const extendedPrisma = prisma.$extends({
               last_updated: start,
               date_created: existing?.date_created ?? start,
               persisted_object_id: (incoming as { id?: number }).id || 0,
+              persisted_object_version: (incoming as { version?: number }).version || 1,
               event_name: 'update',
             },
           })
