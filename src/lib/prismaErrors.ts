@@ -24,7 +24,8 @@ function getLastLineFromErrorMessage(message: string): string {
 
 export function handleErrors(error: any, res: Response) {
   if (error.statregError) {
-    return res.status(400).json({ error: error.statregError })
+    const status = error.status ?? 400
+    return res.status(status).json({ error: error.statregError })
   }
 
   const knownErrorMessage = checkForKnownPrismaErrors(error)

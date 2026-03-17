@@ -67,7 +67,7 @@ export async function getAllReleases({ start = 0, count = 10 }, prisma: ReleaseP
 export async function getReleaseById(id: string, prisma: ReleasePrisma): Promise<ReleaseDetails> {
   const idAsNumber = Number.parseInt(sanitize(id))
   if (isNaN(idAsNumber)) {
-    return Promise.reject({ status: 400, statregError: 'Invalid release id' })
+    return Promise.reject({ statregError: 'Invalid release id' })
   }
 
   const release = await prisma.release.findFirst({
