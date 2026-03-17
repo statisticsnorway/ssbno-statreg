@@ -108,7 +108,7 @@ const extendedPrisma = prisma.$extends({
               class_name: model,
               old_value: JSON.stringify(incoming),
               new_value: null,
-              date_created: (incoming as { date_created?: Date }).date_created ?? ,
+              date_created: (incoming as { date_created?: Date }).date_created ?? '',
               persisted_object_id: (incoming as { id?: number }).id || 0,
               persisted_object_version: (incoming as { version?: number }).version || 1,
               event_name: 'delete',
