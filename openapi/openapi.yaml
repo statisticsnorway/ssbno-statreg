@@ -5,6 +5,7 @@ info:
   description: API for managing publications, statistics and metadata for Statistics Norway
 servers:
   - url: https://ssb.no/statreg-api
+  - url: https://localhost:8080
 
 tags:
   - name: calendar
