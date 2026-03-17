@@ -13,8 +13,8 @@ const adapter = new PrismaPg({
     process.env.NODE_ENV === 'development'
       ? undefined
       : {
-          rejectUnauthorized: false,
-        },
+        rejectUnauthorized: false,
+      },
 })
 
 const prisma = new PrismaClient({ adapter })
@@ -108,11 +108,11 @@ const extendedPrisma = prisma.$extends({
               class_name: model,
               old_value: JSON.stringify(incoming),
               new_value: null,
-              last_updated: start,
-              date_created: existing?.date_created ?? start,
-              persisted_object_id: (existing as { id?: number }).id || 0,
-              persisted_object_version: (existing as { version?: number }).version || 1,
+              date_created: (incoming as { date_created?: Date }).date_created ?? ,
+              persisted_object_id: (incoming as { id?: number }).id || 0,
+              persisted_object_version: (incoming as { version?: number }).version || 1,
               event_name: 'delete',
+              last_updated: start,
             },
           })
           return incoming
