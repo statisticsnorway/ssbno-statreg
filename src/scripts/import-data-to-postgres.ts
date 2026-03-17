@@ -552,9 +552,7 @@ async function importVariant(folder: string) {
 // 12) AUDIT_LOG -> NO Prisma model (raw SQL placeholder)
 //     file: AUDIT_LOG.json
 // ============================================================================
-type AuditlogCreate = Parameters<(typeof prisma)['auditLog']['createMany']>[0]['data'] extends (infer U)[]
-  ? U
-  : never
+type AuditlogCreate = Parameters<(typeof prisma)['auditLog']['createMany']>[0]['data'] extends (infer U)[] ? U : never
 
 function mapAuditlog(raw: any): AuditlogCreate {
   return {

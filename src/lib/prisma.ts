@@ -13,8 +13,8 @@ const adapter = new PrismaPg({
     process.env.NODE_ENV === 'development'
       ? undefined
       : {
-        rejectUnauthorized: false,
-      },
+          rejectUnauthorized: false,
+        },
 })
 
 const prisma = new PrismaClient({ adapter })
