@@ -92,7 +92,7 @@ export async function getStatisticByShortname(shortname: string, prisma: Statist
     },
   })
 
-  if (!statistic) return Promise.reject({ statregError: 'Shortname not found' })
+  if (!statistic) return Promise.reject({ status: 404, statregError: 'Shortname not found' })
 
   const main_language = statistic.language
   const division_code = statistic.division_code
