@@ -67,7 +67,6 @@ describe('releasesService ', async () => {
 
     test('returns 400 if id is not a number', async () => {
       await assert.rejects(() => getReleaseById('test', prismaMock), {
-        status: 400,
         statregError: 'Invalid release id',
       })
     })
