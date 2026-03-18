@@ -321,7 +321,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/Release_details' }
+            schema: { $ref: '#/components/schemas/Release_create' }
       responses:
         '201':
           description: Release details
