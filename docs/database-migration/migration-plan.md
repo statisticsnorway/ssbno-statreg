@@ -4,6 +4,8 @@ Here you'll find the migration plan and scripts used to migrate data from the le
 
 All scripts are found under `src/scripts`
 
+Before performing the migration, we need to allow the prisma methods deleteMany and createMany. We block these in our prisma.ts lib, because they are very hard to reliably create audit logs for and are a common source of issues. [See this PR for more information](https://github.com/statisticsnorway/ssbno-statreg-api/pull/147) about what to comment out. We choose to do this with simple commenting instead of feature toggles or similar in the spirit of keeping things simple.
+
 ## Step by step plan
 
 0. Using the [Oracle SQL Developer Extension](https://marketplace.visualstudio.com/items?itemName=Oracle.sql-developer) for the Visual Studio Code IDE, connect to the Statistikkregisteret Oracle database for table data export. Select "Custom JDBC" as Connection Type and fill in the fields, which can be found in Secret Manager in Google Cloud Platform.
