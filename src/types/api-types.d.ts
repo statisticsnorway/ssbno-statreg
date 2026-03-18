@@ -349,7 +349,7 @@ export interface paths {
       }
       requestBody: {
         content: {
-          'application/json': components['schemas']['Release_details']
+          'application/json': components['schemas']['Release_update']
         }
       }
       responses: {
@@ -655,10 +655,21 @@ export interface components {
       name?: components['schemas']['Translations']
       code?: string
     }
-    Release_details: {
+    Release: {
       readonly id?: number
       /** Format: date-time */
       publish_time?: string
+      /** Format: date-time */
+      period_to?: string
+      /** Format: date-time */
+      period_from?: string
+      release_date_precision?: string
+    }
+    Release_create: components['schemas']['Release']
+    Release_update: components['schemas']['Release'] & {
+      comment?: string
+    }
+    Release_details: components['schemas']['Release'] & {
       has_versions?: boolean
       approval_status?: string | null
       statistic?: {
@@ -674,12 +685,7 @@ export interface components {
           readonly name?: components['schemas']['Translations']
         }
       }
-      /** Format: date-time */
-      period_to?: string
-      /** Format: date-time */
-      period_from?: string
       cancelled?: boolean
-      release_date_precision?: string
     }
     Release_listing: {
       readonly id?: number
