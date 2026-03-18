@@ -1,6 +1,6 @@
 import type { Router } from 'express'
-import { getAllReleases, getReleaseById } from '@/services/releasesService'
-import { skipAuth } from 'plugins/authMiddleware'
+import { getAllReleases, getReleaseById, createRelease } from '@/services/releasesService'
+import { requireUserGroupAuthorization, skipAuth } from 'plugins/authMiddleware'
 import { handleErrors } from '@/lib/prismaErrors'
 import { prisma } from '@/lib/prisma'
 
@@ -26,4 +26,23 @@ export default function releasesController(router: Router) {
       return handleErrors(error, res)
     }
   })
+
+  router.post(
+    '/statistics/:shortname/variants/:id/releases',
+    requireUserGroupAuthorization('ssbno-developers'),
+    async (req, res) => {
+      try {
+        const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id
+        const result = await createRelease(
+          Array.isArray(req.params.shortname) ? (req.params.shortname[0] as string) : (req.params.shortname as string),
+          id!,
+          req.body,
+          prisma
+        )
+        res.json(result)
+      } catch (error) {
+        return handleErrors(error, res)
+      }
+    }
+  )
 }
