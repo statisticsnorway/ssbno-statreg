@@ -1,8 +1,9 @@
-import type { ReleaseListing } from '@/types/index'
-import { getLocalizedName, dateToISOString } from '@/lib/utils'
-import { type PrismaClient } from '@/generated/prisma/client'
+import type { ReleaseDetails, ReleaseListing } from '@/types/index'
+import { getLocalizedName, dateToISOString, sanitize } from '@/lib/utils'
+import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
 
 type ReleasePrisma = Pick<PrismaClient, 'release'>
+const lang_en = 'en'
 
 export async function getAllReleases(
   { start = 0, count = 10, shortname }: { start?: number; count?: number; shortname?: string },
@@ -58,7 +59,6 @@ export async function getAllReleases(
 
   return releases.map((release) => {
     const { statistic, frequency } = release.variant ?? {}
-    const lang_en = 'en'
 
     return {
       id: release.id,
@@ -80,61 +80,43 @@ export async function getAllReleases(
   })
 }
 
-export async function getAllReleasesForStatisticVariant(
-  shortname: string,
-  variantId: number,
-  { start = 0, count = 10 },
-  prisma: ReleasePrisma
-) {
-  const releases = await prisma.release.findMany({
-    skip: start,
-    take: count,
+export async function getReleaseById(id: string, prisma: ReleasePrisma): Promise<ReleaseDetails> {
+  const idAsNumber = Number.parseInt(sanitize(id))
+  if (isNaN(idAsNumber)) {
+    return Promise.reject({ statregError: 'Invalid release id' })
+  }
 
-    where: {
-      variant: {
-        id: variantId,
-        statistic: {
-          shortname: {
-            name: shortname,
-          },
-        },
-      },
-    },
-
-    orderBy: {
-      publish_time: 'desc',
-    },
-
+  const release = await prisma.release.findFirst({
+    where: { id: idAsNumber },
     select: {
-      desk_appoval_status: true,
-      cancelled: true,
+      id: true,
+      version: true,
       publish_time: true,
-      period_from: true,
+      desk_appoval_status: true,
       period_to: true,
-
+      period_from: true,
+      release_date_precision: true,
+      cancelled: true,
       variant: {
         select: {
           id: true,
-          version: true,
-          revision: true,
-          level_of_detail: true,
-          level_of_detail_en: true,
-
           frequency: {
             select: {
-              code: true,
               name: true,
               name_en: true,
             },
           },
-
+          revision: true,
           statistic: {
             select: {
-              shortname: {
-                select: { name: true },
-              },
+              language: true,
               name: true,
               name_en: true,
+              shortname: {
+                select: {
+                  name: true,
+                },
+              },
             },
           },
         },
@@ -142,31 +124,31 @@ export async function getAllReleasesForStatisticVariant(
     },
   })
 
-  return releases.map((r) => ({
-    status: r.desk_appoval_status,
-    cancelled: r.cancelled,
-    kortnavn: r.variant.statistic.shortname.name,
-    period_from: r.period_from,
-    period_to: r.period_to,
-    publish_time: r.publish_time,
+  if (!release) return Promise.reject({ status: 404, statregError: 'Release id not found' })
 
-    statistikk: {
-      name: r.variant.statistic.name,
-      name_en: r.variant.statistic.name_en,
-    },
+  const { statistic, frequency } = release.variant ?? {}
 
+  return {
+    id: release.id,
+    publish_time: dateToISOString(release.publish_time),
+    has_versions: release.version > 1,
+    approval_status: release.desk_appoval_status,
     variant: {
-      id: r.variant.id,
-      version: r.variant.version,
-      revision: r.variant.revision,
-      level_of_detail: r.variant.level_of_detail,
-      level_of_detail_en: r.variant.level_of_detail_en,
+      id: release.variant.id,
+      frequency: {
+        name: [...getLocalizedName('nb', frequency.name), ...getLocalizedName(lang_en, frequency.name_en)],
+      },
+      revision: {
+        name: [...getLocalizedName('nb', release.variant.revision)],
+      },
     },
-
-    frequency: {
-      code: r.variant.frequency.code,
-      name: r.variant.frequency.name,
-      name_en: r.variant.frequency.name_en,
+    statistic: {
+      shortname: statistic.shortname.name,
+      name: [...getLocalizedName(statistic.language, statistic.name), ...getLocalizedName(lang_en, statistic.name_en)],
     },
-  }))
+    period_from: dateToISOString(release.period_from),
+    period_to: dateToISOString(release.period_to),
+    release_date_precision: release.release_date_precision,
+    cancelled: release.cancelled,
+  }
 }

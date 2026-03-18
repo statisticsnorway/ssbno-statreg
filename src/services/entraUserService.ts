@@ -1,9 +1,9 @@
-import type { UserLookupItem } from '@/types/entra'
+import type { UserLookupItem, Users } from '@/types/entra'
 
 import * as entraClient from '@/../plugins/entraReaderClient'
 
-export async function fetchUsers(users: { username: string | null; email: string }[]) {
-  if (!users?.length) return null
+export async function fetchUsers(users: Users[]) {
+  if (!users?.length) return Promise.resolve([])
 
   const token = await entraClient.getAccessToken()
 
@@ -14,7 +14,7 @@ export async function fetchUsers(users: { username: string | null; email: string
 
   if (!token) {
     console.error(`Failed getting access token for entra reader getting user: ${userEmails.join(',')}`)
-    return null
+    return Promise.resolve(users)
   }
 
   const results = await Promise.all(

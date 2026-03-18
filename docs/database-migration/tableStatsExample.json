@@ -1,95 +1,98 @@
-[{
-  "old_table_name": "AUDIT_LOG",
-  "new_table_name": "AuditLogOld",
-  "num_rows":  73036,
-  "old_id_column_name": "id",
-  "id_low_value": 3664,
-  "id_high_value": 210490
-},
-{
-  "old_table_name": "FREKVENS",
-  "new_table_name": "Frequency",
-  "num_rows": 11,
-  "old_id_column_name": "id",
-  "id_low_value": 1,
-  "id_high_value": 8135
-},{
-  "old_table_name": "KALENDER_DATO",
-  "new_table_name": "Calender_date",
-  "num_rows": 20,
-  "old_id_column_name": "id",
-  "id_low_value": 196415,
-  "id_high_value": 207423
-},
-{
-  "old_table_name": "KONTAKT",
-  "new_table_name": "Contact_DoNotUse",
-  "num_rows": 801,
-  "old_id_column_name": "id",
-  "id_low_value": 6163,
-  "id_high_value": 210362
-},
-{
-  "old_table_name": "KORTNAVN",
-  "new_table_name": "Shortname",
-  "num_rows": 619,
-  "old_id_column_name": "id",
-  "id_low_value": 3662,
-  "id_high_value": 207923
-},
-{
-  "old_table_name": "PUBLISERING",
-  "new_table_name": "Release",
-  "num_rows": 22811,
-  "old_id_column_name": "id",
-  "id_low_value": 11159,
-  "id_high_value": 210444
-},
-{
-  "old_table_name": "REGIONALT_NIVA",
-  "new_table_name": "Region_level",
-  "num_rows": 5,
-  "old_id_column_name": "id",
-  "id_low_value": 7,
-  "id_high_value": 11
-},
-{
-  "old_table_name": "SEKSJON",
-  "new_table_name": "Division_DoNotUse",
-  "num_rows": 43,
-  "old_id_column_name": "id",
-  "id_low_value": 3661,
-  "id_high_value": 120222
-},
-{
-  "old_table_name": "STATISTIKK",
-  "new_table_name": "Statistic",
-  "num_rows": 619,
-  "old_id_column_name": "id",
-  "id_low_value": 3663,
-  "id_high_value": 207924
-},
-{
-  "old_table_name": "STATISTIKK_KONTAKTER",
-  "new_table_name": "Statistic_contacts",
-  "num_rows": 957,
-  "old_id_column_name": "statistikk_id",
-  "id_low_value": 3663,
-  "id_high_value": 207924
-},
-{
-  "old_table_name": "STATISTIKK_REGIONALE_NIVAER",
-  "new_table_name": "Statistic_region_level",
-  "num_rows": 1090,
-  "old_id_column_name": "regionalt_niva_id",
-  "id_low_value": 7,
-  "id_high_value": 11
-},
-{
-  "old_table_name": "VARIANT",
-  "new_table_name": "Variant",
-  "num_rows": 722,
-  "old_id_column_name": "id",
-  "id_low_value": 7783,
-  "id_high_value": 210487
-}]
+[
+  {
+    "old_table_name": "AUDIT_LOG",
+    "new_table_name": "AuditLog",
+    "num_rows": 73036,
+    "old_id_column_name": "id",
+    "id_low_value": 3664,
+    "id_high_value": 210490
+  },
+  {
+    "old_table_name": "FREKVENS",
+    "new_table_name": "Frequency",
+    "num_rows": 11,
+    "old_id_column_name": "id",
+    "id_low_value": 1,
+    "id_high_value": 8135
+  },
+  {
+    "old_table_name": "KALENDER_DATO",
+    "new_table_name": "Calender_date",
+    "num_rows": 20,
+    "old_id_column_name": "id",
+    "id_low_value": 196415,
+    "id_high_value": 207423
+  },
+  {
+    "old_table_name": "KONTAKT",
+    "new_table_name": "Contact_DoNotUse",
+    "num_rows": 801,
+    "old_id_column_name": "id",
+    "id_low_value": 6163,
+    "id_high_value": 210362
+  },
+  {
+    "old_table_name": "KORTNAVN",
+    "new_table_name": "Shortname",
+    "num_rows": 619,
+    "old_id_column_name": "id",
+    "id_low_value": 3662,
+    "id_high_value": 207923
+  },
+  {
+    "old_table_name": "PUBLISERING",
+    "new_table_name": "Release",
+    "num_rows": 22811,
+    "old_id_column_name": "id",
+    "id_low_value": 11159,
+    "id_high_value": 210444
+  },
+  {
+    "old_table_name": "REGIONALT_NIVA",
+    "new_table_name": "Region_level",
+    "num_rows": 5,
+    "old_id_column_name": "id",
+    "id_low_value": 7,
+    "id_high_value": 11
+  },
+  {
+    "old_table_name": "SEKSJON",
+    "new_table_name": "Division_DoNotUse",
+    "num_rows": 43,
+    "old_id_column_name": "id",
+    "id_low_value": 3661,
+    "id_high_value": 120222
+  },
+  {
+    "old_table_name": "STATISTIKK",
+    "new_table_name": "Statistic",
+    "num_rows": 619,
+    "old_id_column_name": "id",
+    "id_low_value": 3663,
+    "id_high_value": 207924
+  },
+  {
+    "old_table_name": "STATISTIKK_KONTAKTER",
+    "new_table_name": "Statistic_contacts",
+    "num_rows": 957,
+    "old_id_column_name": "statistikk_id",
+    "id_low_value": 3663,
+    "id_high_value": 207924
+  },
+  {
+    "old_table_name": "STATISTIKK_REGIONALE_NIVAER",
+    "new_table_name": "Statistic_region_level",
+    "num_rows": 1090,
+    "old_id_column_name": "regionalt_niva_id",
+    "id_low_value": 7,
+    "id_high_value": 11
+  },
+  {
+    "old_table_name": "VARIANT",
+    "new_table_name": "Variant",
+    "num_rows": 722,
+    "old_id_column_name": "id",
+    "id_low_value": 7783,
+    "id_high_value": 210487
+  }
+]

@@ -12,13 +12,19 @@ export type GraphUserResponse = {
 }
 
 export type EntraUser = {
+  username?: string | null
   displayName: string
   email: string | null
   businessPhone: string | null
 }
 
 export type UserLookupItem = {
-  lookupEmail: string,
+  lookupEmail: string
   user: EntraUser | null
   error?: string | null
+}
+
+export type Users = { 
+  username: string | null
+  email: string 
 }

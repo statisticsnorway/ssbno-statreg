@@ -211,6 +211,46 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/statistics/{shortname}/variants/{id}/releases': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Create a new release */
+    post: {
+      parameters: {
+        query?: never
+        header?: never
+        path?: never
+        cookie?: never
+      }
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['Release_create']
+        }
+      }
+      responses: {
+        /** @description Release details */
+        201: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            'application/json': components['schemas']['Release_details']
+          }
+        }
+      }
+    }
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/statistics/{shortname}/versions': {
     parameters: {
       query?: never
@@ -276,31 +316,7 @@ export interface paths {
       }
     }
     put?: never
-    /** Create a new release */
-    post: {
-      parameters: {
-        query?: never
-        header?: never
-        path?: never
-        cookie?: never
-      }
-      requestBody: {
-        content: {
-          'application/json': components['schemas']['Release_details']
-        }
-      }
-      responses: {
-        /** @description Release details */
-        201: {
-          headers: {
-            [name: string]: unknown
-          }
-          content: {
-            'application/json': components['schemas']['Release_details']
-          }
-        }
-      }
-    }
+    post?: never
     delete?: never
     options?: never
     head?: never
@@ -349,7 +365,7 @@ export interface paths {
       }
       requestBody: {
         content: {
-          'application/json': components['schemas']['Release_details']
+          'application/json': components['schemas']['Release_update']
         }
       }
       responses: {
@@ -655,16 +671,31 @@ export interface components {
       name?: components['schemas']['Translations']
       code?: string
     }
-    Release_details: {
+    Release: {
       readonly id?: number
       /** Format: date-time */
       publish_time?: string
-      has_versions?: boolean
+      /** Format: date-time */
+      period_to?: string
+      /** Format: date-time */
+      period_from?: string
+    }
+    Release_create: components['schemas']['Release'] & {
+      release_date_precision?: string
+    }
+    Release_update: components['schemas']['Release'] & {
+      comment?: string
+      release_date_precision?: string
+    }
+    Release_get: components['schemas']['Release'] & {
       approval_status?: string | null
       statistic?: {
         readonly shortname?: string
         readonly name?: components['schemas']['Translations']
       }
+    }
+    Release_details: components['schemas']['Release_get'] & {
+      has_versions?: boolean
       variant?: {
         readonly id?: number
         frequency?: {
@@ -674,26 +705,10 @@ export interface components {
           readonly name?: components['schemas']['Translations']
         }
       }
-      /** Format: date-time */
-      period_to?: string
-      /** Format: date-time */
-      period_from?: string
       cancelled?: boolean
       release_date_precision?: string
     }
-    Release_listing: {
-      readonly id?: number
-      /** Format: date-time */
-      publish_time?: string
-      approval_status?: string | null
-      /** Format: date-time */
-      period_to?: string
-      /** Format: date-time */
-      period_from?: string
-      statistic?: {
-        readonly shortname?: string
-        readonly name?: components['schemas']['Translations']
-      }
+    Release_listing: components['schemas']['Release_get'] & {
       frequency?: {
         readonly name?: components['schemas']['Translations']
       }
@@ -704,7 +719,7 @@ export interface components {
       approval_status?: string | null
       main_language?: string
       division?: {
-        code?: string
+        code?: string | null
         readonly name?: components['schemas']['Translations']
       }
       /** Format: date */
@@ -725,7 +740,11 @@ export interface components {
       /** Format: date-time */
       readonly created_at?: string
       variants?: components['schemas']['Variant'][]
-      contacts?: components['schemas']['Contact'][]
+      contacts?: {
+        username?: string | null
+        email?: string
+        name?: string
+      }[]
       statistic_region_levels?: components['schemas']['Translations'][]
     }
     Statistic_listing: {
@@ -749,12 +768,13 @@ export interface components {
       version?: number
       /** Format: date-time */
       readonly updated_at?: string
-      level_of_detail?: components['schemas']['Translations']
+      level_of_detail?: {
+        name?: components['schemas']['Translations']
+      }
       /** Format: date-time */
       readonly created_at?: string
       cancelled?: boolean
       freqency?: {
-        id?: string
         readonly name?: components['schemas']['Translations']
       }
       revision?: string

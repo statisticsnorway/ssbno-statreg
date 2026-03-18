@@ -4,7 +4,7 @@ CREATE SCHEMA IF NOT EXISTS "statreg";
 -- CreateTable
 CREATE TABLE "statreg"."Frequency" (
     "id" SERIAL NOT NULL,
-    "version" INTEGER NOT NULL,
+    "version" INTEGER NOT NULL DEFAULT 1,
     "name" TEXT NOT NULL,
     "name_en" TEXT NOT NULL,
     "code" TEXT NOT NULL,
@@ -15,7 +15,7 @@ CREATE TABLE "statreg"."Frequency" (
 -- CreateTable
 CREATE TABLE "statreg"."Calender_date" (
     "id" SERIAL NOT NULL,
-    "version" INTEGER NOT NULL,
+    "version" INTEGER NOT NULL DEFAULT 1,
     "comment" TEXT NOT NULL,
     "day" TIMESTAMP(6) NOT NULL,
 
@@ -25,7 +25,7 @@ CREATE TABLE "statreg"."Calender_date" (
 -- CreateTable
 CREATE TABLE "statreg"."Contact_DoNotUse" (
     "id" SERIAL NOT NULL,
-    "version" INTEGER NOT NULL,
+    "version" INTEGER NOT NULL DEFAULT 1,
     "initials" TEXT,
     "mobile" TEXT,
     "name" TEXT NOT NULL,
@@ -51,7 +51,7 @@ CREATE TABLE "statreg"."ResponsiblePerson" (
 -- CreateTable
 CREATE TABLE "statreg"."Shortname" (
     "id" SERIAL NOT NULL,
-    "version" INTEGER NOT NULL,
+    "version" INTEGER NOT NULL DEFAULT 1,
     "name" TEXT NOT NULL,
     "last_updated" TIMESTAMP(6) NOT NULL,
     "date_created" TIMESTAMP(6) NOT NULL,
@@ -62,7 +62,7 @@ CREATE TABLE "statreg"."Shortname" (
 -- CreateTable
 CREATE TABLE "statreg"."Release" (
     "id" SERIAL NOT NULL,
-    "version" INTEGER NOT NULL,
+    "version" INTEGER NOT NULL DEFAULT 1,
     "publish_time" TIMESTAMP(6) NOT NULL,
     "has_versions" BOOLEAN NOT NULL,
     "last_updated" TIMESTAMP(6) NOT NULL,
@@ -82,7 +82,7 @@ CREATE TABLE "statreg"."Release" (
 -- CreateTable
 CREATE TABLE "statreg"."Region_level" (
     "id" SERIAL NOT NULL,
-    "version" INTEGER NOT NULL,
+    "version" INTEGER NOT NULL DEFAULT 1,
     "name" TEXT NOT NULL,
     "code" TEXT,
 
@@ -92,7 +92,7 @@ CREATE TABLE "statreg"."Region_level" (
 -- CreateTable
 CREATE TABLE "statreg"."Division_DoNotUse" (
     "id" SERIAL NOT NULL,
-    "version" INTEGER NOT NULL,
+    "version" INTEGER NOT NULL DEFAULT 1,
     "code" TEXT NOT NULL,
     "name_en" TEXT NOT NULL,
     "name" TEXT NOT NULL,
@@ -103,7 +103,7 @@ CREATE TABLE "statreg"."Division_DoNotUse" (
 -- CreateTable
 CREATE TABLE "statreg"."Statistic" (
     "id" SERIAL NOT NULL,
-    "version" INTEGER NOT NULL,
+    "version" INTEGER NOT NULL DEFAULT 1,
     "shortname_id" INTEGER NOT NULL,
     "dir_appoval_status" TEXT,
     "search_phrases" TEXT,
@@ -147,7 +147,7 @@ CREATE TABLE "statreg"."Statistic_region_level" (
 -- CreateTable
 CREATE TABLE "statreg"."Variant" (
     "id" SERIAL NOT NULL,
-    "version" INTEGER NOT NULL,
+    "version" INTEGER NOT NULL DEFAULT 1,
     "last_updated" TIMESTAMP(6) NOT NULL,
     "date_created" TIMESTAMP(6) NOT NULL,
     "cancelled" BOOLEAN NOT NULL,
@@ -161,21 +161,21 @@ CREATE TABLE "statreg"."Variant" (
 );
 
 -- CreateTable
-CREATE TABLE "statreg"."AuditLogOld" (
-    "id" INTEGER NOT NULL,
-    "property_name" TEXT,
+CREATE TABLE "statreg"."AuditLog" (
+    "id" SERIAL NOT NULL,
     "last_updated" TIMESTAMP(3) NOT NULL,
+    "property_name" TEXT,
     "old_value" TEXT,
+    "new_value" TEXT,
     "actor" TEXT NOT NULL,
     "uri" TEXT,
-    "new_value" TEXT,
     "persisted_object_version" INTEGER,
     "date_created" TIMESTAMP(3) NOT NULL,
     "class_name" TEXT NOT NULL,
     "event_name" TEXT NOT NULL,
     "persisted_object_id" INTEGER NOT NULL,
 
-    CONSTRAINT "AuditLogOld_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "AuditLog_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -248,3 +248,4 @@ ALTER TABLE "statreg"."_ResponsiblePersonToStatistic" ADD CONSTRAINT "_Responsib
 
 -- AddForeignKey
 ALTER TABLE "statreg"."_ResponsiblePersonToStatistic" ADD CONSTRAINT "_ResponsiblePersonToStatistic_B_fkey" FOREIGN KEY ("B") REFERENCES "statreg"."Statistic"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
