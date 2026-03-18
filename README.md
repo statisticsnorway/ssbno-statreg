@@ -21,7 +21,8 @@ As to where to find the secrets see docs for [Authentication and Authorization](
 
 ```
 npm install
-npm db:deploy
+npm run generate
+npm run db:deploy
 npm run seed
 npm run dev
 ```
@@ -34,7 +35,7 @@ If new migrations: `npm db:deploy`
 ```
 npm run generate
 npx prisma migrate reset
-npx prisma dp push
+npx prisma db push
 npm run seed
 ```
 

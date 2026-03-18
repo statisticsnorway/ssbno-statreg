@@ -33,17 +33,17 @@ console.log('=== VALIDATION (DB) STARTED ===')
 let failures = 0
 
 // ---------------------------
-// AUDITLOG (AuditLogOld)
+// AUDITLOG (AuditLog)
 // ---------------------------
-console.log(`\nValidating: AuditLogOld`)
-const auditlogMeta = meta.find((o) => o.new_table_name === 'AuditLogOld')
+console.log(`\nValidating: AuditLog`)
+const auditlogMeta = meta.find((o) => o.new_table_name === 'AuditLog')
 
 {
-  const rows = await prisma.auditLogOld.count()
+  const rows = await prisma.auditLog.count()
   const rowOk = rows === auditlogMeta!.num_rows
 
-  const minRec = await prisma.auditLogOld.findMany({ take: 1, orderBy: { id: 'asc' } })
-  const maxRec = await prisma.auditLogOld.findMany({ take: 1, orderBy: { id: 'desc' } })
+  const minRec = await prisma.auditLog.findMany({ take: 1, orderBy: { id: 'asc' } })
+  const maxRec = await prisma.auditLog.findMany({ take: 1, orderBy: { id: 'desc' } })
 
   const min_id = minRec?.length && minRec[0] ? minRec[0].id : null
   const max_id = maxRec?.length && maxRec[0] ? maxRec[0].id : null
@@ -61,7 +61,7 @@ const auditlogMeta = meta.find((o) => o.new_table_name === 'AuditLogOld')
   }
 
   if (rowOk && idOk) {
-    console.log(` ✔ AuditLogOld OK`)
+    console.log(` ✔ AuditLog OK`)
   } else {
     console.error(` ❌ FAIL`)
     failures++

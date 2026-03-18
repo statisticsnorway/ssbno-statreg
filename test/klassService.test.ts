@@ -20,7 +20,7 @@ describe('klassService ', async () => {
   beforeEach(() => {
     delete process.env.KLASS_BASE_URL
 
-    fetchMock = mock.method(globalThis as unknown as { fetch: typeof fetch }, 'fetch', async () => {
+    fetchMock = mock.method(globalThis, 'fetch', async () => {
       return {
         json: async () => classificationItems,
       }
