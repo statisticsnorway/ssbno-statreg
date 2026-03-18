@@ -111,7 +111,7 @@ components:
         division:
           type: object
           properties:
-            code: { type: string }
+            code: { type: string, nullable: true }
             name: { $ref: '#/components/schemas/Translations', readOnly: true }
         first_released_at: { type: string, format: date, nullable: true }
         yearly_reporting: { type: boolean }
@@ -134,7 +134,12 @@ components:
           items: { $ref: '#/components/schemas/Variant' }
         contacts:
           type: array
-          items: { $ref: '#/components/schemas/Contact' }
+          items: 
+            type: object
+            properties:
+              username: { type: string, nullable: true }
+              email: { type: string }
+              name: { type: string }
         statistic_region_levels:
           type: array
           items: { $ref: '#/components/schemas/Translations' }
@@ -171,13 +176,15 @@ components:
         id: { type: integer, readOnly: true }
         version: { type: integer }
         updated_at: { type: string, format: date-time, readOnly: true }
-        level_of_detail: { $ref: '#/components/schemas/Translations', nullable: true }
+        level_of_detail:
+          type: object 
+          properties:
+            name: { $ref: '#/components/schemas/Translations', nullable: true }
         created_at: { type: string, format: date-time, readOnly: true }
         cancelled: { type: boolean }
         freqency:
           type: object
           properties:
-            id: { type: string }
             name: { $ref: '#/components/schemas/Translations', readOnly: true }
         revision: { type: string }
 
