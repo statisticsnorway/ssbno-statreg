@@ -6,7 +6,6 @@ addAssignees: true
 
 # A list of assignees, overrides reviewers if set
 assignees:
-  - ssb-cgn
   - Glenruben
   - johnnadeluy
   - annesiri
