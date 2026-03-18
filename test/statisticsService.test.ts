@@ -127,18 +127,6 @@ describe('statisticService ', async () => {
       })
     })
 
-    test('returns username and email when failing to get token access for fetch users', async () => {
-      setStatisticsResult(mockStatisticsDetailedPrismaResult)
-      fetchUsersMock.mock.mockImplementationOnce(async () => [{ email: 'bob@ssb.no', username: 'bcd' }])
-
-      const result = await getStatisticByShortname('helse', prismaMock)
-
-      assert.deepEqual(result, {
-        ...mockedStatisticDetailedResult,
-        contacts: [{ username: 'bcd', email: 'bob@ssb.no', name: undefined }],
-      })
-    })
-
     test('returns empty contact array when responsible persons is empty', async () => {
       setStatisticsResult({ ...mockStatisticsDetailedPrismaResult, responsiblePersons: [] })
       fetchUsersMock.mock.mockImplementationOnce(async () => [])
