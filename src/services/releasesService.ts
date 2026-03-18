@@ -5,10 +5,42 @@ import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
 type ReleasePrisma = Pick<PrismaClient, 'release'>
 const lang_en = 'en'
 
-export async function getAllReleases({ start = 0, count = 10 }, prisma: ReleasePrisma): Promise<ReleaseListing[]> {
+export async function getAllReleases(
+  {
+    start = 0,
+    count = 10,
+    shortname,
+    variantId,
+  }: {
+    start?: number
+    count?: number
+    shortname?: string
+    variantId?: number
+  },
+  prisma: ReleasePrisma
+): Promise<ReleaseListing[]> {
+  const where =
+    shortname || variantId !== undefined
+      ? {
+          variant: {
+            ...(variantId !== undefined ? { id: variantId } : {}),
+            ...(shortname
+              ? {
+                  statistic: {
+                    shortname: {
+                      name: sanitize(shortname),
+                    },
+                  },
+                }
+              : {}),
+          },
+        }
+      : undefined
+
   const releases = await prisma.release.findMany({
     skip: start,
     take: count,
+    where,
     select: {
       id: true,
       version: true,
@@ -50,15 +82,15 @@ export async function getAllReleases({ start = 0, count = 10 }, prisma: ReleaseP
       approval_status: release.desk_appoval_status,
       period_to: dateToISOString(release.period_to),
       period_from: dateToISOString(release.period_from),
-      frequency: {
-        name: [...getLocalizedName('nb', frequency.name), ...getLocalizedName(lang_en, frequency.name_en)],
-      },
       statistic: {
         shortname: statistic.shortname.name,
         name: [
           ...getLocalizedName(statistic.language, statistic.name),
           ...getLocalizedName(lang_en, statistic.name_en),
         ],
+      },
+      frequency: {
+        name: [...getLocalizedName('nb', frequency.name), ...getLocalizedName(lang_en, frequency.name_en)],
       },
     }
   })
