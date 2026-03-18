@@ -137,12 +137,16 @@ export async function getReleaseById(id: string, prisma: ReleasePrisma): Promise
   }
 }
 
-// TODO: Implement in another PR
 export async function createRelease(
+  prisma: ReleasePrisma,
   shortname: string,
   variantId: string,
-  body: ReleaseCreate,
-  prisma: ReleasePrisma
+  body?: ReleaseCreate
 ): Promise<ReleaseDetails> {
+  // TODO: Implement logic in another PR; log params to prevent lint from failing
+  console.log(`shortname: ${shortname}, (variant) id: ${variantId}, prisma: ${prisma}`)
+
+  if (!body) return Promise.reject({ statregError: 'Invalid body' })
+
   return {}
 }

@@ -34,10 +34,10 @@ export default function releasesController(router: Router) {
       try {
         const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id
         const result = await createRelease(
+          prisma,
           Array.isArray(req.params.shortname) ? (req.params.shortname[0] as string) : (req.params.shortname as string),
           id!,
-          req.body,
-          prisma
+          req.body
         )
         res.json(result)
       } catch (error) {
