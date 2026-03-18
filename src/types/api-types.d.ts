@@ -211,6 +211,46 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/statistics/{shortname}/variants/{id}/releases': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Create a new release */
+    post: {
+      parameters: {
+        query?: never
+        header?: never
+        path?: never
+        cookie?: never
+      }
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['Release_create']
+        }
+      }
+      responses: {
+        /** @description Release details */
+        201: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            'application/json': components['schemas']['Release_details']
+          }
+        }
+      }
+    }
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/statistics/{shortname}/versions': {
     parameters: {
       query?: never
@@ -276,31 +316,7 @@ export interface paths {
       }
     }
     put?: never
-    /** Create a new release */
-    post: {
-      parameters: {
-        query?: never
-        header?: never
-        path?: never
-        cookie?: never
-      }
-      requestBody: {
-        content: {
-          'application/json': components['schemas']['Release_details']
-        }
-      }
-      responses: {
-        /** @description Release details */
-        201: {
-          headers: {
-            [name: string]: unknown
-          }
-          content: {
-            'application/json': components['schemas']['Release_details']
-          }
-        }
-      }
-    }
+    post?: never
     delete?: never
     options?: never
     head?: never

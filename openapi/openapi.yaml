@@ -1,4 +1,6 @@
 openapi: 3.1.0
+# Set required på obligatoriske felter
+# Se om vi kan få spekken opp til 3.1.0 versjon
 info:
   title: Statreg API
   version: 1.1.0
@@ -311,6 +313,21 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Variant' }
+  /statistics/{shortname}/variants/{id}/releases:
+    post:
+      summary: Create a new release
+      tags: [statistics]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Release_create' }
+      responses:
+        '201':
+          description: Release details
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Release_details' }
   /statistics/{shortname}/versions:
     get:
       summary: List all versions with changes and comment. Response object TBD
@@ -334,20 +351,6 @@ paths:
               schema:
                 type: array
                 items: { $ref: '#/components/schemas/Release_listing' }
-    post:
-      summary: Create a new release
-      tags: [releases]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: '#/components/schemas/Release_details' }
-      responses:
-        '201':
-          description: Release details
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/Release_details' }
   /releases/{id}:
     get:
       summary: Get release by id
