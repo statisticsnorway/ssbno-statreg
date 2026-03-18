@@ -44,14 +44,22 @@ export default function statisticsController(router: Router) {
 
   router.get('/statistics/:shortname/variants/:id/releases', skipAuth, async (req, res) => {
     try {
-      const shortname = Array.isArray(req.params.shortname) ? req.params.shortname[0] : req.params.shortname
-      const variantId = Number(req.params.id)
-      if (!shortname || Number.isNaN(variantId)) {
-        return res.status(400).json({ error: 'Invalid parameters' })
+      const shortnameParam = Array.isArray(req.params.shortname) ? req.params.shortname[0] : req.params.shortname
+      const idParam = req.params.id
+
+      if (typeof shortnameParam !== 'string' || shortnameParam.trim() === '') {
+        return res.status(400).json({ error: 'Invalid or missing shortname' })
       }
+
+      const variantId = Number(idParam)
+      if (!idParam || Number.isNaN(variantId)) {
+        return res.status(400).json({ error: 'Invalid variant id' })
+      }
+
       const start = req.query?.start ? Number(req.query.start) : undefined
       const count = req.query?.count ? Number(req.query.count) : undefined
-      const data = await getAllReleases({ start, count, shortname, variantId }, prisma)
+      const data = await getAllReleases({ start, count, shortname: shortnameParam, variantId }, prisma)
+
       res.json(data)
     } catch (error) {
       return handleErrors(error, res)

@@ -2,7 +2,7 @@ import type { ReleaseDetails, ReleaseListing } from '@/types/index'
 import { getLocalizedName, dateToISOString, sanitize } from '@/lib/utils'
 import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
 
-type ReleasePrisma = Pick<PrismaClient, 'release'>
+type ReleasePrisma = Pick<PrismaClient, 'release' | 'statistic' | 'variant'>
 const lang_en = 'en'
 
 export async function getAllReleases(
@@ -19,6 +19,18 @@ export async function getAllReleases(
   },
   prisma: ReleasePrisma
 ): Promise<ReleaseListing[]> {
+  if (shortname) {
+    await assertStatisticExists(shortname, prisma)
+  }
+
+  if (variantId !== undefined) {
+    const variant = await assertVariantExists(variantId, prisma)
+
+    if (shortname) {
+      assertVariantBelongsToStatistic(variant.statistic.shortname.name, shortname)
+    }
+  }
+
   const where =
     shortname || variantId !== undefined
       ? {
@@ -166,5 +178,54 @@ export async function getReleaseById(id: string, prisma: ReleasePrisma): Promise
     period_to: dateToISOString(release.period_to),
     release_date_precision: release.release_date_precision,
     cancelled: release.cancelled,
+  }
+}
+
+// VALIDATION HELPERS
+async function assertStatisticExists(shortname: string, prisma: ReleasePrisma) {
+  const statistic = await prisma.statistic.findFirst({
+    where: {
+      shortname: {
+        name: sanitize(shortname),
+      },
+    },
+    select: { id: true },
+  })
+
+  if (!statistic) {
+    throw { status: 404, statregError: `Statistic '${shortname}' not found` }
+  }
+
+  return statistic
+}
+
+async function assertVariantExists(variantId: number, prisma: ReleasePrisma) {
+  const variant = await prisma.variant.findUnique({
+    where: { id: variantId },
+    select: {
+      id: true,
+      statistic: {
+        select: {
+          shortname: {
+            select: { name: true },
+          },
+        },
+      },
+    },
+  })
+
+  if (!variant) {
+    throw { status: 404, statregError: `Variant '${variantId}' not found` }
+  }
+
+  return variant
+}
+
+function assertVariantBelongsToStatistic(variantShortname: string, requestedShortname: string) {
+  if (variantShortname !== sanitize(requestedShortname)) {
+    throw {
+      status: 404,
+      statregError: `Variant does not belong to statistic '${requestedShortname}'`,
+    }
   }
 }
