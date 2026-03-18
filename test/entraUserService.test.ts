@@ -27,19 +27,19 @@ describe('entraUserService ', () => {
       ;({ fetchUsers } = await import('@/services/entraUserService'))
     })
 
-    test('returns null when users array is empty', async () => {
+    test('returns empty array when users array is empty', async () => {
       const result = await fetchUsers([])
 
-      assert.equal(result, null)
+      assert.deepEqual(result, [])
       assert.equal(getAccessTokenMock.mock.callCount(), 0)
     })
 
-    test('returns null when token retrieval fails', async () => {
+    test('returns original users when token retrieval fails', async () => {
       getAccessTokenMock.mock.mockImplementationOnce(() => null)
 
       const result = await fetchUsers([{ username: 'ola', email: 'ignored@test.com' }])
 
-      assert.equal(result, null)
+      assert.deepEqual(result, [{ username: 'ola', email: 'ignored@test.com' }])
       assert.equal(getAccessTokenMock.mock.callCount(), 1)
       assert.equal(fetchUserByEmailMock.mock.callCount(), 0)
     })

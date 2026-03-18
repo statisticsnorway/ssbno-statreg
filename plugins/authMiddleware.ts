@@ -1,5 +1,6 @@
 import type { Request, Response, NextFunction, RequestHandler } from 'express'
 import { createRemoteJWKSet, jwtVerify, type JWTPayload } from 'jose'
+import { asyncLocalStorage } from '../src/lib/context'
 
 export function unauthorized(res: Response, message: string) {
   return res.status(401).json({ error: message })
@@ -23,7 +24,7 @@ export function getBearerToken(req: Request): string | null {
   return token
 }
 
-export const skipAuth: RequestHandler = (_req, _res, next) => next()
+export const skipAuth: RequestHandler = (_req, _res, next) => asyncLocalStorage.run({}, next)
 ;(skipAuth as any).__skipAuth = true
 
 export function createKeycloakAuthMiddleware(issuer: string, jwksUri: string, audience: string): RequestHandler {
@@ -46,7 +47,8 @@ export function createKeycloakAuthMiddleware(issuer: string, jwksUri: string, au
         email: typeof payload.email === 'string' ? payload.email : undefined,
       }
 
-      return next()
+      // Adding the auth to application context, this is isolated per request and thread so we can read the context in other parts of the application without passing props.
+      asyncLocalStorage.run({ auth: req.auth }, next)
     } catch {
       return unauthorized(res, 'Invalid or expired token')
     }

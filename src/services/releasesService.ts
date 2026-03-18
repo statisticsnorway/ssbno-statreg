@@ -1,6 +1,6 @@
 import type { ReleaseDetails, ReleaseListing } from '@/types/index'
 import { getLocalizedName, dateToISOString, sanitize } from '@/lib/utils'
-import { type PrismaClient } from '@/generated/prisma/client'
+import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
 
 type ReleasePrisma = Pick<PrismaClient, 'release'>
 const lang_en = 'en'
