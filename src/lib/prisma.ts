@@ -68,6 +68,9 @@ const extendedPrisma = prisma.$extends({
       async createMany() {
         throw new Error('CreateMany is not supported by auditLog middleware!')
       },
+      async createManyAndReturn() {
+        throw new Error('CreateManyAndReturn is not supported by auditLog middleware!')
+      },
       async update({ model, args, query }) {
         if (['Variant', 'Statistic', 'Release', 'Frequency', 'Calender_date'].includes(model)) {
           const start = new Date()
@@ -95,6 +98,9 @@ const extendedPrisma = prisma.$extends({
       },
       async updateMany() {
         throw new Error('UpdateMany is not supported by auditLog middleware!')
+      },
+      async updateManyAndReturn() {
+        throw new Error('UpdateManyAndReturn is not supported by auditLog middleware!')
       },
       async delete({ model, args, query }) {
         if (['Variant', 'Statistic', 'Release', 'Frequency', 'Calender_date'].includes(model)) {
