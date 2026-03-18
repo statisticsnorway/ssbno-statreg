@@ -145,7 +145,7 @@ describe('statisticService ', async () => {
       const result = parseStatisticVariants(
         [
           {
-            version: 1,
+            id: 1,
             last_updated: new Date('2025-06-20T10:39:51.621Z'),
             date_created: new Date('2025-06-20T10:39:51.621Z'),
             cancelled: false,
@@ -164,7 +164,7 @@ describe('statisticService ', async () => {
 
       assert.deepEqual(result, [
         {
-          version: 1,
+          id: 1,
           updated_at: '2025-06-20T10:39:51.621Z',
           level_of_detail: { name: [{ language_code: 'nb', text: 'Kommentar' }] },
           created_at: '2025-06-20T10:39:51.621Z',
@@ -270,7 +270,7 @@ const mockStatisticsDetailedPrismaResult = {
   ],
   variants: [
     {
-      version: 1,
+      id: 1,
       last_updated: new Date('2025-06-20T10:39:51.621Z'),
       date_created: new Date('2025-06-20T10:39:51.621Z'),
       cancelled: false,
@@ -283,7 +283,7 @@ const mockStatisticsDetailedPrismaResult = {
       },
     },
     {
-      version: 1,
+      id: 2,
       last_updated: new Date('2025-06-20T10:39:51.621Z'),
       date_created: new Date('2025-06-20T10:39:51.621Z'),
       cancelled: false,
@@ -353,7 +353,7 @@ const mockedStatisticDetailedResult = {
   created_at: '2019-07-01T00:00:00.000Z',
   variants: [
     {
-      version: 1,
+      id: 1,
       updated_at: '2025-06-20T10:39:51.621Z',
       level_of_detail: { name: [] },
       created_at: '2025-06-20T10:39:51.621Z',
@@ -367,7 +367,7 @@ const mockedStatisticDetailedResult = {
       revision: 'I',
     },
     {
-      version: 1,
+      id: 2,
       updated_at: '2025-06-20T10:39:51.621Z',
       level_of_detail: { name: [] },
       created_at: '2025-06-20T10:39:51.621Z',

@@ -44,7 +44,7 @@ export async function getAllStatistics(
 // Statistic details
 
 const VariantSelect = {
-  omit: { id: true, statistic_id: true, freq_id: true },
+  omit: { version: true, statistic_id: true, freq_id: true },
   include: {
     frequency: { select: { name: true, name_en: true } },
   },
@@ -58,7 +58,7 @@ export function parseStatisticVariants(
   if (!variants?.length) return []
 
   return variants.map((variant) => ({
-    version: variant.version,
+    id: variant.id,
     updated_at: dateToISOString(variant.last_updated),
     level_of_detail: {
       name: [
