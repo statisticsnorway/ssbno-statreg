@@ -663,19 +663,23 @@ export interface components {
       period_to?: string
       /** Format: date-time */
       period_from?: string
+    }
+    Release_create: components['schemas']['Release'] & {
       release_date_precision?: string
     }
-    Release_create: components['schemas']['Release']
     Release_update: components['schemas']['Release'] & {
       comment?: string
+      release_date_precision?: string
     }
-    Release_details: components['schemas']['Release'] & {
-      has_versions?: boolean
+    Release_get: components['schemas']['Release'] & {
       approval_status?: string | null
       statistic?: {
         readonly shortname?: string
         readonly name?: components['schemas']['Translations']
       }
+    }
+    Release_details: components['schemas']['Release_get'] & {
+      has_versions?: boolean
       variant?: {
         readonly id?: number
         frequency?: {
@@ -686,20 +690,9 @@ export interface components {
         }
       }
       cancelled?: boolean
+      release_date_precision?: string
     }
-    Release_listing: {
-      readonly id?: number
-      /** Format: date-time */
-      publish_time?: string
-      approval_status?: string | null
-      /** Format: date-time */
-      period_to?: string
-      /** Format: date-time */
-      period_from?: string
-      statistic?: {
-        readonly shortname?: string
-        readonly name?: components['schemas']['Translations']
-      }
+    Release_listing: components['schemas']['Release_get'] & {
       frequency?: {
         readonly name?: components['schemas']['Translations']
       }

@@ -61,11 +61,13 @@ components:
         publish_time: { type: string, format: date-time }
         period_to: { type: string, format: date-time }
         period_from: { type: string, format: date-time }
-        release_date_precision: { type: string }
 
     Release_create:
       allOf:
         - $ref: '#/components/schemas/Release'
+        - type: object
+          properties:
+            release_date_precision: { type: string }
 
     Release_update:
       allOf:
@@ -73,19 +75,26 @@ components:
         - type: object
           properties:
             comment: { type: string }
+            release_date_precision: { type: string }
 
-    Release_details:
+    Release_get:
       allOf:
         - $ref: '#/components/schemas/Release'
         - type: object
           properties:
-            has_versions: { type: boolean }
-            approval_status: { type: string, nullable: true }
+            approval_status: { type: [string, 'null'] }
             statistic:
               type: object
               properties:
                 shortname: { type: string, readOnly: true }
                 name: { $ref: '#/components/schemas/Translations', readOnly: true }
+
+    Release_details:
+      allOf:
+        - $ref: '#/components/schemas/Release_get'
+        - type: object
+          properties:
+            has_versions: { type: boolean }
             variant:
               type: object
               properties:
@@ -99,24 +108,17 @@ components:
                   properties:
                     name: { $ref: '#/components/schemas/Translations', readOnly: true }
             cancelled: { type: boolean }
+            release_date_precision: { type: string }
 
     Release_listing:
-      type: object
-      properties:
-        id: { type: integer, readOnly: true }
-        publish_time: { type: string, format: date-time }
-        approval_status: { type: string, nullable: true }
-        period_to: { type: string, format: date-time }
-        period_from: { type: string, format: date-time }
-        statistic:
-          type: object
+      allOf:
+        - $ref: '#/components/schemas/Release_get'
+        - type: object
           properties:
-            shortname: { type: string, readOnly: true }
-            name: { $ref: '#/components/schemas/Translations', readOnly: true }
-        frequency:
-          type: object
-          properties:
-            name: { $ref: '#/components/schemas/Translations', readOnly: true }
+            frequency:
+              type: object
+              properties:
+                name: { $ref: '#/components/schemas/Translations', readOnly: true }
 
     Statistic_details:
       type: object
