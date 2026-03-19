@@ -1,8 +1,9 @@
 import type { ReleaseDetails, ReleaseListing, ReleaseCreate } from '@/types/index'
 import { getLocalizedName, dateToISOString, sanitize } from '@/lib/utils'
 import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
+import { assertStatisticExists, assertVariantExists, assertVariantMatchesShortname } from '@/lib/asserts'
 
-type ReleasePrisma = Pick<PrismaClient, 'release' | 'statistic' | 'variant'>
+export type ReleasePrisma = Pick<PrismaClient, 'release' | 'statistic' | 'variant'>
 const lang_en = 'en'
 
 export async function getAllReleases(
@@ -19,35 +20,7 @@ export async function getAllReleases(
   },
   prisma: ReleasePrisma
 ): Promise<ReleaseListing[]> {
-  if (shortname) {
-    await assertStatisticExists(shortname, prisma)
-  }
-
-  if (variantId !== undefined) {
-    const variant = await assertVariantExists(variantId, prisma)
-
-    if (shortname) {
-      assertVariantBelongsToStatistic(variant.statistic.shortname.name, shortname)
-    }
-  }
-
-  const where =
-    shortname || variantId !== undefined
-      ? {
-          variant: {
-            ...(variantId !== undefined ? { id: variantId } : {}),
-            ...(shortname
-              ? {
-                  statistic: {
-                    shortname: {
-                      name: sanitize(shortname),
-                    },
-                  },
-                }
-              : {}),
-          },
-        }
-      : undefined
+  const where = await buildReleaseFilter({ shortname, variantId }, prisma)
 
   const releases = await prisma.release.findMany({
     skip: start,
@@ -87,7 +60,6 @@ export async function getAllReleases(
 
   return releases.map((release) => {
     const { statistic, frequency } = release.variant ?? {}
-
     return {
       id: release.id,
       publish_time: dateToISOString(release.publish_time),
@@ -113,7 +85,6 @@ export async function getReleaseById(id: string, prisma: ReleasePrisma): Promise
   if (isNaN(idAsNumber)) {
     return Promise.reject({ statregError: 'Invalid release id' })
   }
-
   const release = await prisma.release.findFirst({
     where: { id: idAsNumber },
     select: {
@@ -151,9 +122,7 @@ export async function getReleaseById(id: string, prisma: ReleasePrisma): Promise
       },
     },
   })
-
   if (!release) return Promise.reject({ status: 404, statregError: 'Release id not found' })
-
   const { statistic, frequency } = release.variant ?? {}
 
   return {
@@ -181,55 +150,6 @@ export async function getReleaseById(id: string, prisma: ReleasePrisma): Promise
   }
 }
 
-// VALIDATION HELPERS
-async function assertStatisticExists(shortname: string, prisma: ReleasePrisma) {
-  const statistic = await prisma.statistic.findFirst({
-    where: {
-      shortname: {
-        name: sanitize(shortname),
-      },
-    },
-    select: { id: true },
-  })
-
-  if (!statistic) {
-    throw { status: 404, statregError: `Statistic '${shortname}' not found` }
-  }
-
-  return statistic
-}
-
-async function assertVariantExists(variantId: number, prisma: ReleasePrisma) {
-  const variant = await prisma.variant.findUnique({
-    where: { id: variantId },
-    select: {
-      id: true,
-      statistic: {
-        select: {
-          shortname: {
-            select: { name: true },
-          },
-        },
-      },
-    },
-  })
-
-  if (!variant) {
-    throw { status: 404, statregError: `Variant '${variantId}' not found` }
-  }
-
-  return variant
-}
-
-function assertVariantBelongsToStatistic(variantShortname: string, requestedShortname: string) {
-  if (variantShortname !== sanitize(requestedShortname)) {
-    throw {
-      status: 404,
-      statregError: `Variant does not belong to statistic '${requestedShortname}'`,
-    }
-  }
-}
-
 export async function createRelease(
   prisma: ReleasePrisma,
   shortname: string,
@@ -242,4 +162,37 @@ export async function createRelease(
   if (!body) return Promise.reject({ statregError: 'Invalid body' })
 
   return {}
+}
+
+async function buildReleaseFilter(
+  { shortname, variantId }: { shortname?: string; variantId?: number },
+  prisma: ReleasePrisma
+) {
+  if (!shortname && variantId === undefined) return
+
+  if (shortname) {
+    await assertStatisticExists(shortname, prisma)
+  }
+
+  if (variantId !== undefined) {
+    await assertVariantExists(variantId, prisma)
+  }
+
+  if (shortname && variantId !== undefined) {
+    await assertVariantMatchesShortname(variantId, shortname, prisma)
+  }
+
+  const where: any = { variant: {} }
+
+  if (variantId !== undefined) {
+    where.variant.id = variantId
+  }
+
+  if (shortname) {
+    where.variant.statistic = {
+      shortname: { name: shortname },
+    }
+  }
+
+  return where
 }
