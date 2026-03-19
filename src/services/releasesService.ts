@@ -5,41 +5,6 @@ import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
 type ReleasePrisma = Pick<PrismaClient, 'release'>
 const lang_en = 'en'
 
-const SELECT_RELEASE_DETAILS = {
-  id: true,
-  version: true,
-  publish_time: true,
-  desk_appoval_status: true,
-  period_to: true,
-  period_from: true,
-  release_date_precision: true,
-  cancelled: true,
-  variant: {
-    select: {
-      id: true,
-      frequency: {
-        select: {
-          name: true,
-          name_en: true,
-        },
-      },
-      revision: true,
-      statistic: {
-        select: {
-          language: true,
-          name: true,
-          name_en: true,
-          shortname: {
-            select: {
-              name: true,
-            },
-          },
-        },
-      },
-    },
-  },
-}
-
 export async function getAllReleases({ start = 0, count = 10 }, prisma: ReleasePrisma): Promise<ReleaseListing[]> {
   const releases = await prisma.release.findMany({
     skip: start,
@@ -192,20 +157,81 @@ export async function updateRelease(id: string, input: ReleaseUpdate, prisma: Re
     return Promise.reject({ statregError: 'Invalid release id' })
   }
 
+  if (!input.comment) return Promise.reject({ status: 400, statregError: 'Required field `comment` is missing' })
+
+  // TODO validate and parse dates
+  // TODO call function to check that release date is not blocked
+  // TODO insert validated data
   const release = await prisma.release.update({
     select: SELECT_RELEASE_DETAILS,
     where: { id: idAsNumber },
-    data: {
-      publish_time: input.publish_time,
-      period_to: input.period_to,
-      period_from: input.period_from,
-      release_date_precision: input.release_date_precision,
-    },
+    data: {},
   })
 
   if (!release) return Promise.reject({ status: 404, statregError: 'Release id not found' })
 
+  return createReleaseDetails(release)
+}
+
+const SELECT_RELEASE_DETAILS = {
+  id: true,
+  version: true,
+  publish_time: true,
+  desk_appoval_status: true,
+  period_to: true,
+  period_from: true,
+  release_date_precision: true,
+  cancelled: true,
+  variant: {
+    select: {
+      id: true,
+      frequency: {
+        select: {
+          name: true,
+          name_en: true,
+        },
+      },
+      revision: true,
+      statistic: {
+        select: {
+          language: true,
+          name: true,
+          name_en: true,
+          shortname: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      },
+    },
+  },
+}
+
+function createReleaseDetails(prismaRelease: any): ReleaseDetails {
+  const { statistic, frequency } = prismaRelease.variant ?? {}
+
   return {
-    id: release.id,
+    id: prismaRelease.id,
+    publish_time: dateToISOString(prismaRelease.publish_time),
+    has_versions: prismaRelease.version > 1,
+    approval_status: prismaRelease.desk_appoval_status,
+    variant: {
+      id: prismaRelease.variant.id,
+      frequency: {
+        name: [...getLocalizedName('nb', frequency.name), ...getLocalizedName(lang_en, frequency.name_en)],
+      },
+      revision: {
+        name: [...getLocalizedName('nb', prismaRelease.variant.revision)],
+      },
+    },
+    statistic: {
+      shortname: statistic.shortname.name,
+      name: [...getLocalizedName(statistic.language, statistic.name), ...getLocalizedName(lang_en, statistic.name_en)],
+    },
+    period_from: dateToISOString(prismaRelease.period_from),
+    period_to: dateToISOString(prismaRelease.period_to),
+    release_date_precision: prismaRelease.release_date_precision,
+    cancelled: prismaRelease.cancelled,
   }
 }
