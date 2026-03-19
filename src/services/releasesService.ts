@@ -1,4 +1,4 @@
-import type { ReleaseDetails, ReleaseListing } from '@/types/index'
+import type { ReleaseDetails, ReleaseListing, ReleaseCreate } from '@/types/index'
 import { getLocalizedName, dateToISOString, sanitize } from '@/lib/utils'
 import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
 
@@ -228,4 +228,18 @@ function assertVariantBelongsToStatistic(variantShortname: string, requestedShor
       statregError: `Variant does not belong to statistic '${requestedShortname}'`,
     }
   }
+
+export async function createRelease(
+  prisma: ReleasePrisma,
+  shortname: string,
+  variantId: string,
+  body?: ReleaseCreate
+): Promise<ReleaseDetails> {
+  // TODO: Implement logic in another PR; log params to prevent lint from failing
+  console.log(`shortname: ${shortname}, (variant) id: ${variantId}, prisma: ${prisma}`)
+
+  if (!body) return Promise.reject({ statregError: 'Invalid body' })
+
+  return {}
+
 }

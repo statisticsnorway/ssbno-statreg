@@ -4,6 +4,8 @@ Here you'll find the migration plan and scripts used to migrate data from the le
 
 All scripts are found under `src/scripts`
 
+Before performing the migration, we need to allow the prisma methods deleteMany and createMany. We block these in our prisma.ts lib, because they are very hard to reliably create audit logs for and are a common source of issues. [See this PR for more information](https://github.com/statisticsnorway/ssbno-statreg-api/pull/147) about what to comment out. We choose to do this with simple commenting instead of feature toggles or similar in the spirit of keeping things simple.
+
 ## Step by step plan
 
 0. Using the [Oracle SQL Developer Extension](https://marketplace.visualstudio.com/items?itemName=Oracle.sql-developer) for the Visual Studio Code IDE, connect to the Statistikkregisteret Oracle database for table data export. Select "Custom JDBC" as Connection Type and fill in the fields, which can be found in Secret Manager in Google Cloud Platform.
@@ -11,7 +13,6 @@ All scripts are found under `src/scripts`
 ### Download tables from old database
 1. Manually update `tableStatsExample.json` with metadata for all tables that includes the table name, number of rows, the highest and lowest ids etc. Run the provided `generate-stats.sql` in SQL Developer -> SQL Worksheet to generate data.
 2. Download all tables "as is" from the old database to JSON files. This is easily done manually from the Data tab and Export as `.json` with SQL Developer in VS Code. Make sure that the JSON files are named after the table e.g. `AUDIT_LOG.json`.
-3. Take a backup of the JSON files and store them in a secure location (for prod data files).
 4. Verify all JSON files with `json-validation.sh` by running this command in the terminal:
 
 ```
@@ -20,14 +21,27 @@ src/scripts/json-validation.sh ./docs/database-migration/tableStatsExample.json 
 
 ### Load data to PostgreSQL
 (Skip steps 6, 9, and 10 if you're only migrating to your local PostgeSQL database)
-6.  Copy JSON files (both data and validation metadata) from localhost into a tmp location in pod on NAIS using kubectl exec (TODO: Verify copilot command suggestion):
+
+5. Bump memory and CPU temporary (in QA env we used about 1GB memory, we bumped to 4GB to make sure)
+
+6.  Copy JSON files (both data and validation metadata) from localhost into a tmp location in pod on NAIS using kubectl exec:
+
+Get pod name:
 ```
-kubectl cp ./data/myfile.json <pod-name>:/app/data/myfile.json
+kubectl get pods -n ssbno
+```
+Copy the json folder into pod (replace with the actual pod name)
+```
+kubectl cp ~/Documents/STATREG_TABLES_JSON ssbno-statreg-api-77ccd46996-qsk9d:/tmp
+```
+Copy tableStats into pod (replace with the actual pod name)
+```
+kubectl cp ~/repos/ssbno-statreg-api/docs/database-migration/tableStatsExample.json ssbno-statreg-api-5665547945-nvjpb:/tmp
 ```
 
 7. Run script `import-data-to-postgres.ts` to delete all existing data in database, load data from JSON files to PostgreSQL by running command in the pod or locally in the terminal:
 ```
-npm exec tsx ./src/scripts/import-data-to-postgres.ts ~/Documents/STATREG_TABLES_JSON
+npm exec tsx ./src/scripts/import-data-to-postgres.ts /tmp/STATREG_TABLES_JSON
 ``` 
 
   * The script also:
@@ -36,7 +50,7 @@ npm exec tsx ./src/scripts/import-data-to-postgres.ts ~/Documents/STATREG_TABLES
 
 8. Run script `validate-import.ts` to verify each table in postgreSQL against the json validation files using a script. Check the number of rows and the highest and lowest ids. Script runs in pod with command: 
 ```
-npx tsx ./src/scripts/validate-import.ts ./docs/database-migration/tableStatsExample.json
+npx tsx ./src/scripts/validate-import.ts /tmp/tableStatsExample.json
 ```
 9. Delete the copied JSON files in the pod
 10. Remove npm package `JSONStream` which only used for importing JSON
