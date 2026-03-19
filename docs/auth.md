@@ -1,11 +1,13 @@
 # Authentication and authorization
 
-Statreg-api uses [keycloak/wonderwall](https://psychic-broccoli-evke4lm.pages.github.io/how-to/auth-foran-applikasjon/) for authenication, and an auth middleware for authorization. 
+Statreg-api uses [keycloak/wonderwall](https://psychic-broccoli-evke4lm.pages.github.io/how-to/auth-foran-applikasjon/) for authenication, and an auth middleware for authorization. Wonderwall is the part that forces login if not already authenicated in the browser.
 
 There are 3 levels of authorization:
 * No authorization (endpoint is open to all). Specified with `skipAuth()` for endpoint in controller.
 * Authozied SSB user (default behavior).
 * Require certain dapla team membership. Specified with `requireUserGroupAuthorization(<dapla-team>)` for endpoint in controller.
+
+For endpoints with no authorization (`with skipAuth()`), we do not want to force login through wonderwall. Wonderwall exceptions are defined by path in nais yaml using `excludePaths`. Since these exceptions are for path only (not different verbs) for convenience we do exclude entire main paths (ie. `/statistics/** and /releases/**`) for statreg API. Authorization are still enforced for all endpoints through `authMiddleware`. The result of this is that wonderwall will _not_ enforce login for ie. a `PUT` request to `/statistics/:shortname` even if the endpoint is specified with `requireUserGroupAuthorization(...)`. However the `authMiddleware` will still validate token and check authorization requirements and in this case return `401`and `Missing bearer token`.
 
 ## Local development with working authentication
 We have a docker compose setup to simulate production auth flow. 
