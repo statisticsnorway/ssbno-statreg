@@ -23,7 +23,7 @@ export function validateAndParseDate(dateString: string | string[] | undefined, 
 
   // TODO: Confirm correct date format. See JIRA issue MIM-2546
   const date = new Date(dateString)
-  if (Number.isNaN(date.getTime())) {
+  if (date.toString() === 'Invalid Date') {
     throw { statregError: `Invalid${fieldName ? ` ${fieldName}` : ''} date format in query parameter` }
   }
 
