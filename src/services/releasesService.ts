@@ -144,6 +144,8 @@ export async function createRelease(
   body?: ReleaseCreate
 ): Promise<ReleaseDetails> {
   // TODO: Add helper functions for find shortname and variant_id
+  // TODO: Validate shortname and variantId
+  const variantIdNumber = Number(variantId)
 
   if (!body) return Promise.reject({ statregError: 'Invalid body' })
 
@@ -159,12 +161,21 @@ export async function createRelease(
       period_from: periodFromDate,
       period_to: periodToDate,
       release_date_precision: sanitize(release_date_precision!),
+      // TODO: Validate all fields after this point;
+      variant: {
+        connect: {
+          id: variantIdNumber,
+        },
+      },
       desk_appoval_status: 'VENTER_PAA_GODKJENNING', // TODO: Enum
+      has_versions: false,
+      comment: '',
+      cancelled: false,
     },
   })
 
   const release = await prisma.release.findFirst({
-    where: { variant_id: Number(variantId) },
+    where: { variant_id: variantIdNumber },
     include: {
       variant: {
         select: {
