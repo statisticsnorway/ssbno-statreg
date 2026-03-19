@@ -1,5 +1,5 @@
 import type { ReleaseDetails, ReleaseListing, ReleaseCreate } from '@/types/index'
-import { getLocalizedName, dateToISOString, sanitize } from '@/lib/utils'
+import { getLocalizedName, dateToISOString, sanitize, validateAndParseDate } from '@/lib/utils'
 import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
 
 type ReleasePrisma = Pick<PrismaClient, 'release'>
@@ -145,15 +145,13 @@ export async function createRelease(
 ): Promise<ReleaseDetails> {
   // TODO: Add helper functions for find shortname and variant_id
 
-  console.log(sanitize(shortname))
-
   if (!body) return Promise.reject({ statregError: 'Invalid body' })
+
   const { publish_time, period_from, period_to, release_date_precision } = body
 
-  // TODO: Use validate and parse date
-  const publishTimeDate = publish_time
-  const periodFromDate = period_from
-  const periodToDate = period_to
+  const publishTimeDate = validateAndParseDate(publish_time)
+  const periodFromDate = validateAndParseDate(period_from)
+  const periodToDate = validateAndParseDate(period_to)
 
   await prisma.release.create({
     data: {
