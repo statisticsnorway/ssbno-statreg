@@ -1,6 +1,6 @@
-import { ExtendedPrismaClient } from '@/lib/prisma'
+import type { ExtendedPrismaClient } from '@/lib/prisma'
 import { dateToISOString, sanitize, validateAndParseDate } from '@/lib/utils'
-import { BlockedReleaseDate } from '@/types'
+import type { BlockedReleaseDate } from '@/types'
 
 export type CalendarDatePrisma = Pick<ExtendedPrismaClient, 'calender_date'>
 
