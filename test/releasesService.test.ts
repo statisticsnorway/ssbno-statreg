@@ -78,7 +78,7 @@ describe('releasesService ', async () => {
   })
 
   describe('updateRelease ', () => {
-    test('returns 400 if id is not a number', async () => {
+    test('returns 400 if comment is missing', async () => {
       const releaseUpdateInputWithoutComment = {
         publish_time: '2026-03-19T11:52:38.903Z',
         period_to: '2026-03-19T11:52:38.903Z',

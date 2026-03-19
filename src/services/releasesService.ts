@@ -151,37 +151,29 @@ export async function createRelease(
   return {}
 }
 
-export async function updateRelease(id: string, input: ReleaseUpdate, prisma: ReleasePrisma): Promise<ReleaseDetails> {
+export async function updateRelease(id: string, body: ReleaseUpdate, prisma: ReleasePrisma): Promise<ReleaseDetails> {
   const idAsNumber = Number.parseInt(sanitize(id))
   if (isNaN(idAsNumber)) {
     return Promise.reject({ statregError: 'Invalid release id' })
   }
 
-  if (!input.comment) return Promise.reject({ status: 400, statregError: 'Required field `comment` is missing' })
+  if (!body.comment) return Promise.reject({ statregError: 'Required field `comment` is missing' })
 
   // TODO validate and parse dates
   // TODO call function to check that release date is not blocked
   // TODO insert validated data
   const release = await prisma.release.update({
-    select: SELECT_RELEASE_DETAILS,
+    include: SELECT_VARIANT_DETAILS,
     where: { id: idAsNumber },
     data: {},
   })
 
   if (!release) return Promise.reject({ status: 404, statregError: 'Release id not found' })
 
-  return createReleaseDetails(release)
+  return mapToReleaseDetails(release)
 }
 
-const SELECT_RELEASE_DETAILS = {
-  id: true,
-  version: true,
-  publish_time: true,
-  desk_appoval_status: true,
-  period_to: true,
-  period_from: true,
-  release_date_precision: true,
-  cancelled: true,
+const SELECT_VARIANT_DETAILS = {
   variant: {
     select: {
       id: true,
@@ -208,7 +200,7 @@ const SELECT_RELEASE_DETAILS = {
   },
 }
 
-function createReleaseDetails(prismaRelease: any): ReleaseDetails {
+function mapToReleaseDetails(prismaRelease: any): ReleaseDetails {
   const { statistic, frequency } = prismaRelease.variant ?? {}
 
   return {

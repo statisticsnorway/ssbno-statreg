@@ -27,6 +27,16 @@ export default function releasesController(router: Router) {
     }
   })
 
+  router.put('/releases/:id', requireUserGroupAuthorization('ssbno-developers'), async (req, res) => {
+    try {
+      const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id
+      const result = await updateRelease(id!, req.body, prisma)
+      res.json(result)
+    } catch (error) {
+      return handleErrors(error, res)
+    }
+  })
+
   router.post(
     '/statistics/:shortname/variants/:id/releases',
     requireUserGroupAuthorization('ssbno-developers'),
@@ -45,14 +55,4 @@ export default function releasesController(router: Router) {
       }
     }
   )
-
-  router.put('/releases/:id', requireUserGroupAuthorization('ssbno-developers'), async (req, res) => {
-    try {
-      const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id
-      const result = await updateRelease(id!, req.body, prisma)
-      res.json(result)
-    } catch (error) {
-      return handleErrors(error, res)
-    }
-  })
 }
