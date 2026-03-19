@@ -228,6 +228,7 @@ function assertVariantBelongsToStatistic(variantShortname: string, requestedShor
       statregError: `Variant does not belong to statistic '${requestedShortname}'`,
     }
   }
+}
 
 export async function createRelease(
   prisma: ReleasePrisma,
@@ -241,5 +242,4 @@ export async function createRelease(
   if (!body) return Promise.reject({ statregError: 'Invalid body' })
 
   return {}
-
 }
