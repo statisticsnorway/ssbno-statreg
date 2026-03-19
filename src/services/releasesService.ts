@@ -143,10 +143,61 @@ export async function createRelease(
   variantId: string,
   body?: ReleaseCreate
 ): Promise<ReleaseDetails> {
-  // TODO: Implement logic in another PR; log params to prevent lint from failing
-  console.log(`shortname: ${shortname}, (variant) id: ${variantId}, prisma: ${prisma}`)
+  // TODO: Add helper functions for find shortname and variant_id
+
+  console.log(sanitize(shortname))
 
   if (!body) return Promise.reject({ statregError: 'Invalid body' })
+  const { publish_time, period_from, period_to, release_date_precision } = body
+
+  // TODO: Use validate and parse date
+  const publishTimeDate = publish_time
+  const periodFromDate = period_from
+  const periodToDate = period_to
+
+  await prisma.release.create({
+    data: {
+      publish_time: publishTimeDate,
+      period_from: periodFromDate,
+      period_to: periodToDate,
+      release_date_precision: sanitize(release_date_precision!),
+      desk_appoval_status: 'VENTER_PAA_GODKJENNING', // TODO: Enum
+    },
+  })
+
+  const release = await prisma.release.findFirst({
+    where: { variant_id: Number(variantId) },
+    include: {
+      variant: {
+        select: {
+          id: true,
+          frequency: {
+            select: {
+              name: true,
+              name_en: true,
+            },
+          },
+          revision: true,
+          statistic: {
+            select: {
+              language: true,
+              name: true,
+              name_en: true,
+              shortname: {
+                select: {
+                  name: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
+
+  if (!release) return Promise.reject({ status: 404, statregError: 'Release not found' })
+
+  // const { statistic, frequency } = release.variant ?? {}
 
   return {}
 }
