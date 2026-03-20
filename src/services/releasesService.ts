@@ -1,4 +1,4 @@
-import type { ReleaseDetails, ReleaseListing, ReleaseCreate } from '@/types/index'
+import type { ReleaseDetails, ReleaseListing, ReleaseCreate, ReleaseUpdate } from '@/types/index'
 import { getLocalizedName, dateToISOString, sanitize } from '@/lib/utils'
 import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
 
@@ -149,4 +149,81 @@ export async function createRelease(
   if (!body) return Promise.reject({ statregError: 'Invalid body' })
 
   return {}
+}
+
+export async function updateRelease(id: string, body: ReleaseUpdate, prisma: ReleasePrisma): Promise<ReleaseDetails> {
+  const idAsNumber = Number.parseInt(sanitize(id))
+  if (isNaN(idAsNumber)) {
+    return Promise.reject({ statregError: 'Invalid release id' })
+  }
+
+  if (!body.comment) return Promise.reject({ statregError: 'Required field `comment` is missing' })
+
+  // TODO validate and parse dates
+  // TODO call function to check that release date is not blocked
+  // TODO insert validated data
+  const release = await prisma.release.update({
+    include: SELECT_VARIANT_DETAILS,
+    where: { id: idAsNumber },
+    data: {},
+  })
+
+  if (!release) return Promise.reject({ status: 404, statregError: 'Release id not found' })
+
+  return mapToReleaseDetails(release)
+}
+
+const SELECT_VARIANT_DETAILS = {
+  variant: {
+    select: {
+      id: true,
+      frequency: {
+        select: {
+          name: true,
+          name_en: true,
+        },
+      },
+      revision: true,
+      statistic: {
+        select: {
+          language: true,
+          name: true,
+          name_en: true,
+          shortname: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      },
+    },
+  },
+}
+
+function mapToReleaseDetails(prismaRelease: any): ReleaseDetails {
+  const { statistic, frequency } = prismaRelease.variant ?? {}
+
+  return {
+    id: prismaRelease.id,
+    publish_time: dateToISOString(prismaRelease.publish_time),
+    has_versions: prismaRelease.version > 1,
+    approval_status: prismaRelease.desk_appoval_status,
+    variant: {
+      id: prismaRelease.variant.id,
+      frequency: {
+        name: [...getLocalizedName('nb', frequency.name), ...getLocalizedName(lang_en, frequency.name_en)],
+      },
+      revision: {
+        name: [...getLocalizedName('nb', prismaRelease.variant.revision)],
+      },
+    },
+    statistic: {
+      shortname: statistic.shortname.name,
+      name: [...getLocalizedName(statistic.language, statistic.name), ...getLocalizedName(lang_en, statistic.name_en)],
+    },
+    period_from: dateToISOString(prismaRelease.period_from),
+    period_to: dateToISOString(prismaRelease.period_to),
+    release_date_precision: prismaRelease.release_date_precision,
+    cancelled: prismaRelease.cancelled,
+  }
 }
