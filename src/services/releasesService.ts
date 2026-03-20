@@ -162,15 +162,16 @@ export async function createRelease(
       period_to: periodToDate,
       release_date_precision: sanitize(release_date_precision!),
       // TODO: Validate all fields after this point;
+      // version: 1, // default is 1 so do we have to define it?
+      has_versions: false,
+      cancelled: false,
+      desk_appoval_status: 'FORSLAG', // Enum from database; GODKJENT, FORSLAG (Venter på godkjenning), AVVIST. Should we reuse them?
+      comment: '',
       variant: {
         connect: {
           id: variantIdNumber,
         },
       },
-      desk_appoval_status: 'VENTER_PAA_GODKJENNING', // TODO: Enum
-      has_versions: false,
-      comment: '',
-      cancelled: false,
     },
   })
 
@@ -206,7 +207,7 @@ export async function createRelease(
 
   if (!release) return Promise.reject({ status: 404, statregError: 'Release not found' })
 
-  // const { statistic, frequency } = release.variant ?? {}
+  // TODO: Use helper function for mapping
 
   return {}
 }
