@@ -1,4 +1,5 @@
 import type { ReleaseDetails, ReleaseListing, ReleaseCreate, ReleaseUpdate } from '@/types/index'
+import { ApprovalStatus } from '@/types/enums'
 import { getLocalizedName, dateToISOString, sanitize, validateAndParseDate } from '@/lib/utils'
 import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
 
@@ -153,7 +154,10 @@ export async function createRelease(
 
   const { publish_time, period_from, period_to, release_date_precision } = body
 
-  // TODO: Use function for blocked days once it's implemented; See JIRA issue MIM-2577
+  /* TODO:
+   * Use function for blocked days once it's implemented; See JIRA issue MIM-2577
+   * Automatic suggestion of period_to and period_from, and release date precision also have their respective tasks
+   */
   const publishTimeDate = validateAndParseDate(publish_time, false, 'publish_time')
   const periodFromDate = validateAndParseDate(period_from, false, 'period_form')
   const periodToDate = validateAndParseDate(period_to, false, 'period_to')
@@ -168,8 +172,8 @@ export async function createRelease(
       cancelled: false,
       last_updated: now,
       date_created: now,
-      desk_appoval_status: 'FORSLAG', // Enum from database; GODKJENT, FORSLAG (Venter på godkjenning), AVVIST. Should we reuse them?
-      comment: '', // TODO: Up for discussion; required in the db but not in the frontend
+      desk_appoval_status: ApprovalStatus.PENDING,
+      comment: '',
       variant: {
         connect: {
           id: variantIdNumber,
@@ -191,7 +195,7 @@ export async function createRelease(
 export async function updateRelease(id: string, body: ReleaseUpdate, prisma: ReleasePrisma): Promise<ReleaseDetails> {
   const idAsNumber = Number.parseInt(sanitize(id))
   if (isNaN(idAsNumber)) {
-    return Promise.reject({ statregError: 'Invalid release id' }) // TODO
+    return Promise.reject({ statregError: 'Invalid release id' })
   }
 
   if (!body.comment) return Promise.reject({ statregError: 'Required field `comment` is missing' })
@@ -205,7 +209,7 @@ export async function updateRelease(id: string, body: ReleaseUpdate, prisma: Rel
     data: {},
   })
 
-  if (!release) return Promise.reject({ status: 404, statregError: 'Release id not found' })
+  if (!release) return Promise.reject({ status: 404, statregError: 'Release id not found' }) // TODO: Consider error `Release not found` instead
 
   return mapToReleaseDetails(release)
 }

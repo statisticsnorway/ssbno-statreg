@@ -1,6 +1,7 @@
 import { describe, test, mock, beforeEach } from 'node:test'
 import assert from 'node:assert/strict'
 import { getAllReleases, getReleaseById, updateRelease, createRelease } from '@/services/releasesService'
+import { ApprovalStatus } from '@/types/enums'
 
 let prismaMock: any
 let releasesResult: object | null
@@ -96,7 +97,12 @@ describe('releasesService ', async () => {
 
   describe('createRelease ', () => {
     test('creates a new release and returns mapped results', async () => {
-      setPrismaResult({ ...mockedSingleReleasePrismaResult, id: 1, version: 1, desk_appoval_status: 'FORSLAG' })
+      setPrismaResult({
+        ...mockedSingleReleasePrismaResult,
+        id: 1,
+        version: 1,
+        desk_appoval_status: ApprovalStatus.PENDING,
+      })
       const newReleaseInput = {
         publish_time: '2024-10-15T08:00:00Z',
         period_to: '2024-12-31T00:00:00Z',
@@ -113,7 +119,7 @@ describe('releasesService ', async () => {
           publish_time: new Date('2024-10-15T08:00:00Z'),
           period_to: new Date('2024-12-31T00:00:00Z'),
           period_from: new Date('2024-09-01T00:00:00Z'),
-          desk_appoval_status: 'FORSLAG',
+          desk_appoval_status: ApprovalStatus.PENDING,
           release_date_precision: 'dag',
           has_versions: false,
           last_updated: now,
@@ -130,7 +136,7 @@ describe('releasesService ', async () => {
       assert.deepStrictEqual(result, {
         ...mockedSingleReleaseResult,
         has_versions: false,
-        approval_status: 'FORSLAG',
+        approval_status: ApprovalStatus.PENDING,
       })
     })
 
