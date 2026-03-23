@@ -149,7 +149,7 @@ components:
       properties:
         division: { type: string, nullable: true }
         first_released_at:  { type: string, format: date, nullable: true }
-        yearly_reporting: boolean
+        yearly_reporting: { type: boolean}
         statistic_region_levels:
           type: array
           items: { string }
@@ -162,7 +162,7 @@ components:
       properties:
         division: { type: string, nullable: true }
         first_released_at:  { type: string, format: date, nullable: true }
-        yearly_reporting: boolean
+        yearly_reporting: { type: boolean}
         statistic_region_levels:
           type: array
           items: { string }
