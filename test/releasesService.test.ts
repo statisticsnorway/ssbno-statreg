@@ -1,6 +1,6 @@
 import { describe, test, mock, beforeEach } from 'node:test'
 import assert from 'node:assert/strict'
-import { getReleases, getReleaseById, updateRelease } from '../src/services/releasesService'
+import { getReleases, getReleaseById, updateRelease, buildReleaseFilter } from '../src/services/releasesService'
 
 let prismaMock: any
 let releasesResult: object | null
@@ -52,38 +52,44 @@ describe('releasesService ', async () => {
   describe('buildReleaseFilter', () => {
     beforeEach(() => {
       prismaMock = {
-        release: { findMany: mock.fn(() => Promise.resolve([])) },
         statistic: { findFirst: mock.fn(() => Promise.resolve({ id: 1 })) },
         variant: { findUnique: mock.fn(() => Promise.resolve({ id: 1 })) },
       }
     })
 
-    test('applies filter when only shortname is provided', async () => {
-      await getReleases({ shortname: 'KPI' }, prismaMock)
+    test('returns undefined when neither shortname nor variantId is provided', async () => {
+      const where = await buildReleaseFilter({}, prismaMock)
 
-      const where = prismaMock.release.findMany.mock.calls[0].arguments[0].where
+      assert.equal(where, undefined)
+      assert.equal(prismaMock.statistic.findFirst.mock.calls.length, 0)
+      assert.equal(prismaMock.variant.findUnique.mock.calls.length, 0)
+    })
+
+    test('applies filter when only shortname is provided', async () => {
+      const where = await buildReleaseFilter({ shortname: 'KPI' }, prismaMock)
+
       assert.deepEqual(where, {
         variant: { statistic: { shortname: { name: 'KPI' } } },
       })
     })
 
     test('applies filter when only variantId is provided', async () => {
-      await getReleases({ variantId: 1 }, prismaMock)
+      const where = await buildReleaseFilter({ variantId: 1 }, prismaMock)
 
-      const where = prismaMock.release.findMany.mock.calls[0].arguments[0].where
-      assert.deepEqual(where, { variant: { id: 1 } })
+      assert.deepEqual(where, {
+        variant: { id: 1 },
+      })
     })
 
     test('applies combined filter when both inputs are provided', async () => {
-      prismaMock.variant.findUnique.mock.mockImplementation((args: any) =>
+      prismaMock.variant.findUnique = mock.fn((args: any) =>
         args.select?.statistic
           ? Promise.resolve({ statistic: { shortname: { name: 'KPI' } } })
           : Promise.resolve({ id: 1 })
       )
 
-      await getReleases({ shortname: 'KPI', variantId: 1 }, prismaMock)
+      const where = await buildReleaseFilter({ shortname: 'KPI', variantId: 1 }, prismaMock)
 
-      const where = prismaMock.release.findMany.mock.calls[0].arguments[0].where
       assert.deepEqual(where, {
         variant: { id: 1, statistic: { shortname: { name: 'KPI' } } },
       })
@@ -92,7 +98,7 @@ describe('releasesService ', async () => {
     test('throws when statistic does not exist', async () => {
       prismaMock.statistic.findFirst = mock.fn(() => Promise.resolve(null))
 
-      await assert.rejects(() => getReleases({ shortname: 'BAD' }, prismaMock), {
+      await assert.rejects(() => buildReleaseFilter({ shortname: 'BAD' }, prismaMock), {
         status: 404,
         statregError: "Statistic 'BAD' not found",
       })
@@ -101,7 +107,7 @@ describe('releasesService ', async () => {
     test('throws when variant does not exist', async () => {
       prismaMock.variant.findUnique = mock.fn(() => Promise.resolve(null))
 
-      await assert.rejects(() => getReleases({ variantId: 999 }, prismaMock), {
+      await assert.rejects(() => buildReleaseFilter({ variantId: 999 }, prismaMock), {
         status: 404,
         statregError: "Variant '999' not found",
       })
@@ -114,7 +120,7 @@ describe('releasesService ', async () => {
           : Promise.resolve({ id: 1 })
       )
 
-      await assert.rejects(() => getReleases({ shortname: 'KPI', variantId: 1 }, prismaMock), {
+      await assert.rejects(() => buildReleaseFilter({ shortname: 'KPI', variantId: 1 }, prismaMock), {
         status: 404,
         statregError: "Variant does not belong to statistic 'KPI'",
       })

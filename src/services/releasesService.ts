@@ -165,7 +165,7 @@ export async function createRelease(
   return {}
 }
 
-async function buildReleaseFilter(
+export async function buildReleaseFilter(
   { shortname, variantId }: { shortname?: string; variantId?: number },
   prisma: ReleasePrisma
 ) {
