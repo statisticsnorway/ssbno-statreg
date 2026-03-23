@@ -1,6 +1,6 @@
 import { describe, test, mock, beforeEach } from 'node:test'
 import assert from 'node:assert/strict'
-import { getAllReleases, getReleaseById, updateRelease } from '../src/services/releasesService'
+import { getAllReleases, getReleaseById, updateRelease, createRelease } from '@/services/releasesService'
 
 let prismaMock: any
 let releasesResult: object | null
@@ -14,6 +14,7 @@ describe('releasesService ', async () => {
     prismaMock = {
       release: {
         findMany: mock.fn(() => Promise.resolve(releasesResult)),
+        create: mock.fn((args) => Promise.resolve({ ...args, id: 0 })),
         findFirst: mock.fn(() => Promise.resolve(releasesResult)),
       },
     }
@@ -89,6 +90,47 @@ describe('releasesService ', async () => {
         statregError: 'Required field `comment` is missing',
       })
     })
+  })
+
+  describe('createRelease ', () => {
+    test('creates a new release and returns mapped results', async () => {
+      setPrismaResult({ ...mockedSingleReleasePrismaResult, id: 1, version: 1, desk_appoval_status: 'FORSLAG' })
+      const newReleaseInput = {
+        publish_time: '2024-10-15',
+        period_to: '2024-09-01',
+        period_from: '2024-08-01',
+        release_date_precision: 'dag',
+      }
+
+      const result = await createRelease(prismaMock, 'kpi', '1', newReleaseInput)
+
+      assert.deepStrictEqual(prismaMock.release.create.mock.callCount(), 1)
+      assert.deepStrictEqual(prismaMock.release.create.mock.calls[0].arguments[0], {
+        data: {
+          publish_time: new Date('2024-10-15'),
+          period_from: new Date('2024-08-01'),
+          period_to: new Date('2024-09-01'),
+          desk_appoval_status: 'FORSLAG',
+          release_date_precision: 'dag',
+          has_versions: false,
+          cancelled: false,
+          variant: {
+            connect: {
+              id: 1,
+            },
+          },
+        },
+      })
+      assert.deepStrictEqual(result, {
+        ...mockedSingleReleaseResult,
+        has_versions: false,
+        approval_status: 'FORSLAG',
+      })
+    })
+
+    test('returns 404 when release is not found', async () => {})
+
+    test('returns 400...', async () => {})
   })
 })
 

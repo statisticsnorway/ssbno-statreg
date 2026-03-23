@@ -146,12 +146,13 @@ export async function createRelease(
   // TODO: Add helper functions for find shortname and variant_id
   // TODO: Validate shortname and variantId
   const variantIdNumber = Number(variantId)
+  const sanitizedShortname = sanitize(shortname)
 
   if (!body) return Promise.reject({ statregError: 'Invalid body' })
 
   const { publish_time, period_from, period_to, release_date_precision } = body
 
-  const publishTimeDate = validateAndParseDate(publish_time)
+  const publishTimeDate = validateAndParseDate(publish_time) // TODO: Help function for sperredato
   const periodFromDate = validateAndParseDate(period_from)
   const periodToDate = validateAndParseDate(period_to)
 
@@ -161,12 +162,10 @@ export async function createRelease(
       period_from: periodFromDate,
       period_to: periodToDate,
       release_date_precision: sanitize(release_date_precision!),
-      // TODO: Validate all fields after this point;
-      // version: 1, // default is 1 so do we have to define it?
+      // TODO: Validate all fields after this point; double check "required" fields
       has_versions: false,
       cancelled: false,
       desk_appoval_status: 'FORSLAG', // Enum from database; GODKJENT, FORSLAG (Venter på godkjenning), AVVIST. Should we reuse them?
-      comment: '',
       variant: {
         connect: {
           id: variantIdNumber,
@@ -176,40 +175,13 @@ export async function createRelease(
   })
 
   const release = await prisma.release.findFirst({
-    where: { variant_id: variantIdNumber },
-    include: {
-      variant: {
-        select: {
-          id: true,
-          frequency: {
-            select: {
-              name: true,
-              name_en: true,
-            },
-          },
-          revision: true,
-          statistic: {
-            select: {
-              language: true,
-              name: true,
-              name_en: true,
-              shortname: {
-                select: {
-                  name: true,
-                },
-              },
-            },
-          },
-        },
-      },
-    },
+    where: { variant: { id: variantIdNumber, statistic: { shortname: { name: sanitizedShortname } } } },
+    include: SELECT_VARIANT_DETAILS,
   })
 
   if (!release) return Promise.reject({ status: 404, statregError: 'Release not found' })
 
-  // TODO: Use helper function for mapping
-
-  return {}
+  return mapToReleaseDetails(release)
 }
 
 export async function updateRelease(id: string, body: ReleaseUpdate, prisma: ReleasePrisma): Promise<ReleaseDetails> {
