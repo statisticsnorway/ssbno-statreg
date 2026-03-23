@@ -1,6 +1,6 @@
 import { describe, test, mock, beforeEach } from 'node:test'
 import assert from 'node:assert/strict'
-import { getAllReleases, getReleaseById } from '../src/services/releasesService'
+import { getAllReleases, getReleaseById, updateRelease } from '../src/services/releasesService'
 
 let prismaMock: any
 let releasesResult: object | null
@@ -146,6 +146,20 @@ describe('releasesService ', async () => {
     test('returns 404 if no release found', async () => {
       setPrismaResult(null)
       await assert.rejects(() => getReleaseById('1', prismaMock), { status: 404, statregError: 'Release id not found' })
+    })
+  })
+
+  describe('updateRelease ', () => {
+    test('returns 400 if comment is missing', async () => {
+      const releaseUpdateInputWithoutComment = {
+        publish_time: '2026-03-19T11:52:38.903Z',
+        period_to: '2026-03-19T11:52:38.903Z',
+        period_from: '2026-03-19T11:52:38.903Z',
+        release_date_precision: 'string',
+      }
+      await assert.rejects(() => updateRelease('1', releaseUpdateInputWithoutComment, prismaMock), {
+        statregError: 'Required field `comment` is missing',
+      })
     })
   })
 })
