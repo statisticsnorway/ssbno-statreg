@@ -39,7 +39,7 @@ components:
       properties:
         date: { type: string, format: date-time }
         is_blocked: { type: boolean, readOnly: true }
-        blocked_comment: { type: [string, "null"], readOnly: true }
+        blocked_comment: { type: string, nullable: true, readOnly: true }
         releases:
           type: array
           items:
@@ -147,7 +147,7 @@ components:
         - $ref: '#/components/schemas/Statistic'
       type: object
       properties:
-        division: [string, "null"]
+        division: { type: string, nullable: true }
         first_released_at:  { type: string, format: date, nullable: true }
         yearly_reporting: boolean
         statistic_region_levels:
@@ -160,7 +160,7 @@ components:
         - $ref: '#/components/schemas/Statistic'
       type: object
       properties:
-        division: [string, "null"]
+        division: { type: string, nullable: true }
         first_released_at:  { type: string, format: date, nullable: true }
         yearly_reporting: boolean
         statistic_region_levels:
