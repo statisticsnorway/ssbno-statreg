@@ -150,9 +150,20 @@ export async function createRelease(
   const variantIdNumber = Number(variantId)
   const sanitizedShortname = sanitize(shortname) // TODO: May not be needed since variant can only have one statistic
 
-  if (!body) return Promise.reject({ statregError: 'Invalid body' })
+  const { publish_time, period_from, period_to, release_date_precision } = body ?? {}
 
-  const { publish_time, period_from, period_to, release_date_precision } = body
+  const missingFields = []
+  if (!publish_time) missingFields.push('publish_time')
+  if (!period_from) missingFields.push('period_from')
+  if (!period_to) missingFields.push('period_to')
+  if (!release_date_precision) missingFields.push('release_date_precision')
+
+  if (missingFields.length > 0) {
+    return Promise.reject({
+      statregError: `Missing required field(s): ${missingFields.join(', ')}`,
+      missingFields,
+    })
+  }
 
   /* TODO:
    * Use function for blocked days once it's implemented; See JIRA issue MIM-2577

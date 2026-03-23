@@ -5,6 +5,7 @@ import { ApprovalStatus } from '@/types/enums'
 
 let prismaMock: any
 let releasesResult: object | null
+let now: Date
 
 function setPrismaResult(next: object | null) {
   releasesResult = next
@@ -96,6 +97,10 @@ describe('releasesService ', async () => {
   // TODO: Create a unit test for mapToReleaseDetails; consider moving mapping function to another file
 
   describe('createRelease ', () => {
+    beforeEach(() => {
+      now = new Date('2026-03-23T08:00:00Z')
+    })
+
     test('creates a new release and returns mapped results', async () => {
       setPrismaResult({
         ...mockedSingleReleasePrismaResult,
@@ -103,15 +108,8 @@ describe('releasesService ', async () => {
         version: 1,
         desk_appoval_status: ApprovalStatus.PENDING,
       })
-      const newReleaseInput = {
-        publish_time: '2024-10-15T08:00:00Z',
-        period_to: '2024-12-31T00:00:00Z',
-        period_from: '2024-09-01T00:00:00Z',
-        release_date_precision: 'dag',
-      }
 
-      const now = new Date('2026-03-23T08:00:00Z')
-      const result = await createRelease(prismaMock, 'kpi', '1', now, newReleaseInput)
+      const result = await createRelease(prismaMock, 'kpi', '1', now, mockCreateReleaseInput)
 
       assert.deepStrictEqual(prismaMock.release.create.mock.callCount(), 1)
       assert.deepStrictEqual(prismaMock.release.create.mock.calls[0].arguments[0], {
@@ -140,11 +138,34 @@ describe('releasesService ', async () => {
       })
     })
 
-    test('returns 404 when release is not found', async () => {})
+    // TODO: Do we need the test below or is it redundant?
+    test('returns 400 if request body is empty', async () => {
+      await assert.rejects(() => createRelease(prismaMock, 'kpi', '1', now, undefined), {
+        statregError: 'Missing required field(s): publish_time, period_from, period_to, release_date_precision',
+      })
+    })
 
-    test('returns 400 when request body is invalid', async () => {})
+    test('returns 400 if any of the required fields are missing', async () => {
+      const newReleaseInput = {
+        publish_time: '2024-10-15T08:00:00Z',
+        release_date_precision: 'dag',
+      }
 
-    test('returns 400 when request body is invalid', async () => {})
+      await assert.rejects(() => createRelease(prismaMock, 'kpi', '1', now, newReleaseInput), {
+        statregError: 'Missing required field(s): period_from, period_to',
+      })
+    })
+
+    test('returns 404 when release is not found', async () => {
+      setPrismaResult(null)
+
+      await assert.rejects(() => createRelease(prismaMock, 'kpi', '1', now, mockCreateReleaseInput), {
+        status: 404,
+        statregError: 'Release not found',
+      })
+    })
+
+    // TODO: Add tests for date validation
   })
 })
 
@@ -294,4 +315,11 @@ const mockedSingleReleaseResult = {
   period_to: '2024-09-01T00:00:00.000Z',
   release_date_precision: 'dag',
   cancelled: false,
+}
+
+const mockCreateReleaseInput = {
+  publish_time: '2024-10-15T08:00:00Z',
+  period_to: '2024-12-31T00:00:00Z',
+  period_from: '2024-09-01T00:00:00Z',
+  release_date_precision: 'dag',
 }
