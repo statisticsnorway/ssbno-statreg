@@ -1,11 +1,8 @@
-import { sanitize } from '@/lib/utils'
 import { ReleasePrisma } from '@/services/releasesService'
 
 export async function assertStatisticExists(shortname: string, prisma: ReleasePrisma) {
-  const name = sanitize(shortname)
-
   const exists = await prisma.statistic.findFirst({
-    where: { shortname: { name } },
+    where: { shortname: { name: shortname } },
     select: { id: true },
   })
 
@@ -37,7 +34,7 @@ export async function assertVariantMatchesShortname(variantId: number, shortname
     },
   })
 
-  if (!variant || variant.statistic.shortname.name !== sanitize(shortname)) {
+  if (!variant || variant.statistic.shortname.name !== shortname) {
     throw {
       status: 404,
       statregError: `Variant does not belong to statistic '${shortname}'`,

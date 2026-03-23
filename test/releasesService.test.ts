@@ -43,7 +43,7 @@ describe('releasesService ', async () => {
     test('returns empty list if no results', async () => {
       setPrismaResult([])
 
-      const result = await geReleases({}, prismaMock)
+      const result = await getReleases({}, prismaMock)
 
       assert.deepEqual(result, [])
     })

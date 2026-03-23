@@ -286,6 +286,7 @@ paths:
   /statistics/{shortname}/releases:
     get:
       summary: List all releases for a statistic
+      security: []
       tags: [statistics]
       parameters:
         - name: shortname
@@ -356,6 +357,7 @@ paths:
   /statistics/{shortname}/variants/{id}/releases:
     get:
       summary: List all releases for one variant
+      security: []
       tags: [statistics]
       parameters:
         - name: shortname

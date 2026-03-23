@@ -20,7 +20,8 @@ export async function getReleases(
   },
   prisma: ReleasePrisma
 ): Promise<ReleaseListing[]> {
-  const where = await buildReleaseFilter({ shortname, variantId }, prisma)
+  const safeShortname = shortname ? sanitize(shortname) : undefined
+  const where = await buildReleaseFilter({ shortname: safeShortname, variantId }, prisma)
 
   const releases = await prisma.release.findMany({
     skip: start,
