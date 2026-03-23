@@ -6,7 +6,7 @@ import { assertStatisticExists, assertVariantExists, assertVariantMatchesShortna
 export type ReleasePrisma = Pick<PrismaClient, 'release' | 'statistic' | 'variant'>
 const lang_en = 'en'
 
-export async function getAllReleases(
+export async function getReleases(
   {
     start = 0,
     count = 10,

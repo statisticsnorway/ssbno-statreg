@@ -1,6 +1,6 @@
 import { describe, test, mock, beforeEach } from 'node:test'
 import assert from 'node:assert/strict'
-import { getAllReleases, getReleaseById, updateRelease } from '../src/services/releasesService'
+import { getReleases, getReleaseById, updateRelease } from '../src/services/releasesService'
 
 let prismaMock: any
 let releasesResult: object | null
@@ -19,11 +19,11 @@ describe('releasesService ', async () => {
     }
   })
 
-  describe('getAllReleases ', () => {
+  describe('getReleases ', () => {
     test('returns mocked data', async () => {
       setPrismaResult(mockedReleasesPrismaResult)
 
-      const result = await getAllReleases({ start: 1, count: 2 }, prismaMock)
+      const result = await getReleases({ start: 1, count: 2 }, prismaMock)
 
       assert.deepEqual(result, mockedReleasesResult)
       assert.equal(prismaMock.release.findMany.mock.calls[0].arguments[0]['skip'], 1)
@@ -33,7 +33,7 @@ describe('releasesService ', async () => {
     test('uses default start and count if not provided', async () => {
       setPrismaResult(mockedReleasesPrismaResult)
 
-      const result = await getAllReleases({}, prismaMock)
+      const result = await getReleases({}, prismaMock)
 
       assert.deepEqual(result, mockedReleasesResult)
       assert.equal(prismaMock.release.findMany.mock.calls[0].arguments[0]['skip'], 0)
@@ -43,7 +43,7 @@ describe('releasesService ', async () => {
     test('returns empty list if no results', async () => {
       setPrismaResult([])
 
-      const result = await getAllReleases({}, prismaMock)
+      const result = await geReleases({}, prismaMock)
 
       assert.deepEqual(result, [])
     })
@@ -59,7 +59,7 @@ describe('releasesService ', async () => {
     })
 
     test('applies filter when only shortname is provided', async () => {
-      await getAllReleases({ shortname: 'KPI' }, prismaMock)
+      await getReleases({ shortname: 'KPI' }, prismaMock)
 
       const where = prismaMock.release.findMany.mock.calls[0].arguments[0].where
       assert.deepEqual(where, {
@@ -68,7 +68,7 @@ describe('releasesService ', async () => {
     })
 
     test('applies filter when only variantId is provided', async () => {
-      await getAllReleases({ variantId: 1 }, prismaMock)
+      await getReleases({ variantId: 1 }, prismaMock)
 
       const where = prismaMock.release.findMany.mock.calls[0].arguments[0].where
       assert.deepEqual(where, { variant: { id: 1 } })
@@ -81,7 +81,7 @@ describe('releasesService ', async () => {
           : Promise.resolve({ id: 1 })
       )
 
-      await getAllReleases({ shortname: 'KPI', variantId: 1 }, prismaMock)
+      await getReleases({ shortname: 'KPI', variantId: 1 }, prismaMock)
 
       const where = prismaMock.release.findMany.mock.calls[0].arguments[0].where
       assert.deepEqual(where, {
@@ -92,7 +92,7 @@ describe('releasesService ', async () => {
     test('throws when statistic does not exist', async () => {
       prismaMock.statistic.findFirst = mock.fn(() => Promise.resolve(null))
 
-      await assert.rejects(() => getAllReleases({ shortname: 'BAD' }, prismaMock), {
+      await assert.rejects(() => getReleases({ shortname: 'BAD' }, prismaMock), {
         status: 404,
         statregError: "Statistic 'BAD' not found",
       })
@@ -101,7 +101,7 @@ describe('releasesService ', async () => {
     test('throws when variant does not exist', async () => {
       prismaMock.variant.findUnique = mock.fn(() => Promise.resolve(null))
 
-      await assert.rejects(() => getAllReleases({ variantId: 999 }, prismaMock), {
+      await assert.rejects(() => getReleases({ variantId: 999 }, prismaMock), {
         status: 404,
         statregError: "Variant '999' not found",
       })
@@ -114,7 +114,7 @@ describe('releasesService ', async () => {
           : Promise.resolve({ id: 1 })
       )
 
-      await assert.rejects(() => getAllReleases({ shortname: 'KPI', variantId: 1 }, prismaMock), {
+      await assert.rejects(() => getReleases({ shortname: 'KPI', variantId: 1 }, prismaMock), {
         status: 404,
         statregError: "Variant does not belong to statistic 'KPI'",
       })

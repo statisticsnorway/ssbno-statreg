@@ -1,6 +1,6 @@
 import type { Router } from 'express'
 import { getAllStatistics, getStatisticByShortname } from '@/services/statisticsService'
-import { getAllReleases } from '@/services/releasesService'
+import { getReleases } from '@/services/releasesService'
 import { skipAuth } from '@/../plugins/authMiddleware'
 import { handleErrors } from '@/lib/prismaErrors'
 import { prisma } from '@/lib/prisma'
@@ -33,7 +33,7 @@ export default function statisticsController(router: Router) {
       const start = req.query?.start ? Number(req.query.start) : undefined
       const count = req.query?.count ? Number(req.query.count) : undefined
 
-      const data = await getAllReleases({ start, count, shortname }, prisma)
+      const data = await getReleases({ start, count, shortname }, prisma)
       res.json(data)
     } catch (error) {
       return handleErrors(error, res)
@@ -48,7 +48,7 @@ export default function statisticsController(router: Router) {
       const start = req.query?.start ? Number(req.query.start) : undefined
       const count = req.query?.count ? Number(req.query.count) : undefined
 
-      const data = await getAllReleases({ start, count, shortname, variantId }, prisma)
+      const data = await getReleases({ start, count, shortname, variantId }, prisma)
       res.json(data)
     } catch (error) {
       return handleErrors(error, res)
