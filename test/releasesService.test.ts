@@ -98,9 +98,9 @@ describe('releasesService ', async () => {
     test('creates a new release and returns mapped results', async () => {
       setPrismaResult({ ...mockedSingleReleasePrismaResult, id: 1, version: 1, desk_appoval_status: 'FORSLAG' })
       const newReleaseInput = {
-        publish_time: '2024-10-15', // TODO: Pick a format that has timezones e.g. ISO
-        period_to: '2024-09-01',
-        period_from: '2024-08-01',
+        publish_time: '2024-10-15T08:00:00Z',
+        period_to: '2024-12-31T00:00:00Z',
+        period_from: '2024-09-01T00:00:00Z',
         release_date_precision: 'dag',
       }
 
@@ -110,9 +110,9 @@ describe('releasesService ', async () => {
       assert.deepStrictEqual(prismaMock.release.create.mock.callCount(), 1)
       assert.deepStrictEqual(prismaMock.release.create.mock.calls[0].arguments[0], {
         data: {
-          publish_time: new Date('2024-10-15'),
-          period_from: new Date('2024-08-01'),
-          period_to: new Date('2024-09-01'),
+          publish_time: new Date('2024-10-15T08:00:00Z'),
+          period_to: new Date('2024-12-31T00:00:00Z'),
+          period_from: new Date('2024-09-01T00:00:00Z'),
           desk_appoval_status: 'FORSLAG',
           release_date_precision: 'dag',
           has_versions: false,

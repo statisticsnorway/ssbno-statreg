@@ -153,9 +153,10 @@ export async function createRelease(
 
   const { publish_time, period_from, period_to, release_date_precision } = body
 
-  const publishTimeDate = validateAndParseDate(publish_time) // TODO: Help function for sperredato
-  const periodFromDate = validateAndParseDate(period_from)
-  const periodToDate = validateAndParseDate(period_to)
+  // TODO: Use function for blocked days once it's implemented; See JIRA issue MIM-2577
+  const publishTimeDate = validateAndParseDate(publish_time, false, 'publish_time')
+  const periodFromDate = validateAndParseDate(period_from, false, 'period_form')
+  const periodToDate = validateAndParseDate(period_to, false, 'period_to')
 
   await prisma.release.create({
     data: {
@@ -163,7 +164,6 @@ export async function createRelease(
       period_from: periodFromDate,
       period_to: periodToDate,
       release_date_precision: sanitize(release_date_precision!),
-      // TODO: Validate all fields after this point; double check "required" fields
       has_versions: false,
       cancelled: false,
       last_updated: now,
