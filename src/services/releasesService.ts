@@ -141,12 +141,13 @@ export async function createRelease(
   prisma: ReleasePrisma,
   shortname: string,
   variantId: string,
+  now: Date,
   body?: ReleaseCreate
 ): Promise<ReleaseDetails> {
   // TODO: Add helper functions for find shortname and variant_id
   // TODO: Validate shortname and variantId
   const variantIdNumber = Number(variantId)
-  const sanitizedShortname = sanitize(shortname)
+  const sanitizedShortname = sanitize(shortname) // TODO: May not be needed since variant can only have one statistic
 
   if (!body) return Promise.reject({ statregError: 'Invalid body' })
 
@@ -165,7 +166,10 @@ export async function createRelease(
       // TODO: Validate all fields after this point; double check "required" fields
       has_versions: false,
       cancelled: false,
+      last_updated: now,
+      date_created: now,
       desk_appoval_status: 'FORSLAG', // Enum from database; GODKJENT, FORSLAG (Venter på godkjenning), AVVIST. Should we reuse them?
+      comment: '', // TODO: Up for discussion; required in the db but not in the frontend
       variant: {
         connect: {
           id: variantIdNumber,
@@ -187,7 +191,7 @@ export async function createRelease(
 export async function updateRelease(id: string, body: ReleaseUpdate, prisma: ReleasePrisma): Promise<ReleaseDetails> {
   const idAsNumber = Number.parseInt(sanitize(id))
   if (isNaN(idAsNumber)) {
-    return Promise.reject({ statregError: 'Invalid release id' })
+    return Promise.reject({ statregError: 'Invalid release id' }) // TODO
   }
 
   if (!body.comment) return Promise.reject({ statregError: 'Required field `comment` is missing' })

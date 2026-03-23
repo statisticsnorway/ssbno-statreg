@@ -92,17 +92,20 @@ describe('releasesService ', async () => {
     })
   })
 
+  // TODO: Create a unit test for mapToReleaseDetails; consider moving mapping function to another file
+
   describe('createRelease ', () => {
     test('creates a new release and returns mapped results', async () => {
       setPrismaResult({ ...mockedSingleReleasePrismaResult, id: 1, version: 1, desk_appoval_status: 'FORSLAG' })
       const newReleaseInput = {
-        publish_time: '2024-10-15',
+        publish_time: '2024-10-15', // TODO: Pick a format that has timezones e.g. ISO
         period_to: '2024-09-01',
         period_from: '2024-08-01',
         release_date_precision: 'dag',
       }
 
-      const result = await createRelease(prismaMock, 'kpi', '1', newReleaseInput)
+      const now = new Date('2026-03-23T08:00:00Z')
+      const result = await createRelease(prismaMock, 'kpi', '1', now, newReleaseInput)
 
       assert.deepStrictEqual(prismaMock.release.create.mock.callCount(), 1)
       assert.deepStrictEqual(prismaMock.release.create.mock.calls[0].arguments[0], {
@@ -113,7 +116,10 @@ describe('releasesService ', async () => {
           desk_appoval_status: 'FORSLAG',
           release_date_precision: 'dag',
           has_versions: false,
+          last_updated: now,
+          date_created: now,
           cancelled: false,
+          comment: '',
           variant: {
             connect: {
               id: 1,
@@ -130,7 +136,9 @@ describe('releasesService ', async () => {
 
     test('returns 404 when release is not found', async () => {})
 
-    test('returns 400...', async () => {})
+    test('returns 400 when request body is invalid', async () => {})
+
+    test('returns 400 when request body is invalid', async () => {})
   })
 })
 
