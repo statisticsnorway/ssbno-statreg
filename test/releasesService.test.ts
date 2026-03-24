@@ -182,8 +182,7 @@ describe('releasesService ', async () => {
 
       // @ts-ignore; Type string[] is incompatible with publish_time type string
       await assert.rejects(() => createRelease(prismaMock, 'kpi', '1', now, newReleaseInput), {
-        statregError:
-          'Invalid publish_time date format in query parameter: 2024-10-15T08:00:00.000Z,2024-10-15T08:00:00.000Z',
+        statregError: 'Invalid publish_time date format: 2024-10-15T08:00:00.000Z,2024-10-15T08:00:00.000Z',
       })
       assert.strictEqual(prismaMock.release.create.mock.callCount(), 0)
       assert.strictEqual(prismaMock.release.findFirst.mock.callCount(), 0)
@@ -193,7 +192,7 @@ describe('releasesService ', async () => {
       const newReleaseInput = { ...mockCreateReleaseInput, period_to: '31. des' }
 
       await assert.rejects(() => createRelease(prismaMock, 'kpi', '1', now, newReleaseInput), {
-        statregError: 'Invalid period_to date format in query parameter: 31. des',
+        statregError: 'Invalid period_to date format: 31. des',
       })
       assert.strictEqual(prismaMock.release.create.mock.callCount(), 0)
       assert.strictEqual(prismaMock.release.findFirst.mock.callCount(), 0)
@@ -203,7 +202,7 @@ describe('releasesService ', async () => {
       const newReleaseInput = { ...mockCreateReleaseInput, period_from: '9999-11-00' }
 
       await assert.rejects(() => createRelease(prismaMock, 'kpi', '1', now, newReleaseInput), {
-        statregError: 'Invalid period_from date format in query parameter: 9999-11-00',
+        statregError: 'Invalid period_from date format: 9999-11-00',
       })
       assert.strictEqual(prismaMock.release.create.mock.callCount(), 0)
       assert.strictEqual(prismaMock.release.findFirst.mock.callCount(), 0)

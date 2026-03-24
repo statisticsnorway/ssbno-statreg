@@ -172,9 +172,9 @@ export async function createRelease(
    * Use function for blocked days once it's implemented; See JIRA issue MIM-2577
    * Automatic suggestion of period_to and period_from, and release date precision also have their respective tasks
    */
-  const publishTimeDate = validateAndParseDate(publish_time, false, 'publish_time')
-  const periodFromDate = validateAndParseDate(period_from, false, 'period_from')
-  const periodToDate = validateAndParseDate(period_to, false, 'period_to')
+  const publishTimeDate = validateAndParseDate(publish_time, 'publish_time')
+  const periodFromDate = validateAndParseDate(period_from, 'period_from')
+  const periodToDate = validateAndParseDate(period_to, 'period_to')
 
   await prisma.release.create({
     data: {
