@@ -176,7 +176,7 @@ export async function createRelease(
   const periodFromDate = validateAndParseDate(period_from, 'period_from')
   const periodToDate = validateAndParseDate(period_to, 'period_to')
 
-  await prisma.release.create({
+  const release = await prisma.release.create({
     data: {
       publish_time: publishTimeDate,
       period_from: periodFromDate,
@@ -194,11 +194,6 @@ export async function createRelease(
         },
       },
     },
-  })
-
-  // TODO: Use function from assert.ts when they are implemented
-  const release = await prisma.release.findFirst({
-    where: { variant: { id: variantIdNumber } },
     include: SELECT_VARIANT_DETAILS,
   })
 
@@ -222,7 +217,7 @@ export async function updateRelease(id: string, body: ReleaseUpdate, prisma: Rel
     data: {},
   })
 
-  // TODO: This check has been moved to mapToReleaseDetails() function
+  // TODO: You may not need this error since Prisma will give an error if update fails
   if (!release) return Promise.reject({ status: 404, statregError: 'Release id not found' })
 
   return mapToReleaseDetails(release)
@@ -258,8 +253,6 @@ const SELECT_VARIANT_DETAILS = {
 export function mapToReleaseDetails(
   prismaRelease: Prisma.ReleaseGetPayload<{ include: typeof SELECT_VARIANT_DETAILS }> | null
 ): ReleaseDetails {
-  if (!prismaRelease) throw { status: 404, statregError: 'Release not found' }
-
   const { statistic, frequency } = prismaRelease.variant ?? {}
 
   return {

@@ -22,8 +22,8 @@ describe('releasesService ', async () => {
     prismaMock = {
       release: {
         findMany: mock.fn(() => Promise.resolve(releasesResult)),
-        create: mock.fn((args) => Promise.resolve({ ...args, id: 0 })),
         findFirst: mock.fn(() => Promise.resolve(releasesResult)),
+        create: mock.fn(() => Promise.resolve({ ...releasesResult })),
       },
     }
   })
@@ -101,14 +101,7 @@ describe('releasesService ', async () => {
   })
 
   describe('mapToReleaseDetails ', () => {
-    // TODO: Add mapped result tests etc
-
-    test('returns 404 when prisma release result is null', () => {
-      assert.throws(() => mapToReleaseDetails(null), {
-        status: 404,
-        statregError: 'Release not found',
-      })
-    })
+    // TODO: Add tests for mapToReleaseDetails
   })
 
   describe('createRelease ', () => {
@@ -145,6 +138,32 @@ describe('releasesService ', async () => {
             },
           },
         },
+        include: {
+          variant: {
+            select: {
+              id: true,
+              frequency: {
+                select: {
+                  name: true,
+                  name_en: true,
+                },
+              },
+              revision: true,
+              statistic: {
+                select: {
+                  language: true,
+                  name: true,
+                  name_en: true,
+                  shortname: {
+                    select: {
+                      name: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
       })
       assert.deepStrictEqual(result, {
         ...mockedSingleReleaseResult,
@@ -158,7 +177,6 @@ describe('releasesService ', async () => {
         statregError: 'Missing required field(s): publish_time, period_from, period_to, release_date_precision',
       })
       assert.strictEqual(prismaMock.release.create.mock.callCount(), 0)
-      assert.strictEqual(prismaMock.release.findFirst.mock.callCount(), 0)
     })
 
     test('returns 400 if any of the required fields are missing', async () => {
@@ -171,7 +189,6 @@ describe('releasesService ', async () => {
         statregError: 'Missing required field(s): period_from, period_to',
       })
       assert.strictEqual(prismaMock.release.create.mock.callCount(), 0)
-      assert.strictEqual(prismaMock.release.findFirst.mock.callCount(), 0)
     })
   })
 })
