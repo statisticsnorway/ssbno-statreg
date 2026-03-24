@@ -1,6 +1,5 @@
 openapi: 3.1.0
-# Set required på obligatoriske felter
-# Se om vi kan få spekken opp til 3.1.0 versjon
+# yaml-language-server: $schema=https://spec.openapis.org/oas/3.1/schema/2022-10-07
 info:
   title: Statreg API
   version: 1.1.0
@@ -131,13 +130,52 @@ components:
               properties:
                 name: { $ref: '#/components/schemas/Translations', readOnly: true }
 
+    Statistic:
+      type: object
+      properties:
+        shortname: { type: string, readOnly: true }
+        main_language: { type: string }
+        status:
+          type: object
+          properties:
+            code: { type: string }
+        name: { $ref: '#/components/schemas/Translations' }
+        approval_status: { type: string }
+
+    Statistic_create:
+      allOf:
+        - $ref: '#/components/schemas/Statistic'
+      type: object
+      properties:
+        division: { type: string, nullable: true }
+        first_released_at:  { type: string, format: date, nullable: true }
+        yearly_reporting: { type: boolean}
+        statistic_region_levels:
+          type: array
+          items: { string }
+        previous_topic_codes: { type: string, nullable: true }
+
+    Statistic_update:
+      allOf:
+        - $ref: '#/components/schemas/Statistic'
+      type: object
+      properties:
+        division: { type: string, nullable: true }
+        first_released_at:  { type: string, format: date, nullable: true }
+        yearly_reporting: { type: boolean}
+        statistic_region_levels:
+          type: array
+          items: { string }
+        previous_topic_codes: { type: string, nullable: true }
+        relation:  { type: string, nullable: true }
+        comment: {type: string}
+
     Statistic_details:
+      allOf:
+        - $ref: '#/components/schemas/Statistic'
       type: object
       properties:
         version: { type: integer }
-        shortname: { type: string, readOnly: true }
-        approval_status: { type: string, nullable: true }
-        main_language: { type: string }
         division:
           type: object
           properties:
@@ -145,17 +183,12 @@ components:
             name: { $ref: '#/components/schemas/Translations', readOnly: true }
         first_released_at: { type: string, format: date, nullable: true }
         yearly_reporting: { type: boolean }
-        status:
-          type: object
-          properties:
-            code: { type: string }
         previous_topic_codes: { type: string, nullable: true }
         relation:
           type: object
           properties:
             shortname: { type: string }
             name: { $ref: '#/components/schemas/Translations', readOnly: true }
-        name: { $ref: '#/components/schemas/Translations' }
         updated_at: { type: string, format: date-time, readOnly: true }
         comment: { type: string }
         created_at: { type: string, format: date-time, readOnly: true }
@@ -175,15 +208,10 @@ components:
           items: { $ref: '#/components/schemas/Translations' }
 
     Statistic_listing:
+      allOf:
+        - $ref: '#/components/schemas/Statistic'
       type: object
       properties:
-        shortname: { type: string, readOnly: true }
-        main_language: { type: string }
-        status:
-          type: object
-          properties:
-            code: { type: string }
-        name: { $ref: '#/components/schemas/Translations' }
         contacts:
           type: array
           items:
@@ -239,7 +267,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/Statistic_details' }
+            schema: { $ref: '#/components/schemas/Statistic_create' }
       responses:
         '201':
           description: Statistic details
@@ -276,7 +304,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/Statistic_details' }
+            schema: { $ref: '#/components/schemas/Statistic_update' }
       responses:
         '200':
           description: Updated statistic details with all its variants
