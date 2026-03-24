@@ -165,8 +165,9 @@ export async function updateStatistic(
     main_language,
     comment,
   } = body
-  // TODO: validation of all parameters in body
 
+  // TODO MIM-2593: input validation
+  // TODO: Reuse shortname validation from MIM-2545
   const statisticId = await prisma.statistic.findFirst({
     where: { shortname: { name: sanitize(shortname) } },
     select: { id: true },
@@ -175,7 +176,7 @@ export async function updateStatistic(
   if (!statisticId) return Promise.reject({ status: 404, statregError: 'Shortname not found' })
 
   //TODO: Fikse name, regional_level så vi setter inn riktig verdi
-  //TODO: Make include statement to a variable
+  //TODO MIM-2590: Make include statement to a variable
   const statistic = await prisma.statistic.update({
     where: { id: statisticId.id },
     data: {
@@ -203,7 +204,7 @@ export async function updateStatistic(
     },
   })
 
-  //TODO: Refactor into a mapping function
+  //TODO MIM-2591: Refactor into mapping function
   return {
     version: statistic.version,
     shortname: statistic.shortname.name,
