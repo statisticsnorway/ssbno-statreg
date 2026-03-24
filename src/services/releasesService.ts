@@ -195,7 +195,7 @@ export async function createRelease(
   })
 
   const release = await prisma.release.findFirst({
-    where: { variant: { id: variantIdNumber, statistic: { shortname: { name: sanitizedShortname } } } },
+    where: { variant: { id: variantIdNumber } },
     include: SELECT_VARIANT_DETAILS,
   })
 
