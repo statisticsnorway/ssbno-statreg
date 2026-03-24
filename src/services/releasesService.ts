@@ -146,11 +146,10 @@ export async function createRelease(
   now: Date,
   body?: ReleaseCreate
 ): Promise<ReleaseDetails> {
-  // TODO: Add helper functions for find shortname and variant_id
+  // TODO: Add asssert functions for find shortname and variant_id
   // TODO: Validate shortname and variantId
   const variantIdNumber = Number(variantId)
-
-  // @ts-ignore; TODO: May not be needed since variant can only have one statistic
+  // @ts-ignore; TODO: Will be used in assert functions
   // eslint-disable-next-line no-unused-vars
   const sanitizedShortname = sanitize(shortname)
 
@@ -197,6 +196,7 @@ export async function createRelease(
     },
   })
 
+  // TODO: Use function from assert.ts when they are implemented
   const release = await prisma.release.findFirst({
     where: { variant: { id: variantIdNumber } },
     include: SELECT_VARIANT_DETAILS,
