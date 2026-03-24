@@ -1,21 +1,11 @@
 import type { Router } from 'express'
 import { getAllStatistics, getStatisticByShortname } from '@/services/statisticsService'
-import { getReleases } from '@/services/releasesService'
 import { skipAuth } from '@/../plugins/authMiddleware'
 import { handleErrors } from '@/lib/prismaErrors'
 import { prisma } from '@/lib/prisma'
 import { ensureString } from '@/lib/utils'
 
 export default function statisticsController(router: Router) {
-  router.get('/statistics/:shortname', skipAuth, async (req, res) => {
-    try {
-      const data = await getStatisticByShortname(ensureString(req.params.shortname), prisma)
-      res.json(data)
-    } catch (error) {
-      return handleErrors(error, res)
-    }
-  })
-
   router.get('/statistics', skipAuth, async (req, res) => {
     try {
       const start = req.query?.start ? Number(req.query.start) : undefined
@@ -26,15 +16,10 @@ export default function statisticsController(router: Router) {
       return handleErrors(error, res)
     }
   })
-  router.get('/statistics/:shortname/variants/:id/releases', skipAuth, async (req, res) => {
+
+  router.get('/statistics/:shortname', skipAuth, async (req, res) => {
     try {
-      const shortname = ensureString(req.params.shortname)
-      const variantId = Number(ensureString(req.params.id))
-
-      const start = req.query?.start ? Number(req.query.start) : undefined
-      const count = req.query?.count ? Number(req.query.count) : undefined
-
-      const data = await getReleases({ start, count, shortname, variantId }, prisma)
+      const data = await getStatisticByShortname(ensureString(req.params.shortname), prisma)
       res.json(data)
     } catch (error) {
       return handleErrors(error, res)
