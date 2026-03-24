@@ -15,21 +15,13 @@ export function sanitize(input: string): string {
   return input.trim().replace(/[^a-zA-Z0-9æøåÆØÅ.,:;!?()/\-\s]/g, '')
 }
 
-export function validateAndParseDate(
-  dateString: string | string[] | undefined,
-  dateOnly = true,
-  fieldName?: string
-): Date {
+export function validateAndParseDate(dateString: string | string[] | undefined, fieldName: string | undefined): Date {
   const errorMessage = () => ({
-    statregError: `Invalid${fieldName ? ` ${fieldName}` : ''} date format in query parameter${dateString ? `: ${dateString}` : ''}`,
+    statregError: ['Invalid', fieldName, 'date format:', dateString].filter(Boolean).join(' '),
   })
 
-  if (!dateString || Array.isArray(dateString)) {
-    throw errorMessage()
-  }
-
-  const dateOnlyRegEx = /^\d{4}-\d{2}-\d{2}$/ // e.g. YYYY-MM-dd
-  if (dateOnly && !dateOnlyRegEx.test(dateString)) {
+  const dateOrISORegex = /^\d{4}-\d{2}-\d{2}(?:T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z)?$/ // e.g. YYYY-MM-dd or YYYY-MM-DDTHH:mm:ssZ
+  if (!dateString || Array.isArray(dateString) || !dateOrISORegex.test(dateString)) {
     throw errorMessage()
   }
 
