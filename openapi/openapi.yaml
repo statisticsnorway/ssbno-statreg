@@ -3,10 +3,11 @@ openapi: 3.1.0
 # Se om vi kan få spekken opp til 3.1.0 versjon
 info:
   title: Statreg API
-  version: 1.1.0
-  description: API for managing publications, statistics and metadata for Statistics Norway
+  version: 0.1.0
+  description: API for managing publications, statistics and metadata for Statistics Norway. This API is under development, and there will be breaking changes.
 servers:
-  - url: https://ssb.no/statreg-api
+  - url: https://ssbno-statreg-api.intern.test.ssb.no
+  - url: http://localhost:8080
 
 tags:
   - name: calendar
