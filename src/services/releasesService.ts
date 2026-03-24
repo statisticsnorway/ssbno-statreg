@@ -158,7 +158,7 @@ export async function createRelease(
   if (!period_to) missingFields.push('period_to')
   if (!release_date_precision) missingFields.push('release_date_precision')
 
-  if (missingFields.length > 0) {
+  if (missingFields.length) {
     return Promise.reject({
       statregError: `Missing required field(s): ${missingFields.join(', ')}`,
       missingFields,
@@ -170,7 +170,7 @@ export async function createRelease(
    * Automatic suggestion of period_to and period_from, and release date precision also have their respective tasks
    */
   const publishTimeDate = validateAndParseDate(publish_time, false, 'publish_time')
-  const periodFromDate = validateAndParseDate(period_from, false, 'period_form')
+  const periodFromDate = validateAndParseDate(period_from, false, 'period_from')
   const periodToDate = validateAndParseDate(period_to, false, 'period_to')
 
   await prisma.release.create({

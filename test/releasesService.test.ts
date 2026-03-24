@@ -138,11 +138,21 @@ describe('releasesService ', async () => {
       })
     })
 
-    // TODO: Do we need the test below or is it redundant?
+    test('returns 404 when release is not found', async () => {
+      setPrismaResult(null)
+
+      await assert.rejects(() => createRelease(prismaMock, 'kpi', '1', now, mockCreateReleaseInput), {
+        status: 404,
+        statregError: 'Release not found',
+      })
+    })
+
     test('returns 400 if request body is empty', async () => {
       await assert.rejects(() => createRelease(prismaMock, 'kpi', '1', now, undefined), {
         statregError: 'Missing required field(s): publish_time, period_from, period_to, release_date_precision',
       })
+      assert.strictEqual(prismaMock.release.create.mock.callCount(), 0)
+      assert.strictEqual(prismaMock.release.findFirst.mock.callCount(), 0)
     })
 
     test('returns 400 if any of the required fields are missing', async () => {
@@ -154,18 +164,40 @@ describe('releasesService ', async () => {
       await assert.rejects(() => createRelease(prismaMock, 'kpi', '1', now, newReleaseInput), {
         statregError: 'Missing required field(s): period_from, period_to',
       })
+      assert.strictEqual(prismaMock.release.create.mock.callCount(), 0)
+      assert.strictEqual(prismaMock.release.findFirst.mock.callCount(), 0)
     })
 
-    test('returns 404 when release is not found', async () => {
-      setPrismaResult(null)
+    test('returns 400 for date input as list', async () => {
+      const newReleaseInput = { ...mockCreateReleaseInput, publish_time: ['2024-10-15T08:00:00.000Z'] }
 
-      await assert.rejects(() => createRelease(prismaMock, 'kpi', '1', now, mockCreateReleaseInput), {
-        status: 404,
-        statregError: 'Release not found',
+      // @ts-ignore; Type string[] is incompatible with publish_time type string
+      await assert.rejects(() => createRelease(prismaMock, 'kpi', '1', now, newReleaseInput), {
+        statregError: 'Invalid publish_time date format in query parameter',
       })
+      assert.strictEqual(prismaMock.release.create.mock.callCount(), 0)
+      assert.strictEqual(prismaMock.release.findFirst.mock.callCount(), 0)
     })
 
-    // TODO: Add tests for date validation
+    test('returns 400 for invalid date string format', async () => {
+      const newReleaseInput = { ...mockCreateReleaseInput, period_to: '31. des' }
+
+      await assert.rejects(() => createRelease(prismaMock, 'kpi', '1', now, newReleaseInput), {
+        statregError: 'Invalid period_to date format in query parameter',
+      })
+      assert.strictEqual(prismaMock.release.create.mock.callCount(), 0)
+      assert.strictEqual(prismaMock.release.findFirst.mock.callCount(), 0)
+    })
+
+    test('returns 400 if date parsing fails', async () => {
+      const newReleaseInput = { ...mockCreateReleaseInput, period_from: '9999-11-00' }
+
+      await assert.rejects(() => createRelease(prismaMock, 'kpi', '1', now, newReleaseInput), {
+        statregError: 'Invalid period_from date format in query parameter',
+      })
+      assert.strictEqual(prismaMock.release.create.mock.callCount(), 0)
+      assert.strictEqual(prismaMock.release.findFirst.mock.callCount(), 0)
+    })
   })
 })
 
