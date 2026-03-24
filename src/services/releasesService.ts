@@ -254,8 +254,8 @@ const SELECT_VARIANT_DETAILS = {
 
 export function mapToReleaseDetails(
   prismaRelease: Prisma.ReleaseGetPayload<{ include: typeof SELECT_VARIANT_DETAILS }> | null
-): Promise<ReleaseDetails> {
-  if (!prismaRelease) return Promise.reject({ status: 404, statregError: 'Release not found' })
+): ReleaseDetails {
+  if (!prismaRelease) throw { status: 404, statregError: 'Release not found' }
 
   const { statistic, frequency } = prismaRelease.variant ?? {}
 

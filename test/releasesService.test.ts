@@ -103,8 +103,8 @@ describe('releasesService ', async () => {
   describe('mapToReleaseDetails ', () => {
     // TODO: Add mapped result tests etc
 
-    test('returns 404 when prisma release result is null', async () => {
-      await assert.rejects(() => mapToReleaseDetails(null), {
+    test('returns 404 when prisma release result is null', () => {
+      assert.throws(() => mapToReleaseDetails(null), {
         status: 404,
         statregError: 'Release not found',
       })
