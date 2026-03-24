@@ -1,12 +1,6 @@
 import { describe, test, mock, beforeEach } from 'node:test'
 import assert from 'node:assert/strict'
-import {
-  getAllReleases,
-  getReleaseById,
-  updateRelease,
-  createRelease,
-  mapToReleaseDetails,
-} from '@/services/releasesService'
+import { getAllReleases, getReleaseById, updateRelease, createRelease } from '@/services/releasesService'
 import { ApprovalStatus } from '@/types/enums'
 
 let prismaMock: any

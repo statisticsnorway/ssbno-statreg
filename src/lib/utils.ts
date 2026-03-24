@@ -15,7 +15,7 @@ export function sanitize(input: string): string {
   return input.trim().replace(/[^a-zA-Z0-9æøåÆØÅ.,:;!?()/\-\s]/g, '')
 }
 
-export function validateAndParseDate(dateString: string | string[] | undefined, fieldName: string | undefined): Date {
+export function validateAndParseDate(dateString: string | string[] | undefined, fieldName = ''): Date {
   const errorMessage = () => ({
     statregError: ['Invalid', fieldName, 'date format:', dateString].filter(Boolean).join(' '),
   })
