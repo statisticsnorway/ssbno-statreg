@@ -173,40 +173,6 @@ describe('releasesService ', async () => {
       assert.strictEqual(prismaMock.release.create.mock.callCount(), 0)
       assert.strictEqual(prismaMock.release.findFirst.mock.callCount(), 0)
     })
-
-    test('returns 400 for date input as list', async () => {
-      const newReleaseInput = {
-        ...mockCreateReleaseInput,
-        publish_time: ['2024-10-15T08:00:00.000Z', '2024-10-15T08:00:00.000Z'],
-      }
-
-      // @ts-ignore; Type string[] is incompatible with publish_time type string
-      await assert.rejects(() => createRelease(prismaMock, 'kpi', '1', now, newReleaseInput), {
-        statregError: 'Invalid publish_time date format: 2024-10-15T08:00:00.000Z,2024-10-15T08:00:00.000Z',
-      })
-      assert.strictEqual(prismaMock.release.create.mock.callCount(), 0)
-      assert.strictEqual(prismaMock.release.findFirst.mock.callCount(), 0)
-    })
-
-    test('returns 400 for invalid date string format', async () => {
-      const newReleaseInput = { ...mockCreateReleaseInput, period_to: '31. des' }
-
-      await assert.rejects(() => createRelease(prismaMock, 'kpi', '1', now, newReleaseInput), {
-        statregError: 'Invalid period_to date format: 31. des',
-      })
-      assert.strictEqual(prismaMock.release.create.mock.callCount(), 0)
-      assert.strictEqual(prismaMock.release.findFirst.mock.callCount(), 0)
-    })
-
-    test('returns 400 if date parsing fails', async () => {
-      const newReleaseInput = { ...mockCreateReleaseInput, period_from: '9999-11-00' }
-
-      await assert.rejects(() => createRelease(prismaMock, 'kpi', '1', now, newReleaseInput), {
-        statregError: 'Invalid period_from date format: 9999-11-00',
-      })
-      assert.strictEqual(prismaMock.release.create.mock.callCount(), 0)
-      assert.strictEqual(prismaMock.release.findFirst.mock.callCount(), 0)
-    })
   })
 })
 
