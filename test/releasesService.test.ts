@@ -1,6 +1,12 @@
 import { describe, test, mock, beforeEach } from 'node:test'
 import assert from 'node:assert/strict'
-import { getAllReleases, getReleaseById, updateRelease, createRelease } from '@/services/releasesService'
+import {
+  getAllReleases,
+  getReleaseById,
+  updateRelease,
+  createRelease,
+  mapToReleaseDetails,
+} from '@/services/releasesService'
 import { ApprovalStatus } from '@/types/enums'
 
 let prismaMock: any
@@ -94,7 +100,16 @@ describe('releasesService ', async () => {
     })
   })
 
-  // TODO: Create a unit test for mapToReleaseDetails; consider moving mapping function to another file
+  describe('mapToReleaseDetails ', () => {
+    // TODO: Add mapped result tests etc
+
+    test('returns 404 when prisma release result is null', async () => {
+      await assert.rejects(() => mapToReleaseDetails(null), {
+        status: 404,
+        statregError: 'Release not found',
+      })
+    })
+  })
 
   describe('createRelease ', () => {
     beforeEach(() => {
@@ -135,15 +150,6 @@ describe('releasesService ', async () => {
         ...mockedSingleReleaseResult,
         has_versions: false,
         approval_status: ApprovalStatus.PENDING,
-      })
-    })
-
-    test('returns 404 when release is not found', async () => {
-      setPrismaResult(null)
-
-      await assert.rejects(() => createRelease(prismaMock, 'kpi', '1', now, mockCreateReleaseInput), {
-        status: 404,
-        statregError: 'Release not found',
       })
     })
 
