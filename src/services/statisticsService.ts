@@ -1,4 +1,4 @@
-import type { StatisticListing, StatisticDetails } from '@/types/index'
+import type { StatisticListing, StatisticDetails, StatisticUpdate } from '@/types/index'
 import { getLocalizedName, dateToISOString, sanitize } from '@/lib/utils'
 import type { PrismaClient, Prisma } from '@/generated/prisma/client'
 import { getDivisionFromCode } from '@/services/klassService'
@@ -101,7 +101,7 @@ export async function getStatisticByShortname(shortname: string, prisma: Statist
   return {
     version: statistic.version,
     shortname: statistic.shortname.name,
-    approval_status: statistic.desk_appoval_status,
+    approval_status: statistic.desk_appoval_status ?? undefined,
     main_language,
     division: {
       code: division_code,
@@ -128,6 +128,112 @@ export async function getStatisticByShortname(shortname: string, prisma: Statist
     comment: statistic.comment,
     created_at: dateToISOString(statistic.date_created),
     variants: parseStatisticVariants(statistic.variants, main_language, lang_en),
+    contacts: await fetchUsers(statistic.responsiblePersons).then((users) =>
+      users?.map((user) => {
+        const lookupUser = (user as UserLookupItem).user
+        const responsiblePerson = user as Users
+
+        return {
+          name: lookupUser?.displayName,
+          email: lookupUser?.email ?? (user as UserLookupItem).lookupEmail ?? responsiblePerson.email,
+          username: responsiblePerson.username as string | undefined,
+        }
+      })
+    ),
+    statistic_region_levels:
+      statistic.statistic_region_levels?.map(({ region_level }) =>
+        getLocalizedName(main_language, region_level.name)
+      ) ?? [],
+  }
+}
+
+export async function updateStatistic(
+  shortname: string,
+  body: StatisticUpdate,
+  prisma: StatisticPrisma
+): Promise<StatisticDetails> {
+  const {
+    division,
+    statistic_region_levels,
+    status,
+    name,
+    approval_status,
+    relation,
+    previous_topic_codes,
+    yearly_reporting,
+    first_released_at,
+    main_language,
+    comment,
+  } = body
+  // TODO: validation of all parameters in body
+
+  const statisticId = await prisma.statistic.findFirst({
+    where: { shortname: { name: sanitize(shortname) } },
+    select: { id: true },
+  })
+
+  if (!statisticId) return Promise.reject({ status: 404, statregError: 'Shortname not found' })
+
+  //TODO: Fikse name, regional_level så vi setter inn riktig verdi
+  //TODO: Make include statement to a variable
+  const statistic = await prisma.statistic.update({
+    where: { id: statisticId.id },
+    data: {
+      name: name![0]?.text,
+      name_en: name![1]?.text,
+      division_code: division,
+      desk_appoval_status: approval_status,
+      status: status!.code,
+      comment,
+      language: main_language,
+      related_statistic_id: relation ? Number(relation) : null,
+      legacy_topic_codes: previous_topic_codes,
+      yearly_reporting,
+      first_release: first_released_at,
+      statistic_region_levels: {},
+    },
+    include: {
+      shortname: { select: { name: true } },
+      responsiblePersons: { select: { email: true, username: true } },
+      related_statistic: { select: { language: true, name: true, name_en: true, shortname: true } },
+      statistic_region_levels: {
+        select: { region_level: { select: { name: true } } },
+      },
+      variants: VariantSelect,
+    },
+  })
+
+  //TODO: Refactor into a mapping function
+  return {
+    version: statistic.version,
+    shortname: statistic.shortname.name,
+    approval_status: statistic.desk_appoval_status ?? undefined,
+    main_language,
+    division: {
+      code: statistic.division_code,
+      name: [
+        ...getLocalizedName(main_language, getDivisionFromCode(Number(statistic.division_code))?.name),
+        ...getLocalizedName(lang_en, getDivisionFromCode(Number(statistic.division_code), lang_en)?.name),
+      ],
+    },
+    first_released_at: dateToISOString(statistic.first_release),
+    yearly_reporting: statistic.yearly_reporting,
+    status: {
+      code: statistic.status,
+    },
+    previous_topic_codes: statistic.legacy_topic_codes,
+    relation: {
+      shortname: statistic.related_statistic?.shortname?.name,
+      name: [
+        ...getLocalizedName(statistic.related_statistic?.language, statistic.related_statistic?.name),
+        ...getLocalizedName(lang_en, statistic.related_statistic?.name_en),
+      ],
+    },
+    name: [...getLocalizedName(main_language, statistic.name), ...getLocalizedName(lang_en, statistic.name_en)],
+    updated_at: dateToISOString(statistic.last_updated),
+    comment: statistic.comment,
+    created_at: dateToISOString(statistic.date_created),
+    variants: parseStatisticVariants(statistic.variants, statistic.language, lang_en),
     contacts: await fetchUsers(statistic.responsiblePersons).then((users) =>
       users?.map((user) => {
         const lookupUser = (user as UserLookupItem).user
