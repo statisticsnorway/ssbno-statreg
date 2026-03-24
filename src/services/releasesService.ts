@@ -149,7 +149,10 @@ export async function createRelease(
   // TODO: Add helper functions for find shortname and variant_id
   // TODO: Validate shortname and variantId
   const variantIdNumber = Number(variantId)
-  const sanitizedShortname = sanitize(shortname) // TODO: May not be needed since variant can only have one statistic
+
+  // @ts-ignore; TODO: May not be needed since variant can only have one statistic
+  // eslint-disable-next-line no-unused-vars
+  const sanitizedShortname = sanitize(shortname)
 
   const { publish_time, period_from, period_to, release_date_precision } = body ?? {}
 
