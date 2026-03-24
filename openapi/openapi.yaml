@@ -2,10 +2,11 @@ openapi: 3.1.0
 # yaml-language-server: $schema=https://spec.openapis.org/oas/3.1/schema/2022-10-07
 info:
   title: Statreg API
-  version: 1.1.0
-  description: API for managing publications, statistics and metadata for Statistics Norway
+  version: 0.1.0
+  description: API for managing publications, statistics and metadata for Statistics Norway. This API is under development, and there will be breaking changes.
 servers:
-  - url: https://ssb.no/statreg-api
+  - url: https://ssbno-statreg-api.intern.test.ssb.no
+  - url: http://localhost:8080
 
 tags:
   - name: calendar
