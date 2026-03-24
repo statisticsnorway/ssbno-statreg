@@ -82,7 +82,7 @@ describe('releasesService ', async () => {
 
     test('returns 404 if no release found', async () => {
       setPrismaResult(null)
-      await assert.rejects(() => getReleaseById('1', prismaMock), { status: 404, statregError: 'Release id not found' })
+      await assert.rejects(() => getReleaseById('1', prismaMock), { status: 404, statregError: 'Release not found' })
     })
   })
 
