@@ -2,6 +2,7 @@ import type { ReleaseDetails, ReleaseListing, ReleaseCreate, ReleaseUpdate } fro
 import { ApprovalStatus } from '@/types/enums'
 import { getLocalizedName, dateToISOString, sanitize, validateAndParseDate } from '@/lib/utils'
 import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
+import type { Prisma } from '@/generated/prisma/client'
 
 type ReleasePrisma = Pick<PrismaClient, 'release'>
 const lang_en = 'en'
@@ -198,8 +199,6 @@ export async function createRelease(
     include: SELECT_VARIANT_DETAILS,
   })
 
-  if (!release) return Promise.reject({ status: 404, statregError: 'Release not found' })
-
   return mapToReleaseDetails(release)
 }
 
@@ -220,7 +219,8 @@ export async function updateRelease(id: string, body: ReleaseUpdate, prisma: Rel
     data: {},
   })
 
-  if (!release) return Promise.reject({ status: 404, statregError: 'Release id not found' }) // TODO: Consider error `Release not found` instead
+  // TODO: This check has been moved to mapToReleaseDetails() function
+  if (!release) return Promise.reject({ status: 404, statregError: 'Release id not found' })
 
   return mapToReleaseDetails(release)
 }
@@ -252,7 +252,11 @@ const SELECT_VARIANT_DETAILS = {
   },
 }
 
-function mapToReleaseDetails(prismaRelease: any): ReleaseDetails {
+export function mapToReleaseDetails(
+  prismaRelease: Prisma.ReleaseGetPayload<{ include: typeof SELECT_VARIANT_DETAILS }> | null
+): Promise<ReleaseDetails> {
+  if (!prismaRelease) return Promise.reject({ status: 404, statregError: 'Release not found' })
+
   const { statistic, frequency } = prismaRelease.variant ?? {}
 
   return {
