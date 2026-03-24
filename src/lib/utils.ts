@@ -21,7 +21,7 @@ export function validateAndParseDate(
   fieldName?: string
 ): Date {
   const errorMessage = () => ({
-    statregError: `Invalid${fieldName ? ` ${fieldName}` : ''} date format in query parameter`,
+    statregError: `Invalid${fieldName ? ` ${fieldName}` : ''} date format in query parameter${dateString ? `: ${dateString}` : ''}`,
   })
 
   if (!dateString || Array.isArray(dateString)) {

@@ -99,11 +99,11 @@ describe('calendarService  ', () => {
     })
 
     test('returns 400 for date input as list', async () => {
-      const inputDate = ['2026-12-24']
+      const inputDate = ['2026-12-24', '2026-12-24']
       const inputComment = { blocked_comment: 'Julaften' }
 
       await assert.rejects(() => createBlockedReleaseDay(prismaMock, inputDate, inputComment), {
-        statregError: 'Invalid date format in query parameter',
+        statregError: 'Invalid date format in query parameter: 2026-12-24,2026-12-24',
       })
       assert.strictEqual(prismaMock.calender_date.create.mock.callCount(), 0)
       assert.strictEqual(prismaMock.calender_date.findMany.mock.callCount(), 0)
@@ -114,7 +114,7 @@ describe('calendarService  ', () => {
       const inputComment = { blocked_comment: 'Julaften' }
 
       await assert.rejects(() => createBlockedReleaseDay(prismaMock, inputDate, inputComment), {
-        statregError: 'Invalid date format in query parameter',
+        statregError: 'Invalid date format in query parameter: 24. des',
       })
       assert.strictEqual(prismaMock.calender_date.create.mock.callCount(), 0)
       assert.strictEqual(prismaMock.calender_date.findMany.mock.callCount(), 0)
@@ -125,7 +125,7 @@ describe('calendarService  ', () => {
       const inputComment = { blocked_comment: 'Julaften' }
 
       await assert.rejects(() => createBlockedReleaseDay(prismaMock, inputDate, inputComment), {
-        statregError: 'Invalid date format in query parameter',
+        statregError: 'Invalid date format in query parameter: 9999-11-00',
       })
       assert.strictEqual(prismaMock.calender_date.create.mock.callCount(), 0)
       assert.strictEqual(prismaMock.calender_date.findMany.mock.callCount(), 0)
