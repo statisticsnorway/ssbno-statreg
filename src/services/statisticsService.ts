@@ -232,37 +232,32 @@ export async function createStatistic(
 ): Promise<StatisticDetails> {
   const now = new Date()
 
-  let errorMessage = ''
-
-  // TODO: Fix proper validation!
+  // TODO: Fix proper validation! Check existance of shortname, as well as other parameters.
   const name: string | undefined = body.name?.find((p) => p.language_code == 'nb')?.text ?? ''
   const name_en: string | undefined = body.name?.find((p) => p.language_code == 'en')?.text
 
   if (!name) {
-    errorMessage = 'No name given, or name format incorrect'
+    return Promise.reject({ status: 400, statregError: 'Shortname is required' })
   }
 
-  if (!errorMessage) {
-    const result = await prisma.statistic.create({
-      data: {
-        name,
-        priority: 1,
-        name_en,
-        yearly_reporting: false,
-        status: 'KOMMENDE',
-        comment: body.comment ?? '',
-        language: 'nb',
-        date_created: now,
-        last_updated: now,
-        shortname: {
-          connect: {
-            name: shortname,
-          },
+  const result = await prisma.statistic.create({
+    data: {
+      name,
+      priority: 1,
+      name_en,
+      yearly_reporting: false,
+      status: 'KOMMENDE',
+      comment: body.comment ?? '',
+      language: 'nb',
+      date_created: now,
+      last_updated: now,
+      shortname: {
+        connect: {
+          name: shortname,
         },
       },
-      include: StatisticsDetailedIncludes,
-    })
-    return await mapStatisticDetails(result)
-  }
-  throw error(errorMessage)
+    },
+    include: StatisticsDetailedIncludes,
+  })
+  return await mapStatisticDetails(result)
 }
