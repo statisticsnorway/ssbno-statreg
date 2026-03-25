@@ -77,6 +77,8 @@ export async function getReleaseById(id: string, prisma: ReleasePrisma): Promise
     include: SELECT_VARIANT_DETAILS,
   })
 
+  if (!release) return Promise.reject({ status: 404, statregError: 'Release not found' })
+
   return mapToReleaseDetails(release)
 }
 
