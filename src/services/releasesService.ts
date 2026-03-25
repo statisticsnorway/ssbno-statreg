@@ -1,6 +1,6 @@
 import type { ReleaseDetails, ReleaseListing, ReleaseCreate, ReleaseUpdate } from '@/types/index'
 import { ApprovalStatus } from '@/types/enums'
-import { getLocalizedName, dateToISOString, sanitize, validateAndParseDate } from '@/lib/utils'
+import { getLocalizedName, dateToISOString, sanitize, validateDateISO } from '@/lib/utils'
 import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
 import type { Prisma } from '@/generated/prisma/client'
 
@@ -170,9 +170,9 @@ export async function createRelease(
 
   // TODO: MIM-2577: Use function for blocked days once it's implemented
   // TODO: Automatic suggestion of period_to and period_from is going to be solved in a seperate task
-  const publishTimeDate = validateAndParseDate(publish_time, 'publish_time')
-  const periodFromDate = validateAndParseDate(period_from, 'period_from')
-  const periodToDate = validateAndParseDate(period_to, 'period_to')
+  const publishTimeDate = validateDateISO(publish_time, 'publish_time')
+  const periodFromDate = validateDateISO(period_from, 'period_from')
+  const periodToDate = validateDateISO(period_to, 'period_to')
 
   const release = await prisma.release.create({
     data: {
