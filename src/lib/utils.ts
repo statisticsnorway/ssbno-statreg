@@ -2,11 +2,15 @@ import type { Translations } from '@/types'
 
 // For usage, remember to destructurize the function's content e.g. { name: [...getLocalizedName(language_code, text)] }
 export function getLocalizedName(language_code = 'nb', text: string | undefined | null): Translations {
-  return text ? [{ language_code, text }] : []
+  if (!text) return []
+
+  return [{ language_code, text }]
 }
 
 export function dateToISOString(date: Date | null): string | undefined {
-  return date ? date.toISOString() : undefined
+  if (!date) return
+
+  return date.toISOString()
 }
 
 export function sanitize(input: string): string {
@@ -26,9 +30,7 @@ export function validateId(id: string) {
 }
 
 export function reqParamToString(reqParam: string | string[]) {
-  if (Array.isArray(reqParam)) {
-    return reqParam[0]
-  }
+  if (Array.isArray(reqParam)) return reqParam[0]
 
   return reqParam
 }
