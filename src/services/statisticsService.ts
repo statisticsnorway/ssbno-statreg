@@ -157,9 +157,9 @@ export async function getStatisticByShortname(shortname: string, prisma: Statist
     where: { shortname: { name: sanitize(shortname) } },
     include: StatisticsDetailedIncludes,
   })
-  if (statistic) {
-    return mapStatisticDetails(statistic)
-  }
+  if (!statistic) return Promise.reject({ status: 404, statregError: 'Shortname not found' })
+
+  return mapStatisticDetails(statistic)
 }
 
 export async function updateStatistic(
