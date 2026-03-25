@@ -33,31 +33,7 @@ export interface paths {
       }
     }
     put?: never
-    /** Create a new statistic */
-    post: {
-      parameters: {
-        query?: never
-        header?: never
-        path?: never
-        cookie?: never
-      }
-      requestBody: {
-        content: {
-          'application/json': components['schemas']['Statistic_create']
-        }
-      }
-      responses: {
-        /** @description Statistic details */
-        201: {
-          headers: {
-            [name: string]: unknown
-          }
-          content: {
-            'application/json': components['schemas']['Statistic_details']
-          }
-        }
-      }
-    }
+    post?: never
     delete?: never
     options?: never
     head?: never
@@ -121,7 +97,31 @@ export interface paths {
         }
       }
     }
-    post?: never
+    /** Create a new statistic */
+    post: {
+      parameters: {
+        query?: never
+        header?: never
+        path?: never
+        cookie?: never
+      }
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['Statistic_create']
+        }
+      }
+      responses: {
+        /** @description Statistic details */
+        201: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            'application/json': components['schemas']['Statistic_details']
+          }
+        }
+      }
+    }
     delete?: never
     options?: never
     head?: never
@@ -729,6 +729,7 @@ export interface components {
       yearly_reporting?: boolean
       statistic_region_levels?: unknown[]
       previous_topic_codes?: string | null
+      comment?: string | null
     } & components['schemas']['Statistic']
     Statistic_update: {
       division?: string | null

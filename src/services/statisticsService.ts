@@ -1,9 +1,12 @@
 import type { StatisticListing, StatisticDetails } from '@/types/index'
 import { getLocalizedName, dateToISOString, sanitize } from '@/lib/utils'
-import type { PrismaClient, Prisma } from '@/generated/prisma/client'
+import type { Prisma } from '@/generated/prisma/client'
 import { getDivisionFromCode } from '@/services/klassService'
 import { fetchUsers } from '@/services/entraUserService'
 import type { UserLookupItem, Users } from '@/types/entra'
+import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
+import { paths } from '@/types/api-types'
+import { error } from 'node:console'
 
 type StatisticPrisma = Pick<PrismaClient, 'statistic'>
 const lang_en = 'en'
@@ -81,19 +84,25 @@ export function parseStatisticVariants(
 export async function getStatisticByShortname(shortname: string, prisma: StatisticPrisma): Promise<StatisticDetails> {
   const statistic = await prisma.statistic.findFirst({
     where: { shortname: { name: sanitize(shortname) } },
-    include: {
-      shortname: { select: { name: true } },
-      responsiblePersons: { select: { email: true, username: true } },
-      related_statistic: { select: { language: true, name: true, name_en: true, shortname: true } },
-      statistic_region_levels: {
-        select: { region_level: { select: { name: true } } },
-      },
-      variants: VariantSelect,
-    },
+    include: STATISTIC_DETAILS,
   })
 
   if (!statistic) return Promise.reject({ status: 404, statregError: 'Shortname not found' })
 
+  return await statisticDetails(statistic)
+}
+
+const STATISTIC_DETAILS = {
+  shortname: { select: { name: true } },
+  responsiblePersons: { select: { email: true, username: true } },
+  related_statistic: { select: { language: true, name: true, name_en: true, shortname: true } },
+  statistic_region_levels: {
+    select: { region_level: { select: { name: true } } },
+  },
+  variants: VariantSelect,
+}
+
+async function statisticDetails(statistic: Prisma.StatisticGetPayload<{ include: typeof STATISTIC_DETAILS }>) {
   const main_language = statistic.language
   const division_code = statistic.division_code
   const related_statistic = statistic.related_statistic
@@ -101,7 +110,7 @@ export async function getStatisticByShortname(shortname: string, prisma: Statist
   return {
     version: statistic.version,
     shortname: statistic.shortname.name,
-    approval_status: statistic.desk_appoval_status,
+    approval_status: statistic.desk_appoval_status ?? undefined,
     main_language,
     division: {
       code: division_code,
@@ -145,4 +154,46 @@ export async function getStatisticByShortname(shortname: string, prisma: Statist
         getLocalizedName(main_language, region_level.name)
       ) ?? [],
   }
+}
+
+export async function createStatistic(
+  prisma: StatisticPrisma,
+  body: paths['/statistics/{shortname}']['post']['requestBody']['content']['application/json'],
+  shortname: string
+): Promise<StatisticDetails> {
+  const now = new Date()
+
+  let errorMessage = ''
+
+  // TODO: Fix proper validation!
+  const name: string | undefined = body.name?.find((p) => p.language_code == 'nb')?.text ?? ''
+  const name_en: string | undefined = body.name?.find((p) => p.language_code == 'en')?.text
+
+  if (!name) {
+    errorMessage = 'No name given, or name format incorrect'
+  }
+
+  if (!errorMessage) {
+    const result = await prisma.statistic.create({
+      data: {
+        name,
+        priority: 1,
+        name_en,
+        yearly_reporting: false,
+        status: '',
+        comment: body.comment ?? '',
+        language: 'no',
+        date_created: now,
+        last_updated: now,
+        shortname: {
+          connect: {
+            name: shortname,
+          },
+        },
+      },
+      include: STATISTIC_DETAILS,
+    })
+    return await statisticDetails(result)
+  }
+  throw error(errorMessage)
 }
