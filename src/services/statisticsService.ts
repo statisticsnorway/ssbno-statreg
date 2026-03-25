@@ -1,11 +1,10 @@
-import type { StatisticListing, StatisticDetails, StatisticUpdate } from '@/types/index'
+import type { StatisticListing, StatisticDetails, StatisticUpdate, StatisticCreate } from '@/types/index'
 import { getLocalizedName, dateToISOString, sanitize } from '@/lib/utils'
 import type { Prisma } from '@/generated/prisma/client'
 import { getDivisionFromCode } from '@/services/klassService'
 import { fetchUsers } from '@/services/entraUserService'
 import type { UserLookupItem, Users } from '@/types/entra'
 import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
-import { paths } from '@/types/api-types'
 import { error } from 'node:console'
 import { ApprovalStatus } from '@/types/enums'
 
@@ -228,7 +227,7 @@ export async function updateStatistic(
 
 export async function createStatistic(
   prisma: StatisticPrisma,
-  body: paths['/statistics/{shortname}']['post']['requestBody']['content']['application/json'],
+  body: StatisticCreate,
   shortname: string
 ): Promise<StatisticDetails> {
   const now = new Date()
@@ -250,9 +249,9 @@ export async function createStatistic(
         priority: 1,
         name_en,
         yearly_reporting: false,
-        status: '',
+        status: 'KOMMENDE',
         comment: body.comment ?? '',
-        language: 'no',
+        language: 'nb',
         date_created: now,
         last_updated: now,
         shortname: {
