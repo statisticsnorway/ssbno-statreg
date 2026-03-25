@@ -109,19 +109,18 @@ export async function createRelease(
     })
   }
 
-  /* TODO:
-   * Use function for blocked days once it's implemented; See JIRA issue MIM-2577
-   * Automatic suggestion of period_to and period_from, and release date precision also have their respective tasks
-   */
-  const publishTimeDate = validateAndParseDate(publish_time, false, 'publish_time')
-  const periodFromDate = validateAndParseDate(period_from, false, 'period_from')
-  const periodToDate = validateAndParseDate(period_to, false, 'period_to')
+  // TODO: MIM-2577: Use function for blocked days once it's implemented
+  // TODO: Automatic suggestion of period_to and period_from is going to be solved in a seperate task
+  const publishTimeDate = validateAndParseDate(publish_time, 'publish_time')
+  const periodFromDate = validateAndParseDate(period_from, 'period_from')
+  const periodToDate = validateAndParseDate(period_to, 'period_to')
 
-  await prisma.release.create({
+  const release = await prisma.release.create({
     data: {
       publish_time: publishTimeDate,
       period_from: periodFromDate,
       period_to: periodToDate,
+      // TODO: Implementation of release_date_precision logic is going to be solved in a seperate task
       release_date_precision: sanitize(release_date_precision!),
       has_versions: false,
       cancelled: false,
@@ -135,11 +134,6 @@ export async function createRelease(
         },
       },
     },
-  })
-
-  // TODO: Use function from assert.ts when they are implemented
-  const release = await prisma.release.findFirst({
-    where: { variant: { id: variantIdNumber } },
     include: SELECT_VARIANT_DETAILS,
   })
 
@@ -163,7 +157,7 @@ export async function updateRelease(id: string, body: ReleaseUpdate, prisma: Rel
     data: {},
   })
 
-  // TODO: This check has been moved to mapToReleaseDetails() function
+  // TODO: You may not need this error since Prisma will give an error if update fails
   if (!release) return Promise.reject({ status: 404, statregError: 'Release id not found' })
 
   return mapToReleaseDetails(release)
@@ -197,10 +191,8 @@ const SELECT_VARIANT_DETAILS = {
 }
 
 export function mapToReleaseDetails(
-  prismaRelease: Prisma.ReleaseGetPayload<{ include: typeof SELECT_VARIANT_DETAILS }> | null
+  prismaRelease: Prisma.ReleaseGetPayload<{ include: typeof SELECT_VARIANT_DETAILS }>
 ): ReleaseDetails {
-  if (!prismaRelease) throw { status: 404, statregError: 'Release not found' }
-
   const { statistic, frequency } = prismaRelease.variant ?? {}
 
   return {

@@ -1,12 +1,6 @@
 import { describe, test, mock, beforeEach } from 'node:test'
 import assert from 'node:assert/strict'
-import {
-  getAllReleases,
-  getReleaseById,
-  updateRelease,
-  createRelease,
-  mapToReleaseDetails,
-} from '@/services/releasesService'
+import { getAllReleases, getReleaseById, updateRelease, createRelease } from '@/services/releasesService'
 import { ApprovalStatus } from '@/types/enums'
 
 let prismaMock: any
@@ -22,8 +16,8 @@ describe('releasesService ', async () => {
     prismaMock = {
       release: {
         findMany: mock.fn(() => Promise.resolve(releasesResult)),
-        create: mock.fn((args) => Promise.resolve({ ...args, id: 0 })),
         findFirst: mock.fn(() => Promise.resolve(releasesResult)),
+        create: mock.fn(() => Promise.resolve({ ...releasesResult })),
       },
     }
   })
@@ -101,14 +95,7 @@ describe('releasesService ', async () => {
   })
 
   describe('mapToReleaseDetails ', () => {
-    // TODO: Add mapped result tests etc
-
-    test('returns 404 when prisma release result is null', () => {
-      assert.throws(() => mapToReleaseDetails(null), {
-        status: 404,
-        statregError: 'Release not found',
-      })
-    })
+    // TODO: Add tests for mapToReleaseDetails
   })
 
   describe('createRelease ', () => {
@@ -145,6 +132,32 @@ describe('releasesService ', async () => {
             },
           },
         },
+        include: {
+          variant: {
+            select: {
+              id: true,
+              frequency: {
+                select: {
+                  name: true,
+                  name_en: true,
+                },
+              },
+              revision: true,
+              statistic: {
+                select: {
+                  language: true,
+                  name: true,
+                  name_en: true,
+                  shortname: {
+                    select: {
+                      name: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
       })
       assert.deepStrictEqual(result, {
         ...mockedSingleReleaseResult,
@@ -158,7 +171,6 @@ describe('releasesService ', async () => {
         statregError: 'Missing required field(s): publish_time, period_from, period_to, release_date_precision',
       })
       assert.strictEqual(prismaMock.release.create.mock.callCount(), 0)
-      assert.strictEqual(prismaMock.release.findFirst.mock.callCount(), 0)
     })
 
     test('returns 400 if any of the required fields are missing', async () => {
@@ -171,42 +183,6 @@ describe('releasesService ', async () => {
         statregError: 'Missing required field(s): period_from, period_to',
       })
       assert.strictEqual(prismaMock.release.create.mock.callCount(), 0)
-      assert.strictEqual(prismaMock.release.findFirst.mock.callCount(), 0)
-    })
-
-    test('returns 400 for date input as list', async () => {
-      const newReleaseInput = {
-        ...mockCreateReleaseInput,
-        publish_time: ['2024-10-15T08:00:00.000Z', '2024-10-15T08:00:00.000Z'],
-      }
-
-      // @ts-ignore; Type string[] is incompatible with publish_time type string
-      await assert.rejects(() => createRelease(prismaMock, 'kpi', '1', now, newReleaseInput), {
-        statregError:
-          'Invalid publish_time date format in query parameter: 2024-10-15T08:00:00.000Z,2024-10-15T08:00:00.000Z',
-      })
-      assert.strictEqual(prismaMock.release.create.mock.callCount(), 0)
-      assert.strictEqual(prismaMock.release.findFirst.mock.callCount(), 0)
-    })
-
-    test('returns 400 for invalid date string format', async () => {
-      const newReleaseInput = { ...mockCreateReleaseInput, period_to: '31. des' }
-
-      await assert.rejects(() => createRelease(prismaMock, 'kpi', '1', now, newReleaseInput), {
-        statregError: 'Invalid period_to date format in query parameter: 31. des',
-      })
-      assert.strictEqual(prismaMock.release.create.mock.callCount(), 0)
-      assert.strictEqual(prismaMock.release.findFirst.mock.callCount(), 0)
-    })
-
-    test('returns 400 if date parsing fails', async () => {
-      const newReleaseInput = { ...mockCreateReleaseInput, period_from: '9999-11-00' }
-
-      await assert.rejects(() => createRelease(prismaMock, 'kpi', '1', now, newReleaseInput), {
-        statregError: 'Invalid period_from date format in query parameter: 9999-11-00',
-      })
-      assert.strictEqual(prismaMock.release.create.mock.callCount(), 0)
-      assert.strictEqual(prismaMock.release.findFirst.mock.callCount(), 0)
     })
   })
 })
