@@ -236,7 +236,7 @@ export async function createStatistic(
   const name_en: string | undefined = body.name?.find((p) => p.language_code == 'en')?.text
 
   if (!name) {
-    return Promise.reject({ status: 400, statregError: 'Shortname is required' })
+    return Promise.reject({ status: 400, statregError: 'Norwegian name is required' })
   }
 
   const result = await prisma.statistic.create({
