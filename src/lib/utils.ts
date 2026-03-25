@@ -15,22 +15,20 @@ export function sanitize(input: string): string {
   return input.trim().replace(/[^a-zA-Z0-9æøåÆØÅ.,:;!?()/\-\s]/g, '')
 }
 
-export function validateDateOnly(dateString: string | string[] | undefined, fieldName = '') {
+type DateString = string | string[] | undefined
+
+export function validateDateOnly(dateString: DateString, fieldName = '') {
   const dateOnlyRegex = /^\d{4}-\d{2}-\d{2}$/ // e.g. YYYY-MM-dd
   return validateAndParseDate(dateString, fieldName, dateOnlyRegex)
 }
 
-export function validateDateISO(dateString: string | string[] | undefined, fieldName = '') {
+export function validateDateISO(dateString: DateString, fieldName = '') {
   // TODO: MIM-2546: Confirm if this regEx covers all our required valid date ISO formats
   const dateISORegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/ // YYYY-MM-DDTHH:mm:ssZ
   return validateAndParseDate(dateString, fieldName, dateISORegex)
 }
 
-export function validateAndParseDate(
-  dateString: string | string[] | undefined,
-  fieldName: string,
-  dateRegEx: RegExp
-): Date {
+export function validateAndParseDate(dateString: DateString, fieldName: string, dateRegEx: RegExp): Date {
   const errorMessage = () => ({
     statregError: ['Invalid', fieldName, 'date format:', dateString].filter(Boolean).join(' '),
   })
