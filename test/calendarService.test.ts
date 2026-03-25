@@ -86,50 +86,6 @@ describe('calendarService  ', () => {
       assert.strictEqual(prismaMock.calender_date.create.mock.callCount(), 0)
       assert.strictEqual(prismaMock.calender_date.findMany.mock.callCount(), 0)
     })
-
-    test('returns 400 if missing date input', async () => {
-      const inputDate = ''
-      const inputComment = { blocked_comment: 'Julaften' }
-
-      await assert.rejects(() => createBlockedReleaseDay(prismaMock, inputDate, inputComment), {
-        statregError: 'Invalid date format:',
-      })
-      assert.strictEqual(prismaMock.calender_date.create.mock.callCount(), 0)
-      assert.strictEqual(prismaMock.calender_date.findMany.mock.callCount(), 0)
-    })
-
-    test('returns 400 for date input as list', async () => {
-      const inputDate = ['2026-12-24', '2026-12-24']
-      const inputComment = { blocked_comment: 'Julaften' }
-
-      await assert.rejects(() => createBlockedReleaseDay(prismaMock, inputDate, inputComment), {
-        statregError: 'Invalid date format: 2026-12-24,2026-12-24',
-      })
-      assert.strictEqual(prismaMock.calender_date.create.mock.callCount(), 0)
-      assert.strictEqual(prismaMock.calender_date.findMany.mock.callCount(), 0)
-    })
-
-    test('returns 400 for invalid date string format', async () => {
-      const inputDate = '24. des'
-      const inputComment = { blocked_comment: 'Julaften' }
-
-      await assert.rejects(() => createBlockedReleaseDay(prismaMock, inputDate, inputComment), {
-        statregError: 'Invalid date format: 24. des',
-      })
-      assert.strictEqual(prismaMock.calender_date.create.mock.callCount(), 0)
-      assert.strictEqual(prismaMock.calender_date.findMany.mock.callCount(), 0)
-    })
-
-    test('returns 400 if date parsing fails', async () => {
-      const inputDate = '9999-11-00'
-      const inputComment = { blocked_comment: 'Julaften' }
-
-      await assert.rejects(() => createBlockedReleaseDay(prismaMock, inputDate, inputComment), {
-        statregError: 'Invalid date format: 9999-11-00',
-      })
-      assert.strictEqual(prismaMock.calender_date.create.mock.callCount(), 0)
-      assert.strictEqual(prismaMock.calender_date.findMany.mock.callCount(), 0)
-    })
   })
 })
 

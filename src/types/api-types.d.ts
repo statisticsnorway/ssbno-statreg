@@ -727,7 +727,8 @@ export interface components {
       /** Format: date */
       first_released_at?: string | null
       yearly_reporting?: boolean
-      statistic_region_levels?: unknown[]
+      /** @description Array with region levels. Valid region levels are K (kommune), F (fylke), LD (landsdel), L (land) and BD (Bydel og krets) */
+      statistic_region_levels?: string[]
       previous_topic_codes?: string | null
       comment?: string | null
     } & components['schemas']['Statistic']
@@ -736,7 +737,8 @@ export interface components {
       /** Format: date */
       first_released_at?: string | null
       yearly_reporting?: boolean
-      statistic_region_levels?: unknown[]
+      /** @description Array with region levels. Valid region levels are K (kommune), F (fylke), LD (landsdel), L (land) and BD (Bydel og krets) */
+      statistic_region_levels?: string[]
       previous_topic_codes?: string | null
       relation?: string | null
       comment?: string

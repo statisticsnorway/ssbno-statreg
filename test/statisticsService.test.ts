@@ -8,6 +8,8 @@ function setStatisticsResult(next: object | null) {
   statisticsResult = next
 }
 
+// TODO MIM-2592: Add unit tests for updateStatistic()
+
 describe('statisticService ', async () => {
   const fetchUsersMock: any = mock.fn(async () => [
     {
