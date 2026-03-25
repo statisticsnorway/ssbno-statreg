@@ -102,7 +102,7 @@ export async function getStatisticByShortname(shortname: string, prisma: Statist
   return {
     version: statistic.version,
     shortname: statistic.shortname.name,
-    approval_status: statistic.desk_appoval_status ?? undefined,
+    approval_status: statistic.desk_appoval_status ?? ApprovalStatus.PENDING,
     main_language,
     division: {
       code: division_code,
