@@ -5,7 +5,6 @@ import { getDivisionFromCode } from '@/services/klassService'
 import { fetchUsers } from '@/services/entraUserService'
 import type { UserLookupItem, Users } from '@/types/entra'
 import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
-import { error } from 'node:console'
 import { ApprovalStatus } from '@/types/enums'
 
 type StatisticPrisma = Pick<PrismaClient, 'statistic'>
