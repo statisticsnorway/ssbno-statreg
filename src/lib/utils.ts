@@ -20,19 +20,13 @@ export function sanitize(input: string): string {
 }
 
 export function validateId(id: string) {
-  const idAsNumber = Number.parseInt(sanitize(id))
+  const idAsNumber = Number.parseInt(id)
 
   if (isNaN(idAsNumber)) {
     throw { statregError: 'Invalid id format' }
   }
 
   return idAsNumber
-}
-
-export function reqParamToString(reqParam: string | string[]) {
-  if (Array.isArray(reqParam)) return reqParam[0]
-
-  return reqParam
 }
 
 export function validateAndParseDate(dateString: string | string[] | undefined, fieldName = ''): Date {
