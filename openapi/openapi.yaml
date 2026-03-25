@@ -153,7 +153,8 @@ components:
         yearly_reporting: { type: boolean}
         statistic_region_levels:
           type: array
-          items: { string }
+          items: { type: string }
+          description: 'Array with region levels. Valid region levels are K (kommune), F (fylke), LD (landsdel), L (land) and BD (Bydel og krets)'
         previous_topic_codes: { type: string, nullable: true }
 
     Statistic_update:
@@ -166,7 +167,8 @@ components:
         yearly_reporting: { type: boolean}
         statistic_region_levels:
           type: array
-          items: { string }
+          items: { type: string }
+          description: 'Array with region levels. Valid region levels are K (kommune), F (fylke), LD (landsdel), L (land) and BD (Bydel og krets)'
         previous_topic_codes: { type: string, nullable: true }
         relation:  { type: string, nullable: true }
         comment: {type: string}

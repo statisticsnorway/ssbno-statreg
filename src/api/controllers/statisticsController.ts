@@ -1,5 +1,5 @@
 import type { Router } from 'express'
-import { getAllStatistics, getStatisticByShortname } from '@/services/statisticsService'
+import { getAllStatistics, getStatisticByShortname, updateStatistic } from '@/services/statisticsService'
 import { skipAuth } from '@/../plugins/authMiddleware'
 import { handleErrors } from '@/lib/prismaErrors'
 import { prisma } from '@/lib/prisma'
@@ -23,6 +23,16 @@ export default function statisticsController(router: Router) {
       const count = req.query?.count ? Number(req.query.count) : undefined
       const data = await getAllStatistics({ start, count }, prisma)
       res.json(data)
+    } catch (error) {
+      return handleErrors(error, res)
+    }
+  })
+
+  router.put('/statistics/:shortname', async (req, res) => {
+    try {
+      const shortname = Array.isArray(req.params.shortname) ? req.params.shortname[0] : req.params.shortname
+      const result = await updateStatistic(shortname!, req.body, prisma)
+      res.json(result)
     } catch (error) {
       return handleErrors(error, res)
     }
