@@ -8,7 +8,6 @@ import {
 import { requireAdminAuthorization, skipAuth } from '@/../plugins/authMiddleware'
 import { handleErrors } from '@/lib/prismaErrors'
 import { prisma } from '@/lib/prisma'
-import { requireUserGroupAuthorization } from 'plugins/authMiddleware'
 
 export default function statisticsController(router: Router) {
   router.get('/statistics/:shortname', skipAuth, async (req, res) => {
@@ -23,7 +22,7 @@ export default function statisticsController(router: Router) {
     }
   })
 
-  router.post('/statistics/:shortname', requireUserGroupAuthorization('ssbno-developers'), async (req, res) => {
+  router.post('/statistics/:shortname', requireAdminAuthorization(), async (req, res) => {
     try {
       res.json(await createStatistic(prisma, req.body, req.params.shortname as string))
     } catch (error) {
