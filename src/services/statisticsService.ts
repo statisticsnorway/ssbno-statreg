@@ -44,11 +44,25 @@ export async function getAllStatistics(
 
 // Statistic details
 
+// @ts-ignore; TODO: Remove ts-ignore and eslint-disable-next-line once implemented
+// eslint-disable-next-line no-unused-vars
+type StatisticPrismaResult = Prisma.StatisticGetPayload<{ include: typeof StatisticsDetailedIncludes }>
+
 const VariantSelect = {
   omit: { version: true, statistic_id: true, freq_id: true },
   include: {
     frequency: { select: { name: true, name_en: true } },
   },
+}
+
+const StatisticsDetailedIncludes = {
+  shortname: { select: { name: true } },
+  responsiblePersons: { select: { email: true, username: true } },
+  related_statistic: { select: { language: true, name: true, name_en: true, shortname: true } },
+  statistic_region_levels: {
+    select: { region_level: { select: { name: true } } },
+  },
+  variants: VariantSelect,
 }
 
 export function parseStatisticVariants(
@@ -82,15 +96,7 @@ export function parseStatisticVariants(
 export async function getStatisticByShortname(shortname: string, prisma: StatisticPrisma): Promise<StatisticDetails> {
   const statistic = await prisma.statistic.findFirst({
     where: { shortname: { name: sanitize(shortname) } },
-    include: {
-      shortname: { select: { name: true } },
-      responsiblePersons: { select: { email: true, username: true } },
-      related_statistic: { select: { language: true, name: true, name_en: true, shortname: true } },
-      statistic_region_levels: {
-        select: { region_level: { select: { name: true } } },
-      },
-      variants: VariantSelect,
-    },
+    include: StatisticsDetailedIncludes,
   })
 
   if (!statistic) return Promise.reject({ status: 404, statregError: 'Shortname not found' })
