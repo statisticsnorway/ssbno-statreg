@@ -1,12 +1,12 @@
 openapi: 3.1.0
-# Set required på obligatoriske felter
-# Se om vi kan få spekken opp til 3.1.0 versjon
+# yaml-language-server: $schema=https://spec.openapis.org/oas/3.1/schema/2022-10-07
 info:
   title: Statreg API
-  version: 1.1.0
-  description: API for managing publications, statistics and metadata for Statistics Norway
+  version: 0.1.0
+  description: API for managing publications, statistics and metadata for Statistics Norway. This API is under development, and there will be breaking changes.
 servers:
-  - url: https://ssb.no/statreg-api
+  - url: https://ssbno-statreg-api.intern.test.ssb.no
+  - url: http://localhost:8080
 
 tags:
   - name: calendar
@@ -18,7 +18,16 @@ tags:
   - name: statistics
     description: Statistics information and manipulation
 
+security:
+  - keykloak_token: []
+
 components:
+  securitySchemes:
+    keykloak_token:
+      type: http
+      scheme: bearer
+      description: A token granted by Statistics Norway's Keycloak instance for ssbno-statreg-api.
+
   schemas:
     Blocked_release_date:
       type: object
@@ -122,13 +131,52 @@ components:
               properties:
                 name: { $ref: '#/components/schemas/Translations', readOnly: true }
 
+    Statistic:
+      type: object
+      properties:
+        shortname: { type: string, readOnly: true }
+        main_language: { type: string }
+        status:
+          type: object
+          properties:
+            code: { type: string }
+        name: { $ref: '#/components/schemas/Translations' }
+        approval_status: { type: string }
+
+    Statistic_create:
+      allOf:
+        - $ref: '#/components/schemas/Statistic'
+      type: object
+      properties:
+        division: { type: string, nullable: true }
+        first_released_at:  { type: string, format: date, nullable: true }
+        yearly_reporting: { type: boolean}
+        statistic_region_levels:
+          type: array
+          items: { string }
+        previous_topic_codes: { type: string, nullable: true }
+
+    Statistic_update:
+      allOf:
+        - $ref: '#/components/schemas/Statistic'
+      type: object
+      properties:
+        division: { type: string, nullable: true }
+        first_released_at:  { type: string, format: date, nullable: true }
+        yearly_reporting: { type: boolean}
+        statistic_region_levels:
+          type: array
+          items: { string }
+        previous_topic_codes: { type: string, nullable: true }
+        relation:  { type: string, nullable: true }
+        comment: {type: string}
+
     Statistic_details:
+      allOf:
+        - $ref: '#/components/schemas/Statistic'
       type: object
       properties:
         version: { type: integer }
-        shortname: { type: string, readOnly: true }
-        approval_status: { type: string, nullable: true }
-        main_language: { type: string }
         division:
           type: object
           properties:
@@ -136,17 +184,12 @@ components:
             name: { $ref: '#/components/schemas/Translations', readOnly: true }
         first_released_at: { type: string, format: date, nullable: true }
         yearly_reporting: { type: boolean }
-        status:
-          type: object
-          properties:
-            code: { type: string }
         previous_topic_codes: { type: string, nullable: true }
         relation:
           type: object
           properties:
             shortname: { type: string }
             name: { $ref: '#/components/schemas/Translations', readOnly: true }
-        name: { $ref: '#/components/schemas/Translations' }
         updated_at: { type: string, format: date-time, readOnly: true }
         comment: { type: string }
         created_at: { type: string, format: date-time, readOnly: true }
@@ -166,15 +209,10 @@ components:
           items: { $ref: '#/components/schemas/Translations' }
 
     Statistic_listing:
+      allOf:
+        - $ref: '#/components/schemas/Statistic'
       type: object
       properties:
-        shortname: { type: string, readOnly: true }
-        main_language: { type: string }
-        status:
-          type: object
-          properties:
-            code: { type: string }
-        name: { $ref: '#/components/schemas/Translations' }
         contacts:
           type: array
           items:
@@ -213,6 +251,7 @@ paths:
   /statistics:
     get:
       summary: List of all statistics
+      security: []
       tags: [statistics]
       responses:
         '200':
@@ -229,7 +268,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/Statistic_details' }
+            schema: { $ref: '#/components/schemas/Statistic_create' }
       responses:
         '201':
           description: Statistic details
@@ -239,6 +278,7 @@ paths:
   /statistics/{shortname}:
     get:
       summary: Get a statistic by its shortname
+      security: []
       tags: [statistics]
       parameters:
         - name: shortname
@@ -265,7 +305,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/Statistic_details' }
+            schema: { $ref: '#/components/schemas/Statistic_update' }
       responses:
         '200':
           description: Updated statistic details with all its variants
@@ -342,6 +382,7 @@ paths:
   /releases:
     get:
       summary: List all releases. TBD; Pagination and filtering in backend or frontend
+      security: []
       tags: [releases]
       responses:
         '200':
@@ -354,6 +395,7 @@ paths:
   /releases/{id}:
     get:
       summary: Get release by id
+      security: []
       tags: [releases]
       parameters:
         - name: id
@@ -420,6 +462,7 @@ paths:
   /calendar:
     get:
       summary: List all days within date range with releases, statuses, nonreleaseing days and reasons using defult parameters
+      security: []
       tags: [calendar]
       responses:
         '200':
@@ -432,6 +475,7 @@ paths:
   /calendar/{fromdate}-{todate}:
     get:
       summary: List all days within date range with releases, statuses, nonreleaseing days and reasons
+      security: []
       tags: [calendar]
       parameters:
         - name: fromdate

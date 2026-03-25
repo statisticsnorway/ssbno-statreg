@@ -43,7 +43,7 @@ export interface paths {
       }
       requestBody: {
         content: {
-          'application/json': components['schemas']['Statistic_details']
+          'application/json': components['schemas']['Statistic_create']
         }
       }
       responses: {
@@ -106,7 +106,7 @@ export interface paths {
       }
       requestBody: {
         content: {
-          'application/json': components['schemas']['Statistic_details']
+          'application/json': components['schemas']['Statistic_update']
         }
       }
       responses: {
@@ -713,11 +713,35 @@ export interface components {
         readonly name?: components['schemas']['Translations']
       }
     }
+    Statistic: {
+      readonly shortname?: string
+      main_language?: string
+      status?: {
+        code?: string
+      }
+      name?: components['schemas']['Translations']
+      approval_status?: string
+    }
+    Statistic_create: {
+      division?: string | null
+      /** Format: date */
+      first_released_at?: string | null
+      yearly_reporting?: boolean
+      statistic_region_levels?: unknown[]
+      previous_topic_codes?: string | null
+    } & components['schemas']['Statistic']
+    Statistic_update: {
+      division?: string | null
+      /** Format: date */
+      first_released_at?: string | null
+      yearly_reporting?: boolean
+      statistic_region_levels?: unknown[]
+      previous_topic_codes?: string | null
+      relation?: string | null
+      comment?: string
+    } & components['schemas']['Statistic']
     Statistic_details: {
       version?: number
-      readonly shortname?: string
-      approval_status?: string | null
-      main_language?: string
       division?: {
         code?: string | null
         readonly name?: components['schemas']['Translations']
@@ -725,15 +749,11 @@ export interface components {
       /** Format: date */
       first_released_at?: string | null
       yearly_reporting?: boolean
-      status?: {
-        code?: string
-      }
       previous_topic_codes?: string | null
       relation?: {
         shortname?: string
         readonly name?: components['schemas']['Translations']
       }
-      name?: components['schemas']['Translations']
       /** Format: date-time */
       readonly updated_at?: string
       comment?: string
@@ -746,19 +766,13 @@ export interface components {
         name?: string
       }[]
       statistic_region_levels?: components['schemas']['Translations'][]
-    }
+    } & components['schemas']['Statistic']
     Statistic_listing: {
-      readonly shortname?: string
-      main_language?: string
-      status?: {
-        code?: string
-      }
-      name?: components['schemas']['Translations']
       contacts?: {
         username?: string | null
         email?: string
       }[]
-    }
+    } & components['schemas']['Statistic']
     Translations: {
       language_code?: string
       text?: string
