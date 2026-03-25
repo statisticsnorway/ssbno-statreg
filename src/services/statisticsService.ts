@@ -186,7 +186,6 @@ export async function updateStatistic(
   //   (incomingRegLvl) => !statistic.statistic_region_levels?.find(existingRegLvl => incomingRegLvl === existingRegLvl.region_level.code)
   // )
 
-  //TODO: regional_level så vi setter inn riktig verdi
   //TODO MIM-2590: Make include statement to a variable
   const updatedStatistic = await prisma.statistic.update({
     where: { id: statistic.id },
