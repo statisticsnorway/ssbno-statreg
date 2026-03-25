@@ -26,7 +26,9 @@ export function validateId(id: string) {
 }
 
 export function reqParamToString(reqParam: string | string[]) {
-  if (Array.isArray(reqParam)) return reqParam[0]
+  if (Array.isArray(reqParam)) {
+    return reqParam[0]
+  }
 
   return reqParam
 }
