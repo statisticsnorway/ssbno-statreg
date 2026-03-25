@@ -4,6 +4,7 @@ import type { PrismaClient, Prisma } from '@/generated/prisma/client'
 import { getDivisionFromCode } from '@/services/klassService'
 import { fetchUsers } from '@/services/entraUserService'
 import type { UserLookupItem, Users } from '@/types/entra'
+import { ApprovalStatus } from '@/types/enums'
 
 type StatisticPrisma = Pick<PrismaClient, 'statistic'>
 const lang_en = 'en'
@@ -101,7 +102,7 @@ export async function getStatisticByShortname(shortname: string, prisma: Statist
   return {
     version: statistic.version,
     shortname: statistic.shortname.name,
-    approval_status: statistic.desk_appoval_status ?? undefined,
+    approval_status: statistic.desk_appoval_status ?? ApprovalStatus.PENDING,
     main_language,
     division: {
       code: division_code,
@@ -218,7 +219,7 @@ export async function updateStatistic(
   return {
     version: updatedStatistic.version,
     shortname: updatedStatistic.shortname.name,
-    approval_status: updatedStatistic.desk_appoval_status ?? undefined,
+    approval_status: updatedStatistic.desk_appoval_status ?? ApprovalStatus.PENDING,
     main_language,
     division: {
       code: updatedStatistic.division_code,
