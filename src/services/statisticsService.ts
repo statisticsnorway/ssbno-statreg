@@ -154,7 +154,7 @@ export async function updateStatistic(
 ): Promise<StatisticDetails> {
   const {
     division,
-    statistic_region_levels,
+    // statistic_region_levels,
     status,
     name,
     approval_status,
@@ -166,22 +166,33 @@ export async function updateStatistic(
     comment,
   } = body
 
+  const nameNorwegian = name?.find((obj) => obj.language_code == main_language)?.text
+  const nameEnglish = name?.find((obj) => obj.language_code == 'en')?.text
+  const safeShortname = sanitize(shortname)
   // TODO MIM-2593: input validation
   // TODO: Reuse shortname validation from MIM-2545
-  const statisticId = await prisma.statistic.findFirst({
-    where: { shortname: { name: sanitize(shortname) } },
-    select: { id: true },
+  const statistic = await prisma.statistic.findFirst({
+    where: { shortname: { name: safeShortname } },
+    select: { id: true, statistic_region_levels: { select: { region_level: { select: { code: true, id: true } } } } },
   })
 
-  if (!statisticId) return Promise.reject({ status: 404, statregError: 'Shortname not found' })
+  if (!statistic) return Promise.reject({ status: 404, statregError: `Shortname ${safeShortname} not found` })
 
-  //TODO: Fikse name, regional_level så vi setter inn riktig verdi
+  // TODO MIM-2595: Handle removal and additions of region_levels
+  // const regionLevelsToRemove = statistic.statistic_region_levels.map(
+  //   (existingRegLvl) => !statistic_region_levels?.find(incomingRegLvl => incomingRegLvl === existingRegLvl.region_level.code)
+  // )
+  // const regionLevelsToAdd = statistic_region_levels?.map(
+  //   (incomingRegLvl) => !statistic.statistic_region_levels?.find(existingRegLvl => incomingRegLvl === existingRegLvl.region_level.code)
+  // )
+
+  //TODO: regional_level så vi setter inn riktig verdi
   //TODO MIM-2590: Make include statement to a variable
-  const statistic = await prisma.statistic.update({
-    where: { id: statisticId.id },
+  const updatedStatistic = await prisma.statistic.update({
+    where: { id: statistic.id },
     data: {
-      name: name![0]?.text,
-      name_en: name![1]?.text,
+      name: nameNorwegian,
+      name_en: nameEnglish,
       division_code: division,
       desk_appoval_status: approval_status,
       status: status!.code,
@@ -206,36 +217,39 @@ export async function updateStatistic(
 
   //TODO MIM-2591: Refactor into mapping function
   return {
-    version: statistic.version,
-    shortname: statistic.shortname.name,
-    approval_status: statistic.desk_appoval_status ?? undefined,
+    version: updatedStatistic.version,
+    shortname: updatedStatistic.shortname.name,
+    approval_status: updatedStatistic.desk_appoval_status ?? undefined,
     main_language,
     division: {
-      code: statistic.division_code,
+      code: updatedStatistic.division_code,
       name: [
-        ...getLocalizedName(main_language, getDivisionFromCode(Number(statistic.division_code))?.name),
-        ...getLocalizedName(lang_en, getDivisionFromCode(Number(statistic.division_code), lang_en)?.name),
+        ...getLocalizedName(main_language, getDivisionFromCode(Number(updatedStatistic.division_code))?.name),
+        ...getLocalizedName(lang_en, getDivisionFromCode(Number(updatedStatistic.division_code), lang_en)?.name),
       ],
     },
-    first_released_at: dateToISOString(statistic.first_release),
-    yearly_reporting: statistic.yearly_reporting,
+    first_released_at: dateToISOString(updatedStatistic.first_release),
+    yearly_reporting: updatedStatistic.yearly_reporting,
     status: {
-      code: statistic.status,
+      code: updatedStatistic.status,
     },
-    previous_topic_codes: statistic.legacy_topic_codes,
+    previous_topic_codes: updatedStatistic.legacy_topic_codes,
     relation: {
-      shortname: statistic.related_statistic?.shortname?.name,
+      shortname: updatedStatistic.related_statistic?.shortname?.name,
       name: [
-        ...getLocalizedName(statistic.related_statistic?.language, statistic.related_statistic?.name),
-        ...getLocalizedName(lang_en, statistic.related_statistic?.name_en),
+        ...getLocalizedName(updatedStatistic.related_statistic?.language, updatedStatistic.related_statistic?.name),
+        ...getLocalizedName(lang_en, updatedStatistic.related_statistic?.name_en),
       ],
     },
-    name: [...getLocalizedName(main_language, statistic.name), ...getLocalizedName(lang_en, statistic.name_en)],
-    updated_at: dateToISOString(statistic.last_updated),
-    comment: statistic.comment,
-    created_at: dateToISOString(statistic.date_created),
-    variants: parseStatisticVariants(statistic.variants, statistic.language, lang_en),
-    contacts: await fetchUsers(statistic.responsiblePersons).then((users) =>
+    name: [
+      ...getLocalizedName(main_language, updatedStatistic.name),
+      ...getLocalizedName(lang_en, updatedStatistic.name_en),
+    ],
+    updated_at: dateToISOString(updatedStatistic.last_updated),
+    comment: updatedStatistic.comment,
+    created_at: dateToISOString(updatedStatistic.date_created),
+    variants: parseStatisticVariants(updatedStatistic.variants, updatedStatistic.language, lang_en),
+    contacts: await fetchUsers(updatedStatistic.responsiblePersons).then((users) =>
       users?.map((user) => {
         const lookupUser = (user as UserLookupItem).user
         const responsiblePerson = user as Users
@@ -248,7 +262,7 @@ export async function updateStatistic(
       })
     ),
     statistic_region_levels:
-      statistic.statistic_region_levels?.map(({ region_level }) =>
+      updatedStatistic.statistic_region_levels?.map(({ region_level }) =>
         getLocalizedName(main_language, region_level.name)
       ) ?? [],
   }
