@@ -1,6 +1,6 @@
 import type { Router } from 'express'
 import { getAllStatistics, getStatisticByShortname, updateStatistic } from '@/services/statisticsService'
-import { skipAuth } from '@/../plugins/authMiddleware'
+import { requireAdminAuthorization, skipAuth } from '@/../plugins/authMiddleware'
 import { handleErrors } from '@/lib/prismaErrors'
 import { prisma } from '@/lib/prisma'
 
@@ -28,7 +28,7 @@ export default function statisticsController(router: Router) {
     }
   })
 
-  router.put('/statistics/:shortname', async (req, res) => {
+  router.put('/statistics/:shortname', requireAdminAuthorization(), async (req, res) => {
     try {
       const shortname = Array.isArray(req.params.shortname) ? req.params.shortname[0] : req.params.shortname
       const result = await updateStatistic(shortname!, req.body, prisma)

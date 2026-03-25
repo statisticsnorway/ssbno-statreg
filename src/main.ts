@@ -3,7 +3,7 @@ import express, { Request, Response } from 'express'
 import helmet from 'helmet'
 import swaggerUi from 'swagger-ui-express'
 import YAML from 'yaml'
-import { requireAuthentication } from '../plugins/authMiddleware'
+import { requireAuthorization } from '../plugins/authMiddleware'
 import { startServer } from '../plugins/expressServer'
 import { promBundleMetrics } from '../plugins/promBundle'
 import controllerRouter from './api/core/controllerRouter'
@@ -12,7 +12,7 @@ import { initializeDepartments } from './services/klassService'
 import * as dotenv from 'dotenv'
 
 dotenv.config()
-const auth = requireAuthentication()
+const auth = requireAuthorization()
 const app = express()
 app.use(helmet())
 app.use(promBundleMetrics)
