@@ -156,6 +156,7 @@ components:
           items: { type: string }
           description: 'Array with region levels. Valid region levels are K (kommune), F (fylke), LD (landsdel), L (land) and BD (Bydel og krets)'
         previous_topic_codes: { type: string, nullable: true }
+        comment: { type: string, nullable: true}
 
     Statistic_update:
       allOf:
@@ -263,20 +264,6 @@ paths:
               schema:
                 type: array
                 items: { $ref: '#/components/schemas/Statistic_listing' }
-    post:
-      summary: Create a new statistic
-      tags: [statistics]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: '#/components/schemas/Statistic_create' }
-      responses:
-        '201':
-          description: Statistic details
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/Statistic_details' }
   /statistics/{shortname}:
     get:
       summary: Get a statistic by its shortname
@@ -291,6 +278,20 @@ paths:
       responses:
         '200':
           description: Statistic details with all its variants
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Statistic_details' }
+    post:
+      summary: Create a new statistic
+      tags: [statistics]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Statistic_create' }
+      responses:
+        '201':
+          description: Statistic details
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Statistic_details' }

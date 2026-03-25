@@ -1,9 +1,10 @@
-import type { StatisticListing, StatisticDetails, StatisticUpdate } from '@/types/index'
+import type { StatisticListing, StatisticDetails, StatisticUpdate, StatisticCreate } from '@/types/index'
 import { getLocalizedName, dateToISOString, sanitize } from '@/lib/utils'
-import type { PrismaClient, Prisma } from '@/generated/prisma/client'
+import type { Prisma } from '@/generated/prisma/client'
 import { getDivisionFromCode } from '@/services/klassService'
 import { fetchUsers } from '@/services/entraUserService'
 import type { UserLookupItem, Users } from '@/types/entra'
+import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
 import { ApprovalStatus } from '@/types/enums'
 
 type StatisticPrisma = Pick<PrismaClient, 'statistic'>
@@ -93,14 +94,9 @@ export function parseStatisticVariants(
   }))
 }
 
-export async function getStatisticByShortname(shortname: string, prisma: StatisticPrisma): Promise<StatisticDetails> {
-  const statistic = await prisma.statistic.findFirst({
-    where: { shortname: { name: sanitize(shortname) } },
-    include: StatisticsDetailedIncludes,
-  })
-
-  if (!statistic) return Promise.reject({ status: 404, statregError: 'Shortname not found' })
-
+async function mapStatisticDetails(
+  statistic: Prisma.StatisticGetPayload<{ include: typeof StatisticsDetailedIncludes }>
+) {
   const main_language = statistic.language
   const division_code = statistic.division_code
   const related_statistic = statistic.related_statistic
@@ -152,6 +148,16 @@ export async function getStatisticByShortname(shortname: string, prisma: Statist
         getLocalizedName(main_language, region_level.name)
       ) ?? [],
   }
+}
+
+export async function getStatisticByShortname(shortname: string, prisma: StatisticPrisma): Promise<StatisticDetails> {
+  const statistic = await prisma.statistic.findFirst({
+    where: { shortname: { name: sanitize(shortname) } },
+    include: StatisticsDetailedIncludes,
+  })
+  if (!statistic) return Promise.reject({ status: 404, statregError: 'Shortname not found' })
+
+  return mapStatisticDetails(statistic)
 }
 
 export async function updateStatistic(
@@ -210,66 +216,47 @@ export async function updateStatistic(
       first_release: first_released_at,
       statistic_region_levels: {},
     },
-    include: {
-      shortname: { select: { name: true } },
-      responsiblePersons: { select: { email: true, username: true } },
-      related_statistic: { select: { language: true, name: true, name_en: true, shortname: true } },
-      statistic_region_levels: {
-        select: { region_level: { select: { name: true } } },
-      },
-      variants: VariantSelect,
-    },
+    include: StatisticsDetailedIncludes,
   })
 
-  //TODO MIM-2591: Refactor into mapping function
-  return {
-    version: updatedStatistic.version,
-    shortname: updatedStatistic.shortname.name,
-    approval_status: updatedStatistic.desk_appoval_status ?? ApprovalStatus.PENDING,
-    main_language,
-    division: {
-      code: updatedStatistic.division_code,
-      name: [
-        ...getLocalizedName(main_language, getDivisionFromCode(Number(updatedStatistic.division_code))?.name),
-        ...getLocalizedName(lang_en, getDivisionFromCode(Number(updatedStatistic.division_code), lang_en)?.name),
-      ],
-    },
-    first_released_at: dateToISOString(updatedStatistic.first_release),
-    yearly_reporting: updatedStatistic.yearly_reporting,
-    status: {
-      code: updatedStatistic.status,
-    },
-    previous_topic_codes: updatedStatistic.legacy_topic_codes,
-    relation: {
-      shortname: updatedStatistic.related_statistic?.shortname?.name,
-      name: [
-        ...getLocalizedName(updatedStatistic.related_statistic?.language, updatedStatistic.related_statistic?.name),
-        ...getLocalizedName(lang_en, updatedStatistic.related_statistic?.name_en),
-      ],
-    },
-    name: [
-      ...getLocalizedName(main_language, updatedStatistic.name),
-      ...getLocalizedName(lang_en, updatedStatistic.name_en),
-    ],
-    updated_at: dateToISOString(updatedStatistic.last_updated),
-    comment: updatedStatistic.comment,
-    created_at: dateToISOString(updatedStatistic.date_created),
-    variants: parseStatisticVariants(updatedStatistic.variants, updatedStatistic.language, lang_en),
-    contacts: await fetchUsers(updatedStatistic.responsiblePersons).then((users) =>
-      users?.map((user) => {
-        const lookupUser = (user as UserLookupItem).user
-        const responsiblePerson = user as Users
+  const result = mapStatisticDetails(updatedStatistic)
 
-        return {
-          name: lookupUser?.displayName,
-          email: lookupUser?.email ?? (user as UserLookupItem).lookupEmail ?? responsiblePerson.email,
-          username: responsiblePerson.username as string | undefined,
-        }
-      })
-    ),
-    statistic_region_levels:
-      updatedStatistic.statistic_region_levels?.map(({ region_level }) =>
-        getLocalizedName(main_language, region_level.name)
-      ) ?? [],
+  return result
+}
+
+export async function createStatistic(
+  prisma: StatisticPrisma,
+  body: StatisticCreate,
+  shortname: string
+): Promise<StatisticDetails> {
+  const now = new Date()
+
+  // TODO: Fix proper validation! Check existance of shortname, as well as other parameters.
+  const name: string | undefined = body.name?.find((p) => p.language_code == 'nb')?.text ?? ''
+  const name_en: string | undefined = body.name?.find((p) => p.language_code == 'en')?.text
+
+  if (!name) {
+    return Promise.reject({ status: 400, statregError: 'Norwegian name is required' })
   }
+
+  const result = await prisma.statistic.create({
+    data: {
+      name,
+      priority: 1,
+      name_en,
+      yearly_reporting: false,
+      status: 'KOMMENDE',
+      comment: body.comment ?? '',
+      language: 'nb',
+      date_created: now,
+      last_updated: now,
+      shortname: {
+        connect: {
+          name: shortname,
+        },
+      },
+    },
+    include: StatisticsDetailedIncludes,
+  })
+  return await mapStatisticDetails(result)
 }
