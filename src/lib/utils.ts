@@ -15,18 +15,20 @@ export function sanitize(input: string): string {
   return input.trim().replace(/[^a-zA-Z0-9æøåÆØÅ.,:;!?()/\-\s]/g, '')
 }
 
-export function validateAndParseDate(dateString: string | string[] | undefined, fieldName?: string): Date {
-  const dateRegEx = /^\d{4}-\d{2}-\d{2}$/
-  if (!dateString || Array.isArray(dateString) || !dateRegEx.test(dateString)) {
-    throw {
-      statregError: `Invalid${fieldName ? ` ${fieldName}` : ''} date format in query parameter`,
-    }
+export function validateAndParseDate(dateString: string | string[] | undefined, fieldName = ''): Date {
+  const errorMessage = () => ({
+    statregError: ['Invalid', fieldName, 'date format:', dateString].filter(Boolean).join(' '),
+  })
+
+  const dateOrISORegex = /^\d{4}-\d{2}-\d{2}(?:T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z)?$/ // e.g. YYYY-MM-dd or YYYY-MM-DDTHH:mm:ssZ
+  if (!dateString || Array.isArray(dateString) || !dateOrISORegex.test(dateString)) {
+    throw errorMessage()
   }
 
   // TODO: Confirm correct date format. See JIRA issue MIM-2546
   const date = new Date(dateString)
   if (date.toString() === 'Invalid Date') {
-    throw { statregError: `Invalid${fieldName ? ` ${fieldName}` : ''} date format in query parameter` }
+    throw errorMessage()
   }
 
   return date

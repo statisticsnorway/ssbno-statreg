@@ -1,9 +1,11 @@
 import { describe, test, mock, beforeEach } from 'node:test'
 import assert from 'node:assert/strict'
-import { getAllReleases, getReleaseById, updateRelease } from '../src/services/releasesService'
+import { getAllReleases, getReleaseById, updateRelease, createRelease } from '@/services/releasesService'
+import { ApprovalStatus } from '@/types/enums'
 
 let prismaMock: any
 let releasesResult: object | null
+let now: Date
 
 function setPrismaResult(next: object | null) {
   releasesResult = next
@@ -15,6 +17,7 @@ describe('releasesService ', async () => {
       release: {
         findMany: mock.fn(() => Promise.resolve(releasesResult)),
         findFirst: mock.fn(() => Promise.resolve(releasesResult)),
+        create: mock.fn(() => Promise.resolve({ ...releasesResult })),
       },
     }
   })
@@ -88,6 +91,98 @@ describe('releasesService ', async () => {
       await assert.rejects(() => updateRelease('1', releaseUpdateInputWithoutComment, prismaMock), {
         statregError: 'Required field `comment` is missing',
       })
+    })
+  })
+
+  describe('mapToReleaseDetails ', () => {
+    // TODO: Add tests for mapToReleaseDetails
+  })
+
+  describe('createRelease ', () => {
+    beforeEach(() => {
+      now = new Date('2026-03-23T08:00:00Z')
+    })
+
+    test('creates a new release and returns mapped results', async () => {
+      setPrismaResult({
+        ...mockedSingleReleasePrismaResult,
+        id: 1,
+        version: 1,
+        desk_appoval_status: ApprovalStatus.PENDING,
+      })
+
+      const result = await createRelease(prismaMock, 'kpi', '1', now, mockCreateReleaseInput)
+
+      assert.deepStrictEqual(prismaMock.release.create.mock.callCount(), 1)
+      assert.deepStrictEqual(prismaMock.release.create.mock.calls[0].arguments[0], {
+        data: {
+          publish_time: new Date('2024-10-15T08:00:00Z'),
+          period_to: new Date('2024-12-31T00:00:00Z'),
+          period_from: new Date('2024-09-01T00:00:00Z'),
+          desk_appoval_status: ApprovalStatus.PENDING,
+          release_date_precision: 'dag',
+          has_versions: false,
+          last_updated: now,
+          date_created: now,
+          cancelled: false,
+          comment: '',
+          variant: {
+            connect: {
+              id: 1,
+            },
+          },
+        },
+        include: {
+          variant: {
+            select: {
+              id: true,
+              frequency: {
+                select: {
+                  name: true,
+                  name_en: true,
+                },
+              },
+              revision: true,
+              statistic: {
+                select: {
+                  language: true,
+                  name: true,
+                  name_en: true,
+                  shortname: {
+                    select: {
+                      name: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      })
+      assert.deepStrictEqual(result, {
+        ...mockedSingleReleaseResult,
+        has_versions: false,
+        approval_status: ApprovalStatus.PENDING,
+      })
+    })
+
+    test('returns 400 if request body is empty', async () => {
+      await assert.rejects(() => createRelease(prismaMock, 'kpi', '1', now, undefined), {
+        statregError: 'Missing required field(s): publish_time, period_from, period_to, release_date_precision',
+      })
+      assert.strictEqual(prismaMock.release.create.mock.callCount(), 0)
+    })
+
+    test('returns 400 if any of the required fields are missing', async () => {
+      const newReleaseInput = {
+        publish_time: '2024-10-15T08:00:00Z',
+        release_date_precision: 'dag',
+      }
+
+      await assert.rejects(() => createRelease(prismaMock, 'kpi', '1', now, newReleaseInput), {
+        statregError: 'Missing required field(s): period_from, period_to',
+      })
+      assert.strictEqual(prismaMock.release.create.mock.callCount(), 0)
     })
   })
 })
@@ -238,4 +333,11 @@ const mockedSingleReleaseResult = {
   period_to: '2024-09-01T00:00:00.000Z',
   release_date_precision: 'dag',
   cancelled: false,
+}
+
+const mockCreateReleaseInput = {
+  publish_time: '2024-10-15T08:00:00Z',
+  period_to: '2024-12-31T00:00:00Z',
+  period_from: '2024-09-01T00:00:00Z',
+  release_date_precision: 'dag',
 }
