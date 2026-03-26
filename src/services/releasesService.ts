@@ -1,5 +1,5 @@
 import type { ReleaseDetails, ReleaseListing, ReleaseCreate, ReleaseUpdate } from '@/types/index'
-import { getLocalizedName, dateToISOString, sanitize } from '@/lib/utils'
+import { getLocalizedName, dateToISOString, sanitize, ensureVariantIdNumber } from '@/lib/utils'
 import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
 import { assertStatisticExists, assertVariantExists, assertVariantMatchesShortname } from '@/lib/asserts'
 
@@ -166,27 +166,29 @@ export async function createRelease(
 }
 
 export async function buildReleaseFilter(
-  { shortname, variantId }: { shortname?: string; variantId?: number },
+  { shortname, variantId }: { shortname?: string; variantId?: string | number },
   prisma: ReleasePrisma
 ) {
   if (!shortname && variantId === undefined) return
+
+  const parsedVariantId = typeof variantId === 'string' ? ensureVariantIdNumber(variantId) : variantId
 
   if (shortname) {
     await assertStatisticExists(shortname, prisma)
   }
 
-  if (variantId !== undefined) {
-    await assertVariantExists(variantId, prisma)
+  if (parsedVariantId !== undefined) {
+    await assertVariantExists(parsedVariantId, prisma)
   }
 
-  if (shortname && variantId !== undefined) {
-    await assertVariantMatchesShortname(variantId, shortname, prisma)
+  if (shortname && parsedVariantId !== undefined) {
+    await assertVariantMatchesShortname(parsedVariantId, shortname, prisma)
   }
 
   const where: any = { variant: {} }
 
-  if (variantId !== undefined) {
-    where.variant.id = variantId
+  if (parsedVariantId !== undefined) {
+    where.variant.id = parsedVariantId
   }
 
   if (shortname) {

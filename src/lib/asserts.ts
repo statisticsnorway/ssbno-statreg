@@ -23,18 +23,19 @@ export async function assertVariantExists(variantId: number, prisma: ReleasePris
 }
 
 export async function assertVariantMatchesShortname(variantId: number, shortname: string, prisma: ReleasePrisma) {
-  const variant = await prisma.variant.findUnique({
-    where: { id: variantId },
-    select: {
+  const variant = await prisma.variant.findFirst({
+    where: {
+      id: variantId,
       statistic: {
-        select: {
-          shortname: { select: { name: true } },
+        shortname: {
+          name: shortname,
         },
       },
     },
+    select: { id: true },
   })
 
-  if (!variant || variant.statistic.shortname.name !== shortname) {
+  if (!variant) {
     throw {
       status: 404,
       statregError: `Variant does not belong to statistic '${shortname}'`,

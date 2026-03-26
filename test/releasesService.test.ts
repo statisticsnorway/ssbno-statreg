@@ -53,7 +53,10 @@ describe('releasesService ', async () => {
     beforeEach(() => {
       prismaMock = {
         statistic: { findFirst: mock.fn(() => Promise.resolve({ id: 1 })) },
-        variant: { findUnique: mock.fn(() => Promise.resolve({ id: 1 })) },
+        variant: {
+          findUnique: mock.fn(() => Promise.resolve({ id: 1 })),
+          findFirst: mock.fn(() => Promise.resolve({ id: 1 })),
+        },
       }
     })
 
@@ -63,6 +66,7 @@ describe('releasesService ', async () => {
       assert.equal(where, undefined)
       assert.equal(prismaMock.statistic.findFirst.mock.calls.length, 0)
       assert.equal(prismaMock.variant.findUnique.mock.calls.length, 0)
+      assert.equal(prismaMock.variant.findFirst.mock.calls.length, 0)
     })
 
     test('applies filter when only shortname is provided', async () => {
@@ -82,11 +86,7 @@ describe('releasesService ', async () => {
     })
 
     test('applies combined filter when both inputs are provided', async () => {
-      prismaMock.variant.findUnique = mock.fn((args: any) =>
-        args.select?.statistic
-          ? Promise.resolve({ statistic: { shortname: { name: 'KPI' } } })
-          : Promise.resolve({ id: 1 })
-      )
+      prismaMock.variant.findFirst = mock.fn(() => Promise.resolve({ id: 1 }))
 
       const where = await buildReleaseFilter({ shortname: 'KPI', variantId: 1 }, prismaMock)
 
@@ -114,11 +114,7 @@ describe('releasesService ', async () => {
     })
 
     test('throws when variant does not belong to statistic', async () => {
-      prismaMock.variant.findUnique = mock.fn((args: any) =>
-        args.select?.statistic
-          ? Promise.resolve({ statistic: { shortname: { name: 'OTHER' } } })
-          : Promise.resolve({ id: 1 })
-      )
+      prismaMock.variant.findFirst = mock.fn(() => Promise.resolve(null))
 
       await assert.rejects(() => buildReleaseFilter({ shortname: 'KPI', variantId: 1 }, prismaMock), {
         status: 404,

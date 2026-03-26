@@ -13,6 +13,7 @@ describe('asserts tests', () => {
         },
         variant: {
           findUnique: mock.fn(),
+          findFirst: mock.fn(),
         },
       }
     })
@@ -67,28 +68,16 @@ describe('asserts tests', () => {
 
     describe('assertVariantMatchesShortname', () => {
       test('resolves when variant belongs to statistic', async () => {
-        prismaMock.variant.findUnique = mock.fn(() =>
-          Promise.resolve({
-            statistic: {
-              shortname: { name: 'KPI' },
-            },
-          })
-        )
+        prismaMock.variant.findFirst = mock.fn(() => Promise.resolve({ id: 1 }))
 
         const result = await assertVariantMatchesShortname(1, 'KPI', prismaMock)
 
         assert.equal(result, undefined)
-        assert.equal(prismaMock.variant.findUnique.mock.calls.length, 1)
+        assert.equal(prismaMock.variant.findFirst.mock.calls.length, 1)
       })
 
       test('throws when variant belongs to another statistic', async () => {
-        prismaMock.variant.findUnique = mock.fn(() =>
-          Promise.resolve({
-            statistic: {
-              shortname: { name: 'OTHER' },
-            },
-          })
-        )
+        prismaMock.variant.findFirst = mock.fn(() => Promise.resolve(null))
 
         await assert.rejects(() => assertVariantMatchesShortname(1, 'KPI', prismaMock), {
           status: 404,
@@ -97,7 +86,7 @@ describe('asserts tests', () => {
       })
 
       test('throws when variant is null', async () => {
-        prismaMock.variant.findUnique = mock.fn(() => Promise.resolve(null))
+        prismaMock.variant.findFirst = mock.fn(() => Promise.resolve(null))
 
         await assert.rejects(() => assertVariantMatchesShortname(1, 'KPI', prismaMock), {
           status: 404,

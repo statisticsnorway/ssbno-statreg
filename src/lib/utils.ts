@@ -35,3 +35,11 @@ export function validateAndParseDate(dateString: string | string[] | undefined, 
 export function ensureString(value?: string | string[]): string {
   return Array.isArray(value) ? (value[0] ?? '') : (value ?? '')
 }
+
+export function ensureVariantIdNumber(variantId: string): number {
+  const parsedVariantId = Number(sanitize(variantId))
+  if (!Number.isInteger(parsedVariantId)) {
+    throw { statregError: 'Invalid variant id' }
+  }
+  return parsedVariantId
+}
