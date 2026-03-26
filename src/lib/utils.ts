@@ -36,10 +36,12 @@ export function ensureString(value?: string | string[]): string {
   return Array.isArray(value) ? (value[0] ?? '') : (value ?? '')
 }
 
-export function ensureVariantIdNumber(variantId: string): number {
-  const parsedVariantId = Number(sanitize(variantId))
+export function ensureVariantIdNumber(variantId: string | number): number {
+  const parsedVariantId = typeof variantId === 'number' ? variantId : Number(sanitize(variantId))
+
   if (!Number.isInteger(parsedVariantId)) {
-    throw { statregError: 'Invalid variant id' }
+    throw { statregError: 'Invalid variant id (not a number)' }
   }
+
   return parsedVariantId
 }

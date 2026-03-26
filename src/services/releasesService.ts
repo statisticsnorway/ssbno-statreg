@@ -171,7 +171,7 @@ export async function buildReleaseFilter(
 ) {
   if (!shortname && variantId === undefined) return
 
-  const parsedVariantId = typeof variantId === 'string' ? ensureVariantIdNumber(variantId) : variantId
+  const parsedVariantId = variantId === undefined ? undefined : ensureVariantIdNumber(variantId)
 
   if (shortname) {
     await assertStatisticExists(shortname, prisma)
