@@ -173,7 +173,7 @@ export async function updateStatistic(
     comment,
   } = body ?? {}
 
-  const nameNorwegian = name?.find((n) => ['nb', 'nn'].includes(n.language_code as string))?.text
+  const nameNorwegian = name?.find((obj) => obj.language_code == main_language)?.text
   const nameEnglish = name?.find((obj) => obj.language_code == 'en')?.text
   const safeShortname = sanitize(shortname)
   // TODO MIM-2593: input validation

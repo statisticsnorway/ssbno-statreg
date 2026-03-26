@@ -148,7 +148,7 @@ describe('statisticService ', async () => {
         division: '105',
         status: { code: 'SP' },
         name: [
-          { language_code: 'nb', text: 'Helse' },
+          { language_code: 'nn', text: 'Helse' },
           { language_code: 'en', text: 'Health' },
         ],
         approval_status: 'FORSLAG',
@@ -209,6 +209,8 @@ describe('statisticService ', async () => {
         statistic_region_levels: [[{ language_code: 'nn', text: 'Bydel og krets' }]],
       })
     })
+
+    // TODO MIM-2593: input validation for main_language and name, and undefined values
 
     test('throws Error when shortname is not found', async () => {
       setStatisticsResult(null)
