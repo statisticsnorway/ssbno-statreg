@@ -69,11 +69,11 @@ export function keycloakAuth(): RequestHandler {
   return createKeycloakAuthMiddleware(issuer, jwksUri, audience)
 }
 
-export function requireAuthentication(): RequestHandler {
+export function requireAuthorization(): RequestHandler {
   return process.env.AUTH_ENABLED === 'false' ? skipAuth : keycloakAuth()
 }
 
-export function requireUserGroupAuthorization(requiredGroup: string): RequestHandler {
+export function requireAdminAuthorization(): RequestHandler {
   if (process.env.AUTH_ENABLED === 'false') return skipAuth
 
   return (req, res, next) => {
@@ -93,7 +93,9 @@ export function requireUserGroupAuthorization(requiredGroup: string): RequestHan
       return forbidden(res, 'Missing authorization groups')
     }
 
-    if (!groups.includes(requiredGroup)) {
+    const adminGroups = process.env.ADMIN_GROUPS?.split(',') ?? []
+
+    if (!adminGroups.some((group) => groups.includes(group))) {
       return forbidden(res, 'Insufficient access')
     }
 

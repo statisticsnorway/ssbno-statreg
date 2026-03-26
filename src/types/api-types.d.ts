@@ -715,11 +715,13 @@ export interface components {
     }
     Statistic: {
       readonly shortname?: string
+      /** @description Main language will be either 'nn' or 'nb' for statistics */
       main_language?: string
       status?: {
         code?: string
       }
       name?: components['schemas']['Translations']
+      /** @description Is one of 'GODKJENT', 'AVVIST' or 'FORSLAG' */
       approval_status?: string
     }
     Statistic_create: {

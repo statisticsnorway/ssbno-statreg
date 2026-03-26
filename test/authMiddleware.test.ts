@@ -1,4 +1,4 @@
-import { test, beforeEach, afterEach, describe, mock } from 'node:test'
+import { test, beforeEach, afterEach, describe, mock, after } from 'node:test'
 import assert from 'node:assert/strict'
 import httpMocks, { createResponse, MockResponse } from 'node-mocks-http'
 
@@ -90,22 +90,26 @@ describe('authMiddleWare', () => {
     })
   })
 
-  describe('requireUserGroupAuthorization', () => {
-    const REQUIRED_GROUP = 'ssbno-developers'
+  describe('requireAdminAuthorization', () => {
     let res: MockResponse<any>
     let next: ReturnType<typeof mock.fn>
 
     beforeEach(() => {
+      process.env.ADMIN_GROUPS = 'ssbno-developers'
       res = createResponse()
       next = mock.fn()
+    })
+
+    after(() => {
+      process.env = { ...OLD_ENV }
     })
 
     test('bypasses when AUTH_ENABLED=false and calls next()', async () => {
       process.env.AUTH_ENABLED = 'false'
 
-      const { requireUserGroupAuthorization } = await import('../plugins/authMiddleware')
+      const { requireAdminAuthorization: requireAdminAuthorization } = await import('../plugins/authMiddleware')
 
-      const handler = requireUserGroupAuthorization(REQUIRED_GROUP)
+      const handler = requireAdminAuthorization()
       const req = httpMocks.createRequest()
 
       await handler(req, res, next as any)
@@ -116,9 +120,9 @@ describe('authMiddleWare', () => {
     test('returns 401 when not authenticated', async () => {
       process.env.AUTH_ENABLED = 'true'
 
-      const { requireUserGroupAuthorization } = await import('../plugins/authMiddleware')
+      const { requireAdminAuthorization: requireAdminAuthorization } = await import('../plugins/authMiddleware')
 
-      const handler = requireUserGroupAuthorization(REQUIRED_GROUP)
+      const handler = requireAdminAuthorization()
       const req = httpMocks.createRequest()
 
       await handler(req, res, next as any)
@@ -131,9 +135,9 @@ describe('authMiddleWare', () => {
     test('returns 403 when dapla.groups is missing', async () => {
       process.env.AUTH_ENABLED = 'true'
 
-      const { requireUserGroupAuthorization } = await import('../plugins/authMiddleware')
+      const { requireAdminAuthorization: requireAdminAuthorization } = await import('../plugins/authMiddleware')
 
-      const handler = requireUserGroupAuthorization(REQUIRED_GROUP)
+      const handler = requireAdminAuthorization()
       const req = httpMocks.createRequest()
       req.auth = { claims: {} }
 
@@ -147,9 +151,9 @@ describe('authMiddleWare', () => {
     test('returns 403 when required group is not present', async () => {
       process.env.AUTH_ENABLED = 'true'
 
-      const { requireUserGroupAuthorization } = await import('../plugins/authMiddleware')
+      const { requireAdminAuthorization: requireAdminAuthorization } = await import('../plugins/authMiddleware')
 
-      const handler = requireUserGroupAuthorization(REQUIRED_GROUP)
+      const handler = requireAdminAuthorization()
       const req = httpMocks.createRequest()
 
       req.auth = {
@@ -170,9 +174,9 @@ describe('authMiddleWare', () => {
     test('calls next when required group exists', async () => {
       process.env.AUTH_ENABLED = 'true'
 
-      const { requireUserGroupAuthorization } = await import('../plugins/authMiddleware')
+      const { requireAdminAuthorization: requireAdminAuthorization } = await import('../plugins/authMiddleware')
 
-      const handler = requireUserGroupAuthorization(REQUIRED_GROUP)
+      const handler = requireAdminAuthorization()
       const req = httpMocks.createRequest()
 
       req.auth = {
