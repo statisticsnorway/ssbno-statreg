@@ -1,4 +1,4 @@
-import type { Translations } from '@/types'
+import type { Translations, ReleaseCreate } from '@/types'
 
 // For usage, remember to destructurize the function's content e.g. { name: [...getLocalizedName(language_code, text)] }
 export function getLocalizedName(language_code = 'nb', text: string | undefined | null): Translations {
@@ -58,4 +58,17 @@ export function validateAndParseDate(dateString: DateString, fieldName: string, 
   }
 
   return date
+}
+
+export function ensureRequiredFieldsExists(body: ReleaseCreate | undefined, requiredFields: string[]) {
+  if (!body) return {}
+
+  const missingFields = requiredFields.filter((key) => body[key] === undefined)
+  if (missingFields.length) {
+    throw {
+      statregError: `Missing required field(s): ${missingFields.join(', ')}`,
+    }
+  }
+
+  return body
 }
