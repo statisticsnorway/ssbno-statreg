@@ -45,8 +45,6 @@ export async function getAllStatistics(
 
 // Statistic details
 
-// @ts-ignore; TODO: Remove ts-ignore and eslint-disable-next-line once implemented
-// eslint-disable-next-line no-unused-vars
 type StatisticPrismaResult = Prisma.StatisticGetPayload<{ include: typeof StatisticsDetailedIncludes }>
 
 const VariantSelect = {
@@ -56,10 +54,10 @@ const VariantSelect = {
   },
 }
 
-const StatisticsDetailedIncludes = {
+export const StatisticsDetailedIncludes = {
   shortname: { select: { name: true } },
   responsiblePersons: { select: { email: true, username: true } },
-  related_statistic: { select: { language: true, name: true, name_en: true, shortname: true } },
+  related_statistic: { select: { language: true, name: true, name_en: true, shortname: { select: { name: true } } } },
   statistic_region_levels: {
     select: { region_level: { select: { name: true } } },
   },
@@ -67,9 +65,7 @@ const StatisticsDetailedIncludes = {
 }
 
 export function parseStatisticVariants(
-  variants: Prisma.VariantGetPayload<typeof VariantSelect>[] | undefined,
-  main_language: string,
-  lang_en: string
+  variants: Prisma.VariantGetPayload<typeof VariantSelect>[] | undefined
 ): StatisticDetails['variants'] {
   if (!variants?.length) return []
 
@@ -78,7 +74,7 @@ export function parseStatisticVariants(
     updated_at: dateToISOString(variant.last_updated),
     level_of_detail: {
       name: [
-        ...getLocalizedName(main_language, variant.level_of_detail),
+        ...getLocalizedName('nb', variant.level_of_detail),
         ...getLocalizedName(lang_en, variant.level_of_detail_en),
       ],
     },
@@ -86,7 +82,7 @@ export function parseStatisticVariants(
     cancelled: variant.cancelled,
     frequency: {
       name: [
-        ...getLocalizedName(main_language, variant.frequency.name),
+        ...getLocalizedName('nb', variant.frequency.name),
         ...getLocalizedName(lang_en, variant.frequency.name_en),
       ],
     },
@@ -94,9 +90,7 @@ export function parseStatisticVariants(
   }))
 }
 
-async function mapStatisticDetails(
-  statistic: Prisma.StatisticGetPayload<{ include: typeof StatisticsDetailedIncludes }>
-) {
+async function mapStatisticDetails(statistic: StatisticPrismaResult) {
   const main_language = statistic.language
   const division_code = statistic.division_code
   const related_statistic = statistic.related_statistic
@@ -130,7 +124,7 @@ async function mapStatisticDetails(
     updated_at: dateToISOString(statistic.last_updated),
     comment: statistic.comment,
     created_at: dateToISOString(statistic.date_created),
-    variants: parseStatisticVariants(statistic.variants, main_language, lang_en),
+    variants: parseStatisticVariants(statistic.variants),
     contacts: await fetchUsers(statistic.responsiblePersons).then((users) =>
       users?.map((user) => {
         const lookupUser = (user as UserLookupItem).user
@@ -177,7 +171,7 @@ export async function updateStatistic(
     first_released_at,
     main_language,
     comment,
-  } = body
+  } = body ?? {}
 
   const nameNorwegian = name?.find((obj) => obj.language_code == main_language)?.text
   const nameEnglish = name?.find((obj) => obj.language_code == 'en')?.text
