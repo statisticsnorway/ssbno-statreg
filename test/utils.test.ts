@@ -6,6 +6,7 @@ import {
   validateDateOnly,
   validateDateISO,
   validateAndParseDate,
+  ensureRequiredFieldsExists,
 } from '@/lib/utils'
 import { describe, test } from 'node:test'
 import assert from 'node:assert/strict'
@@ -150,6 +151,42 @@ describe('utils ', () => {
     test('returns 400 for date array input', () => {
       assert.throws(() => validateAndParseDate(['2026-03-25', '2026-03-26'], '', dateRegEx), {
         statregError: 'Invalid date format: 2026-03-25,2026-03-26',
+      })
+    })
+  })
+
+  describe('ensureRequiredFieldsExists', () => {
+    test('return body when all the required fields exists', () => {
+      const requiredFields: (keyof { field_1: 'test' })[] = ['field_1']
+      const body = {
+        field_1: 'test',
+      }
+      assert.deepStrictEqual(body, ensureRequiredFieldsExists(body, requiredFields))
+    })
+
+    test('return body when there are no required fields', () => {
+      const requiredFields: (keyof { field_1: 'test' })[] = []
+      const body = {
+        field_1: 'test',
+      }
+      assert.deepStrictEqual(body, ensureRequiredFieldsExists(body, requiredFields))
+    })
+
+    test('return 400 when a required field is undefined', () => {
+      const requiredFields: (keyof { field_1: 'test'; field_2: 'value' })[] = ['field_1', 'field_2']
+      const body = {
+        field_1: 'test',
+        field_2: undefined,
+      }
+      assert.throws(() => ensureRequiredFieldsExists(body, requiredFields), {
+        statregError: 'Missing required field(s): field_2',
+      })
+    })
+
+    test('return 400 when body is undefined', () => {
+      const requiredFields = ['field_1', 'field_2']
+      assert.throws(() => ensureRequiredFieldsExists(undefined, requiredFields), {
+        statregError: 'Missing required field(s): field_1, field_2',
       })
     })
   })
