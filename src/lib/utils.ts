@@ -19,7 +19,7 @@ export function sanitize(input: string): string {
   return input.trim().replace(/[^a-zA-Z0-9æøåÆØÅ.,:;!?()/\-\s]/g, '')
 }
 
-export function validateId(id: string) {
+export function validateId(id: string): number {
   const idAsNumber = Number.parseInt(id)
 
   if (isNaN(idAsNumber)) {
@@ -31,12 +31,12 @@ export function validateId(id: string) {
 
 type DateString = string | string[] | undefined
 
-export function validateDateOnly(dateString: DateString, fieldName = '') {
+export function validateDateOnly(dateString: DateString, fieldName = ''): Date {
   const dateOnlyRegex = /^\d{4}-\d{2}-\d{2}$/ // e.g. YYYY-MM-dd
   return validateAndParseDate(dateString, fieldName, dateOnlyRegex)
 }
 
-export function validateDateISO(dateString: DateString, fieldName = '') {
+export function validateDateISO(dateString: DateString, fieldName = ''): Date {
   // TODO: MIM-2546: Confirm if this regEx covers all our required valid date ISO formats
   const dateISORegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/ // YYYY-MM-DDTHH:mm:ssZ
   return validateAndParseDate(dateString, fieldName, dateISORegex)
@@ -60,11 +60,13 @@ export function validateAndParseDate(dateString: DateString, fieldName: string, 
   return date
 }
 
-export function ensureRequiredFieldsExists(body: ReleaseCreate | undefined, requiredFields: string[]) {
-  if (!body) return {}
+export function ensureRequiredFieldsExists<T extends Record<string, any>>(
+  body: T | undefined,
+  requiredFields: (keyof T)[]
+): T | undefined {
+  const missingFields = requiredFields.filter((key) => !body || body[key] === undefined || body[key] === null)
 
-  const missingFields = requiredFields.filter((key) => body[key] === undefined)
-  if (missingFields.length) {
+  if (missingFields?.length) {
     throw {
       statregError: `Missing required field(s): ${missingFields.join(', ')}`,
     }
