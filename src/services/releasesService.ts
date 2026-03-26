@@ -1,6 +1,13 @@
 import type { ReleaseDetails, ReleaseListing, ReleaseCreate, ReleaseUpdate } from '@/types/index'
 import { ApprovalStatus } from '@/types/enums'
-import { getLocalizedName, dateToISOString, sanitize, validateDateISO, ensureVariantIdNumber } from '@/lib/utils'
+import {
+  getLocalizedName,
+  dateToISOString,
+  sanitize,
+  validateDateISO,
+  ensureVariantIdNumber,
+  ensureRequiredFieldsExists,
+} from '@/lib/utils'
 import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
 import type { Prisma } from '@/generated/prisma/client'
 import { assertStatisticExists, assertVariantExists, assertVariantMatchesShortname } from '@/lib/asserts'
@@ -112,20 +119,9 @@ export async function createRelease(
   // eslint-disable-next-line no-unused-vars
   const sanitizedShortname = sanitize(shortname)
 
-  const { publish_time, period_from, period_to, release_date_precision } = body ?? {}
-
-  const missingFields = []
-  if (!publish_time) missingFields.push('publish_time')
-  if (!period_from) missingFields.push('period_from')
-  if (!period_to) missingFields.push('period_to')
-  if (!release_date_precision) missingFields.push('release_date_precision')
-
-  if (missingFields.length) {
-    return Promise.reject({
-      statregError: `Missing required field(s): ${missingFields.join(', ')}`,
-      missingFields,
-    })
-  }
+  const requiredFields: (keyof ReleaseCreate)[] = ['publish_time', 'period_from', 'period_to', 'release_date_precision']
+  const { publish_time, period_from, period_to, release_date_precision } =
+    ensureRequiredFieldsExists(body, requiredFields) ?? {}
 
   // TODO: MIM-2577: Use function for blocked days once it's implemented
   // TODO: Automatic suggestion of period_to and period_from is going to be solved in a seperate task
