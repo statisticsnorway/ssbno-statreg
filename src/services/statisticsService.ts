@@ -201,7 +201,7 @@ export async function updateStatistic(
       name_en: nameEnglish,
       division_code: division,
       desk_appoval_status: approval_status,
-      status: status?.code,
+      status: status!.code,
       comment,
       language: main_language,
       related_statistic_id: relation ? Number(relation) : null,
