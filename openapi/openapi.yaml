@@ -315,6 +315,36 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Statistic_details' }
+  /statistics/{shortname}/releases:
+    get:
+      summary: List all releases for a statistic
+      security: []
+      tags: [statistics]
+      parameters:
+        - name: shortname
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: start
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: count
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of releases
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Release_listing' }
+
   /statistics/{shortname}/variants:
     post:
       summary: Create a variant on a spesific statistic
@@ -357,6 +387,39 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/Variant' }
   /statistics/{shortname}/variants/{id}/releases:
+    get:
+      summary: List all releases for one variant
+      security: []
+      tags: [statistics]
+      parameters:
+        - name: shortname
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: start
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: count
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of releases based on variant
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Release_listing' }
     post:
       summary: Create a new release
       tags: [statistics]
