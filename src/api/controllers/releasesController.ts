@@ -68,36 +68,6 @@ export default function releasesController(router: Router) {
     }
   })
 
-  router.get('/statistics/:shortname/releases', skipAuth, async (req, res) => {
-    try {
-      const shortname = ensureString(req.params.shortname)
-
-      const start = req.query?.start ? Number(req.query.start) : undefined
-      const count = req.query?.count ? Number(req.query.count) : undefined
-
-      const data = await getReleases({ start, count, shortname }, prisma)
-
-      res.json(data)
-    } catch (error) {
-      return handleErrors(error, res)
-    }
-  })
-
-  router.get('/statistics/:shortname/variants/:id/releases', skipAuth, async (req, res) => {
-    try {
-      const shortname = ensureString(req.params.shortname)
-      const variantId = Number(ensureString(req.params.id))
-
-      const start = req.query?.start ? Number(req.query.start) : undefined
-      const count = req.query?.count ? Number(req.query.count) : undefined
-
-      const data = await getReleases({ start, count, shortname, variantId }, prisma)
-      res.json(data)
-    } catch (error) {
-      return handleErrors(error, res)
-    }
-  })
-
   router.post('/statistics/:shortname/variants/:id/releases', requireAdminAuthorization(), async (req, res) => {
     try {
       const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id
