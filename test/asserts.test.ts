@@ -84,7 +84,7 @@ describe('asserts', () => {
       })
     })
 
-    test('throws when variant is null', async () => {
+    test('throws when variant does not belong to shortname', async () => {
       prismaMock.variant.findFirst = mock.fn(() => Promise.resolve(null))
 
       await assert.rejects(() => assertVariantMatchesShortname(1, 'KPI', prismaMock), {
