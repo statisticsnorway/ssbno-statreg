@@ -25,6 +25,11 @@ describe('releasesService ', async () => {
         findFirst: mock.fn(() => Promise.resolve(releasesResult)),
         create: mock.fn(() => Promise.resolve({ ...releasesResult })),
       },
+      statistic: { findFirst: mock.fn(() => Promise.resolve({ id: 1 })) },
+      variant: {
+        findUnique: mock.fn(() => Promise.resolve({ id: 1 })),
+        findFirst: mock.fn(() => Promise.resolve({ id: 1 })),
+      },
     }
   })
 
@@ -59,16 +64,6 @@ describe('releasesService ', async () => {
   })
 
   describe('buildReleaseFilter', () => {
-    beforeEach(() => {
-      prismaMock = {
-        statistic: { findFirst: mock.fn(() => Promise.resolve({ id: 1 })) },
-        variant: {
-          findUnique: mock.fn(() => Promise.resolve({ id: 1 })),
-          findFirst: mock.fn(() => Promise.resolve({ id: 1 })),
-        },
-      }
-    })
-
     test('returns undefined when neither shortname nor variantId is provided', async () => {
       const where = await buildReleaseFilter({}, prismaMock)
 
@@ -191,7 +186,7 @@ describe('releasesService ', async () => {
         desk_appoval_status: ApprovalStatus.PENDING,
       })
 
-      const result = await createRelease(prismaMock, 'kpi', '1', now, mockCreateReleaseInput)
+      const result = await createRelease(prismaMock, 'KPI', '1', now, mockCreateReleaseInput)
 
       assert.deepStrictEqual(prismaMock.release.create.mock.callCount(), 1)
       assert.deepStrictEqual(prismaMock.release.create.mock.calls[0].arguments[0], {

@@ -105,12 +105,12 @@ export async function createRelease(
   now: Date,
   body?: ReleaseCreate
 ): Promise<ReleaseDetails> {
-  // TODO: Add asssert functions for find shortname and variant_id
-  // TODO: Validate shortname and variantId
-  const variantIdNumber = Number(variantId)
-  // @ts-ignore; TODO: Will be used in assert functions
-  // eslint-disable-next-line no-unused-vars
-  const sanitizedShortname = sanitize(shortname)
+  const variantIdNumber = ensureVariantIdNumber(variantId)
+  const safeShortname = sanitize(shortname)
+
+  await assertStatisticExists(safeShortname, prisma)
+  await assertVariantExists(variantIdNumber, prisma)
+  await assertVariantMatchesShortname(variantIdNumber, safeShortname, prisma)
 
   const { publish_time, period_from, period_to, release_date_precision } = body ?? {}
 
