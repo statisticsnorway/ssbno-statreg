@@ -148,7 +148,7 @@ describe('statisticService ', async () => {
         division: '105',
         status: { code: 'SP' },
         name: [
-          { language_code: 'nn', text: 'Helse' },
+          { language_code: 'nb', text: 'Helse' },
           { language_code: 'en', text: 'Health' },
         ],
         approval_status: 'FORSLAG',
@@ -196,7 +196,7 @@ describe('statisticService ', async () => {
         yearly_reporting: input.yearly_reporting,
         approval_status: input.approval_status,
         comment: input.comment,
-        name: input.name,
+        name: [{ language_code: 'nn', text: 'Helse' }, { ...input.name[1] }],
         relation: {
           shortname: 'befolk',
           name: [

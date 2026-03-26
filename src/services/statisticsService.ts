@@ -173,8 +173,7 @@ export async function updateStatistic(
     comment,
   } = body ?? {}
 
-  // TODO: Will likely not find any elements when main_language has been changed by the input
-  const nameNorwegian = name?.find((obj) => obj.language_code == main_language)?.text
+  const nameNorwegian = name?.find((n) => ['nb', 'nn'].includes(n.language_code as string))?.text
   const nameEnglish = name?.find((obj) => obj.language_code == 'en')?.text
   const safeShortname = sanitize(shortname)
   // TODO MIM-2593: input validation
@@ -202,7 +201,7 @@ export async function updateStatistic(
       name_en: nameEnglish,
       division_code: division,
       desk_appoval_status: approval_status,
-      status: status!.code,
+      status: status?.code,
       comment,
       language: main_language,
       related_statistic_id: relation ? Number(relation) : null,
