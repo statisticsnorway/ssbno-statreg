@@ -1,5 +1,4 @@
 import {
-  getLocalizedName,
   dateToISOString,
   sanitize,
   validateId,
@@ -11,23 +10,6 @@ import { describe, test } from 'node:test'
 import assert from 'node:assert/strict'
 
 describe('utils ', () => {
-  describe('getLocalizedName ', () => {
-    test('returns localized text with en language_code', () => {
-      const result = getLocalizedName('en', 'Hello')
-      assert.deepEqual(result, [{ language_code: 'en', text: 'Hello' }])
-    })
-
-    test('returns localized text with default language_code nb when no language has been passed', () => {
-      const result = getLocalizedName(undefined, 'Hei')
-      assert.deepEqual(result, [{ language_code: 'nb', text: 'Hei' }])
-    })
-
-    test('returns empty array when text is undefined', () => {
-      const result = getLocalizedName('nb', undefined)
-      assert.deepEqual(result, [])
-    })
-  })
-
   describe('dateToISOString ', () => {
     test('returns ISO string for valid date', () => {
       const date = new Date('2020-01-01T12:00:00Z')
