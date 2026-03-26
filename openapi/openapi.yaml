@@ -1,12 +1,12 @@
 openapi: 3.1.0
-# Set required på obligatoriske felter
-# Se om vi kan få spekken opp til 3.1.0 versjon
+# yaml-language-server: $schema=https://spec.openapis.org/oas/3.1/schema/2022-10-07
 info:
   title: Statreg API
-  version: 1.1.0
-  description: API for managing publications, statistics and metadata for Statistics Norway
+  version: 0.1.0
+  description: API for managing publications, statistics and metadata for Statistics Norway. This API is under development, and there will be breaking changes.
 servers:
-  - url: https://ssb.no/statreg-api
+  - url: https://ssbno-statreg-api.intern.test.ssb.no
+  - url: http://localhost:8080
 
 tags:
   - name: calendar
@@ -131,13 +131,55 @@ components:
               properties:
                 name: { $ref: '#/components/schemas/Translations', readOnly: true }
 
+    Statistic:
+      type: object
+      properties:
+        shortname: { type: string, readOnly: true }
+        main_language: { type: string, description: "Main language will be either 'nn' or 'nb' for statistics" }
+        status:
+          type: object
+          properties:
+            code: { type: string }
+        name: { $ref: '#/components/schemas/Translations' }
+        approval_status: { type: string, description: " Is one of 'GODKJENT', 'AVVIST' or 'FORSLAG'" }
+
+    Statistic_create:
+      allOf:
+        - $ref: '#/components/schemas/Statistic'
+      type: object
+      properties:
+        division: { type: string, nullable: true }
+        first_released_at:  { type: string, format: date, nullable: true }
+        yearly_reporting: { type: boolean}
+        statistic_region_levels:
+          type: array
+          items: { type: string }
+          description: 'Array with region levels. Valid region levels are K (kommune), F (fylke), LD (landsdel), L (land) and BD (Bydel og krets)'
+        previous_topic_codes: { type: string, nullable: true }
+        comment: { type: string, nullable: true}
+
+    Statistic_update:
+      allOf:
+        - $ref: '#/components/schemas/Statistic'
+      type: object
+      properties:
+        division: { type: string, nullable: true }
+        first_released_at:  { type: string, format: date, nullable: true }
+        yearly_reporting: { type: boolean}
+        statistic_region_levels:
+          type: array
+          items: { type: string }
+          description: 'Array with region levels. Valid region levels are K (kommune), F (fylke), LD (landsdel), L (land) and BD (Bydel og krets)'
+        previous_topic_codes: { type: string, nullable: true }
+        relation:  { type: string, nullable: true }
+        comment: {type: string}
+
     Statistic_details:
+      allOf:
+        - $ref: '#/components/schemas/Statistic'
       type: object
       properties:
         version: { type: integer }
-        shortname: { type: string, readOnly: true }
-        approval_status: { type: string, nullable: true }
-        main_language: { type: string }
         division:
           type: object
           properties:
@@ -145,17 +187,12 @@ components:
             name: { $ref: '#/components/schemas/Translations', readOnly: true }
         first_released_at: { type: string, format: date, nullable: true }
         yearly_reporting: { type: boolean }
-        status:
-          type: object
-          properties:
-            code: { type: string }
         previous_topic_codes: { type: string, nullable: true }
         relation:
           type: object
           properties:
             shortname: { type: string }
             name: { $ref: '#/components/schemas/Translations', readOnly: true }
-        name: { $ref: '#/components/schemas/Translations' }
         updated_at: { type: string, format: date-time, readOnly: true }
         comment: { type: string }
         created_at: { type: string, format: date-time, readOnly: true }
@@ -175,15 +212,10 @@ components:
           items: { $ref: '#/components/schemas/Translations' }
 
     Statistic_listing:
+      allOf:
+        - $ref: '#/components/schemas/Statistic'
       type: object
       properties:
-        shortname: { type: string, readOnly: true }
-        main_language: { type: string }
-        status:
-          type: object
-          properties:
-            code: { type: string }
-        name: { $ref: '#/components/schemas/Translations' }
         contacts:
           type: array
           items:
@@ -232,20 +264,6 @@ paths:
               schema:
                 type: array
                 items: { $ref: '#/components/schemas/Statistic_listing' }
-    post:
-      summary: Create a new statistic
-      tags: [statistics]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: '#/components/schemas/Statistic_details' }
-      responses:
-        '201':
-          description: Statistic details
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/Statistic_details' }
   /statistics/{shortname}:
     get:
       summary: Get a statistic by its shortname
@@ -263,6 +281,20 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Statistic_details' }
+    post:
+      summary: Create a new statistic
+      tags: [statistics]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Statistic_create' }
+      responses:
+        '201':
+          description: Statistic details
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Statistic_details' }
     put:
       summary: Update a statistic
       tags: [statistics]
@@ -276,7 +308,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/Statistic_details' }
+            schema: { $ref: '#/components/schemas/Statistic_update' }
       responses:
         '200':
           description: Updated statistic details with all its variants

@@ -33,31 +33,7 @@ export interface paths {
       }
     }
     put?: never
-    /** Create a new statistic */
-    post: {
-      parameters: {
-        query?: never
-        header?: never
-        path?: never
-        cookie?: never
-      }
-      requestBody: {
-        content: {
-          'application/json': components['schemas']['Statistic_details']
-        }
-      }
-      responses: {
-        /** @description Statistic details */
-        201: {
-          headers: {
-            [name: string]: unknown
-          }
-          content: {
-            'application/json': components['schemas']['Statistic_details']
-          }
-        }
-      }
-    }
+    post?: never
     delete?: never
     options?: never
     head?: never
@@ -106,7 +82,7 @@ export interface paths {
       }
       requestBody: {
         content: {
-          'application/json': components['schemas']['Statistic_details']
+          'application/json': components['schemas']['Statistic_update']
         }
       }
       responses: {
@@ -121,7 +97,31 @@ export interface paths {
         }
       }
     }
-    post?: never
+    /** Create a new statistic */
+    post: {
+      parameters: {
+        query?: never
+        header?: never
+        path?: never
+        cookie?: never
+      }
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['Statistic_create']
+        }
+      }
+      responses: {
+        /** @description Statistic details */
+        201: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            'application/json': components['schemas']['Statistic_details']
+          }
+        }
+      }
+    }
     delete?: never
     options?: never
     head?: never
@@ -780,11 +780,40 @@ export interface components {
         readonly name?: components['schemas']['Translations']
       }
     }
+    Statistic: {
+      readonly shortname?: string
+      /** @description Main language will be either 'nn' or 'nb' for statistics */
+      main_language?: string
+      status?: {
+        code?: string
+      }
+      name?: components['schemas']['Translations']
+      /** @description Is one of 'GODKJENT', 'AVVIST' or 'FORSLAG' */
+      approval_status?: string
+    }
+    Statistic_create: {
+      division?: string | null
+      /** Format: date */
+      first_released_at?: string | null
+      yearly_reporting?: boolean
+      /** @description Array with region levels. Valid region levels are K (kommune), F (fylke), LD (landsdel), L (land) and BD (Bydel og krets) */
+      statistic_region_levels?: string[]
+      previous_topic_codes?: string | null
+      comment?: string | null
+    } & components['schemas']['Statistic']
+    Statistic_update: {
+      division?: string | null
+      /** Format: date */
+      first_released_at?: string | null
+      yearly_reporting?: boolean
+      /** @description Array with region levels. Valid region levels are K (kommune), F (fylke), LD (landsdel), L (land) and BD (Bydel og krets) */
+      statistic_region_levels?: string[]
+      previous_topic_codes?: string | null
+      relation?: string | null
+      comment?: string
+    } & components['schemas']['Statistic']
     Statistic_details: {
       version?: number
-      readonly shortname?: string
-      approval_status?: string | null
-      main_language?: string
       division?: {
         code?: string | null
         readonly name?: components['schemas']['Translations']
@@ -792,15 +821,11 @@ export interface components {
       /** Format: date */
       first_released_at?: string | null
       yearly_reporting?: boolean
-      status?: {
-        code?: string
-      }
       previous_topic_codes?: string | null
       relation?: {
         shortname?: string
         readonly name?: components['schemas']['Translations']
       }
-      name?: components['schemas']['Translations']
       /** Format: date-time */
       readonly updated_at?: string
       comment?: string
@@ -813,19 +838,13 @@ export interface components {
         name?: string
       }[]
       statistic_region_levels?: components['schemas']['Translations'][]
-    }
+    } & components['schemas']['Statistic']
     Statistic_listing: {
-      readonly shortname?: string
-      main_language?: string
-      status?: {
-        code?: string
-      }
-      name?: components['schemas']['Translations']
       contacts?: {
         username?: string | null
         email?: string
       }[]
-    }
+    } & components['schemas']['Statistic']
     Translations: {
       language_code?: string
       text?: string

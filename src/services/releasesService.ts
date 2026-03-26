@@ -1,6 +1,8 @@
 import type { ReleaseDetails, ReleaseListing, ReleaseCreate, ReleaseUpdate } from '@/types/index'
-import { getLocalizedName, dateToISOString, sanitize, ensureVariantIdNumber } from '@/lib/utils'
+import { ApprovalStatus } from '@/types/enums'
+import { getLocalizedName, dateToISOString, sanitize, validateDateISO, ensureVariantIdNumber } from '@/lib/utils'
 import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
+import type { Prisma } from '@/generated/prisma/client'
 import { assertStatisticExists, assertVariantExists, assertVariantMatchesShortname } from '@/lib/asserts'
 
 export type ReleasePrisma = Pick<PrismaClient, 'release' | 'statistic' | 'variant'>
@@ -88,81 +90,72 @@ export async function getReleaseById(id: string, prisma: ReleasePrisma): Promise
   }
   const release = await prisma.release.findFirst({
     where: { id: idAsNumber },
-    select: {
-      id: true,
-      version: true,
-      publish_time: true,
-      desk_appoval_status: true,
-      period_to: true,
-      period_from: true,
-      release_date_precision: true,
-      cancelled: true,
-      variant: {
-        select: {
-          id: true,
-          frequency: {
-            select: {
-              name: true,
-              name_en: true,
-            },
-          },
-          revision: true,
-          statistic: {
-            select: {
-              language: true,
-              name: true,
-              name_en: true,
-              shortname: {
-                select: {
-                  name: true,
-                },
-              },
-            },
-          },
-        },
-      },
-    },
+    include: SELECT_VARIANT_DETAILS,
   })
-  if (!release) return Promise.reject({ status: 404, statregError: 'Release id not found' })
-  const { statistic, frequency } = release.variant ?? {}
 
-  return {
-    id: release.id,
-    publish_time: dateToISOString(release.publish_time),
-    has_versions: release.version > 1,
-    approval_status: release.desk_appoval_status,
-    variant: {
-      id: release.variant.id,
-      frequency: {
-        name: [...getLocalizedName('nb', frequency.name), ...getLocalizedName(lang_en, frequency.name_en)],
-      },
-      revision: {
-        name: [...getLocalizedName('nb', release.variant.revision)],
-      },
-    },
-    statistic: {
-      shortname: statistic.shortname.name,
-      name: [...getLocalizedName(statistic.language, statistic.name), ...getLocalizedName(lang_en, statistic.name_en)],
-    },
-    period_from: dateToISOString(release.period_from),
-    period_to: dateToISOString(release.period_to),
-    release_date_precision: release.release_date_precision,
-    cancelled: release.cancelled,
-  }
+  if (!release) return Promise.reject({ status: 404, statregError: 'Release not found' })
+
+  return mapToReleaseDetails(release)
 }
 
 export async function createRelease(
   prisma: ReleasePrisma,
   shortname: string,
   variantId: string,
+  now: Date,
   body?: ReleaseCreate
 ): Promise<ReleaseDetails> {
-  // TODO: Implement logic in another PR; log params to prevent lint from failing
-  console.log(`shortname: ${shortname}, (variant) id: ${variantId}, prisma: ${prisma}`)
+  // TODO: Add asssert functions for find shortname and variant_id
+  // TODO: Validate shortname and variantId
+  const variantIdNumber = Number(variantId)
+  // @ts-ignore; TODO: Will be used in assert functions
+  // eslint-disable-next-line no-unused-vars
+  const sanitizedShortname = sanitize(shortname)
 
-  if (!body) return Promise.reject({ statregError: 'Invalid body' })
+  const { publish_time, period_from, period_to, release_date_precision } = body ?? {}
 
-  return {}
+  const missingFields = []
+  if (!publish_time) missingFields.push('publish_time')
+  if (!period_from) missingFields.push('period_from')
+  if (!period_to) missingFields.push('period_to')
+  if (!release_date_precision) missingFields.push('release_date_precision')
+
+  if (missingFields.length) {
+    return Promise.reject({
+      statregError: `Missing required field(s): ${missingFields.join(', ')}`,
+      missingFields,
+    })
+  }
+
+  // TODO: MIM-2577: Use function for blocked days once it's implemented
+  // TODO: Automatic suggestion of period_to and period_from is going to be solved in a seperate task
+  const publishTimeDate = validateDateISO(publish_time, 'publish_time')
+  const periodFromDate = validateDateISO(period_from, 'period_from')
+  const periodToDate = validateDateISO(period_to, 'period_to')
+
+  const release = await prisma.release.create({
+    data: {
+      publish_time: publishTimeDate,
+      period_from: periodFromDate,
+      period_to: periodToDate,
+      // TODO: Implementation of release_date_precision logic is going to be solved in a seperate task
+      release_date_precision: sanitize(release_date_precision!),
+      has_versions: false,
+      cancelled: false,
+      last_updated: now,
+      date_created: now,
+      desk_appoval_status: ApprovalStatus.PENDING,
+      comment: '',
+      variant: {
+        connect: {
+          id: variantIdNumber,
+        },
+      },
+    },
+    include: SELECT_VARIANT_DETAILS,
+  })
+
+  return mapToReleaseDetails(release)
 }
 
 export async function buildReleaseFilter(
@@ -217,6 +210,7 @@ export async function updateRelease(id: string, body: ReleaseUpdate, prisma: Rel
     data: {},
   })
 
+  // TODO: You may not need this error since Prisma will give an error if update fails
   if (!release) return Promise.reject({ status: 404, statregError: 'Release id not found' })
 
   return mapToReleaseDetails(release)
@@ -249,7 +243,9 @@ const SELECT_VARIANT_DETAILS = {
   },
 }
 
-function mapToReleaseDetails(prismaRelease: any): ReleaseDetails {
+export function mapToReleaseDetails(
+  prismaRelease: Prisma.ReleaseGetPayload<{ include: typeof SELECT_VARIANT_DETAILS }>
+): ReleaseDetails {
   const { statistic, frequency } = prismaRelease.variant ?? {}
 
   return {
