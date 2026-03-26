@@ -139,7 +139,9 @@ components:
         status:
           type: object
           properties:
-            code: { type: string }
+            code: 
+              type: string
+              description: 'Can be one of K (kommende), A (aktiv), SA (sammenslått), SP (Splittet), UT (opphørt/utgått), IA (ikke aktiv)'
         name: { $ref: '#/components/schemas/Translations' }
         approval_status: { type: string }
 

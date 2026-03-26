@@ -56,7 +56,7 @@ const VariantSelect = {
   },
 }
 
-const StatisticsDetailedIncludes = {
+export const StatisticsDetailedIncludes = {
   shortname: { select: { name: true } },
   responsiblePersons: { select: { email: true, username: true } },
   related_statistic: { select: { language: true, name: true, name_en: true, shortname: true } },
@@ -226,14 +226,13 @@ export async function updateStatistic(
 
 export async function createStatistic(
   prisma: StatisticPrisma,
-  body: StatisticCreate,
-  shortname: string
+  shortname: string,
+  body?: StatisticCreate,
+  now = new Date()
 ): Promise<StatisticDetails> {
-  const now = new Date()
-
   // TODO: Fix proper validation! Check existance of shortname, as well as other parameters.
-  const name: string | undefined = body.name?.find((p) => p.language_code == 'nb')?.text ?? ''
-  const name_en: string | undefined = body.name?.find((p) => p.language_code == 'en')?.text
+  const name: string | undefined = body?.name?.find((p) => p.language_code == 'nb')?.text ?? ''
+  const name_en: string | undefined = body?.name?.find((p) => p.language_code == 'en')?.text
 
   if (!name) {
     return Promise.reject({ status: 400, statregError: 'Norwegian name is required' })
@@ -245,8 +244,8 @@ export async function createStatistic(
       priority: 1,
       name_en,
       yearly_reporting: false,
-      status: 'KOMMENDE',
-      comment: body.comment ?? '',
+      status: 'K',
+      comment: body?.comment ?? '',
       language: 'nb',
       date_created: now,
       last_updated: now,

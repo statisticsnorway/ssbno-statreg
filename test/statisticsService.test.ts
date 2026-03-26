@@ -1,8 +1,11 @@
 import { describe, mock, test, before, beforeEach } from 'node:test'
 import assert from 'node:assert/strict'
+import { createStatistic, StatisticsDetailedIncludes } from '@/services/statisticsService'
+import { ApprovalStatus } from '@/types/enums'
 
 let prismaMock: any
 let statisticsResult: object | null
+let now: Date
 
 function setStatisticsResult(next: object | null) {
   statisticsResult = next
@@ -139,6 +142,67 @@ describe('statisticService ', async () => {
         ...mockedStatisticDetailedResult,
         contacts: [],
       })
+    })
+  })
+
+  // TODO: Fix tests
+  describe('createStatistic ', () => {
+    beforeEach(() => {
+      now = new Date('2026-03-23T08:00:00Z')
+    })
+
+    test('creates a new statistic and returns mapped results', async () => {
+      setStatisticsResult({
+        ...mockedStatisticDetailedResult,
+        id: 1,
+        version: 1,
+      })
+
+      const result = await createStatistic(prismaMock, 'kpi', '1', now, mockCreateReleaseInput)
+
+      assert.deepStrictEqual(prismaMock.release.create.mock.callCount(), 1)
+      assert.deepStrictEqual(prismaMock.release.create.mock.calls[0].arguments[0], {
+        data: {
+          publish_time: new Date('2024-10-15T08:00:00Z'),
+          period_to: new Date('2024-12-31T00:00:00Z'),
+          period_from: new Date('2024-09-01T00:00:00Z'),
+          desk_appoval_status: ApprovalStatus.PENDING,
+          release_date_precision: 'dag',
+          has_versions: false,
+          last_updated: now,
+          date_created: now,
+          cancelled: false,
+          comment: '',
+          variant: {
+            connect: {
+              id: 1,
+            },
+          },
+        },
+        include: StatisticsDetailedIncludes,
+      })
+      assert.deepStrictEqual(result, {
+        ...mockedStatisticDetailedResult,
+      })
+    })
+
+    test('returns 400 if statistic name is not provided in body', async () => {
+      await assert.rejects(() => createStatistic(prismaMock, 'kpi', '1', now, undefined), {
+        statregError: 'Missing required field(s): publish_time, period_from, period_to, release_date_precision',
+      })
+      assert.strictEqual(prismaMock.release.create.mock.callCount(), 0)
+    })
+
+    test('returns 400 if any of the required fields are missing', async () => {
+      const newReleaseInput = {
+        publish_time: '2024-10-15T08:00:00Z',
+        release_date_precision: 'dag',
+      }
+
+      await assert.rejects(() => createStatistic(prismaMock, 'kpi', '1', now, newReleaseInput), {
+        statregError: 'Missing required field(s): period_from, period_to',
+      })
+      assert.strictEqual(prismaMock.release.create.mock.callCount(), 0)
     })
   })
 
@@ -352,6 +416,67 @@ const mockedStatisticDetailedResult = {
   ],
   updated_at: '2021-09-01T08:30:00.000Z',
   comment: 'statistikk over befolkningens helse og tjenestebruk',
+  created_at: '2019-07-01T00:00:00.000Z',
+  variants: [
+    {
+      id: 1,
+      updated_at: '2025-06-20T10:39:51.621Z',
+      level_of_detail: { name: [] },
+      created_at: '2025-06-20T10:39:51.621Z',
+      cancelled: false,
+      frequency: {
+        name: [
+          { language_code: 'nb', text: 'Måned' },
+          { language_code: 'en', text: 'Month' },
+        ],
+      },
+      revision: 'I',
+    },
+    {
+      id: 2,
+      updated_at: '2025-06-20T10:39:51.621Z',
+      level_of_detail: { name: [] },
+      created_at: '2025-06-20T10:39:51.621Z',
+      cancelled: false,
+      frequency: {
+        name: [
+          { language_code: 'nb', text: 'Uke' },
+          { language_code: 'en', text: 'Week' },
+        ],
+      },
+      revision: 'I',
+    },
+  ],
+  contacts: [{ username: undefined, name: 'Bob', email: 'bob@ssb.no' }],
+  statistic_region_levels: [[{ language_code: 'nb', text: 'Bydel og krets' }]],
+}
+
+const mockedStatisticCreatedResult = {
+  version: 1,
+  shortname: 'helse',
+  approval_status: 'FORSLAG',
+  main_language: 'nb',
+  division: {
+    code: null,
+    name: [],
+  },
+  first_released_at: '1970-01-01T00:00:00.000Z',
+  yearly_reporting: false,
+  status: { code: 'K' },
+  previous_topic_codes: '05.01.01',
+  relation: {
+    shortname: 'kpi',
+    name: [
+      { language_code: 'nb', text: 'Utenrikshandel og varestrøm' },
+      { language_code: 'en', text: 'Foreign trade and goods flow' },
+    ],
+  },
+  name: [
+    { language_code: 'nb', text: 'Helse og helsetjenester' },
+    { language_code: 'en', text: 'Health and health services' },
+  ],
+  updated_at: '2021-09-01T08:30:00.000Z',
+  comment: '',
   created_at: '2019-07-01T00:00:00.000Z',
   variants: [
     {

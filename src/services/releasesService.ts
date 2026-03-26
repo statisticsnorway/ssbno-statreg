@@ -86,8 +86,8 @@ export async function createRelease(
   prisma: ReleasePrisma,
   shortname: string,
   variantId: string,
-  now: Date,
-  body?: ReleaseCreate
+  body?: ReleaseCreate,
+  now = new Date()
 ): Promise<ReleaseDetails> {
   // TODO: Add asssert functions for find shortname and variant_id
   // TODO: Validate shortname and variantId
