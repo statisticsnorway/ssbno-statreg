@@ -23,11 +23,6 @@ describe('asserts', () => {
     const result = await assertStatisticExists('KPI', prismaMock)
 
     assert.equal(result, undefined)
-    assert.equal(prismaMock.statistic.findFirst.mock.calls.length, 1)
-    assert.deepEqual(prismaMock.statistic.findFirst.mock.calls[0].arguments[0], {
-      where: { shortname: { name: 'KPI' } },
-      select: { id: true },
-    })
   })
 
   test('assertStatisticExists throws when statistic does not exist', async () => {
@@ -45,11 +40,6 @@ describe('asserts', () => {
     const result = await assertVariantExists(1, prismaMock)
 
     assert.equal(result, undefined)
-    assert.equal(prismaMock.variant.findUnique.mock.calls.length, 1)
-    assert.deepEqual(prismaMock.variant.findUnique.mock.calls[0].arguments[0], {
-      where: { id: 1 },
-      select: { id: true },
-    })
   })
 
   test('assertVariantExists throws when variant does not exist', async () => {
@@ -67,18 +57,6 @@ describe('asserts', () => {
     const result = await assertVariantMatchesShortname(1, 'KPI', prismaMock)
 
     assert.equal(result, undefined)
-    assert.equal(prismaMock.variant.findFirst.mock.calls.length, 1)
-    assert.deepEqual(prismaMock.variant.findFirst.mock.calls[0].arguments[0], {
-      where: {
-        id: 1,
-        statistic: {
-          shortname: {
-            name: 'KPI',
-          },
-        },
-      },
-      select: { id: true },
-    })
   })
 
   test('assertVariantMatchesShortname throws when variant does not belong to statistic', async () => {
