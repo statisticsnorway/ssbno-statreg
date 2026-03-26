@@ -797,13 +797,9 @@ export interface components {
       status?: {
         code?: string
       }
-<<<<<<< HEAD
       name?: string
       name_en?: string
-=======
-      name?: components['schemas']['Translations']
       /** @description Is one of 'GODKJENT', 'AVVIST' or 'FORSLAG' */
->>>>>>> develop
       approval_status?: string
     }
     Statistic_create: {
