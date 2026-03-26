@@ -153,10 +153,8 @@ describe('statisticService ', async () => {
       const input = {
         division: '105',
         status: { code: 'SP' },
-        name: [
-          { language_code: 'nn', text: 'Helse' },
-          { language_code: 'en', text: 'Health' },
-        ],
+        name: 'Helse',
+        name_en: 'Health',
         approval_status: 'FORSLAG',
         relation: '2',
         previous_topic_codes: '05.01.02',
@@ -169,8 +167,8 @@ describe('statisticService ', async () => {
       setStatisticsResult({
         ...mockStatisticsDetailedPrismaResult,
         division_code: input.division,
-        name: input.name[0]?.text,
-        name_en: input.name[1]?.text,
+        name: input.name,
+        name_en: input.name_en,
         status: input.status.code,
         desk_appoval_status: input.approval_status,
         language: input.main_language,
@@ -197,22 +195,21 @@ describe('statisticService ', async () => {
       })
       assert.deepStrictEqual(result, {
         ...mockedStatisticDetailedResult,
-        division: { code: input.division, name: [] },
+        division: { code: input.division, name: undefined },
         main_language: input.main_language,
         yearly_reporting: input.yearly_reporting,
         approval_status: input.approval_status,
         comment: input.comment,
-        name: [{ language_code: 'nn', text: 'Helse' }, { ...input.name[1] }],
+        name: 'Helse',
+        name_en: 'Health',
         relation: {
           shortname: 'befolk',
-          name: [
-            { language_code: 'nb', text: 'Befolkning og demografi' },
-            { language_code: 'en', text: 'Foreign trade and goods flow' },
-          ],
+          name: 'Befolkning og demografi',
+          name_en: 'Foreign trade and goods flow',
         },
         status: input.status,
         // TODO MIM-2595: Make adjustments if necessary on handle removal and addition of region level task
-        statistic_region_levels: [[{ language_code: 'nn', text: 'Bydel og krets' }]],
+        statistic_region_levels: [{ name: 'Bydel og krets', code: 'BD' }],
       })
     })
 

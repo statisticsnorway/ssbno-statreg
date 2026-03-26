@@ -740,6 +740,7 @@ export interface components {
       name?: string
       code?: string
     }
+    /** @description Text field to specify variant beyond frequency and revision */
     Level_of_detail: {
       name?: string | null
       name_en?: string | null
@@ -786,6 +787,7 @@ export interface components {
     Release_listing: components['schemas']['Release_get'] & {
       frequency?: components['schemas']['Frequency']
     }
+    /** @description Valid revision codes are:	I (Ingen), B (Beregnede), E (Endelige), F (Foreløpige), R (Reviderte), IG (Integrert) */
     Revision: {
       readonly name?: string
       readonly code?: string
@@ -807,8 +809,7 @@ export interface components {
       /** Format: date */
       first_released_at?: string | null
       yearly_reporting?: boolean
-      /** @description Array with region levels. Valid region levels are K (kommune), F (fylke), LD (landsdel), L (land) and BD (Bydel og krets) */
-      statistic_region_levels?: string[]
+      statistic_region_levels?: components['schemas']['Region_level'][]
       previous_topic_codes?: string | null
       comment?: string | null
     } & components['schemas']['Statistic']
@@ -817,8 +818,7 @@ export interface components {
       /** Format: date */
       first_released_at?: string | null
       yearly_reporting?: boolean
-      /** @description Array with region levels. Valid region levels are K (kommune), F (fylke), LD (landsdel), L (land) and BD (Bydel og krets) */
-      statistic_region_levels?: string[]
+      statistic_region_levels?: components['schemas']['Region_level'][]
       previous_topic_codes?: string | null
       relation?: string | null
       comment?: string
