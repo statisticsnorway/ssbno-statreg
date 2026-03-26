@@ -6,6 +6,7 @@ import {
   updateRelease,
   createRelease,
   buildReleaseFilter,
+  ReleaseDetailsIncludes,
 } from '@/services/releasesService'
 import { ApprovalStatus } from '@/types/enums'
 
@@ -186,7 +187,7 @@ describe('releasesService ', async () => {
         desk_appoval_status: ApprovalStatus.PENDING,
       })
 
-      const result = await createRelease(prismaMock, 'KPI', '1', now, mockCreateReleaseInput)
+      const result = await createRelease(prismaMock, 'kpi', '1', now, mockCreateReleaseInput)
 
       assert.deepStrictEqual(prismaMock.release.create.mock.callCount(), 1)
       assert.deepStrictEqual(prismaMock.release.create.mock.calls[0].arguments[0], {
@@ -207,32 +208,7 @@ describe('releasesService ', async () => {
             },
           },
         },
-        include: {
-          variant: {
-            select: {
-              id: true,
-              frequency: {
-                select: {
-                  name: true,
-                  name_en: true,
-                },
-              },
-              revision: true,
-              statistic: {
-                select: {
-                  language: true,
-                  name: true,
-                  name_en: true,
-                  shortname: {
-                    select: {
-                      name: true,
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
+        include: ReleaseDetailsIncludes,
       })
       assert.deepStrictEqual(result, {
         ...mockedSingleReleaseResult,

@@ -90,7 +90,7 @@ export async function getReleaseById(id: string, prisma: ReleasePrisma): Promise
   }
   const release = await prisma.release.findFirst({
     where: { id: idAsNumber },
-    include: SELECT_VARIANT_DETAILS,
+    include: ReleaseDetailsIncludes,
   })
 
   if (!release) return Promise.reject({ status: 404, statregError: 'Release not found' })
@@ -152,7 +152,7 @@ export async function createRelease(
         },
       },
     },
-    include: SELECT_VARIANT_DETAILS,
+    include: ReleaseDetailsIncludes,
   })
 
   return mapToReleaseDetails(release)
@@ -205,7 +205,7 @@ export async function updateRelease(id: string, body: ReleaseUpdate, prisma: Rel
   // TODO call function to check that release date is not blocked
   // TODO insert validated data
   const release = await prisma.release.update({
-    include: SELECT_VARIANT_DETAILS,
+    include: ReleaseDetailsIncludes,
     where: { id: idAsNumber },
     data: {},
   })
@@ -216,7 +216,7 @@ export async function updateRelease(id: string, body: ReleaseUpdate, prisma: Rel
   return mapToReleaseDetails(release)
 }
 
-const SELECT_VARIANT_DETAILS = {
+export const ReleaseDetailsIncludes = {
   variant: {
     select: {
       id: true,
@@ -244,7 +244,7 @@ const SELECT_VARIANT_DETAILS = {
 }
 
 export function mapToReleaseDetails(
-  prismaRelease: Prisma.ReleaseGetPayload<{ include: typeof SELECT_VARIANT_DETAILS }>
+  prismaRelease: Prisma.ReleaseGetPayload<{ include: typeof ReleaseDetailsIncludes }>
 ): ReleaseDetails {
   const { statistic, frequency } = prismaRelease.variant ?? {}
 
