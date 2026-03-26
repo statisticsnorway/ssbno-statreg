@@ -1,5 +1,6 @@
 import { describe, test, mock, beforeEach } from 'node:test'
 import assert from 'node:assert/strict'
+import { releaseAsserts } from '@/lib/asserts'
 import {
   getReleases,
   getReleaseById,
@@ -19,6 +20,7 @@ function setPrismaResult(next: object | null) {
 
 describe('releasesService ', async () => {
   beforeEach(() => {
+    releasesResult = null
     prismaMock = {
       release: {
         findMany: mock.fn(() => Promise.resolve(releasesResult)),
@@ -26,6 +28,9 @@ describe('releasesService ', async () => {
         create: mock.fn(() => Promise.resolve({ ...releasesResult })),
       },
     }
+    releaseAsserts.assertStatisticExists = mock.fn(async () => undefined) as any
+    releaseAsserts.assertVariantExists = mock.fn(async () => undefined) as any
+    releaseAsserts.assertVariantMatchesShortname = mock.fn(async () => undefined) as any
   })
 
   describe('getReleases ', () => {
@@ -59,23 +64,13 @@ describe('releasesService ', async () => {
   })
 
   describe('buildReleaseFilter', () => {
-    beforeEach(() => {
-      prismaMock = {
-        statistic: { findFirst: mock.fn(() => Promise.resolve({ id: 1 })) },
-        variant: {
-          findUnique: mock.fn(() => Promise.resolve({ id: 1 })),
-          findFirst: mock.fn(() => Promise.resolve({ id: 1 })),
-        },
-      }
-    })
-
     test('returns undefined when neither shortname nor variantId is provided', async () => {
       const where = await buildReleaseFilter({}, prismaMock)
 
       assert.equal(where, undefined)
-      assert.equal(prismaMock.statistic.findFirst.mock.calls.length, 0)
-      assert.equal(prismaMock.variant.findUnique.mock.calls.length, 0)
-      assert.equal(prismaMock.variant.findFirst.mock.calls.length, 0)
+      assert.equal((releaseAsserts.assertStatisticExists as any).mock.calls.length, 0)
+      assert.equal((releaseAsserts.assertVariantExists as any).mock.calls.length, 0)
+      assert.equal((releaseAsserts.assertVariantMatchesShortname as any).mock.calls.length, 0)
     })
 
     test('applies filter when only shortname is provided', async () => {
@@ -84,6 +79,12 @@ describe('releasesService ', async () => {
       assert.deepEqual(where, {
         variant: { statistic: { shortname: { name: 'KPI' } } },
       })
+
+      assert.equal((releaseAsserts.assertStatisticExists as any).mock.calls.length, 1)
+      assert.deepEqual((releaseAsserts.assertStatisticExists as any).mock.calls[0].arguments, ['KPI', prismaMock])
+
+      assert.equal((releaseAsserts.assertVariantExists as any).mock.calls.length, 0)
+      assert.equal((releaseAsserts.assertVariantMatchesShortname as any).mock.calls.length, 0)
     })
 
     test('applies filter when only variantId is provided', async () => {
@@ -92,20 +93,38 @@ describe('releasesService ', async () => {
       assert.deepEqual(where, {
         variant: { id: 1 },
       })
+
+      assert.equal((releaseAsserts.assertStatisticExists as any).mock.calls.length, 0)
+      assert.equal((releaseAsserts.assertVariantExists as any).mock.calls.length, 1)
+      assert.deepEqual((releaseAsserts.assertVariantExists as any).mock.calls[0].arguments, [1, prismaMock])
+      assert.equal((releaseAsserts.assertVariantMatchesShortname as any).mock.calls.length, 0)
     })
 
     test('applies combined filter when both inputs are provided', async () => {
-      prismaMock.variant.findFirst = mock.fn(() => Promise.resolve({ id: 1 }))
-
       const where = await buildReleaseFilter({ shortname: 'KPI', variantId: 1 }, prismaMock)
 
       assert.deepEqual(where, {
         variant: { id: 1, statistic: { shortname: { name: 'KPI' } } },
       })
+
+      assert.equal((releaseAsserts.assertStatisticExists as any).mock.calls.length, 1)
+      assert.deepEqual((releaseAsserts.assertStatisticExists as any).mock.calls[0].arguments, ['KPI', prismaMock])
+
+      assert.equal((releaseAsserts.assertVariantExists as any).mock.calls.length, 1)
+      assert.deepEqual((releaseAsserts.assertVariantExists as any).mock.calls[0].arguments, [1, prismaMock])
+
+      assert.equal((releaseAsserts.assertVariantMatchesShortname as any).mock.calls.length, 1)
+      assert.deepEqual((releaseAsserts.assertVariantMatchesShortname as any).mock.calls[0].arguments, [
+        1,
+        'KPI',
+        prismaMock,
+      ])
     })
 
     test('throws when statistic does not exist', async () => {
-      prismaMock.statistic.findFirst = mock.fn(() => Promise.resolve(null))
+      releaseAsserts.assertStatisticExists = mock.fn(async () => {
+        throw { status: 404, statregError: "Statistic 'BAD' not found" }
+      }) as any
 
       await assert.rejects(() => buildReleaseFilter({ shortname: 'BAD' }, prismaMock), {
         status: 404,
@@ -114,7 +133,9 @@ describe('releasesService ', async () => {
     })
 
     test('throws when variant does not exist', async () => {
-      prismaMock.variant.findUnique = mock.fn(() => Promise.resolve(null))
+      releaseAsserts.assertVariantExists = mock.fn(async () => {
+        throw { status: 404, statregError: "Variant '999' not found" }
+      }) as any
 
       await assert.rejects(() => buildReleaseFilter({ variantId: 999 }, prismaMock), {
         status: 404,
@@ -123,7 +144,9 @@ describe('releasesService ', async () => {
     })
 
     test('throws when variant does not belong to statistic', async () => {
-      prismaMock.variant.findFirst = mock.fn(() => Promise.resolve(null))
+      releaseAsserts.assertVariantMatchesShortname = mock.fn(async () => {
+        throw { status: 404, statregError: "Variant does not belong to statistic 'KPI'" }
+      }) as any
 
       await assert.rejects(() => buildReleaseFilter({ shortname: 'KPI', variantId: 1 }, prismaMock), {
         status: 404,
