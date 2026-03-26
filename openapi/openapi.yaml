@@ -79,8 +79,8 @@ components:
       description: "Valid region levels are (name in parethesis): L (Land), LD (Landsdel), F (Fylke), K (Kommune), BD (Bydel og krets)"
       type: object
       properties:
-        code: { type: string, readOnly: true }
-        name: { type: string, readOnly: true }
+        code: { type: string }
+        name: { type: string }
 
     Release:
       type: object
@@ -147,8 +147,8 @@ components:
       description: "Valid revision codes are:	I (Ingen), B (Beregnede), E (Endelige), F (Foreløpige), R (Reviderte), IG (Integrert)"
       type: object
       properties:
-        name: { type: string, readOnly: true }
-        code: {type: string, readOnly: true }
+        name: { type: string }
+        code: {type: string }
 
     Statistic:
       type: object

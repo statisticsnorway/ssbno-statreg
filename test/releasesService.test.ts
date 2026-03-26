@@ -219,7 +219,7 @@ describe('releasesService ', async () => {
               frequency: {
                 select: {
                   name: true,
-                  name_en: true,
+                  code: true,
                 },
               },
               revision: true,
@@ -329,7 +329,7 @@ const mockedSingleReleasePrismaResult = {
     revision: 'I',
     frequency: {
       name: 'Måned',
-      name_en: 'Monthly',
+      code: 'M',
     },
     statistic: {
       language: 'nb',
@@ -386,6 +386,7 @@ const mockedSingleReleaseResult = {
     id: 1,
     frequency: {
       name: 'Måned',
+      code: 'M',
     },
     revision: {
       name: 'I',

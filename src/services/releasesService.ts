@@ -216,7 +216,7 @@ const SELECT_VARIANT_DETAILS = {
       frequency: {
         select: {
           name: true,
-          name_en: true,
+          code: true,
         },
       },
       revision: true,
@@ -250,6 +250,7 @@ export function mapToReleaseDetails(
       id: prismaRelease.variant.id,
       frequency: {
         name: frequency.name,
+        code: frequency.code,
       },
       revision: {
         name: prismaRelease.variant.revision,
