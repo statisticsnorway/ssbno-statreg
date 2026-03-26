@@ -1,4 +1,4 @@
-import type { Translations, ReleaseCreate } from '@/types'
+import type { Translations } from '@/types'
 
 // For usage, remember to destructurize the function's content e.g. { name: [...getLocalizedName(language_code, text)] }
 export function getLocalizedName(language_code = 'nb', text: string | undefined | null): Translations {
