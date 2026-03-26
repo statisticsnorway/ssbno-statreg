@@ -8,7 +8,6 @@ import {
 import { requireAdminAuthorization, skipAuth } from '@/../plugins/authMiddleware'
 import { handleErrors } from '@/lib/prismaErrors'
 import { prisma } from '@/lib/prisma'
-import { ensureString } from '@/lib/utils'
 
 export default function statisticsController(router: Router) {
   router.get('/statistics/:shortname', skipAuth, async (req, res) => {
