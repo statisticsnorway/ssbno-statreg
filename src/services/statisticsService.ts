@@ -54,7 +54,7 @@ const VariantSelect = {
   },
 }
 
-const StatisticsDetailedIncludes = {
+export const StatisticsDetailedIncludes = {
   shortname: { select: { name: true } },
   responsiblePersons: { select: { email: true, username: true } },
   related_statistic: { select: { language: true, name: true, name_en: true, shortname: { select: { name: true } } } },

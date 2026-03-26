@@ -30,6 +30,7 @@ describe('statisticService ', async () => {
   let getAllStatistics: Function
   let updateStatistic: Function
   let parseStatisticVariants: Function
+  let StatisticsDetailedIncludes: any
 
   before(async () => {
     // eslint-disable-next-line no-unused-vars
@@ -49,8 +50,13 @@ describe('statisticService ', async () => {
         klassService,
       },
     })
-    ;({ getAllStatistics, getStatisticByShortname, parseStatisticVariants, updateStatistic } =
-      await import('@/services/statisticsService'))
+    ;({
+      getAllStatistics,
+      getStatisticByShortname,
+      parseStatisticVariants,
+      updateStatistic,
+      StatisticsDetailedIncludes,
+    } = await import('@/services/statisticsService'))
   })
 
   beforeEach(async () => {
@@ -185,10 +191,10 @@ describe('statisticService ', async () => {
       const result = await updateStatistic('helse', input, prismaMock)
 
       assert.deepStrictEqual(prismaMock.statistic.update.mock.callCount(), 1)
-      assert.deepStrictEqual(
-        prismaMock.statistic.update.mock.calls[0].arguments[0],
-        mockUpdateStatisticPrismaUpdateData
-      )
+      assert.deepStrictEqual(prismaMock.statistic.update.mock.calls[0].arguments[0], {
+        ...mockUpdateStatisticPrismaUpdateData,
+        include: StatisticsDetailedIncludes,
+      })
       assert.deepStrictEqual(result, {
         ...mockedStatisticDetailedResult,
         division: { code: input.division, name: [] },
@@ -474,51 +480,6 @@ const mockUpdateStatisticPrismaUpdateData = {
     statistic_region_levels: {},
     status: 'SP',
     yearly_reporting: false,
-  },
-  include: {
-    related_statistic: {
-      select: {
-        language: true,
-        name: true,
-        name_en: true,
-        shortname: { select: { name: true } },
-      },
-    },
-    responsiblePersons: {
-      select: {
-        email: true,
-        username: true,
-      },
-    },
-    shortname: {
-      select: {
-        name: true,
-      },
-    },
-    statistic_region_levels: {
-      select: {
-        region_level: {
-          select: {
-            name: true,
-          },
-        },
-      },
-    },
-    variants: {
-      include: {
-        frequency: {
-          select: {
-            name: true,
-            name_en: true,
-          },
-        },
-      },
-      omit: {
-        freq_id: true,
-        statistic_id: true,
-        version: true,
-      },
-    },
   },
   where: {
     id: 5,
