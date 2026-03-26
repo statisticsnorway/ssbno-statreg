@@ -5,27 +5,24 @@ import {
   getStatisticByShortname,
   updateStatistic,
 } from '@/services/statisticsService'
-import { skipAuth } from '@/../plugins/authMiddleware'
+import { requireAdminAuthorization, skipAuth } from '@/../plugins/authMiddleware'
 import { handleErrors } from '@/lib/prismaErrors'
 import { prisma } from '@/lib/prisma'
-import { requireUserGroupAuthorization } from 'plugins/authMiddleware'
+import { ensureString } from '@/lib/utils'
 
 export default function statisticsController(router: Router) {
   router.get('/statistics/:shortname', skipAuth, async (req, res) => {
     try {
-      const data = await getStatisticByShortname(
-        Array.isArray(req.params.shortname) ? (req.params.shortname[0] as string) : (req.params.shortname as string),
-        prisma
-      )
+      const data = await getStatisticByShortname(ensureString(req.params.shortname), prisma)
       res.json(data)
     } catch (error) {
       return handleErrors(error, res)
     }
   })
 
-  router.post('/statistics/:shortname', requireUserGroupAuthorization('ssbno-developers'), async (req, res) => {
+  router.post('/statistics/:shortname', requireAdminAuthorization(), async (req, res) => {
     try {
-      res.json(await createStatistic(prisma, req.body, req.params.shortname as string))
+      res.json(await createStatistic(prisma, req.body, ensureString(req.params.shortname)))
     } catch (error) {
       return handleErrors(error, res)
     }
@@ -42,10 +39,9 @@ export default function statisticsController(router: Router) {
     }
   })
 
-  router.put('/statistics/:shortname', async (req, res) => {
+  router.put('/statistics/:shortname', requireAdminAuthorization(), async (req, res) => {
     try {
-      const shortname = Array.isArray(req.params.shortname) ? req.params.shortname[0] : req.params.shortname
-      const result = await updateStatistic(shortname!, req.body, prisma)
+      const result = await updateStatistic(ensureString(req.params.shortname), req.body, prisma)
       res.json(result)
     } catch (error) {
       return handleErrors(error, res)

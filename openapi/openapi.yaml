@@ -152,14 +152,14 @@ components:
       type: object
       properties:
         shortname: { type: string, readOnly: true }
-        main_language: { type: string }
+        main_language: { type: string, description: "Main language will be either 'nn' or 'nb' for statistics" }
         status:
           type: object
           properties:
             code: { type: string }
         name: { type: string }
         name_en: { type: string }
-        approval_status: { type: string }
+        approval_status: { type: string, description: " Is one of 'GODKJENT', 'AVVIST' or 'FORSLAG'" }
 
     Statistic_create:
       allOf:
@@ -323,6 +323,36 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Statistic_details' }
+  /statistics/{shortname}/releases:
+    get:
+      summary: List all releases for a statistic
+      security: []
+      tags: [statistics]
+      parameters:
+        - name: shortname
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: start
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: count
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of releases
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Release_listing' }
+
   /statistics/{shortname}/variants:
     post:
       summary: Create a variant on a spesific statistic
@@ -365,6 +395,39 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/Variant' }
   /statistics/{shortname}/variants/{id}/releases:
+    get:
+      summary: List all releases for one variant
+      security: []
+      tags: [statistics]
+      parameters:
+        - name: shortname
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: start
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: count
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of releases based on variant
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Release_listing' }
     post:
       summary: Create a new release
       tags: [statistics]
