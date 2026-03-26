@@ -153,4 +153,8 @@ describe('utils ', () => {
       })
     })
   })
+
+  describe('ensureRequiredFieldsExists', () => {
+    // TODO:
+  })
 })
