@@ -215,7 +215,6 @@ export async function updateStatistic(
   })
 
   const result = mapStatisticDetails(updatedStatistic)
-  console.log(result)
 
   return result
 }
