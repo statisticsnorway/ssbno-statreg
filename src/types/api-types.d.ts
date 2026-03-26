@@ -747,8 +747,8 @@ export interface components {
     }
     /** @description Valid region levels are (name in parethesis): L (Land), LD (Landsdel), F (Fylke), K (Kommune), BD (Bydel og krets) */
     Region_level: {
-      readonly code?: string
-      readonly name?: string
+      code?: string
+      name?: string
     }
     Release: {
       readonly id?: number
@@ -789,8 +789,8 @@ export interface components {
     }
     /** @description Valid revision codes are:	I (Ingen), B (Beregnede), E (Endelige), F (Foreløpige), R (Reviderte), IG (Integrert) */
     Revision: {
-      readonly name?: string
-      readonly code?: string
+      name?: string
+      code?: string
     }
     Statistic: {
       readonly shortname?: string

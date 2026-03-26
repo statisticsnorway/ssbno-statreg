@@ -50,7 +50,7 @@ type StatisticPrismaResult = Prisma.StatisticGetPayload<{ include: typeof Statis
 const VariantSelect = {
   omit: { version: true, statistic_id: true, freq_id: true },
   include: {
-    frequency: { select: { name: true, name_en: true, code: true } },
+    frequency: { select: { name: true, code: true } },
   },
 }
 
