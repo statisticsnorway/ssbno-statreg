@@ -60,6 +60,20 @@ export function validateAndParseDate(dateString: DateString, fieldName: string, 
   return date
 }
 
+export function ensureString(value?: string | string[]): string {
+  return Array.isArray(value) ? (value[0] ?? '') : (value ?? '')
+}
+
+export function ensureVariantIdNumber(variantId: string | number): number {
+  const parsedVariantId = typeof variantId === 'number' ? variantId : Number(sanitize(variantId))
+
+  if (!Number.isInteger(parsedVariantId)) {
+    throw { statregError: 'Invalid variant id (not a number)' }
+  }
+
+  return parsedVariantId
+}
+
 export function ensureRequiredFieldsExists<T extends Record<string, any>>(
   body: T | undefined,
   requiredFields: (keyof T)[]

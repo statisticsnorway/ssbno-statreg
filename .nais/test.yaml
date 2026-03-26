@@ -33,6 +33,7 @@ spec:
   envFrom:
     - secret: login-config-ssbno-statreg-api
     - secret: statreg-api-secrets
+    - configmap: statreg-api-config
 
   env:
     - name: NODE_ENV
@@ -62,6 +63,7 @@ spec:
       enabled: true
       excludePaths:
         - /docs
+        - /docs/**
         - /statistics
         - /statistics/**
         - /releases

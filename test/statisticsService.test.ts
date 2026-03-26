@@ -8,8 +8,6 @@ function setStatisticsResult(next: object | null) {
   statisticsResult = next
 }
 
-// TODO MIM-2592: Add unit tests for updateStatistic()
-
 describe('statisticService ', async () => {
   const fetchUsersMock: any = mock.fn(async () => [
     {
@@ -30,7 +28,9 @@ describe('statisticService ', async () => {
 
   let getStatisticByShortname: Function
   let getAllStatistics: Function
+  let updateStatistic: Function
   let parseStatisticVariants: Function
+  let StatisticsDetailedIncludes: any
 
   before(async () => {
     // eslint-disable-next-line no-unused-vars
@@ -50,8 +50,13 @@ describe('statisticService ', async () => {
         klassService,
       },
     })
-    ;({ getAllStatistics, getStatisticByShortname, parseStatisticVariants } =
-      await import('@/services/statisticsService'))
+    ;({
+      getAllStatistics,
+      getStatisticByShortname,
+      parseStatisticVariants,
+      updateStatistic,
+      StatisticsDetailedIncludes,
+    } = await import('@/services/statisticsService'))
   })
 
   beforeEach(async () => {
@@ -59,6 +64,7 @@ describe('statisticService ', async () => {
       statistic: {
         findMany: mock.fn(() => Promise.resolve(statisticsResult)),
         findFirst: mock.fn(() => Promise.resolve(statisticsResult)),
+        update: mock.fn(() => Promise.resolve(statisticsResult)),
       },
     }
   })
@@ -142,27 +148,104 @@ describe('statisticService ', async () => {
     })
   })
 
+  describe('updateStatistics', async () => {
+    test('returns mocked data', async () => {
+      const input = {
+        division: '105',
+        status: { code: 'SP' },
+        name: [
+          { language_code: 'nn', text: 'Helse' },
+          { language_code: 'en', text: 'Health' },
+        ],
+        approval_status: 'FORSLAG',
+        relation: '2',
+        previous_topic_codes: '05.01.02',
+        yearly_reporting: false,
+        first_released_at: '2026-03-25T08:30:00.000Z',
+        main_language: 'nn',
+        comment: 'Beskrivelse av endring',
+      }
+
+      setStatisticsResult({
+        ...mockStatisticsDetailedPrismaResult,
+        division_code: input.division,
+        name: input.name[0]?.text,
+        name_en: input.name[1]?.text,
+        status: input.status.code,
+        desk_appoval_status: input.approval_status,
+        language: input.main_language,
+        previous_topic_codes: input.previous_topic_codes,
+        yearly_reporting: input.yearly_reporting,
+        first_released_at: input.first_released_at,
+        comment: input.comment,
+        related_statistic: {
+          language: 'nb',
+          name: 'Befolkning og demografi',
+          name_en: 'Foreign trade and goods flow',
+          shortname: {
+            name: 'befolk',
+          },
+        },
+      })
+
+      const result = await updateStatistic('helse', input, prismaMock)
+
+      assert.deepStrictEqual(prismaMock.statistic.update.mock.callCount(), 1)
+      assert.deepStrictEqual(prismaMock.statistic.update.mock.calls[0].arguments[0], {
+        ...mockUpdateStatisticPrismaUpdateData,
+        include: StatisticsDetailedIncludes,
+      })
+      assert.deepStrictEqual(result, {
+        ...mockedStatisticDetailedResult,
+        division: { code: input.division, name: [] },
+        main_language: input.main_language,
+        yearly_reporting: input.yearly_reporting,
+        approval_status: input.approval_status,
+        comment: input.comment,
+        name: [{ language_code: 'nn', text: 'Helse' }, { ...input.name[1] }],
+        relation: {
+          shortname: 'befolk',
+          name: [
+            { language_code: 'nb', text: 'Befolkning og demografi' },
+            { language_code: 'en', text: 'Foreign trade and goods flow' },
+          ],
+        },
+        status: input.status,
+        // TODO MIM-2595: Make adjustments if necessary on handle removal and addition of region level task
+        statistic_region_levels: [[{ language_code: 'nn', text: 'Bydel og krets' }]],
+      })
+    })
+
+    // TODO MIM-2593: input validation for main_language and name, and undefined values
+
+    test('throws Error when shortname is not found', async () => {
+      setStatisticsResult(null)
+
+      await assert.rejects(() => updateStatistic('test', {}, prismaMock), {
+        status: 404,
+        statregError: `Shortname test not found`,
+      })
+      assert.deepStrictEqual(prismaMock.statistic.update.mock.callCount(), 0)
+    })
+  })
+
   describe('parseStatisticVariants', async () => {
     test('returns parsed variants array', () => {
-      const result = parseStatisticVariants(
-        [
-          {
-            id: 1,
-            last_updated: new Date('2025-06-20T10:39:51.621Z'),
-            date_created: new Date('2025-06-20T10:39:51.621Z'),
-            cancelled: false,
-            revision: 'I',
-            level_of_detail: 'Kommentar',
-            level_of_detail_en: null,
-            frequency: {
-              name: 'Måned',
-              name_en: 'Month',
-            },
+      const result = parseStatisticVariants([
+        {
+          id: 1,
+          last_updated: new Date('2025-06-20T10:39:51.621Z'),
+          date_created: new Date('2025-06-20T10:39:51.621Z'),
+          cancelled: false,
+          revision: 'I',
+          level_of_detail: 'Kommentar',
+          level_of_detail_en: null,
+          frequency: {
+            name: 'Måned',
+            name_en: 'Month',
           },
-        ],
-        'nb',
-        'en'
-      )
+        },
+      ])
 
       assert.deepEqual(result, [
         {
@@ -183,7 +266,7 @@ describe('statisticService ', async () => {
     })
 
     test('returns empty array when variants is empty', () => {
-      const result = parseStatisticVariants([], 'nb', 'en')
+      const result = parseStatisticVariants([])
 
       assert.deepEqual(result, [])
     })
@@ -256,11 +339,7 @@ const mockStatisticsDetailedPrismaResult = {
     name: 'Utenrikshandel og varestrøm',
     name_en: 'Foreign trade and goods flow',
     shortname: {
-      id: 3,
-      version: 0,
       name: 'kpi',
-      last_updated: new Date('2010-11-05T09:05:19.000Z'),
-      date_created: new Date('2010-11-05T09:05:19.000Z'),
     },
   },
   statistic_region_levels: [
@@ -385,4 +464,24 @@ const mockedStatisticDetailedResult = {
   ],
   contacts: [{ username: undefined, name: 'Bob', email: 'bob@ssb.no' }],
   statistic_region_levels: [[{ language_code: 'nb', text: 'Bydel og krets' }]],
+}
+
+const mockUpdateStatisticPrismaUpdateData = {
+  data: {
+    comment: 'Beskrivelse av endring',
+    desk_appoval_status: 'FORSLAG',
+    division_code: '105',
+    first_release: '2026-03-25T08:30:00.000Z',
+    language: 'nn',
+    legacy_topic_codes: '05.01.02',
+    name: 'Helse',
+    name_en: 'Health',
+    related_statistic_id: 2,
+    statistic_region_levels: {},
+    status: 'SP',
+    yearly_reporting: false,
+  },
+  where: {
+    id: 5,
+  },
 }

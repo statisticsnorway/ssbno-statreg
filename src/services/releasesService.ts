@@ -1,16 +1,34 @@
 import type { ReleaseDetails, ReleaseListing, ReleaseCreate, ReleaseUpdate } from '@/types/index'
 import { ApprovalStatus } from '@/types/enums'
-import { getLocalizedName, dateToISOString, sanitize, validateDateISO } from '@/lib/utils'
+import { getLocalizedName, dateToISOString, sanitize, validateDateISO, ensureVariantIdNumber } from '@/lib/utils'
 import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
 import type { Prisma } from '@/generated/prisma/client'
+import { assertStatisticExists, assertVariantExists, assertVariantMatchesShortname } from '@/lib/asserts'
 
-type ReleasePrisma = Pick<PrismaClient, 'release'>
+export type ReleasePrisma = Pick<PrismaClient, 'release' | 'statistic' | 'variant'>
 const lang_en = 'en'
 
-export async function getAllReleases({ start = 0, count = 10 }, prisma: ReleasePrisma): Promise<ReleaseListing[]> {
+export async function getReleases(
+  {
+    start = 0,
+    count = 10,
+    shortname,
+    variantId,
+  }: {
+    start?: number
+    count?: number
+    shortname?: string
+    variantId?: number
+  },
+  prisma: ReleasePrisma
+): Promise<ReleaseListing[]> {
+  const safeShortname = shortname ? sanitize(shortname) : undefined
+  const where = await buildReleaseFilter({ shortname: safeShortname, variantId }, prisma)
+
   const releases = await prisma.release.findMany({
     skip: start,
     take: count,
+    where,
     select: {
       id: true,
       version: true,
@@ -45,22 +63,21 @@ export async function getAllReleases({ start = 0, count = 10 }, prisma: ReleaseP
 
   return releases.map((release) => {
     const { statistic, frequency } = release.variant ?? {}
-
     return {
       id: release.id,
       publish_time: dateToISOString(release.publish_time),
       approval_status: release.desk_appoval_status,
       period_to: dateToISOString(release.period_to),
       period_from: dateToISOString(release.period_from),
-      frequency: {
-        name: [...getLocalizedName('nb', frequency.name), ...getLocalizedName(lang_en, frequency.name_en)],
-      },
       statistic: {
         shortname: statistic.shortname.name,
         name: [
           ...getLocalizedName(statistic.language, statistic.name),
           ...getLocalizedName(lang_en, statistic.name_en),
         ],
+      },
+      frequency: {
+        name: [...getLocalizedName('nb', frequency.name), ...getLocalizedName(lang_en, frequency.name_en)],
       },
     }
   })
@@ -71,7 +88,6 @@ export async function getReleaseById(id: string, prisma: ReleasePrisma): Promise
   if (isNaN(idAsNumber)) {
     return Promise.reject({ statregError: 'Invalid release id' })
   }
-
   const release = await prisma.release.findFirst({
     where: { id: idAsNumber },
     include: SELECT_VARIANT_DETAILS,
@@ -140,6 +156,41 @@ export async function createRelease(
   })
 
   return mapToReleaseDetails(release)
+}
+
+export async function buildReleaseFilter(
+  { shortname, variantId }: { shortname?: string; variantId?: string | number },
+  prisma: ReleasePrisma
+) {
+  if (!shortname && variantId === undefined) return
+
+  const parsedVariantId = variantId === undefined ? undefined : ensureVariantIdNumber(variantId)
+
+  if (shortname) {
+    await assertStatisticExists(shortname, prisma)
+  }
+
+  if (parsedVariantId !== undefined) {
+    await assertVariantExists(parsedVariantId, prisma)
+  }
+
+  if (shortname && parsedVariantId !== undefined) {
+    await assertVariantMatchesShortname(parsedVariantId, shortname, prisma)
+  }
+
+  const where: any = { variant: {} }
+
+  if (parsedVariantId !== undefined) {
+    where.variant.id = parsedVariantId
+  }
+
+  if (shortname) {
+    where.variant.statistic = {
+      shortname: { name: shortname },
+    }
+  }
+
+  return where
 }
 
 export async function updateRelease(id: string, body: ReleaseUpdate, prisma: ReleasePrisma): Promise<ReleaseDetails> {
