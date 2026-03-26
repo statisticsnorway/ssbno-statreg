@@ -3,7 +3,7 @@ import { ApprovalStatus } from '@/types/enums'
 import { getLocalizedName, dateToISOString, sanitize, validateDateISO, ensureVariantIdNumber } from '@/lib/utils'
 import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
 import type { Prisma } from '@/generated/prisma/client'
-import { assertStatisticExists, assertVariantExists, assertVariantMatchesShortname } from '@/lib/asserts'
+import { releaseAsserts } from '@/lib/asserts'
 
 export type ReleasePrisma = Pick<PrismaClient, 'release' | 'statistic' | 'variant'>
 const lang_en = 'en'
@@ -167,15 +167,15 @@ export async function buildReleaseFilter(
   const parsedVariantId = variantId === undefined ? undefined : ensureVariantIdNumber(variantId)
 
   if (shortname) {
-    await assertStatisticExists(shortname, prisma)
+    await releaseAsserts.assertStatisticExists(shortname, prisma)
   }
 
   if (parsedVariantId !== undefined) {
-    await assertVariantExists(parsedVariantId, prisma)
+    await releaseAsserts.assertVariantExists(parsedVariantId, prisma)
   }
 
   if (shortname && parsedVariantId !== undefined) {
-    await assertVariantMatchesShortname(parsedVariantId, shortname, prisma)
+    await releaseAsserts.assertVariantMatchesShortname(parsedVariantId, shortname, prisma)
   }
 
   const where: any = { variant: {} }
