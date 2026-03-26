@@ -18,7 +18,7 @@ describe('asserts', () => {
   })
 
   describe('assertStatisticExists', () => {
-    test('resolves when statistic exists', async () => {
+    test('returns undefined when statistic exists', async () => {
       prismaMock.statistic.findFirst = mock.fn(() => Promise.resolve({ id: 1 }))
 
       const result = await assertStatisticExists('KPI', prismaMock)
@@ -42,7 +42,7 @@ describe('asserts', () => {
   })
 
   describe('assertVariantExists', () => {
-    test('resolves when variant exists', async () => {
+    test('returns undefined when variant exists', async () => {
       prismaMock.variant.findUnique = mock.fn(() => Promise.resolve({ id: 1 }))
 
       const result = await assertVariantExists(1, prismaMock)
@@ -66,7 +66,7 @@ describe('asserts', () => {
   })
 
   describe('assertVariantMatchesShortname', () => {
-    test('resolves when variant belongs to statistic', async () => {
+    test('returns undefined when variant belongs to statistic', async () => {
       prismaMock.variant.findFirst = mock.fn(() => Promise.resolve({ id: 1 }))
 
       const result = await assertVariantMatchesShortname(1, 'KPI', prismaMock)
