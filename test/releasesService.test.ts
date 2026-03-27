@@ -283,7 +283,7 @@ const mockedReleasesPrismaResult = [
     variant: {
       frequency: {
         name: 'Måned',
-        name_en: 'Monthly',
+        code: 'M',
       },
       statistic: {
         language: 'nb',
@@ -305,7 +305,7 @@ const mockedReleasesPrismaResult = [
     variant: {
       frequency: {
         name: 'År',
-        name_en: 'Year',
+        code: 'Y',
       },
       statistic: {
         language: 'nb',
@@ -333,7 +333,7 @@ const mockedSingleReleasePrismaResult = {
     revision: 'I',
     frequency: {
       name: 'Måned',
-      name_en: 'Monthly',
+      code: 'M',
     },
     statistic: {
       language: 'nb',
@@ -354,17 +354,13 @@ const mockedReleasesResult = [
     period_to: '2024-09-01T00:00:00.000Z',
     period_from: '2024-08-01T00:00:00.000Z',
     frequency: {
-      name: [
-        { language_code: 'nb', text: 'Måned' },
-        { language_code: 'en', text: 'Monthly' },
-      ],
+      name: 'Måned',
+      code: 'M',
     },
     statistic: {
       shortname: 'KPI',
-      name: [
-        { language_code: 'nb', text: 'Konsumprisindeks' },
-        { language_code: 'en', text: 'Consumer Price Index' },
-      ],
+      name: 'Konsumprisindeks',
+      name_en: 'Consumer Price Index',
     },
   },
   {
@@ -374,17 +370,13 @@ const mockedReleasesResult = [
     period_to: '2024-12-31T00:00:00.000Z',
     period_from: '2024-01-01T00:00:00.000Z',
     frequency: {
-      name: [
-        { language_code: 'nb', text: 'År' },
-        { language_code: 'en', text: 'Year' },
-      ],
+      name: 'År',
+      code: 'Y',
     },
     statistic: {
       shortname: 'NR',
-      name: [
-        { language_code: 'nb', text: 'Nasjonalregnskap' },
-        { language_code: 'en', text: 'National Accounts' },
-      ],
+      name: 'Nasjonalregnskap',
+      name_en: 'National Accounts',
     },
   },
 ]
@@ -397,21 +389,17 @@ const mockedSingleReleaseResult = {
   variant: {
     id: 1,
     frequency: {
-      name: [
-        { language_code: 'nb', text: 'Måned' },
-        { language_code: 'en', text: 'Monthly' },
-      ],
+      name: 'Måned',
+      code: 'M',
     },
     revision: {
-      name: [{ language_code: 'nb', text: 'I' }],
+      name: 'I',
     },
   },
   statistic: {
     shortname: 'KPI',
-    name: [
-      { language_code: 'nb', text: 'Konsumprisindeks' },
-      { language_code: 'en', text: 'Consumer Price Index' },
-    ],
+    name: 'Konsumprisindeks',
+    name_en: 'Consumer Price Index',
   },
   period_from: '2024-08-01T00:00:00.000Z',
   period_to: '2024-09-01T00:00:00.000Z',

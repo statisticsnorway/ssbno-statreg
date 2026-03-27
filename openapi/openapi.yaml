@@ -47,8 +47,12 @@ components:
             type: object
             properties:
               release_id: { type: integer, readOnly: true }
-              statistic_shortname: { type: string, readOnly: true }
-              statistic_name: { $ref: '#/components/schemas/Translations', readOnly: true }
+              statistic:
+                type: object
+                properties:
+                  shortname: { type: string, readOnly: true }
+                  name: { type: string, readOnly: true }
+                  name_en: { type: string, readOnly: true }
 
     Contact:
       type: object
@@ -61,9 +65,22 @@ components:
     Frequency:
       type: object
       properties:
-        id: { type: integer, readOnly: true }
-        name: { $ref: '#/components/schemas/Translations' }
+        name: { type: string }
         code: { type: string }
+
+    Level_of_detail:
+      description: "Text field to specify variant beyond frequency and revision"
+      type: object
+      properties: 
+        name: { type: string, nullable: true }
+        name_en: { type: string, nullable: true }
+
+    Region_level:
+      description: "Valid region levels are (name in parethesis): L (Land), LD (Landsdel), F (Fylke), K (Kommune), BD (Bydel og krets)"
+      type: object
+      properties:
+        code: { type: string }
+        name: { type: string }
 
     Release:
       type: object
@@ -98,7 +115,8 @@ components:
               type: object
               properties:
                 shortname: { type: string, readOnly: true }
-                name: { $ref: '#/components/schemas/Translations', readOnly: true }
+                name: { type: string, readOnly: true }
+                name_en: { type: string, readOnly: true }
 
     Release_details:
       allOf:
@@ -111,13 +129,9 @@ components:
               properties:
                 id: { type: integer, readOnly: true }
                 frequency:
-                  type: object
-                  properties:
-                    name: { $ref: '#/components/schemas/Translations', readOnly: true }
+                  $ref: '#/components/schemas/Frequency'
                 revision:
-                  type: object
-                  properties:
-                    name: { $ref: '#/components/schemas/Translations', readOnly: true }
+                  $ref: '#/components/schemas/Revision'
             cancelled: { type: boolean }
             release_date_precision: { type: string }
 
@@ -127,9 +141,14 @@ components:
         - type: object
           properties:
             frequency:
-              type: object
-              properties:
-                name: { $ref: '#/components/schemas/Translations', readOnly: true }
+              $ref: '#/components/schemas/Frequency'
+
+    Revision:
+      description: "Valid revision codes are:	I (Ingen), B (Beregnede), E (Endelige), F (Foreløpige), R (Reviderte), IG (Integrert)"
+      type: object
+      properties:
+        name: { type: string }
+        code: {type: string }
 
     Statistic:
       type: object
@@ -140,7 +159,8 @@ components:
           type: object
           properties:
             code: { type: string }
-        name: { $ref: '#/components/schemas/Translations' }
+        name: { type: string }
+        name_en: { type: string }
         approval_status: { type: string, description: " Is one of 'GODKJENT', 'AVVIST' or 'FORSLAG'" }
 
     Statistic_create:
@@ -153,8 +173,7 @@ components:
         yearly_reporting: { type: boolean}
         statistic_region_levels:
           type: array
-          items: { type: string }
-          description: 'Array with region levels. Valid region levels are K (kommune), F (fylke), LD (landsdel), L (land) and BD (Bydel og krets)'
+          items: { $ref: '#/components/schemas/Region_level' }
         previous_topic_codes: { type: string, nullable: true }
         comment: { type: string, nullable: true}
 
@@ -168,8 +187,7 @@ components:
         yearly_reporting: { type: boolean}
         statistic_region_levels:
           type: array
-          items: { type: string }
-          description: 'Array with region levels. Valid region levels are K (kommune), F (fylke), LD (landsdel), L (land) and BD (Bydel og krets)'
+          items: { $ref: '#/components/schemas/Region_level' }
         previous_topic_codes: { type: string, nullable: true }
         relation:  { type: string, nullable: true }
         comment: {type: string}
@@ -184,7 +202,7 @@ components:
           type: object
           properties:
             code: { type: string, nullable: true }
-            name: { $ref: '#/components/schemas/Translations', readOnly: true }
+            name: { type: string, readOnly: true }
         first_released_at: { type: string, format: date, nullable: true }
         yearly_reporting: { type: boolean }
         previous_topic_codes: { type: string, nullable: true }
@@ -192,7 +210,8 @@ components:
           type: object
           properties:
             shortname: { type: string }
-            name: { $ref: '#/components/schemas/Translations', readOnly: true }
+            name: { type: string, readOnly: true }
+            name_en: { type: string, readOnly: true }
         updated_at: { type: string, format: date-time, readOnly: true }
         comment: { type: string }
         created_at: { type: string, format: date-time, readOnly: true }
@@ -209,7 +228,8 @@ components:
               name: { type: string }
         statistic_region_levels:
           type: array
-          items: { $ref: '#/components/schemas/Translations' }
+          items:
+            $ref: '#/components/schemas/Region_level'
 
     Statistic_listing:
       allOf:
@@ -224,14 +244,6 @@ components:
               username: { type: string, nullable: true }
               email: { type: string }
 
-    Translations:
-      type: array
-      items:
-        type: object
-        properties:
-          language_code: { type: string }
-          text: { type: string }
-
     Variant:
       type: object
       properties:
@@ -239,15 +251,11 @@ components:
         version: { type: integer }
         updated_at: { type: string, format: date-time, readOnly: true }
         level_of_detail:
-          type: object
-          properties:
-            name: { $ref: '#/components/schemas/Translations', nullable: true }
+          $ref: '#/components/schemas/Level_of_detail'
         created_at: { type: string, format: date-time, readOnly: true }
         cancelled: { type: boolean }
-        freqency:
-          type: object
-          properties:
-            name: { $ref: '#/components/schemas/Translations', readOnly: true }
+        frequency:
+          $ref: '#/components/schemas/Frequency'
         revision: { type: string }
 
 paths:

@@ -118,7 +118,7 @@ describe('statisticService ', async () => {
 
       const result = await getStatisticByShortname('helse', prismaMock)
 
-      assert.deepEqual(result, { ...mockedStatisticDetailedResult, division: { code: '105', name: [] } })
+      assert.deepEqual(result, { ...mockedStatisticDetailedResult, division: { code: '105', name: undefined } })
     })
 
     test('returns only email when user is not found', async () => {
@@ -153,10 +153,8 @@ describe('statisticService ', async () => {
       const input = {
         division: '105',
         status: { code: 'SP' },
-        name: [
-          { language_code: 'nn', text: 'Helse' },
-          { language_code: 'en', text: 'Health' },
-        ],
+        name: 'Helse',
+        name_en: 'Health',
         approval_status: 'FORSLAG',
         relation: '2',
         previous_topic_codes: '05.01.02',
@@ -169,8 +167,8 @@ describe('statisticService ', async () => {
       setStatisticsResult({
         ...mockStatisticsDetailedPrismaResult,
         division_code: input.division,
-        name: input.name[0]?.text,
-        name_en: input.name[1]?.text,
+        name: input.name,
+        name_en: input.name_en,
         status: input.status.code,
         desk_appoval_status: input.approval_status,
         language: input.main_language,
@@ -197,22 +195,21 @@ describe('statisticService ', async () => {
       })
       assert.deepStrictEqual(result, {
         ...mockedStatisticDetailedResult,
-        division: { code: input.division, name: [] },
+        division: { code: input.division, name: undefined },
         main_language: input.main_language,
         yearly_reporting: input.yearly_reporting,
         approval_status: input.approval_status,
         comment: input.comment,
-        name: [{ language_code: 'nn', text: 'Helse' }, { ...input.name[1] }],
+        name: 'Helse',
+        name_en: 'Health',
         relation: {
           shortname: 'befolk',
-          name: [
-            { language_code: 'nb', text: 'Befolkning og demografi' },
-            { language_code: 'en', text: 'Foreign trade and goods flow' },
-          ],
+          name: 'Befolkning og demografi',
+          name_en: 'Foreign trade and goods flow',
         },
         status: input.status,
         // TODO MIM-2595: Make adjustments if necessary on handle removal and addition of region level task
-        statistic_region_levels: [[{ language_code: 'nn', text: 'Bydel og krets' }]],
+        statistic_region_levels: [{ name: 'Bydel og krets', code: 'BD' }],
       })
     })
 
@@ -242,7 +239,7 @@ describe('statisticService ', async () => {
           level_of_detail_en: null,
           frequency: {
             name: 'Måned',
-            name_en: 'Month',
+            code: 'M',
           },
         },
       ])
@@ -251,14 +248,12 @@ describe('statisticService ', async () => {
         {
           id: 1,
           updated_at: '2025-06-20T10:39:51.621Z',
-          level_of_detail: { name: [{ language_code: 'nb', text: 'Kommentar' }] },
+          level_of_detail: { name: 'Kommentar', name_en: '' },
           created_at: '2025-06-20T10:39:51.621Z',
           cancelled: false,
           frequency: {
-            name: [
-              { language_code: 'nb', text: 'Måned' },
-              { language_code: 'en', text: 'Month' },
-            ],
+            code: 'M',
+            name: 'Måned',
           },
           revision: 'I',
         },
@@ -346,6 +341,7 @@ const mockStatisticsDetailedPrismaResult = {
     {
       region_level: {
         name: 'Bydel og krets',
+        code: 'BD',
       },
     },
   ],
@@ -361,6 +357,7 @@ const mockStatisticsDetailedPrismaResult = {
       frequency: {
         name: 'Måned',
         name_en: 'Month',
+        code: 'M',
       },
     },
     {
@@ -374,6 +371,7 @@ const mockStatisticsDetailedPrismaResult = {
       frequency: {
         name: 'Uke',
         name_en: 'Week',
+        code: 'W',
       },
     },
   ],
@@ -384,20 +382,16 @@ const mockedStatisticsResult = [
     shortname: 'energ',
     main_language: 'nb',
     status: { code: 'SA' },
-    name: [
-      { language_code: 'nb', text: 'Energiregnskap og energibalanse' },
-      { language_code: 'en', text: 'Energy account and energy balance' },
-    ],
+    name: 'Energiregnskap og energibalanse',
+    name_en: 'Energy account and energy balance',
     contacts: [{ username: 'abc', email: 'alice@ssb.no' }],
   },
   {
     shortname: 'befolk',
     main_language: 'nb',
     status: { code: 'SA' },
-    name: [
-      { language_code: 'nb', text: 'Befolkning og demografi' },
-      { language_code: 'en', text: 'Population and demography' },
-    ],
+    name: 'Befolkning og demografi',
+    name_en: 'Population and demography',
     contacts: [{ username: 'bcd', email: 'bob@ssb.no' }],
   },
 ]
@@ -409,10 +403,7 @@ const mockedStatisticDetailedResult = {
   main_language: 'nb',
   division: {
     code: '104',
-    name: [
-      { language_code: 'nb', text: 'Seksjon A1' },
-      { language_code: 'en', text: 'Division A1' },
-    ],
+    name: 'Seksjon A1',
   },
   first_released_at: '1970-01-01T00:00:00.000Z',
   yearly_reporting: true,
@@ -420,15 +411,11 @@ const mockedStatisticDetailedResult = {
   previous_topic_codes: '05.01.01',
   relation: {
     shortname: 'kpi',
-    name: [
-      { language_code: 'nb', text: 'Utenrikshandel og varestrøm' },
-      { language_code: 'en', text: 'Foreign trade and goods flow' },
-    ],
+    name: 'Utenrikshandel og varestrøm',
+    name_en: 'Foreign trade and goods flow',
   },
-  name: [
-    { language_code: 'nb', text: 'Helse og helsetjenester' },
-    { language_code: 'en', text: 'Health and health services' },
-  ],
+  name: 'Helse og helsetjenester',
+  name_en: 'Health and health services',
   updated_at: '2021-09-01T08:30:00.000Z',
   comment: 'statistikk over befolkningens helse og tjenestebruk',
   created_at: '2019-07-01T00:00:00.000Z',
@@ -436,34 +423,33 @@ const mockedStatisticDetailedResult = {
     {
       id: 1,
       updated_at: '2025-06-20T10:39:51.621Z',
-      level_of_detail: { name: [] },
+      level_of_detail: { name: '', name_en: '' },
       created_at: '2025-06-20T10:39:51.621Z',
       cancelled: false,
       frequency: {
-        name: [
-          { language_code: 'nb', text: 'Måned' },
-          { language_code: 'en', text: 'Month' },
-        ],
+        name: 'Måned',
+        code: 'M',
       },
       revision: 'I',
     },
     {
       id: 2,
       updated_at: '2025-06-20T10:39:51.621Z',
-      level_of_detail: { name: [] },
+      level_of_detail: {
+        name: '',
+        name_en: '',
+      },
       created_at: '2025-06-20T10:39:51.621Z',
       cancelled: false,
       frequency: {
-        name: [
-          { language_code: 'nb', text: 'Uke' },
-          { language_code: 'en', text: 'Week' },
-        ],
+        name: 'Uke',
+        code: 'W',
       },
       revision: 'I',
     },
   ],
   contacts: [{ username: undefined, name: 'Bob', email: 'bob@ssb.no' }],
-  statistic_region_levels: [[{ language_code: 'nb', text: 'Bydel og krets' }]],
+  statistic_region_levels: [{ name: 'Bydel og krets', code: 'BD' }],
 }
 
 const mockUpdateStatisticPrismaUpdateData = {

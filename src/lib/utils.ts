@@ -1,12 +1,3 @@
-import type { Translations } from '@/types'
-
-// For usage, remember to destructurize the function's content e.g. { name: [...getLocalizedName(language_code, text)] }
-export function getLocalizedName(language_code = 'nb', text: string | undefined | null): Translations {
-  if (!text) return []
-
-  return [{ language_code, text }]
-}
-
 export function dateToISOString(date: Date | null): string | undefined {
   if (!date) return
 
