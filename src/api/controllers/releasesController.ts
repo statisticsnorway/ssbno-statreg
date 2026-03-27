@@ -71,12 +71,10 @@ export default function releasesController(router: Router) {
   router.post('/statistics/:shortname/variants/:id/releases', requireAdminAuthorization(), async (req, res) => {
     try {
       const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id
-      const now = new Date()
       const result = await createRelease(
         prisma,
         Array.isArray(req.params.shortname) ? (req.params.shortname[0] as string) : (req.params.shortname as string),
         id!,
-        now,
         req.body
       )
       res.json(result)

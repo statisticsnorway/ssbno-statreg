@@ -220,7 +220,7 @@ describe('releasesService ', async () => {
         desk_appoval_status: ApprovalStatus.PENDING,
       })
 
-      const result = await createRelease(prismaMock, 'kpi', '1', now, mockCreateReleaseInput)
+      const result = await createRelease(prismaMock, 'kpi', '1', mockCreateReleaseInput, now)
 
       assert.deepStrictEqual(prismaMock.release.create.mock.callCount(), 1)
       assert.deepStrictEqual(prismaMock.release.create.mock.calls[0].arguments[0], {
@@ -251,7 +251,7 @@ describe('releasesService ', async () => {
     })
 
     test('returns 400 if request body is empty', async () => {
-      await assert.rejects(() => createRelease(prismaMock, 'kpi', '1', now, undefined), {
+      await assert.rejects(() => createRelease(prismaMock, 'kpi', '1', undefined, now), {
         statregError: 'Missing required field(s): publish_time, period_from, period_to, release_date_precision',
       })
       assert.strictEqual(prismaMock.release.create.mock.callCount(), 0)
@@ -263,7 +263,7 @@ describe('releasesService ', async () => {
         release_date_precision: 'dag',
       }
 
-      await assert.rejects(() => createRelease(prismaMock, 'kpi', '1', now, newReleaseInput), {
+      await assert.rejects(() => createRelease(prismaMock, 'kpi', '1', newReleaseInput, now), {
         statregError: 'Missing required field(s): period_from, period_to',
       })
       assert.strictEqual(prismaMock.release.create.mock.callCount(), 0)

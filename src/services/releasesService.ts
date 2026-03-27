@@ -106,8 +106,8 @@ export async function createRelease(
   prisma: ReleasePrisma,
   shortname: string,
   variantId: string,
-  now: Date,
-  body?: ReleaseCreate
+  body?: ReleaseCreate,
+  now = new Date()
 ): Promise<ReleaseDetails> {
   const variantIdNumber = ensureVariantIdNumber(variantId)
   const safeShortname = sanitize(shortname)
