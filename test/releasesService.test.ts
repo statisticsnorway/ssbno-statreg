@@ -1,6 +1,12 @@
 import { describe, test, mock, beforeEach } from 'node:test'
 import assert from 'node:assert/strict'
-import { getAllReleases, getReleaseById, updateRelease, createRelease } from '@/services/releasesService'
+import {
+  getReleases,
+  getReleaseById,
+  updateRelease,
+  createRelease,
+  buildReleaseFilter,
+} from '@/services/releasesService'
 import { ApprovalStatus } from '@/types/enums'
 
 let prismaMock: any
@@ -22,11 +28,11 @@ describe('releasesService ', async () => {
     }
   })
 
-  describe('getAllReleases ', () => {
+  describe('getReleases ', () => {
     test('returns mocked data', async () => {
       setPrismaResult(mockedReleasesPrismaResult)
 
-      const result = await getAllReleases({ start: 1, count: 2 }, prismaMock)
+      const result = await getReleases({ start: 1, count: 2 }, prismaMock)
 
       assert.deepEqual(result, mockedReleasesResult)
       assert.equal(prismaMock.release.findMany.mock.calls[0].arguments[0]['skip'], 1)
@@ -36,7 +42,7 @@ describe('releasesService ', async () => {
     test('uses default start and count if not provided', async () => {
       setPrismaResult(mockedReleasesPrismaResult)
 
-      const result = await getAllReleases({}, prismaMock)
+      const result = await getReleases({}, prismaMock)
 
       assert.deepEqual(result, mockedReleasesResult)
       assert.equal(prismaMock.release.findMany.mock.calls[0].arguments[0]['skip'], 0)
@@ -46,9 +52,83 @@ describe('releasesService ', async () => {
     test('returns empty list if no results', async () => {
       setPrismaResult([])
 
-      const result = await getAllReleases({}, prismaMock)
+      const result = await getReleases({}, prismaMock)
 
       assert.deepEqual(result, [])
+    })
+  })
+
+  describe('buildReleaseFilter', () => {
+    beforeEach(() => {
+      prismaMock = {
+        statistic: { findFirst: mock.fn(() => Promise.resolve({ id: 1 })) },
+        variant: {
+          findUnique: mock.fn(() => Promise.resolve({ id: 1 })),
+          findFirst: mock.fn(() => Promise.resolve({ id: 1 })),
+        },
+      }
+    })
+
+    test('returns undefined when neither shortname nor variantId is provided', async () => {
+      const where = await buildReleaseFilter({}, prismaMock)
+
+      assert.equal(where, undefined)
+      assert.equal(prismaMock.statistic.findFirst.mock.calls.length, 0)
+      assert.equal(prismaMock.variant.findUnique.mock.calls.length, 0)
+      assert.equal(prismaMock.variant.findFirst.mock.calls.length, 0)
+    })
+
+    test('applies filter when only shortname is provided', async () => {
+      const where = await buildReleaseFilter({ shortname: 'KPI' }, prismaMock)
+
+      assert.deepEqual(where, {
+        variant: { statistic: { shortname: { name: 'KPI' } } },
+      })
+    })
+
+    test('applies filter when only variantId is provided', async () => {
+      const where = await buildReleaseFilter({ variantId: 1 }, prismaMock)
+
+      assert.deepEqual(where, {
+        variant: { id: 1 },
+      })
+    })
+
+    test('applies combined filter when both inputs are provided', async () => {
+      prismaMock.variant.findFirst = mock.fn(() => Promise.resolve({ id: 1 }))
+
+      const where = await buildReleaseFilter({ shortname: 'KPI', variantId: 1 }, prismaMock)
+
+      assert.deepEqual(where, {
+        variant: { id: 1, statistic: { shortname: { name: 'KPI' } } },
+      })
+    })
+
+    test('throws when statistic does not exist', async () => {
+      prismaMock.statistic.findFirst = mock.fn(() => Promise.resolve(null))
+
+      await assert.rejects(() => buildReleaseFilter({ shortname: 'BAD' }, prismaMock), {
+        status: 404,
+        statregError: "Statistic 'BAD' not found",
+      })
+    })
+
+    test('throws when variant does not exist', async () => {
+      prismaMock.variant.findUnique = mock.fn(() => Promise.resolve(null))
+
+      await assert.rejects(() => buildReleaseFilter({ variantId: 999 }, prismaMock), {
+        status: 404,
+        statregError: "Variant '999' not found",
+      })
+    })
+
+    test('throws when variant does not belong to statistic', async () => {
+      prismaMock.variant.findFirst = mock.fn(() => Promise.resolve(null))
+
+      await assert.rejects(() => buildReleaseFilter({ shortname: 'KPI', variantId: 1 }, prismaMock), {
+        status: 404,
+        statregError: "Variant does not belong to statistic 'KPI'",
+      })
     })
   })
 
@@ -139,7 +219,7 @@ describe('releasesService ', async () => {
               frequency: {
                 select: {
                   name: true,
-                  name_en: true,
+                  code: true,
                 },
               },
               revision: true,
@@ -199,7 +279,7 @@ const mockedReleasesPrismaResult = [
     variant: {
       frequency: {
         name: 'Måned',
-        name_en: 'Monthly',
+        code: 'M',
       },
       statistic: {
         language: 'nb',
@@ -221,7 +301,7 @@ const mockedReleasesPrismaResult = [
     variant: {
       frequency: {
         name: 'År',
-        name_en: 'Year',
+        code: 'Y',
       },
       statistic: {
         language: 'nb',
@@ -249,7 +329,7 @@ const mockedSingleReleasePrismaResult = {
     revision: 'I',
     frequency: {
       name: 'Måned',
-      name_en: 'Monthly',
+      code: 'M',
     },
     statistic: {
       language: 'nb',
@@ -270,17 +350,13 @@ const mockedReleasesResult = [
     period_to: '2024-09-01T00:00:00.000Z',
     period_from: '2024-08-01T00:00:00.000Z',
     frequency: {
-      name: [
-        { language_code: 'nb', text: 'Måned' },
-        { language_code: 'en', text: 'Monthly' },
-      ],
+      name: 'Måned',
+      code: 'M',
     },
     statistic: {
       shortname: 'KPI',
-      name: [
-        { language_code: 'nb', text: 'Konsumprisindeks' },
-        { language_code: 'en', text: 'Consumer Price Index' },
-      ],
+      name: 'Konsumprisindeks',
+      name_en: 'Consumer Price Index',
     },
   },
   {
@@ -290,17 +366,13 @@ const mockedReleasesResult = [
     period_to: '2024-12-31T00:00:00.000Z',
     period_from: '2024-01-01T00:00:00.000Z',
     frequency: {
-      name: [
-        { language_code: 'nb', text: 'År' },
-        { language_code: 'en', text: 'Year' },
-      ],
+      name: 'År',
+      code: 'Y',
     },
     statistic: {
       shortname: 'NR',
-      name: [
-        { language_code: 'nb', text: 'Nasjonalregnskap' },
-        { language_code: 'en', text: 'National Accounts' },
-      ],
+      name: 'Nasjonalregnskap',
+      name_en: 'National Accounts',
     },
   },
 ]
@@ -313,21 +385,17 @@ const mockedSingleReleaseResult = {
   variant: {
     id: 1,
     frequency: {
-      name: [
-        { language_code: 'nb', text: 'Måned' },
-        { language_code: 'en', text: 'Monthly' },
-      ],
+      name: 'Måned',
+      code: 'M',
     },
     revision: {
-      name: [{ language_code: 'nb', text: 'I' }],
+      name: 'I',
     },
   },
   statistic: {
     shortname: 'KPI',
-    name: [
-      { language_code: 'nb', text: 'Konsumprisindeks' },
-      { language_code: 'en', text: 'Consumer Price Index' },
-    ],
+    name: 'Konsumprisindeks',
+    name_en: 'Consumer Price Index',
   },
   period_from: '2024-08-01T00:00:00.000Z',
   period_to: '2024-09-01T00:00:00.000Z',
