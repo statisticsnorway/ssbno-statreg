@@ -42,3 +42,9 @@ export async function assertVariantMatchesShortname(variantId: number, shortname
     }
   }
 }
+
+export const releaseAsserts = {
+  assertStatisticExists,
+  assertVariantExists,
+  assertVariantMatchesShortname,
+}
