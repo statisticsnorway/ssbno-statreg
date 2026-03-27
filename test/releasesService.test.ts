@@ -7,6 +7,7 @@ import {
   updateRelease,
   createRelease,
   buildReleaseFilter,
+  ReleaseDetailsIncludes,
 } from '@/services/releasesService'
 import { ApprovalStatus } from '@/types/enums'
 
@@ -26,6 +27,11 @@ describe('releasesService ', async () => {
         findMany: mock.fn(() => Promise.resolve(releasesResult)),
         findFirst: mock.fn(() => Promise.resolve(releasesResult)),
         create: mock.fn(() => Promise.resolve({ ...releasesResult })),
+      },
+      statistic: { findFirst: mock.fn(() => Promise.resolve({ id: 1 })) },
+      variant: {
+        findUnique: mock.fn(() => Promise.resolve({ id: 1 })),
+        findFirst: mock.fn(() => Promise.resolve({ id: 1 })),
       },
     }
     releaseAsserts.assertStatisticExists = mock.fn(async () => undefined) as any
@@ -235,32 +241,7 @@ describe('releasesService ', async () => {
             },
           },
         },
-        include: {
-          variant: {
-            select: {
-              id: true,
-              frequency: {
-                select: {
-                  name: true,
-                  code: true,
-                },
-              },
-              revision: true,
-              statistic: {
-                select: {
-                  language: true,
-                  name: true,
-                  name_en: true,
-                  shortname: {
-                    select: {
-                      name: true,
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
+        include: ReleaseDetailsIncludes,
       })
       assert.deepStrictEqual(result, {
         ...mockedSingleReleaseResult,
