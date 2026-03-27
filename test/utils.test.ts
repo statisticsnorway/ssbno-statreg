@@ -1,16 +1,17 @@
 import {
   dateToISOString,
   sanitize,
-  validateId,
   validateDateOnly,
   validateDateISO,
   validateAndParseDate,
+  ensureString,
+  ensureNumber,
   ensureRequiredFieldsExists,
 } from '@/lib/utils'
 import { describe, test } from 'node:test'
 import assert from 'node:assert/strict'
 
-describe('utils ', () => {
+describe('utils', () => {
   describe('dateToISOString ', () => {
     test('returns ISO string for valid date', () => {
       const date = new Date('2020-01-01T12:00:00Z')
@@ -24,7 +25,7 @@ describe('utils ', () => {
     })
   })
 
-  describe('sanitize ', () => {
+  describe('sanitize', () => {
     test('handles empty string', async () => {
       const result = sanitize('')
       assert.equal(result, '')
@@ -45,18 +46,7 @@ describe('utils ', () => {
     })
   })
 
-  describe('validateId ', () => {
-    test('returns parsed number for valid ID', () => {
-      const result = validateId('123')
-      assert.equal(result, 123)
-    })
-
-    test('throws error for invalid numeric format', () => {
-      assert.throws(() => validateId('abc'), { statregError: 'Invalid id format' })
-    })
-  })
-
-  describe('validateDateOnly ', () => {
+  describe('validateDateOnly', () => {
     test('accepts and returns valid Date', () => {
       const result = validateDateOnly('2026-12-24')
       assert.deepStrictEqual(result, new Date('2026-12-24'))
@@ -116,7 +106,7 @@ describe('utils ', () => {
     })
   })
 
-  describe('validateAndParseDate ', () => {
+  describe('validateAndParseDate', () => {
     const dateRegEx = /^\d{4}-\d{2}-\d{2}$/ // YYYY-MM-dd
 
     test('returns Date for valid input', () => {
@@ -134,6 +124,39 @@ describe('utils ', () => {
       assert.throws(() => validateAndParseDate(['2026-03-25', '2026-03-26'], '', dateRegEx), {
         statregError: 'Invalid date format: 2026-03-25,2026-03-26',
       })
+    })
+  })
+
+  describe('ensureString', () => {
+    test('returns passed string', () => {
+      const result = ensureString('value')
+      assert.equal(result, 'value')
+    })
+
+    test('returns first element if passed value is an array of string', () => {
+      const result = ensureString(['value1', 'value2'])
+      assert.equal(result, 'value1')
+    })
+
+    test('returns empty string if string is undefined', () => {
+      const result = ensureString(undefined)
+      assert.equal(result, '')
+    })
+  })
+
+  describe('ensureNumber', () => {
+    test('returns parsed number for valid string id', () => {
+      const result = ensureNumber('123')
+      assert.equal(result, 123)
+    })
+
+    test('returns parsed number for valid number id', () => {
+      const result = ensureNumber(123)
+      assert.equal(result, 123)
+    })
+
+    test('throws error for invalid numeric format', () => {
+      assert.throws(() => ensureNumber('abc'), { statregError: 'Invalid id format' })
     })
   })
 
