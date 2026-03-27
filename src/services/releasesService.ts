@@ -115,9 +115,9 @@ export async function createRelease(
   const variantIdNumber = ensureVariantIdNumber(variantId)
   const safeShortname = sanitize(shortname)
 
-  await assertStatisticExists(safeShortname, prisma)
-  await assertVariantExists(variantIdNumber, prisma)
-  await assertVariantMatchesShortname(variantIdNumber, safeShortname, prisma)
+  await releaseAsserts.assertStatisticExists(safeShortname, prisma)
+  await releaseAsserts.assertVariantExists(variantIdNumber, prisma)
+  await releaseAsserts.assertVariantMatchesShortname(variantIdNumber, safeShortname, prisma)
 
   const requiredFields: (keyof ReleaseCreate)[] = ['publish_time', 'period_from', 'period_to', 'release_date_precision']
   const { publish_time, period_from, period_to, release_date_precision } =
