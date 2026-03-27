@@ -45,7 +45,7 @@ export function ensureString(value?: string | string[]): string {
   return Array.isArray(value) ? (value[0] ?? '') : (value ?? '')
 }
 
-export function ensureNumber(variantId: string | number): number {
+export function ensureIdIsNumber(variantId: string | number): number {
   const parsedVariantId = typeof variantId === 'number' ? variantId : Number(sanitize(variantId))
 
   if (!Number.isInteger(parsedVariantId)) {

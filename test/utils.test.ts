@@ -5,7 +5,7 @@ import {
   validateDateISO,
   validateAndParseDate,
   ensureString,
-  ensureNumber,
+  ensureIdIsNumber,
   ensureRequiredFieldsExists,
 } from '@/lib/utils'
 import { describe, test } from 'node:test'
@@ -144,19 +144,19 @@ describe('utils', () => {
     })
   })
 
-  describe('ensureNumber', () => {
+  describe('ensureIdIsNumber', () => {
     test('returns parsed number for valid string id', () => {
-      const result = ensureNumber('123')
+      const result = ensureIdIsNumber('123')
       assert.equal(result, 123)
     })
 
     test('returns parsed number for valid number id', () => {
-      const result = ensureNumber(123)
+      const result = ensureIdIsNumber(123)
       assert.equal(result, 123)
     })
 
     test('throws error for invalid numeric format', () => {
-      assert.throws(() => ensureNumber('abc'), { statregError: 'Invalid id format' })
+      assert.throws(() => ensureIdIsNumber('abc'), { statregError: 'Invalid id format' })
     })
   })
 

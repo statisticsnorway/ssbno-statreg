@@ -1,6 +1,6 @@
 import type { ReleaseDetails, ReleaseListing, ReleaseCreate, ReleaseUpdate } from '@/types/index'
 import { ApprovalStatus } from '@/types/enums'
-import { dateToISOString, sanitize, validateDateISO, ensureNumber, ensureRequiredFieldsExists } from '@/lib/utils'
+import { dateToISOString, sanitize, validateDateISO, ensureIdIsNumber, ensureRequiredFieldsExists } from '@/lib/utils'
 import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
 import type { Prisma } from '@/generated/prisma/client'
 import { releaseAsserts } from '@/lib/asserts'
@@ -103,7 +103,7 @@ export async function createRelease(
   now: Date,
   body?: ReleaseCreate
 ): Promise<ReleaseDetails> {
-  const variantIdNumber = ensureNumber(variantId)
+  const variantIdNumber = ensureIdIsNumber(variantId)
   const safeShortname = sanitize(shortname)
 
   await releaseAsserts.assertStatisticExists(safeShortname, prisma)
@@ -151,7 +151,7 @@ export async function buildReleaseFilter(
 ) {
   if (!shortname && variantId === undefined) return
 
-  const parsedVariantId = variantId === undefined ? undefined : ensureNumber(variantId)
+  const parsedVariantId = variantId === undefined ? undefined : ensureIdIsNumber(variantId)
 
   if (shortname) {
     await releaseAsserts.assertStatisticExists(shortname, prisma)
