@@ -39,7 +39,7 @@
     "eslint": "^9.39.2",
     "eslint-plugin-prettier": "^5.5.5",
     "node-mocks-http": "^1.17.2",
-    "nodemon": "^3.1.11",
+    "nodemon": "^3.1.14",
     "openapi-typescript": "^7.12.0",
     "pkgroll": "^2.25.2",
     "prisma": "^7.3.0",
@@ -57,6 +57,6 @@
     "swagger-ui-express": "^5.0.1",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3",
-    "yaml": "^2.8.1"
+    "yaml": "^2.8.3"
   }
 }
