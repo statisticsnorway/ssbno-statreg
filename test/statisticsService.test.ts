@@ -1,25 +1,31 @@
 import { describe, mock, test, before, beforeEach } from 'node:test'
 import assert from 'node:assert/strict'
+import { ApprovalStatus } from '@/types/enums'
+import { Users } from '@/types/entra'
 
 let prismaMock: any
 let statisticsResult: object | null
+let now: Date
 
 function setStatisticsResult(next: object | null) {
   statisticsResult = next
 }
 
 describe('statisticService ', async () => {
-  const fetchUsersMock: any = mock.fn(async () => [
-    {
-      lookupEmail: 'bob@ssb.no',
-      user: {
-        displayName: 'Bob',
-        username: 'bcd',
-        email: 'bob@ssb.no',
-        businessPhone: '11223344',
+  const fetchUsersMock: any = mock.fn(async (users: Users[]) => {
+    if (!users?.length) return []
+    return [
+      {
+        lookupEmail: 'bob@ssb.no',
+        user: {
+          displayName: 'Bob',
+          username: 'bcd',
+          email: 'bob@ssb.no',
+          businessPhone: '11223344',
+        },
       },
-    },
-  ])
+    ]
+  })
 
   const fetchDivisionMock = mock.fn((code: number, language?: string) => {
     if (code === 104 && language === 'en') return { code: 104, name: 'Division A1' }
@@ -29,6 +35,7 @@ describe('statisticService ', async () => {
   let getStatisticByShortname: Function
   let getAllStatistics: Function
   let updateStatistic: Function
+  let createStatistic: Function
   let parseStatisticVariants: Function
   let StatisticsDetailedIncludes: any
 
@@ -55,6 +62,7 @@ describe('statisticService ', async () => {
       getStatisticByShortname,
       parseStatisticVariants,
       updateStatistic,
+      createStatistic,
       StatisticsDetailedIncludes,
     } = await import('@/services/statisticsService'))
   })
@@ -65,6 +73,7 @@ describe('statisticService ', async () => {
         findMany: mock.fn(() => Promise.resolve(statisticsResult)),
         findFirst: mock.fn(() => Promise.resolve(statisticsResult)),
         update: mock.fn(() => Promise.resolve(statisticsResult)),
+        create: mock.fn(() => Promise.resolve(statisticsResult)),
       },
     }
   })
@@ -99,7 +108,7 @@ describe('statisticService ', async () => {
     })
   })
 
-  describe('getStatisticByShortname', async () => {
+  describe('getStatisticByShortname ', async () => {
     test('returns mocked data', async () => {
       setStatisticsResult(mockStatisticsDetailedPrismaResult)
 
@@ -148,7 +157,7 @@ describe('statisticService ', async () => {
     })
   })
 
-  describe('updateStatistics', async () => {
+  describe('updateStatistics ', async () => {
     test('returns mocked data', async () => {
       const input = {
         division: '105',
@@ -226,7 +235,64 @@ describe('statisticService ', async () => {
     })
   })
 
-  describe('parseStatisticVariants', async () => {
+  describe('createStatistic ', () => {
+    beforeEach(() => {
+      now = new Date('2026-03-23T08:00:00Z')
+    })
+
+    test('creates a new statistic and returns mapped results', async () => {
+      setStatisticsResult({
+        ...mockedStatisticCreatedPrismaResult,
+        id: 1,
+        version: 1,
+        desk_appoval_status: ApprovalStatus.PENDING,
+      })
+
+      const result = await createStatistic(prismaMock, 'kpi', { name: 'Konsumprisindeksen' }, now)
+
+      assert.deepStrictEqual(prismaMock.statistic.create.mock.callCount(), 1)
+      assert.deepStrictEqual(prismaMock.statistic.create.mock.calls[0].arguments[0], {
+        data: {
+          name: 'Konsumprisindeksen',
+          priority: 1,
+          name_en: undefined,
+          yearly_reporting: false,
+          status: 'K',
+          comment: '',
+          language: 'nb',
+          date_created: now,
+          last_updated: now,
+          desk_appoval_status: ApprovalStatus.PENDING,
+          shortname: {
+            connect: {
+              name: 'kpi',
+            },
+          },
+        },
+        include: StatisticsDetailedIncludes,
+      })
+      assert.deepStrictEqual(result, {
+        ...mockedStatisticCreatedResponse,
+      })
+    })
+
+    test('returns 400 if request body is empty', async () => {
+      await assert.rejects(() => createStatistic(prismaMock, 'kpi', undefined, now), {
+        statregError: 'Norwegian name is required',
+      })
+      assert.strictEqual(prismaMock.statistic.create.mock.callCount(), 0)
+    })
+
+    test('returns 400 if any of the required fields are missing', async () => {
+      // TODO: Add more fields to this test when validation logic are in place
+      await assert.rejects(() => createStatistic(prismaMock, 'kpi', {}, now), {
+        statregError: 'Norwegian name is required',
+      })
+      assert.strictEqual(prismaMock.statistic.create.mock.callCount(), 0)
+    })
+  })
+
+  describe('parseStatisticVariants ', async () => {
     test('returns parsed variants array', () => {
       const result = parseStatisticVariants([
         {
@@ -265,6 +331,10 @@ describe('statisticService ', async () => {
 
       assert.deepEqual(result, [])
     })
+  })
+
+  describe('mapStatisticDetails ', async () => {
+    // TODO: Add tests for mapping function
   })
 })
 
@@ -472,63 +542,51 @@ const mockUpdateStatisticPrismaUpdateData = {
   },
 }
 
-const mockedStatisticCreatedResult = {
+const mockedStatisticCreatedResponse = {
   version: 1,
-  shortname: 'helse',
+  shortname: 'kpi',
   approval_status: 'FORSLAG',
   main_language: 'nb',
   division: {
-    code: null,
-    name: [],
+    code: undefined,
+    name: undefined,
   },
   first_released_at: '1970-01-01T00:00:00.000Z',
   yearly_reporting: false,
   status: { code: 'K' },
-  previous_topic_codes: '05.01.01',
-  relation: {
-    shortname: 'kpi',
-    name: [
-      { language_code: 'nb', text: 'Utenrikshandel og varestrøm' },
-      { language_code: 'en', text: 'Foreign trade and goods flow' },
-    ],
-  },
-  name: [
-    { language_code: 'nb', text: 'Helse og helsetjenester' },
-    { language_code: 'en', text: 'Health and health services' },
-  ],
-  updated_at: '2021-09-01T08:30:00.000Z',
+  previous_topic_codes: '',
+  relation: {},
+  name: 'Konsumprisindeksen',
+  name_en: '',
+  updated_at: '2026-03-23T08:00:00.000Z',
   comment: '',
-  created_at: '2019-07-01T00:00:00.000Z',
-  variants: [
-    {
-      id: 1,
-      updated_at: '2025-06-20T10:39:51.621Z',
-      level_of_detail: { name: [] },
-      created_at: '2025-06-20T10:39:51.621Z',
-      cancelled: false,
-      frequency: {
-        name: [
-          { language_code: 'nb', text: 'Måned' },
-          { language_code: 'en', text: 'Month' },
-        ],
-      },
-      revision: 'I',
-    },
-    {
-      id: 2,
-      updated_at: '2025-06-20T10:39:51.621Z',
-      level_of_detail: { name: [] },
-      created_at: '2025-06-20T10:39:51.621Z',
-      cancelled: false,
-      frequency: {
-        name: [
-          { language_code: 'nb', text: 'Uke' },
-          { language_code: 'en', text: 'Week' },
-        ],
-      },
-      revision: 'I',
-    },
-  ],
-  contacts: [{ username: undefined, name: 'Bob', email: 'bob@ssb.no' }],
-  statistic_region_levels: [[{ language_code: 'nb', text: 'Bydel og krets' }]],
+  created_at: '2026-03-23T08:00:00.000Z',
+  variants: [],
+  contacts: [],
+  statistic_region_levels: [],
+}
+
+const mockedStatisticCreatedPrismaResult = {
+  id: 5,
+  version: 1,
+  desk_appoval_status: 'FORSLAG',
+  language: 'nb',
+  division_code: undefined,
+  first_release: new Date('1970-01-01T00:00:00.000Z'),
+  yearly_reporting: false,
+  status: 'K',
+  related_statistic_id: undefined,
+  name: 'Konsumprisindeksen',
+  last_updated: new Date('2026-03-23T08:00:00Z'),
+  comment: '',
+  name_en: '',
+  date_created: new Date('2026-03-23T08:00:00Z'),
+  legacy_topic_codes: '',
+  shortname: {
+    name: 'kpi',
+  },
+  responsiblePersons: [],
+  related_statistic: {},
+  statistic_region_levels: [],
+  variants: [],
 }

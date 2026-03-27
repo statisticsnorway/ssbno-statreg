@@ -89,7 +89,13 @@ export function parseStatisticVariants(
 async function mapStatisticDetails(statistic: StatisticPrismaResult) {
   const main_language = statistic.language
   const division_code = statistic.division_code
-  const related_statistic = statistic.related_statistic
+  const relation = statistic.related_statistic?.shortname
+    ? {
+        shortname: statistic.related_statistic?.shortname?.name,
+        name: statistic.related_statistic?.name,
+        name_en: statistic.related_statistic?.name_en ?? '',
+      }
+    : {}
 
   return {
     version: statistic.version,
@@ -106,11 +112,7 @@ async function mapStatisticDetails(statistic: StatisticPrismaResult) {
       code: statistic.status,
     },
     previous_topic_codes: statistic.legacy_topic_codes,
-    relation: {
-      shortname: related_statistic?.shortname?.name,
-      name: related_statistic?.name,
-      name_en: related_statistic?.name_en ?? '',
-    },
+    relation,
     name: statistic.name,
     name_en: statistic.name_en ?? '',
     updated_at: dateToISOString(statistic.last_updated),
@@ -142,7 +144,7 @@ export async function getStatisticByShortname(shortname: string, prisma: Statist
   })
   if (!statistic) return Promise.reject({ status: 404, statregError: 'Shortname not found' })
 
-  return mapStatisticDetails(statistic)
+  return await mapStatisticDetails(statistic)
 }
 
 export async function updateStatistic(
@@ -183,7 +185,6 @@ export async function updateStatistic(
   //   (incomingRegLvl) => !statistic.statistic_region_levels?.find(existingRegLvl => incomingRegLvl === existingRegLvl.region_level.code)
   // )
 
-  //TODO MIM-2590: Make include statement to a variable
   const updatedStatistic = await prisma.statistic.update({
     where: { id: statistic.id },
     data: {
@@ -203,7 +204,7 @@ export async function updateStatistic(
     include: StatisticsDetailedIncludes,
   })
 
-  const result = mapStatisticDetails(updatedStatistic)
+  const result = await mapStatisticDetails(updatedStatistic)
 
   return result
 }
@@ -215,7 +216,6 @@ export async function createStatistic(
   now = new Date()
 ): Promise<StatisticDetails> {
   // TODO: Fix proper validation! Check existance of shortname, as well as other parameters.
-
   if (!body?.name) {
     return Promise.reject({ status: 400, statregError: 'Norwegian name is required' })
   }
@@ -231,6 +231,7 @@ export async function createStatistic(
       language: 'nb',
       date_created: now,
       last_updated: now,
+      desk_appoval_status: ApprovalStatus.PENDING,
       shortname: {
         connect: {
           name: shortname,
