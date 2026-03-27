@@ -5,10 +5,15 @@ import { Users } from '@/types/entra'
 
 let prismaMock: any
 let statisticsResult: object | null
+let updateStatisticsResult: object | null
 let now: Date
 
 function setStatisticsResult(next: object | null) {
   statisticsResult = next
+}
+
+function setUpdateStatisticsResult(next: object | null) {
+  updateStatisticsResult = next
 }
 
 describe('statisticService ', async () => {
@@ -72,7 +77,7 @@ describe('statisticService ', async () => {
       statistic: {
         findMany: mock.fn(() => Promise.resolve(statisticsResult)),
         findFirst: mock.fn(() => Promise.resolve(statisticsResult)),
-        update: mock.fn(() => Promise.resolve(statisticsResult)),
+        update: mock.fn(() => Promise.resolve(updateStatisticsResult)),
         create: mock.fn(() => Promise.resolve(statisticsResult)),
       },
     }
@@ -171,9 +176,22 @@ describe('statisticService ', async () => {
         first_released_at: '2026-03-25T08:30:00.000Z',
         main_language: 'nn',
         comment: 'Beskrivelse av endring',
+        statistic_region_levels: [{ code: 'L' }],
       }
 
       setStatisticsResult({
+        id: 5,
+        statistic_region_levels: [
+          {
+            region_level: {
+              id: 1,
+              code: 'K',
+            },
+          },
+        ],
+      })
+
+      setUpdateStatisticsResult({
         ...mockStatisticsDetailedPrismaResult,
         division_code: input.division,
         name: input.name,
@@ -533,7 +551,25 @@ const mockUpdateStatisticPrismaUpdateData = {
     name: 'Helse',
     name_en: 'Health',
     related_statistic_id: 2,
-    statistic_region_levels: {},
+    statistic_region_levels: {
+      create: [
+        {
+          region_level: {
+            connect: {
+              code: 'L',
+            },
+          },
+        },
+      ],
+      delete: [
+        {
+          statistic_id_region_level_id: {
+            region_level_id: 1,
+            statistic_id: 5,
+          },
+        },
+      ],
+    },
     status: 'SP',
     yearly_reporting: false,
   },
