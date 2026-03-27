@@ -1,7 +1,6 @@
 import type { ReleaseDetails, ReleaseListing, ReleaseCreate, ReleaseUpdate } from '@/types/index'
 import { ApprovalStatus } from '@/types/enums'
 import {
-  getLocalizedName,
   dateToISOString,
   sanitize,
   validateDateISO,
@@ -13,7 +12,6 @@ import type { Prisma } from '@/generated/prisma/client'
 import { releaseAsserts } from '@/lib/asserts'
 
 export type ReleasePrisma = Pick<PrismaClient, 'release' | 'statistic' | 'variant'>
-const lang_en = 'en'
 
 export async function getReleases(
   {
@@ -48,7 +46,7 @@ export async function getReleases(
           frequency: {
             select: {
               name: true,
-              name_en: true,
+              code: true,
             },
           },
           statistic: {
@@ -78,13 +76,12 @@ export async function getReleases(
       period_from: dateToISOString(release.period_from),
       statistic: {
         shortname: statistic.shortname.name,
-        name: [
-          ...getLocalizedName(statistic.language, statistic.name),
-          ...getLocalizedName(lang_en, statistic.name_en),
-        ],
+        name: statistic.name,
+        name_en: statistic.name_en ?? '',
       },
       frequency: {
-        name: [...getLocalizedName('nb', frequency.name), ...getLocalizedName(lang_en, frequency.name_en)],
+        name: frequency.name,
+        code: frequency.code,
       },
     }
   })
@@ -219,7 +216,7 @@ const SELECT_VARIANT_DETAILS = {
       frequency: {
         select: {
           name: true,
-          name_en: true,
+          code: true,
         },
       },
       revision: true,
@@ -252,15 +249,17 @@ export function mapToReleaseDetails(
     variant: {
       id: prismaRelease.variant.id,
       frequency: {
-        name: [...getLocalizedName('nb', frequency.name), ...getLocalizedName(lang_en, frequency.name_en)],
+        name: frequency.name,
+        code: frequency.code,
       },
       revision: {
-        name: [...getLocalizedName('nb', prismaRelease.variant.revision)],
+        name: prismaRelease.variant.revision,
       },
     },
     statistic: {
       shortname: statistic.shortname.name,
-      name: [...getLocalizedName(statistic.language, statistic.name), ...getLocalizedName(lang_en, statistic.name_en)],
+      name: statistic.name,
+      name_en: statistic.name_en ?? '',
     },
     period_from: dateToISOString(prismaRelease.period_from),
     period_to: dateToISOString(prismaRelease.period_to),
