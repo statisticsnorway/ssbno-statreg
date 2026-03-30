@@ -344,7 +344,7 @@ describe('statisticService ', async () => {
       input = structuredClone(mockStatisticsDetailedPrismaResult)
       input.responsiblePersons = [{ username: 'bcd', email: 'bob@ssb.no' }]
 
-      fetchUsersResult = [structuredClone(mockFetchedUserWithResponsiblePersonResult)]
+      fetchUsersResult = [structuredClone(mockFetchedUserLookupResult)]
       fetchUsersMock.mock.mockImplementation(async (users: Users[]) => {
         if (!users?.length) return []
         return fetchUsersResult
