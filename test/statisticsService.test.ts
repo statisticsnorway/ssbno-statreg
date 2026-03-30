@@ -37,6 +37,7 @@ describe('statisticService ', async () => {
   let updateStatistic: Function
   let createStatistic: Function
   let parseStatisticVariants: Function
+  let mapStatisticDetails: Function
   let StatisticsDetailedIncludes: any
 
   before(async () => {
@@ -61,6 +62,7 @@ describe('statisticService ', async () => {
       getAllStatistics,
       getStatisticByShortname,
       parseStatisticVariants,
+      mapStatisticDetails,
       updateStatistic,
       createStatistic,
       StatisticsDetailedIncludes,
@@ -334,7 +336,150 @@ describe('statisticService ', async () => {
   })
 
   describe('mapStatisticDetails ', async () => {
-    // TODO: Add tests for mapping function
+    test('returns correct statisticDetails when all conditionals succeed', async () => {
+      const result = await mapStatisticDetails(mockStatisticsDetailedPrismaResult)
+
+      assert.deepEqual(result, mockedStatisticDetailedResult)
+    })
+
+    test('sets empty relation when related statistic is missing', async () => {
+      const input = {
+        ...mockStatisticsDetailedPrismaResult,
+        related_statistic: null,
+      }
+
+      const result = await mapStatisticDetails(input)
+
+      assert.deepEqual(result, {
+        ...mockedStatisticDetailedResult,
+        relation: {},
+      })
+    })
+
+    test('falls back to pending approval status when desk approval status is missing', async () => {
+      const input = {
+        ...mockStatisticsDetailedPrismaResult,
+        desk_appoval_status: null,
+      }
+
+      const result = await mapStatisticDetails(input)
+
+      assert.deepEqual(result, {
+        ...mockedStatisticDetailedResult,
+        approval_status: ApprovalStatus.PENDING,
+      })
+    })
+
+    test('sets division name to undefined when division lookup does not find a match', async () => {
+      const input = {
+        ...mockStatisticsDetailedPrismaResult,
+        division_code: '105',
+      }
+
+      const result = await mapStatisticDetails(input)
+
+      // TODO verify that this is the behaviour we want
+      assert.deepEqual(result, {
+        ...mockedStatisticDetailedResult,
+        division: { code: '105', name: undefined },
+      })
+    })
+
+    test('falls back to empty English name when name_en is missing', async () => {
+      const input = {
+        ...mockStatisticsDetailedPrismaResult,
+        name_en: null,
+      }
+
+      const result = await mapStatisticDetails(input)
+
+      assert.deepEqual(result, {
+        ...mockedStatisticDetailedResult,
+        name_en: '',
+      })
+    })
+
+    test('falls back to lookupEmail when fetched user email is missing', async () => {
+      const input = {
+        ...mockStatisticsDetailedPrismaResult,
+      }
+      fetchUsersMock.mock.mockImplementationOnce(async () => [
+        {
+          lookupEmail: 'bob@ssb.no',
+          user: {
+            displayName: 'Bob',
+            username: 'bcd',
+            email: null,
+            businessPhone: '11223344',
+          },
+        },
+      ])
+
+      const result = await mapStatisticDetails(input)
+
+      assert.deepEqual(result, mockedStatisticDetailedResult)
+    })
+
+    test('falls back to responsible person email when fetched user email and lookupEmail are missing', async () => {
+      const input = {
+        ...mockStatisticsDetailedPrismaResult,
+        responsiblePersons: [{ ...mockStatisticsDetailedPrismaResult.responsiblePersons[0], email: 'fallback@ssb.no' }],
+      }
+      fetchUsersMock.mock.mockImplementationOnce(async () => [
+        {
+          user: {
+            displayName: 'Bob',
+            username: 'bcd',
+            email: null,
+            businessPhone: '11223344',
+          },
+          username: 'bcd',
+          email: 'fallback@ssb.no',
+        },
+      ])
+
+      const result = await mapStatisticDetails(input)
+
+      assert.deepEqual(result, {
+        ...mockedStatisticDetailedResult,
+        contacts: [{ username: 'bcd', name: 'Bob', email: 'fallback@ssb.no' }],
+      })
+    })
+
+    test('falls back to empty region level code when code is missing', async () => {
+      const input = {
+        ...mockStatisticsDetailedPrismaResult,
+        statistic_region_levels: [
+          {
+            region_level: {
+              ...mockStatisticsDetailedPrismaResult.statistic_region_levels[0].region_level,
+              code: null,
+            },
+          },
+        ],
+      }
+
+      const result = await mapStatisticDetails(input)
+
+      assert.deepEqual(result, {
+        ...mockedStatisticDetailedResult,
+        statistic_region_levels: [{ name: 'Bydel og krets', code: '' }],
+      })
+    })
+
+    test('returns undefined region levels when statistic_region_levels is missing', async () => {
+      const input = {
+        ...mockStatisticsDetailedPrismaResult,
+        statistic_region_levels: undefined,
+      }
+
+      const result = await mapStatisticDetails(input)
+
+      assert.deepEqual(result, {
+        ...mockedStatisticDetailedResult,
+        statistic_region_levels: undefined,
+      })
+    })
   })
 })
 
