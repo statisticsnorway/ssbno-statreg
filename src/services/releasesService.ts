@@ -1,12 +1,6 @@
 import type { ReleaseDetails, ReleaseListing, ReleaseCreate, ReleaseUpdate } from '@/types/index'
 import { ApprovalStatus } from '@/types/enums'
-import {
-  dateToISOString,
-  sanitize,
-  validateDateISO,
-  ensureVariantIdNumber,
-  ensureRequiredFieldsExists,
-} from '@/lib/utils'
+import { dateToISOString, sanitize, validateDateISO, ensureIdIsNumber, ensureRequiredFieldsExists } from '@/lib/utils'
 import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
 import type { Prisma } from '@/generated/prisma/client'
 import { releaseAsserts } from '@/lib/asserts'
@@ -94,7 +88,7 @@ export async function getReleaseById(id: string, prisma: ReleasePrisma): Promise
   }
   const release = await prisma.release.findFirst({
     where: { id: idAsNumber },
-    include: SELECT_VARIANT_DETAILS,
+    include: ReleaseDetailsIncludes,
   })
 
   if (!release) return Promise.reject({ status: 404, statregError: 'Release not found' })
@@ -109,12 +103,12 @@ export async function createRelease(
   body?: ReleaseCreate,
   now = new Date()
 ): Promise<ReleaseDetails> {
-  // TODO: Add asssert functions for find shortname and variant_id
-  // TODO: Validate shortname and variantId
-  const variantIdNumber = Number(variantId)
-  // @ts-ignore; TODO: Will be used in assert functions
-  // eslint-disable-next-line no-unused-vars
-  const sanitizedShortname = sanitize(shortname)
+  const variantIdNumber = ensureIdIsNumber(variantId)
+  const safeShortname = sanitize(shortname)
+
+  await releaseAsserts.assertStatisticExists(safeShortname, prisma)
+  await releaseAsserts.assertVariantExists(variantIdNumber, prisma)
+  await releaseAsserts.assertVariantMatchesShortname(variantIdNumber, safeShortname, prisma)
 
   const requiredFields: (keyof ReleaseCreate)[] = ['publish_time', 'period_from', 'period_to', 'release_date_precision']
   const { publish_time, period_from, period_to, release_date_precision } =
@@ -145,7 +139,7 @@ export async function createRelease(
         },
       },
     },
-    include: SELECT_VARIANT_DETAILS,
+    include: ReleaseDetailsIncludes,
   })
 
   return mapToReleaseDetails(release)
@@ -157,7 +151,7 @@ export async function buildReleaseFilter(
 ) {
   if (!shortname && variantId === undefined) return
 
-  const parsedVariantId = variantId === undefined ? undefined : ensureVariantIdNumber(variantId)
+  const parsedVariantId = variantId === undefined ? undefined : ensureIdIsNumber(variantId)
 
   if (shortname) {
     await releaseAsserts.assertStatisticExists(shortname, prisma)
@@ -198,7 +192,7 @@ export async function updateRelease(id: string, body: ReleaseUpdate, prisma: Rel
   // TODO call function to check that release date is not blocked
   // TODO insert validated data
   const release = await prisma.release.update({
-    include: SELECT_VARIANT_DETAILS,
+    include: ReleaseDetailsIncludes,
     where: { id: idAsNumber },
     data: {},
   })
@@ -209,7 +203,7 @@ export async function updateRelease(id: string, body: ReleaseUpdate, prisma: Rel
   return mapToReleaseDetails(release)
 }
 
-const SELECT_VARIANT_DETAILS = {
+export const ReleaseDetailsIncludes = {
   variant: {
     select: {
       id: true,
@@ -237,7 +231,7 @@ const SELECT_VARIANT_DETAILS = {
 }
 
 export function mapToReleaseDetails(
-  prismaRelease: Prisma.ReleaseGetPayload<{ include: typeof SELECT_VARIANT_DETAILS }>
+  prismaRelease: Prisma.ReleaseGetPayload<{ include: typeof ReleaseDetailsIncludes }>
 ): ReleaseDetails {
   const { statistic, frequency } = prismaRelease.variant ?? {}
 
