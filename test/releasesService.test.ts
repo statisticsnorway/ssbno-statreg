@@ -27,6 +27,7 @@ describe('releasesService ', async () => {
         findMany: mock.fn(() => Promise.resolve(releasesResult)),
         findFirst: mock.fn(() => Promise.resolve(releasesResult)),
         create: mock.fn(() => Promise.resolve({ ...releasesResult })),
+        update: mock.fn(() => Promise.resolve({ ...releasesResult })),
       },
       statistic: { findFirst: mock.fn(() => Promise.resolve({ id: 1 })) },
       variant: {
@@ -190,23 +191,42 @@ describe('releasesService ', async () => {
   })
 
   describe('updateRelease ', () => {
-    test('returns 200 and calls prisma with correct data', async () => {
-      const releaseUpdateInput = {
-        publish_time: '2026-03-19T11:52:38.903Z',
-        period_to: '2026-03-19T11:52:38.903Z',
-        period_from: '2026-03-19T11:52:38.903Z',
-        release_date_precision: 'string',
-        comment: 'string',
-      }
+    beforeEach(() => {
+      setPrismaResult(mockedSingleReleasePrismaResult)
+      now = new Date('2026-03-23T08:00:00Z')
     })
-    test('returns 400 if comment is missing', async () => {
+    test('resolves and calls prisma with correct data', async () => {
+      const releaseUpdateInput = {
+        publish_time: '2024-10-15T08:00:00Z',
+        period_to: '2024-12-31T00:00:00Z',
+        period_from: '2024-09-01T00:00:00Z',
+        release_date_precision: 'dag',
+        comment: 'Mock comment.',
+      }
+
+      await updateRelease(prismaMock, '1', releaseUpdateInput, now)
+
+      assert.deepStrictEqual(prismaMock.release.update.mock.calls[0].arguments[0], {
+        include: ReleaseDetailsIncludes,
+        where: { id: 1 },
+        data: {
+          publish_time: new Date('2024-10-15T08:00:00Z'),
+          period_to: new Date('2024-12-31T00:00:00Z'),
+          period_from: new Date('2024-09-01T00:00:00Z'),
+          release_date_precision: 'dag',
+          last_updated: now,
+          comment: 'Mock comment.',
+        },
+      })
+    })
+    test('rejects with error message if comment is missing', async () => {
       const releaseUpdateInputWithoutComment = {
         publish_time: '2026-03-19T11:52:38.903Z',
         period_to: '2026-03-19T11:52:38.903Z',
         period_from: '2026-03-19T11:52:38.903Z',
         release_date_precision: 'string',
       }
-      await assert.rejects(() => updateRelease(prismaMock, '1', releaseUpdateInputWithoutComment), {
+      await assert.rejects(() => updateRelease(prismaMock, '1', releaseUpdateInputWithoutComment, now), {
         statregError: "Required field 'comment' is missing",
       })
     })
