@@ -1,11 +1,12 @@
 import type { StatisticListing, StatisticDetails, StatisticUpdate, StatisticCreate } from '@/types/index'
-import { dateToISOString, sanitize } from '@/lib/utils'
+import { dateToISOString, sanitize, isNumber } from '@/lib/utils'
 import type { Prisma } from '@/generated/prisma/client'
 import { getDivisionFromCode } from '@/services/klassService'
 import { fetchUsers } from '@/services/entraUserService'
 import type { UserLookupItem, Users } from '@/types/entra'
 import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
 import { ApprovalStatus } from '@/types/enums'
+import { assertShortnameExists, assertShortnameExistsAndIsAvailable } from '@/lib/asserts'
 
 type StatisticPrisma = Pick<PrismaClient, 'statistic'>
 
@@ -210,28 +211,61 @@ export async function updateStatistic(
 }
 
 export async function createStatistic(
-  prisma: StatisticPrisma,
+  prisma: PrismaClient,
   shortname: string,
   body?: StatisticCreate,
   now = new Date()
 ): Promise<StatisticDetails> {
+  // if (validateStatisticInputs.length) {
+  //   return Promise.reject({ status: 400, statregError: `Input validation failed. Invalid fields: ${validateStatisticInputs.toString()}`})
+  // }
+
+  const {
+    division,
+    // statistic_region_levels,
+    // status,
+    name,
+    name_en,
+    // approval_status,
+    // relation,
+    // previous_topic_codes,
+    yearly_reporting,
+    first_released_at,
+    main_language,
+    comment,
+  } = body ?? {}
+
   // TODO: Fix proper validation! Check existance of shortname, as well as other parameters.
-  if (!body?.name) {
+  const shornameValid = await assertShortnameExists(shortname, prisma)
+  if (!shornameValid) {
+    return Promise.reject({ status: 400, statregError: 'Shortname does not exist' })
+  }
+
+  const shornameIsAvailable = await assertShortnameExistsAndIsAvailable(shortname, prisma)
+  if (!shornameIsAvailable) {
+    return Promise.reject({ status: 400, statregError: 'Shortname is already in use' })
+  }
+
+  if (!name) {
     return Promise.reject({ status: 400, statregError: 'Norwegian name is required' })
+  }
+
+  if (!isNumber(division)) {
+    return Promise.reject({ status: 400, statregError: 'Division is required and must be a number' })
   }
 
   const result = await prisma.statistic.create({
     data: {
-      name: body.name,
+      name,
+      name_en,
       priority: 1,
-      name_en: body.name_en,
       yearly_reporting: false,
       status: 'K',
-      comment: body.comment ?? '',
-      language: 'nb',
+      language: main_language || 'nb',
       date_created: now,
       last_updated: now,
-      desk_appoval_status: ApprovalStatus.PENDING,
+      first_release: first_released_at,
+      comment: comment || `Create statistic with shortname: ${shortname}`,
       shortname: {
         connect: {
           name: shortname,
