@@ -342,15 +342,25 @@ describe('statisticService ', async () => {
 
     beforeEach(() => {
       input = structuredClone(mockStatisticsDetailedPrismaResult)
-      input.responsiblePersons = [{ username: 'bcd', email: 'bob@ssb.no' }]
+      input.responsiblePersons = [{ username: 'bcd', email: 'bob_fallback@ssb.no' }]
 
-      fetchUsersResult = [structuredClone(mockFetchedUserLookupResult)]
+      fetchUsersResult = [
+        {
+          lookupEmail: 'bob_lookup@ssb.no',
+          user: {
+            displayName: 'Bob',
+            username: 'bcd',
+            email: 'bob@ssb.no',
+            businessPhone: '11223344',
+          },
+        },
+      ]
       fetchUsersMock.mock.mockImplementation(async () => {
         return fetchUsersResult
       })
 
       expectedResult = structuredClone(mockedStatisticDetailedResult)
-      // TODO : username should not be undefined, but tested function needs fix
+      // TODO bug: see task in mapStatisticsDetails
       expectedResult.contacts = [{ username: undefined, name: 'Bob', email: 'bob@ssb.no' }]
     })
 
@@ -387,7 +397,7 @@ describe('statisticService ', async () => {
       assert.deepEqual(result, expectedResult)
     })
 
-    test('falls back to empty English name when name_en is missing', async () => {
+    test('falls back to empty english name when name_en is missing', async () => {
       input.name_en = null
       expectedResult.name_en = ''
 
@@ -398,16 +408,17 @@ describe('statisticService ', async () => {
 
     test('falls back to lookupEmail when fetched user email is missing', async () => {
       fetchUsersResult[0].user.email = null
+      expectedResult.contacts[0].email = 'bob_lookup@ssb.no'
 
       const result = await mapStatisticDetails(input)
 
       assert.deepEqual(result, expectedResult)
     })
 
-    test('falls back to responsible person info when fetchUsers returns input unchanged', async () => {
-      input.responsiblePersons = [{ username: 'bcd', email: 'fallback@ssb.no' }]
+    test('falls back to responsible person data when fetchUsers returns users unchanged', async () => {
+      input.responsiblePersons = [{ username: 'bcd', email: 'bob_fallback@ssb.no' }]
       fetchUsersMock.mock.mockImplementation(async (users: Users[]) => users)
-      expectedResult.contacts[0] = { username: 'bcd', name: undefined, email: 'fallback@ssb.no' }
+      expectedResult.contacts[0] = { name: undefined, email: 'bob_fallback@ssb.no', username: 'bcd' }
 
       const result = await mapStatisticDetails(input)
 
