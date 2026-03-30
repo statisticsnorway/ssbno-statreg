@@ -1,5 +1,5 @@
 import type { StatisticListing, StatisticDetails, StatisticUpdate, StatisticCreate } from '@/types/index'
-import { dateToISOString, sanitize, isNumber } from '@/lib/utils'
+import { dateToISOString, sanitize, isNumber, validateDateISO, validateDateOnly } from '@/lib/utils'
 import type { Prisma } from '@/generated/prisma/client'
 import { getDivisionFromCode } from '@/services/klassService'
 import { fetchUsers } from '@/services/entraUserService'
@@ -7,6 +7,7 @@ import type { UserLookupItem, Users } from '@/types/entra'
 import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
 import { ApprovalStatus } from '@/types/enums'
 import { assertShortnameExists, assertShortnameExistsAndIsAvailable } from '@/lib/asserts'
+import { isDate } from 'util/types'
 
 export type StatisticPrisma = Pick<PrismaClient, 'statistic' | 'shortname'>
 
@@ -216,10 +217,6 @@ export async function createStatistic(
   body?: StatisticCreate,
   now = new Date()
 ): Promise<StatisticDetails> {
-  // if (validateStatisticInputs.length) {
-  //   return Promise.reject({ status: 400, statregError: `Input validation failed. Invalid fields: ${validateStatisticInputs.toString()}`})
-  // }
-
   const {
     division,
     // statistic_region_levels,
@@ -229,13 +226,12 @@ export async function createStatistic(
     // approval_status,
     // relation,
     // previous_topic_codes,
-    yearly_reporting,
+    // yearly_reporting,
     first_released_at,
     main_language,
     comment,
   } = body ?? {}
 
-  // TODO: Fix proper validation! Check existance of shortname, as well as other parameters.
   const shornameValid = await assertShortnameExists(shortname, prisma)
   if (!shornameValid) {
     return Promise.reject({ status: 400, statregError: 'Shortname does not exist' })
@@ -264,7 +260,7 @@ export async function createStatistic(
       language: main_language || 'nb',
       date_created: now,
       last_updated: now,
-      first_release: first_released_at,
+      first_release: validateDateOnly(first_released_at!),
       comment: comment || `Create statistic with shortname: ${shortname}`,
       division_code: division,
       shortname: {
