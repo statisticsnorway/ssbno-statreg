@@ -190,6 +190,15 @@ describe('releasesService ', async () => {
   })
 
   describe('updateRelease ', () => {
+    test('returns 200 and calls prisma with correct data', async () => {
+      const releaseUpdateInput = {
+        publish_time: '2026-03-19T11:52:38.903Z',
+        period_to: '2026-03-19T11:52:38.903Z',
+        period_from: '2026-03-19T11:52:38.903Z',
+        release_date_precision: 'string',
+        comment: 'string',
+      }
+    })
     test('returns 400 if comment is missing', async () => {
       const releaseUpdateInputWithoutComment = {
         publish_time: '2026-03-19T11:52:38.903Z',
@@ -197,8 +206,8 @@ describe('releasesService ', async () => {
         period_from: '2026-03-19T11:52:38.903Z',
         release_date_precision: 'string',
       }
-      await assert.rejects(() => updateRelease('1', releaseUpdateInputWithoutComment, prismaMock), {
-        statregError: 'Required field `comment` is missing',
+      await assert.rejects(() => updateRelease(prismaMock, '1', releaseUpdateInputWithoutComment), {
+        statregError: "Required field 'comment' is missing",
       })
     })
   })

@@ -110,6 +110,7 @@ export async function createRelease(
   await releaseAsserts.assertVariantExists(variantIdNumber, prisma)
   await releaseAsserts.assertVariantMatchesShortname(variantIdNumber, safeShortname, prisma)
 
+  // TODO: release input validation function is factored out and can be used here
   const requiredFields: (keyof ReleaseCreate)[] = ['publish_time', 'period_from', 'period_to', 'release_date_precision']
   const { publish_time, period_from, period_to, release_date_precision } =
     ensureRequiredFieldsExists(body, requiredFields) ?? {}
@@ -180,22 +181,30 @@ export async function buildReleaseFilter(
   return where
 }
 
-export async function updateRelease(id: string, body: ReleaseUpdate, prisma: ReleasePrisma): Promise<ReleaseDetails> {
-  const idAsNumber = Number.parseInt(sanitize(id))
-  if (isNaN(idAsNumber)) {
-    return Promise.reject({ statregError: 'Invalid release id' })
-  }
+export async function updateRelease(
+  prisma: ReleasePrisma,
+  id: string,
+  body: ReleaseUpdate,
+  now = new Date()
+): Promise<ReleaseDetails> {
+  const idAsNumber = ensureIdIsNumber(id)
 
-  if (!body.comment) return Promise.reject({ statregError: 'Required field `comment` is missing' })
+  // TODO if both comment and other fields are missing, the error message doesn't mention comment
+  const { publishTimeDate, periodFromDate, periodToDate, releaseDatePrecision } = validateReleaseInput(body)
 
-  const validatedReleaseInput = validateReleaseInput(body)
+  if (!body.comment) return Promise.reject({ statregError: "Required field 'comment' is missing" })
 
-  // TODO call function to check that release date is not blocked
-  // TODO insert validated data
   const release = await prisma.release.update({
     include: ReleaseDetailsIncludes,
     where: { id: idAsNumber },
-    data: {},
+    data: {
+      publish_time: publishTimeDate,
+      period_from: periodFromDate,
+      period_to: periodToDate,
+      release_date_precision: releaseDatePrecision,
+      last_updated: now,
+      comment: body.comment,
+    },
   })
 
   // TODO: You may not need this error since Prisma will give an error if update fails
@@ -223,7 +232,7 @@ export function validateReleaseInput(body: ReleaseCreate): ValidatedReleaseCreat
     publishTimeDate: validateDateISO(publish_time, 'publish_time'),
     periodFromDate: validateDateISO(period_from, 'period_from'),
     periodToDate: validateDateISO(period_to, 'period_to'),
-    releaseDatePrecision: release_date_precision,
+    releaseDatePrecision: sanitize(release_date_precision!),
   }
 }
 
