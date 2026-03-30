@@ -31,7 +31,7 @@ export default function releasesController(router: Router) {
   router.put('/releases/:id', requireAdminAuthorization(), async (req, res) => {
     try {
       const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id
-      const result = await updateRelease(id!, req.body, prisma)
+      const result = await updateRelease(prisma, id!, req.body)
       res.json(result)
     } catch (error) {
       return handleErrors(error, res)

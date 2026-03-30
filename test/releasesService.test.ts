@@ -27,6 +27,7 @@ describe('releasesService ', async () => {
         findMany: mock.fn(() => Promise.resolve(releasesResult)),
         findFirst: mock.fn(() => Promise.resolve(releasesResult)),
         create: mock.fn(() => Promise.resolve({ ...releasesResult })),
+        update: mock.fn(() => Promise.resolve({ ...releasesResult })),
       },
       statistic: { findFirst: mock.fn(() => Promise.resolve({ id: 1 })) },
       variant: {
@@ -190,16 +191,58 @@ describe('releasesService ', async () => {
   })
 
   describe('updateRelease ', () => {
-    test('returns 400 if comment is missing', async () => {
+    beforeEach(() => {
+      setPrismaResult(mockedSingleReleasePrismaResult)
+      now = new Date('2026-03-23T08:00:00Z')
+    })
+    test('updates exactly one release when input data is correct', async () => {
+      const releaseUpdateInput = {
+        publish_time: '2024-10-15T08:00:00Z',
+        period_to: '2024-12-31T00:00:00Z',
+        period_from: '2024-09-01T00:00:00Z',
+        release_date_precision: 'dag',
+        comment: 'Mock comment.',
+      }
+
+      await updateRelease(prismaMock, '1', releaseUpdateInput, now)
+
+      assert.deepStrictEqual(prismaMock.release.update.mock.callCount(), 1)
+
+      assert.deepStrictEqual(prismaMock.release.update.mock.calls[0].arguments[0], {
+        include: ReleaseDetailsIncludes,
+        where: { id: 1 },
+        data: {
+          publish_time: new Date('2024-10-15T08:00:00Z'),
+          period_to: new Date('2024-12-31T00:00:00Z'),
+          period_from: new Date('2024-09-01T00:00:00Z'),
+          release_date_precision: 'dag',
+          desk_appoval_status: ApprovalStatus.PENDING,
+          last_updated: now,
+          comment: 'Mock comment.',
+        },
+      })
+    })
+
+    test('rejects with error message if request body is empty', async () => {
+      await assert.rejects(() => updateRelease(prismaMock, '1', undefined, now), {
+        statregError:
+          'Missing required field(s): publish_time, period_from, period_to, release_date_precision, comment',
+      })
+      assert.strictEqual(prismaMock.release.update.mock.callCount(), 0)
+    })
+
+    test('rejects with error message if comment is missing', async () => {
       const releaseUpdateInputWithoutComment = {
         publish_time: '2026-03-19T11:52:38.903Z',
         period_to: '2026-03-19T11:52:38.903Z',
         period_from: '2026-03-19T11:52:38.903Z',
         release_date_precision: 'string',
       }
-      await assert.rejects(() => updateRelease('1', releaseUpdateInputWithoutComment, prismaMock), {
-        statregError: 'Required field `comment` is missing',
+      await assert.rejects(() => updateRelease(prismaMock, '1', releaseUpdateInputWithoutComment, now), {
+        statregError: 'Missing required field(s): comment',
       })
+
+      assert.deepStrictEqual(prismaMock.release.update.mock.callCount(), 0)
     })
   })
 
