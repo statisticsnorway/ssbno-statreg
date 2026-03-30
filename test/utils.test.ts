@@ -157,8 +157,14 @@ describe('utils', () => {
 
     test('throws error for invalid numeric format', () => {
       assert.throws(() => ensureIdIsNumber('abc'), { statregError: 'Invalid id format' })
+    })
+
     test('throws error for negative number', () => {
       assert.throws(() => ensureIdIsNumber('-1'), { statregError: 'Invalid id format' })
+    })
+
+    test('throws error if passed id is 0', () => {
+      assert.throws(() => ensureIdIsNumber(0), { statregError: 'Invalid id format' })
     })
   })
 

@@ -48,7 +48,7 @@ export function ensureString(value?: string | string[]): string {
 export function ensureIdIsNumber(variantId: string | number): number {
   const parsedVariantId = typeof variantId === 'number' ? variantId : Number(sanitize(variantId))
 
-  if (!Number.isInteger(parsedVariantId)) {
+  if (!Number.isInteger(parsedVariantId) || parsedVariantId <= 0) {
     throw { statregError: 'Invalid id format' }
   }
 
