@@ -194,7 +194,8 @@ export async function updateRelease(id: string, body: ReleaseUpdate, prisma: Rel
 
   if (!body.comment) return Promise.reject({ statregError: 'Required field `comment` is missing' })
 
-  // TODO validate and parse dates
+  const validatedReleaseInput = validateReleaseInput(body)
+
   // TODO call function to check that release date is not blocked
   // TODO insert validated data
   const release = await prisma.release.update({
@@ -207,6 +208,29 @@ export async function updateRelease(id: string, body: ReleaseUpdate, prisma: Rel
   if (!release) return Promise.reject({ status: 404, statregError: 'Release id not found' })
 
   return mapToReleaseDetails(release)
+}
+
+type ValidatedReleaseCreate = {
+  publishTimeDate: Date
+  periodFromDate: Date
+  periodToDate: Date
+  releaseDatePrecision: string
+}
+
+export function validateReleaseInput(body: ReleaseCreate): ValidatedReleaseCreate {
+  const requiredFields: (keyof ReleaseCreate)[] = ['publish_time', 'period_from', 'period_to', 'release_date_precision']
+  const { publish_time, period_from, period_to, release_date_precision } =
+    ensureRequiredFieldsExists(body, requiredFields) ?? {}
+
+  // TODO check that release_data_precision is enum
+  // TODO: MIM-2577: Use function for blocked days once it's implemented
+  // TODO: Automatic suggestion of period_to and period_from is going to be solved in a seperate task
+  return {
+    publishTimeDate: validateDateISO(publish_time, 'publish_time'),
+    periodFromDate: validateDateISO(period_from, 'period_from'),
+    periodToDate: validateDateISO(period_to, 'period_to'),
+    releaseDatePrecision: release_date_precision,
+  }
 }
 
 export const ReleaseDetailsIncludes = {
