@@ -7,6 +7,7 @@ import {
   ensureString,
   ensureIdIsNumber,
   ensureRequiredFieldsExists,
+  isNumber,
 } from '@/lib/utils'
 import { describe, test } from 'node:test'
 import assert from 'node:assert/strict'
@@ -201,6 +202,18 @@ describe('utils', () => {
       assert.throws(() => ensureRequiredFieldsExists(undefined, requiredFields), {
         statregError: 'Missing required field(s): field_1, field_2',
       })
+    })
+  })
+
+  describe('isNumber', () => {
+    test('a number is a number', () => {
+      assert.equal(true, isNumber(42))
+    })
+    test('a string with a number is castable as number', () => {
+      assert.equal(true, isNumber('9000'))
+    })
+    test('a string of text is not a number', () => {
+      assert.equal(false, isNumber('text in a string'))
     })
   })
 })

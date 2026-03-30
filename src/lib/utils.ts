@@ -69,3 +69,7 @@ export function ensureRequiredFieldsExists<T extends Record<string, any>>(
 
   return body
 }
+
+export function isNumber(str: string | number | undefined | null) {
+  return Number.isInteger(Number(str))
+}
