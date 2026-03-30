@@ -179,22 +179,19 @@ export async function updateRelease(
 ): Promise<ReleaseDetails> {
   const idAsNumber = ensureIdIsNumber(id)
 
-  const { publishTimeDate, periodFromDate, periodToDate, releaseDatePrecision, comment } = validateReleaseInput(
-    body,
-    true
-  )
+  const validatedInput = validateReleaseInput(body, true)
 
   const release = await prisma.release.update({
     include: ReleaseDetailsIncludes,
     where: { id: idAsNumber },
     data: {
-      publish_time: publishTimeDate,
-      period_from: periodFromDate,
-      period_to: periodToDate,
-      release_date_precision: releaseDatePrecision,
+      publish_time: validatedInput.publishTimeDate,
+      period_from: validatedInput.periodFromDate,
+      period_to: validatedInput.periodToDate,
+      release_date_precision: validatedInput.releaseDatePrecision,
       desk_appoval_status: ApprovalStatus.PENDING,
       last_updated: now,
-      comment,
+      comment: validatedInput.comment,
     },
   })
 
