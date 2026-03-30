@@ -266,6 +266,7 @@ export async function createStatistic(
       last_updated: now,
       first_release: first_released_at,
       comment: comment || `Create statistic with shortname: ${shortname}`,
+      division_code: division,
       shortname: {
         connect: {
           name: shortname,
