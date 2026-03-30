@@ -228,7 +228,7 @@ describe('releasesService ', async () => {
         release_date_precision: 'string',
       }
       await assert.rejects(() => updateRelease(prismaMock, '1', releaseUpdateInputWithoutComment, now), {
-        statregError: "Required field 'comment' is missing",
+        statregError: 'Missing required field(s): comment',
       })
     })
   })

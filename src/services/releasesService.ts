@@ -110,24 +110,14 @@ export async function createRelease(
   await releaseAsserts.assertVariantExists(variantIdNumber, prisma)
   await releaseAsserts.assertVariantMatchesShortname(variantIdNumber, safeShortname, prisma)
 
-  // TODO: release input validation function is factored out and can be used here
-  const requiredFields: (keyof ReleaseCreate)[] = ['publish_time', 'period_from', 'period_to', 'release_date_precision']
-  const { publish_time, period_from, period_to, release_date_precision } =
-    ensureRequiredFieldsExists(body, requiredFields) ?? {}
-
-  // TODO: MIM-2577: Use function for blocked days once it's implemented
-  // TODO: Automatic suggestion of period_to and period_from is going to be solved in a seperate task
-  const publishTimeDate = validateDateISO(publish_time, 'publish_time')
-  const periodFromDate = validateDateISO(period_from, 'period_from')
-  const periodToDate = validateDateISO(period_to, 'period_to')
+  const { publishTimeDate, periodFromDate, periodToDate, releaseDatePrecision } = validateReleaseInput(body)
 
   const release = await prisma.release.create({
     data: {
       publish_time: publishTimeDate,
       period_from: periodFromDate,
       period_to: periodToDate,
-      // TODO: Implementation of release_date_precision logic is going to be solved in a seperate task
-      release_date_precision: sanitize(release_date_precision!),
+      release_date_precision: releaseDatePrecision,
       has_versions: false,
       cancelled: false,
       last_updated: now,
@@ -189,8 +179,10 @@ export async function updateRelease(
 ): Promise<ReleaseDetails> {
   const idAsNumber = ensureIdIsNumber(id)
 
-  // TODO if both comment and other fields are missing, the error message doesn't mention comment
-  const { publishTimeDate, periodFromDate, periodToDate, releaseDatePrecision } = validateReleaseInput(body)
+  const { publishTimeDate, periodFromDate, periodToDate, releaseDatePrecision, comment } = validateReleaseInput(
+    body,
+    true
+  )
 
   if (!body.comment) return Promise.reject({ statregError: "Required field 'comment' is missing" })
 
@@ -204,7 +196,7 @@ export async function updateRelease(
       release_date_precision: releaseDatePrecision,
       desk_appoval_status: ApprovalStatus.PENDING,
       last_updated: now,
-      comment: body.comment,
+      comment,
     },
   })
 
@@ -219,11 +211,23 @@ type ValidatedReleaseCreate = {
   periodFromDate: Date
   periodToDate: Date
   releaseDatePrecision: string
+  comment: string
 }
 
-export function validateReleaseInput(body: ReleaseCreate): ValidatedReleaseCreate {
-  const requiredFields: (keyof ReleaseCreate)[] = ['publish_time', 'period_from', 'period_to', 'release_date_precision']
-  const { publish_time, period_from, period_to, release_date_precision } =
+export function validateReleaseInput(
+  body: ReleaseCreate | ReleaseUpdate | undefined,
+  update = false
+): ValidatedReleaseCreate {
+  const requiredFields: (keyof ReleaseCreate | ReleaseUpdate)[] = [
+    'publish_time',
+    'period_from',
+    'period_to',
+    'release_date_precision',
+  ]
+
+  if (update) requiredFields.push('comment')
+
+  const { publish_time, period_from, period_to, release_date_precision, comment } =
     ensureRequiredFieldsExists(body, requiredFields) ?? {}
 
   // TODO check that release_data_precision is enum
@@ -234,6 +238,7 @@ export function validateReleaseInput(body: ReleaseCreate): ValidatedReleaseCreat
     periodFromDate: validateDateISO(period_from, 'period_from'),
     periodToDate: validateDateISO(period_to, 'period_to'),
     releaseDatePrecision: sanitize(release_date_precision!),
+    comment: update ? sanitize(comment) : '',
   }
 }
 
