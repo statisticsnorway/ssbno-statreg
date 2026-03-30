@@ -86,7 +86,7 @@ export function parseStatisticVariants(
   }))
 }
 
-async function mapStatisticDetails(statistic: StatisticPrismaResult) {
+async function mapStatisticDetails(statistic: StatisticPrismaResult): Promise<StatisticDetails> {
   const main_language = statistic.language
   const division_code = statistic.division_code
   const relation = statistic.related_statistic?.shortname
