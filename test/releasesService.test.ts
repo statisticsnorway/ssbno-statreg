@@ -222,6 +222,15 @@ describe('releasesService ', async () => {
         },
       })
     })
+
+    test('rejects with error message if request body is empty', async () => {
+      await assert.rejects(() => updateRelease(prismaMock, '1', undefined, now), {
+        statregError:
+          'Missing required field(s): publish_time, period_from, period_to, release_date_precision, comment',
+      })
+      assert.strictEqual(prismaMock.release.update.mock.callCount(), 0)
+    })
+
     test('rejects with error message if comment is missing', async () => {
       const releaseUpdateInputWithoutComment = {
         publish_time: '2026-03-19T11:52:38.903Z',

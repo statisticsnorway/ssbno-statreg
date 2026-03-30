@@ -174,7 +174,7 @@ export async function buildReleaseFilter(
 export async function updateRelease(
   prisma: ReleasePrisma,
   id: string,
-  body: ReleaseUpdate,
+  body: ReleaseUpdate | undefined,
   now = new Date()
 ): Promise<ReleaseDetails> {
   const idAsNumber = ensureIdIsNumber(id)
