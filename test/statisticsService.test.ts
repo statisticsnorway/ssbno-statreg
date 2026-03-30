@@ -404,15 +404,16 @@ describe('statisticService ', async () => {
 
     test('falls back to responsible person email when fetched user email and lookupEmail are missing', async () => {
       const input: any = structuredClone(mockStatisticsDetailedPrismaResult)
-      input.responsiblePersons[0].email = 'fallback@ssb.no'
+      input.responsiblePersons = [{ username: 'bcd', email: 'fallback@ssb.no' }]
 
-      const fetchedUser: any = structuredClone(mockFetchedUserWithResponsiblePersonResult)
+      const fetchedUser: any = structuredClone(mockFetchedUserLookupResult)
       fetchedUser.user.email = null
       fetchedUser.lookupEmail = undefined
       fetchUsersMock.mock.mockImplementationOnce(async () => [fetchedUser])
 
       const expectedResult: any = structuredClone(mockedStatisticDetailedResult)
-      expectedResult.contacts = [{ username: 'bcd', name: 'Bob', email: 'fallback@ssb.no' }]
+      expectedResult.contacts[0].username = 'bcd'
+      expectedResult.contacts[0].email = 'fallback@ssb.no'
 
       const result = await mapStatisticDetails(input)
 
@@ -424,7 +425,7 @@ describe('statisticService ', async () => {
       input.statistic_region_levels[0].region_level.code = null
 
       const expectedResult: any = structuredClone(mockedStatisticDetailedResult)
-      expectedResult.statistic_region_levels = [{ name: 'Bydel og krets', code: '' }]
+      expectedResult.statistic_region_levels[0].code = ''
 
       const result = await mapStatisticDetails(input)
 
