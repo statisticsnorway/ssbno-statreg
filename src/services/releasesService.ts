@@ -179,7 +179,7 @@ export async function updateRelease(
 ): Promise<ReleaseDetails> {
   const idAsNumber = ensureIdIsNumber(id)
 
-  const validatedInput = validateReleaseInput(body, true)
+  const validatedInput = validateReleaseInput(body, 'update')
 
   const release = await prisma.release.update({
     include: ReleaseDetailsIncludes,
@@ -209,10 +209,13 @@ type ValidatedReleaseInput = {
   comment: string
 }
 
-export function validateReleaseInput(body: ReleaseUpdate | undefined, update = false): ValidatedReleaseInput {
+export function validateReleaseInput(
+  body: ReleaseUpdate | undefined,
+  type: 'create' | 'update' = 'create'
+): ValidatedReleaseInput {
   let createFields: (keyof ReleaseCreate)[] = ['publish_time', 'period_from', 'period_to', 'release_date_precision']
 
-  const requiredFields: (keyof ReleaseUpdate)[] = update ? [...createFields, 'comment'] : createFields
+  const requiredFields: (keyof ReleaseUpdate)[] = type === 'create' ? createFields : [...createFields, 'comment']
 
   const { publish_time, period_from, period_to, release_date_precision, comment } =
     ensureRequiredFieldsExists(body, requiredFields) ?? {}
