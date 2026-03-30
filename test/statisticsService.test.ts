@@ -393,17 +393,9 @@ describe('statisticService ', async () => {
     test('falls back to lookupEmail when fetched user email is missing', async () => {
       const input: any = structuredClone(mockStatisticsDetailedPrismaResult)
 
-      fetchUsersMock.mock.mockImplementationOnce(async () => [
-        {
-          lookupEmail: 'bob@ssb.no',
-          user: {
-            displayName: 'Bob',
-            username: 'bcd',
-            email: null,
-            businessPhone: '11223344',
-          },
-        },
-      ])
+      const fetchedUser: any = structuredClone(mockFetchedUserLookupResult)
+      fetchedUser.user.email = null
+      fetchUsersMock.mock.mockImplementationOnce(async () => [fetchedUser])
 
       const result = await mapStatisticDetails(input)
 
@@ -414,21 +406,13 @@ describe('statisticService ', async () => {
       const input: any = structuredClone(mockStatisticsDetailedPrismaResult)
       input.responsiblePersons[0].email = 'fallback@ssb.no'
 
+      const fetchedUser: any = structuredClone(mockFetchedUserWithResponsiblePersonResult)
+      fetchedUser.user.email = null
+      fetchedUser.lookupEmail = undefined
+      fetchUsersMock.mock.mockImplementationOnce(async () => [fetchedUser])
+
       const expectedResult: any = structuredClone(mockedStatisticDetailedResult)
       expectedResult.contacts = [{ username: 'bcd', name: 'Bob', email: 'fallback@ssb.no' }]
-
-      fetchUsersMock.mock.mockImplementationOnce(async () => [
-        {
-          user: {
-            displayName: 'Bob',
-            username: 'bcd',
-            email: null,
-            businessPhone: '11223344',
-          },
-          username: 'bcd',
-          email: 'fallback@ssb.no',
-        },
-      ])
 
       const result = await mapStatisticDetails(input)
 
@@ -643,6 +627,22 @@ const mockedStatisticDetailedResult = {
   ],
   contacts: [{ username: undefined, name: 'Bob', email: 'bob@ssb.no' }],
   statistic_region_levels: [{ name: 'Bydel og krets', code: 'BD' }],
+}
+
+const mockFetchedUserLookupResult = {
+  lookupEmail: 'bob@ssb.no',
+  user: {
+    displayName: 'Bob',
+    username: 'bcd',
+    email: 'bob@ssb.no',
+    businessPhone: '11223344',
+  },
+}
+
+const mockFetchedUserWithResponsiblePersonResult = {
+  ...mockFetchedUserLookupResult,
+  username: 'bcd',
+  email: 'fallback@ssb.no',
 }
 
 const mockUpdateStatisticPrismaUpdateData = {
