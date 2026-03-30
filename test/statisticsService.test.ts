@@ -336,17 +336,26 @@ describe('statisticService ', async () => {
   })
 
   describe('mapStatisticDetails ', async () => {
-    test('returns correct statisticDetails when all conditionals succeed', async () => {
-      const result = await mapStatisticDetails(mockStatisticsDetailedPrismaResult)
+    let input: any
+    let expectedResult: any
 
-      assert.deepEqual(result, mockedStatisticDetailedResult)
+    beforeEach(() => {
+      input = structuredClone(mockStatisticsDetailedPrismaResult)
+      expectedResult = structuredClone(mockedStatisticDetailedResult)
+      fetchUsersMock.mock.mockImplementation(async (users: Users[]) => {
+        if (!users?.length) return []
+        return [structuredClone(mockFetchedUserLookupResult)]
+      })
+    })
+
+    test('returns correct statisticDetails when all conditionals succeed', async () => {
+      const result = await mapStatisticDetails(input)
+
+      assert.deepEqual(result, expectedResult)
     })
 
     test('falls back to empty relation object when related statistic is missing', async () => {
-      const input: any = structuredClone(mockStatisticsDetailedPrismaResult)
       input.related_statistic = null
-
-      const expectedResult: any = structuredClone(mockedStatisticDetailedResult)
       expectedResult.relation = {}
 
       const result = await mapStatisticDetails(input)
@@ -355,10 +364,7 @@ describe('statisticService ', async () => {
     })
 
     test('falls back to pending approval status when desk approval status is missing', async () => {
-      const input: any = structuredClone(mockStatisticsDetailedPrismaResult)
       input.desk_appoval_status = null
-
-      const expectedResult: any = structuredClone(mockedStatisticDetailedResult)
       expectedResult.approval_status = ApprovalStatus.PENDING
 
       const result = await mapStatisticDetails(input)
@@ -367,10 +373,7 @@ describe('statisticService ', async () => {
     })
 
     test('falls back to undefined division name when division lookup does not find a match', async () => {
-      const input: any = structuredClone(mockStatisticsDetailedPrismaResult)
       input.division_code = '105'
-
-      const expectedResult: any = structuredClone(mockedStatisticDetailedResult)
       expectedResult.division = { code: '105', name: undefined }
 
       const result = await mapStatisticDetails(input)
@@ -379,10 +382,7 @@ describe('statisticService ', async () => {
     })
 
     test('falls back to empty English name when name_en is missing', async () => {
-      const input: any = structuredClone(mockStatisticsDetailedPrismaResult)
       input.name_en = null
-
-      const expectedResult: any = structuredClone(mockedStatisticDetailedResult)
       expectedResult.name_en = ''
 
       const result = await mapStatisticDetails(input)
@@ -391,24 +391,22 @@ describe('statisticService ', async () => {
     })
 
     test('falls back to lookupEmail when fetched user email is missing', async () => {
-      const input: any = structuredClone(mockStatisticsDetailedPrismaResult)
-
-      const fetchedUser: any = structuredClone(mockFetchedUserLookupResult)
-      fetchedUser.user.email = null
-      fetchUsersMock.mock.mockImplementationOnce(async () => [fetchedUser])
+      fetchUsersMock.mock.mockImplementation(async (users: Users[]) => {
+        if (!users?.length) return []
+        const fetchedUser = structuredClone(mockFetchedUserLookupResult)
+        fetchedUser.user.email = null
+        return [fetchedUser]
+      })
 
       const result = await mapStatisticDetails(input)
 
-      assert.deepEqual(result, mockedStatisticDetailedResult)
+      assert.deepEqual(result, expectedResult)
     })
 
     test('falls back to responsible person info when fetchUsers returns input unchanged', async () => {
-      const input: any = structuredClone(mockStatisticsDetailedPrismaResult)
       input.responsiblePersons = [{ username: 'bcd', email: 'fallback@ssb.no' }]
 
-      fetchUsersMock.mock.mockImplementationOnce(async (users: Users[]) => users)
-
-      const expectedResult: any = structuredClone(mockedStatisticDetailedResult)
+      fetchUsersMock.mock.mockImplementation(async (users: Users[]) => users)
       expectedResult.contacts[0] = { username: 'bcd', name: undefined, email: 'fallback@ssb.no' }
 
       const result = await mapStatisticDetails(input)
@@ -417,10 +415,7 @@ describe('statisticService ', async () => {
     })
 
     test('falls back to empty region level code when code is missing', async () => {
-      const input: any = structuredClone(mockStatisticsDetailedPrismaResult)
       input.statistic_region_levels[0].region_level.code = null
-
-      const expectedResult: any = structuredClone(mockedStatisticDetailedResult)
       expectedResult.statistic_region_levels[0].code = ''
 
       const result = await mapStatisticDetails(input)
