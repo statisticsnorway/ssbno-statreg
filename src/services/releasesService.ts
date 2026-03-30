@@ -184,8 +184,6 @@ export async function updateRelease(
     true
   )
 
-  if (!body.comment) return Promise.reject({ statregError: "Required field 'comment' is missing" })
-
   const release = await prisma.release.update({
     include: ReleaseDetailsIncludes,
     where: { id: idAsNumber },
@@ -206,7 +204,7 @@ export async function updateRelease(
   return mapToReleaseDetails(release)
 }
 
-type ValidatedReleaseCreate = {
+type ValidatedReleaseInput = {
   publishTimeDate: Date
   periodFromDate: Date
   periodToDate: Date
@@ -214,18 +212,10 @@ type ValidatedReleaseCreate = {
   comment: string
 }
 
-export function validateReleaseInput(
-  body: ReleaseCreate | ReleaseUpdate | undefined,
-  update = false
-): ValidatedReleaseCreate {
-  const requiredFields: (keyof ReleaseCreate | ReleaseUpdate)[] = [
-    'publish_time',
-    'period_from',
-    'period_to',
-    'release_date_precision',
-  ]
+export function validateReleaseInput(body: ReleaseUpdate | undefined, update = false): ValidatedReleaseInput {
+  let createFields: (keyof ReleaseCreate)[] = ['publish_time', 'period_from', 'period_to', 'release_date_precision']
 
-  if (update) requiredFields.push('comment')
+  const requiredFields: (keyof ReleaseUpdate)[] = update ? [...createFields, 'comment'] : createFields
 
   const { publish_time, period_from, period_to, release_date_precision, comment } =
     ensureRequiredFieldsExists(body, requiredFields) ?? {}
@@ -238,7 +228,7 @@ export function validateReleaseInput(
     periodFromDate: validateDateISO(period_from, 'period_from'),
     periodToDate: validateDateISO(period_to, 'period_to'),
     releaseDatePrecision: sanitize(release_date_precision!),
-    comment: update ? sanitize(comment) : '',
+    comment: comment ? sanitize(comment) : '',
   }
 }
 
