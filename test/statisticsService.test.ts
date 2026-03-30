@@ -342,67 +342,57 @@ describe('statisticService ', async () => {
       assert.deepEqual(result, mockedStatisticDetailedResult)
     })
 
-    test('sets empty relation when related statistic is missing', async () => {
-      const input = {
-        ...mockStatisticsDetailedPrismaResult,
-        related_statistic: null,
-      }
+    test('falls back to empty relation object when related statistic is missing', async () => {
+      const input: any = structuredClone(mockStatisticsDetailedPrismaResult)
+      input.related_statistic = null
+
+      const expectedResult: any = structuredClone(mockedStatisticDetailedResult)
+      expectedResult.relation = {}
 
       const result = await mapStatisticDetails(input)
 
-      assert.deepEqual(result, {
-        ...mockedStatisticDetailedResult,
-        relation: {},
-      })
+      assert.deepEqual(result, expectedResult)
     })
 
     test('falls back to pending approval status when desk approval status is missing', async () => {
-      const input = {
-        ...mockStatisticsDetailedPrismaResult,
-        desk_appoval_status: null,
-      }
+      const input: any = structuredClone(mockStatisticsDetailedPrismaResult)
+      input.desk_appoval_status = null
+
+      const expectedResult: any = structuredClone(mockedStatisticDetailedResult)
+      expectedResult.approval_status = ApprovalStatus.PENDING
 
       const result = await mapStatisticDetails(input)
 
-      assert.deepEqual(result, {
-        ...mockedStatisticDetailedResult,
-        approval_status: ApprovalStatus.PENDING,
-      })
+      assert.deepEqual(result, expectedResult)
     })
 
-    test('sets division name to undefined when division lookup does not find a match', async () => {
-      const input = {
-        ...mockStatisticsDetailedPrismaResult,
-        division_code: '105',
-      }
+    test('falls back to undefined division name when division lookup does not find a match', async () => {
+      const input: any = structuredClone(mockStatisticsDetailedPrismaResult)
+      input.division_code = '105'
+
+      const expectedResult: any = structuredClone(mockedStatisticDetailedResult)
+      expectedResult.division = { code: '105', name: undefined }
 
       const result = await mapStatisticDetails(input)
 
-      // TODO verify that this is the behaviour we want
-      assert.deepEqual(result, {
-        ...mockedStatisticDetailedResult,
-        division: { code: '105', name: undefined },
-      })
+      assert.deepEqual(result, expectedResult)
     })
 
     test('falls back to empty English name when name_en is missing', async () => {
-      const input = {
-        ...mockStatisticsDetailedPrismaResult,
-        name_en: null,
-      }
+      const input: any = structuredClone(mockStatisticsDetailedPrismaResult)
+      input.name_en = null
+
+      const expectedResult: any = structuredClone(mockedStatisticDetailedResult)
+      expectedResult.name_en = ''
 
       const result = await mapStatisticDetails(input)
 
-      assert.deepEqual(result, {
-        ...mockedStatisticDetailedResult,
-        name_en: '',
-      })
+      assert.deepEqual(result, expectedResult)
     })
 
     test('falls back to lookupEmail when fetched user email is missing', async () => {
-      const input = {
-        ...mockStatisticsDetailedPrismaResult,
-      }
+      const input: any = structuredClone(mockStatisticsDetailedPrismaResult)
+
       fetchUsersMock.mock.mockImplementationOnce(async () => [
         {
           lookupEmail: 'bob@ssb.no',
@@ -421,10 +411,12 @@ describe('statisticService ', async () => {
     })
 
     test('falls back to responsible person email when fetched user email and lookupEmail are missing', async () => {
-      const input = {
-        ...mockStatisticsDetailedPrismaResult,
-        responsiblePersons: [{ ...mockStatisticsDetailedPrismaResult.responsiblePersons[0], email: 'fallback@ssb.no' }],
-      }
+      const input: any = structuredClone(mockStatisticsDetailedPrismaResult)
+      input.responsiblePersons[0].email = 'fallback@ssb.no'
+
+      const expectedResult: any = structuredClone(mockedStatisticDetailedResult)
+      expectedResult.contacts = [{ username: 'bcd', name: 'Bob', email: 'fallback@ssb.no' }]
+
       fetchUsersMock.mock.mockImplementationOnce(async () => [
         {
           user: {
@@ -440,45 +432,31 @@ describe('statisticService ', async () => {
 
       const result = await mapStatisticDetails(input)
 
-      assert.deepEqual(result, {
-        ...mockedStatisticDetailedResult,
-        contacts: [{ username: 'bcd', name: 'Bob', email: 'fallback@ssb.no' }],
-      })
+      assert.deepEqual(result, expectedResult)
     })
 
     test('falls back to empty region level code when code is missing', async () => {
-      const input = {
-        ...mockStatisticsDetailedPrismaResult,
-        statistic_region_levels: [
-          {
-            region_level: {
-              ...mockStatisticsDetailedPrismaResult.statistic_region_levels[0].region_level,
-              code: null,
-            },
-          },
-        ],
-      }
+      const input: any = structuredClone(mockStatisticsDetailedPrismaResult)
+      input.statistic_region_levels[0].region_level.code = null
+
+      const expectedResult: any = structuredClone(mockedStatisticDetailedResult)
+      expectedResult.statistic_region_levels = [{ name: 'Bydel og krets', code: '' }]
 
       const result = await mapStatisticDetails(input)
 
-      assert.deepEqual(result, {
-        ...mockedStatisticDetailedResult,
-        statistic_region_levels: [{ name: 'Bydel og krets', code: '' }],
-      })
+      assert.deepEqual(result, expectedResult)
     })
 
     test('returns undefined region levels when statistic_region_levels is missing', async () => {
-      const input = {
-        ...mockStatisticsDetailedPrismaResult,
-        statistic_region_levels: undefined,
-      }
+      const input: any = structuredClone(mockStatisticsDetailedPrismaResult)
+      input.statistic_region_levels = undefined
+
+      const expectedResult: any = structuredClone(mockedStatisticDetailedResult)
+      expectedResult.statistic_region_levels = undefined
 
       const result = await mapStatisticDetails(input)
 
-      assert.deepEqual(result, {
-        ...mockedStatisticDetailedResult,
-        statistic_region_levels: undefined,
-      })
+      assert.deepEqual(result, expectedResult)
     })
   })
 })
