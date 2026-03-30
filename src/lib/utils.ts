@@ -10,16 +10,6 @@ export function sanitize(input: string): string {
   return input.trim().replace(/[^a-zA-Z0-9æøåÆØÅ.,:;!?()/\-\s]/g, '')
 }
 
-export function validateId(id: string): number {
-  const idAsNumber = Number.parseInt(id)
-
-  if (isNaN(idAsNumber)) {
-    throw { statregError: 'Invalid id format' }
-  }
-
-  return idAsNumber
-}
-
 type DateString = string | string[] | undefined
 
 export function validateDateOnly(dateString: DateString, fieldName = ''): Date {
@@ -55,11 +45,11 @@ export function ensureString(value?: string | string[]): string {
   return Array.isArray(value) ? (value[0] ?? '') : (value ?? '')
 }
 
-export function ensureVariantIdNumber(variantId: string | number): number {
+export function ensureIdIsNumber(variantId: string | number): number {
   const parsedVariantId = typeof variantId === 'number' ? variantId : Number(sanitize(variantId))
 
-  if (!Number.isInteger(parsedVariantId)) {
-    throw { statregError: 'Invalid variant id (not a number)' }
+  if (!Number.isInteger(parsedVariantId) || parsedVariantId <= 0) {
+    throw { statregError: 'Invalid id format' }
   }
 
   return parsedVariantId
