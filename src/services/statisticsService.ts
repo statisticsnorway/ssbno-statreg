@@ -223,7 +223,7 @@ export async function createStatistic(
     // status,
     name,
     name_en,
-    // approval_status,
+    approval_status,
     // relation,
     // previous_topic_codes,
     // yearly_reporting,
@@ -231,6 +231,10 @@ export async function createStatistic(
     main_language,
     comment,
   } = body ?? {}
+
+  if (!name) {
+    return Promise.reject({ status: 400, statregError: 'Norwegian name is required' })
+  }
 
   const shornameValid = await assertShortnameExists(shortname, prisma)
   if (!shornameValid) {
@@ -240,10 +244,6 @@ export async function createStatistic(
   const shornameIsAvailable = await assertShortnameExistsAndIsAvailable(shortname, prisma)
   if (!shornameIsAvailable) {
     return Promise.reject({ status: 400, statregError: 'Shortname is already in use' })
-  }
-
-  if (!name) {
-    return Promise.reject({ status: 400, statregError: 'Norwegian name is required' })
   }
 
   if (!isNumber(division)) {
@@ -257,6 +257,7 @@ export async function createStatistic(
       priority: 1,
       yearly_reporting: false,
       status: 'K',
+      desk_appoval_status: approval_status || ApprovalStatus.PENDING,
       language: main_language || 'nb',
       date_created: now,
       last_updated: now,

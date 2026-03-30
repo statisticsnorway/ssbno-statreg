@@ -2,6 +2,8 @@ import { describe, mock, test, before, beforeEach } from 'node:test'
 import assert from 'node:assert/strict'
 import { ApprovalStatus } from '@/types/enums'
 import { Users } from '@/types/entra'
+import { assertShortnameExists } from '@/lib/asserts'
+import { PrismaClient } from '@prisma/client/extension'
 
 let prismaMock: any
 let statisticsResult: object | null
@@ -74,6 +76,9 @@ describe('statisticService ', async () => {
         findFirst: mock.fn(() => Promise.resolve(statisticsResult)),
         update: mock.fn(() => Promise.resolve(statisticsResult)),
         create: mock.fn(() => Promise.resolve(statisticsResult)),
+      },
+      shortname: {
+        findUnique: mock.fn(() => Promise.resolve({ name: 'kpi', id: 1 })),
       },
     }
   })
@@ -248,7 +253,12 @@ describe('statisticService ', async () => {
         desk_appoval_status: ApprovalStatus.PENDING,
       })
 
-      const result = await createStatistic(prismaMock, 'kpi', { name: 'Konsumprisindeksen' }, now)
+      const result = await createStatistic(
+        prismaMock,
+        'kpi',
+        { name: 'Konsumprisindeksen', division: '723', first_released_at: '2024-04-01' },
+        now
+      )
 
       assert.deepStrictEqual(prismaMock.statistic.create.mock.callCount(), 1)
       assert.deepStrictEqual(prismaMock.statistic.create.mock.calls[0].arguments[0], {
@@ -258,7 +268,9 @@ describe('statisticService ', async () => {
           name_en: undefined,
           yearly_reporting: false,
           status: 'K',
-          comment: '',
+          division_code: '723',
+          first_release: new Date('2024-04-01T00:00:00.000Z'),
+          comment: 'Create statistic with shortname: kpi',
           language: 'nb',
           date_created: now,
           last_updated: now,
