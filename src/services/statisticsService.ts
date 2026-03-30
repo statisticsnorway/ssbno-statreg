@@ -127,6 +127,7 @@ export async function mapStatisticDetails(statistic: StatisticPrismaResult): Pro
         return {
           name: lookupUser?.displayName,
           email: lookupUser?.email ?? (user as UserLookupItem).lookupEmail ?? responsiblePerson.email,
+          // TODO: fix: when fetchUsers succeeds, username will always be undefined here
           username: responsiblePerson.username as string | undefined,
         }
       })
