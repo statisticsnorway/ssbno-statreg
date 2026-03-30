@@ -1,5 +1,5 @@
 import { ReleasePrisma } from '@/services/releasesService'
-import { ExtendedPrismaClient as PrismaClient } from './prisma'
+import { StatisticPrisma } from '@/services/statisticsService'
 
 export async function assertStatisticExists(shortname: string, prisma: ReleasePrisma) {
   const exists = await prisma.statistic.findFirst({
@@ -44,7 +44,7 @@ export async function assertVariantMatchesShortname(variantId: number, shortname
   }
 }
 
-export async function assertShortnameExists(shortname: string, prisma: PrismaClient): Promise<boolean> {
+export async function assertShortnameExists(shortname: string, prisma: StatisticPrisma): Promise<boolean> {
   const foundShortname = await prisma.shortname.findUnique({
     where: {
       name: shortname,
@@ -53,7 +53,10 @@ export async function assertShortnameExists(shortname: string, prisma: PrismaCli
   return !!foundShortname
 }
 
-export async function assertShortnameExistsAndIsAvailable(shortname: string, prisma: PrismaClient): Promise<boolean> {
+export async function assertShortnameExistsAndIsAvailable(
+  shortname: string,
+  prisma: StatisticPrisma
+): Promise<boolean> {
   const foundShortname = await prisma.shortname.findUnique({
     where: {
       name: shortname,

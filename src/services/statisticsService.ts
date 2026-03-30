@@ -8,7 +8,7 @@ import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
 import { ApprovalStatus } from '@/types/enums'
 import { assertShortnameExists, assertShortnameExistsAndIsAvailable } from '@/lib/asserts'
 
-type StatisticPrisma = Pick<PrismaClient, 'statistic'>
+export type StatisticPrisma = Pick<PrismaClient, 'statistic' | 'shortname'>
 
 // Statistic listing
 
@@ -211,7 +211,7 @@ export async function updateStatistic(
 }
 
 export async function createStatistic(
-  prisma: PrismaClient,
+  prisma: StatisticPrisma,
   shortname: string,
   body?: StatisticCreate,
   now = new Date()
