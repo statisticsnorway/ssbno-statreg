@@ -214,6 +214,7 @@ describe('releasesService ', async () => {
           period_to: new Date('2024-12-31T00:00:00Z'),
           period_from: new Date('2024-09-01T00:00:00Z'),
           release_date_precision: 'dag',
+          desk_appoval_status: ApprovalStatus.PENDING,
           last_updated: now,
           comment: 'Mock comment.',
         },

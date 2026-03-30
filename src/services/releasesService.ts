@@ -202,6 +202,7 @@ export async function updateRelease(
       period_from: periodFromDate,
       period_to: periodToDate,
       release_date_precision: releaseDatePrecision,
+      desk_appoval_status: ApprovalStatus.PENDING,
       last_updated: now,
       comment: body.comment,
     },
