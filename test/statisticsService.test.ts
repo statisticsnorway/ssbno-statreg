@@ -2,8 +2,6 @@ import { describe, mock, test, before, beforeEach } from 'node:test'
 import assert from 'node:assert/strict'
 import { ApprovalStatus } from '@/types/enums'
 import { Users } from '@/types/entra'
-import { assertShortnameExists } from '@/lib/asserts'
-import { PrismaClient } from '@prisma/client/extension'
 
 let prismaMock: any
 let statisticsResult: object | null

@@ -1,5 +1,5 @@
 import type { StatisticListing, StatisticDetails, StatisticUpdate, StatisticCreate } from '@/types/index'
-import { dateToISOString, sanitize, isNumber, validateDateISO, validateDateOnly } from '@/lib/utils'
+import { dateToISOString, sanitize, isNumber, validateDateOnly } from '@/lib/utils'
 import type { Prisma } from '@/generated/prisma/client'
 import { getDivisionFromCode } from '@/services/klassService'
 import { fetchUsers } from '@/services/entraUserService'
@@ -7,7 +7,6 @@ import type { UserLookupItem, Users } from '@/types/entra'
 import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
 import { ApprovalStatus } from '@/types/enums'
 import { assertShortnameExists, assertShortnameExistsAndIsAvailable } from '@/lib/asserts'
-import { isDate } from 'util/types'
 
 export type StatisticPrisma = Pick<PrismaClient, 'statistic' | 'shortname'>
 
