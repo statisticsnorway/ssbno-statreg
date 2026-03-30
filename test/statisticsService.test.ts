@@ -620,16 +620,6 @@ const mockedStatisticDetailedResult = {
   statistic_region_levels: [{ name: 'Bydel og krets', code: 'BD' }],
 }
 
-const mockFetchedUserLookupResult = {
-  lookupEmail: 'bob@ssb.no',
-  user: {
-    displayName: 'Bob',
-    username: 'bcd',
-    email: 'bob@ssb.no',
-    businessPhone: '11223344',
-  },
-}
-
 const mockUpdateStatisticPrismaUpdateData = {
   data: {
     comment: 'Beskrivelse av endring',
