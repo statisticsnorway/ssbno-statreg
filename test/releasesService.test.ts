@@ -195,7 +195,7 @@ describe('releasesService ', async () => {
       setPrismaResult(mockedSingleReleasePrismaResult)
       now = new Date('2026-03-23T08:00:00Z')
     })
-    test('resolves and calls prisma with correct data', async () => {
+    test('updates exactly one release when input data is correct', async () => {
       const releaseUpdateInput = {
         publish_time: '2024-10-15T08:00:00Z',
         period_to: '2024-12-31T00:00:00Z',
@@ -205,6 +205,8 @@ describe('releasesService ', async () => {
       }
 
       await updateRelease(prismaMock, '1', releaseUpdateInput, now)
+
+      assert.deepStrictEqual(prismaMock.release.update.mock.callCount(), 1)
 
       assert.deepStrictEqual(prismaMock.release.update.mock.calls[0].arguments[0], {
         include: ReleaseDetailsIncludes,
@@ -230,6 +232,8 @@ describe('releasesService ', async () => {
       await assert.rejects(() => updateRelease(prismaMock, '1', releaseUpdateInputWithoutComment, now), {
         statregError: 'Missing required field(s): comment',
       })
+
+      assert.deepStrictEqual(prismaMock.release.update.mock.callCount(), 0)
     })
   })
 
