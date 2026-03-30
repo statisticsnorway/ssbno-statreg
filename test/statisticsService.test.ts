@@ -338,14 +338,20 @@ describe('statisticService ', async () => {
   describe('mapStatisticDetails ', async () => {
     let input: any
     let expectedResult: any
+    let fetchUsersResult: any
 
     beforeEach(() => {
       input = structuredClone(mockStatisticsDetailedPrismaResult)
-      expectedResult = structuredClone(mockedStatisticDetailedResult)
+      input.responsiblePersons = [{ username: 'bcd', email: 'bob@ssb.no' }]
+
+      fetchUsersResult = [structuredClone(mockFetchedUserWithResponsiblePersonResult)]
       fetchUsersMock.mock.mockImplementation(async (users: Users[]) => {
         if (!users?.length) return []
-        return [structuredClone(mockFetchedUserLookupResult)]
+        return fetchUsersResult
       })
+
+      expectedResult = structuredClone(mockedStatisticDetailedResult)
+      expectedResult.contacts = [{ username: 'bcd', name: 'Bob', email: 'bob@ssb.no' }]
     })
 
     test('returns correct statisticDetails when all conditionals succeed', async () => {
@@ -391,12 +397,7 @@ describe('statisticService ', async () => {
     })
 
     test('falls back to lookupEmail when fetched user email is missing', async () => {
-      fetchUsersMock.mock.mockImplementation(async (users: Users[]) => {
-        if (!users?.length) return []
-        const fetchedUser = structuredClone(mockFetchedUserLookupResult)
-        fetchedUser.user.email = null
-        return [fetchedUser]
-      })
+      fetchUsersResult[0].user.email = null
 
       const result = await mapStatisticDetails(input)
 
@@ -405,7 +406,6 @@ describe('statisticService ', async () => {
 
     test('falls back to responsible person info when fetchUsers returns input unchanged', async () => {
       input.responsiblePersons = [{ username: 'bcd', email: 'fallback@ssb.no' }]
-
       fetchUsersMock.mock.mockImplementation(async (users: Users[]) => users)
       expectedResult.contacts[0] = { username: 'bcd', name: undefined, email: 'fallback@ssb.no' }
 
