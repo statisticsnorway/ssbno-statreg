@@ -22,7 +22,7 @@ export default function statisticsController(router: Router) {
 
   router.post('/statistics/:shortname', requireAdminAuthorization(), async (req, res) => {
     try {
-      res.json(await createStatistic(prisma, req.body, ensureString(req.params.shortname)))
+      res.json(await createStatistic(prisma, ensureString(req.params.shortname), req.body))
     } catch (error) {
       return handleErrors(error, res)
     }
