@@ -110,23 +110,14 @@ export async function createRelease(
   await releaseAsserts.assertVariantExists(variantIdNumber, prisma)
   await releaseAsserts.assertVariantMatchesShortname(variantIdNumber, safeShortname, prisma)
 
-  const requiredFields: (keyof ReleaseCreate)[] = ['publish_time', 'period_from', 'period_to', 'release_date_precision']
-  const { publish_time, period_from, period_to, release_date_precision } =
-    ensureRequiredFieldsExists(body, requiredFields) ?? {}
-
-  // TODO: MIM-2577: Use function for blocked days once it's implemented
-  // TODO: Automatic suggestion of period_to and period_from is going to be solved in a seperate task
-  const publishTimeDate = validateDateISO(publish_time, 'publish_time')
-  const periodFromDate = validateDateISO(period_from, 'period_from')
-  const periodToDate = validateDateISO(period_to, 'period_to')
+  const { publishTimeDate, periodFromDate, periodToDate, releaseDatePrecision } = validateReleaseInput(body)
 
   const release = await prisma.release.create({
     data: {
       publish_time: publishTimeDate,
       period_from: periodFromDate,
       period_to: periodToDate,
-      // TODO: Implementation of release_date_precision logic is going to be solved in a seperate task
-      release_date_precision: sanitize(release_date_precision!),
+      release_date_precision: releaseDatePrecision,
       has_versions: false,
       cancelled: false,
       last_updated: now,
@@ -180,27 +171,65 @@ export async function buildReleaseFilter(
   return where
 }
 
-export async function updateRelease(id: string, body: ReleaseUpdate, prisma: ReleasePrisma): Promise<ReleaseDetails> {
-  const idAsNumber = Number.parseInt(sanitize(id))
-  if (isNaN(idAsNumber)) {
-    return Promise.reject({ statregError: 'Invalid release id' })
-  }
+export async function updateRelease(
+  prisma: ReleasePrisma,
+  id: string,
+  body: ReleaseUpdate | undefined,
+  now = new Date()
+): Promise<ReleaseDetails> {
+  const idAsNumber = ensureIdIsNumber(id)
 
-  if (!body.comment) return Promise.reject({ statregError: 'Required field `comment` is missing' })
+  const validatedInput = validateReleaseInput(body, 'update')
 
-  // TODO validate and parse dates
-  // TODO call function to check that release date is not blocked
-  // TODO insert validated data
   const release = await prisma.release.update({
     include: ReleaseDetailsIncludes,
     where: { id: idAsNumber },
-    data: {},
+    data: {
+      publish_time: validatedInput.publishTimeDate,
+      period_from: validatedInput.periodFromDate,
+      period_to: validatedInput.periodToDate,
+      release_date_precision: validatedInput.releaseDatePrecision,
+      desk_appoval_status: ApprovalStatus.PENDING,
+      last_updated: now,
+      comment: validatedInput.comment,
+    },
   })
 
   // TODO: You may not need this error since Prisma will give an error if update fails
   if (!release) return Promise.reject({ status: 404, statregError: 'Release id not found' })
 
   return mapToReleaseDetails(release)
+}
+
+type ValidatedReleaseInput = {
+  publishTimeDate: Date
+  periodFromDate: Date
+  periodToDate: Date
+  releaseDatePrecision: string
+  comment: string
+}
+
+export function validateReleaseInput(
+  body: ReleaseUpdate | undefined,
+  type: 'create' | 'update' = 'create'
+): ValidatedReleaseInput {
+  let createFields: (keyof ReleaseCreate)[] = ['publish_time', 'period_from', 'period_to', 'release_date_precision']
+
+  const requiredFields: (keyof ReleaseUpdate)[] = type === 'create' ? createFields : [...createFields, 'comment']
+
+  const { publish_time, period_from, period_to, release_date_precision, comment } =
+    ensureRequiredFieldsExists(body, requiredFields) ?? {}
+
+  // TODO check that release_data_precision is enum
+  // TODO: MIM-2577: Use function for blocked days once it's implemented
+  // TODO: Automatic suggestion of period_to and period_from is going to be solved in a seperate task
+  return {
+    publishTimeDate: validateDateISO(publish_time, 'publish_time'),
+    periodFromDate: validateDateISO(period_from, 'period_from'),
+    periodToDate: validateDateISO(period_to, 'period_to'),
+    releaseDatePrecision: sanitize(release_date_precision!),
+    comment: comment ? sanitize(comment) : '',
+  }
 }
 
 export const ReleaseDetailsIncludes = {
