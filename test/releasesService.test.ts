@@ -1,9 +1,19 @@
 import { describe, test, mock, beforeEach } from 'node:test'
 import assert from 'node:assert/strict'
-import { getAllReleases, getReleaseById, updateRelease } from '../src/services/releasesService'
+import { releaseAsserts } from '@/lib/asserts'
+import {
+  getReleases,
+  getReleaseById,
+  updateRelease,
+  createRelease,
+  buildReleaseFilter,
+  ReleaseDetailsIncludes,
+} from '@/services/releasesService'
+import { ApprovalStatus } from '@/types/enums'
 
 let prismaMock: any
 let releasesResult: object | null
+let now: Date
 
 function setPrismaResult(next: object | null) {
   releasesResult = next
@@ -11,19 +21,29 @@ function setPrismaResult(next: object | null) {
 
 describe('releasesService ', async () => {
   beforeEach(() => {
+    releasesResult = null
     prismaMock = {
       release: {
         findMany: mock.fn(() => Promise.resolve(releasesResult)),
         findFirst: mock.fn(() => Promise.resolve(releasesResult)),
+        create: mock.fn(() => Promise.resolve({ ...releasesResult })),
+      },
+      statistic: { findFirst: mock.fn(() => Promise.resolve({ id: 1 })) },
+      variant: {
+        findUnique: mock.fn(() => Promise.resolve({ id: 1 })),
+        findFirst: mock.fn(() => Promise.resolve({ id: 1 })),
       },
     }
+    releaseAsserts.assertStatisticExists = mock.fn(async () => undefined) as any
+    releaseAsserts.assertVariantExists = mock.fn(async () => undefined) as any
+    releaseAsserts.assertVariantMatchesShortname = mock.fn(async () => undefined) as any
   })
 
-  describe('getAllReleases ', () => {
+  describe('getReleases ', () => {
     test('returns mocked data', async () => {
       setPrismaResult(mockedReleasesPrismaResult)
 
-      const result = await getAllReleases({ start: 1, count: 2 }, prismaMock)
+      const result = await getReleases({ start: 1, count: 2 }, prismaMock)
 
       assert.deepEqual(result, mockedReleasesResult)
       assert.equal(prismaMock.release.findMany.mock.calls[0].arguments[0]['skip'], 1)
@@ -33,7 +53,7 @@ describe('releasesService ', async () => {
     test('uses default start and count if not provided', async () => {
       setPrismaResult(mockedReleasesPrismaResult)
 
-      const result = await getAllReleases({}, prismaMock)
+      const result = await getReleases({}, prismaMock)
 
       assert.deepEqual(result, mockedReleasesResult)
       assert.equal(prismaMock.release.findMany.mock.calls[0].arguments[0]['skip'], 0)
@@ -43,9 +63,101 @@ describe('releasesService ', async () => {
     test('returns empty list if no results', async () => {
       setPrismaResult([])
 
-      const result = await getAllReleases({}, prismaMock)
+      const result = await getReleases({}, prismaMock)
 
       assert.deepEqual(result, [])
+    })
+  })
+
+  describe('buildReleaseFilter', () => {
+    test('returns undefined when neither shortname nor variantId is provided', async () => {
+      const where = await buildReleaseFilter({}, prismaMock)
+
+      assert.equal(where, undefined)
+      assert.equal((releaseAsserts.assertStatisticExists as any).mock.calls.length, 0)
+      assert.equal((releaseAsserts.assertVariantExists as any).mock.calls.length, 0)
+      assert.equal((releaseAsserts.assertVariantMatchesShortname as any).mock.calls.length, 0)
+    })
+
+    test('applies filter when only shortname is provided', async () => {
+      const where = await buildReleaseFilter({ shortname: 'KPI' }, prismaMock)
+
+      assert.deepEqual(where, {
+        variant: { statistic: { shortname: { name: 'KPI' } } },
+      })
+
+      assert.equal((releaseAsserts.assertStatisticExists as any).mock.calls.length, 1)
+      assert.deepEqual((releaseAsserts.assertStatisticExists as any).mock.calls[0].arguments, ['KPI', prismaMock])
+
+      assert.equal((releaseAsserts.assertVariantExists as any).mock.calls.length, 0)
+      assert.equal((releaseAsserts.assertVariantMatchesShortname as any).mock.calls.length, 0)
+    })
+
+    test('applies filter when only variantId is provided', async () => {
+      const where = await buildReleaseFilter({ variantId: 1 }, prismaMock)
+
+      assert.deepEqual(where, {
+        variant: { id: 1 },
+      })
+
+      assert.equal((releaseAsserts.assertStatisticExists as any).mock.calls.length, 0)
+      assert.equal((releaseAsserts.assertVariantExists as any).mock.calls.length, 1)
+      assert.deepEqual((releaseAsserts.assertVariantExists as any).mock.calls[0].arguments, [1, prismaMock])
+      assert.equal((releaseAsserts.assertVariantMatchesShortname as any).mock.calls.length, 0)
+    })
+
+    test('applies combined filter when both inputs are provided', async () => {
+      const where = await buildReleaseFilter({ shortname: 'KPI', variantId: 1 }, prismaMock)
+
+      assert.deepEqual(where, {
+        variant: { id: 1, statistic: { shortname: { name: 'KPI' } } },
+      })
+
+      assert.equal((releaseAsserts.assertStatisticExists as any).mock.calls.length, 1)
+      assert.deepEqual((releaseAsserts.assertStatisticExists as any).mock.calls[0].arguments, ['KPI', prismaMock])
+
+      assert.equal((releaseAsserts.assertVariantExists as any).mock.calls.length, 1)
+      assert.deepEqual((releaseAsserts.assertVariantExists as any).mock.calls[0].arguments, [1, prismaMock])
+
+      assert.equal((releaseAsserts.assertVariantMatchesShortname as any).mock.calls.length, 1)
+      assert.deepEqual((releaseAsserts.assertVariantMatchesShortname as any).mock.calls[0].arguments, [
+        1,
+        'KPI',
+        prismaMock,
+      ])
+    })
+
+    test('throws when statistic does not exist', async () => {
+      releaseAsserts.assertStatisticExists = mock.fn(async () => {
+        throw { status: 404, statregError: "Statistic 'BAD' not found" }
+      }) as any
+
+      await assert.rejects(() => buildReleaseFilter({ shortname: 'BAD' }, prismaMock), {
+        status: 404,
+        statregError: "Statistic 'BAD' not found",
+      })
+    })
+
+    test('throws when variant does not exist', async () => {
+      releaseAsserts.assertVariantExists = mock.fn(async () => {
+        throw { status: 404, statregError: "Variant '999' not found" }
+      }) as any
+
+      await assert.rejects(() => buildReleaseFilter({ variantId: 999 }, prismaMock), {
+        status: 404,
+        statregError: "Variant '999' not found",
+      })
+    })
+
+    test('throws when variant does not belong to statistic', async () => {
+      releaseAsserts.assertVariantMatchesShortname = mock.fn(async () => {
+        throw { status: 404, statregError: "Variant does not belong to statistic 'KPI'" }
+      }) as any
+
+      await assert.rejects(() => buildReleaseFilter({ shortname: 'KPI', variantId: 1 }, prismaMock), {
+        status: 404,
+        statregError: "Variant does not belong to statistic 'KPI'",
+      })
     })
   })
 
@@ -73,7 +185,7 @@ describe('releasesService ', async () => {
 
     test('returns 404 if no release found', async () => {
       setPrismaResult(null)
-      await assert.rejects(() => getReleaseById('1', prismaMock), { status: 404, statregError: 'Release id not found' })
+      await assert.rejects(() => getReleaseById('1', prismaMock), { status: 404, statregError: 'Release not found' })
     })
   })
 
@@ -90,6 +202,73 @@ describe('releasesService ', async () => {
       })
     })
   })
+
+  describe('mapToReleaseDetails ', () => {
+    // TODO: Add tests for mapToReleaseDetails
+  })
+
+  describe('createRelease ', () => {
+    beforeEach(() => {
+      now = new Date('2026-03-23T08:00:00Z')
+    })
+
+    test('creates a new release and returns mapped results', async () => {
+      setPrismaResult({
+        ...mockedSingleReleasePrismaResult,
+        id: 1,
+        version: 1,
+        desk_appoval_status: ApprovalStatus.PENDING,
+      })
+
+      const result = await createRelease(prismaMock, 'kpi', '1', mockCreateReleaseInput, now)
+
+      assert.deepStrictEqual(prismaMock.release.create.mock.callCount(), 1)
+      assert.deepStrictEqual(prismaMock.release.create.mock.calls[0].arguments[0], {
+        data: {
+          publish_time: new Date('2024-10-15T08:00:00Z'),
+          period_to: new Date('2024-12-31T00:00:00Z'),
+          period_from: new Date('2024-09-01T00:00:00Z'),
+          desk_appoval_status: ApprovalStatus.PENDING,
+          release_date_precision: 'dag',
+          has_versions: false,
+          last_updated: now,
+          date_created: now,
+          cancelled: false,
+          comment: '',
+          variant: {
+            connect: {
+              id: 1,
+            },
+          },
+        },
+        include: ReleaseDetailsIncludes,
+      })
+      assert.deepStrictEqual(result, {
+        ...mockedSingleReleaseResult,
+        has_versions: false,
+        approval_status: ApprovalStatus.PENDING,
+      })
+    })
+
+    test('returns 400 if request body is empty', async () => {
+      await assert.rejects(() => createRelease(prismaMock, 'kpi', '1', undefined, now), {
+        statregError: 'Missing required field(s): publish_time, period_from, period_to, release_date_precision',
+      })
+      assert.strictEqual(prismaMock.release.create.mock.callCount(), 0)
+    })
+
+    test('returns 400 if any of the required fields are missing', async () => {
+      const newReleaseInput = {
+        publish_time: '2024-10-15T08:00:00Z',
+        release_date_precision: 'dag',
+      }
+
+      await assert.rejects(() => createRelease(prismaMock, 'kpi', '1', newReleaseInput, now), {
+        statregError: 'Missing required field(s): period_from, period_to',
+      })
+      assert.strictEqual(prismaMock.release.create.mock.callCount(), 0)
+    })
+  })
 })
 
 ////////////// MOCK DATA ////////////////////////////////
@@ -104,7 +283,7 @@ const mockedReleasesPrismaResult = [
     variant: {
       frequency: {
         name: 'Måned',
-        name_en: 'Monthly',
+        code: 'M',
       },
       statistic: {
         language: 'nb',
@@ -126,7 +305,7 @@ const mockedReleasesPrismaResult = [
     variant: {
       frequency: {
         name: 'År',
-        name_en: 'Year',
+        code: 'Y',
       },
       statistic: {
         language: 'nb',
@@ -154,7 +333,7 @@ const mockedSingleReleasePrismaResult = {
     revision: 'I',
     frequency: {
       name: 'Måned',
-      name_en: 'Monthly',
+      code: 'M',
     },
     statistic: {
       language: 'nb',
@@ -175,17 +354,13 @@ const mockedReleasesResult = [
     period_to: '2024-09-01T00:00:00.000Z',
     period_from: '2024-08-01T00:00:00.000Z',
     frequency: {
-      name: [
-        { language_code: 'nb', text: 'Måned' },
-        { language_code: 'en', text: 'Monthly' },
-      ],
+      name: 'Måned',
+      code: 'M',
     },
     statistic: {
       shortname: 'KPI',
-      name: [
-        { language_code: 'nb', text: 'Konsumprisindeks' },
-        { language_code: 'en', text: 'Consumer Price Index' },
-      ],
+      name: 'Konsumprisindeks',
+      name_en: 'Consumer Price Index',
     },
   },
   {
@@ -195,17 +370,13 @@ const mockedReleasesResult = [
     period_to: '2024-12-31T00:00:00.000Z',
     period_from: '2024-01-01T00:00:00.000Z',
     frequency: {
-      name: [
-        { language_code: 'nb', text: 'År' },
-        { language_code: 'en', text: 'Year' },
-      ],
+      name: 'År',
+      code: 'Y',
     },
     statistic: {
       shortname: 'NR',
-      name: [
-        { language_code: 'nb', text: 'Nasjonalregnskap' },
-        { language_code: 'en', text: 'National Accounts' },
-      ],
+      name: 'Nasjonalregnskap',
+      name_en: 'National Accounts',
     },
   },
 ]
@@ -218,24 +389,27 @@ const mockedSingleReleaseResult = {
   variant: {
     id: 1,
     frequency: {
-      name: [
-        { language_code: 'nb', text: 'Måned' },
-        { language_code: 'en', text: 'Monthly' },
-      ],
+      name: 'Måned',
+      code: 'M',
     },
     revision: {
-      name: [{ language_code: 'nb', text: 'I' }],
+      name: 'I',
     },
   },
   statistic: {
     shortname: 'KPI',
-    name: [
-      { language_code: 'nb', text: 'Konsumprisindeks' },
-      { language_code: 'en', text: 'Consumer Price Index' },
-    ],
+    name: 'Konsumprisindeks',
+    name_en: 'Consumer Price Index',
   },
   period_from: '2024-08-01T00:00:00.000Z',
   period_to: '2024-09-01T00:00:00.000Z',
   release_date_precision: 'dag',
   cancelled: false,
+}
+
+const mockCreateReleaseInput = {
+  publish_time: '2024-10-15T08:00:00Z',
+  period_to: '2024-12-31T00:00:00Z',
+  period_from: '2024-09-01T00:00:00Z',
+  release_date_precision: 'dag',
 }

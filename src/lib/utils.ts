@@ -1,12 +1,7 @@
-import type { Translations } from '@/types'
-
-// For usage, remember to destructurize the function's content e.g. { name: [...getLocalizedName(language_code, text)] }
-export function getLocalizedName(language_code = 'nb', text: string | undefined | null): Translations {
-  return text ? [{ language_code, text }] : []
-}
-
 export function dateToISOString(date: Date | null): string | undefined {
-  return date ? date.toISOString() : undefined
+  if (!date) return
+
+  return date.toISOString()
 }
 
 export function sanitize(input: string): string {
@@ -15,19 +10,72 @@ export function sanitize(input: string): string {
   return input.trim().replace(/[^a-zA-Z0-9æøåÆØÅ.,:;!?()/\-\s]/g, '')
 }
 
-export function validateAndParseDate(dateString: string | string[] | undefined, fieldName?: string): Date {
-  const dateRegEx = /^\d{4}-\d{2}-\d{2}$/
-  if (!dateString || Array.isArray(dateString) || !dateRegEx.test(dateString)) {
-    throw {
-      statregError: `Invalid${fieldName ? ` ${fieldName}` : ''} date format in query parameter`,
-    }
+export function validateId(id: string): number {
+  const idAsNumber = Number.parseInt(id)
+
+  if (isNaN(idAsNumber)) {
+    throw { statregError: 'Invalid id format' }
   }
 
-  // TODO: Confirm correct date format. See JIRA issue MIM-2546
+  return idAsNumber
+}
+
+type DateString = string | string[] | undefined
+
+export function validateDateOnly(dateString: DateString, fieldName = ''): Date {
+  const dateOnlyRegex = /^\d{4}-\d{2}-\d{2}$/ // e.g. YYYY-MM-dd
+  return validateAndParseDate(dateString, fieldName, dateOnlyRegex)
+}
+
+export function validateDateISO(dateString: DateString, fieldName = ''): Date {
+  // TODO: MIM-2546: Confirm if this regEx covers all our required valid date ISO formats
+  const dateISORegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/ // YYYY-MM-DDTHH:mm:ssZ
+  return validateAndParseDate(dateString, fieldName, dateISORegex)
+}
+
+export function validateAndParseDate(dateString: DateString, fieldName: string, dateRegEx: RegExp): Date {
+  const errorMessage = () => ({
+    statregError: ['Invalid', fieldName, 'date format:', dateString].filter(Boolean).join(' '),
+  })
+
+  if (!dateString || Array.isArray(dateString) || !dateRegEx.test(dateString)) {
+    throw errorMessage()
+  }
+
+  // TODO: MIM-2546: Confirm correct date format
   const date = new Date(dateString)
   if (date.toString() === 'Invalid Date') {
-    throw { statregError: `Invalid${fieldName ? ` ${fieldName}` : ''} date format in query parameter` }
+    throw errorMessage()
   }
 
   return date
+}
+
+export function ensureString(value?: string | string[]): string {
+  return Array.isArray(value) ? (value[0] ?? '') : (value ?? '')
+}
+
+export function ensureVariantIdNumber(variantId: string | number): number {
+  const parsedVariantId = typeof variantId === 'number' ? variantId : Number(sanitize(variantId))
+
+  if (!Number.isInteger(parsedVariantId)) {
+    throw { statregError: 'Invalid variant id (not a number)' }
+  }
+
+  return parsedVariantId
+}
+
+export function ensureRequiredFieldsExists<T extends Record<string, any>>(
+  body: T | undefined,
+  requiredFields: (keyof T)[]
+): T | undefined {
+  const missingFields = requiredFields.filter((key) => !body || body[key] === undefined || body[key] === null)
+
+  if (missingFields?.length) {
+    throw {
+      statregError: `Missing required field(s): ${missingFields.join(', ')}`,
+    }
+  }
+
+  return body
 }

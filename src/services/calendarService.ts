@@ -1,5 +1,5 @@
 import type { ExtendedPrismaClient } from '@/lib/prisma'
-import { dateToISOString, sanitize, validateAndParseDate } from '@/lib/utils'
+import { dateToISOString, sanitize, validateDateOnly } from '@/lib/utils'
 import type { BlockedReleaseDate } from '@/types'
 
 export type CalendarDatePrisma = Pick<ExtendedPrismaClient, 'calender_date'>
@@ -11,7 +11,7 @@ export async function createBlockedReleaseDay(
 ): Promise<BlockedReleaseDate[]> {
   if (!body?.blocked_comment) return Promise.reject({ statregError: 'Invalid body' })
   const blocked_comment = sanitize(body!.blocked_comment!)
-  const date = validateAndParseDate(dateString)
+  const date = validateDateOnly(dateString)
 
   await prisma.calender_date.create({
     data: {

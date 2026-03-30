@@ -5,12 +5,12 @@ Statreg-api uses [keycloak/wonderwall](https://psychic-broccoli-evke4lm.pages.gi
 There are 3 levels of authorization:
 * No authorization (endpoint is open to all). Specified with `skipAuth()` for endpoint in controller.
 * Authozied SSB user (default behavior).
-* Require certain dapla team membership. Specified with `requireUserGroupAuthorization(<dapla-team>)` for endpoint in controller.
+* Require admin, specified with `requireAdminAuthorization()` for endpoint in controller. Admin authorization level is granted based on dapla group memberships that are defined in environment variable.
 
-For endpoints with no authorization (`with skipAuth()`), we do not want to force login through wonderwall. Wonderwall exceptions are defined by path in nais yaml using `excludePaths`. Since these exceptions are for path only (not different verbs) for convenience we do exclude entire main paths (ie. `/statistics/** and /releases/**`) for statreg API. Authorization are still enforced for all endpoints through `authMiddleware`. The result of this is that wonderwall will _not_ enforce login for ie. a `PUT` request to `/statistics/:shortname` even if the endpoint is specified with `requireUserGroupAuthorization(...)`. However the `authMiddleware` will still validate token and check authorization requirements and in this case return `401`and `Missing bearer token`.
+For endpoints with no authorization (`with skipAuth()`), we do not want to force login through wonderwall. Wonderwall exceptions are defined by path in nais yaml using `excludePaths`. Since these exceptions are for path only (not different verbs) for convenience we do exclude entire main paths (ie. `/statistics/** and /releases/**`) for statreg API. Authorization are still enforced for all endpoints through `authMiddleware`. The result of this is that wonderwall will _not_ enforce login for ie. a `PUT` request to `/statistics/:shortname` even if the endpoint is specified with `requireAdminAuthorization()`. However the `authMiddleware` will still validate token and check authorization requirements and in this case return `401`and `Missing bearer token`.
 
 ## Local development with working authentication
-We have a docker compose setup to simulate production auth flow. 
+We have a docker compose setup to simulate production auth flow. Alternatively one can retrieve a valid token for the play keycloak client and pass as authorization header.
 
 ### Run locally with authentication flow
 In `.env` make sure `AUTH_ENABLED` is set to `true` and that the following variables are defined:

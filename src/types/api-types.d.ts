@@ -33,31 +33,7 @@ export interface paths {
       }
     }
     put?: never
-    /** Create a new statistic */
-    post: {
-      parameters: {
-        query?: never
-        header?: never
-        path?: never
-        cookie?: never
-      }
-      requestBody: {
-        content: {
-          'application/json': components['schemas']['Statistic_create']
-        }
-      }
-      responses: {
-        /** @description Statistic details */
-        201: {
-          headers: {
-            [name: string]: unknown
-          }
-          content: {
-            'application/json': components['schemas']['Statistic_details']
-          }
-        }
-      }
-    }
+    post?: never
     delete?: never
     options?: never
     head?: never
@@ -121,6 +97,71 @@ export interface paths {
         }
       }
     }
+    /** Create a new statistic */
+    post: {
+      parameters: {
+        query?: never
+        header?: never
+        path?: never
+        cookie?: never
+      }
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['Statistic_create']
+        }
+      }
+      responses: {
+        /** @description Statistic details */
+        201: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            'application/json': components['schemas']['Statistic_details']
+          }
+        }
+      }
+    }
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/statistics/{shortname}/releases': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** List all releases for a statistic */
+    get: {
+      parameters: {
+        query?: {
+          start?: number
+          count?: number
+        }
+        header?: never
+        path: {
+          shortname: string
+        }
+        cookie?: never
+      }
+      requestBody?: never
+      responses: {
+        /** @description List of releases */
+        200: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            'application/json': components['schemas']['Release_listing'][]
+          }
+        }
+      }
+    }
+    put?: never
     post?: never
     delete?: never
     options?: never
@@ -218,7 +259,33 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    get?: never
+    /** List all releases for one variant */
+    get: {
+      parameters: {
+        query?: {
+          start?: number
+          count?: number
+        }
+        header?: never
+        path: {
+          shortname: string
+          id: number
+        }
+        cookie?: never
+      }
+      requestBody?: never
+      responses: {
+        /** @description List of releases based on variant */
+        200: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            'application/json': components['schemas']['Release_listing'][]
+          }
+        }
+      }
+    }
     put?: never
     /** Create a new release */
     post: {
@@ -654,8 +721,11 @@ export interface components {
       readonly blocked_comment?: string | null
       releases?: {
         readonly release_id?: number
-        readonly statistic_shortname?: string
-        readonly statistic_name?: components['schemas']['Translations']
+        statistic?: {
+          readonly shortname?: string
+          readonly name?: string
+          readonly name_en?: string
+        }
       }[]
     }
     Contact: {
@@ -667,9 +737,18 @@ export interface components {
       readonly email?: string
     }
     Frequency: {
-      readonly id?: number
-      name?: components['schemas']['Translations']
+      name?: string
       code?: string
+    }
+    /** @description Text field to specify variant beyond frequency and revision */
+    Level_of_detail: {
+      name?: string | null
+      name_en?: string | null
+    }
+    /** @description Valid region levels are (name in parethesis): L (Land), LD (Landsdel), F (Fylke), K (Kommune), BD (Bydel og krets) */
+    Region_level: {
+      code?: string
+      name?: string
     }
     Release: {
       readonly id?: number
@@ -691,35 +770,38 @@ export interface components {
       approval_status?: string | null
       statistic?: {
         readonly shortname?: string
-        readonly name?: components['schemas']['Translations']
+        readonly name?: string
+        readonly name_en?: string
       }
     }
     Release_details: components['schemas']['Release_get'] & {
       has_versions?: boolean
       variant?: {
         readonly id?: number
-        frequency?: {
-          readonly name?: components['schemas']['Translations']
-        }
-        revision?: {
-          readonly name?: components['schemas']['Translations']
-        }
+        frequency?: components['schemas']['Frequency']
+        revision?: components['schemas']['Revision']
       }
       cancelled?: boolean
       release_date_precision?: string
     }
     Release_listing: components['schemas']['Release_get'] & {
-      frequency?: {
-        readonly name?: components['schemas']['Translations']
-      }
+      frequency?: components['schemas']['Frequency']
+    }
+    /** @description Valid revision codes are:	I (Ingen), B (Beregnede), E (Endelige), F (Foreløpige), R (Reviderte), IG (Integrert) */
+    Revision: {
+      name?: string
+      code?: string
     }
     Statistic: {
       readonly shortname?: string
+      /** @description Main language will be either 'nn' or 'nb' for statistics */
       main_language?: string
       status?: {
         code?: string
       }
-      name?: components['schemas']['Translations']
+      name?: string
+      name_en?: string
+      /** @description Is one of 'GODKJENT', 'AVVIST' or 'FORSLAG' */
       approval_status?: string
     }
     Statistic_create: {
@@ -727,15 +809,16 @@ export interface components {
       /** Format: date */
       first_released_at?: string | null
       yearly_reporting?: boolean
-      statistic_region_levels?: unknown[]
+      statistic_region_levels?: components['schemas']['Region_level'][]
       previous_topic_codes?: string | null
+      comment?: string | null
     } & components['schemas']['Statistic']
     Statistic_update: {
       division?: string | null
       /** Format: date */
       first_released_at?: string | null
       yearly_reporting?: boolean
-      statistic_region_levels?: unknown[]
+      statistic_region_levels?: components['schemas']['Region_level'][]
       previous_topic_codes?: string | null
       relation?: string | null
       comment?: string
@@ -744,7 +827,7 @@ export interface components {
       version?: number
       division?: {
         code?: string | null
-        readonly name?: components['schemas']['Translations']
+        readonly name?: string
       }
       /** Format: date */
       first_released_at?: string | null
@@ -752,7 +835,8 @@ export interface components {
       previous_topic_codes?: string | null
       relation?: {
         shortname?: string
-        readonly name?: components['schemas']['Translations']
+        readonly name?: string
+        readonly name_en?: string
       }
       /** Format: date-time */
       readonly updated_at?: string
@@ -765,7 +849,7 @@ export interface components {
         email?: string
         name?: string
       }[]
-      statistic_region_levels?: components['schemas']['Translations'][]
+      statistic_region_levels?: components['schemas']['Region_level'][]
     } & components['schemas']['Statistic']
     Statistic_listing: {
       contacts?: {
@@ -773,24 +857,16 @@ export interface components {
         email?: string
       }[]
     } & components['schemas']['Statistic']
-    Translations: {
-      language_code?: string
-      text?: string
-    }[]
     Variant: {
       readonly id?: number
       version?: number
       /** Format: date-time */
       readonly updated_at?: string
-      level_of_detail?: {
-        name?: components['schemas']['Translations']
-      }
+      level_of_detail?: components['schemas']['Level_of_detail']
       /** Format: date-time */
       readonly created_at?: string
       cancelled?: boolean
-      freqency?: {
-        readonly name?: components['schemas']['Translations']
-      }
+      frequency?: components['schemas']['Frequency']
       revision?: string
     }
   }

@@ -16,3 +16,7 @@ Express middleware with popular prometheus metrics in one bundle. Exposes `/metr
 ## Auth middleware
 
 Middleware to automatically handle authentication and authorization. Read more in [Authentication and authorization](auth.md).
+
+## Prisma middleware
+
+We interrupt Prisma create, update and delete calls to write auditLog entries. This happens in the common Prisma client definition, and as long as you import the extended types it should not interfere with operation. CreateMany, updateMany and similar calls are disabled project wide. Remember to keep the list of extended types updated to ensure new versions are logged.
