@@ -289,6 +289,10 @@ export function validateStatisticInput(body: StatisticCreate | undefined): Valid
     throw { statregError: "Field 'division' must be a number" }
   }
 
+  if (!getDivisionFromCode(Number(division))) {
+    throw { statregError: "Field 'division' does not correspond to an existing division." }
+  }
+
   return {
     division: sanitize(division!),
     name: sanitize(name!),
