@@ -415,7 +415,7 @@ describe('statisticService ', async () => {
       assert.deepEqual(result, expectedResult)
     })
 
-    test('falls back to responsible person data when fetchUsers returns users unchanged', async () => {
+    test('falls back to responsible person data when fetchUsers returns Users[] instead of lookupUsers[]', async () => {
       input.responsiblePersons = [{ username: 'bcd', email: 'bob_fallback@ssb.no' }]
       fetchUsersMock.mock.mockImplementation(async (users: Users[]) => users)
       expectedResult.contacts[0] = { name: undefined, email: 'bob_fallback@ssb.no', username: 'bcd' }
