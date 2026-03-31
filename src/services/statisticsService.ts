@@ -267,35 +267,34 @@ type ValidatedStatisticInput = {
   name_en: string
   first_released_at: Date
   main_language: 'nb' | 'nn'
-  comment: string
+  comment: string | null
 }
 
 export function validateStatisticInput(body: StatisticCreate | undefined): ValidatedStatisticInput {
   const requiredFields: (keyof StatisticCreate)[] = [
     'name',
     'name_en',
-    'status',
     'division',
-    //'contacts', // TODO contacts missing in open API spec
-    'statistic_region_levels',
+    //'contacts', // TODO required according to Figma design, missing in open API spec
     'first_released_at',
-    //'variants', // TODO variants missing in open API spec
+    //'variants', // TODO required according to Figma design, missing in open API spec
   ]
 
-  const { division, name, name_en, first_released_at, main_language, comment } = ensureRequiredFieldsExists(
+  const { name, name_en, division, main_language, first_released_at, comment } = ensureRequiredFieldsExists(
     body,
     requiredFields
   )
 
   if (!isNumber(division)) {
-    throw { statregError: 'Division is required and must be a number' }
+    throw { statregError: "Field 'division' must be a number" }
   }
+
   return {
     division: division!,
     name: sanitize(name!),
     name_en: sanitize(name_en!),
     first_released_at: validateDateOnly(first_released_at!),
     main_language: main_language == 'nn' ? 'nn' : 'nb',
-    comment: sanitize(comment!),
+    comment: comment ? sanitize(comment) : null,
   }
 }
