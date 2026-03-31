@@ -270,15 +270,20 @@ type ValidatedStatisticInput = {
   comment: string | null
 }
 
-export function validateStatisticInput(body: StatisticCreate | undefined): ValidatedStatisticInput {
-  const requiredFields: (keyof StatisticCreate)[] = [
+export function validateStatisticInput(
+  body: StatisticUpdate | undefined,
+  type: 'create' | 'update' = 'create'
+): ValidatedStatisticInput {
+  const createFields: (keyof StatisticCreate)[] = [
     'name',
     'name_en',
     'division',
-    //'contacts', // TODO required according to Figma design, missing in open API spec
+    //'contacts', // TODO contacts required according to Figma design, missing in open API spec
     'first_released_at',
-    //'variants', // TODO required according to Figma design, missing in open API spec
+    //'variants', // TODO variants required according to Figma design, missing in open API spec
   ]
+
+  const requiredFields = type == 'create' ? createFields : [...createFields] // TODO add extra required update fields
 
   const { name, name_en, division, main_language, first_released_at, comment } = ensureRequiredFieldsExists(
     body,
@@ -293,12 +298,22 @@ export function validateStatisticInput(body: StatisticCreate | undefined): Valid
     throw { statregError: "Field 'division' does not correspond to an existing division." }
   }
 
-  return {
+  const validatedCreateInput: ValidatedStatisticInput = {
     division: sanitize(division!),
     name: sanitize(name!),
     name_en: sanitize(name_en!),
     first_released_at: validateDateOnly(first_released_at!),
     main_language: main_language == 'nn' ? 'nn' : 'nb',
     comment: comment ? sanitize(comment) : null,
+  }
+
+  if (type == 'create') {
+    return validatedCreateInput
+  }
+
+  //TODO validate and add extra update fields
+
+  return {
+    ...validatedCreateInput,
   }
 }

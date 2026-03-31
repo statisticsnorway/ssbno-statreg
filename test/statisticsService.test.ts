@@ -467,7 +467,7 @@ describe('statisticService ', async () => {
     })
   })
 
-  describe('validateStatisticInput ', async () => {
+  describe('validateStatisticInput(input, "create") ', async () => {
     let input: any
     let expectedResult: any
 
