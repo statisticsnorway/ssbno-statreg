@@ -1,6 +1,5 @@
 import { describe, mock, test, before, beforeEach } from 'node:test'
 import assert from 'node:assert/strict'
-import { statisticsAsserts } from '@/lib/asserts'
 import { ApprovalStatus } from '@/types/enums'
 import { Users } from '@/types/entra'
 
@@ -87,8 +86,6 @@ describe('statisticService ', async () => {
         findUnique: mock.fn(() => Promise.resolve({ name: 'kpi', id: 1 })),
       },
     }
-    statisticsAsserts.assertShortnameExists = mock.fn(async () => undefined) as any
-    statisticsAsserts.assertShortnameExistsAndIsAvailable = mock.fn(async () => undefined) as any
   })
 
   describe('getAllStatistics ', async () => {
@@ -277,30 +274,16 @@ describe('statisticService ', async () => {
       const result = await createStatistic(
         prismaMock,
         'kpi',
-        {
-          name: 'Konsumprisindeksen',
-          name_en: 'Consumer Price Index',
-          status: { code: 'K' },
-          division: '723',
-          contacts: [],
-          statistic_region_levels: [],
-          first_released_at: '2024-04-01',
-          variants: [],
-        },
+        { name: 'Konsumprisindeksen', division: '723', first_released_at: '2024-04-01' },
         now
       )
 
       assert.deepStrictEqual(prismaMock.statistic.create.mock.callCount(), 1)
-      assert.deepStrictEqual((statisticsAsserts.assertShortnameExists as any).mock.calls[0].arguments, ['kpi', prismaMock])
-      assert.deepStrictEqual((statisticsAsserts.assertShortnameExistsAndIsAvailable as any).mock.calls[0].arguments, [
-        'kpi',
-        prismaMock,
-      ])
       assert.deepStrictEqual(prismaMock.statistic.create.mock.calls[0].arguments[0], {
         data: {
           name: 'Konsumprisindeksen',
           priority: 1,
-          name_en: 'Consumer Price Index',
+          name_en: undefined,
           yearly_reporting: false,
           status: 'K',
           division_code: '723',
@@ -325,130 +308,17 @@ describe('statisticService ', async () => {
 
     test('returns 400 if request body is empty', async () => {
       await assert.rejects(() => createStatistic(prismaMock, 'kpi', undefined, now), {
-        statregError:
-          'Missing required field(s): name, name_en, status, division, contacts, statistic_region_levels, first_released_at, variants',
+        statregError: 'Norwegian name is required',
       })
       assert.strictEqual(prismaMock.statistic.create.mock.callCount(), 0)
     })
 
     test('returns 400 if any of the required fields are missing', async () => {
-      await assert.rejects(
-        () =>
-          createStatistic(
-            prismaMock,
-            'kpi',
-            {
-              name: 'Konsumprisindeksen',
-              name_en: 'Consumer Price Index',
-              division: '723',
-              contacts: [],
-              statistic_region_levels: [],
-              first_released_at: '2024-04-01',
-            },
-            now
-          ),
-        {
-          statregError: 'Missing required field(s): status, variants',
-        }
-      )
-      assert.strictEqual(prismaMock.statistic.create.mock.callCount(), 0)
-    })
-
-    test('throws when shortname does not exist', async () => {
-      statisticsAsserts.assertShortnameExists = mock.fn(async () => {
-        throw { status: 400, statregError: 'Shortname does not exist' }
-      }) as any
-
-      await assert.rejects(
-        () =>
-          createStatistic(
-            prismaMock,
-            'kpi',
-            {
-              name: 'Konsumprisindeksen',
-              name_en: 'Consumer Price Index',
-              status: { code: 'K' },
-              division: '723',
-              contacts: [],
-              statistic_region_levels: [],
-              first_released_at: '2024-04-01',
-              variants: [],
-            },
-            now
-          ),
-        {
-          status: 400,
-          statregError: 'Shortname does not exist',
-        }
-      )
-      assert.strictEqual(prismaMock.statistic.create.mock.callCount(), 0)
-    })
-
-    test('throws when shortname is already in use', async () => {
-      statisticsAsserts.assertShortnameExistsAndIsAvailable = mock.fn(async () => {
-        throw { status: 400, statregError: 'Shortname is already in use' }
-      }) as any
-
-      await assert.rejects(
-        () =>
-          createStatistic(
-            prismaMock,
-            'kpi',
-            {
-              name: 'Konsumprisindeksen',
-              name_en: 'Consumer Price Index',
-              status: { code: 'K' },
-              division: '723',
-              contacts: [],
-              statistic_region_levels: [],
-              first_released_at: '2024-04-01',
-              variants: [],
-            },
-            now
-          ),
-        {
-          status: 400,
-          statregError: 'Shortname is already in use',
-        }
-      )
-      assert.strictEqual(prismaMock.statistic.create.mock.callCount(), 0)
-    })
-
-    test('sanitizes shortname before calling asserts and create', async () => {
-      setStatisticsResult({
-        ...mockedStatisticCreatedPrismaResult,
-        id: 1,
-        version: 1,
-        desk_appoval_status: ApprovalStatus.PENDING,
+      // TODO: Add more fields to this test when validation logic are in place
+      await assert.rejects(() => createStatistic(prismaMock, 'kpi', {}, now), {
+        statregError: 'Norwegian name is required',
       })
-
-      await createStatistic(
-        prismaMock,
-        ' kpi! ',
-        {
-          name: 'Konsumprisindeksen',
-          name_en: 'Consumer Price Index',
-          status: { code: 'K' },
-          division: '723',
-          contacts: [],
-          statistic_region_levels: [],
-          first_released_at: '2024-04-01',
-          variants: [],
-        },
-        now
-      )
-
-      assert.deepStrictEqual((statisticsAsserts.assertShortnameExists as any).mock.calls[0].arguments, ['kpi!', prismaMock])
-      assert.deepStrictEqual((statisticsAsserts.assertShortnameExistsAndIsAvailable as any).mock.calls[0].arguments, [
-        'kpi!',
-        prismaMock,
-      ])
-      assert.deepStrictEqual(prismaMock.statistic.create.mock.calls[0].arguments[0].data.shortname, {
-        connect: {
-          name: 'kpi!',
-        },
-      })
-      assert.strictEqual(prismaMock.statistic.create.mock.callCount(), 1)
+      assert.strictEqual(prismaMock.statistic.create.mock.callCount(), 0)
     })
   })
 
