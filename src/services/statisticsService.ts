@@ -276,10 +276,10 @@ export function validateStatisticInput(body: StatisticCreate | undefined): Valid
     'name_en',
     'status',
     'division',
-    //'contacts', // TODO contacts should exist
+    //'contacts', // TODO contacts missing in open API spec
     'statistic_region_levels',
     'first_released_at',
-    //'variants', // TODO variants should exist
+    //'variants', // TODO variants missing in open API spec
   ]
 
   const { division, name, name_en, first_released_at, main_language, comment } = ensureRequiredFieldsExists(
