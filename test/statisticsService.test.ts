@@ -277,7 +277,7 @@ describe('statisticService ', async () => {
         {
           name: 'Konsumprisindeksen',
           name_en: 'Consumer price index',
-          division: '723',
+          division: '104',
           first_released_at: '2024-04-01',
         },
         now
@@ -291,7 +291,7 @@ describe('statisticService ', async () => {
           name_en: 'Consumer price index',
           yearly_reporting: false,
           status: 'K',
-          division_code: '723',
+          division_code: '104',
           first_release: new Date('2024-04-01T00:00:00.000Z'),
           comment: 'Create statistic with shortname: kpi',
           language: 'nb',
