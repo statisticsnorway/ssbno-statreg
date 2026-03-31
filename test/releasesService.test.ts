@@ -254,31 +254,7 @@ describe('releasesService ', async () => {
     beforeEach(() => {
       input = structuredClone(mockedSingleReleasePrismaResult)
 
-      expectedResult = {
-        id: 1,
-        publish_time: '2024-10-15T08:00:00.000Z',
-        has_versions: true,
-        approval_status: 'APPROVED',
-        variant: {
-          frequency: {
-            name: 'Måned',
-            code: 'M',
-          },
-          revision: {
-            name: 'I',
-          },
-          id: 1,
-        },
-        statistic: {
-          shortname: 'KPI',
-          name: 'Konsumprisindeks',
-          name_en: 'Consumer Price Index',
-        },
-        period_from: '2024-08-01T00:00:00.000Z',
-        period_to: '2024-09-01T00:00:00.000Z',
-        release_date_precision: 'dag',
-        cancelled: false,
-      }
+      expectedResult = structuredClone(mockedSingleReleaseResult)
     })
 
     test('returns correct releaseDetails when all conditionals succeed', () => {
