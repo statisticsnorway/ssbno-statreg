@@ -86,7 +86,7 @@ export function parseStatisticVariants(
   }))
 }
 
-async function mapStatisticDetails(statistic: StatisticPrismaResult) {
+export async function mapStatisticDetails(statistic: StatisticPrismaResult): Promise<StatisticDetails> {
   const main_language = statistic.language
   const division_code = statistic.division_code
   const relation = statistic.related_statistic?.shortname
@@ -124,6 +124,7 @@ async function mapStatisticDetails(statistic: StatisticPrismaResult) {
         const lookupUser = (user as UserLookupItem).user
         const responsiblePerson = user as Users
 
+        // TODO bug: when fetchUsers "succeeds", username is always undefined
         return {
           name: lookupUser?.displayName,
           email: lookupUser?.email ?? (user as UserLookupItem).lookupEmail ?? responsiblePerson.email,

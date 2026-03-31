@@ -8,6 +8,7 @@ import {
   createRelease,
   buildReleaseFilter,
   ReleaseDetailsIncludes,
+  mapToReleaseDetails,
 } from '@/services/releasesService'
 import { ApprovalStatus } from '@/types/enums'
 
@@ -247,7 +248,38 @@ describe('releasesService ', async () => {
   })
 
   describe('mapToReleaseDetails ', () => {
-    // TODO: Add tests for mapToReleaseDetails
+    let input: any
+    let expectedResult: any
+
+    beforeEach(() => {
+      input = structuredClone(mockedSingleReleasePrismaResult)
+
+      expectedResult = structuredClone(mockedSingleReleaseResult)
+    })
+
+    test('returns correct releaseDetails when all conditionals succeed', () => {
+      const result = mapToReleaseDetails(input)
+
+      assert.deepEqual(result, expectedResult)
+    })
+
+    test('falls back to has_versions false when version is 1', () => {
+      input.version = 1
+      expectedResult.has_versions = false
+
+      const result = mapToReleaseDetails(input)
+
+      assert.deepEqual(result, expectedResult)
+    })
+
+    test('falls back to empty english name when name_en is missing', () => {
+      input.variant.statistic.name_en = null
+      expectedResult.statistic.name_en = ''
+
+      const result = mapToReleaseDetails(input)
+
+      assert.deepEqual(result, expectedResult)
+    })
   })
 
   describe('createRelease ', () => {

@@ -42,6 +42,7 @@ describe('statisticService ', async () => {
   let updateStatistic: Function
   let createStatistic: Function
   let parseStatisticVariants: Function
+  let mapStatisticDetails: Function
   let StatisticsDetailedIncludes: any
 
   before(async () => {
@@ -66,6 +67,7 @@ describe('statisticService ', async () => {
       getAllStatistics,
       getStatisticByShortname,
       parseStatisticVariants,
+      mapStatisticDetails,
       updateStatistic,
       createStatistic,
       StatisticsDetailedIncludes,
@@ -352,7 +354,103 @@ describe('statisticService ', async () => {
   })
 
   describe('mapStatisticDetails ', async () => {
-    // TODO: Add tests for mapping function
+    let input: any
+    let expectedResult: any
+    let fetchUsersResult: any
+
+    beforeEach(() => {
+      input = structuredClone(mockStatisticsDetailedPrismaResult)
+      input.responsiblePersons = [{ username: 'bcd', email: 'bob_fallback@ssb.no' }]
+
+      fetchUsersResult = [
+        {
+          lookupEmail: 'bob_lookup@ssb.no',
+          user: {
+            displayName: 'Bob',
+            username: 'bcd',
+            email: 'bob@ssb.no',
+            businessPhone: '11223344',
+          },
+        },
+      ]
+      fetchUsersMock.mock.mockImplementation(async () => {
+        return fetchUsersResult
+      })
+
+      expectedResult = structuredClone(mockedStatisticDetailedResult)
+      // TODO bug: when fetchUsers "succeeds", username is always undefined
+      expectedResult.contacts = [{ username: undefined, name: 'Bob', email: 'bob@ssb.no' }]
+    })
+
+    test('returns correct statisticDetails when all conditionals succeed', async () => {
+      const result = await mapStatisticDetails(input)
+
+      assert.deepEqual(result, expectedResult)
+    })
+
+    test('falls back to empty relation object when related statistic is missing', async () => {
+      input.related_statistic = null
+      expectedResult.relation = {}
+
+      const result = await mapStatisticDetails(input)
+
+      assert.deepEqual(result, expectedResult)
+    })
+
+    test('falls back to pending approval status when desk approval status is missing', async () => {
+      input.desk_appoval_status = null
+      expectedResult.approval_status = ApprovalStatus.PENDING
+
+      const result = await mapStatisticDetails(input)
+
+      assert.deepEqual(result, expectedResult)
+    })
+
+    test('falls back to undefined division name when division lookup does not find a match', async () => {
+      input.division_code = '105'
+      expectedResult.division = { code: '105', name: undefined }
+
+      const result = await mapStatisticDetails(input)
+
+      assert.deepEqual(result, expectedResult)
+    })
+
+    test('falls back to empty english name when name_en is missing', async () => {
+      input.name_en = null
+      expectedResult.name_en = ''
+
+      const result = await mapStatisticDetails(input)
+
+      assert.deepEqual(result, expectedResult)
+    })
+
+    test('falls back to lookupEmail when fetched user email is missing', async () => {
+      fetchUsersResult[0].user.email = null
+      expectedResult.contacts[0].email = 'bob_lookup@ssb.no'
+
+      const result = await mapStatisticDetails(input)
+
+      assert.deepEqual(result, expectedResult)
+    })
+
+    test('falls back to responsible person data when fetchUsers returns Users[] instead of lookupUsers[]', async () => {
+      input.responsiblePersons = [{ username: 'bcd', email: 'bob_fallback@ssb.no' }]
+      fetchUsersMock.mock.mockImplementation(async (users: Users[]) => users)
+      expectedResult.contacts[0] = { name: undefined, email: 'bob_fallback@ssb.no', username: 'bcd' }
+
+      const result = await mapStatisticDetails(input)
+
+      assert.deepEqual(result, expectedResult)
+    })
+
+    test('falls back to empty region level code when code is missing', async () => {
+      input.statistic_region_levels[0].region_level.code = null
+      expectedResult.statistic_region_levels[0].code = ''
+
+      const result = await mapStatisticDetails(input)
+
+      assert.deepEqual(result, expectedResult)
+    })
   })
 })
 
