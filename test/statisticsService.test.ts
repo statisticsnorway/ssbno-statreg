@@ -265,7 +265,7 @@ describe('statisticService ', async () => {
       now = new Date('2026-03-23T08:00:00Z')
     })
 
-    test('creates a new statistic and returns mapped results', async () => {
+    test('creates exactly one new statistic when input is valid', async () => {
       setStatisticsResult({
         ...mockedStatisticCreatedPrismaResult,
         id: 1,
@@ -310,14 +310,14 @@ describe('statisticService ', async () => {
       })
     })
 
-    test('returns 400 if request body is empty', async () => {
+    test('reject with error message if body is missing', async () => {
       await assert.rejects(() => createStatistic(prismaMock, 'kpi', undefined, now), {
         statregError: 'Missing required field(s): name, name_en, division, first_released_at',
       })
       assert.strictEqual(prismaMock.statistic.create.mock.callCount(), 0)
     })
 
-    test('returns 400 if any of the required fields are missing', async () => {
+    test('rejects with error message any of the required fields are missing', async () => {
       // TODO: Add more fields to this test when validation logic are in place
       await assert.rejects(() => createStatistic(prismaMock, 'kpi', {}, now), {
         statregError: 'Missing required field(s): name, name_en, division, first_released_at',
