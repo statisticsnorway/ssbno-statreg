@@ -360,7 +360,7 @@ describe('statisticService ', async () => {
       })
 
       expectedResult = structuredClone(mockedStatisticDetailedResult)
-      // TODO bug: see task in mapStatisticsDetails
+      // TODO bug: when fetchUsers "succeeds", username is always undefined
       expectedResult.contacts = [{ username: undefined, name: 'Bob', email: 'bob@ssb.no' }]
     })
 
