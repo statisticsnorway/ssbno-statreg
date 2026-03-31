@@ -230,19 +230,12 @@ export async function createStatistic(
   now = new Date()
 ): Promise<StatisticDetails> {
   const safeShortname = sanitize(shortname)
+
+  const { division, name, name_en, approval_status, first_released_at, main_language, comment } =
+    validateStatisticInput(body)
+
   await statisticsAsserts.assertShortnameExists(safeShortname, prisma)
   await statisticsAsserts.assertShortnameExistsAndIsAvailable(safeShortname, prisma)
-
-  const validatedInput = validateStatisticInput(body)
-  const {
-    division,
-    name,
-    name_en,
-    approval_status,
-    first_released_at,
-    main_language,
-    comment,
-  } = validatedInput
 
   const result = await prisma.statistic.create({
     data: {
@@ -269,17 +262,17 @@ export async function createStatistic(
   return await mapStatisticDetails(result)
 }
 
-export function validateStatisticInput(body: StatisticCreate | undefined): StatisticCreate {
+export function validateStatisticInput(body: StatisticCreate | undefined): StatisticCreate | undefined {
   const requiredFields: (keyof StatisticCreate)[] = [
     'name',
     'name_en',
     'status',
     'division',
-    'contacts',
+    //'contacts', // TODO contacts should exist
     'statistic_region_levels',
     'first_released_at',
-    'variants',
+    //'variants', // TODO variants should exist
   ]
 
-  return ensureRequiredFieldsExists(body, requiredFields) as StatisticCreate
+  return ensureRequiredFieldsExists(body, requiredFields)
 }
