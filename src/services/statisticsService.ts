@@ -154,8 +154,21 @@ export async function updateStatistic(
   body: StatisticUpdate,
   prisma: StatisticPrisma
 ): Promise<StatisticDetails> {
-  // TODO: Consider making all fields for editing required for v1 to ensure no unintentional overwriting of existing data with undefined fields
-  const requiredFields: (keyof StatisticUpdate)[] = ['name', 'comment']
+  // TODO: V1: All fields for editing required for now to ensure no unintentional overwriting of existing data to undefined fields
+  const requiredFields: (keyof StatisticUpdate)[] = [
+    'division',
+    'statistic_region_levels',
+    'status',
+    'name',
+    'name_en',
+    'relation',
+    'previous_topic_codes',
+    'yearly_reporting',
+    'first_released_at',
+    'main_language',
+    'comment',
+  ]
+
   const {
     division,
     statistic_region_levels = [],
@@ -171,8 +184,7 @@ export async function updateStatistic(
   } = ensureRequiredFieldsExists(body, requiredFields) ?? {}
 
   const safeShortname = sanitize(shortname)
-  await assertShortnameExists(safeShortname, prisma)
-
+  // TODO: Can we reuse assert functions when we expect statistics to be returned by the function?
   const statistic = await prisma.statistic.findFirst({
     where: { shortname: { name: safeShortname } },
     select: { id: true, statistic_region_levels: { select: { region_level: { select: { code: true, id: true } } } } },

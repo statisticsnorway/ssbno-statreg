@@ -168,8 +168,10 @@ describe('statisticService ', async () => {
   })
 
   describe('updateStatistics ', async () => {
-    test('returns mocked data', async () => {
-      const input = {
+    let input: any
+
+    beforeEach(() => {
+      input = {
         division: '105',
         status: { code: 'SP' },
         name: 'Helse',
@@ -183,7 +185,9 @@ describe('statisticService ', async () => {
         comment: 'Beskrivelse av endring',
         statistic_region_levels: [{ code: 'L' }],
       }
+    })
 
+    test('returns mocked data', async () => {
       setStatisticsResult({
         id: 5,
         statistic_region_levels: [
@@ -250,7 +254,7 @@ describe('statisticService ', async () => {
     test('throws Error when shortname is not found', async () => {
       setStatisticsResult(null)
 
-      await assert.rejects(() => updateStatistic('test', {}, prismaMock), {
+      await assert.rejects(() => updateStatistic('test', input, prismaMock), {
         status: 404,
         statregError: `Shortname test not found`,
       })
