@@ -262,7 +262,7 @@ export const ReleaseDetailsIncludes = {
 export function mapToReleaseDetails(
   prismaRelease: Prisma.ReleaseGetPayload<{ include: typeof ReleaseDetailsIncludes }>
 ): ReleaseDetails {
-  const { statistic, frequency } = prismaRelease.variant ?? {}
+  const { statistic, frequency } = prismaRelease.variant
 
   return {
     id: prismaRelease.id,

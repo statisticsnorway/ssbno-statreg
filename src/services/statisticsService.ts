@@ -87,7 +87,7 @@ export function parseStatisticVariants(
   }))
 }
 
-async function mapStatisticDetails(statistic: StatisticPrismaResult) {
+export async function mapStatisticDetails(statistic: StatisticPrismaResult): Promise<StatisticDetails> {
   const main_language = statistic.language
   const division_code = statistic.division_code
   const relation = statistic.related_statistic?.shortname
@@ -125,6 +125,7 @@ async function mapStatisticDetails(statistic: StatisticPrismaResult) {
         const lookupUser = (user as UserLookupItem).user
         const responsiblePerson = user as Users
 
+        // TODO bug: when fetchUsers "succeeds", username is always undefined
         return {
           name: lookupUser?.displayName,
           email: lookupUser?.email ?? (user as UserLookupItem).lookupEmail ?? responsiblePerson.email,
@@ -155,7 +156,7 @@ export async function updateStatistic(
 ): Promise<StatisticDetails> {
   const {
     division,
-    // statistic_region_levels,
+    statistic_region_levels = [],
     status,
     name,
     name_en,
@@ -178,13 +179,22 @@ export async function updateStatistic(
 
   if (!statistic) return Promise.reject({ status: 404, statregError: `Shortname ${safeShortname} not found` })
 
-  // TODO MIM-2595: Handle removal and additions of region_levels
-  // const regionLevelsToRemove = statistic.statistic_region_levels.map(
-  //   (existingRegLvl) => !statistic_region_levels?.find(incomingRegLvl => incomingRegLvl === existingRegLvl.region_level.code)
-  // )
-  // const regionLevelsToAdd = statistic_region_levels?.map(
-  //   (incomingRegLvl) => !statistic.statistic_region_levels?.find(existingRegLvl => incomingRegLvl === existingRegLvl.region_level.code)
-  // )
+  const regionLevelsToRemove = statistic.statistic_region_levels.filter(
+    (existingRegLvl) =>
+      !statistic_region_levels?.find((incomingRegLvl) => incomingRegLvl === existingRegLvl.region_level.code)
+  )
+  const deleteRegionLevelStatement = regionLevelsToRemove.map((regLvl) => {
+    return { statistic_id_region_level_id: { statistic_id: statistic.id, region_level_id: regLvl.region_level.id } }
+  })
+
+  const regionLevelsToAdd = statistic_region_levels.filter(
+    (incomingRegLvl) =>
+      incomingRegLvl.code &&
+      !statistic.statistic_region_levels?.find((existingRegLvl) => incomingRegLvl === existingRegLvl.region_level.code)
+  )
+  const createRegionLevelStatement = regionLevelsToAdd.map((regLvl) => {
+    return { region_level: { connect: { code: regLvl.code } } }
+  })
 
   const updatedStatistic = await prisma.statistic.update({
     where: { id: statistic.id },
@@ -200,7 +210,10 @@ export async function updateStatistic(
       legacy_topic_codes: previous_topic_codes,
       yearly_reporting,
       first_release: first_released_at,
-      statistic_region_levels: {},
+      statistic_region_levels: {
+        create: createRegionLevelStatement,
+        delete: deleteRegionLevelStatement,
+      },
     },
     include: StatisticsDetailedIncludes,
   })
