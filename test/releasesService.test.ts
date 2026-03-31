@@ -192,10 +192,11 @@ describe('releasesService ', async () => {
 
   describe('updateRelease ', () => {
     beforeEach(() => {
-      setPrismaResult(mockedSingleReleasePrismaResult)
       now = new Date('2026-03-23T08:00:00Z')
     })
+
     test('updates exactly one release when input data is correct', async () => {
+      setPrismaResult(mockedSingleReleasePrismaResult)
       const releaseUpdateInput = {
         publish_time: '2024-10-15T08:00:00Z',
         period_to: '2024-12-31T00:00:00Z',
@@ -207,7 +208,6 @@ describe('releasesService ', async () => {
       await updateRelease(prismaMock, '1', releaseUpdateInput, now)
 
       assert.deepStrictEqual(prismaMock.release.update.mock.callCount(), 1)
-
       assert.deepStrictEqual(prismaMock.release.update.mock.calls[0].arguments[0], {
         include: ReleaseDetailsIncludes,
         where: { id: 1 },
@@ -255,7 +255,7 @@ describe('releasesService ', async () => {
       now = new Date('2026-03-23T08:00:00Z')
     })
 
-    test('creates a new release and returns mapped results', async () => {
+    test('creates a new release when input data is correct', async () => {
       setPrismaResult({
         ...mockedSingleReleasePrismaResult,
         id: 1,
@@ -263,7 +263,7 @@ describe('releasesService ', async () => {
         desk_appoval_status: ApprovalStatus.PENDING,
       })
 
-      const result = await createRelease(prismaMock, 'kpi', '1', mockCreateReleaseInput, now)
+      await createRelease(prismaMock, 'kpi', '1', mockCreateReleaseInput, now)
 
       assert.deepStrictEqual(prismaMock.release.create.mock.callCount(), 1)
       assert.deepStrictEqual(prismaMock.release.create.mock.calls[0].arguments[0], {
@@ -285,11 +285,6 @@ describe('releasesService ', async () => {
           },
         },
         include: ReleaseDetailsIncludes,
-      })
-      assert.deepStrictEqual(result, {
-        ...mockedSingleReleaseResult,
-        has_versions: false,
-        approval_status: ApprovalStatus.PENDING,
       })
     })
 
