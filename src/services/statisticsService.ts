@@ -290,7 +290,7 @@ export function validateStatisticInput(body: StatisticCreate | undefined): Valid
   }
 
   return {
-    division: division!,
+    division: sanitize(division!),
     name: sanitize(name!),
     name_en: sanitize(name_en!),
     first_released_at: validateDateOnly(first_released_at!),
