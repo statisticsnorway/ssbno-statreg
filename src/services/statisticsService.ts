@@ -1,5 +1,5 @@
 import type { StatisticListing, StatisticDetails, StatisticUpdate, StatisticCreate } from '@/types/index'
-import { dateToISOString, sanitize, validateDateOnly, ensureRequiredFieldsExists } from '@/lib/utils'
+import { dateToISOString, sanitize, validateDateOnly, ensureRequiredFieldsExists, isNumber } from '@/lib/utils'
 import type { Prisma } from '@/generated/prisma/client'
 import { getDivisionFromCode } from '@/services/klassService'
 import { fetchUsers } from '@/services/entraUserService'
@@ -231,8 +231,7 @@ export async function createStatistic(
 ): Promise<StatisticDetails> {
   const safeShortname = sanitize(shortname)
 
-  const { division, name, name_en, approval_status, first_released_at, main_language, comment } =
-    validateStatisticInput(body)
+  const { division, name, name_en, first_released_at, main_language, comment } = validateStatisticInput(body)
 
   await statisticsAsserts.assertShortnameExists(safeShortname, prisma)
   await statisticsAsserts.assertShortnameExistsAndIsAvailable(safeShortname, prisma)
@@ -244,11 +243,11 @@ export async function createStatistic(
       priority: 1,
       yearly_reporting: false,
       status: 'K',
-      desk_appoval_status: approval_status || ApprovalStatus.PENDING,
-      language: main_language || 'nb',
+      desk_appoval_status: ApprovalStatus.ACCEPTED,
+      language: main_language,
       date_created: now,
       last_updated: now,
-      first_release: validateDateOnly(first_released_at!),
+      first_release: first_released_at,
       comment: comment || `Create statistic with shortname: ${shortname}`,
       division_code: division,
       shortname: {
@@ -262,7 +261,16 @@ export async function createStatistic(
   return await mapStatisticDetails(result)
 }
 
-export function validateStatisticInput(body: StatisticCreate | undefined): StatisticCreate | undefined {
+type ValidatedStatisticInput = {
+  division: string
+  name: string
+  name_en: string
+  first_released_at: Date
+  main_language: 'nb' | 'nn'
+  comment: string
+}
+
+export function validateStatisticInput(body: StatisticCreate | undefined): ValidatedStatisticInput {
   const requiredFields: (keyof StatisticCreate)[] = [
     'name',
     'name_en',
@@ -274,5 +282,20 @@ export function validateStatisticInput(body: StatisticCreate | undefined): Stati
     //'variants', // TODO variants should exist
   ]
 
-  return ensureRequiredFieldsExists(body, requiredFields)
+  const { division, name, name_en, first_released_at, main_language, comment } = ensureRequiredFieldsExists(
+    body,
+    requiredFields
+  )
+
+  if (!isNumber(division)) {
+    throw { statregError: 'Division is required and must be a number' }
+  }
+  return {
+    division: division!,
+    name: sanitize(name!),
+    name_en: sanitize(name_en!),
+    first_released_at: validateDateOnly(first_released_at!),
+    main_language: main_language == 'nn' ? 'nn' : 'nb',
+    comment: sanitize(comment!),
+  }
 }
