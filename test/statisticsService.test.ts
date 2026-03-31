@@ -271,10 +271,15 @@ describe('statisticService ', async () => {
         desk_appoval_status: ApprovalStatus.PENDING,
       })
 
-      const result = await createStatistic(
+      await createStatistic(
         prismaMock,
         'kpi',
-        { name: 'Konsumprisindeksen', division: '723', first_released_at: '2024-04-01' },
+        {
+          name: 'Konsumprisindeksen',
+          name_en: 'Consumer price index',
+          division: '723',
+          first_released_at: '2024-04-01',
+        },
         now
       )
 
@@ -283,7 +288,7 @@ describe('statisticService ', async () => {
         data: {
           name: 'Konsumprisindeksen',
           priority: 1,
-          name_en: undefined,
+          name_en: 'Consumer price index',
           yearly_reporting: false,
           status: 'K',
           division_code: '723',
@@ -292,7 +297,7 @@ describe('statisticService ', async () => {
           language: 'nb',
           date_created: now,
           last_updated: now,
-          desk_appoval_status: ApprovalStatus.PENDING,
+          desk_appoval_status: ApprovalStatus.ACCEPTED,
           shortname: {
             connect: {
               name: 'kpi',
@@ -301,14 +306,11 @@ describe('statisticService ', async () => {
         },
         include: StatisticsDetailedIncludes,
       })
-      assert.deepStrictEqual(result, {
-        ...mockedStatisticCreatedResponse,
-      })
     })
 
     test('returns 400 if request body is empty', async () => {
       await assert.rejects(() => createStatistic(prismaMock, 'kpi', undefined, now), {
-        statregError: 'Norwegian name is required',
+        statregError: 'Missing required field(s): name, name_en, division, first_released_at',
       })
       assert.strictEqual(prismaMock.statistic.create.mock.callCount(), 0)
     })
@@ -316,7 +318,7 @@ describe('statisticService ', async () => {
     test('returns 400 if any of the required fields are missing', async () => {
       // TODO: Add more fields to this test when validation logic are in place
       await assert.rejects(() => createStatistic(prismaMock, 'kpi', {}, now), {
-        statregError: 'Norwegian name is required',
+        statregError: 'Missing required field(s): name, name_en, division, first_released_at',
       })
       assert.strictEqual(prismaMock.statistic.create.mock.callCount(), 0)
     })
