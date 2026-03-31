@@ -61,13 +61,13 @@ export function ensureRequiredFieldsExists<T extends Record<string, any>>(
 ): T {
   const missingFields = requiredFields.filter((key) => !body || body[key] === undefined || body[key] === null)
 
-  if (!body || missingFields?.length) {
+  if (missingFields?.length) {
     throw {
       statregError: `Missing required field(s): ${missingFields.join(', ')}`,
     }
   }
 
-  return body
+  return body as T
 }
 
 export function isNumber(str: string | number | undefined | null) {
