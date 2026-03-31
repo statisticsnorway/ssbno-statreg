@@ -1,5 +1,5 @@
 import type { StatisticListing, StatisticDetails, StatisticUpdate, StatisticCreate } from '@/types/index'
-import { dateToISOString, sanitize, isNumber, validateDateOnly } from '@/lib/utils'
+import { dateToISOString, sanitize, isNumber, validateDateOnly, ensureRequiredFieldsExists } from '@/lib/utils'
 import type { Prisma } from '@/generated/prisma/client'
 import { getDivisionFromCode } from '@/services/klassService'
 import { fetchUsers } from '@/services/entraUserService'
@@ -154,24 +154,25 @@ export async function updateStatistic(
   body: StatisticUpdate,
   prisma: StatisticPrisma
 ): Promise<StatisticDetails> {
+  // TODO: Consider making all fields for editing required for v1 to ensure no unintentional overwriting of existing data with undefined fields
+  const requiredFields: (keyof StatisticUpdate)[] = ['name', 'comment']
   const {
     division,
     statistic_region_levels = [],
     status,
     name,
     name_en,
-    approval_status,
     relation,
     previous_topic_codes,
     yearly_reporting,
     first_released_at,
     main_language,
     comment,
-  } = body ?? {}
+  } = ensureRequiredFieldsExists(body, requiredFields) ?? {}
 
   const safeShortname = sanitize(shortname)
-  // TODO MIM-2593: input validation
-  // TODO: Reuse shortname validation from MIM-2545
+  await assertShortnameExists(safeShortname, prisma)
+
   const statistic = await prisma.statistic.findFirst({
     where: { shortname: { name: safeShortname } },
     select: { id: true, statistic_region_levels: { select: { region_level: { select: { code: true, id: true } } } } },
@@ -202,7 +203,7 @@ export async function updateStatistic(
       name: name,
       name_en: name_en,
       division_code: division,
-      desk_appoval_status: approval_status,
+      desk_appoval_status: ApprovalStatus.PENDING,
       status: status!.code,
       comment,
       language: main_language,
@@ -218,9 +219,7 @@ export async function updateStatistic(
     include: StatisticsDetailedIncludes,
   })
 
-  const result = await mapStatisticDetails(updatedStatistic)
-
-  return result
+  return await mapStatisticDetails(updatedStatistic)
 }
 
 export async function createStatistic(
