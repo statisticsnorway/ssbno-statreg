@@ -262,6 +262,7 @@ export const ReleaseDetailsIncludes = {
 export function mapToReleaseDetails(
   prismaRelease: Prisma.ReleaseGetPayload<{ include: typeof ReleaseDetailsIncludes }>
 ): ReleaseDetails {
+  // TODO: clarify if we need a conditional here
   const { statistic, frequency } = prismaRelease.variant ?? {}
 
   return {

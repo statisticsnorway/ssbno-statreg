@@ -8,6 +8,7 @@ import {
   createRelease,
   buildReleaseFilter,
   ReleaseDetailsIncludes,
+  mapToReleaseDetails,
 } from '@/services/releasesService'
 import { ApprovalStatus } from '@/types/enums'
 
@@ -247,7 +248,62 @@ describe('releasesService ', async () => {
   })
 
   describe('mapToReleaseDetails ', () => {
-    // TODO: Add tests for mapToReleaseDetails
+    let input: any
+    let expectedResult: any
+
+    beforeEach(() => {
+      input = structuredClone(mockedSingleReleasePrismaResult)
+
+      expectedResult = {
+        id: 1,
+        publish_time: '2024-10-15T08:00:00.000Z',
+        has_versions: true,
+        approval_status: 'APPROVED',
+        variant: {
+          frequency: {
+            name: 'Måned',
+            code: 'M',
+          },
+          revision: {
+            name: 'I',
+          },
+          id: 1,
+        },
+        statistic: {
+          shortname: 'KPI',
+          name: 'Konsumprisindeks',
+          name_en: 'Consumer Price Index',
+        },
+        period_from: '2024-08-01T00:00:00.000Z',
+        period_to: '2024-09-01T00:00:00.000Z',
+        release_date_precision: 'dag',
+        cancelled: false,
+      }
+    })
+
+    test('returns correct releaseDetails when all conditionals succeed', () => {
+      const result = mapToReleaseDetails(input)
+
+      assert.deepEqual(result, expectedResult)
+    })
+
+    test('falls back to has_versions false when version is 1', () => {
+      input.version = 1
+      expectedResult.has_versions = false
+
+      const result = mapToReleaseDetails(input)
+
+      assert.deepEqual(result, expectedResult)
+    })
+
+    test('falls back to empty english name when name_en is missing', () => {
+      input.variant.statistic.name_en = null
+      expectedResult.statistic.name_en = ''
+
+      const result = mapToReleaseDetails(input)
+
+      assert.deepEqual(result, expectedResult)
+    })
   })
 
   describe('createRelease ', () => {
