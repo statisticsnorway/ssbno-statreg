@@ -58,10 +58,10 @@ export function ensureIdIsNumber(variantId: string | number): number {
 export function ensureRequiredFieldsExists<T extends Record<string, any>>(
   body: T | undefined,
   requiredFields: (keyof T)[]
-): T | undefined {
+): T {
   const missingFields = requiredFields.filter((key) => !body || body[key] === undefined || body[key] === null)
 
-  if (missingFields?.length) {
+  if (!body || missingFields?.length) {
     throw {
       statregError: `Missing required field(s): ${missingFields.join(', ')}`,
     }
