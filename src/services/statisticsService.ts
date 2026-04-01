@@ -1,5 +1,12 @@
 import type { StatisticListing, StatisticDetails, StatisticUpdate, StatisticCreate } from '@/types/index'
-import { dateToISOString, sanitize, validateDateOnly, ensureRequiredFieldsExists, isNumber } from '@/lib/utils'
+import {
+  dateToISOString,
+  sanitize,
+  validateDateOnly,
+  ensureRequiredFieldsExists,
+  isNumber,
+  validateDateISO,
+} from '@/lib/utils'
 import type { Prisma } from '@/generated/prisma/client'
 import { getDivisionFromCode } from '@/services/klassService'
 import { fetchUsers } from '@/services/entraUserService'
@@ -283,7 +290,7 @@ export function validateStatisticInput(
     //'variants', // TODO variants required according to Figma design, missing in open API spec
   ]
 
-  const requiredFields = type == 'create' ? createFields : [...createFields] // TODO add extra required update fields
+  const requiredFields = type == 'create' ? createFields : [...createFields]
 
   const { name, name_en, division, main_language, first_released_at, comment } = ensureRequiredFieldsExists(
     body,
@@ -307,13 +314,5 @@ export function validateStatisticInput(
     comment: comment ? sanitize(comment) : null,
   }
 
-  if (type == 'create') {
-    return validatedCreateInput
-  }
-
-  //TODO validate and add extra update fields
-
-  return {
-    ...validatedCreateInput,
-  }
+  return validatedCreateInput
 }
