@@ -181,7 +181,7 @@ export async function updateStatistic(
     first_released_at,
     main_language,
     comment,
-  } = validateStatisticInput(body, requiredFields, 'update') ?? {}
+  } = validateStatisticInput(body, requiredFields, 'update')
 
   const safeShortname = sanitize(shortname)
   // TODO: Can we reuse assert functions when we expect statistics to be returned by the function?
@@ -276,11 +276,19 @@ export async function createStatistic(
   return await mapStatisticDetails(result)
 }
 
+type ValidatedStatisticInput = StatisticUpdate & {
+  name: string
+  status: string
+  main_language: string
+  first_released_at: string | Date
+  relation: number | null
+}
+
 export function validateStatisticInput(
   body: StatisticCreate | StatisticUpdate | undefined,
-  requiredFields: (keyof StatisticUpdate)[],
+  requiredFields: (keyof StatisticUpdate | StatisticCreate)[],
   type: 'create' | 'update' = 'create'
-) {
+): ValidatedStatisticInput {
   const {
     division,
     statistic_region_levels,
@@ -307,7 +315,7 @@ export function validateStatisticInput(
     throw { statregError: "Field 'division' does not correspond to an existing division." }
   }
 
-  const validatedInput: StatisticCreate | StatisticUpdate = {
+  const validatedInput = {
     division,
     name: sanitize(name),
     name_en: sanitize(name_en!),
@@ -322,10 +330,10 @@ export function validateStatisticInput(
     return {
       ...validatedInput,
       statistic_region_levels,
-      status: sanitize(status!.code),
+      status: sanitize(status?.code!),
       previous_topic_codes: sanitize(previous_topic_codes!),
-      yearly_reporting: yearly_reporting ?? false,
-      relation: relation ? Number(relation) : null,
+      yearly_reporting: Boolean(yearly_reporting),
+      relation: Number(relation),
     }
   }
 
