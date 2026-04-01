@@ -222,8 +222,6 @@ describe('statisticService ', async () => {
   describe('createStatistic ', () => {
     beforeEach(() => {
       now = new Date('2026-03-23T08:00:00Z')
-
-      // TODO: Check why we have to reimplement mockImplementation here
     })
 
     test('creates a new statistic when input data is valid', async () => {
@@ -352,8 +350,6 @@ describe('statisticService ', async () => {
         return fetchUsersResult
       })
 
-      // TODO: Check why we have to reimplement mockImplementation here
-
       expectedResult = structuredClone(mockedStatisticDetailedResult)
       // TODO bug: when fetchUsers "succeeds", username is always undefined
       expectedResult.contacts = [{ username: undefined, name: 'Bob', email: 'bob@ssb.no' }]
@@ -454,8 +450,6 @@ describe('statisticService ', async () => {
         main_language: 'nn',
         comment: '  Kommentar om statistikken  ',
       }
-
-      // TODO: Check why we have to reimplement mockImplementation here
 
       expectedResult = {
         division: '104',
