@@ -307,7 +307,7 @@ export function validateStatisticInput(
     throw { statregError: "Field 'division' does not correspond to an existing division." }
   }
 
-  let validatedInput: StatisticCreate | StatisticUpdate = {
+  const validatedInput: StatisticCreate | StatisticUpdate = {
     division,
     name: sanitize(name),
     name_en: sanitize(name_en!),
@@ -319,7 +319,7 @@ export function validateStatisticInput(
   if (type === 'update') {
     if (!isNumber(relation)) throw { statregError: "Field 'relation' must be a number" }
 
-    validatedInput = {
+    return {
       ...validatedInput,
       statistic_region_levels,
       status: sanitize(status!.code),

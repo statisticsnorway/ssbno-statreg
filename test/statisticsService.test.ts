@@ -153,6 +153,10 @@ describe('statisticService ', async () => {
         comment: 'Beskrivelse av endring',
         statistic_region_levels: [{ code: 'L' }],
       }
+
+      fetchDivisionMock.mock.mockImplementation((code: number) => {
+        if (code === 105) return { code: 104, name: 'Seksjon B1' }
+      })
     })
 
     test('returns mocked data', async () => {
@@ -198,8 +202,6 @@ describe('statisticService ', async () => {
         include: StatisticsDetailedIncludes,
       })
     })
-
-    // TODO MIM-2593: input validation for main_language and name, and undefined values
 
     test('throws Error when shortname is not found', async () => {
       setStatisticsResult(null)
@@ -442,11 +444,6 @@ describe('statisticService ', async () => {
         main_language: 'nn',
         comment: '  Kommentar om statistikken  ',
       }
-
-      fetchDivisionMock.mock.mockImplementation((code: number, language?: string) => {
-        if (code === 104 && language === 'en') return { code: 104, name: 'Division A1' }
-        if (code === 104) return { code: 104, name: 'Seksjon A1' }
-      })
 
       expectedResult = {
         division: '104',
