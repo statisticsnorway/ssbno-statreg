@@ -1,12 +1,5 @@
 import type { StatisticListing, StatisticDetails, StatisticUpdate, StatisticCreate } from '@/types/index'
-import {
-  dateToISOString,
-  sanitize,
-  validateDateOnly,
-  ensureRequiredFieldsExists,
-  isNumber,
-  validateDateISO,
-} from '@/lib/utils'
+import { dateToISOString, sanitize, validateDateOnly, ensureRequiredFieldsExists, isNumber } from '@/lib/utils'
 import type { Prisma } from '@/generated/prisma/client'
 import { getDivisionFromCode } from '@/services/klassService'
 import { fetchUsers } from '@/services/entraUserService'
