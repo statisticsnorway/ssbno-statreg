@@ -208,7 +208,7 @@ describe('statisticService ', async () => {
       now = new Date('2026-03-23T08:00:00Z')
     })
 
-    test('creates a new statistic when input data is correct', async () => {
+    test('creates a new statistic when input data is valid', async () => {
       setStatisticsResult({
         ...mockedStatisticCreatedPrismaResult,
         id: 1,
@@ -327,7 +327,7 @@ describe('statisticService ', async () => {
       expectedResult.contacts = [{ username: undefined, name: 'Bob', email: 'bob@ssb.no' }]
     })
 
-    test('returns correct statisticDetails when all conditionals succeed', async () => {
+    test('returns valid statisticDetails when all conditionals succeed', async () => {
       const result = await mapStatisticDetails(input)
 
       assert.deepEqual(result, expectedResult)
@@ -382,6 +382,16 @@ describe('statisticService ', async () => {
       input.responsiblePersons = [{ username: 'bcd', email: 'bob_fallback@ssb.no' }]
       fetchUsersMock.mock.mockImplementation(async (users: Users[]) => users)
       expectedResult.contacts[0] = { name: undefined, email: 'bob_fallback@ssb.no', username: 'bcd' }
+
+      const result = await mapStatisticDetails(input)
+
+      assert.deepEqual(result, expectedResult)
+    })
+
+    test('falls back to empty contact array when responsible persons is empty', async () => {
+      input.responsiblePersons = []
+      fetchUsersResult = []
+      expectedResult.contacts = []
 
       const result = await mapStatisticDetails(input)
 
