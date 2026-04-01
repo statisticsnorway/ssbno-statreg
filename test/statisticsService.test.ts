@@ -32,7 +32,7 @@ describe('statisticService ', async () => {
     ]
   })
 
-  const fetchDivisionMock = mock.fn((code: number, language?: string) => {
+  let fetchDivisionMock = mock.fn((code: number, language?: string) => {
     if (code === 104 && language === 'en') return { code: 104, name: 'Division A1' }
     if (code === 104) return { code: 104, name: 'Seksjon A1' }
   })
@@ -77,6 +77,11 @@ describe('statisticService ', async () => {
   })
 
   beforeEach(async () => {
+    fetchDivisionMock = mock.fn((code: number, language?: string) => {
+      if (code === 104 && language === 'en') return { code: 104, name: 'Division A1' }
+      if (code === 104) return { code: 104, name: 'Seksjon A1' }
+    })
+
     prismaMock = {
       statistic: {
         findMany: mock.fn(() => Promise.resolve(statisticsResult)),
@@ -140,7 +145,7 @@ describe('statisticService ', async () => {
 
     beforeEach(() => {
       input = {
-        division: '105',
+        division: '104',
         status: { code: 'SP' },
         name: 'Helse',
         name_en: 'Health',
@@ -153,10 +158,6 @@ describe('statisticService ', async () => {
         comment: 'Beskrivelse av endring',
         statistic_region_levels: [{ code: 'L' }],
       }
-
-      fetchDivisionMock.mock.mockImplementation((code: number) => {
-        if (code === 105) return { code: 105, name: 'Seksjon B1' }
-      })
     })
 
     test('returns mocked data', async () => {
@@ -219,10 +220,6 @@ describe('statisticService ', async () => {
       now = new Date('2026-03-23T08:00:00Z')
 
       // TODO: Check why we have to reimplement mockImplementation here
-      fetchDivisionMock.mock.mockImplementation((code: number, language?: string) => {
-        if (code === 104 && language === 'en') return { code: 104, name: 'Division A1' }
-        if (code === 104) return { code: 104, name: 'Seksjon A1' }
-      })
     })
 
     test('creates a new statistic when input data is valid', async () => {
@@ -352,10 +349,6 @@ describe('statisticService ', async () => {
       })
 
       // TODO: Check why we have to reimplement mockImplementation here
-      fetchDivisionMock.mock.mockImplementation((code: number, language?: string) => {
-        if (code === 104 && language === 'en') return { code: 104, name: 'Division A1' }
-        if (code === 104) return { code: 104, name: 'Seksjon A1' }
-      })
 
       expectedResult = structuredClone(mockedStatisticDetailedResult)
       // TODO bug: when fetchUsers "succeeds", username is always undefined
@@ -459,10 +452,6 @@ describe('statisticService ', async () => {
       }
 
       // TODO: Check why we have to reimplement mockImplementation here
-      fetchDivisionMock.mock.mockImplementation((code: number, language?: string) => {
-        if (code === 104 && language === 'en') return { code: 104, name: 'Division A1' }
-        if (code === 104) return { code: 104, name: 'Seksjon A1' }
-      })
 
       expectedResult = {
         division: '104',
@@ -724,7 +713,7 @@ const mockUpdateStatisticPrismaUpdateData = {
   data: {
     comment: 'Beskrivelse av endring',
     desk_appoval_status: 'FORSLAG',
-    division_code: '105',
+    division_code: '104',
     first_release: new Date('2026-03-25T00:00:00.000Z'),
     language: 'nn',
     legacy_topic_codes: '05.01.02',
