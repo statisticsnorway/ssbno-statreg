@@ -181,7 +181,7 @@ export async function updateStatistic(
     first_released_at,
     main_language,
     comment,
-  } = ensureRequiredFieldsExists(body, requiredFields) ?? {}
+  } = validateStatisticInput(body, requiredFields, 'update') ?? {}
 
   const safeShortname = sanitize(shortname)
   // TODO: Can we reuse assert functions when we expect statistics to be returned by the function?
@@ -212,14 +212,14 @@ export async function updateStatistic(
   const updatedStatistic = await prisma.statistic.update({
     where: { id: statistic.id },
     data: {
-      name: name,
-      name_en: name_en,
+      name,
+      name_en,
       division_code: division,
       desk_appoval_status: ApprovalStatus.PENDING,
-      status: status!.code,
+      status,
       comment,
       language: main_language,
-      related_statistic_id: relation ? Number(relation) : null,
+      related_statistic_id: relation,
       legacy_topic_codes: previous_topic_codes,
       yearly_reporting,
       first_release: first_released_at,
@@ -242,7 +242,11 @@ export async function createStatistic(
 ): Promise<StatisticDetails> {
   const safeShortname = sanitize(shortname)
 
-  const { division, name, name_en, first_released_at, main_language, comment } = validateStatisticInput(body)
+  const requiredFields: (keyof StatisticCreate)[] = ['division', 'name', 'name_en', 'first_released_at']
+  const { division, name, name_en, first_released_at, main_language, comment } = validateStatisticInput(
+    body,
+    requiredFields
+  )
 
   await statisticsAsserts.assertShortnameExists(safeShortname, prisma)
   await statisticsAsserts.assertShortnameExistsAndIsAvailable(safeShortname, prisma)
@@ -272,34 +276,24 @@ export async function createStatistic(
   return await mapStatisticDetails(result)
 }
 
-type ValidatedStatisticInput = {
-  division: string
-  name: string
-  name_en: string
-  first_released_at: Date
-  main_language: 'nb' | 'nn'
-  comment: string | null
-}
-
 export function validateStatisticInput(
-  body: StatisticUpdate | undefined,
+  body: StatisticCreate | StatisticUpdate | undefined,
+  requiredFields: (keyof StatisticUpdate)[],
   type: 'create' | 'update' = 'create'
-): ValidatedStatisticInput {
-  const createFields: (keyof StatisticCreate)[] = [
-    'name',
-    'name_en',
-    'division',
-    //'contacts', // TODO contacts required according to Figma design, missing in open API spec
-    'first_released_at',
-    //'variants', // TODO variants required according to Figma design, missing in open API spec
-  ]
-
-  const requiredFields = type == 'create' ? createFields : [...createFields]
-
-  const { name, name_en, division, main_language, first_released_at, comment } = ensureRequiredFieldsExists(
-    body,
-    requiredFields
-  )
+) {
+  const {
+    division,
+    statistic_region_levels,
+    status,
+    name,
+    name_en,
+    previous_topic_codes,
+    yearly_reporting,
+    first_released_at,
+    main_language,
+    comment,
+    relation,
+  } = ensureRequiredFieldsExists(body, requiredFields)
 
   if (!name) {
     throw { statregError: "Field 'name' must be a non-empty string." }
@@ -313,14 +307,27 @@ export function validateStatisticInput(
     throw { statregError: "Field 'division' does not correspond to an existing division." }
   }
 
-  const validatedCreateInput: ValidatedStatisticInput = {
-    division: sanitize(division!),
-    name: sanitize(name!),
+  let validatedInput: StatisticCreate | StatisticUpdate = {
+    division,
+    name: sanitize(name),
     name_en: sanitize(name_en!),
     first_released_at: validateDateOnly(first_released_at!),
-    main_language: main_language == 'nn' ? 'nn' : 'nb',
+    main_language: main_language == 'nn' ? 'nn' : 'nb', // TODO: validate main_language
     comment: comment ? sanitize(comment) : null,
   }
 
-  return validatedCreateInput
+  if (type === 'update') {
+    if (!isNumber(relation)) throw { statregError: "Field 'relation' must be a number" }
+
+    validatedInput = {
+      ...validatedInput,
+      statistic_region_levels,
+      status: sanitize(status!.code),
+      previous_topic_codes: sanitize(previous_topic_codes!),
+      yearly_reporting: yearly_reporting ?? false,
+      relation: relation ? Number(relation) : null,
+    }
+  }
+
+  return validatedInput
 }
