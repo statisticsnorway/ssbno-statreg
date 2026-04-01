@@ -1,12 +1,19 @@
 import type { StatisticListing, StatisticDetails, StatisticUpdate, StatisticCreate } from '@/types/index'
-import { dateToISOString, sanitize, isNumber, validateDateOnly } from '@/lib/utils'
+import {
+  dateToISOString,
+  sanitize,
+  validateDateOnly,
+  ensureRequiredFieldsExists,
+  isNumber,
+  validateDateISO,
+} from '@/lib/utils'
 import type { Prisma } from '@/generated/prisma/client'
 import { getDivisionFromCode } from '@/services/klassService'
 import { fetchUsers } from '@/services/entraUserService'
 import type { UserLookupItem, Users } from '@/types/entra'
 import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
 import { ApprovalStatus } from '@/types/enums'
-import { assertShortnameExists, assertShortnameExistsAndIsAvailable } from '@/lib/asserts'
+import { statisticsAsserts } from '@/lib/asserts'
 
 export type StatisticPrisma = Pick<PrismaClient, 'statistic' | 'shortname'>
 
@@ -229,38 +236,12 @@ export async function createStatistic(
   body?: StatisticCreate,
   now = new Date()
 ): Promise<StatisticDetails> {
-  const {
-    division,
-    // statistic_region_levels,
-    // status,
-    name,
-    name_en,
-    approval_status,
-    // relation,
-    // previous_topic_codes,
-    // yearly_reporting,
-    first_released_at,
-    main_language,
-    comment,
-  } = body ?? {}
+  const safeShortname = sanitize(shortname)
 
-  if (!name) {
-    return Promise.reject({ status: 400, statregError: 'Norwegian name is required' })
-  }
+  const { division, name, name_en, first_released_at, main_language, comment } = validateStatisticInput(body)
 
-  const shornameValid = await assertShortnameExists(shortname, prisma)
-  if (!shornameValid) {
-    return Promise.reject({ status: 400, statregError: 'Shortname does not exist' })
-  }
-
-  const shornameIsAvailable = await assertShortnameExistsAndIsAvailable(shortname, prisma)
-  if (!shornameIsAvailable) {
-    return Promise.reject({ status: 400, statregError: 'Shortname is already in use' })
-  }
-
-  if (!isNumber(division)) {
-    return Promise.reject({ status: 400, statregError: 'Division is required and must be a number' })
-  }
+  await statisticsAsserts.assertShortnameExists(safeShortname, prisma)
+  await statisticsAsserts.assertShortnameExistsAndIsAvailable(safeShortname, prisma)
 
   const result = await prisma.statistic.create({
     data: {
@@ -269,20 +250,73 @@ export async function createStatistic(
       priority: 1,
       yearly_reporting: false,
       status: 'K',
-      desk_appoval_status: approval_status || ApprovalStatus.PENDING,
-      language: main_language || 'nb',
+      desk_appoval_status: ApprovalStatus.ACCEPTED,
+      language: main_language,
       date_created: now,
       last_updated: now,
-      first_release: validateDateOnly(first_released_at!),
+      first_release: first_released_at,
       comment: comment || `Create statistic with shortname: ${shortname}`,
       division_code: division,
       shortname: {
         connect: {
-          name: shortname,
+          name: safeShortname,
         },
       },
     },
     include: StatisticsDetailedIncludes,
   })
   return await mapStatisticDetails(result)
+}
+
+type ValidatedStatisticInput = {
+  division: string
+  name: string
+  name_en: string
+  first_released_at: Date
+  main_language: 'nb' | 'nn'
+  comment: string | null
+}
+
+export function validateStatisticInput(
+  body: StatisticUpdate | undefined,
+  type: 'create' | 'update' = 'create'
+): ValidatedStatisticInput {
+  const createFields: (keyof StatisticCreate)[] = [
+    'name',
+    'name_en',
+    'division',
+    //'contacts', // TODO contacts required according to Figma design, missing in open API spec
+    'first_released_at',
+    //'variants', // TODO variants required according to Figma design, missing in open API spec
+  ]
+
+  const requiredFields = type == 'create' ? createFields : [...createFields]
+
+  const { name, name_en, division, main_language, first_released_at, comment } = ensureRequiredFieldsExists(
+    body,
+    requiredFields
+  )
+
+  if (!name) {
+    throw { statregError: "Field 'name' must be a non-empty string." }
+  }
+
+  if (!isNumber(division)) {
+    throw { statregError: "Field 'division' must be a number" }
+  }
+
+  if (!getDivisionFromCode(Number(division))) {
+    throw { statregError: "Field 'division' does not correspond to an existing division." }
+  }
+
+  const validatedCreateInput: ValidatedStatisticInput = {
+    division: sanitize(division!),
+    name: sanitize(name!),
+    name_en: sanitize(name_en!),
+    first_released_at: validateDateOnly(first_released_at!),
+    main_language: main_language == 'nn' ? 'nn' : 'nb',
+    comment: comment ? sanitize(comment) : null,
+  }
+
+  return validatedCreateInput
 }

@@ -50,7 +50,12 @@ export async function assertShortnameExists(shortname: string, prisma: Statistic
       name: shortname,
     },
   })
-  return !!foundShortname
+
+  if (!foundShortname) {
+    throw { status: 400, statregError: `Shortname '${shortname}' does not exist` }
+  }
+
+  return true
 }
 
 export async function assertShortnameExistsAndIsAvailable(
@@ -64,6 +69,10 @@ export async function assertShortnameExistsAndIsAvailable(
     },
   })
 
+  if (!foundShortname) {
+    throw { status: 400, statregError: `Shortname '${shortname}' is already in use` }
+  }
+
   return !!foundShortname
 }
 
@@ -71,4 +80,9 @@ export const releaseAsserts = {
   assertStatisticExists,
   assertVariantExists,
   assertVariantMatchesShortname,
+}
+
+export const statisticsAsserts = {
+  assertShortnameExists,
+  assertShortnameExistsAndIsAvailable,
 }

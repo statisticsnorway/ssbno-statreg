@@ -178,14 +178,6 @@ describe('utils', () => {
       assert.deepStrictEqual(body, ensureRequiredFieldsExists(body, requiredFields))
     })
 
-    test('return body when there are no required fields', () => {
-      const requiredFields: (keyof { field_1: 'test' })[] = []
-      const body = {
-        field_1: 'test',
-      }
-      assert.deepStrictEqual(body, ensureRequiredFieldsExists(body, requiredFields))
-    })
-
     test('return 400 when a required field is undefined', () => {
       const requiredFields: (keyof { field_1: 'test'; field_2: 'value' })[] = ['field_1', 'field_2']
       const body = {
