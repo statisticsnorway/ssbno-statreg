@@ -58,7 +58,7 @@ export function ensureIdIsNumber(variantId: string | number): number {
 export function ensureRequiredFieldsExists<T extends Record<string, any>>(
   body: T | undefined,
   requiredFields: (keyof T)[]
-): T | undefined {
+): T {
   const missingFields = requiredFields.filter((key) => !body || body[key] === undefined || body[key] === null)
 
   if (missingFields?.length) {
@@ -67,5 +67,9 @@ export function ensureRequiredFieldsExists<T extends Record<string, any>>(
     }
   }
 
-  return body
+  return body as T
+}
+
+export function isNumber(str: string | number | undefined | null) {
+  return Number.isInteger(Number(str))
 }

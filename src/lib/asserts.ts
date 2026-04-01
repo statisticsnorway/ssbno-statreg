@@ -1,4 +1,5 @@
 import { ReleasePrisma } from '@/services/releasesService'
+import { StatisticPrisma } from '@/services/statisticsService'
 
 export async function assertStatisticExists(shortname: string, prisma: ReleasePrisma) {
   const exists = await prisma.statistic.findFirst({
@@ -43,8 +44,45 @@ export async function assertVariantMatchesShortname(variantId: number, shortname
   }
 }
 
+export async function assertShortnameExists(shortname: string, prisma: StatisticPrisma): Promise<boolean> {
+  const foundShortname = await prisma.shortname.findUnique({
+    where: {
+      name: shortname,
+    },
+  })
+
+  if (!foundShortname) {
+    throw { status: 400, statregError: `Shortname '${shortname}' does not exist` }
+  }
+
+  return true
+}
+
+export async function assertShortnameExistsAndIsAvailable(
+  shortname: string,
+  prisma: StatisticPrisma
+): Promise<boolean> {
+  const foundShortname = await prisma.shortname.findUnique({
+    where: {
+      name: shortname,
+      statistic: null,
+    },
+  })
+
+  if (!foundShortname) {
+    throw { status: 400, statregError: `Shortname '${shortname}' is already in use` }
+  }
+
+  return !!foundShortname
+}
+
 export const releaseAsserts = {
   assertStatisticExists,
   assertVariantExists,
   assertVariantMatchesShortname,
+}
+
+export const statisticsAsserts = {
+  assertShortnameExists,
+  assertShortnameExistsAndIsAvailable,
 }

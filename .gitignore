@@ -13,3 +13,4 @@ src/generated/
 
 # Do not commit your .env file, please
 .env
+.DS_Store
