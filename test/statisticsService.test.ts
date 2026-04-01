@@ -145,7 +145,7 @@ describe('statisticService ', async () => {
 
     beforeEach(() => {
       input = {
-        division: '104',
+        division: '105',
         status: { code: 'SP' },
         name: 'Helse',
         name_en: 'Health',
@@ -158,6 +158,10 @@ describe('statisticService ', async () => {
         comment: 'Beskrivelse av endring',
         statistic_region_levels: [{ code: 'L' }],
       }
+
+      fetchDivisionMock.mock.mockImplementation((code: number) => {
+        if (code === 105) return { code: 105, name: 'Seksjon B1' }
+      })
     })
 
     test('returns mocked data', async () => {
@@ -713,7 +717,7 @@ const mockUpdateStatisticPrismaUpdateData = {
   data: {
     comment: 'Beskrivelse av endring',
     desk_appoval_status: 'FORSLAG',
-    division_code: '104',
+    division_code: '105',
     first_release: new Date('2026-03-25T00:00:00.000Z'),
     language: 'nn',
     legacy_topic_codes: '05.01.02',
