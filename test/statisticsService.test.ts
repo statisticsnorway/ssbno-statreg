@@ -8,6 +8,11 @@ let statisticsResult: object | null
 let updateStatisticsResult: object | null
 let now: Date
 
+function defaultFetchDivisionImplementation(code: number, language?: string) {
+  if (code === 104 && language === 'en') return { code: 104, name: 'Division A1' }
+  if (code === 104) return { code: 104, name: 'Seksjon A1' }
+}
+
 function setStatisticsResult(next: object | null) {
   statisticsResult = next
 }
@@ -32,10 +37,7 @@ describe('statisticService ', async () => {
     ]
   })
 
-  let fetchDivisionMock = mock.fn((code: number, language?: string) => {
-    if (code === 104 && language === 'en') return { code: 104, name: 'Division A1' }
-    if (code === 104) return { code: 104, name: 'Seksjon A1' }
-  })
+  const fetchDivisionMock = mock.fn(defaultFetchDivisionImplementation)
 
   let getStatisticByShortname: Function
   let getAllStatistics: Function
@@ -77,10 +79,8 @@ describe('statisticService ', async () => {
   })
 
   beforeEach(async () => {
-    fetchDivisionMock = mock.fn((code: number, language?: string) => {
-      if (code === 104 && language === 'en') return { code: 104, name: 'Division A1' }
-      if (code === 104) return { code: 104, name: 'Seksjon A1' }
-    })
+    fetchDivisionMock.mock.resetCalls()
+    fetchDivisionMock.mock.mockImplementation(defaultFetchDivisionImplementation)
 
     prismaMock = {
       statistic: {
