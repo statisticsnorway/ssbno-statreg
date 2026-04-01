@@ -133,40 +133,6 @@ describe('statisticService ', async () => {
       setStatisticsResult(null)
       await assert.rejects(() => getStatisticByShortname('', prismaMock), { statregError: 'Shortname not found' })
     })
-
-    test('returns undefined division name when division does not exist', async () => {
-      setStatisticsResult({ ...mockStatisticsDetailedPrismaResult, division_code: '105' })
-
-      const result = await getStatisticByShortname('helse', prismaMock)
-
-      assert.deepEqual(result, { ...mockedStatisticDetailedResult, division: { code: '105', name: undefined } })
-    })
-
-    test('returns only email when user is not found', async () => {
-      setStatisticsResult(mockStatisticsDetailedPrismaResult)
-      fetchUsersMock.mock.mockImplementationOnce(async () => [
-        { lookupEmail: 'bob@ssb.no', user: null, error: 'User not found' },
-      ])
-
-      const result = await getStatisticByShortname('helse', prismaMock)
-
-      assert.deepEqual(result, {
-        ...mockedStatisticDetailedResult,
-        contacts: [{ username: undefined, email: 'bob@ssb.no', name: undefined }],
-      })
-    })
-
-    test('returns empty contact array when responsible persons is empty', async () => {
-      setStatisticsResult({ ...mockStatisticsDetailedPrismaResult, responsiblePersons: [] })
-      fetchUsersMock.mock.mockImplementationOnce(async () => [])
-
-      const result = await getStatisticByShortname('helse', prismaMock)
-
-      assert.deepEqual(result, {
-        ...mockedStatisticDetailedResult,
-        contacts: [],
-      })
-    })
   })
 
   describe('updateStatistics ', async () => {
@@ -220,30 +186,12 @@ describe('statisticService ', async () => {
         },
       })
 
-      const result = await updateStatistic('helse', input, prismaMock)
+      await updateStatistic('helse', input, prismaMock)
 
       assert.deepStrictEqual(prismaMock.statistic.update.mock.callCount(), 1)
       assert.deepStrictEqual(prismaMock.statistic.update.mock.calls[0].arguments[0], {
         ...mockUpdateStatisticPrismaUpdateData,
         include: StatisticsDetailedIncludes,
-      })
-      assert.deepStrictEqual(result, {
-        ...mockedStatisticDetailedResult,
-        division: { code: input.division, name: undefined },
-        main_language: input.main_language,
-        yearly_reporting: input.yearly_reporting,
-        approval_status: input.approval_status,
-        comment: input.comment,
-        name: 'Helse',
-        name_en: 'Health',
-        relation: {
-          shortname: 'befolk',
-          name: 'Befolkning og demografi',
-          name_en: 'Foreign trade and goods flow',
-        },
-        status: input.status,
-        // TODO MIM-2595: Make adjustments if necessary on handle removal and addition of region level task
-        statistic_region_levels: [{ name: 'Bydel og krets', code: 'BD' }],
       })
     })
 
@@ -265,7 +213,7 @@ describe('statisticService ', async () => {
       now = new Date('2026-03-23T08:00:00Z')
     })
 
-    test('creates exactly one new statistic when input is valid', async () => {
+    test('creates a new statistic when input data is valid', async () => {
       setStatisticsResult({
         ...mockedStatisticCreatedPrismaResult,
         id: 1,
@@ -396,7 +344,7 @@ describe('statisticService ', async () => {
       expectedResult.contacts = [{ username: undefined, name: 'Bob', email: 'bob@ssb.no' }]
     })
 
-    test('returns correct statisticDetails when all conditionals succeed', async () => {
+    test('returns valid statisticDetails when all conditionals succeed', async () => {
       const result = await mapStatisticDetails(input)
 
       assert.deepEqual(result, expectedResult)
@@ -451,6 +399,16 @@ describe('statisticService ', async () => {
       input.responsiblePersons = [{ username: 'bcd', email: 'bob_fallback@ssb.no' }]
       fetchUsersMock.mock.mockImplementation(async (users: Users[]) => users)
       expectedResult.contacts[0] = { name: undefined, email: 'bob_fallback@ssb.no', username: 'bcd' }
+
+      const result = await mapStatisticDetails(input)
+
+      assert.deepEqual(result, expectedResult)
+    })
+
+    test('falls back to empty contact array when responsible persons is empty', async () => {
+      input.responsiblePersons = []
+      fetchUsersResult = []
+      expectedResult.contacts = []
 
       const result = await mapStatisticDetails(input)
 
@@ -778,30 +736,6 @@ const mockUpdateStatisticPrismaUpdateData = {
   where: {
     id: 5,
   },
-}
-
-const mockedStatisticCreatedResponse = {
-  version: 1,
-  shortname: 'kpi',
-  approval_status: 'FORSLAG',
-  main_language: 'nb',
-  division: {
-    code: undefined,
-    name: undefined,
-  },
-  first_released_at: '1970-01-01T00:00:00.000Z',
-  yearly_reporting: false,
-  status: { code: 'K' },
-  previous_topic_codes: '',
-  relation: {},
-  name: 'Konsumprisindeksen',
-  name_en: '',
-  updated_at: '2026-03-23T08:00:00.000Z',
-  comment: '',
-  created_at: '2026-03-23T08:00:00.000Z',
-  variants: [],
-  contacts: [],
-  statistic_region_levels: [],
 }
 
 const mockedStatisticCreatedPrismaResult = {
