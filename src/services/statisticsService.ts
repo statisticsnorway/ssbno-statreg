@@ -297,6 +297,10 @@ export function validateStatisticInput(
     requiredFields
   )
 
+  if (!name) {
+    throw { statregError: "Field 'name' must be a non-empty string." }
+  }
+
   if (!isNumber(division)) {
     throw { statregError: "Field 'division' must be a number" }
   }

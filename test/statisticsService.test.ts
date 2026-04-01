@@ -502,6 +502,14 @@ describe('statisticService ', async () => {
       assert.deepEqual(result, expectedResult)
     })
 
+    test('throws correct error when name is an empty string', () => {
+      input.name = ''
+
+      assert.throws(() => validateStatisticInput(input), {
+        statregError: "Field 'name' must be a non-empty string.",
+      })
+    })
+
     test('throws correct error when division is not a number', () => {
       input.division = 'division-a'
 
