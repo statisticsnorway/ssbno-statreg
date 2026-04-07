@@ -1,6 +1,12 @@
 import { describe, test, beforeEach, mock } from 'node:test'
 import assert from 'node:assert/strict'
-import { assertStatisticExists, assertVariantExists, assertVariantMatchesShortname } from '@/lib/asserts'
+import {
+  assertShortnameExists,
+  assertShortnameExistsAndIsAvailable,
+  assertStatisticExists,
+  assertVariantExists,
+  assertVariantMatchesShortname,
+} from '@/lib/asserts'
 
 let prismaMock: any
 
@@ -13,6 +19,9 @@ describe('asserts', () => {
       variant: {
         findUnique: mock.fn(),
         findFirst: mock.fn(),
+      },
+      shortname: {
+        findUnique: mock.fn(),
       },
     }
   })
@@ -65,6 +74,40 @@ describe('asserts', () => {
     await assert.rejects(() => assertVariantMatchesShortname(1, 'KPI', prismaMock), {
       status: 404,
       statregError: "Variant does not belong to statistic 'KPI'",
+    })
+  })
+
+  test('assertShortnameExists returns true when shortname exists', async () => {
+    prismaMock.shortname.findUnique = mock.fn(() => Promise.resolve({ id: 1, name: 'KPI' }))
+
+    const result = await assertShortnameExists('KPI', prismaMock)
+
+    assert.equal(result, true)
+  })
+
+  test('assertShortnameExists throws when shortname does not exist', async () => {
+    prismaMock.shortname.findUnique = mock.fn(() => Promise.resolve(null))
+
+    await assert.rejects(() => assertShortnameExists('BAD', prismaMock), {
+      status: 400,
+      statregError: "Shortname 'BAD' does not exist",
+    })
+  })
+
+  test('assertShortnameExistsAndIsAvailable returns true when shortname exists and is available', async () => {
+    prismaMock.shortname.findUnique = mock.fn(() => Promise.resolve({ id: 1, name: 'KPI' }))
+
+    const result = await assertShortnameExistsAndIsAvailable('KPI', prismaMock)
+
+    assert.equal(result, true)
+  })
+
+  test('assertShortnameExistsAndIsAvailable throws when shortname is already in use', async () => {
+    prismaMock.shortname.findUnique = mock.fn(() => Promise.resolve(null))
+
+    await assert.rejects(() => assertShortnameExistsAndIsAvailable('KPI', prismaMock), {
+      status: 400,
+      statregError: "Shortname 'KPI' is already in use",
     })
   })
 })
