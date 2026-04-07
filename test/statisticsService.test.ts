@@ -240,6 +240,7 @@ describe('statisticService ', async () => {
           name_en: 'Consumer price index',
           division: '104',
           first_released_at: '2024-04-01',
+          main_language: 'nb',
         },
         now
       )
@@ -467,7 +468,7 @@ describe('statisticService ', async () => {
       assert.deepEqual(result, expectedResult)
     })
 
-    test('throws correct error when name is an empty string', () => {
+    test('throws error when name is an empty string', () => {
       input.name = ''
 
       assert.throws(() => validateStatisticInput(input, requiredCreateFields), {
@@ -475,15 +476,15 @@ describe('statisticService ', async () => {
       })
     })
 
-    test('throws correct error when division is not a number', () => {
+    test('throws error when division is not a number', () => {
       input.division = 'division-a'
 
       assert.throws(() => validateStatisticInput(input, requiredCreateFields), {
-        statregError: "Field 'division' must be a number",
+        statregError: "Field 'division' must be a number.",
       })
     })
 
-    test('throws correct error when division lookup does not find a match', () => {
+    test('throws error when division lookup does not find a match', () => {
       input.division = '105'
 
       assert.throws(() => validateStatisticInput(input, requiredCreateFields), {
@@ -497,13 +498,13 @@ describe('statisticService ', async () => {
       assert.deepEqual(result, expectedResult)
     })
 
-    test("falls back to 'nb' when main_language is not 'nn'", () => {
+    test("throws error main_language is neither 'nb' or 'nn'", () => {
       input.main_language = 'en'
       expectedResult.main_language = 'nb'
 
-      const result = validateStatisticInput(input, requiredCreateFields)
-
-      assert.deepEqual(result, expectedResult)
+      assert.throws(() => validateStatisticInput(input, requiredCreateFields), {
+        statregError: "Field 'main_language' must be either 'nb' or 'nn'.",
+      })
     })
 
     test('returns sanitized comment when comment is provided', () => {

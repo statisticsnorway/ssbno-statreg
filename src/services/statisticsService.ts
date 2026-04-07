@@ -1,5 +1,12 @@
 import type { StatisticListing, StatisticDetails, StatisticUpdate, StatisticCreate } from '@/types/index'
-import { dateToISOString, sanitize, validateDateOnly, ensureRequiredFieldsExists, isNumber } from '@/lib/utils'
+import {
+  dateToISOString,
+  sanitize,
+  validateDateOnly,
+  ensureRequiredFieldsExists,
+  isNumber,
+  ensureIdIsNumber,
+} from '@/lib/utils'
 import type { Prisma } from '@/generated/prisma/client'
 import { getDivisionFromCode } from '@/services/klassService'
 import { fetchUsers } from '@/services/entraUserService'
@@ -308,11 +315,15 @@ export function validateStatisticInput(
   }
 
   if (!isNumber(division)) {
-    throw { statregError: "Field 'division' must be a number" }
+    throw { statregError: "Field 'division' must be a number." }
   }
 
   if (!getDivisionFromCode(Number(division))) {
     throw { statregError: "Field 'division' does not correspond to an existing division." }
+  }
+
+  if (main_language !== 'nb' && main_language !== 'nn') {
+    throw { statregError: "Field 'main_language' must be either 'nb' or 'nn'." }
   }
 
   const validatedInput = {
@@ -320,20 +331,22 @@ export function validateStatisticInput(
     name: sanitize(name),
     name_en: sanitize(name_en!),
     first_released_at: validateDateOnly(first_released_at!),
-    main_language: main_language == 'nn' ? 'nn' : 'nb', // TODO: validate main_language
+    main_language: sanitize(main_language),
     comment: comment ? sanitize(comment) : null,
   }
 
   if (type === 'update') {
-    if (!isNumber(relation)) throw { statregError: "Field 'relation' must be a number" }
+    if (typeof yearly_reporting !== 'boolean') {
+      throw { statregError: "Field 'yearly_reporting' must be a boolean." }
+    }
 
     return {
       ...validatedInput,
       statistic_region_levels,
-      status: sanitize(status?.code!),
+      status: sanitize(status?.code!), // TODO: Should be validated against enum values 'SA', 'A' etc.
       previous_topic_codes: sanitize(previous_topic_codes!),
       yearly_reporting: Boolean(yearly_reporting),
-      relation: Number(relation),
+      relation: ensureIdIsNumber(relation, 'related statistic'),
     }
   }
 

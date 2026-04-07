@@ -45,11 +45,11 @@ export function ensureString(value?: string | string[]): string {
   return Array.isArray(value) ? (value[0] ?? '') : (value ?? '')
 }
 
-export function ensureIdIsNumber(variantId: string | number): number {
+export function ensureIdIsNumber(variantId: string | number, fieldName?: string): number {
   const parsedVariantId = typeof variantId === 'number' ? variantId : Number(sanitize(variantId))
 
   if (!Number.isInteger(parsedVariantId) || parsedVariantId <= 0) {
-    throw { statregError: 'Invalid id format' }
+    throw { statregError: ['Invalid', fieldName, 'id format'].filter(Boolean).join(' ') }
   }
 
   return parsedVariantId
