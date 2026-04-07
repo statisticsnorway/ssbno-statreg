@@ -69,14 +69,14 @@ components:
         code: { type: string }
 
     Level_of_detail:
-      description: "Text field to specify variant beyond frequency and revision"
+      description: 'Text field to specify variant beyond frequency and revision'
       type: object
-      properties: 
+      properties:
         name: { type: string, nullable: true }
         name_en: { type: string, nullable: true }
 
     Region_level:
-      description: "Valid region levels are (name in parethesis): L (Land), LD (Landsdel), F (Fylke), K (Kommune), BD (Bydel og krets)"
+      description: 'Valid region levels are (name in parethesis): L (Land), LD (Landsdel), F (Fylke), K (Kommune), BD (Bydel og krets)'
       type: object
       properties:
         code: { type: string }
@@ -144,11 +144,11 @@ components:
               $ref: '#/components/schemas/Frequency'
 
     Revision:
-      description: "Valid revision codes are:	I (Ingen), B (Beregnede), E (Endelige), F (Foreløpige), R (Reviderte), IG (Integrert)"
+      description: 'Valid revision codes are:	I (Ingen), B (Beregnede), E (Endelige), F (Foreløpige), R (Reviderte), IG (Integrert)'
       type: object
       properties:
         name: { type: string }
-        code: {type: string }
+        code: { type: string }
 
     Statistic:
       type: object
@@ -169,28 +169,20 @@ components:
       type: object
       properties:
         division: { type: string, nullable: true }
-        first_released_at:  { type: string, format: date, nullable: true }
-        yearly_reporting: { type: boolean}
+        first_released_at: { type: string, format: date, nullable: true }
+        yearly_reporting: { type: boolean }
         statistic_region_levels:
           type: array
           items: { $ref: '#/components/schemas/Region_level' }
         previous_topic_codes: { type: string, nullable: true }
-        comment: { type: string, nullable: true}
+        comment: { type: string }
 
     Statistic_update:
       allOf:
-        - $ref: '#/components/schemas/Statistic'
+        - $ref: '#/components/schemas/Statistic_create'
       type: object
       properties:
-        division: { type: string, nullable: true }
-        first_released_at:  { type: string, format: date, nullable: true }
-        yearly_reporting: { type: boolean}
-        statistic_region_levels:
-          type: array
-          items: { $ref: '#/components/schemas/Region_level' }
-        previous_topic_codes: { type: string, nullable: true }
-        relation:  { type: string, nullable: true }
-        comment: {type: string}
+        relation: { type: string, nullable: true }
 
     Statistic_details:
       allOf:

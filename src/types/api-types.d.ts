@@ -811,18 +811,11 @@ export interface components {
       yearly_reporting?: boolean
       statistic_region_levels?: components['schemas']['Region_level'][]
       previous_topic_codes?: string | null
-      comment?: string | null
-    } & components['schemas']['Statistic']
-    Statistic_update: {
-      division?: string | null
-      /** Format: date */
-      first_released_at?: string | null
-      yearly_reporting?: boolean
-      statistic_region_levels?: components['schemas']['Region_level'][]
-      previous_topic_codes?: string | null
-      relation?: string | null
       comment?: string
     } & components['schemas']['Statistic']
+    Statistic_update: {
+      relation?: string | null
+    } & components['schemas']['Statistic_create']
     Statistic_details: {
       version?: number
       division?: {
