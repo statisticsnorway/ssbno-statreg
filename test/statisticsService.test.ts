@@ -591,6 +591,14 @@ describe('statisticService ', async () => {
         statregError: 'Invalid related statistic id format',
       })
     })
+
+    test('throws error when status is an invalid format', () => {
+      input.status = 'ABC'
+
+      assert.throws(() => validateStatisticInput(input, requiredUpdateFields, 'update'), {
+        statregError: "Field 'status' must be one of these: K, A, IA, UT, SA, SP.",
+      })
+    })
   })
 })
 

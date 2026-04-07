@@ -12,7 +12,7 @@ import { getDivisionFromCode } from '@/services/klassService'
 import { fetchUsers } from '@/services/entraUserService'
 import type { UserLookupItem, Users } from '@/types/entra'
 import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
-import { ApprovalStatus } from '@/types/enums'
+import { ApprovalStatus, StatisticStatus } from '@/types/enums'
 import { statisticsAsserts } from '@/lib/asserts'
 
 export type StatisticPrisma = Pick<PrismaClient, 'statistic' | 'shortname'>
@@ -288,7 +288,7 @@ type ValidatedStatisticInput = StatisticUpdate & {
   status: string
   main_language: string
   first_released_at: Date
-  relation: number | null
+  relation: number
 }
 
 export function validateStatisticInput(
@@ -340,10 +340,14 @@ export function validateStatisticInput(
       throw { statregError: "Field 'yearly_reporting' must be a boolean." }
     }
 
+    if (!Object.keys(StatisticStatus).includes(status?.code!)) {
+      throw { statregError: `Field 'status' must be one of these: ${Object.keys(StatisticStatus).join(', ')}.` }
+    }
+
     return {
       ...validatedInput,
       statistic_region_levels,
-      status: sanitize(status?.code!), // TODO: Should be validated against enum values 'SA', 'A' etc.
+      status: sanitize(status?.code!),
       previous_topic_codes: sanitize(previous_topic_codes!),
       yearly_reporting: Boolean(yearly_reporting),
       relation: ensureIdIsNumber(relation as string, 'related statistic'),

@@ -4,3 +4,12 @@ export enum ApprovalStatus {
   PENDING = 'FORSLAG',
   DECLINED = 'AVVIST',
 }
+
+export enum StatisticStatus {
+  K = 'Kommende',
+  A = 'Aktiv',
+  IA = 'Ikke-aktiv',
+  UT = 'Opphørt',
+  SA = 'Sammenslått',
+  SP = 'Splittet',
+}
