@@ -1,4 +1,4 @@
-import { describe, mock, test, before, beforeEach } from 'node:test'
+import { describe, mock, test, before, beforeEach, afterEach } from 'node:test'
 import assert from 'node:assert/strict'
 import { ApprovalStatus } from '@/types/enums'
 import { Users } from '@/types/entra'
@@ -11,6 +11,7 @@ let now: Date
 function defaultFetchDivisionImplementation(code: number, language?: string) {
   if (code === 104 && language === 'en') return { code: 104, name: 'Division A1' }
   if (code === 104) return { code: 104, name: 'Seksjon A1' }
+  if (code === 105) return { code: 105, name: 'Seksjon B1' }
 }
 
 function setStatisticsResult(next: object | null) {
@@ -79,7 +80,6 @@ describe('statisticService ', async () => {
   })
 
   beforeEach(async () => {
-    fetchDivisionMock.mock.resetCalls()
     fetchDivisionMock.mock.mockImplementation(defaultFetchDivisionImplementation)
 
     prismaMock = {
@@ -158,10 +158,6 @@ describe('statisticService ', async () => {
         comment: 'Beskrivelse av endring',
         statistic_region_levels: [{ code: 'L' }],
       }
-
-      fetchDivisionMock.mock.mockImplementation((code: number) => {
-        if (code === 105) return { code: 105, name: 'Seksjon B1' }
-      })
     })
 
     test('returns mocked data', async () => {
@@ -381,8 +377,8 @@ describe('statisticService ', async () => {
     })
 
     test('falls back to undefined division name when division lookup does not find a match', async () => {
-      input.division_code = '105'
-      expectedResult.division = { code: '105', name: undefined }
+      input.division_code = '106'
+      expectedResult.division = { code: '106', name: undefined }
 
       const result = await mapStatisticDetails(input)
 
@@ -485,7 +481,7 @@ describe('statisticService ', async () => {
     })
 
     test('throws error when division lookup does not find a match', () => {
-      input.division = '105'
+      input.division = '106'
 
       assert.throws(() => validateAndParseStatisticInput(input, requiredCreateFields), {
         statregError: "Field 'division' does not correspond to an existing division.",
