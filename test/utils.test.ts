@@ -163,10 +163,6 @@ describe('utils', () => {
     test('throws error for negative number', () => {
       assert.throws(() => ensureIdIsNumber('-1', 'variant'), { statregError: 'Invalid variant id format' })
     })
-
-    test('throws error if passed id is 0', () => {
-      assert.throws(() => ensureIdIsNumber(0), { statregError: 'Invalid id format' })
-    })
   })
 
   describe('ensureRequiredFieldsExists', () => {

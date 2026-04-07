@@ -48,7 +48,7 @@ export function ensureString(value?: string | string[]): string {
 export function ensureIdIsNumber(variantId: string | number, fieldName?: string): number {
   const parsedVariantId = typeof variantId === 'number' ? variantId : Number(sanitize(variantId))
 
-  if (!Number.isInteger(parsedVariantId) || parsedVariantId <= 0) {
+  if (!Number.isInteger(parsedVariantId) || parsedVariantId < 0) {
     throw { statregError: ['Invalid', fieldName, 'id format'].filter(Boolean).join(' ') }
   }
 

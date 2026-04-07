@@ -183,7 +183,6 @@ export async function updateStatistic(
   } = validateStatisticInput(body, requiredFields, 'update')
 
   const safeShortname = sanitize(shortname)
-  // TODO: Can we reuse assert functions when we expect statistics to be returned by the function?
   const statistic = await prisma.statistic.findFirst({
     where: { shortname: { name: safeShortname } },
     select: { id: true, statistic_region_levels: { select: { region_level: { select: { code: true, id: true } } } } },
