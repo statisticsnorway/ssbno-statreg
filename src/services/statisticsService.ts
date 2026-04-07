@@ -275,14 +275,19 @@ export async function createStatistic(
   return await mapStatisticDetails(result)
 }
 
-type ValidatedStatisticInput = Omit<
-  StatisticUpdate,
-  'name' | 'status' | 'main_language' | 'first_released_at' | 'relation'
-> & {
-  name: string
+type ValidatedStatisticInput = {
+  division: string | null | undefined
+  statistic_region_levels?: {
+    code?: string | undefined
+  }[]
   status?: string
-  main_language: string
+  name: string
+  name_en: string
+  previous_topic_codes?: string
+  yearly_reporting?: boolean
   first_released_at: Date
+  main_language: string
+  comment: string
   relation?: number
 }
 
