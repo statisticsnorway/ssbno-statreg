@@ -287,13 +287,13 @@ type ValidatedStatisticInput = StatisticUpdate & {
   name: string
   status: string
   main_language: string
-  first_released_at: string | Date
+  first_released_at: Date
   relation: number | null
 }
 
 export function validateStatisticInput(
   body: StatisticCreate | StatisticUpdate | undefined,
-  requiredFields: (keyof StatisticUpdate | StatisticCreate)[],
+  requiredFields: (keyof StatisticUpdate | keyof StatisticCreate)[],
   type: 'create' | 'update' = 'create'
 ): ValidatedStatisticInput {
   const {
@@ -336,8 +336,8 @@ export function validateStatisticInput(
   }
 
   if (type === 'update') {
-    if (typeof yearly_reporting !== 'boolean') {
-      throw { statregError: "Field 'yearly_reporting' must be a boolean." }
+    if (yearly_reporting !== 'true' && yearly_reporting !== 'false') {
+      throw { statregError: "Field 'yearly_reporting' must be either 'true' or 'false'." }
     }
 
     return {
@@ -345,7 +345,7 @@ export function validateStatisticInput(
       statistic_region_levels,
       status: sanitize(status?.code!), // TODO: Should be validated against enum values 'SA', 'A' etc.
       previous_topic_codes: sanitize(previous_topic_codes!),
-      yearly_reporting: Boolean(yearly_reporting),
+      yearly_reporting: yearly_reporting === 'true' ? true : false,
       relation: ensureIdIsNumber(relation, 'related statistic'),
     }
   }

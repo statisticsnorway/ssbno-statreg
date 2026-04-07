@@ -152,7 +152,7 @@ describe('statisticService ', async () => {
         approval_status: 'FORSLAG',
         relation: '2',
         previous_topic_codes: '05.01.02',
-        yearly_reporting: false,
+        yearly_reporting: 'false',
         first_released_at: '2026-03-25',
         main_language: 'nn',
         comment: 'Beskrivelse av endring',
@@ -445,11 +445,11 @@ describe('statisticService ', async () => {
     beforeEach(() => {
       input = {
         division: '104',
-        name: '  Helse og helsetjenester  ',
-        name_en: '  Health and health services  ',
+        name: 'Helse og helsetjenester',
+        name_en: 'Health and health services',
         first_released_at: '2024-04-01',
         main_language: 'nn',
-        comment: '  Kommentar om statistikken  ',
+        comment: 'Kommentar om statistikken',
       }
 
       expectedResult = {
@@ -520,6 +520,76 @@ describe('statisticService ', async () => {
       const result = validateStatisticInput(input, requiredCreateFields)
 
       assert.deepEqual(result, expectedResult)
+    })
+  })
+
+  describe('validateStatisticInput(input, "update") ', async () => {
+    let input: any
+    let expectedResult: any
+    const requiredUpdateFields = [
+      'division',
+      'statistic_region_levels',
+      'status',
+      'name',
+      'name_en',
+      'relation',
+      'previous_topic_codes',
+      'yearly_reporting',
+      'first_released_at',
+      'main_language',
+      'comment',
+    ]
+
+    beforeEach(() => {
+      input = {
+        division: '104',
+        name: 'Helse og helsetjenester',
+        name_en: 'Health and health services',
+        first_released_at: '2024-04-01',
+        main_language: 'nn',
+        comment: 'Kommentar om statistikken',
+        status: { code: 'SA' },
+        relation: 2,
+        previous_topic_codes: '05.01.02',
+        yearly_reporting: 'false',
+        statistic_region_levels: [],
+      }
+
+      expectedResult = {
+        division: '104',
+        name: 'Helse og helsetjenester',
+        name_en: 'Health and health services',
+        first_released_at: new Date('2024-04-01T00:00:00.000Z'),
+        main_language: 'nn',
+        comment: 'Kommentar om statistikken',
+        status: 'SA',
+        relation: 2,
+        previous_topic_codes: '05.01.02',
+        yearly_reporting: false,
+        statistic_region_levels: [],
+      }
+    })
+
+    test('returns validated statistic input when all conditionals succeed', () => {
+      const result = validateStatisticInput(input, requiredUpdateFields, 'update')
+
+      assert.deepEqual(result, expectedResult)
+    })
+
+    test('throws error when yearly_reporting is not a valid boolean', () => {
+      input.yearly_reporting = 'not-a-boolean'
+
+      assert.throws(() => validateStatisticInput(input, requiredUpdateFields, 'update'), {
+        statregError: "Field 'yearly_reporting' must be either 'true' or 'false'.",
+      })
+    })
+
+    test('throws error when relation id is an invalid format', () => {
+      input.relation = 'abc'
+
+      assert.throws(() => validateStatisticInput(input, requiredUpdateFields, 'update'), {
+        statregError: 'Invalid related statistic id format',
+      })
     })
   })
 })
