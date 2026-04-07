@@ -45,7 +45,7 @@ describe('statisticService ', async () => {
   let createStatistic: Function
   let parseStatisticVariants: Function
   let mapStatisticDetails: Function
-  let validateStatisticInput: Function
+  let validateAndParseStatisticInput: Function
   let StatisticsDetailedIncludes: any
 
   before(async () => {
@@ -71,7 +71,7 @@ describe('statisticService ', async () => {
       getStatisticByShortname,
       parseStatisticVariants,
       mapStatisticDetails,
-      validateStatisticInput,
+      validateAndParseStatisticInput,
       updateStatistic,
       createStatistic,
       StatisticsDetailedIncludes,
@@ -437,7 +437,7 @@ describe('statisticService ', async () => {
     })
   })
 
-  describe('validateStatisticInput(input, "create") ', async () => {
+  describe('validateAndParseStatisticInput(input, "create") ', async () => {
     let input: any
     let expectedResult: any
     const requiredCreateFields = ['division', 'name', 'name_en', 'first_released_at']
@@ -463,7 +463,7 @@ describe('statisticService ', async () => {
     })
 
     test('returns validated statistic input when all conditionals succeed', () => {
-      const result = validateStatisticInput(input, requiredCreateFields)
+      const result = validateAndParseStatisticInput(input, requiredCreateFields)
 
       assert.deepEqual(result, expectedResult)
     })
@@ -471,7 +471,7 @@ describe('statisticService ', async () => {
     test('throws error when name is an empty string', () => {
       input.name = ''
 
-      assert.throws(() => validateStatisticInput(input, requiredCreateFields), {
+      assert.throws(() => validateAndParseStatisticInput(input, requiredCreateFields), {
         statregError: "Field 'name' must be a non-empty string.",
       })
     })
@@ -479,7 +479,7 @@ describe('statisticService ', async () => {
     test('throws error when division is not a number', () => {
       input.division = 'division-a'
 
-      assert.throws(() => validateStatisticInput(input, requiredCreateFields), {
+      assert.throws(() => validateAndParseStatisticInput(input, requiredCreateFields), {
         statregError: "Field 'division' must be a number.",
       })
     })
@@ -487,13 +487,13 @@ describe('statisticService ', async () => {
     test('throws error when division lookup does not find a match', () => {
       input.division = '105'
 
-      assert.throws(() => validateStatisticInput(input, requiredCreateFields), {
+      assert.throws(() => validateAndParseStatisticInput(input, requiredCreateFields), {
         statregError: "Field 'division' does not correspond to an existing division.",
       })
     })
 
     test("returns 'nn' when main_language is 'nn'", () => {
-      const result = validateStatisticInput(input, requiredCreateFields)
+      const result = validateAndParseStatisticInput(input, requiredCreateFields)
 
       assert.deepEqual(result, expectedResult)
     })
@@ -502,13 +502,13 @@ describe('statisticService ', async () => {
       input.main_language = 'en'
       expectedResult.main_language = 'nb'
 
-      assert.throws(() => validateStatisticInput(input, requiredCreateFields), {
+      assert.throws(() => validateAndParseStatisticInput(input, requiredCreateFields), {
         statregError: "Field 'main_language' must be either 'nb' or 'nn'.",
       })
     })
 
     test('returns sanitized comment when comment is provided', () => {
-      const result = validateStatisticInput(input, requiredCreateFields)
+      const result = validateAndParseStatisticInput(input, requiredCreateFields)
 
       assert.deepEqual(result, expectedResult)
     })
@@ -517,13 +517,13 @@ describe('statisticService ', async () => {
       input.comment = undefined
       expectedResult.comment = ''
 
-      const result = validateStatisticInput(input, requiredCreateFields)
+      const result = validateAndParseStatisticInput(input, requiredCreateFields)
 
       assert.deepEqual(result, expectedResult)
     })
   })
 
-  describe('validateStatisticInput(input, "update") ', async () => {
+  describe('validateAndParseStatisticInput(input, "update") ', async () => {
     let input: any
     let expectedResult: any
     const requiredUpdateFields = [
@@ -571,7 +571,7 @@ describe('statisticService ', async () => {
     })
 
     test('returns validated statistic input when all conditionals succeed', () => {
-      const result = validateStatisticInput(input, requiredUpdateFields, 'update')
+      const result = validateAndParseStatisticInput(input, requiredUpdateFields, 'update')
 
       assert.deepEqual(result, expectedResult)
     })
@@ -579,7 +579,7 @@ describe('statisticService ', async () => {
     test('throws error when yearly_reporting is not a valid boolean', () => {
       input.yearly_reporting = 'not-a-boolean'
 
-      assert.throws(() => validateStatisticInput(input, requiredUpdateFields, 'update'), {
+      assert.throws(() => validateAndParseStatisticInput(input, requiredUpdateFields, 'update'), {
         statregError: "Field 'yearly_reporting' must be a boolean.",
       })
     })
@@ -587,7 +587,7 @@ describe('statisticService ', async () => {
     test('throws error when relation id is an invalid format', () => {
       input.relation = 'abc'
 
-      assert.throws(() => validateStatisticInput(input, requiredUpdateFields, 'update'), {
+      assert.throws(() => validateAndParseStatisticInput(input, requiredUpdateFields, 'update'), {
         statregError: "Field 'relation' must be a number.",
       })
     })
@@ -595,7 +595,7 @@ describe('statisticService ', async () => {
     test('throws error when status is an invalid format', () => {
       input.status = 'ABC'
 
-      assert.throws(() => validateStatisticInput(input, requiredUpdateFields, 'update'), {
+      assert.throws(() => validateAndParseStatisticInput(input, requiredUpdateFields, 'update'), {
         statregError: "Field 'status' must be one of these: K, A, IA, UT, SA, SP.",
       })
     })

@@ -180,7 +180,7 @@ export async function updateStatistic(
     first_released_at,
     main_language,
     comment,
-  } = validateStatisticInput(body, requiredFields, 'update')
+  } = validateAndParseStatisticInput(body, requiredFields, 'update')
 
   const safeShortname = sanitize(shortname)
   const statistic = await prisma.statistic.findFirst({
@@ -241,7 +241,7 @@ export async function createStatistic(
   const safeShortname = sanitize(shortname)
 
   const requiredFields: (keyof StatisticCreate)[] = ['division', 'name', 'name_en', 'first_released_at']
-  const { division, name, name_en, first_released_at, main_language, comment } = validateStatisticInput(
+  const { division, name, name_en, first_released_at, main_language, comment } = validateAndParseStatisticInput(
     body,
     requiredFields
   )
@@ -290,7 +290,7 @@ type ValidatedStatisticInput = {
   relation?: number
 }
 
-export function validateStatisticInput(
+export function validateAndParseStatisticInput(
   body: StatisticCreate | StatisticUpdate | undefined,
   requiredFields: (keyof StatisticCreate)[] | (keyof StatisticUpdate)[],
   type: 'create' | 'update' = 'create'
