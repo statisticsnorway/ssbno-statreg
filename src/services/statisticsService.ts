@@ -293,7 +293,7 @@ type ValidatedStatisticInput = StatisticUpdate & {
 
 export function validateStatisticInput(
   body: StatisticCreate | StatisticUpdate | undefined,
-  requiredFields: (keyof StatisticUpdate | keyof StatisticCreate)[],
+  requiredFields: (keyof StatisticCreate)[] | (keyof StatisticUpdate)[],
   type: 'create' | 'update' = 'create'
 ): ValidatedStatisticInput {
   const {
@@ -308,7 +308,7 @@ export function validateStatisticInput(
     main_language,
     comment,
     relation,
-  } = ensureRequiredFieldsExists(body, requiredFields)
+  } = ensureRequiredFieldsExists(body as StatisticUpdate, requiredFields as (keyof StatisticUpdate)[])
 
   if (!name) {
     throw { statregError: "Field 'name' must be a non-empty string." }
@@ -336,8 +336,8 @@ export function validateStatisticInput(
   }
 
   if (type === 'update') {
-    if (yearly_reporting !== 'true' && yearly_reporting !== 'false') {
-      throw { statregError: "Field 'yearly_reporting' must be either 'true' or 'false'." }
+    if (typeof yearly_reporting !== 'boolean') {
+      throw { statregError: "Field 'yearly_reporting' must be a boolean." }
     }
 
     return {
@@ -345,8 +345,8 @@ export function validateStatisticInput(
       statistic_region_levels,
       status: sanitize(status?.code!), // TODO: Should be validated against enum values 'SA', 'A' etc.
       previous_topic_codes: sanitize(previous_topic_codes!),
-      yearly_reporting: yearly_reporting === 'true' ? true : false,
-      relation: ensureIdIsNumber(relation, 'related statistic'),
+      yearly_reporting: Boolean(yearly_reporting),
+      relation: ensureIdIsNumber(relation as string, 'related statistic'),
     }
   }
 

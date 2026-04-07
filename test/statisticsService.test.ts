@@ -152,7 +152,7 @@ describe('statisticService ', async () => {
         approval_status: 'FORSLAG',
         relation: '2',
         previous_topic_codes: '05.01.02',
-        yearly_reporting: 'false',
+        yearly_reporting: false,
         first_released_at: '2026-03-25',
         main_language: 'nn',
         comment: 'Beskrivelse av endring',
@@ -551,7 +551,7 @@ describe('statisticService ', async () => {
         status: { code: 'SA' },
         relation: 2,
         previous_topic_codes: '05.01.02',
-        yearly_reporting: 'false',
+        yearly_reporting: false,
         statistic_region_levels: [],
       }
 
@@ -580,7 +580,7 @@ describe('statisticService ', async () => {
       input.yearly_reporting = 'not-a-boolean'
 
       assert.throws(() => validateStatisticInput(input, requiredUpdateFields, 'update'), {
-        statregError: "Field 'yearly_reporting' must be either 'true' or 'false'.",
+        statregError: "Field 'yearly_reporting' must be a boolean.",
       })
     })
 
