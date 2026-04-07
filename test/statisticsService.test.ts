@@ -561,6 +561,14 @@ describe('statisticService ', async () => {
         assert.deepEqual(result, expectedResult)
       })
 
+      test('throws error when comment is an empty string', () => {
+        input.comment = ''
+
+        assert.throws(() => validateAndParseStatisticInput(input, requiredUpdateFields, 'update'), {
+          statregError: "Field 'comment' must be a non-empty string.",
+        })
+      })
+
       test('throws error when yearly_reporting is not a valid boolean', () => {
         input.yearly_reporting = 'not-a-boolean'
 

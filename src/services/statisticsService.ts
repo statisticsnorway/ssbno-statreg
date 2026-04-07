@@ -347,6 +347,10 @@ export function validateAndParseStatisticInput(
       throw { statregError: "Field 'relation' must be a number." }
     }
 
+    if (!comment) {
+      throw { statregError: "Field 'comment' must be a non-empty string." }
+    }
+
     return {
       ...validatedInput,
       statistic_region_levels,
@@ -354,6 +358,7 @@ export function validateAndParseStatisticInput(
       previous_topic_codes: sanitize(previous_topic_codes!),
       yearly_reporting: Boolean(yearly_reporting),
       relation: Number(relation),
+      comment: sanitize(comment!),
     }
   }
 
