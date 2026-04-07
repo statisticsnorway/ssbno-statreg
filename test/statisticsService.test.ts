@@ -513,9 +513,9 @@ describe('statisticService ', async () => {
       assert.deepEqual(result, expectedResult)
     })
 
-    test('falls back to null when comment is missing', () => {
+    test('falls back to empty string when comment is missing', () => {
       input.comment = undefined
-      expectedResult.comment = null
+      expectedResult.comment = ''
 
       const result = validateStatisticInput(input, requiredCreateFields)
 
@@ -588,7 +588,7 @@ describe('statisticService ', async () => {
       input.relation = 'abc'
 
       assert.throws(() => validateStatisticInput(input, requiredUpdateFields, 'update'), {
-        statregError: 'Invalid related statistic id format',
+        statregError: "Field 'relation' must be a number.",
       })
     })
 

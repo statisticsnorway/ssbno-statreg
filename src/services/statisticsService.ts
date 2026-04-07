@@ -1,12 +1,5 @@
 import type { StatisticListing, StatisticDetails, StatisticUpdate, StatisticCreate } from '@/types/index'
-import {
-  dateToISOString,
-  sanitize,
-  validateDateOnly,
-  ensureRequiredFieldsExists,
-  isNumber,
-  ensureIdIsNumber,
-} from '@/lib/utils'
+import { dateToISOString, sanitize, validateDateOnly, ensureRequiredFieldsExists, isNumber } from '@/lib/utils'
 import type { Prisma } from '@/generated/prisma/client'
 import { getDivisionFromCode } from '@/services/klassService'
 import { fetchUsers } from '@/services/entraUserService'
@@ -346,13 +339,17 @@ export function validateStatisticInput(
       throw { statregError: `Field 'status' must be one of these: ${Object.keys(StatisticStatus).join(', ')}.` }
     }
 
+    if (!isNumber(relation)) {
+      throw { statregError: "Field 'relation' must be a number." }
+    }
+
     return {
       ...validatedInput,
       statistic_region_levels,
       status: sanitize(status?.code!),
       previous_topic_codes: sanitize(previous_topic_codes!),
       yearly_reporting: Boolean(yearly_reporting),
-      relation: ensureIdIsNumber(relation as string, 'related statistic'),
+      relation: Number(relation),
     }
   }
 
