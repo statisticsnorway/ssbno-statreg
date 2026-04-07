@@ -1,4 +1,4 @@
-import { describe, mock, test, before, beforeEach, afterEach } from 'node:test'
+import { describe, mock, test, before, beforeEach } from 'node:test'
 import assert from 'node:assert/strict'
 import { ApprovalStatus } from '@/types/enums'
 import { Users } from '@/types/entra'
@@ -433,166 +433,156 @@ describe('statisticService ', async () => {
     })
   })
 
-  describe('validateAndParseStatisticInput(input, "create") ', async () => {
-    let input: any
-    let expectedResult: any
-    const requiredCreateFields = ['division', 'name', 'name_en', 'first_released_at']
+  describe('validateAndParseStatisticInput ', async () => {
+    describe('create', async () => {
+      let input: any
+      let expectedResult: any
+      const requiredCreateFields = ['division', 'name', 'name_en', 'first_released_at']
 
-    beforeEach(() => {
-      input = {
-        division: '104',
-        name: 'Helse og helsetjenester',
-        name_en: 'Health and health services',
-        first_released_at: '2024-04-01',
-        main_language: 'nn',
-        comment: 'Kommentar om statistikken',
-      }
+      beforeEach(() => {
+        input = {
+          division: '104',
+          name: 'Helse og helsetjenester',
+          name_en: 'Health and health services',
+          first_released_at: '2024-04-01',
+          main_language: 'nn',
+          comment: 'Kommentar om statistikken',
+        }
 
-      expectedResult = {
-        division: '104',
-        name: 'Helse og helsetjenester',
-        name_en: 'Health and health services',
-        first_released_at: new Date('2024-04-01T00:00:00.000Z'),
-        main_language: 'nn',
-        comment: 'Kommentar om statistikken',
-      }
-    })
+        expectedResult = {
+          division: '104',
+          name: 'Helse og helsetjenester',
+          name_en: 'Health and health services',
+          first_released_at: new Date('2024-04-01T00:00:00.000Z'),
+          main_language: 'nn',
+          comment: 'Kommentar om statistikken',
+        }
+      })
 
-    test('returns validated statistic input when all conditionals succeed', () => {
-      const result = validateAndParseStatisticInput(input, requiredCreateFields)
+      test('returns validated statistic input when all conditionals succeed', () => {
+        const result = validateAndParseStatisticInput(input, requiredCreateFields)
 
-      assert.deepEqual(result, expectedResult)
-    })
+        assert.deepEqual(result, expectedResult)
+      })
 
-    test('throws error when name is an empty string', () => {
-      input.name = ''
+      test('throws error when name is an empty string', () => {
+        input.name = ''
 
-      assert.throws(() => validateAndParseStatisticInput(input, requiredCreateFields), {
-        statregError: "Field 'name' must be a non-empty string.",
+        assert.throws(() => validateAndParseStatisticInput(input, requiredCreateFields), {
+          statregError: "Field 'name' must be a non-empty string.",
+        })
+      })
+
+      test('throws error when division is not a number', () => {
+        input.division = 'division-a'
+
+        assert.throws(() => validateAndParseStatisticInput(input, requiredCreateFields), {
+          statregError: "Field 'division' must be a number.",
+        })
+      })
+
+      test('throws error when division lookup does not find a match', () => {
+        input.division = '106'
+
+        assert.throws(() => validateAndParseStatisticInput(input, requiredCreateFields), {
+          statregError: "Field 'division' does not correspond to an existing division.",
+        })
+      })
+
+      test("throws error main_language is neither 'nb' or 'nn'", () => {
+        input.main_language = 'en'
+        expectedResult.main_language = 'nb'
+
+        assert.throws(() => validateAndParseStatisticInput(input, requiredCreateFields), {
+          statregError: "Field 'main_language' must be either 'nb' or 'nn'.",
+        })
+      })
+
+      test('falls back to empty string when comment is missing', () => {
+        input.comment = undefined
+        expectedResult.comment = ''
+
+        const result = validateAndParseStatisticInput(input, requiredCreateFields)
+
+        assert.deepEqual(result, expectedResult)
       })
     })
 
-    test('throws error when division is not a number', () => {
-      input.division = 'division-a'
+    describe('update', async () => {
+      let input: any
+      let expectedResult: any
+      const requiredUpdateFields = [
+        'division',
+        'statistic_region_levels',
+        'status',
+        'name',
+        'name_en',
+        'relation',
+        'previous_topic_codes',
+        'yearly_reporting',
+        'first_released_at',
+        'main_language',
+        'comment',
+      ]
 
-      assert.throws(() => validateAndParseStatisticInput(input, requiredCreateFields), {
-        statregError: "Field 'division' must be a number.",
+      beforeEach(() => {
+        input = {
+          division: '104',
+          name: 'Helse og helsetjenester',
+          name_en: 'Health and health services',
+          first_released_at: '2024-04-01',
+          main_language: 'nn',
+          comment: 'Kommentar om statistikken',
+          status: { code: 'SA' },
+          relation: 2,
+          previous_topic_codes: '05.01.02',
+          yearly_reporting: false,
+          statistic_region_levels: [],
+        }
+
+        expectedResult = {
+          division: '104',
+          name: 'Helse og helsetjenester',
+          name_en: 'Health and health services',
+          first_released_at: new Date('2024-04-01T00:00:00.000Z'),
+          main_language: 'nn',
+          comment: 'Kommentar om statistikken',
+          status: 'SA',
+          relation: 2,
+          previous_topic_codes: '05.01.02',
+          yearly_reporting: false,
+          statistic_region_levels: [],
+        }
       })
-    })
 
-    test('throws error when division lookup does not find a match', () => {
-      input.division = '106'
+      test('returns validated statistic input when all conditionals succeed', () => {
+        const result = validateAndParseStatisticInput(input, requiredUpdateFields, 'update')
 
-      assert.throws(() => validateAndParseStatisticInput(input, requiredCreateFields), {
-        statregError: "Field 'division' does not correspond to an existing division.",
+        assert.deepEqual(result, expectedResult)
       })
-    })
 
-    test("returns 'nn' when main_language is 'nn'", () => {
-      const result = validateAndParseStatisticInput(input, requiredCreateFields)
+      test('throws error when yearly_reporting is not a valid boolean', () => {
+        input.yearly_reporting = 'not-a-boolean'
 
-      assert.deepEqual(result, expectedResult)
-    })
-
-    test("throws error main_language is neither 'nb' or 'nn'", () => {
-      input.main_language = 'en'
-      expectedResult.main_language = 'nb'
-
-      assert.throws(() => validateAndParseStatisticInput(input, requiredCreateFields), {
-        statregError: "Field 'main_language' must be either 'nb' or 'nn'.",
+        assert.throws(() => validateAndParseStatisticInput(input, requiredUpdateFields, 'update'), {
+          statregError: "Field 'yearly_reporting' must be a boolean.",
+        })
       })
-    })
 
-    test('returns sanitized comment when comment is provided', () => {
-      const result = validateAndParseStatisticInput(input, requiredCreateFields)
+      test('throws error when relation id is an invalid format', () => {
+        input.relation = 'abc'
 
-      assert.deepEqual(result, expectedResult)
-    })
-
-    test('falls back to empty string when comment is missing', () => {
-      input.comment = undefined
-      expectedResult.comment = ''
-
-      const result = validateAndParseStatisticInput(input, requiredCreateFields)
-
-      assert.deepEqual(result, expectedResult)
-    })
-  })
-
-  describe('validateAndParseStatisticInput(input, "update") ', async () => {
-    let input: any
-    let expectedResult: any
-    const requiredUpdateFields = [
-      'division',
-      'statistic_region_levels',
-      'status',
-      'name',
-      'name_en',
-      'relation',
-      'previous_topic_codes',
-      'yearly_reporting',
-      'first_released_at',
-      'main_language',
-      'comment',
-    ]
-
-    beforeEach(() => {
-      input = {
-        division: '104',
-        name: 'Helse og helsetjenester',
-        name_en: 'Health and health services',
-        first_released_at: '2024-04-01',
-        main_language: 'nn',
-        comment: 'Kommentar om statistikken',
-        status: { code: 'SA' },
-        relation: 2,
-        previous_topic_codes: '05.01.02',
-        yearly_reporting: false,
-        statistic_region_levels: [],
-      }
-
-      expectedResult = {
-        division: '104',
-        name: 'Helse og helsetjenester',
-        name_en: 'Health and health services',
-        first_released_at: new Date('2024-04-01T00:00:00.000Z'),
-        main_language: 'nn',
-        comment: 'Kommentar om statistikken',
-        status: 'SA',
-        relation: 2,
-        previous_topic_codes: '05.01.02',
-        yearly_reporting: false,
-        statistic_region_levels: [],
-      }
-    })
-
-    test('returns validated statistic input when all conditionals succeed', () => {
-      const result = validateAndParseStatisticInput(input, requiredUpdateFields, 'update')
-
-      assert.deepEqual(result, expectedResult)
-    })
-
-    test('throws error when yearly_reporting is not a valid boolean', () => {
-      input.yearly_reporting = 'not-a-boolean'
-
-      assert.throws(() => validateAndParseStatisticInput(input, requiredUpdateFields, 'update'), {
-        statregError: "Field 'yearly_reporting' must be a boolean.",
+        assert.throws(() => validateAndParseStatisticInput(input, requiredUpdateFields, 'update'), {
+          statregError: "Field 'relation' must be a number.",
+        })
       })
-    })
 
-    test('throws error when relation id is an invalid format', () => {
-      input.relation = 'abc'
+      test('throws error when status is not valid value', () => {
+        input.status = 'ABC'
 
-      assert.throws(() => validateAndParseStatisticInput(input, requiredUpdateFields, 'update'), {
-        statregError: "Field 'relation' must be a number.",
-      })
-    })
-
-    test('throws error when status is an invalid format', () => {
-      input.status = 'ABC'
-
-      assert.throws(() => validateAndParseStatisticInput(input, requiredUpdateFields, 'update'), {
-        statregError: "Field 'status' must be one of these: K, A, IA, UT, SA, SP.",
+        assert.throws(() => validateAndParseStatisticInput(input, requiredUpdateFields, 'update'), {
+          statregError: "Field 'status' must be one of these: K, A, IA, UT, SA, SP.",
+        })
       })
     })
   })
