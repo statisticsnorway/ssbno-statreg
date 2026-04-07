@@ -161,7 +161,6 @@ export async function updateStatistic(
   body: StatisticUpdate,
   prisma: StatisticPrisma
 ): Promise<StatisticDetails> {
-  // TODO: V1: All fields for editing required for now to ensure no unintentional overwriting of existing data to undefined fields
   const requiredFields: (keyof StatisticUpdate)[] = [
     'division',
     'statistic_region_levels',
@@ -283,12 +282,15 @@ export async function createStatistic(
   return await mapStatisticDetails(result)
 }
 
-type ValidatedStatisticInput = StatisticUpdate & {
+type ValidatedStatisticInput = Omit<
+  StatisticUpdate,
+  'name' | 'status' | 'main_language' | 'first_released_at' | 'relation'
+> & {
   name: string
-  status: string
+  status?: string
   main_language: string
   first_released_at: Date
-  relation: number
+  relation?: number
 }
 
 export function validateStatisticInput(
@@ -332,7 +334,7 @@ export function validateStatisticInput(
     name_en: sanitize(name_en!),
     first_released_at: validateDateOnly(first_released_at!),
     main_language: sanitize(main_language),
-    comment: comment ? sanitize(comment) : null,
+    comment: comment ? sanitize(comment) : '',
   }
 
   if (type === 'update') {
