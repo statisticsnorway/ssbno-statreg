@@ -326,7 +326,7 @@ export function validateAndParseStatisticInput(
   }
 
   const validatedInput = {
-    division,
+    division: division!.toString(),
     name: sanitize(name),
     name_en: sanitize(name_en!),
     first_released_at: validateDateOnly(first_released_at!),

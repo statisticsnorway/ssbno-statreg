@@ -62,7 +62,7 @@ export function ensureRequiredFieldsExists<T extends Record<string, any>>(
   const validBody = Object.keys(body ?? {}).length
   const missingFields = validBody ? requiredFields.filter((key) => !Object.hasOwn(body ?? {}, key)) : requiredFields
 
-  if (missingFields?.length || !validBody) {
+  if (missingFields?.length) {
     throw {
       statregError: `Missing required field(s): ${missingFields.join(', ')}`,
     }
