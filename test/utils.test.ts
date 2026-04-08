@@ -167,9 +167,10 @@ describe('utils', () => {
 
   describe('ensureRequiredFieldsExists', () => {
     test('return body when all the required fields exists', () => {
-      const requiredFields: (keyof { field_1: 'test' })[] = ['field_1']
+      const requiredFields: (keyof { field_1: 'test'; field_2: null })[] = ['field_1', 'field_2']
       const body = {
         field_1: 'test',
+        field_2: null,
       }
       assert.deepStrictEqual(body, ensureRequiredFieldsExists(body, requiredFields))
     })
@@ -177,6 +178,13 @@ describe('utils', () => {
     test('return 400 when body is undefined', () => {
       const requiredFields = ['field_1', 'field_2']
       assert.throws(() => ensureRequiredFieldsExists(undefined, requiredFields), {
+        statregError: 'Missing required field(s): field_1, field_2',
+      })
+    })
+
+    test('return 400 when body object is empty', () => {
+      const requiredFields = ['field_1', 'field_2']
+      assert.throws(() => ensureRequiredFieldsExists({}, requiredFields as never[]), {
         statregError: 'Missing required field(s): field_1, field_2',
       })
     })
