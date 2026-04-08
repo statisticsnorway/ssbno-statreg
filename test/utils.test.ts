@@ -161,37 +161,30 @@ describe('utils', () => {
     })
 
     test('throws error for negative number', () => {
-      assert.throws(() => ensureIdIsNumber('-1'), { statregError: 'Invalid id format' })
-    })
-
-    test('throws error if passed id is 0', () => {
-      assert.throws(() => ensureIdIsNumber(0), { statregError: 'Invalid id format' })
+      assert.throws(() => ensureIdIsNumber('-1', 'variant'), { statregError: 'Invalid variant id format' })
     })
   })
 
   describe('ensureRequiredFieldsExists', () => {
     test('return body when all the required fields exists', () => {
-      const requiredFields: (keyof { field_1: 'test' })[] = ['field_1']
+      const requiredFields: (keyof { field_1: 'test'; field_2: null })[] = ['field_1', 'field_2']
       const body = {
         field_1: 'test',
+        field_2: null,
       }
       assert.deepStrictEqual(body, ensureRequiredFieldsExists(body, requiredFields))
-    })
-
-    test('return 400 when a required field is undefined', () => {
-      const requiredFields: (keyof { field_1: 'test'; field_2: 'value' })[] = ['field_1', 'field_2']
-      const body = {
-        field_1: 'test',
-        field_2: undefined,
-      }
-      assert.throws(() => ensureRequiredFieldsExists(body, requiredFields), {
-        statregError: 'Missing required field(s): field_2',
-      })
     })
 
     test('return 400 when body is undefined', () => {
       const requiredFields = ['field_1', 'field_2']
       assert.throws(() => ensureRequiredFieldsExists(undefined, requiredFields), {
+        statregError: 'Missing required field(s): field_1, field_2',
+      })
+    })
+
+    test('return 400 when body object is empty', () => {
+      const requiredFields = ['field_1', 'field_2']
+      assert.throws(() => ensureRequiredFieldsExists({}, requiredFields as never[]), {
         statregError: 'Missing required field(s): field_1, field_2',
       })
     })

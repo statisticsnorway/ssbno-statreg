@@ -45,11 +45,11 @@ export function ensureString(value?: string | string[]): string {
   return Array.isArray(value) ? (value[0] ?? '') : (value ?? '')
 }
 
-export function ensureIdIsNumber(variantId: string | number): number {
+export function ensureIdIsNumber(variantId: string | number, fieldName?: string): number {
   const parsedVariantId = typeof variantId === 'number' ? variantId : Number(sanitize(variantId))
 
-  if (!Number.isInteger(parsedVariantId) || parsedVariantId <= 0) {
-    throw { statregError: 'Invalid id format' }
+  if (!Number.isInteger(parsedVariantId) || parsedVariantId < 0) {
+    throw { statregError: ['Invalid', fieldName, 'id format'].filter(Boolean).join(' ') }
   }
 
   return parsedVariantId
@@ -59,7 +59,8 @@ export function ensureRequiredFieldsExists<T extends Record<string, any>>(
   body: T | undefined,
   requiredFields: (keyof T)[]
 ): T {
-  const missingFields = requiredFields.filter((key) => !body || body[key] === undefined || body[key] === null)
+  const validBody = Object.keys(body ?? {}).length
+  const missingFields = validBody ? requiredFields.filter((key) => !Object.hasOwn(body ?? {}, key)) : requiredFields
 
   if (missingFields?.length) {
     throw {

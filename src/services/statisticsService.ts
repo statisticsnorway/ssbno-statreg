@@ -5,7 +5,7 @@ import { getDivisionFromCode } from '@/services/klassService'
 import { fetchUsers } from '@/services/entraUserService'
 import type { UserLookupItem, Users } from '@/types/entra'
 import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
-import { ApprovalStatus } from '@/types/enums'
+import { ApprovalStatus, StatisticStatus } from '@/types/enums'
 import { statisticsAsserts } from '@/lib/asserts'
 
 export type StatisticPrisma = Pick<PrismaClient, 'statistic' | 'shortname'>
@@ -154,24 +154,35 @@ export async function updateStatistic(
   body: StatisticUpdate,
   prisma: StatisticPrisma
 ): Promise<StatisticDetails> {
+  const requiredFields: (keyof StatisticUpdate)[] = [
+    'division',
+    'statistic_region_levels',
+    'status',
+    'name',
+    'name_en',
+    'relation',
+    'previous_topic_codes',
+    'yearly_reporting',
+    'first_released_at',
+    'main_language',
+    'comment',
+  ]
+
   const {
     division,
     statistic_region_levels = [],
     status,
     name,
     name_en,
-    approval_status,
     relation,
     previous_topic_codes,
     yearly_reporting,
     first_released_at,
     main_language,
     comment,
-  } = body ?? {}
+  } = validateAndParseStatisticInput(body, requiredFields, 'update')
 
   const safeShortname = sanitize(shortname)
-  // TODO MIM-2593: input validation
-  // TODO: Reuse shortname validation from MIM-2545
   const statistic = await prisma.statistic.findFirst({
     where: { shortname: { name: safeShortname } },
     select: { id: true, statistic_region_levels: { select: { region_level: { select: { code: true, id: true } } } } },
@@ -199,14 +210,14 @@ export async function updateStatistic(
   const updatedStatistic = await prisma.statistic.update({
     where: { id: statistic.id },
     data: {
-      name: name,
-      name_en: name_en,
+      name,
+      name_en,
       division_code: division,
-      desk_appoval_status: approval_status,
-      status: status!.code,
+      desk_appoval_status: ApprovalStatus.PENDING,
+      status,
       comment,
       language: main_language,
-      related_statistic_id: relation ? Number(relation) : null,
+      related_statistic_id: relation,
       legacy_topic_codes: previous_topic_codes,
       yearly_reporting,
       first_release: first_released_at,
@@ -218,9 +229,7 @@ export async function updateStatistic(
     include: StatisticsDetailedIncludes,
   })
 
-  const result = await mapStatisticDetails(updatedStatistic)
-
-  return result
+  return await mapStatisticDetails(updatedStatistic)
 }
 
 export async function createStatistic(
@@ -231,7 +240,11 @@ export async function createStatistic(
 ): Promise<StatisticDetails> {
   const safeShortname = sanitize(shortname)
 
-  const { division, name, name_en, first_released_at, main_language, comment } = validateStatisticInput(body)
+  const requiredFields: (keyof StatisticCreate)[] = ['division', 'name', 'name_en', 'first_released_at']
+  const { division, name, name_en, first_released_at, main_language, comment } = validateAndParseStatisticInput(
+    body,
+    requiredFields
+  )
 
   await statisticsAsserts.assertShortnameExists(safeShortname, prisma)
   await statisticsAsserts.assertShortnameExistsAndIsAvailable(safeShortname, prisma)
@@ -262,54 +275,92 @@ export async function createStatistic(
 }
 
 type ValidatedStatisticInput = {
-  division: string
+  division: string | null | undefined
+  statistic_region_levels?: {
+    code?: string | undefined
+  }[]
+  status?: string
   name: string
   name_en: string
+  previous_topic_codes?: string
+  yearly_reporting?: boolean
   first_released_at: Date
-  main_language: 'nb' | 'nn'
-  comment: string | null
+  main_language: string
+  comment: string
+  relation?: number | null
 }
 
-export function validateStatisticInput(
-  body: StatisticUpdate | undefined,
+export function validateAndParseStatisticInput(
+  body: StatisticCreate | StatisticUpdate | undefined,
+  requiredFields: (keyof StatisticCreate)[] | (keyof StatisticUpdate)[],
   type: 'create' | 'update' = 'create'
 ): ValidatedStatisticInput {
-  const createFields: (keyof StatisticCreate)[] = [
-    'name',
-    'name_en',
-    'division',
-    //'contacts', // TODO contacts required according to Figma design, missing in open API spec
-    'first_released_at',
-    //'variants', // TODO variants required according to Figma design, missing in open API spec
-  ]
-
-  const requiredFields = type == 'create' ? createFields : [...createFields]
-
-  const { name, name_en, division, main_language, first_released_at, comment } = ensureRequiredFieldsExists(
-    body,
-    requiredFields
-  )
+  const {
+    division,
+    statistic_region_levels,
+    status,
+    name,
+    name_en,
+    previous_topic_codes,
+    yearly_reporting,
+    first_released_at,
+    main_language,
+    comment,
+    relation,
+  } = ensureRequiredFieldsExists(body as StatisticUpdate, requiredFields as (keyof StatisticUpdate)[])
 
   if (!name) {
     throw { statregError: "Field 'name' must be a non-empty string." }
   }
 
   if (!isNumber(division)) {
-    throw { statregError: "Field 'division' must be a number" }
+    throw { statregError: "Field 'division' must be a number." }
   }
 
   if (!getDivisionFromCode(Number(division))) {
     throw { statregError: "Field 'division' does not correspond to an existing division." }
   }
 
-  const validatedCreateInput: ValidatedStatisticInput = {
-    division: sanitize(division!),
-    name: sanitize(name!),
-    name_en: sanitize(name_en!),
-    first_released_at: validateDateOnly(first_released_at!),
-    main_language: main_language == 'nn' ? 'nn' : 'nb',
-    comment: comment ? sanitize(comment) : null,
+  if (main_language !== 'nb' && main_language !== 'nn') {
+    throw { statregError: "Field 'main_language' must be either 'nb' or 'nn'." }
   }
 
-  return validatedCreateInput
+  const validatedInput = {
+    division: division!.toString(),
+    name: sanitize(name),
+    name_en: sanitize(name_en!),
+    first_released_at: validateDateOnly(first_released_at!),
+    main_language: sanitize(main_language),
+    comment: comment ? sanitize(comment) : '',
+  }
+
+  if (type === 'update') {
+    if (typeof yearly_reporting !== 'boolean') {
+      throw { statregError: "Field 'yearly_reporting' must be a boolean." }
+    }
+
+    if (!Object.keys(StatisticStatus).includes(status?.code!)) {
+      throw { statregError: `Field 'status' must be one of these: ${Object.keys(StatisticStatus).join(', ')}.` }
+    }
+
+    if (relation && !isNumber(relation)) {
+      throw { statregError: "Field 'relation' must be a number." }
+    }
+
+    if (!comment) {
+      throw { statregError: "Field 'comment' must be a non-empty string." }
+    }
+
+    return {
+      ...validatedInput,
+      statistic_region_levels,
+      status: sanitize(status?.code!),
+      previous_topic_codes: sanitize(previous_topic_codes!),
+      yearly_reporting: Boolean(yearly_reporting),
+      relation: relation ? Number(relation) : null,
+      comment: sanitize(comment!),
+    }
+  }
+
+  return validatedInput
 }

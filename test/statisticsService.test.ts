@@ -8,6 +8,12 @@ let statisticsResult: object | null
 let updateStatisticsResult: object | null
 let now: Date
 
+function defaultFetchDivisionImplementation(code: number, language?: string) {
+  if (code === 104 && language === 'en') return { code: 104, name: 'Division A1' }
+  if (code === 104) return { code: 104, name: 'Seksjon A1' }
+  if (code === 105) return { code: 105, name: 'Seksjon B1' }
+}
+
 function setStatisticsResult(next: object | null) {
   statisticsResult = next
 }
@@ -32,10 +38,7 @@ describe('statisticService ', async () => {
     ]
   })
 
-  const fetchDivisionMock = mock.fn((code: number, language?: string) => {
-    if (code === 104 && language === 'en') return { code: 104, name: 'Division A1' }
-    if (code === 104) return { code: 104, name: 'Seksjon A1' }
-  })
+  const fetchDivisionMock = mock.fn(defaultFetchDivisionImplementation)
 
   let getStatisticByShortname: Function
   let getAllStatistics: Function
@@ -43,7 +46,7 @@ describe('statisticService ', async () => {
   let createStatistic: Function
   let parseStatisticVariants: Function
   let mapStatisticDetails: Function
-  let validateStatisticInput: Function
+  let validateAndParseStatisticInput: Function
   let StatisticsDetailedIncludes: any
 
   before(async () => {
@@ -69,7 +72,7 @@ describe('statisticService ', async () => {
       getStatisticByShortname,
       parseStatisticVariants,
       mapStatisticDetails,
-      validateStatisticInput,
+      validateAndParseStatisticInput,
       updateStatistic,
       createStatistic,
       StatisticsDetailedIncludes,
@@ -77,6 +80,8 @@ describe('statisticService ', async () => {
   })
 
   beforeEach(async () => {
+    fetchDivisionMock.mock.mockImplementation(defaultFetchDivisionImplementation)
+
     prismaMock = {
       statistic: {
         findMany: mock.fn(() => Promise.resolve(statisticsResult)),
@@ -136,8 +141,10 @@ describe('statisticService ', async () => {
   })
 
   describe('updateStatistics ', async () => {
-    test('returns mocked data', async () => {
-      const input = {
+    let input: any
+
+    beforeEach(() => {
+      input = {
         division: '105',
         status: { code: 'SP' },
         name: 'Helse',
@@ -146,12 +153,14 @@ describe('statisticService ', async () => {
         relation: '2',
         previous_topic_codes: '05.01.02',
         yearly_reporting: false,
-        first_released_at: '2026-03-25T08:30:00.000Z',
+        first_released_at: '2026-03-25',
         main_language: 'nn',
         comment: 'Beskrivelse av endring',
         statistic_region_levels: [{ code: 'L' }],
       }
+    })
 
+    test('returns mocked data', async () => {
       setStatisticsResult({
         id: 5,
         statistic_region_levels: [
@@ -195,12 +204,10 @@ describe('statisticService ', async () => {
       })
     })
 
-    // TODO MIM-2593: input validation for main_language and name, and undefined values
-
     test('throws Error when shortname is not found', async () => {
       setStatisticsResult(null)
 
-      await assert.rejects(() => updateStatistic('test', {}, prismaMock), {
+      await assert.rejects(() => updateStatistic('test', input, prismaMock), {
         status: 404,
         statregError: `Shortname test not found`,
       })
@@ -229,6 +236,7 @@ describe('statisticService ', async () => {
           name_en: 'Consumer price index',
           division: '104',
           first_released_at: '2024-04-01',
+          main_language: 'nb',
         },
         now
       )
@@ -260,7 +268,7 @@ describe('statisticService ', async () => {
 
     test('reject with error message if body is missing', async () => {
       await assert.rejects(() => createStatistic(prismaMock, 'kpi', undefined, now), {
-        statregError: 'Missing required field(s): name, name_en, division, first_released_at',
+        statregError: 'Missing required field(s): division, name, name_en, first_released_at',
       })
       assert.strictEqual(prismaMock.statistic.create.mock.callCount(), 0)
     })
@@ -268,7 +276,7 @@ describe('statisticService ', async () => {
     test('rejects with error message any of the required fields are missing', async () => {
       // TODO: Add more fields to this test when validation logic are in place
       await assert.rejects(() => createStatistic(prismaMock, 'kpi', {}, now), {
-        statregError: 'Missing required field(s): name, name_en, division, first_released_at',
+        statregError: 'Missing required field(s): division, name, name_en, first_released_at',
       })
       assert.strictEqual(prismaMock.statistic.create.mock.callCount(), 0)
     })
@@ -369,8 +377,8 @@ describe('statisticService ', async () => {
     })
 
     test('falls back to undefined division name when division lookup does not find a match', async () => {
-      input.division_code = '105'
-      expectedResult.division = { code: '105', name: undefined }
+      input.division_code = '106'
+      expectedResult.division = { code: '106', name: undefined }
 
       const result = await mapStatisticDetails(input)
 
@@ -425,93 +433,165 @@ describe('statisticService ', async () => {
     })
   })
 
-  describe('validateStatisticInput(input, "create") ', async () => {
-    let input: any
-    let expectedResult: any
+  describe('validateAndParseStatisticInput ', async () => {
+    describe('create', async () => {
+      let input: any
+      let expectedResult: any
+      const requiredCreateFields = ['division', 'name', 'name_en', 'first_released_at']
 
-    beforeEach(() => {
-      input = {
-        division: '104',
-        name: '  Helse og helsetjenester  ',
-        name_en: '  Health and health services  ',
-        first_released_at: '2024-04-01',
-        main_language: 'nn',
-        comment: '  Kommentar om statistikken  ',
-      }
+      beforeEach(() => {
+        input = {
+          division: '104',
+          name: 'Helse og helsetjenester',
+          name_en: 'Health and health services',
+          first_released_at: '2024-04-01',
+          main_language: 'nn',
+          comment: 'Kommentar om statistikken',
+        }
 
-      fetchDivisionMock.mock.mockImplementation((code: number, language?: string) => {
-        if (code === 104 && language === 'en') return { code: 104, name: 'Division A1' }
-        if (code === 104) return { code: 104, name: 'Seksjon A1' }
+        expectedResult = {
+          division: '104',
+          name: 'Helse og helsetjenester',
+          name_en: 'Health and health services',
+          first_released_at: new Date('2024-04-01T00:00:00.000Z'),
+          main_language: 'nn',
+          comment: 'Kommentar om statistikken',
+        }
       })
 
-      expectedResult = {
-        division: '104',
-        name: 'Helse og helsetjenester',
-        name_en: 'Health and health services',
-        first_released_at: new Date('2024-04-01T00:00:00.000Z'),
-        main_language: 'nn',
-        comment: 'Kommentar om statistikken',
-      }
-    })
+      test('returns validated statistic input when all conditionals succeed', () => {
+        const result = validateAndParseStatisticInput(input, requiredCreateFields)
 
-    test('returns validated statistic input when all conditionals succeed', () => {
-      const result = validateStatisticInput(input)
+        assert.deepEqual(result, expectedResult)
+      })
 
-      assert.deepEqual(result, expectedResult)
-    })
+      test('throws error when name is an empty string', () => {
+        input.name = ''
 
-    test('throws correct error when name is an empty string', () => {
-      input.name = ''
+        assert.throws(() => validateAndParseStatisticInput(input, requiredCreateFields), {
+          statregError: "Field 'name' must be a non-empty string.",
+        })
+      })
 
-      assert.throws(() => validateStatisticInput(input), {
-        statregError: "Field 'name' must be a non-empty string.",
+      test('throws error when division is not a number', () => {
+        input.division = 'division-a'
+
+        assert.throws(() => validateAndParseStatisticInput(input, requiredCreateFields), {
+          statregError: "Field 'division' must be a number.",
+        })
+      })
+
+      test('throws error when division lookup does not find a match', () => {
+        input.division = '106'
+
+        assert.throws(() => validateAndParseStatisticInput(input, requiredCreateFields), {
+          statregError: "Field 'division' does not correspond to an existing division.",
+        })
+      })
+
+      test("throws error main_language is neither 'nb' or 'nn'", () => {
+        input.main_language = 'en'
+        expectedResult.main_language = 'nb'
+
+        assert.throws(() => validateAndParseStatisticInput(input, requiredCreateFields), {
+          statregError: "Field 'main_language' must be either 'nb' or 'nn'.",
+        })
+      })
+
+      test('falls back to empty string when comment is missing', () => {
+        input.comment = undefined
+        expectedResult.comment = ''
+
+        const result = validateAndParseStatisticInput(input, requiredCreateFields)
+
+        assert.deepEqual(result, expectedResult)
       })
     })
 
-    test('throws correct error when division is not a number', () => {
-      input.division = 'division-a'
+    describe('update', async () => {
+      let input: any
+      let expectedResult: any
+      const requiredUpdateFields = [
+        'division',
+        'statistic_region_levels',
+        'status',
+        'name',
+        'name_en',
+        'relation',
+        'previous_topic_codes',
+        'yearly_reporting',
+        'first_released_at',
+        'main_language',
+        'comment',
+      ]
 
-      assert.throws(() => validateStatisticInput(input), {
-        statregError: "Field 'division' must be a number",
+      beforeEach(() => {
+        input = {
+          division: '104',
+          name: 'Helse og helsetjenester',
+          name_en: 'Health and health services',
+          first_released_at: '2024-04-01',
+          main_language: 'nn',
+          comment: 'Kommentar om statistikken',
+          status: { code: 'SA' },
+          relation: 2,
+          previous_topic_codes: '05.01.02',
+          yearly_reporting: false,
+          statistic_region_levels: [],
+        }
+
+        expectedResult = {
+          division: '104',
+          name: 'Helse og helsetjenester',
+          name_en: 'Health and health services',
+          first_released_at: new Date('2024-04-01T00:00:00.000Z'),
+          main_language: 'nn',
+          comment: 'Kommentar om statistikken',
+          status: 'SA',
+          relation: 2,
+          previous_topic_codes: '05.01.02',
+          yearly_reporting: false,
+          statistic_region_levels: [],
+        }
       })
-    })
 
-    test('throws correct error when division lookup does not find a match', () => {
-      input.division = '105'
+      test('returns validated statistic input when all conditionals succeed', () => {
+        const result = validateAndParseStatisticInput(input, requiredUpdateFields, 'update')
 
-      assert.throws(() => validateStatisticInput(input), {
-        statregError: "Field 'division' does not correspond to an existing division.",
+        assert.deepEqual(result, expectedResult)
       })
-    })
 
-    test("returns 'nn' when main_language is 'nn'", () => {
-      const result = validateStatisticInput(input)
+      test('throws error when comment is an empty string', () => {
+        input.comment = ''
 
-      assert.deepEqual(result, expectedResult)
-    })
+        assert.throws(() => validateAndParseStatisticInput(input, requiredUpdateFields, 'update'), {
+          statregError: "Field 'comment' must be a non-empty string.",
+        })
+      })
 
-    test("falls back to 'nb' when main_language is not 'nn'", () => {
-      input.main_language = 'en'
-      expectedResult.main_language = 'nb'
+      test('throws error when yearly_reporting is not a valid boolean', () => {
+        input.yearly_reporting = 'not-a-boolean'
 
-      const result = validateStatisticInput(input)
+        assert.throws(() => validateAndParseStatisticInput(input, requiredUpdateFields, 'update'), {
+          statregError: "Field 'yearly_reporting' must be a boolean.",
+        })
+      })
 
-      assert.deepEqual(result, expectedResult)
-    })
+      test('throws error when relation id is an invalid format', () => {
+        input.relation = 'abc'
 
-    test('returns sanitized comment when comment is provided', () => {
-      const result = validateStatisticInput(input)
+        assert.throws(() => validateAndParseStatisticInput(input, requiredUpdateFields, 'update'), {
+          statregError: "Field 'relation' must be a number.",
+        })
+      })
 
-      assert.deepEqual(result, expectedResult)
-    })
+      test('throws error when status is not valid value', () => {
+        input.status = 'ABC'
 
-    test('falls back to null when comment is missing', () => {
-      input.comment = undefined
-      expectedResult.comment = null
-
-      const result = validateStatisticInput(input)
-
-      assert.deepEqual(result, expectedResult)
+        assert.throws(() => validateAndParseStatisticInput(input, requiredUpdateFields, 'update'), {
+          statregError: "Field 'status' must be one of these: K, A, IA, UT, SA, SP.",
+        })
+      })
     })
   })
 })
@@ -705,7 +785,7 @@ const mockUpdateStatisticPrismaUpdateData = {
     comment: 'Beskrivelse av endring',
     desk_appoval_status: 'FORSLAG',
     division_code: '105',
-    first_release: '2026-03-25T08:30:00.000Z',
+    first_release: new Date('2026-03-25T00:00:00.000Z'),
     language: 'nn',
     legacy_topic_codes: '05.01.02',
     name: 'Helse',
