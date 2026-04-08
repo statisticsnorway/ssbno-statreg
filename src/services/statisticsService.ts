@@ -287,7 +287,7 @@ type ValidatedStatisticInput = {
   first_released_at: Date
   main_language: string
   comment: string
-  relation?: number
+  relation?: number | null
 }
 
 export function validateAndParseStatisticInput(
@@ -343,7 +343,7 @@ export function validateAndParseStatisticInput(
       throw { statregError: `Field 'status' must be one of these: ${Object.keys(StatisticStatus).join(', ')}.` }
     }
 
-    if (!isNumber(relation)) {
+    if (relation && !isNumber(relation)) {
       throw { statregError: "Field 'relation' must be a number." }
     }
 
@@ -357,7 +357,7 @@ export function validateAndParseStatisticInput(
       status: sanitize(status?.code!),
       previous_topic_codes: sanitize(previous_topic_codes!),
       yearly_reporting: Boolean(yearly_reporting),
-      relation: Number(relation),
+      relation: relation ? Number(relation) : null,
       comment: sanitize(comment!),
     }
   }
