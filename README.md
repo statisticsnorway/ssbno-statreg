@@ -2,7 +2,7 @@
 
 ## Description
 
-Statreg is a fullstack application for statistikkregisteret. It provides endpoints for fetching and managing statistics and publications, amongst other things.
+Statreg is a fullstack application for statistikkregisteret. It includes an API that provides endpoints for fetching and managing statistics and publications, amongst other things.
 
 ## Documentation
 Technical documentation are found in [docs](./docs/)-folder

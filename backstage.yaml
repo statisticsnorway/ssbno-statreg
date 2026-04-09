@@ -3,7 +3,7 @@ kind: Component
 metadata:
   name: ssbno-statreg
   description: |
-    Statreg is a fullstack application for statistikkregisteret. It provides endpoints for fetching and managing statistics and publications, amongst other things. 
+    Statreg is a fullstack application for statistikkregisteret. It includes an API that provides endpoints for fetching and managing statistics and publications, amongst other things. 
   links:
     - title: ssbno-statreg.intern.ssb.no
       url: https://ssbno-statreg.intern.ssb.no
