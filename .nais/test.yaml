@@ -31,8 +31,8 @@ spec:
   port: 8080
 
   envFrom:
-    - secret: login-config-ssbno-statreg-api
-    - secret: statreg-api-secrets
+    - secret: login-config-ssbno-statreg
+    - secret: statreg-secrets
     - configmap: statreg-api-config
 
   env:
