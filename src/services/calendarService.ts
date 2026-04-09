@@ -37,5 +37,9 @@ export async function createBlockedReleaseDay(
 
 //checks if a date is among the blocked release dates in the database
 export async function isBlockedDay(prisma: CalendarDatePrisma, day: Date): Promise<Boolean> {
-  throw new Error('Not implemented')
+  const blockedDay = await prisma.calender_date.findUnique({
+    where: { day },
+  })
+
+  return blockedDay !== null
 }
