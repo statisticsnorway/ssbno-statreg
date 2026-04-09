@@ -34,3 +34,8 @@ export async function createBlockedReleaseDay(
     date: dateToISOString(blockedDay.day),
   }))
 }
+
+//checks if a date is among the blocked release dates in the database
+export async function isBlockedDay(prisma: CalendarDatePrisma, day: Date): Promise<Boolean> {
+  throw new Error('Not implemented')
+}
