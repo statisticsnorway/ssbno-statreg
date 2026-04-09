@@ -1,5 +1,5 @@
 import type { StatisticListing, StatisticDetails, StatisticUpdate, StatisticCreate } from '@/types/index'
-import { dateToISOString, sanitize, validateDateOnly, ensureRequiredFieldsExists, isNumber } from '@/lib/utils'
+import { dateToISOString, sanitize, parseDateOnly, ensureRequiredFieldsExists, isNumber, parseId } from '@/lib/utils'
 import type { Prisma } from '@/generated/prisma/client'
 import { getDivisionFromCode } from '@/services/klassService'
 import { fetchUsers } from '@/services/entraUserService'
@@ -140,8 +140,10 @@ export async function mapStatisticDetails(statistic: StatisticPrismaResult): Pro
 }
 
 export async function getStatisticByShortname(shortname: string, prisma: StatisticPrisma): Promise<StatisticDetails> {
+  const safeShortname = sanitize(shortname)
+
   const statistic = await prisma.statistic.findFirst({
-    where: { shortname: { name: sanitize(shortname) } },
+    where: { shortname: { name: safeShortname } },
     include: StatisticsDetailedIncludes,
   })
   if (!statistic) return Promise.reject({ status: 404, statregError: 'Shortname not found' })
@@ -168,6 +170,14 @@ export async function updateStatistic(
     'comment',
   ]
 
+  const safeShortname = sanitize(shortname)
+  const existingStatistic = await prisma.statistic.findFirst({
+    where: { shortname: { name: safeShortname } },
+    select: { id: true, statistic_region_levels: { select: { region_level: { select: { code: true, id: true } } } } },
+  })
+
+  if (!existingStatistic) return Promise.reject({ status: 404, statregError: `Shortname ${safeShortname} not found` })
+
   const {
     division,
     statistic_region_levels = [],
@@ -180,35 +190,31 @@ export async function updateStatistic(
     first_released_at,
     main_language,
     comment,
-  } = validateAndParseStatisticInput(body, requiredFields, 'update')
+  } = parseStatisticInput(body, requiredFields, 'update')
 
-  const safeShortname = sanitize(shortname)
-  const statistic = await prisma.statistic.findFirst({
-    where: { shortname: { name: safeShortname } },
-    select: { id: true, statistic_region_levels: { select: { region_level: { select: { code: true, id: true } } } } },
-  })
-
-  if (!statistic) return Promise.reject({ status: 404, statregError: `Shortname ${safeShortname} not found` })
-
-  const regionLevelsToRemove = statistic.statistic_region_levels.filter(
+  const regionLevelsToRemove = existingStatistic.statistic_region_levels.filter(
     (existingRegLvl) =>
       !statistic_region_levels?.find((incomingRegLvl) => incomingRegLvl === existingRegLvl.region_level.code)
   )
   const deleteRegionLevelStatement = regionLevelsToRemove.map((regLvl) => {
-    return { statistic_id_region_level_id: { statistic_id: statistic.id, region_level_id: regLvl.region_level.id } }
+    return {
+      statistic_id_region_level_id: { statistic_id: existingStatistic.id, region_level_id: regLvl.region_level.id },
+    }
   })
 
   const regionLevelsToAdd = statistic_region_levels.filter(
     (incomingRegLvl) =>
       incomingRegLvl.code &&
-      !statistic.statistic_region_levels?.find((existingRegLvl) => incomingRegLvl === existingRegLvl.region_level.code)
+      !existingStatistic.statistic_region_levels?.find(
+        (existingRegLvl) => incomingRegLvl === existingRegLvl.region_level.code
+      )
   )
   const createRegionLevelStatement = regionLevelsToAdd.map((regLvl) => {
     return { region_level: { connect: { code: regLvl.code } } }
   })
 
   const updatedStatistic = await prisma.statistic.update({
-    where: { id: statistic.id },
+    where: { id: existingStatistic.id },
     data: {
       name,
       name_en,
@@ -240,14 +246,14 @@ export async function createStatistic(
 ): Promise<StatisticDetails> {
   const safeShortname = sanitize(shortname)
 
+  await statisticsAsserts.assertShortnameExists(safeShortname, prisma)
+  await statisticsAsserts.assertShortnameExistsAndIsAvailable(safeShortname, prisma)
+
   const requiredFields: (keyof StatisticCreate)[] = ['division', 'name', 'name_en', 'first_released_at']
-  const { division, name, name_en, first_released_at, main_language, comment } = validateAndParseStatisticInput(
+  const { division, name, name_en, first_released_at, main_language, comment } = parseStatisticInput(
     body,
     requiredFields
   )
-
-  await statisticsAsserts.assertShortnameExists(safeShortname, prisma)
-  await statisticsAsserts.assertShortnameExistsAndIsAvailable(safeShortname, prisma)
 
   const result = await prisma.statistic.create({
     data: {
@@ -290,7 +296,7 @@ type ValidatedStatisticInput = {
   relation?: number | null
 }
 
-export function validateAndParseStatisticInput(
+export function parseStatisticInput(
   body: StatisticCreate | StatisticUpdate | undefined,
   requiredFields: (keyof StatisticCreate)[] | (keyof StatisticUpdate)[],
   type: 'create' | 'update' = 'create'
@@ -309,16 +315,12 @@ export function validateAndParseStatisticInput(
     relation,
   } = ensureRequiredFieldsExists(body as StatisticUpdate, requiredFields as (keyof StatisticUpdate)[])
 
-  if (!name) {
+  const safeName = sanitize(name)
+  const safeNameEn = sanitize(name_en)
+  const safeComment = sanitize(comment)
+
+  if (!safeName) {
     throw { statregError: "Field 'name' must be a non-empty string." }
-  }
-
-  if (!isNumber(division)) {
-    throw { statregError: "Field 'division' must be a number." }
-  }
-
-  if (!getDivisionFromCode(Number(division))) {
-    throw { statregError: "Field 'division' does not correspond to an existing division." }
   }
 
   if (main_language !== 'nb' && main_language !== 'nn') {
@@ -326,12 +328,12 @@ export function validateAndParseStatisticInput(
   }
 
   const validatedInput = {
-    division: division!.toString(),
-    name: sanitize(name),
-    name_en: sanitize(name_en!),
-    first_released_at: validateDateOnly(first_released_at!),
-    main_language: sanitize(main_language),
-    comment: comment ? sanitize(comment) : '',
+    division: parseDivision(division),
+    name: safeName,
+    name_en: safeNameEn,
+    first_released_at: parseDateOnly(first_released_at!),
+    main_language: main_language,
+    comment: safeComment,
   }
 
   if (type === 'update') {
@@ -339,28 +341,46 @@ export function validateAndParseStatisticInput(
       throw { statregError: "Field 'yearly_reporting' must be a boolean." }
     }
 
-    if (!Object.keys(StatisticStatus).includes(status?.code!)) {
-      throw { statregError: `Field 'status' must be one of these: ${Object.keys(StatisticStatus).join(', ')}.` }
-    }
-
-    if (relation && !isNumber(relation)) {
-      throw { statregError: "Field 'relation' must be a number." }
-    }
-
-    if (!comment) {
+    if (!safeComment) {
       throw { statregError: "Field 'comment' must be a non-empty string." }
     }
 
     return {
       ...validatedInput,
       statistic_region_levels,
-      status: sanitize(status?.code!),
+      status: parseStatusCode(status?.code),
       previous_topic_codes: sanitize(previous_topic_codes!),
       yearly_reporting: Boolean(yearly_reporting),
-      relation: relation ? Number(relation) : null,
-      comment: sanitize(comment!),
+      relation: parseRelation(relation),
+      comment: safeComment,
     }
   }
 
   return validatedInput
+}
+
+export function parseDivision(division?: string | null) {
+  if (!division || !isNumber(division)) {
+    throw { statregError: "Field 'division' must be a number." }
+  }
+
+  if (!getDivisionFromCode(Number(division))) {
+    throw { statregError: "Field 'division' does not correspond to an existing division." }
+  }
+
+  return division.toString()
+}
+
+export function parseStatusCode(statusCode?: string): string {
+  if (!statusCode || !Object.keys(StatisticStatus).includes(statusCode)) {
+    throw { statregError: `Field 'status' must be one of these: ${Object.keys(StatisticStatus).join(', ')}.` }
+  }
+  return statusCode
+}
+
+export function parseRelation(relationId?: string | null): number | null {
+  if (relationId) {
+    return parseId(relationId, 'relation')
+  }
+  return null
 }

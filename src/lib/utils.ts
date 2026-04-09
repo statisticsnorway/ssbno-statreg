@@ -4,7 +4,7 @@ export function dateToISOString(date: Date | null): string | undefined {
   return date.toISOString()
 }
 
-export function sanitize(input: string): string {
+export function sanitize(input?: string): string {
   if (typeof input !== 'string') return ''
 
   return input.trim().replace(/[^a-zA-Z0-9æøåÆØÅ.,:;!?()/\-\s]/g, '')
@@ -12,18 +12,18 @@ export function sanitize(input: string): string {
 
 type DateString = string | string[] | undefined
 
-export function validateDateOnly(dateString: DateString, fieldName = ''): Date {
+export function parseDateOnly(dateString: DateString, fieldName = ''): Date {
   const dateOnlyRegex = /^\d{4}-\d{2}-\d{2}$/ // e.g. YYYY-MM-dd
-  return validateAndParseDate(dateString, fieldName, dateOnlyRegex)
+  return parseDate(dateString, fieldName, dateOnlyRegex)
 }
 
-export function validateDateISO(dateString: DateString, fieldName = ''): Date {
+export function parseDateISO(dateString: DateString, fieldName = ''): Date {
   // TODO: MIM-2546: Confirm if this regEx covers all our required valid date ISO formats
   const dateISORegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/ // YYYY-MM-DDTHH:mm:ssZ
-  return validateAndParseDate(dateString, fieldName, dateISORegex)
+  return parseDate(dateString, fieldName, dateISORegex)
 }
 
-export function validateAndParseDate(dateString: DateString, fieldName: string, dateRegEx: RegExp): Date {
+export function parseDate(dateString: DateString, fieldName: string, dateRegEx: RegExp): Date {
   const errorMessage = () => ({
     statregError: ['Invalid', fieldName, 'date format:', dateString].filter(Boolean).join(' '),
   })
@@ -45,14 +45,12 @@ export function ensureString(value?: string | string[]): string {
   return Array.isArray(value) ? (value[0] ?? '') : (value ?? '')
 }
 
-export function ensureIdIsNumber(variantId: string | number, fieldName?: string): number {
-  const parsedVariantId = typeof variantId === 'number' ? variantId : Number(sanitize(variantId))
-
-  if (!Number.isInteger(parsedVariantId) || parsedVariantId < 0) {
+export function parseId(id: string | number, fieldName?: string): number {
+  if (!isNumber(id) || Number(id) < 0) {
     throw { statregError: ['Invalid', fieldName, 'id format'].filter(Boolean).join(' ') }
   }
 
-  return parsedVariantId
+  return Number(id)
 }
 
 export function ensureRequiredFieldsExists<T extends Record<string, any>>(

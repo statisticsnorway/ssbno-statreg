@@ -1,7 +1,7 @@
 import { ReleasePrisma } from '@/services/releasesService'
 import { StatisticPrisma } from '@/services/statisticsService'
 
-export async function assertStatisticExists(shortname: string, prisma: ReleasePrisma) {
+export async function assertStatisticExists(shortname: string, prisma: ReleasePrisma | StatisticPrisma) {
   const exists = await prisma.statistic.findFirst({
     where: { shortname: { name: shortname } },
     select: { id: true },

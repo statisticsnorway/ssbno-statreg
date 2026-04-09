@@ -70,7 +70,7 @@ describe('calendarService  ', () => {
       const inputComment = { blocked_comment: '' }
 
       await assert.rejects(() => createBlockedReleaseDay(prismaMock, inputDate, inputComment), {
-        statregError: 'Invalid body',
+        statregError: `Field 'blocked_comment' must be a non-empty string.`,
       })
       assert.strictEqual(prismaMock.calender_date.create.mock.callCount(), 0)
       assert.strictEqual(prismaMock.calender_date.findMany.mock.callCount(), 0)
@@ -81,7 +81,7 @@ describe('calendarService  ', () => {
       const inputComment = {}
 
       await assert.rejects(() => createBlockedReleaseDay(prismaMock, inputDate, inputComment), {
-        statregError: 'Invalid body',
+        statregError: 'Missing required field(s): blocked_comment',
       })
       assert.strictEqual(prismaMock.calender_date.create.mock.callCount(), 0)
       assert.strictEqual(prismaMock.calender_date.findMany.mock.callCount(), 0)
