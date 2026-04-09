@@ -4,7 +4,7 @@ Here you'll find the migration plan and scripts used to migrate data from the le
 
 All scripts are found under `src/scripts`
 
-Before performing the migration, we need to allow the prisma methods deleteMany and createMany. We block these in our prisma.ts lib, because they are very hard to reliably create audit logs for and are a common source of issues. [See this PR for more information](https://github.com/statisticsnorway/ssbno-statreg-api/pull/147) about what to comment out. We choose to do this with simple commenting instead of feature toggles or similar in the spirit of keeping things simple.
+Before performing the migration, we need to allow the prisma methods deleteMany and createMany. We block these in our prisma.ts lib, because they are very hard to reliably create audit logs for and are a common source of issues. [See this PR for more information](https://github.com/statisticsnorway/ssbno-statreg/pull/147) about what to comment out. We choose to do this with simple commenting instead of feature toggles or similar in the spirit of keeping things simple.
 
 ## Step by step plan
 
@@ -32,11 +32,11 @@ kubectl get pods -n ssbno
 ```
 Copy the json folder into pod (replace with the actual pod name)
 ```
-kubectl cp ~/Documents/STATREG_TABLES_JSON ssbno-statreg-api-77ccd46996-qsk9d:/tmp
+kubectl cp ~/Documents/STATREG_TABLES_JSON ssbno-statreg-77ccd46996-qsk9d:/tmp
 ```
 Copy tableStats into pod (replace with the actual pod name)
 ```
-kubectl cp ~/repos/ssbno-statreg-api/docs/database-migration/tableStatsExample.json ssbno-statreg-api-5665547945-nvjpb:/tmp
+kubectl cp ~/repos/ssbno-statreg/docs/database-migration/tableStatsExample.json ssbno-statreg-5665547945-nvjpb:/tmp
 ```
 
 7. Run script `import-data-to-postgres.ts` to delete all existing data in database, load data from JSON files to PostgreSQL by running command in the pod or locally in the terminal:

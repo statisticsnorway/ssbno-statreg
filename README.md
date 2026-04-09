@@ -1,8 +1,8 @@
-# ssbno-statreg-api
+# ssbno-statreg
 
 ## Description
 
-Statreg API is a backend service for statistikkregisteret. It provides endpoints for fetching and managing statistics and publications, amongst other things.
+Statreg is a fullstack application for statistikkregisteret. It provides endpoints for fetching and managing statistics and publications, amongst other things.
 
 ## Documentation
 Technical documentation are found in [docs](./docs/)-folder
