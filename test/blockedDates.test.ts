@@ -36,6 +36,7 @@ describe('blockedDates', () => {
           new Date(2028, 5, 5), // Andre pinsedag
         ],
       }
+
       assert.deepEqual(calculateMovableHolidays(2026), movableHolidaysByYear['2026'])
       assert.deepEqual(calculateMovableHolidays(2027), movableHolidaysByYear['2027'])
       assert.deepEqual(calculateMovableHolidays(2028), movableHolidaysByYear['2028'])

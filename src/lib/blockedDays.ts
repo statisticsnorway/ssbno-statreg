@@ -1,3 +1,12 @@
+export let MOVABLE_HOLIDAYS: Record<number, Date[]> = {}
+
+export function getMovableHolidays(year: number): Date[] {
+  if (!MOVABLE_HOLIDAYS[year]) {
+    MOVABLE_HOLIDAYS[year] = calculateMovableHolidays(year)
+  }
+  return MOVABLE_HOLIDAYS[year]
+}
+
 export function calculateMovableHolidays(year: number): Date[] {
   // https://no.wikipedia.org/wiki/Helligdager_i_Norge#Helligdager
 
