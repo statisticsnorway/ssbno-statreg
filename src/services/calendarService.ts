@@ -34,3 +34,10 @@ export async function createBlockedReleaseDay(
     date: dateToISOString(blockedDay.day),
   }))
 }
+
+export async function isManuallyBlockedDay(prisma: CalendarDatePrisma, day: Date): Promise<Boolean> {
+  const manuallyBlockedDay = await prisma.calender_date.findUnique({
+    where: { day },
+  })
+  return !!manuallyBlockedDay
+}
