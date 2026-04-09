@@ -30,8 +30,8 @@ spec:
   image: '{{ image }}' # Injected from the GitHub Action
   port: 8080
 
-  envFrom: # TODO: Where do these secrets come from?
-    - secret: login-config-ssbno-statreg
+  envFrom:
+    - secret: login-config-ssbno-statreg-api
     - secret: statreg-api-secrets
     - configmap: statreg-api-config
 
