@@ -35,13 +35,13 @@ export async function createBlockedReleaseDay(
   }))
 }
 
-export async function isBlockedDay(prisma: CalendarDatePrisma, day: Date): Promise<Boolean> {
+export async function isManuallyBlockedDay(prisma: CalendarDatePrisma, day: Date): Promise<Boolean> {
   const manuallyBlockedDay = await prisma.calender_date.findUnique({
     where: { day },
   })
   if (manuallyBlockedDay) {
     return true
+  } else {
+    return false
   }
-  //TODO: check automatically blocked days
-  return false
 }

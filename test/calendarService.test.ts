@@ -1,6 +1,6 @@
 import { beforeEach, describe, test, mock } from 'node:test'
 import assert from 'node:assert'
-import { createBlockedReleaseDay, isBlockedDay } from '@/services/calendarService'
+import { createBlockedReleaseDay, isManuallyBlockedDay } from '@/services/calendarService'
 import { dateToISOString } from '@/lib/utils'
 
 // Uncomment next line to run tests locally with UTC timezone (same as nais cluster)
@@ -93,12 +93,12 @@ describe('calendarService  ', () => {
       assert.strictEqual(prismaMock.calender_date.findMany.mock.callCount(), 0)
     })
   })
-  describe('isDateBlocked() ', () => {
-    test('returns true when day is a manually blocked day', async () => {
+  describe('isManuallyBlockedDay() ', () => {
+    test('returns true when day is manually blocked', async () => {
       const blockedDay = new Date('2026-12-24T00:00:00Z')
       setFindUniqueReturn({ comment: 'Julaften', day: blockedDay })
 
-      const result = await isBlockedDay(prismaMock, blockedDay)
+      const result = await isManuallyBlockedDay(prismaMock, blockedDay)
 
       assert.strictEqual(prismaMock.calender_date.findUnique.mock.callCount(), 1)
       assert.deepStrictEqual(prismaMock.calender_date.findUnique.mock.calls[0].arguments[0], {
@@ -107,11 +107,11 @@ describe('calendarService  ', () => {
       assert.strictEqual(result, true)
     })
 
-    test('returns false when day is not blocked', async () => {
+    test('returns false when day is not manually blocked', async () => {
       const unblockedDay = new Date('2026-12-01T00:00:00Z')
       setFindUniqueReturn(null)
 
-      const result = await isBlockedDay(prismaMock, unblockedDay)
+      const result = await isManuallyBlockedDay(prismaMock, unblockedDay)
 
       assert.strictEqual(prismaMock.calender_date.findUnique.mock.callCount(), 1)
       assert.deepStrictEqual(prismaMock.calender_date.findUnique.mock.calls[0].arguments[0], {
