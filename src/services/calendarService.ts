@@ -39,9 +39,5 @@ export async function isManuallyBlockedDay(prisma: CalendarDatePrisma, day: Date
   const manuallyBlockedDay = await prisma.calender_date.findUnique({
     where: { day },
   })
-  if (manuallyBlockedDay) {
-    return true
-  } else {
-    return false
-  }
+  return !!manuallyBlockedDay
 }
