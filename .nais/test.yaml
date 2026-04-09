@@ -33,7 +33,7 @@ spec:
   envFrom:
     - secret: login-config-ssbno-statreg
     - secret: statreg-secrets
-    - configmap: statreg-api-config
+    - configmap: statreg-config
 
   env:
     - name: NODE_ENV
