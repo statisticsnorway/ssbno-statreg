@@ -1,3 +1,22 @@
+export function calculateMovableHolidays(year: number): Date[] {
+  // https://no.wikipedia.org/wiki/Helligdager_i_Norge#Helligdager
+
+  const easterSunday = calculateEasterSunday(year)
+
+  // prettier-ignore
+  const movableHolidays = {
+    "Skjærtorsdag": addDays(easterSunday, -3),
+    "Langfredag": addDays(easterSunday, -2),
+    "Første påskedag": easterSunday,
+    "Andre påskedag": addDays(easterSunday, 1),
+    "Kristi himmelfartsdag": addDays(easterSunday, 39),
+    "Første pinsedag": addDays(easterSunday, 49),
+    "Andre pinsedag": addDays(easterSunday, 50),
+  }
+
+  return Object.values(movableHolidays)
+}
+
 export function calculateEasterSunday(year: number) {
   // https://no.wikipedia.org/wiki/P%C3%A5skeformelen#Meeus/Jones/Butchers_formel_(bare_for_gregoriansk_kalender)
   const a = year % 19
@@ -16,4 +35,10 @@ export function calculateEasterSunday(year: number) {
   const p = ((h + l - 7 * m + 114) % 31) + 1
 
   return new Date(year, n - 1, p)
+}
+
+function addDays(date: Date, days: number): Date {
+  const result = new Date(date)
+  result.setDate(result.getDate() + days)
+  return result
 }
