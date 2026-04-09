@@ -16,7 +16,7 @@ We have a docker compose setup to simulate production auth flow. Alternatively o
 In `.env` make sure `AUTH_ENABLED` is set to `true` and that the following variables are defined:
 
 ```
-KEYCLOAK_CLIENT_ID=oauth2-proxy-ssbno-statreg-api
+KEYCLOAK_CLIENT_ID=oauth2-proxy-ssbno-statreg
 KEYCLOAK_CLIENT_SECRET= (this password is only for devs and stored in gcp secret manager)
 KEYCLOAK_WELL_KNOWN_URL=https://auth-play.test.ssb.no/realms/ssb/.well-known/openid-configuration
 ```

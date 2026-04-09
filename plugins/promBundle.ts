@@ -6,7 +6,7 @@ export const promBundleMetrics = promBundle({
   includeStatusCode: true,
   includeUp: true,
   customLabels: {
-    deployment: 'ssbno-statreg-api',
+    deployment: 'ssbno-statreg',
     namespace: 'ssbno',
     team: 'ssbno',
   },

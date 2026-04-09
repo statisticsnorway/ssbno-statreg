@@ -2,7 +2,7 @@
   "engines": {
     "node": ">=22.13.0"
   },
-  "name": "ssbno-statreg-api",
+  "name": "ssbno-statreg",
   "private": true,
   "version": "0.0.0",
   "type": "module",
