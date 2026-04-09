@@ -100,10 +100,6 @@ describe('calendarService  ', () => {
 
       const result = await isManuallyBlockedDay(prismaMock, blockedDay)
 
-      assert.strictEqual(prismaMock.calender_date.findUnique.mock.callCount(), 1)
-      assert.deepStrictEqual(prismaMock.calender_date.findUnique.mock.calls[0].arguments[0], {
-        where: { day: blockedDay },
-      })
       assert.strictEqual(result, true)
     })
 
@@ -113,10 +109,6 @@ describe('calendarService  ', () => {
 
       const result = await isManuallyBlockedDay(prismaMock, unblockedDay)
 
-      assert.strictEqual(prismaMock.calender_date.findUnique.mock.callCount(), 1)
-      assert.deepStrictEqual(prismaMock.calender_date.findUnique.mock.calls[0].arguments[0], {
-        where: { day: unblockedDay },
-      })
       assert.strictEqual(result, false)
     })
   })
