@@ -1,0 +1,45 @@
+name: API integration tests
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: statregdb
+        ports:
+          - 5433:5432
+
+    env:
+      PGURL: postgresql://ci:ci@localhost:5433/statregdb?schema=statreg_data
+      AUTH_ENABLED: 'false'
+      TEST_BASE_URL: http://127.0.0.1:8080
+      TEST_AVAILABLE_SHORTNAME: befolk
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npm run generate
+      - run: npm run db:deploy
+      - run: npm run seed
+      - run: npm run build
+      - run: npm run start > app.log 2>&1 &
+      - run: npx wait-on http://127.0.0.1:8080
+      - run: npx tsx --test test/integration/*.test.ts
+
+      - if: failure()
+        run: cat app.log || true
