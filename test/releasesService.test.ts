@@ -181,13 +181,13 @@ describe('releasesService ', async () => {
 
     test('returns 400 if id is not a number', async () => {
       await assert.rejects(() => getReleaseById('test', prismaMock), {
-        statregError: 'Invalid release id',
+        statregError: 'Invalid release id format',
       })
     })
 
     test('returns 404 if no release found', async () => {
       setPrismaResult(null)
-      await assert.rejects(() => getReleaseById('1', prismaMock), { status: 404, statregError: 'Release not found' })
+      await assert.rejects(() => getReleaseById('1', prismaMock), { status: 404, statregError: 'Release 1 not found' })
     })
   })
 
