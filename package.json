@@ -21,7 +21,7 @@
     "lint:fix": "eslint --fix '**/*.{js,mjs,cjs,ts}'",
     "test": "tsx --test --experimental-test-module-mocks 'test/**.test.ts' 'src/**.test.ts' ",
     "ci-test": "tsx --test --experimental-test-module-mocks 'test/**.test.ts' 'src/**.test.ts'",
-    "test:integration": "tsx --test --experimental-test-module-mocks 'test/integration/**.test.ts'",
+    "test:integration": "tsx --test 'test/integration/**.test.ts'",
     "generate:api-types": "openapi-typescript ./openapi/openapi.yaml | prettier --parser typescript > src/types/api-types.d.ts"
   },
   "overrides": {
