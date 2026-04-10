@@ -642,7 +642,7 @@ describe('statisticService ', async () => {
       assert.throws(() => parseStatusCode('INVALID_STATUS'), { statregError: expectedError })
     })
 
-    test('is case-senstestive', () => {
+    test('is case-sensitive', () => {
       assert.throws(() => parseStatusCode('k'), { statregError: expectedError })
     })
   })

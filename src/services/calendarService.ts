@@ -12,8 +12,8 @@ export async function createBlockedReleaseDay(
   const date = parseDateOnly(dateString)
   const { blocked_comment } = ensureRequiredFieldsExists(body, ['blocked_comment'])
   const comment = sanitize(blocked_comment)
-  if (comment.length == 0) {
-    return Promise.reject({ status: 400, statregError: `Field 'blocked_comment' must be a non-empty string.` })
+  if (!comment) {
+    return Promise.reject({ statregError: `Field 'blocked_comment' must be a non-empty string.` })
   }
 
   await prisma.calender_date.create({

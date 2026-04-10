@@ -332,7 +332,7 @@ export function parseStatisticInput(
     name: safeName,
     name_en: safeNameEn,
     first_released_at: parseDateOnly(first_released_at!),
-    main_language: main_language,
+    main_language,
     comment: safeComment,
   }
 

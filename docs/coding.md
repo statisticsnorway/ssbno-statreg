@@ -1,4 +1,4 @@
-# Coding practices and convetions in this project
+# Coding practices and conventions in this project
 
 ## Sanitation, validation and parsing in service layer
 
