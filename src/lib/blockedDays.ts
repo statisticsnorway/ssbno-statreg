@@ -1,10 +1,32 @@
-export let MOVABLE_HOLIDAYS: Record<number, Date[]> = {}
+import { PrismaClient } from '@prisma/client/extension'
+import { assertDayNotManuallyBlocked } from './asserts'
 
-export function getMovableHolidays(year: number): Date[] {
-  if (!MOVABLE_HOLIDAYS[year]) {
-    MOVABLE_HOLIDAYS[year] = calculateMovableHolidays(year)
+export const HOLIDAYS: Record<number, Date[]> = {}
+
+export async function isDateBlocked(date: Date): Promise<Boolean> {
+  if (date.getDay() == 5 || date.getDay() == 6) return true
+
+  const year = date.getFullYear()
+  const holidays = getHolidays(year)
+  if (holidays.some((d) => d === date)) return true
+
+  if (await !assertDayNotManuallyBlocked(PrismaClient, date)) return true
+
+  return false
+}
+
+export function getHolidays(year: number): Date[] {
+  if (!HOLIDAYS[year]) {
+    const holidaysOnStaticDates = [
+      new Date(year, 1, 1),
+      new Date(year, 5, 1),
+      new Date(year, 5, 17),
+      new Date(year, 12, 25),
+      new Date(year, 12, 26),
+    ]
+    HOLIDAYS[year] = holidaysOnStaticDates.concat(calculateMovableHolidays(year))
   }
-  return MOVABLE_HOLIDAYS[year]
+  return HOLIDAYS[year]
 }
 
 export function calculateMovableHolidays(year: number): Date[] {
