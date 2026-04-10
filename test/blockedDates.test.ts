@@ -3,6 +3,7 @@ import { describe, test } from 'node:test'
 import assert from 'node:assert/strict'
 
 describe('blockedDates ', () => {
+  // TODO legg inn tester for isDateBlocked()
   describe('getHolidays() ', () => {
     test('returns correct dates for 2026', () => {
       const holidays = getHolidays(2026)

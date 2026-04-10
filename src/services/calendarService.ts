@@ -16,7 +16,6 @@ export async function createBlockedReleaseDay(
   const isAlreadyBlocked = await isDateBlocked(date)
   if (isAlreadyBlocked) {
     return Promise.reject({
-      status: 400,
       statregError: 'Date is already blocked, either manually, weekend or public holiday',
     })
   }
