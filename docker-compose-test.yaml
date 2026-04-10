@@ -6,15 +6,44 @@ services:
     environment:
       POSTGRES_USER: test_user
       POSTGRES_PASSWORD: test_pass
-      POSTGRES_DB: test_db
+      POSTGRES_DB: statreg_db
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "test_user", "-d", "statreg_db"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
 
-  api:
-    build:
-      context: .
-      dockerfile: Dockerfile
+  app:
+    image: node:24
+    working_dir: /app
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: sh -c "npm install && npm run build && npm run generate && npm run db:deploy && npm run seed && npm run start"
+    expose:
+      - '8080'
     environment:
-      PGURL: postgresql://test_user:test_pass@db:5432/test_db
       NODE_ENV: test
+      PGURL: postgresql://test_user:test_pass@db:5432/statreg_db?sslmode=disable
+      AUTH_ENABLED: false 
     depends_on:
-      - db
-    command: sh -c "npm run db:deploy && npm run test:integration"
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/docs"] # TODO proper health check here 
+      interval: 2s
+      timeout: 2s
+      retries: 30
+      
+  tests:
+    image: node:24
+    working_dir: /app
+    volumes:
+      - .:/app
+    environment:
+      NODE_ENV: test
+      API_URL: http://app:8080
+    depends_on:
+      app:
+        condition: service_healthy
+    command: sh -c "npm run test:integration"
