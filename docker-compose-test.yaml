@@ -22,8 +22,8 @@ services:
     command: >
       sh -c "
       npm ci &&
-      npm run build &&
       npm run generate &&
+      npm run build &&
       npm run db:deploy &&
       npm run seed &&
       npm run start
