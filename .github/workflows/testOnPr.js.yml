@@ -40,4 +40,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Run integration tests
-        run: docker-compose -f docker-compose-test.yaml up --abort-on-container-exit --exit-code-from tests
+        run: docker compose -f docker-compose-test.yaml up --abort-on-container-exit --exit-code-from tests
