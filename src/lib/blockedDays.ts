@@ -12,7 +12,7 @@ export async function isDateBlocked(date: Date): Promise<Boolean> {
   const holidays = getHolidays(year)
   if (holidays.some((d) => d === date)) return true
 
-  if (await !assertDayNotManuallyBlocked(PrismaClient, date)) return true
+  if (await !assertDayNotManuallyBlocked(prisma, date)) return true
 
   return false
 }
