@@ -36,7 +36,7 @@ describe('blockedDates ', () => {
     test('returns true for static holiday', async () => {
       assert.equal(await isDateBlocked(new Date('2027-5-1')), true)
     })
-    test('returns true if date manually blocked', async () => {
+    test('returns true if date is manually blocked', async () => {
       assertDateNotManuallyBlockedMock.mock.mockImplementationOnce(() => false)
       assert.equal(await isDateBlocked(new Date('2027-2-5')), true)
     })
