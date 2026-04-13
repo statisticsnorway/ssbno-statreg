@@ -20,11 +20,11 @@ export async function isDateBlocked(date: Date): Promise<Boolean> {
 export function getHolidays(year: number): Date[] {
   if (!HOLIDAYS[year]) {
     const holidaysOnStaticDates = [
-      new Date(year, 1, 1),
-      new Date(year, 5, 1),
-      new Date(year, 5, 17),
-      new Date(year, 12, 25),
-      new Date(year, 12, 26),
+      new Date(`${year}-1-1`),
+      new Date(`${year}-5-1`),
+      new Date(`${year}-5-17`),
+      new Date(`${year}-12-25`),
+      new Date(`${year}-12-26`),
     ]
     HOLIDAYS[year] = holidaysOnStaticDates.concat(calculateMovableHolidays(year))
   }
@@ -67,7 +67,7 @@ export function calculateEasterSunday(year: number) {
   const n = Math.floor((h + l - 7 * m + 114) / 31)
   const p = ((h + l - 7 * m + 114) % 31) + 1
 
-  return new Date(year, n - 1, p)
+  return new Date(`${year}-${n}-${p}`)
 }
 
 function addDays(date: Date, days: number): Date {
