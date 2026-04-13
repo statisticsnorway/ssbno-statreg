@@ -17,11 +17,11 @@ function setListReturn(next: { comment: string; day: Date }[]) {
 describe('calendarService  ', () => {
   before(async () => {
     // eslint-disable-next-line no-unused-vars
-    const blockedDatesLib = await import('@/lib/blockedDays').then(({ isDateBlocked: _, ...rest }) => rest)
-    mock.module('@/lib/blockedDays', {
+    const blockedDatesLib = await import('@/lib/blockedDates').then(({ isDateBlocked: _, ...rest }) => rest)
+    mock.module('@/lib/blockedDates', {
       namedExports: {
         isDateBlocked: isDateBlockedMock,
-        assertsLib: blockedDatesLib,
+        blockedDatesLib,
       },
     })
     ;({ createBlockedReleaseDay } = await import('@/services/calendarService'))

@@ -4,13 +4,15 @@ import { assertDayNotManuallyBlocked } from './asserts'
 export const HOLIDAYS: Record<number, Date[]> = {}
 
 export async function isDateBlocked(date: Date): Promise<Boolean> {
-  if (date.getDay() == 5 || date.getDay() == 6) return true
+  console.log(date)
+  if (date.getDay() == 6 || date.getDay() == ) return true
 
   const year = date.getFullYear()
   const holidays = getHolidays(year)
   if (holidays.some((d) => d === date)) return true
 
-  if (await !assertDayNotManuallyBlocked(PrismaClient, date)) return true
+  const isManuallyBlocked = await !assertDayNotManuallyBlocked(PrismaClient, date)
+  if (isManuallyBlocked) return true
 
   return false
 }
@@ -18,11 +20,11 @@ export async function isDateBlocked(date: Date): Promise<Boolean> {
 export function getHolidays(year: number): Date[] {
   if (!HOLIDAYS[year]) {
     const holidaysOnStaticDates = [
-      new Date(year, 1, 1),
-      new Date(year, 5, 1),
-      new Date(year, 5, 17),
-      new Date(year, 12, 25),
-      new Date(year, 12, 26),
+      new Date(year, 0, 1),
+      new Date(year, 4, 1),
+      new Date(year, 4, 17),
+      new Date(year, 11, 25),
+      new Date(year, 11, 26),
     ]
     HOLIDAYS[year] = holidaysOnStaticDates.concat(calculateMovableHolidays(year))
   }
