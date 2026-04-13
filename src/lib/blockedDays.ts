@@ -4,7 +4,9 @@ import { assertDayNotManuallyBlocked } from './asserts'
 export const HOLIDAYS: Record<number, Date[]> = {}
 
 export async function isDateBlocked(date: Date): Promise<Boolean> {
-  if (date.getDay() == 5 || date.getDay() == 6) return true
+  const sunday = 0
+  const saturday = 6
+  if (date.getDay() == saturday || date.getDay() == sunday) return true
 
   const year = date.getFullYear()
   const holidays = getHolidays(year)
