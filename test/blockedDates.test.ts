@@ -1,9 +1,9 @@
 import { before, describe, mock, test } from 'node:test'
 import assert from 'node:assert/strict'
-import { isDateBlocked } from '@/lib/blockedDates'
 
 let calculateEasterSunday: Function
 let calculateMovableHolidays: Function
+let isDateBlocked: Function
 let getHolidays: Function
 const assertDateNotManuallyBlockedMock = mock.fn(() => true)
 
@@ -17,7 +17,8 @@ describe('blockedDates ', () => {
         assertsLib,
       },
     })
-    ;({ calculateEasterSunday, calculateMovableHolidays, getHolidays } = await import('@/lib/blockedDates'))
+    ;({ calculateEasterSunday, calculateMovableHolidays, getHolidays, isDateBlocked } =
+      await import('@/lib/blockedDates'))
   })
   describe('isDateBlocked() ', () => {
     test('returns false if date not blocked (Friday 5. feb 2027)', async () => {
@@ -33,7 +34,7 @@ describe('blockedDates ', () => {
       assert.equal(await isDateBlocked(new Date('2027-3-28')), true)
     })
     test('returns true for static holiday', async () => {
-      assert.equal(await isDateBlocked(new Date('2027-1-1')), true)
+      assert.equal(await isDateBlocked(new Date('2027-5-1')), true)
     })
     test('returns true if date manually blocked', async () => {
       assertDateNotManuallyBlockedMock.mock.mockImplementationOnce(() => false)
