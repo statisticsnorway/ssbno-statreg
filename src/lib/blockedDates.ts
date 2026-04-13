@@ -1,17 +1,18 @@
-import { PrismaClient } from '@prisma/client/extension'
+import { prisma } from '@/lib/prisma'
 import { assertDayNotManuallyBlocked } from './asserts'
 
 export const HOLIDAYS: Record<number, Date[]> = {}
 
 export async function isDateBlocked(date: Date): Promise<Boolean> {
-  console.log(date)
-  if (date.getDay() == 6 || date.getDay() == ) return true
+  const sunday = 0
+  const saturday = 6
+  if (date.getDay() == saturday || date.getDay() == sunday) return true
 
   const year = date.getFullYear()
   const holidays = getHolidays(year)
   if (holidays.some((d) => d === date)) return true
 
-  const isManuallyBlocked = await !assertDayNotManuallyBlocked(PrismaClient, date)
+  const isManuallyBlocked = await !assertDayNotManuallyBlocked(prisma, date)
   if (isManuallyBlocked) return true
 
   return false
@@ -20,11 +21,11 @@ export async function isDateBlocked(date: Date): Promise<Boolean> {
 export function getHolidays(year: number): Date[] {
   if (!HOLIDAYS[year]) {
     const holidaysOnStaticDates = [
-      new Date(year, 0, 1),
-      new Date(year, 4, 1),
-      new Date(year, 4, 17),
-      new Date(year, 11, 25),
-      new Date(year, 11, 26),
+      new Date(`${year}-1-1`),
+      new Date(`${year}-5-1`),
+      new Date(`${year}-5-17`),
+      new Date(`${year}-12-25`),
+      new Date(`${year}-12-26`),
     ]
     HOLIDAYS[year] = holidaysOnStaticDates.concat(calculateMovableHolidays(year))
   }
@@ -67,7 +68,7 @@ export function calculateEasterSunday(year: number) {
   const n = Math.floor((h + l - 7 * m + 114) / 31)
   const p = ((h + l - 7 * m + 114) % 31) + 1
 
-  return new Date(year, n - 1, p)
+  return new Date(`${year}-${n}-${p}`)
 }
 
 function addDays(date: Date, days: number): Date {
