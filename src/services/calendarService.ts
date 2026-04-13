@@ -1,6 +1,6 @@
 import { isDateBlocked } from '@/lib/blockedDays'
 import type { ExtendedPrismaClient } from '@/lib/prisma'
-import { dateToISOString, sanitize, validateDateOnly } from '@/lib/utils'
+import { dateToISOString, sanitize, parseDateOnly, ensureRequiredFieldsExists } from '@/lib/utils'
 import type { BlockedReleaseDate } from '@/types'
 
 export type CalendarDatePrisma = Pick<ExtendedPrismaClient, 'calender_date'>
@@ -10,9 +10,13 @@ export async function createBlockedReleaseDay(
   dateString?: string | string[],
   body?: { blocked_comment?: string }
 ): Promise<BlockedReleaseDate[]> {
-  if (!body?.blocked_comment) return Promise.reject({ statregError: 'Invalid body' })
-  const comment = sanitize(body!.blocked_comment!)
-  const date = validateDateOnly(dateString)
+  const date = parseDateOnly(dateString)
+  const { blocked_comment } = ensureRequiredFieldsExists(body, ['blocked_comment'])
+  const comment = sanitize(blocked_comment)
+  if (!comment) {
+    return Promise.reject({ statregError: `Field 'blocked_comment' must be a non-empty string.` })
+  }
+
   const isAlreadyBlocked = await isDateBlocked(date)
   if (isAlreadyBlocked) {
     return Promise.reject({
