@@ -1,18 +1,12 @@
 import { describe, mock, test, before, beforeEach } from 'node:test'
 import assert from 'node:assert/strict'
-import { ApprovalStatus } from '@/types/enums'
+import { ApprovalStatus, StatisticStatus } from '@/types/enums'
 import { Users } from '@/types/entra'
 
 let prismaMock: any
 let statisticsResult: object | null
 let updateStatisticsResult: object | null
 let now: Date
-
-function defaultFetchDivisionImplementation(code: number, language?: string) {
-  if (code === 104 && language === 'en') return { code: 104, name: 'Division A1' }
-  if (code === 104) return { code: 104, name: 'Seksjon A1' }
-  if (code === 105) return { code: 105, name: 'Seksjon B1' }
-}
 
 function setStatisticsResult(next: object | null) {
   statisticsResult = next
@@ -38,7 +32,11 @@ describe('statisticService ', async () => {
     ]
   })
 
-  const fetchDivisionMock = mock.fn(defaultFetchDivisionImplementation)
+  const fetchDivisionMock = mock.fn((code: number, language?: string) => {
+    if (code === 104 && language === 'en') return { code: 104, name: 'Division A1' }
+    if (code === 104) return { code: 104, name: 'Seksjon A1' }
+    if (code === 105) return { code: 105, name: 'Seksjon B1' }
+  })
 
   let getStatisticByShortname: Function
   let getAllStatistics: Function
@@ -46,7 +44,10 @@ describe('statisticService ', async () => {
   let createStatistic: Function
   let parseStatisticVariants: Function
   let mapStatisticDetails: Function
-  let validateAndParseStatisticInput: Function
+  let parseStatisticInput: Function
+  let parseDivision: Function
+  let parseStatusCode: Function
+  let parseRelation: Function
   let StatisticsDetailedIncludes: any
 
   before(async () => {
@@ -65,6 +66,8 @@ describe('statisticService ', async () => {
       namedExports: {
         getDivisionFromCode: fetchDivisionMock,
         klassService,
+        isNumber: (val: string) => !isNaN(Number(val)),
+        parseId: (id: string) => Number(id),
       },
     })
     ;({
@@ -72,16 +75,17 @@ describe('statisticService ', async () => {
       getStatisticByShortname,
       parseStatisticVariants,
       mapStatisticDetails,
-      validateAndParseStatisticInput,
+      parseStatisticInput,
       updateStatistic,
       createStatistic,
       StatisticsDetailedIncludes,
+      parseDivision,
+      parseStatusCode,
+      parseRelation,
     } = await import('@/services/statisticsService'))
   })
 
   beforeEach(async () => {
-    fetchDivisionMock.mock.mockImplementation(defaultFetchDivisionImplementation)
-
     prismaMock = {
       statistic: {
         findMany: mock.fn(() => Promise.resolve(statisticsResult)),
@@ -460,7 +464,7 @@ describe('statisticService ', async () => {
       })
 
       test('returns validated statistic input when all conditionals succeed', () => {
-        const result = validateAndParseStatisticInput(input, requiredCreateFields)
+        const result = parseStatisticInput(input, requiredCreateFields)
 
         assert.deepEqual(result, expectedResult)
       })
@@ -468,7 +472,7 @@ describe('statisticService ', async () => {
       test('throws error when name is an empty string', () => {
         input.name = ''
 
-        assert.throws(() => validateAndParseStatisticInput(input, requiredCreateFields), {
+        assert.throws(() => parseStatisticInput(input, requiredCreateFields), {
           statregError: "Field 'name' must be a non-empty string.",
         })
       })
@@ -476,7 +480,7 @@ describe('statisticService ', async () => {
       test('throws error when division is not a number', () => {
         input.division = 'division-a'
 
-        assert.throws(() => validateAndParseStatisticInput(input, requiredCreateFields), {
+        assert.throws(() => parseStatisticInput(input, requiredCreateFields), {
           statregError: "Field 'division' must be a number.",
         })
       })
@@ -484,7 +488,7 @@ describe('statisticService ', async () => {
       test('throws error when division lookup does not find a match', () => {
         input.division = '106'
 
-        assert.throws(() => validateAndParseStatisticInput(input, requiredCreateFields), {
+        assert.throws(() => parseStatisticInput(input, requiredCreateFields), {
           statregError: "Field 'division' does not correspond to an existing division.",
         })
       })
@@ -493,7 +497,7 @@ describe('statisticService ', async () => {
         input.main_language = 'en'
         expectedResult.main_language = 'nb'
 
-        assert.throws(() => validateAndParseStatisticInput(input, requiredCreateFields), {
+        assert.throws(() => parseStatisticInput(input, requiredCreateFields), {
           statregError: "Field 'main_language' must be either 'nb' or 'nn'.",
         })
       })
@@ -502,7 +506,7 @@ describe('statisticService ', async () => {
         input.comment = undefined
         expectedResult.comment = ''
 
-        const result = validateAndParseStatisticInput(input, requiredCreateFields)
+        const result = parseStatisticInput(input, requiredCreateFields)
 
         assert.deepEqual(result, expectedResult)
       })
@@ -556,7 +560,7 @@ describe('statisticService ', async () => {
       })
 
       test('returns validated statistic input when all conditionals succeed', () => {
-        const result = validateAndParseStatisticInput(input, requiredUpdateFields, 'update')
+        const result = parseStatisticInput(input, requiredUpdateFields, 'update')
 
         assert.deepEqual(result, expectedResult)
       })
@@ -564,7 +568,7 @@ describe('statisticService ', async () => {
       test('throws error when comment is an empty string', () => {
         input.comment = ''
 
-        assert.throws(() => validateAndParseStatisticInput(input, requiredUpdateFields, 'update'), {
+        assert.throws(() => parseStatisticInput(input, requiredUpdateFields, 'update'), {
           statregError: "Field 'comment' must be a non-empty string.",
         })
       })
@@ -572,7 +576,7 @@ describe('statisticService ', async () => {
       test('throws error when yearly_reporting is not a valid boolean', () => {
         input.yearly_reporting = 'not-a-boolean'
 
-        assert.throws(() => validateAndParseStatisticInput(input, requiredUpdateFields, 'update'), {
+        assert.throws(() => parseStatisticInput(input, requiredUpdateFields, 'update'), {
           statregError: "Field 'yearly_reporting' must be a boolean.",
         })
       })
@@ -580,18 +584,88 @@ describe('statisticService ', async () => {
       test('throws error when relation id is an invalid format', () => {
         input.relation = 'abc'
 
-        assert.throws(() => validateAndParseStatisticInput(input, requiredUpdateFields, 'update'), {
-          statregError: "Field 'relation' must be a number.",
+        assert.throws(() => parseStatisticInput(input, requiredUpdateFields, 'update'), {
+          statregError: 'Invalid relation id format',
         })
       })
 
       test('throws error when status is not valid value', () => {
         input.status = 'ABC'
 
-        assert.throws(() => validateAndParseStatisticInput(input, requiredUpdateFields, 'update'), {
+        assert.throws(() => parseStatisticInput(input, requiredUpdateFields, 'update'), {
           statregError: "Field 'status' must be one of these: K, A, IA, UT, SA, SP.",
         })
       })
+    })
+  })
+
+  describe('parseDivision ', () => {
+    test('returns division as string when valid', () => {
+      assert.equal(parseDivision('104'), '104')
+    })
+
+    test('throws when division is undefined', () => {
+      assert.throws(() => parseDivision(undefined), { statregError: "Field 'division' must be a number." })
+    })
+
+    test('throws when division is null', () => {
+      assert.throws(() => parseDivision(null), { statregError: "Field 'division' must be a number." })
+    })
+
+    test('throws when division is not a number', () => {
+      assert.throws(() => parseDivision('abc'), { statregError: "Field 'division' must be a number." })
+    })
+
+    test('throws when division does not correspond to an existing division', () => {
+      assert.throws(() => parseDivision('999'), {
+        statregError: "Field 'division' does not correspond to an existing division.",
+      })
+    })
+  })
+
+  describe('parseStatusCode', () => {
+    const expectedError = `Field 'status' must be one of these: ${Object.keys(StatisticStatus).join(', ')}.`
+
+    test('returns statusCode when valid', () => {
+      assert.equal(parseStatusCode('K'), 'K')
+    })
+
+    test('throws when statusCode is undefined', () => {
+      assert.throws(() => parseStatusCode(undefined), { statregError: expectedError })
+    })
+
+    test('throws when statusCode is empty string', () => {
+      assert.throws(() => parseStatusCode(''), { statregError: expectedError })
+    })
+
+    test('throws when statusCode is not a valid status', () => {
+      assert.throws(() => parseStatusCode('INVALID_STATUS'), { statregError: expectedError })
+    })
+
+    test('is case-sensitive', () => {
+      assert.throws(() => parseStatusCode('k'), { statregError: expectedError })
+    })
+  })
+
+  describe('parseRelation', () => {
+    test('returns null when relationId is undefined', () => {
+      assert.equal(parseRelation(undefined), null)
+    })
+
+    test('returns null when relationId is null', () => {
+      assert.equal(parseRelation(null), null)
+    })
+
+    test('returns null when relationId is empty string', () => {
+      assert.equal(parseRelation(''), null)
+    })
+
+    test('returns parsed number when relationId is valid', () => {
+      assert.equal(parseRelation('42'), 42)
+    })
+
+    test('throws when relationId is not a valid id', () => {
+      assert.throws(() => parseRelation('abc'), { statregError: 'Invalid relation id format' })
     })
   })
 })
