@@ -25,7 +25,7 @@ describe('asserts', () => {
         findUnique: vi.fn(),
       },
       calender_date: {
-        findUnique: mock.fn(),
+        findUnique: vi.fn(),
       },
     }
   })
@@ -109,7 +109,7 @@ describe('asserts', () => {
   test('assertShortnameExistsAndIsAvailable throws when shortname is already in use', async () => {
     prismaMock.shortname.findUnique = vi.fn(() => Promise.resolve(null))
 
-    await expect(() => assertShortnameExistsAndIsAvailable('KPI', prismaMock)).rejects.toMatchObject({
+    await expect(() => assertShortnameExistsAndIsAvailable('KPI', prismaMock)).rejects.contains({
       status: 400,
       statregError: "Shortname 'KPI' is already in use",
     })
@@ -118,20 +118,20 @@ describe('asserts', () => {
   describe('assertDayNotManuallyBlocked() ', () => {
     test('returns false when day is manually blocked', async () => {
       const blockedDay = new Date('2026-12-24T00:00:00Z')
-      prismaMock.calender_date.findUnique = mock.fn(() => Promise.resolve({ comment: 'Julaften', day: blockedDay }))
+      prismaMock.calender_date.findUnique = vi.fn(() => Promise.resolve({ comment: 'Julaften', day: blockedDay }))
 
       const result = await assertDayNotManuallyBlocked(prismaMock, blockedDay)
 
-      assert.strictEqual(result, false)
+      expect(result).toBe(false)
     })
 
     test('returns true when day is not manually blocked', async () => {
       const unblockedDay = new Date('2026-12-01T00:00:00Z')
-      prismaMock.calender_date.findUnique = mock.fn(() => Promise.resolve(null))
+      prismaMock.calender_date.findUnique = vi.fn(() => Promise.resolve(null))
 
       const result = await assertDayNotManuallyBlocked(prismaMock, unblockedDay)
 
-      assert.strictEqual(result, true)
+      expect(result).toBe(true)
     })
   })
 })

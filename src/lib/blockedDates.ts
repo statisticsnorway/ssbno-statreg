@@ -1,5 +1,6 @@
-import { prisma } from '@/lib/prisma'
-import { assertDayNotManuallyBlocked } from './asserts'
+// TODO: change back to import from '@/lib/....'
+import { prisma } from './prisma'
+import { assertDayNotManuallyBlocked } from '@/lib/asserts'
 
 export const HOLIDAYS: Record<number, Date[]> = {}
 
@@ -12,7 +13,7 @@ export async function isDateBlocked(date: Date): Promise<Boolean> {
   const holidays = getHolidays(year)
   if (holidays.some((d) => d === date)) return true
 
-  if (await !assertDayNotManuallyBlocked(prisma, date)) return true
+  if (!(await assertDayNotManuallyBlocked(prisma, date))) return true
 
   return false
 }
