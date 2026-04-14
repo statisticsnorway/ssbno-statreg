@@ -1,3 +1,4 @@
+import { CalendarDatePrisma } from '@/services/calendarService'
 import { ReleasePrisma } from '@/services/releasesService'
 import { StatisticPrisma } from '@/services/statisticsService'
 
@@ -74,6 +75,13 @@ export async function assertShortnameExistsAndIsAvailable(
   }
 
   return !!foundShortname
+}
+
+export async function assertDayNotManuallyBlocked(prisma: CalendarDatePrisma, day: Date): Promise<boolean> {
+  const manuallyBlockedDay = await prisma.calender_date.findUnique({
+    where: { day },
+  })
+  return !manuallyBlockedDay
 }
 
 export const releaseAsserts = {

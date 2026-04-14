@@ -1,6 +1,7 @@
 import { vi, describe, test, expect, beforeEach } from 'vitest'
 // TODO: change back to import from '@/lib/asserts'
 import {
+  assertDayNotManuallyBlocked,
   assertShortnameExists,
   assertShortnameExistsAndIsAvailable,
   assertStatisticExists,
@@ -22,6 +23,9 @@ describe('asserts', () => {
       },
       shortname: {
         findUnique: vi.fn(),
+      },
+      calender_date: {
+        findUnique: mock.fn(),
       },
     }
   })
@@ -108,6 +112,26 @@ describe('asserts', () => {
     await expect(() => assertShortnameExistsAndIsAvailable('KPI', prismaMock)).rejects.toMatchObject({
       status: 400,
       statregError: "Shortname 'KPI' is already in use",
+    })
+  })
+
+  describe('assertDayNotManuallyBlocked() ', () => {
+    test('returns false when day is manually blocked', async () => {
+      const blockedDay = new Date('2026-12-24T00:00:00Z')
+      prismaMock.calender_date.findUnique = mock.fn(() => Promise.resolve({ comment: 'Julaften', day: blockedDay }))
+
+      const result = await assertDayNotManuallyBlocked(prismaMock, blockedDay)
+
+      assert.strictEqual(result, false)
+    })
+
+    test('returns true when day is not manually blocked', async () => {
+      const unblockedDay = new Date('2026-12-01T00:00:00Z')
+      prismaMock.calender_date.findUnique = mock.fn(() => Promise.resolve(null))
+
+      const result = await assertDayNotManuallyBlocked(prismaMock, unblockedDay)
+
+      assert.strictEqual(result, true)
     })
   })
 })

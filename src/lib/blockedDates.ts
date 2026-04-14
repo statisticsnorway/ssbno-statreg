@@ -1,10 +1,34 @@
-export let MOVABLE_HOLIDAYS: Record<number, Date[]> = {}
+import { prisma } from '@/lib/prisma'
+import { assertDayNotManuallyBlocked } from './asserts'
 
-export function getMovableHolidays(year: number): Date[] {
-  if (!MOVABLE_HOLIDAYS[year]) {
-    MOVABLE_HOLIDAYS[year] = calculateMovableHolidays(year)
+export const HOLIDAYS: Record<number, Date[]> = {}
+
+export async function isDateBlocked(date: Date): Promise<Boolean> {
+  const sunday = 0
+  const saturday = 6
+  if (date.getDay() == saturday || date.getDay() == sunday) return true
+
+  const year = date.getFullYear()
+  const holidays = getHolidays(year)
+  if (holidays.some((d) => d === date)) return true
+
+  if (await !assertDayNotManuallyBlocked(prisma, date)) return true
+
+  return false
+}
+
+export function getHolidays(year: number): Date[] {
+  if (!HOLIDAYS[year]) {
+    const holidaysOnStaticDates = [
+      new Date(`${year}-1-1`),
+      new Date(`${year}-5-1`),
+      new Date(`${year}-5-17`),
+      new Date(`${year}-12-25`),
+      new Date(`${year}-12-26`),
+    ]
+    HOLIDAYS[year] = holidaysOnStaticDates.concat(calculateMovableHolidays(year))
   }
-  return MOVABLE_HOLIDAYS[year]
+  return HOLIDAYS[year]
 }
 
 export function calculateMovableHolidays(year: number): Date[] {
@@ -43,7 +67,7 @@ export function calculateEasterSunday(year: number) {
   const n = Math.floor((h + l - 7 * m + 114) / 31)
   const p = ((h + l - 7 * m + 114) % 31) + 1
 
-  return new Date(year, n - 1, p)
+  return new Date(`${year}-${n}-${p}`)
 }
 
 function addDays(date: Date, days: number): Date {
