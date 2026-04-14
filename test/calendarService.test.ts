@@ -1,6 +1,5 @@
-import { beforeEach, describe, test, mock } from 'node:test'
+import { beforeEach, describe, test, mock, before } from 'node:test'
 import assert from 'node:assert'
-import { createBlockedReleaseDay, isManuallyBlockedDay } from '@/services/calendarService'
 import { dateToISOString } from '@/lib/utils'
 
 // Uncomment next line to run tests locally with UTC timezone (same as nais cluster)
@@ -8,23 +7,30 @@ import { dateToISOString } from '@/lib/utils'
 
 let prismaMock: any
 let listReturn: object
-let findUniqueReturn: object | null
+let createBlockedReleaseDay: Function
+const isDateBlockedMock = mock.fn(() => false)
 
 function setListReturn(next: { comment: string; day: Date }[]) {
   listReturn = next
 }
 
-function setFindUniqueReturn(next: { comment: string; day: Date } | null) {
-  findUniqueReturn = next
-}
-
 describe('calendarService  ', () => {
+  before(async () => {
+    // eslint-disable-next-line no-unused-vars
+    const blockedDatesLib = await import('@/lib/blockedDays').then(({ isDateBlocked: _, ...rest }) => rest)
+    mock.module('@/lib/blockedDays', {
+      namedExports: {
+        isDateBlocked: isDateBlockedMock,
+        assertsLib: blockedDatesLib,
+      },
+    })
+    ;({ createBlockedReleaseDay } = await import('@/services/calendarService'))
+  })
   beforeEach(() => {
     prismaMock = {
       calender_date: {
         create: mock.fn((args) => Promise.resolve({ ...args, id: 0 })),
         findMany: mock.fn(() => Promise.resolve(listReturn)),
-        findUnique: mock.fn(() => Promise.resolve(findUniqueReturn)),
       },
     }
   })
@@ -50,24 +56,12 @@ describe('calendarService  ', () => {
     test('returns 400 if date already blocked (unique constraint violation)', async () => {
       const inputDate = '2026-12-24'
       const inputComment = { blocked_comment: 'Julaften' }
-      prismaMock = {
-        calender_date: {
-          create: mock.fn(() =>
-            Promise.reject({
-              name: 'PrismaClientKnownRequestError',
-              code: 'P2002',
-              message: 'Unique constraint failed on the fields: (`day`)',
-            })
-          ),
-          findMany: mock.fn(() => Promise.resolve([])),
-        },
-      }
+      isDateBlockedMock.mock.mockImplementationOnce(() => true)
 
       await assert.rejects(() => createBlockedReleaseDay(prismaMock, inputDate, inputComment), {
-        message: 'Unique constraint failed on the fields: (`day`)',
-        code: 'P2002',
+        statregError: 'Date is already blocked, either manually, weekend or public holiday',
       })
-      assert.strictEqual(prismaMock.calender_date.create.mock.callCount(), 1)
+      assert.strictEqual(prismaMock.calender_date.create.mock.callCount(), 0)
       assert.strictEqual(prismaMock.calender_date.findMany.mock.callCount(), 0)
     })
 
@@ -91,25 +85,6 @@ describe('calendarService  ', () => {
       })
       assert.strictEqual(prismaMock.calender_date.create.mock.callCount(), 0)
       assert.strictEqual(prismaMock.calender_date.findMany.mock.callCount(), 0)
-    })
-  })
-  describe('isManuallyBlockedDay() ', () => {
-    test('returns true when day is manually blocked', async () => {
-      const blockedDay = new Date('2026-12-24T00:00:00Z')
-      setFindUniqueReturn({ comment: 'Julaften', day: blockedDay })
-
-      const result = await isManuallyBlockedDay(prismaMock, blockedDay)
-
-      assert.strictEqual(result, true)
-    })
-
-    test('returns false when day is not manually blocked', async () => {
-      const unblockedDay = new Date('2026-12-01T00:00:00Z')
-      setFindUniqueReturn(null)
-
-      const result = await isManuallyBlockedDay(prismaMock, unblockedDay)
-
-      assert.strictEqual(result, false)
     })
   })
 })

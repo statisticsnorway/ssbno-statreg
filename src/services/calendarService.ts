@@ -1,3 +1,4 @@
+import { isDateBlocked } from '@/lib/blockedDays'
 import type { ExtendedPrismaClient } from '@/lib/prisma'
 import { dateToISOString, sanitize, parseDateOnly, ensureRequiredFieldsExists } from '@/lib/utils'
 import type { BlockedReleaseDate } from '@/types'
@@ -14,6 +15,13 @@ export async function createBlockedReleaseDay(
   const comment = sanitize(blocked_comment)
   if (!comment) {
     return Promise.reject({ statregError: `Field 'blocked_comment' must be a non-empty string.` })
+  }
+
+  const isAlreadyBlocked = await isDateBlocked(date)
+  if (isAlreadyBlocked) {
+    return Promise.reject({
+      statregError: 'Date is already blocked, either manually, weekend or public holiday',
+    })
   }
 
   await prisma.calender_date.create({
@@ -36,11 +44,4 @@ export async function createBlockedReleaseDay(
     blocked_comment: blockedDay.comment,
     date: dateToISOString(blockedDay.day),
   }))
-}
-
-export async function isManuallyBlockedDay(prisma: CalendarDatePrisma, day: Date): Promise<Boolean> {
-  const manuallyBlockedDay = await prisma.calender_date.findUnique({
-    where: { day },
-  })
-  return !!manuallyBlockedDay
 }
