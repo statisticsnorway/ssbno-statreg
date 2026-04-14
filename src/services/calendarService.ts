@@ -1,4 +1,4 @@
-import { isDateBlocked } from '@/lib/blockedDays'
+import { isDateBlocked } from '@/lib/blockedDates'
 import type { ExtendedPrismaClient } from '@/lib/prisma'
 import { dateToISOString, sanitize, parseDateOnly, ensureRequiredFieldsExists } from '@/lib/utils'
 import type { BlockedReleaseDate } from '@/types'

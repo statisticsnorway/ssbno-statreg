@@ -1,9 +1,46 @@
-import { calculateEasterSunday, calculateMovableHolidays, getHolidays } from '@/lib/blockedDays'
-import { describe, test } from 'node:test'
+import { before, describe, mock, test } from 'node:test'
 import assert from 'node:assert/strict'
 
+let calculateEasterSunday: Function
+let calculateMovableHolidays: Function
+let isDateBlocked: Function
+let getHolidays: Function
+const assertDateNotManuallyBlockedMock = mock.fn(() => true)
+
 describe('blockedDates ', () => {
-  // TODO legg inn tester for isDateBlocked()
+  before(async () => {
+    // eslint-disable-next-line no-unused-vars
+    const assertsLib = await import('@/lib/asserts').then(({ assertDayNotManuallyBlocked: _, ...rest }) => rest)
+    mock.module('@/lib/asserts', {
+      namedExports: {
+        assertDayNotManuallyBlocked: assertDateNotManuallyBlockedMock,
+        assertsLib,
+      },
+    })
+    ;({ calculateEasterSunday, calculateMovableHolidays, getHolidays, isDateBlocked } =
+      await import('@/lib/blockedDates'))
+  })
+  describe('isDateBlocked() ', () => {
+    test('returns false if date not blocked (Friday 5. feb 2027)', async () => {
+      assert.equal(await isDateBlocked(new Date('2027-2-5')), false)
+    })
+    test('returns true for Saturday 6. feb 2027', async () => {
+      assert.equal(await isDateBlocked(new Date('2027-2-6')), true)
+    })
+    test('returns true for Sunday 7. feb 2027', async () => {
+      assert.equal(await isDateBlocked(new Date('2027-2-7')), true)
+    })
+    test('returns true for movable holiday ("1. Påskedag" 28. march 2027)', async () => {
+      assert.equal(await isDateBlocked(new Date('2027-3-28')), true)
+    })
+    test('returns true for static holiday', async () => {
+      assert.equal(await isDateBlocked(new Date('2027-5-1')), true)
+    })
+    test('returns true if date is manually blocked', async () => {
+      assertDateNotManuallyBlockedMock.mock.mockImplementationOnce(() => false)
+      assert.equal(await isDateBlocked(new Date('2027-2-5')), true)
+    })
+  })
   describe('getHolidays() ', () => {
     test('returns correct dates for 2026', () => {
       const holidays = getHolidays(2026)
