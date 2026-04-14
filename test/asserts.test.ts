@@ -1,5 +1,4 @@
 import { vi, describe, test, expect, beforeEach } from 'vitest'
-// TODO: change back to import from '@/lib/asserts'
 import {
   assertDayNotManuallyBlocked,
   assertShortnameExists,
@@ -7,7 +6,7 @@ import {
   assertStatisticExists,
   assertVariantExists,
   assertVariantMatchesShortname,
-} from '../src/lib/asserts'
+} from '@/lib/asserts'
 
 let prismaMock: any
 

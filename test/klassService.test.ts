@@ -5,7 +5,7 @@ import {
   setDepartmentsEn,
   getDepartmentsFromKlass,
   getDivisionFromCode,
-} from '../src/services/klassService'
+} from '@/services/klassService'
 import process from 'node:process'
 
 let fetchMock: ReturnType<typeof mock.method>

@@ -1,7 +1,5 @@
 import { vi, describe, test, expect } from 'vitest'
-// TODO: change back to import from '@/lib/....'
-
-import { calculateEasterSunday, calculateMovableHolidays, getHolidays, isDateBlocked } from '../src/lib/blockedDates'
+import { calculateEasterSunday, calculateMovableHolidays, getHolidays, isDateBlocked } from '@/lib/blockedDates'
 
 const { assertDayNotManuallyBlockedMock } = vi.hoisted(() => ({
   assertDayNotManuallyBlockedMock: vi.fn(() => Promise.resolve(true)),

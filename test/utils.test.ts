@@ -1,4 +1,3 @@
-// TODO: change back to import from '@/lib/....'
 import {
   dateToISOString,
   sanitize,
@@ -9,7 +8,7 @@ import {
   parseId,
   ensureRequiredFieldsExists,
   isNumber,
-} from '../src/lib/utils'
+} from '@/lib/utils'
 import { describe, test, expect } from 'vitest'
 
 describe('utils', () => {

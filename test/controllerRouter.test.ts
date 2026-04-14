@@ -1,7 +1,7 @@
 import { describe, test, beforeEach } from 'node:test'
 import assert from 'node:assert/strict'
 import express, { Router, type RequestHandler } from 'express'
-import controllerRouter from '../src/api/core/controllerRouter'
+import controllerRouter from '@/api/core/controllerRouter'
 import { invoke, makeSkipAuthMarker } from './helpers'
 import { MockResponse } from 'node-mocks-http'
 
