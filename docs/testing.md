@@ -7,7 +7,7 @@
 Test against running instance (e.g. after running `npm run dev`):
 
 ```bash
-npm run test:interation
+npm run test:integration
 ```
 
 Test in a Docker container:
