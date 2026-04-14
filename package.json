@@ -7,8 +7,13 @@
   ],
   "scripts": {
     "dev": "concurrently \"npm run dev -w backend\" \"npm run dev -w frontend\"",
-    "build": "npm run build -ws",
-    "start": "npm run start -w backend"
+    "build": "npm run build -w backend",
+    "start": "npm run start -w backend",
+    "ci-test": "npm run ci-test -w backend",
+    "test": "npm run test -w backend",
+    "seed": "npm run seed -w backend",
+    "generate": "npm run generate -w backend",
+    "generate:api-types": "npm run generate:api-types -w backend"
   },
   "devDependencies": {
     "concurrently": "^8.2.0",
