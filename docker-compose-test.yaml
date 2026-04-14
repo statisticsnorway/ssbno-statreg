@@ -8,7 +8,7 @@ services:
       POSTGRES_PASSWORD: test_pass
       POSTGRES_DB: statreg_db
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U test_user -d statreg_db"]
+      test: ['CMD-SHELL', 'pg_isready -U test_user -d statreg_db']
       interval: 2s
       timeout: 2s
       retries: 30
@@ -30,13 +30,14 @@ services:
       "
     environment:
       NODE_ENV: test
-      PGURL: postgresql://test_user:test_pass@db:5432/statreg_db?sslmode=disable
-      AUTH_ENABLED: "false"
+      PGURL: &test_pgurl postgresql://test_user:test_pass@db:5432/statreg_db?sslmode=disable
+      AUTH_ENABLED: 'false'
+      MOCK_ENTRA_USERS: 'true'
     depends_on:
       db:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8080/docs"] # TODO proper health check here 
+      test: ['CMD', 'wget', '-qO-', 'http://localhost:8080/docs'] # TODO proper health check here
       interval: 2s
       timeout: 2s
       retries: 30
@@ -50,6 +51,7 @@ services:
     environment:
       NODE_ENV: test
       API_URL: http://app:8080
+      PGURL: *test_pgurl
     depends_on:
       app:
         condition: service_healthy

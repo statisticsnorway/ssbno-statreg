@@ -1,7 +1,6 @@
 import { describe, test } from 'node:test'
 import assert from 'node:assert/strict'
-
-const BASE_URL = process.env.API_URL ?? 'http://localhost:8080'
+import { BASE_URL } from './integrationUtils'
 
 describe('GET /releases ', () => {
   test('returns status code 200', async () => {
