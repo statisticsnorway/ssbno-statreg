@@ -1,4 +1,4 @@
-import { prisma } from './prisma'
+import { prisma } from '@/lib/prisma'
 import { assertDayNotManuallyBlocked } from '@/lib/asserts'
 
 export const HOLIDAYS: Record<number, Date[]> = {}
