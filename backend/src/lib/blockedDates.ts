@@ -1,4 +1,3 @@
-// TODO: change back to import from '@/lib/....'
 import { prisma } from './prisma'
 import { assertDayNotManuallyBlocked } from '@/lib/asserts'
 
