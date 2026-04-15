@@ -65,6 +65,7 @@ describe('release data is persisted when ', () => {
     const fetched = await response.json()
 
     // test persistence
+    assert.equal(fetched.id, picked.id)
     assertEqualReleaseData(fetched, body)
   })
 })
