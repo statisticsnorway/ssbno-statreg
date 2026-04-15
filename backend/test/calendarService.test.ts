@@ -55,7 +55,7 @@ describe('calendarService  ', () => {
     test('returns 400 if date already blocked (unique constraint violation)', async () => {
       const inputDate = '2026-12-24'
       const inputComment = { blocked_comment: 'Julaften' }
-      isDateBlockedMock.mockImplementationOnce(async () => true)
+      isDateBlockedMock.mockResolvedValueOnce(true)
 
       await expect(() => createBlockedReleaseDay(prismaMock, inputDate, inputComment)).rejects.toMatchObject({
         statregError: 'Date is already blocked, either manually, weekend or public holiday',
