@@ -1,0 +1,77 @@
+import type { Prisma } from '@/generated/prisma/client'
+import { prisma } from '@/lib/prisma'
+
+export const BASE_URL = process.env.API_URL ?? 'http://localhost:8080'
+
+export type StatisticWithShortname = Prisma.StatisticGetPayload<{
+  include: {
+    shortname: true
+  }
+}>
+
+export async function fetchJson(path: string, init?: Parameters<typeof fetch>[1]) {
+  const response = await fetch(`${BASE_URL}${path}`, init)
+  const body = await response.json()
+  return { response, body }
+}
+
+export async function getSeededStatisticWithShortname(): Promise<StatisticWithShortname> {
+  return prisma.statistic.findFirstOrThrow({
+    include: {
+      shortname: true,
+    },
+    orderBy: {
+      id: 'asc',
+    },
+  })
+}
+
+export async function createTestShortname(prefix = 'it-stat'): Promise<string> {
+  const now = new Date()
+  const shortname = `${prefix}-${now.getTime()}`
+
+  await prisma.shortname.create({
+    data: {
+      name: shortname,
+      version: 1,
+      date_created: now,
+      last_updated: now,
+    },
+  })
+
+  return shortname
+}
+
+export async function readStatisticFromDb(shortname: string): Promise<StatisticWithShortname> {
+  return prisma.statistic.findFirstOrThrow({
+    where: {
+      shortname: {
+        name: shortname,
+      },
+    },
+    include: {
+      shortname: true,
+    },
+  })
+}
+
+export async function cleanupCreatedStatisticAndShortname(
+  statisticId: number | null,
+  shortname: string | null
+): Promise<void> {
+  if (statisticId !== null) {
+    await prisma.statistic.delete({
+      where: {
+        id: statisticId,
+      },
+    })
+  }
+
+  if (shortname !== null) {
+    await prisma.shortname.delete({
+      where: {
+        name: shortname,
+      },
+    })
+  }
+}
