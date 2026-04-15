@@ -52,7 +52,7 @@ describe('entraUserService ', () => {
 
       const result = await fetchUsers(usersInput)
 
-      expect(result!.length).toStrictEqual(2)
+      expect(result!.length).toBe(2)
       expect(result).toStrictEqual([
         {
           lookupEmail: 'ola@ssb.no',
@@ -69,7 +69,7 @@ describe('entraUserService ', () => {
     test('returns user without email & phone', async () => {
       const result = await fetchUsers([{ username: null, email: 'userWithoutEmailAndPhone@ssb.no' }])
 
-      expect(result!.length).toStrictEqual(1)
+      expect(result!.length).toBe(1)
       expect(result).toStrictEqual([
         {
           lookupEmail: 'userWithoutEmailAndPhone@ssb.no',
