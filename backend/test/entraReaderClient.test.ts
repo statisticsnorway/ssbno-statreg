@@ -33,7 +33,7 @@ function mockFetchError(status: number, message?: string) {
   return Promise.reject({
     ok: false,
     status,
-    text: async () => message,
+    text: message,
   })
 }
 
@@ -69,7 +69,8 @@ describe('entraReaderClient ', () => {
     test('throws error if fetch from api fails', async () => {
       fetchMock.mockReturnValueOnce(mockFetchError(500, 'api error'))
       await expect(() => getAccessToken()).rejects.contain({
-        message: 'OAuth token request failed',
+        status: 500,
+        text: 'api error',
       })
     })
 
@@ -109,7 +110,7 @@ describe('entraReaderClient ', () => {
     test('returns null if email is missing', async () => {
       const user = await fetchUserByEmail('', 'token')
       expect(fetchMock).toHaveBeenCalledTimes(0)
-      assert.deepEqual(user, null)
+      expect(user).toBeNull()
     })
 
     test('throws error if missing token', async () => {
@@ -138,22 +139,25 @@ describe('entraReaderClient ', () => {
       expect(user).toStrictEqual(entraUserResult.user)
     })
 
-    test('returns null when Graph returns 404', async () => {
+    test('returns rejected Promise when Graph returns 404', async () => {
       fetchMock.mockReturnValueOnce(mockFetchError(404, 'user not found'))
-      const user = await fetchUserByEmail('NonExistingUser', 'token')
-      expect(fetchMock).toHaveBeenCalledExactlyOnceWith(
+      await expect(() => fetchUserByEmail('NonExistingUser', 'token')).rejects.contain({
+        status: 404,
+        text: 'user not found',
+      })
+      await expect(fetchMock).toHaveBeenCalledExactlyOnceWith(
         expect.stringContaining(
-          `/${encodeURIComponent(TEST_EMAIL)}?$select=displayName,businessPhones,mail,userPrincipalName`
+          `/${encodeURIComponent('NonExistingUser')}?$select=displayName,businessPhones,mail,userPrincipalName`
         ),
         expect.anything()
       )
-      expect(user).toBeNull()
     })
 
     test('throws error if fetch from api fails', async () => {
       fetchMock.mockReturnValueOnce(mockFetchError(500, 'api error'))
       await expect(() => fetchUserByEmail('admin', 'token')).rejects.contain({
-        message: 'Graph request failed: 500',
+        status: 500,
+        text: 'api error',
       })
     })
 
