@@ -347,7 +347,7 @@ describe('statisticService', () => {
     test('returns valid statisticDetails when all conditionals succeed', async () => {
       const result = await mapStatisticDetails(input)
 
-      expect(result, expectedResult)
+      expect(result).toStrictEqual(expectedResult)
     })
 
     test('falls back to empty relation object when related statistic is missing', async () => {
@@ -356,7 +356,7 @@ describe('statisticService', () => {
 
       const result = await mapStatisticDetails(input)
 
-      expect(result, expectedResult)
+      expect(result).toStrictEqual(expectedResult)
     })
 
     test('falls back to pending approval status when desk approval status is missing', async () => {
@@ -365,7 +365,7 @@ describe('statisticService', () => {
 
       const result = await mapStatisticDetails(input)
 
-      expect(result, expectedResult)
+      expect(result).toStrictEqual(expectedResult)
     })
 
     test('falls back to undefined division name when division lookup does not find a match', async () => {
@@ -374,7 +374,7 @@ describe('statisticService', () => {
 
       const result = await mapStatisticDetails(input)
 
-      expect(result, expectedResult)
+      expect(result).toStrictEqual(expectedResult)
     })
 
     test('falls back to empty english name when name_en is missing', async () => {
@@ -383,7 +383,7 @@ describe('statisticService', () => {
 
       const result = await mapStatisticDetails(input)
 
-      expect(result, expectedResult)
+      expect(result).toStrictEqual(expectedResult)
     })
 
     test('falls back to lookupEmail when fetched user email is missing', async () => {
@@ -392,7 +392,7 @@ describe('statisticService', () => {
 
       const result = await mapStatisticDetails(input)
 
-      expect(result, expectedResult)
+      expect(result).toStrictEqual(expectedResult)
     })
 
     test('falls back to responsible person data when fetchUsers returns Users[] instead of lookupUsers[]', async () => {
@@ -402,7 +402,7 @@ describe('statisticService', () => {
 
       const result = await mapStatisticDetails(input)
 
-      expect(result, expectedResult)
+      expect(result).toStrictEqual(expectedResult)
     })
 
     test('falls back to empty contact array when responsible persons is empty', async () => {
@@ -412,7 +412,7 @@ describe('statisticService', () => {
 
       const result = await mapStatisticDetails(input)
 
-      expect(result, expectedResult)
+      expect(result).toStrictEqual(expectedResult)
     })
 
     test('falls back to empty region level code when code is missing', async () => {
@@ -421,7 +421,7 @@ describe('statisticService', () => {
 
       const result = await mapStatisticDetails(input)
 
-      expect(result, expectedResult)
+      expect(result).toStrictEqual(expectedResult)
     })
   })
 
@@ -454,7 +454,7 @@ describe('statisticService', () => {
       test('returns validated statistic input when all conditionals succeed', () => {
         const result = parseStatisticInput(input, requiredCreateFields)
 
-        expect(result, expectedResult)
+        expect(result).toStrictEqual(expectedResult)
       })
 
       test('throws error when name is an empty string', () => {
@@ -496,7 +496,7 @@ describe('statisticService', () => {
 
         const result = parseStatisticInput(input, requiredCreateFields)
 
-        expect(result, expectedResult)
+        expect(result).toStrictEqual(expectedResult)
       })
     })
 
@@ -550,7 +550,7 @@ describe('statisticService', () => {
       test('returns validated statistic input when all conditionals succeed', () => {
         const result = parseStatisticInput(input, requiredUpdateFields, 'update')
 
-        expect(result, expectedResult)
+        expect(result).toStrictEqual(expectedResult)
       })
 
       test('throws error when comment is an empty string', () => {
@@ -589,7 +589,7 @@ describe('statisticService', () => {
 
   describe('parseDivision ', () => {
     test('returns division as string when valid', () => {
-      expect(parseDivision('104'), '104')
+      expect(parseDivision('104')).toBe('104')
     })
 
     test('throws when division is undefined', () => {
@@ -615,7 +615,7 @@ describe('statisticService', () => {
     const expectedError = `Field 'status' must be one of these: ${Object.keys(StatisticStatus).join(', ')}.`
 
     test('returns statusCode when valid', () => {
-      expect(parseStatusCode('K'), 'K')
+      expect(parseStatusCode('K')).toBe('K')
     })
 
     test('throws when statusCode is undefined', () => {
