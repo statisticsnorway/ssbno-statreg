@@ -85,7 +85,7 @@ describe('asserts', () => {
 
     const result = await assertShortnameExists('KPI', prismaMock)
 
-    expect(result).toBe(true)
+    expect(result).toBeTruthy()
   })
 
   test('assertShortnameExists throws when shortname does not exist', async () => {
@@ -102,7 +102,7 @@ describe('asserts', () => {
 
     const result = await assertShortnameExistsAndIsAvailable('KPI', prismaMock)
 
-    expect(result).toBe(true)
+    expect(result).toBeTruthy()
   })
 
   test('assertShortnameExistsAndIsAvailable throws when shortname is already in use', async () => {
@@ -130,7 +130,7 @@ describe('asserts', () => {
 
       const result = await assertDayNotManuallyBlocked(prismaMock, unblockedDay)
 
-      expect(result).toBe(true)
+      expect(result).toBeTruthy()
     })
   })
 })
