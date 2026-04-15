@@ -48,6 +48,8 @@ services:
     environment:
       NODE_ENV: test
       API_URL: http://app:8080
+      PGURL: postgresql://test_user:test_pass@db:5432/statreg_db?sslmode=disable
+      AUTH_ENABLED: 'false'
     depends_on:
       app:
         condition: service_healthy
