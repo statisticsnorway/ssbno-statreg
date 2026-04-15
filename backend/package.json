@@ -18,7 +18,7 @@
     "seed": "prisma db seed",
     "db:deploy": "prisma migrate deploy",
     "test": "vitest",
-    "ci-test": "tsx --test --experimental-test-module-mocks 'test/**.test.ts' 'src/**.test.ts'",
+    "ci-test": "vitest run",
     "generate:api-types": "openapi-typescript ./openapi/openapi.yaml | prettier --parser typescript > src/types/api-types.d.ts"
   },
   "overrides": {
