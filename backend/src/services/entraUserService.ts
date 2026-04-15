@@ -29,6 +29,7 @@ export async function fetchUsers(users: Users[]) {
           }
         }
 
+        //TODO: Rewrite according to actual implementation
         return {
           lookupEmail: email,
           user: null,
