@@ -34,7 +34,7 @@ describe('asserts', () => {
 
     const result = await assertStatisticExists('KPI', prismaMock)
 
-    expect(result, undefined)
+    expect(result).toBe(undefined)
   })
 
   test('assertStatisticExists throws when statistic does not exist', async () => {
@@ -51,7 +51,7 @@ describe('asserts', () => {
 
     const result = await assertVariantExists(1, prismaMock)
 
-    expect(result, undefined)
+    expect(result).toBe(undefined)
   })
 
   test('assertVariantExists throws when variant does not exist', async () => {
@@ -68,7 +68,7 @@ describe('asserts', () => {
 
     const result = await assertVariantMatchesShortname(1, 'KPI', prismaMock)
 
-    expect(result, undefined)
+    expect(result).toBe(undefined)
   })
 
   test('assertVariantMatchesShortname throws when variant does not belong to statistic', async () => {
