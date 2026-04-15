@@ -1,5 +1,4 @@
-import { test, beforeEach, afterEach, describe, mock, after } from 'node:test'
-import assert from 'node:assert/strict'
+import { vi, describe, test, expect, beforeEach, afterEach } from 'vitest'
 import httpMocks, { createResponse, MockResponse } from 'node-mocks-http'
 
 describe('authMiddleWare', () => {
@@ -14,9 +13,9 @@ describe('authMiddleWare', () => {
       const { unauthorized } = await import('../plugins/authMiddleware')
 
       const response = unauthorized(httpMocks.createResponse(), 'You are unautorized')
-      assert.equal(response.statusCode, 401)
-      assert.equal((response as any)._getJSONData().error, 'You are unautorized')
-      assert.ok((response as any)._isEndCalled())
+      expect(response.statusCode).toBe(401)
+      expect((response as any)._getJSONData().error).toBe('You are unautorized')
+      expect((response as any)._isEndCalled()).toBeTruthy()
     })
   })
 
@@ -25,189 +24,191 @@ describe('authMiddleWare', () => {
       const { forbidden } = await import('../plugins/authMiddleware')
 
       const response = forbidden(httpMocks.createResponse(), 'You have no access')
-      assert.equal(response.statusCode, 403)
-      assert.equal((response as any)._getJSONData().error, 'You have no access')
-      assert.ok((response as any)._isEndCalled())
-    })
-  })
-
-  describe('getBearerToken', () => {
-    test('returns token if given Bearer authorization header', async () => {
-      const { getBearerToken } = await import('../plugins/authMiddleware')
-
-      const token = getBearerToken(
-        httpMocks.createRequest({
-          headers: { authorization: 'Bearer myBearerTokenValue' },
-        })
-      )
-
-      assert.equal(token, 'myBearerTokenValue')
-    })
-    test('returns token if given Bearer authorization header, and check for case insentitivity and extra whitespaces', async () => {
-      const { getBearerToken } = await import('../plugins/authMiddleware')
-
-      const token = getBearerToken(
-        httpMocks.createRequest({ headers: { AUthorization: 'beareR  myBearerTokenValue' } })
-      )
-      assert.equal(token, 'myBearerTokenValue')
-    })
-    test('returns null when missing authorization header', async () => {
-      const { getBearerToken } = await import('../plugins/authMiddleware')
-
-      const token = getBearerToken(httpMocks.createRequest())
-      assert.equal(token, null)
-    })
-    test('returns null when authorization header not starting with "Bearer " (including one or more whitespace)', async () => {
-      const { getBearerToken } = await import('../plugins/authMiddleware')
-
-      const token = getBearerToken(httpMocks.createRequest({ headers: { authorization: 'bearermyBearerTokenValue' } }))
-      assert.equal(token, null)
-    })
-  })
-
-  describe('keycloakAuth', () => {
-    test('throws when AUTH_ENABLED=true and dev env vars are missing', async () => {
-      delete process.env.KEYCLOAK_REALM_ISSUER
-      delete process.env.KEYCLOAK_JWKS_URI
-      delete process.env.KEYCLOAK_TOKEN_AUDIENCE
-
-      const { keycloakAuth } = await import('../plugins/authMiddleware')
-
-      assert.throws(() => keycloakAuth(), /Keycloak configuration is missing/)
+      expect(response.statusCode).toBe(403)
+      expect((response as any)._getJSONData().error).toBe('You have no access')
+      expect((response as any)._isEndCalled()).toBeTruthy()
     })
 
-    test('throws when AUTH_ENABLED=true and prod env vars are missing', async () => {
-      process.env.NODE_ENV = 'production'
-      process.env.AUTH_ENABLED = 'true'
+    describe('getBearerToken', () => {
+      test('returns token if given Bearer authorization header', async () => {
+        const { getBearerToken } = await import('../plugins/authMiddleware')
 
-      delete process.env.KEYCLOAK_REALM_ISSUER
-      delete process.env.KEYCLOAK_JWKS_URI
-      delete process.env.KEYCLOAK_TOKEN_AUDIENCE
+        const token = getBearerToken(
+          httpMocks.createRequest({
+            headers: { authorization: 'Bearer myBearerTokenValue' },
+          })
+        )
 
-      const { keycloakAuth } = await import('../plugins/authMiddleware')
+        expect(token).toStrictEqual('myBearerTokenValue')
+      })
+      test('returns token if given Bearer authorization header, and check for case insentitivity and extra whitespaces', async () => {
+        const { getBearerToken } = await import('../plugins/authMiddleware')
 
-      assert.throws(() => keycloakAuth(), /Keycloak configuration is missing/)
-    })
-  })
+        const token = getBearerToken(
+          httpMocks.createRequest({ headers: { AUthorization: 'beareR  myBearerTokenValue' } })
+        )
+        expect(token).toStrictEqual('myBearerTokenValue')
+      })
+      test('returns null when missing authorization header', async () => {
+        const { getBearerToken } = await import('../plugins/authMiddleware')
 
-  describe('requireAdminAuthorization', () => {
-    let res: MockResponse<any>
-    let next: ReturnType<typeof mock.fn>
+        const token = getBearerToken(httpMocks.createRequest())
+        expect(token).toBeNull
+      })
+      test('returns null when authorization header not starting with "Bearer " (including one or more whitespace)', async () => {
+        const { getBearerToken } = await import('../plugins/authMiddleware')
 
-    beforeEach(() => {
-      process.env.ADMIN_GROUPS = 'ssbno-developers'
-      res = createResponse()
-      next = mock.fn()
-    })
-
-    after(() => {
-      process.env = { ...OLD_ENV }
-    })
-
-    test('bypasses when AUTH_ENABLED=false and calls next()', async () => {
-      process.env.AUTH_ENABLED = 'false'
-
-      const { requireAdminAuthorization: requireAdminAuthorization } = await import('../plugins/authMiddleware')
-
-      const handler = requireAdminAuthorization()
-      const req = httpMocks.createRequest()
-
-      await handler(req, res, next as any)
-
-      assert.equal(next.mock.callCount(), 1)
+        const token = getBearerToken(
+          httpMocks.createRequest({ headers: { authorization: 'bearermyBearerTokenValue' } })
+        )
+        expect(token).toBeNull
+      })
     })
 
-    test('returns 401 when not authenticated', async () => {
-      process.env.AUTH_ENABLED = 'true'
+    describe('keycloakAuth', () => {
+      test('throws when AUTH_ENABLED=true and dev env vars are missing', async () => {
+        delete process.env.KEYCLOAK_REALM_ISSUER
+        delete process.env.KEYCLOAK_JWKS_URI
+        delete process.env.KEYCLOAK_TOKEN_AUDIENCE
 
-      const { requireAdminAuthorization: requireAdminAuthorization } = await import('../plugins/authMiddleware')
+        const { keycloakAuth } = await import('../plugins/authMiddleware')
 
-      const handler = requireAdminAuthorization()
-      const req = httpMocks.createRequest()
+        expect(() => keycloakAuth()).toThrow(/Keycloak configuration is missing/)
+      })
 
-      await handler(req, res, next as any)
+      test('throws when AUTH_ENABLED=true and prod env vars are missing', async () => {
+        process.env.NODE_ENV = 'production'
+        process.env.AUTH_ENABLED = 'true'
 
-      assert.equal(res.statusCode, 401)
-      assert.equal(res._getJSONData().error, 'Not authenticated')
-      assert.equal(next.mock.callCount(), 0)
+        delete process.env.KEYCLOAK_REALM_ISSUER
+        delete process.env.KEYCLOAK_JWKS_URI
+        delete process.env.KEYCLOAK_TOKEN_AUDIENCE
+
+        const { keycloakAuth } = await import('../plugins/authMiddleware')
+
+        expect(() => keycloakAuth()).toThrow(/Keycloak configuration is missing/)
+      })
     })
 
-    test('returns 403 when dapla.groups is missing', async () => {
-      process.env.AUTH_ENABLED = 'true'
+    describe('requireAdminAuthorization', () => {
+      let res: MockResponse<any>
+      let next: ReturnType<typeof vi.fn>
 
-      const { requireAdminAuthorization: requireAdminAuthorization } = await import('../plugins/authMiddleware')
+      beforeEach(() => {
+        process.env.ADMIN_GROUPS = 'ssbno-developers'
+        res = createResponse()
+        next = vi.fn()
+      })
 
-      const handler = requireAdminAuthorization()
-      const req = httpMocks.createRequest()
-      req.auth = { claims: {} }
+      afterEach(() => {
+        process.env = { ...OLD_ENV }
+      })
 
-      await handler(req, res, next as any)
+      test('bypasses when AUTH_ENABLED=false and calls next()', async () => {
+        process.env.AUTH_ENABLED = 'false'
 
-      assert.equal(res.statusCode, 403)
-      assert.equal(res._getJSONData().error, 'Missing authorization groups')
-      assert.equal(next.mock.callCount(), 0)
-    })
+        const { requireAdminAuthorization: requireAdminAuthorization } = await import('../plugins/authMiddleware')
 
-    test('returns 403 when required group is not present', async () => {
-      process.env.AUTH_ENABLED = 'true'
+        const handler = requireAdminAuthorization()
+        const req = httpMocks.createRequest()
 
-      const { requireAdminAuthorization: requireAdminAuthorization } = await import('../plugins/authMiddleware')
+        await handler(req, res, next as any)
 
-      const handler = requireAdminAuthorization()
-      const req = httpMocks.createRequest()
+        expect(next).toHaveBeenCalledOnce()
+      })
 
-      req.auth = {
-        claims: {
-          dapla: {
-            groups: ['other-group'],
+      test('returns 401 when not authenticated', async () => {
+        process.env.AUTH_ENABLED = 'true'
+
+        const { requireAdminAuthorization: requireAdminAuthorization } = await import('../plugins/authMiddleware')
+
+        const handler = requireAdminAuthorization()
+        const req = httpMocks.createRequest()
+
+        await handler(req, res, next as any)
+
+        expect(res.statusCode).toBe(401)
+        expect(res._getJSONData().error).toBe('Not authenticated')
+        expect(next).toHaveBeenCalledTimes(0)
+      })
+
+      test('returns 403 when dapla.groups is missing', async () => {
+        process.env.AUTH_ENABLED = 'true'
+
+        const { requireAdminAuthorization: requireAdminAuthorization } = await import('../plugins/authMiddleware')
+
+        const handler = requireAdminAuthorization()
+        const req = httpMocks.createRequest()
+        req.auth = { claims: {} }
+
+        await handler(req, res, next as any)
+
+        expect(res.statusCode).toBe(403)
+        expect(res._getJSONData().error).toBe('Missing authorization groups')
+        expect(next).toHaveBeenCalledTimes(0)
+      })
+
+      test('returns 403 when required group is not present', async () => {
+        process.env.AUTH_ENABLED = 'true'
+
+        const { requireAdminAuthorization: requireAdminAuthorization } = await import('../plugins/authMiddleware')
+
+        const handler = requireAdminAuthorization()
+        const req = httpMocks.createRequest()
+
+        req.auth = {
+          claims: {
+            dapla: {
+              groups: ['other-group'],
+            },
           },
-        },
-      }
+        }
 
-      await handler(req, res, next as any)
+        await handler(req, res, next as any)
 
-      assert.equal(res.statusCode, 403)
-      assert.equal(res._getJSONData().error, 'Insufficient access')
-      assert.equal(next.mock.callCount(), 0)
-    })
+        expect(res.statusCode).toBe(403)
+        expect(res._getJSONData().error).toBe('Insufficient access')
+        expect(next).toHaveBeenCalledTimes(0)
+      })
 
-    test('calls next when required group exists', async () => {
-      process.env.AUTH_ENABLED = 'true'
+      test('calls next when required group exists', async () => {
+        process.env.AUTH_ENABLED = 'true'
 
-      const { requireAdminAuthorization: requireAdminAuthorization } = await import('../plugins/authMiddleware')
+        const { requireAdminAuthorization: requireAdminAuthorization } = await import('../plugins/authMiddleware')
 
-      const handler = requireAdminAuthorization()
-      const req = httpMocks.createRequest()
+        const handler = requireAdminAuthorization()
+        const req = httpMocks.createRequest()
 
-      req.auth = {
-        claims: {
-          dapla: {
-            groups: ['ssbno-developers', 'another-group'],
+        req.auth = {
+          claims: {
+            dapla: {
+              groups: ['ssbno-developers', 'another-group'],
+            },
           },
-        },
-      }
+        }
 
-      await handler(req, res, next as any)
+        await handler(req, res, next as any)
 
-      assert.equal(next.mock.callCount(), 1)
-      assert.equal(res.statusCode, 200)
+        expect(next).toHaveBeenCalledOnce()
+        expect(res.statusCode).toBe(200)
+      })
     })
-  })
 
-  describe('createKeycloakAuthMiddleware', () => {
-    test('returns 401 when bearer token is missing', async () => {
-      const { createKeycloakAuthMiddleware } = await import('../plugins/authMiddleware')
+    describe('createKeycloakAuthMiddleware', () => {
+      test('returns 401 when bearer token is missing', async () => {
+        const { createKeycloakAuthMiddleware } = await import('../plugins/authMiddleware')
 
-      const handler = createKeycloakAuthMiddleware('issuer', 'https://jwks', 'audience')
+        const handler = createKeycloakAuthMiddleware('issuer', 'https://jwks', 'audience')
 
-      const req = httpMocks.createRequest()
-      const res = httpMocks.createResponse()
-      const next = () => {}
+        const req = httpMocks.createRequest()
+        const res = httpMocks.createResponse()
+        const next = () => {}
 
-      await handler(req, res, next)
+        await handler(req, res, next)
 
-      assert.equal(res.statusCode, 401)
-      assert.equal(res._getJSONData().error, 'Missing Bearer token')
+        expect(res.statusCode).toBe(401)
+        expect(res._getJSONData().error).toBe('Missing Bearer token')
+      })
     })
   })
 })
