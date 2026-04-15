@@ -1,11 +1,11 @@
 import {
   dateToISOString,
   sanitize,
-  validateDateOnly,
-  validateDateISO,
-  validateAndParseDate,
+  parseDateOnly,
+  parseDateISO,
+  parseDate,
   ensureString,
-  ensureIdIsNumber,
+  parseId,
   ensureRequiredFieldsExists,
   isNumber,
 } from '@/lib/utils'
@@ -49,24 +49,24 @@ describe('utils', () => {
 
   describe('validateDateOnly', () => {
     test('accepts and returns valid Date', () => {
-      const result = validateDateOnly('2026-12-24')
+      const result = parseDateOnly('2026-12-24')
       assert.deepStrictEqual(result, new Date('2026-12-24'))
     })
 
     test('returns 400 for date ISO format', async () => {
-      assert.throws(() => validateDateOnly('2026-03-25T12:30:00Z'), {
+      assert.throws(() => parseDateOnly('2026-03-25T12:30:00Z'), {
         statregError: 'Invalid date format: 2026-03-25T12:30:00Z',
       })
     })
 
     test('returns 400 for invalid date string format', async () => {
-      assert.throws(() => validateDateOnly('24. des'), {
+      assert.throws(() => parseDateOnly('24. des'), {
         statregError: 'Invalid date format: 24. des',
       })
     })
 
     test('returns 400 if date parsing fails', async () => {
-      assert.throws(() => validateDateOnly('9999-11-00'), {
+      assert.throws(() => parseDateOnly('9999-11-00'), {
         statregError: 'Invalid date format: 9999-11-00',
       })
     })
@@ -74,34 +74,34 @@ describe('utils', () => {
 
   describe('validateDateISO ', () => {
     test('accepts and returns valid date ISO format with Z', () => {
-      const result = validateDateISO('2026-03-25T12:30:00Z')
+      const result = parseDateISO('2026-03-25T12:30:00Z')
       assert.deepStrictEqual(result, new Date('2026-03-25T12:30:00Z'))
     })
 
     test('accepts and returns valid date ISO format with offset', () => {
-      const result = validateDateISO('2026-03-25T12:30:00+01:00')
+      const result = parseDateISO('2026-03-25T12:30:00+01:00')
       assert.deepStrictEqual(result, new Date('2026-03-25T12:30:00+01:00'))
     })
 
     test('accepts and returns valid date ISO format with milliseconds', () => {
-      const result = validateDateISO('2026-03-25T12:30:00.123Z')
+      const result = parseDateISO('2026-03-25T12:30:00.123Z')
       assert.deepStrictEqual(result, new Date('2026-03-25T12:30:00.123Z'))
     })
 
     test('returns 400 for invalid date only format', () => {
-      assert.throws(() => validateDateISO('2026-03-25', 'publish_time'), {
+      assert.throws(() => parseDateISO('2026-03-25', 'publish_time'), {
         statregError: 'Invalid publish_time date format: 2026-03-25',
       })
     })
 
     test('returns 400 for invalid date with missing timezone', () => {
-      assert.throws(() => validateDateISO('2026-03-25T12:30:00'), {
+      assert.throws(() => parseDateISO('2026-03-25T12:30:00'), {
         statregError: 'Invalid date format: 2026-03-25T12:30:00',
       })
     })
 
     test('returns 400 for invalid date with space instead of T', () => {
-      assert.throws(() => validateDateISO('2026-03-25 12:30:00Z'), {
+      assert.throws(() => parseDateISO('2026-03-25 12:30:00Z'), {
         statregError: 'Invalid date format: 2026-03-25 12:30:00Z',
       })
     })
@@ -111,18 +111,18 @@ describe('utils', () => {
     const dateRegEx = /^\d{4}-\d{2}-\d{2}$/ // YYYY-MM-dd
 
     test('returns Date for valid input', () => {
-      const result = validateAndParseDate('2026-03-25', '', dateRegEx)
+      const result = parseDate('2026-03-25', '', dateRegEx)
       assert.deepStrictEqual(result, new Date('2026-03-25'))
     })
 
     test('returns 400 for missing date', () => {
-      assert.throws(() => validateAndParseDate(undefined, 'test', dateRegEx), {
+      assert.throws(() => parseDate(undefined, 'test', dateRegEx), {
         statregError: 'Invalid test date format:',
       })
     })
 
     test('returns 400 for date array input', () => {
-      assert.throws(() => validateAndParseDate(['2026-03-25', '2026-03-26'], '', dateRegEx), {
+      assert.throws(() => parseDate(['2026-03-25', '2026-03-26'], '', dateRegEx), {
         statregError: 'Invalid date format: 2026-03-25,2026-03-26',
       })
     })
@@ -147,21 +147,21 @@ describe('utils', () => {
 
   describe('ensureIdIsNumber', () => {
     test('returns parsed number for valid string id', () => {
-      const result = ensureIdIsNumber('123')
+      const result = parseId('123')
       assert.equal(result, 123)
     })
 
     test('returns parsed number for valid number id', () => {
-      const result = ensureIdIsNumber(123)
+      const result = parseId(123)
       assert.equal(result, 123)
     })
 
     test('throws error for invalid numeric format', () => {
-      assert.throws(() => ensureIdIsNumber('abc'), { statregError: 'Invalid id format' })
+      assert.throws(() => parseId('abc'), { statregError: 'Invalid id format' })
     })
 
     test('throws error for negative number', () => {
-      assert.throws(() => ensureIdIsNumber('-1', 'variant'), { statregError: 'Invalid variant id format' })
+      assert.throws(() => parseId('-1', 'variant'), { statregError: 'Invalid variant id format' })
     })
   })
 

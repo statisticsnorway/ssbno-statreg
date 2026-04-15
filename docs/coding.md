@@ -1,0 +1,9 @@
+# Coding practices and conventions in this project
+
+## Sanitation, validation and parsing in service layer
+
+As a rule of thumb we:
+
+* Sanitize, then parse. Validation are done as a part of parsing
+* Validate parameters and resources given from path parameters, then parse body
+* Functions named `assert...` or `validate...` returns boolean, `parse...` returns parsed object

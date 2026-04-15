@@ -1,63 +1,25 @@
 {
-  "engines": {
-    "node": ">=22.13.0"
-  },
-  "name": "ssbno-statreg-api",
+  "name": "ssbno-statreg",
   "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "exports": "./dist/main.js",
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
-  },
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
   "scripts": {
-    "dev": "nodemon --config nodemon.json",
-    "start": "node dist/main.js",
-    "build": "pkgroll",
-    "generate": "prisma generate",
-    "seed": "prisma db seed",
-    "db:deploy": "prisma migrate deploy",
+    "dev": "concurrently \"npm run dev -w backend\" \"npm run dev -w frontend\"",
+    "build": "npm run build -w backend",
+    "start": "npm run start -w backend",
+    "ci-test": "npm run ci-test -w backend",
+    "test": "npm run test -w backend",
     "lint": "eslint '**/*.{js,mjs,cjs,ts}'",
     "lint:fix": "eslint --fix '**/*.{js,mjs,cjs,ts}'",
-    "test": "tsx --test --experimental-test-module-mocks 'test/**.test.ts' 'src/**.test.ts' ",
-    "ci-test": "tsx --test --experimental-test-module-mocks 'test/**.test.ts' 'src/**.test.ts'",
+    "seed": "npm run seed -w backend",
+    "generate": "npm run generate -w backend",
     "test:integration": "tsx --test 'test/integration/**.test.ts'",
-    "generate:api-types": "openapi-typescript ./openapi/openapi.yaml | prettier --parser typescript > src/types/api-types.d.ts"
-  },
-  "overrides": {
-    "hono": "^4.12.9",
-    "valibot": "^1.2.0",
-    "body-parser": "^2.2.1",
-    "fastify": "^5.7.4",
-    "qs": "^6.14.1",
-    "lodash": "^4.17.23"
+    "generate:api-types": "npm run generate:api-types -w backend"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.2",
-    "@types/express": "^5.0.6",
-    "@types/node": "^24.12.0",
-    "@types/swagger-ui-express": "^4.1.8",
-    "eslint": "^9.39.2",
-    "eslint-plugin-prettier": "^5.5.5",
-    "node-mocks-http": "^1.17.2",
-    "nodemon": "^3.1.14",
-    "openapi-typescript": "^7.12.0",
-    "pkgroll": "^2.27.0",
-    "prisma": "^7.5.0",
-    "typescript-eslint": "^8.57.2"
-  },
-  "dependencies": {
-    "@prisma/adapter-pg": "^7.5.0",
-    "@prisma/client": "^7.5.0",
-    "express": "^5.1.0",
-    "express-prom-bundle": "^8.0.0",
-    "helmet": "^8.1.0",
-    "jose": "^6.2.2",
-    "JSONStream": "^1.3.5",
-    "lightship": "^9.0.3",
-    "swagger-ui-express": "^5.0.1",
-    "tsx": "^4.20.6",
-    "typescript": "^5.9.3",
-    "yaml": "^2.8.3"
+    "concurrently": "^8.2.0",
+    "typescript": "^5.4.0"
   }
 }

@@ -1,6 +1,6 @@
 import type { ReleaseDetails, ReleaseListing, ReleaseCreate, ReleaseUpdate } from '@/types/index'
 import { ApprovalStatus } from '@/types/enums'
-import { dateToISOString, sanitize, validateDateISO, ensureIdIsNumber, ensureRequiredFieldsExists } from '@/lib/utils'
+import { dateToISOString, sanitize, parseDateISO, parseId, ensureRequiredFieldsExists } from '@/lib/utils'
 import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
 import type { Prisma } from '@/generated/prisma/client'
 import { releaseAsserts } from '@/lib/asserts'
@@ -21,8 +21,10 @@ export async function getReleases(
   },
   prisma: ReleasePrisma
 ): Promise<ReleaseListing[]> {
-  const safeShortname = shortname ? sanitize(shortname) : undefined
-  const where = await buildReleaseFilter({ shortname: safeShortname, variantId }, prisma)
+  const safeShortname = sanitize(shortname)
+  const parsedVariantId = variantId ? parseId(variantId) : undefined
+
+  const where = await buildReleaseFilter({ shortname: safeShortname, variantId: parsedVariantId }, prisma)
 
   const releases = await prisma.release.findMany({
     skip: start,
@@ -82,16 +84,13 @@ export async function getReleases(
 }
 
 export async function getReleaseById(id: string, prisma: ReleasePrisma): Promise<ReleaseDetails> {
-  const idAsNumber = Number.parseInt(sanitize(id))
-  if (isNaN(idAsNumber)) {
-    return Promise.reject({ statregError: 'Invalid release id' })
-  }
+  const idAsNumber = parseId(id, 'release')
   const release = await prisma.release.findFirst({
     where: { id: idAsNumber },
     include: ReleaseDetailsIncludes,
   })
 
-  if (!release) return Promise.reject({ status: 404, statregError: 'Release not found' })
+  if (!release) return Promise.reject({ status: 404, statregError: `Release ${idAsNumber} not found` })
 
   return mapToReleaseDetails(release)
 }
@@ -103,14 +102,14 @@ export async function createRelease(
   body?: ReleaseCreate,
   now = new Date()
 ): Promise<ReleaseDetails> {
-  const variantIdNumber = ensureIdIsNumber(variantId)
+  const parsedVariantId = parseId(variantId)
   const safeShortname = sanitize(shortname)
 
   await releaseAsserts.assertStatisticExists(safeShortname, prisma)
-  await releaseAsserts.assertVariantExists(variantIdNumber, prisma)
-  await releaseAsserts.assertVariantMatchesShortname(variantIdNumber, safeShortname, prisma)
+  await releaseAsserts.assertVariantExists(parsedVariantId, prisma)
+  await releaseAsserts.assertVariantMatchesShortname(parsedVariantId, safeShortname, prisma)
 
-  const { publishTimeDate, periodFromDate, periodToDate, releaseDatePrecision } = validateReleaseInput(body)
+  const { publishTimeDate, periodFromDate, periodToDate, releaseDatePrecision } = parseReleaseInput(body)
 
   const release = await prisma.release.create({
     data: {
@@ -126,7 +125,7 @@ export async function createRelease(
       comment: '',
       variant: {
         connect: {
-          id: variantIdNumber,
+          id: parsedVariantId,
         },
       },
     },
@@ -137,29 +136,27 @@ export async function createRelease(
 }
 
 export async function buildReleaseFilter(
-  { shortname, variantId }: { shortname?: string; variantId?: string | number },
+  { shortname, variantId }: { shortname?: string; variantId?: number },
   prisma: ReleasePrisma
 ) {
   if (!shortname && variantId === undefined) return
-
-  const parsedVariantId = variantId === undefined ? undefined : ensureIdIsNumber(variantId)
 
   if (shortname) {
     await releaseAsserts.assertStatisticExists(shortname, prisma)
   }
 
-  if (parsedVariantId !== undefined) {
-    await releaseAsserts.assertVariantExists(parsedVariantId, prisma)
+  if (variantId !== undefined) {
+    await releaseAsserts.assertVariantExists(variantId, prisma)
   }
 
-  if (shortname && parsedVariantId !== undefined) {
-    await releaseAsserts.assertVariantMatchesShortname(parsedVariantId, shortname, prisma)
+  if (shortname && variantId !== undefined) {
+    await releaseAsserts.assertVariantMatchesShortname(variantId, shortname, prisma)
   }
 
   const where: any = { variant: {} }
 
-  if (parsedVariantId !== undefined) {
-    where.variant.id = parsedVariantId
+  if (variantId !== undefined) {
+    where.variant.id = variantId
   }
 
   if (shortname) {
@@ -177,9 +174,9 @@ export async function updateRelease(
   body: ReleaseUpdate | undefined,
   now = new Date()
 ): Promise<ReleaseDetails> {
-  const idAsNumber = ensureIdIsNumber(id)
+  const idAsNumber = parseId(id)
 
-  const validatedInput = validateReleaseInput(body, 'update')
+  const validatedInput = parseReleaseInput(body, 'update')
 
   const release = await prisma.release.update({
     include: ReleaseDetailsIncludes,
@@ -195,9 +192,6 @@ export async function updateRelease(
     },
   })
 
-  // TODO: You may not need this error since Prisma will give an error if update fails
-  if (!release) return Promise.reject({ status: 404, statregError: 'Release id not found' })
-
   return mapToReleaseDetails(release)
 }
 
@@ -209,7 +203,7 @@ type ValidatedReleaseInput = {
   comment: string
 }
 
-export function validateReleaseInput(
+export function parseReleaseInput(
   body: ReleaseUpdate | undefined,
   type: 'create' | 'update' = 'create'
 ): ValidatedReleaseInput {
@@ -220,15 +214,22 @@ export function validateReleaseInput(
   const { publish_time, period_from, period_to, release_date_precision, comment } =
     ensureRequiredFieldsExists(body, requiredFields) ?? {}
 
+  const safeComment = sanitize(comment)
+  if (type === 'update') {
+    if (!safeComment) {
+      throw { statregError: "Field 'comment' must be a non-empty string." }
+    }
+  }
+
   // TODO check that release_data_precision is enum
   // TODO: MIM-2577: Use function for blocked days once it's implemented
   // TODO: Automatic suggestion of period_to and period_from is going to be solved in a seperate task
   return {
-    publishTimeDate: validateDateISO(publish_time, 'publish_time'),
-    periodFromDate: validateDateISO(period_from, 'period_from'),
-    periodToDate: validateDateISO(period_to, 'period_to'),
+    publishTimeDate: parseDateISO(publish_time, 'publish_time'),
+    periodFromDate: parseDateISO(period_from, 'period_from'),
+    periodToDate: parseDateISO(period_to, 'period_to'),
     releaseDatePrecision: sanitize(release_date_precision!),
-    comment: comment ? sanitize(comment) : '',
+    comment: safeComment,
   }
 }
 

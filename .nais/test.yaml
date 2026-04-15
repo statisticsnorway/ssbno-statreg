@@ -21,19 +21,19 @@ kind: Application
 metadata:
   labels:
     team: ssbno-developers
-  name: ssbno-statreg-api
+  name: ssbno-statreg
   namespace: ssbno
 
 spec:
   ingresses:
-    - https://ssbno-statreg-api.intern.test.ssb.no
+    - https://ssbno-statreg.intern.test.ssb.no
   image: '{{ image }}' # Injected from the GitHub Action
   port: 8080
 
   envFrom:
-    - secret: login-config-ssbno-statreg-api
-    - secret: statreg-api-secrets
-    - configmap: statreg-api-config
+    - secret: login-config-ssbno-statreg
+    - secret: statreg-secrets
+    - configmap: statreg-config
 
   env:
     - name: NODE_ENV
@@ -41,7 +41,7 @@ spec:
     - name: AUTH_ENABLED
       value: 'true'
     - name: KEYCLOAK_CLIENT_ID
-      value: ssbno-statreg-api
+      value: ssbno-statreg
     - name: KLASS_BASE_URL
       value: https://data.qa.ssb.no
     - name: KEYCLOAK_REALM_ISSUER
@@ -49,7 +49,7 @@ spec:
     - name: KEYCLOAK_JWKS_URI
       value: https://auth.test.ssb.no/realms/ssb/protocol/openid-connect/certs
     - name: KEYCLOAK_TOKEN_AUDIENCE
-      value: oauth2-proxy-ssbno-statreg-api
+      value: oauth2-proxy-ssbno-statreg
 
   accessPolicy:
     outbound:

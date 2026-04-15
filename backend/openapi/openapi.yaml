@@ -5,7 +5,7 @@ info:
   version: 0.1.0
   description: API for managing publications, statistics and metadata for Statistics Norway. This API is under development, and there will be breaking changes.
 servers:
-  - url: https://ssbno-statreg-api.intern.test.ssb.no
+  - url: https://ssbno-statreg.intern.test.ssb.no
   - url: http://localhost:8080
 
 tags:
@@ -26,7 +26,7 @@ components:
     keykloak_token:
       type: http
       scheme: bearer
-      description: A token granted by Statistics Norway's Keycloak instance for ssbno-statreg-api.
+      description: A token granted by Statistics Norway's Keycloak instance for ssbno-statreg.
 
   schemas:
     Blocked_release_date:
