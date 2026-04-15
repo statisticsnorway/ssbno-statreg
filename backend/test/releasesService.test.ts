@@ -1,5 +1,4 @@
 import { vi, describe, test, expect, beforeEach } from 'vitest'
-import assert from 'node:assert/strict'
 import { releaseAsserts } from '@/lib/asserts'
 import {
   getReleases,
@@ -122,7 +121,7 @@ describe('releasesService ', async () => {
         throw { status: 404, statregError: "Statistic 'BAD' not found" }
       }) as any
 
-      await assert.rejects(() => buildReleaseFilter({ shortname: 'BAD' }, prismaMock), {
+      await expect(() => buildReleaseFilter({ shortname: 'BAD' }, prismaMock)).rejects.toMatchObject({
         status: 404,
         statregError: "Statistic 'BAD' not found",
       })
@@ -133,7 +132,7 @@ describe('releasesService ', async () => {
         throw { status: 404, statregError: "Variant '999' not found" }
       }) as any
 
-      await assert.rejects(() => buildReleaseFilter({ variantId: 999 }, prismaMock), {
+      await expect(() => buildReleaseFilter({ variantId: 999 }, prismaMock)).rejects.toMatchObject({
         status: 404,
         statregError: "Variant '999' not found",
       })
@@ -144,7 +143,7 @@ describe('releasesService ', async () => {
         throw { status: 404, statregError: "Variant does not belong to statistic 'KPI'" }
       }) as any
 
-      await assert.rejects(() => buildReleaseFilter({ shortname: 'KPI', variantId: 1 }, prismaMock), {
+      await expect(() => buildReleaseFilter({ shortname: 'KPI', variantId: 1 }, prismaMock)).rejects.toMatchObject({
         status: 404,
         statregError: "Variant does not belong to statistic 'KPI'",
       })
@@ -168,14 +167,17 @@ describe('releasesService ', async () => {
     })
 
     test('returns 400 if id is not a number', async () => {
-      await assert.rejects(() => getReleaseById('test', prismaMock), {
+      await expect(() => getReleaseById('test', prismaMock)).rejects.toMatchObject({
         statregError: 'Invalid release id format',
       })
     })
 
     test('returns 404 if no release found', async () => {
       setPrismaResult(null)
-      await assert.rejects(() => getReleaseById('1', prismaMock), { status: 404, statregError: 'Release 1 not found' })
+      await expect(() => getReleaseById('1', prismaMock)).rejects.toMatchObject({
+        status: 404,
+        statregError: 'Release 1 not found',
+      })
     })
   })
 
@@ -212,7 +214,7 @@ describe('releasesService ', async () => {
     })
 
     test('rejects with error message if request body is empty', async () => {
-      await assert.rejects(() => updateRelease(prismaMock, '1', undefined, now), {
+      await expect(() => updateRelease(prismaMock, '1', undefined, now)).rejects.toMatchObject({
         statregError:
           'Missing required field(s): publish_time, period_from, period_to, release_date_precision, comment',
       })
@@ -226,7 +228,7 @@ describe('releasesService ', async () => {
         period_from: '2026-03-19T11:52:38.903Z',
         release_date_precision: 'string',
       }
-      await assert.rejects(() => updateRelease(prismaMock, '1', releaseUpdateInputWithoutComment, now), {
+      await expect(() => updateRelease(prismaMock, '1', releaseUpdateInputWithoutComment, now)).rejects.toMatchObject({
         statregError: 'Missing required field(s): comment',
       })
 
@@ -307,7 +309,7 @@ describe('releasesService ', async () => {
     })
 
     test('returns 400 if request body is empty', async () => {
-      await assert.rejects(() => createRelease(prismaMock, 'kpi', '1', undefined, now), {
+      await expect(() => createRelease(prismaMock, 'kpi', '1', undefined, now)).rejects.toMatchObject({
         statregError: 'Missing required field(s): publish_time, period_from, period_to, release_date_precision',
       })
       expect(prismaMock.release.create).toHaveBeenCalledTimes(0)
@@ -319,7 +321,7 @@ describe('releasesService ', async () => {
         release_date_precision: 'dag',
       }
 
-      await assert.rejects(() => createRelease(prismaMock, 'kpi', '1', newReleaseInput, now), {
+      await expect(() => createRelease(prismaMock, 'kpi', '1', newReleaseInput, now)).rejects.toMatchObject({
         statregError: 'Missing required field(s): period_from, period_to',
       })
       expect(prismaMock.release.create).toHaveBeenCalledTimes(0)
