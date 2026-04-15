@@ -15,6 +15,17 @@ export async function fetchJson(path: string, init?: Parameters<typeof fetch>[1]
   return { response, body }
 }
 
+export async function getSeededStatisticWithShortname(): Promise<StatisticWithShortname> {
+  return prisma.statistic.findFirstOrThrow({
+    include: {
+      shortname: true,
+    },
+    orderBy: {
+      id: 'asc',
+    },
+  })
+}
+
 export async function createTestShortname(prefix = 'it-stat'): Promise<string> {
   const now = new Date()
   const shortname = `${prefix}-${now.getTime()}`
