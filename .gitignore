@@ -1,16 +1,11 @@
 # Ignore the dist folder
-dist/
+**/dist
+**/node_modules
+**/generated
 
-# Ignore node_modules
-node_modules
-
-# Ignore coverage folder
 coverage/
-
-# Ignore generate folder, you should make your own. 
-# Use npm run generate
-src/generated/
 
 # Do not commit your .env file, please
 .env
+*/.env
 .DS_Store

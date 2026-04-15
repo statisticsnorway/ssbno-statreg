@@ -21,6 +21,7 @@ jobs:
         with:
           team: ssbno
           tag: latest
+          docker_context: ./backend
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
           project_id: ${{ secrets.NAIS_MANAGEMENT_PROJECT_ID }}
       - name: Deploy to Nais
