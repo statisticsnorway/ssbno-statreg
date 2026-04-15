@@ -1,36 +1,35 @@
-import { beforeEach, describe, test, mock, before } from 'node:test'
-import assert from 'node:assert'
+import { vi, beforeEach, describe, test, expect } from 'vitest'
+import { createBlockedReleaseDay } from '@/services/calendarService'
 import { dateToISOString } from '@/lib/utils'
+
+const { isDateBlockedMock } = vi.hoisted(() => ({
+  isDateBlockedMock: vi.fn(async () => false),
+}))
+
+vi.mock(import('@/lib/blockedDates'), async (importOriginal) => {
+  const original = await importOriginal<typeof import('@/lib/blockedDates')>()
+  return {
+    ...original,
+    isDateBlocked: isDateBlockedMock,
+  }
+})
 
 // Uncomment next line to run tests locally with UTC timezone (same as nais cluster)
 // process.env.TZ = 'UTC'
 
 let prismaMock: any
 let listReturn: object
-let createBlockedReleaseDay: Function
-const isDateBlockedMock = mock.fn(() => false)
 
 function setListReturn(next: { comment: string; day: Date }[]) {
   listReturn = next
 }
 
 describe('calendarService  ', () => {
-  before(async () => {
-    // eslint-disable-next-line no-unused-vars
-    const blockedDatesLib = await import('@/lib/blockedDates').then(({ isDateBlocked: _, ...rest }) => rest)
-    mock.module('@/lib/blockedDates', {
-      namedExports: {
-        isDateBlocked: isDateBlockedMock,
-        blockedDatesLib,
-      },
-    })
-    ;({ createBlockedReleaseDay } = await import('@/services/calendarService'))
-  })
   beforeEach(() => {
     prismaMock = {
       calender_date: {
-        create: mock.fn((args) => Promise.resolve({ ...args, id: 0 })),
-        findMany: mock.fn(() => Promise.resolve(listReturn)),
+        create: vi.fn((args) => Promise.resolve({ ...args, id: 0 })),
+        findMany: vi.fn(() => Promise.resolve(listReturn)),
       },
     }
   })
@@ -43,48 +42,48 @@ describe('calendarService  ', () => {
 
       const result = await createBlockedReleaseDay(prismaMock, inputDate, inputComment)
 
-      assert.strictEqual(prismaMock.calender_date.create.mock.callCount(), 1)
-      assert.deepStrictEqual(prismaMock.calender_date.create.mock.calls[0].arguments[0], {
+      expect(prismaMock.calender_date.findMany).toHaveBeenCalledOnce()
+      expect(prismaMock.calender_date.create).toHaveBeenCalledExactlyOnceWith({
         data: {
           comment: inputComment.blocked_comment,
           day: new Date(inputDate),
         },
       })
-      assert.deepStrictEqual(result, calendar_date_result)
+      expect(result).toStrictEqual(calendar_date_result)
     })
 
     test('returns 400 if date already blocked (unique constraint violation)', async () => {
       const inputDate = '2026-12-24'
       const inputComment = { blocked_comment: 'Julaften' }
-      isDateBlockedMock.mock.mockImplementationOnce(() => true)
+      isDateBlockedMock.mockImplementationOnce(async () => true)
 
-      await assert.rejects(() => createBlockedReleaseDay(prismaMock, inputDate, inputComment), {
+      await expect(() => createBlockedReleaseDay(prismaMock, inputDate, inputComment)).rejects.toMatchObject({
         statregError: 'Date is already blocked, either manually, weekend or public holiday',
       })
-      assert.strictEqual(prismaMock.calender_date.create.mock.callCount(), 0)
-      assert.strictEqual(prismaMock.calender_date.findMany.mock.callCount(), 0)
+      expect(prismaMock.calender_date.create).toHaveBeenCalledTimes(0)
+      expect(prismaMock.calender_date.findMany).toHaveBeenCalledTimes(0)
     })
 
     test('returns 400 if blocked comment is "" ', async () => {
       const inputDate = '2026-12-24'
       const inputComment = { blocked_comment: '' }
 
-      await assert.rejects(() => createBlockedReleaseDay(prismaMock, inputDate, inputComment), {
+      await expect(() => createBlockedReleaseDay(prismaMock, inputDate, inputComment)).rejects.toMatchObject({
         statregError: `Field 'blocked_comment' must be a non-empty string.`,
       })
-      assert.strictEqual(prismaMock.calender_date.create.mock.callCount(), 0)
-      assert.strictEqual(prismaMock.calender_date.findMany.mock.callCount(), 0)
+      expect(prismaMock.calender_date.create).toHaveBeenCalledTimes(0)
+      expect(prismaMock.calender_date.findMany).toHaveBeenCalledTimes(0)
     })
 
     test('returns 400 if body have no blocked_comment property', async () => {
       const inputDate = '2026-12-24'
       const inputComment = {}
 
-      await assert.rejects(() => createBlockedReleaseDay(prismaMock, inputDate, inputComment), {
+      await expect(() => createBlockedReleaseDay(prismaMock, inputDate, inputComment)).rejects.toMatchObject({
         statregError: 'Missing required field(s): blocked_comment',
       })
-      assert.strictEqual(prismaMock.calender_date.create.mock.callCount(), 0)
-      assert.strictEqual(prismaMock.calender_date.findMany.mock.callCount(), 0)
+      expect(prismaMock.calender_date.create).toHaveBeenCalledTimes(0)
+      expect(prismaMock.calender_date.findMany).toHaveBeenCalledTimes(0)
     })
   })
 })
