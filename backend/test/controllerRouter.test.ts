@@ -1,68 +1,77 @@
-import { describe, test, beforeEach } from 'node:test'
-import assert from 'node:assert/strict'
+import { describe, test, expect, beforeEach, vi } from 'vitest'
 import express, { Router, type RequestHandler } from 'express'
 import controllerRouter from '@/api/core/controllerRouter'
 import { invoke, makeSkipAuthMarker } from './helpers'
 import { MockResponse } from 'node-mocks-http'
 
-describe('controllerRouter integration testing: ', () => {
-  describe('controllerRouter ', () => {
-    let requireAuthCalls: string[]
-    let requireAuth: RequestHandler
+describe('controllerRouter', () => {
+  let requireAuthCalls: string[]
+  let requireAuth: RequestHandler
 
-    const fakeController = (router: Router) => {
-      const skip = makeSkipAuthMarker()
+  const fakeController = (router: Router) => {
+    const skip = makeSkipAuthMarker()
 
-      router.get('/public', skip, (_req, res) => res.json({ ok: 'public' }))
-      router.get('/protected', (_req, res) => res.json({ ok: 'protected' }))
+    router.get('/public', skip, (_req, res) => res.json({ ok: 'public' }))
+    router.get('/protected', (_req, res) => res.json({ ok: 'protected' }))
+
+    vi.mock('@/api/controllers/statisticsController', () => ({
+      default: () => {},
+    }))
+
+    vi.mock('@/api/controllers/releasesController', () => ({
+      default: () => {},
+    }))
+
+    vi.mock('@/api/controllers/calendarController', () => ({
+      default: () => {},
+    }))
+  }
+
+  const makeApp = () =>
+    express()
+      .disable('x-powered-by')
+      .use(controllerRouter(requireAuth, [fakeController]))
+
+  beforeEach(() => {
+    requireAuthCalls = []
+    requireAuth = (req, _res, next) => {
+      requireAuthCalls.push(`${req.method} ${req.url}`)
+      next()
     }
+  })
 
-    const makeApp = () =>
-      express()
-        .disable('x-powered-by')
-        .use(controllerRouter(requireAuth, [fakeController]))
+  test('calls requireAuth on protected routes and returns 200', async () => {
+    const app = makeApp()
+    const res: MockResponse<any> = await invoke(app, 'GET', '/protected')
 
-    beforeEach(() => {
-      requireAuthCalls = []
-      requireAuth = (req, _res, next) => {
-        requireAuthCalls.push(`${req.method} ${req.url}`)
-        next()
-      }
-    })
+    expect(res.statusCode).toBe(200)
+    expect(res._getJSONData().ok).toBe('protected')
+    expect(requireAuthCalls).toHaveLength(1)
+    expect(requireAuthCalls[0]).toBe('GET /protected')
+  })
 
-    test('calls requireAuth on protected routes and returns 200', async () => {
-      const app = makeApp()
-      const res: MockResponse<any> = await invoke(app, 'GET', '/protected')
+  test('bypasses requireAuth on public routes', async () => {
+    const app = makeApp()
+    const res: MockResponse<any> = await invoke(app, 'GET', '/public')
 
-      assert.equal(res.statusCode, 200)
-      assert.equal(res._getJSONData().ok, 'protected')
-      assert.equal(requireAuthCalls.length, 1)
-      assert.equal(requireAuthCalls[0], 'GET /protected')
-    })
+    expect(res.statusCode).toBe(200)
+    expect(res._getJSONData().ok).toBe('public')
+    expect(requireAuthCalls).toHaveLength(0)
+  })
 
-    test('bypasses requireAuth on public routes', async () => {
-      const app = makeApp()
-      const res: MockResponse<any> = await invoke(app, 'GET', '/public')
+  test('returns 405 for disallowed methods (e.g., PATCH)', async () => {
+    const app = makeApp()
+    const res: MockResponse<any> = await invoke(app, 'PATCH', '/public')
 
-      assert.equal(res.statusCode, 200)
-      assert.equal(res._getJSONData().ok, 'public')
-      assert.equal(requireAuthCalls.length, 0)
-    })
+    expect(res.statusCode).toBe(405)
+    expect(res._getJSONData().error).toBe('Method Not Allowed')
+  })
 
-    test('returns 405 for disallowed methods (e.g., PATCH)', async () => {
-      const app = makeApp()
-      const res: MockResponse<any> = await invoke(app, 'PATCH', '/public')
+  test('returns 404 for unknown routes with allowed method', async () => {
+    const app = makeApp()
+    const res: MockResponse<any> = await invoke(app, 'GET', '/unknown')
 
-      assert.equal(res.statusCode, 405)
-      assert.equal(res._getJSONData().error, 'Method Not Allowed')
-    })
-
-    test('returns 404 for unknown routes with allowed method', async () => {
-      const app = makeApp()
-      const res: MockResponse<any> = await invoke(app, 'GET', '/unknown')
-
-      assert.equal(res.statusCode, 404)
-      assert.equal(res._getJSONData().error, 'Not Found')
-    })
+    expect(res.statusCode).toBe(404)
+    expect(res._getJSONData().error).toBe('Not Found')
   })
 })
