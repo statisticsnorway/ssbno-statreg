@@ -15,8 +15,8 @@ const { fetchUserByEmailMock, getAccessTokenMock } = vi.hoisted(() => ({
   getAccessTokenMock: vi.fn(() => 'token' as any),
 }))
 
-vi.mock(import('@/../plugins/entraReaderClient'), async (importOriginal) => {
-  const original = await importOriginal<typeof import('@/../plugins/entraReaderClient')>()
+vi.mock(import('../plugins/entraReaderClient'), async (importOriginal) => {
+  const original = await importOriginal<typeof import('../plugins/entraReaderClient')>()
   return {
     ...original,
     fetchUserByEmail: fetchUserByEmailMock as any,
