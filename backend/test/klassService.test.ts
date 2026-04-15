@@ -114,8 +114,8 @@ describe('klassService ', async () => {
       const divisionNb = getDivisionFromCode(999)
       const divisionEn = getDivisionFromCode(999, 'en')
 
-      expect(divisionNb).toBeUndefined
-      expect(divisionEn).toBeUndefined
+      expect(divisionNb).toBeUndefined()
+      expect(divisionEn).toBeUndefined()
     })
 
     test('returns undefined when departments is an empty array', async () => {
@@ -125,8 +125,8 @@ describe('klassService ', async () => {
       const divisionNb = getDivisionFromCode(999)
       const divisionEn = getDivisionFromCode(999, 'en')
 
-      expect(divisionNb).toBeUndefined
-      expect(divisionEn).toBeUndefined
+      expect(divisionNb).toBeUndefined()
+      expect(divisionEn).toBeUndefined()
     })
   })
 })
