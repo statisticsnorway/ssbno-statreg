@@ -19,6 +19,7 @@
     "db:deploy": "prisma migrate deploy",
     "test": "vitest",
     "ci-test": "vitest run",
+    "test:integration": "vitest run --include 'test/integration/**/*.test.ts'",
     "generate:api-types": "openapi-typescript ./openapi/openapi.yaml | prettier --parser typescript > src/types/api-types.d.ts"
   },
   "overrides": {

@@ -6,5 +6,6 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, 'backend/src'),
     },
+    exclude: ['test/integration/**'],
   },
 })
