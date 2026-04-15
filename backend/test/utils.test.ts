@@ -21,7 +21,7 @@ describe('utils', () => {
 
     test('returns undefined when date is null', () => {
       const result = dateToISOString(null)
-      expect(result).toBeUndefined()
+      expect(result).toBeUndefined
     })
   })
 

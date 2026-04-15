@@ -110,7 +110,7 @@ describe('entraReaderClient ', () => {
     test('returns null if email is missing', async () => {
       const user = await fetchUserByEmail('', 'token')
       expect(fetchMock).toHaveBeenCalledTimes(0)
-      expect(user).toBeNull()
+      expect(user).toBeNull
     })
 
     test('throws error if missing token', async () => {
