@@ -17,7 +17,7 @@ services:
     image: node:24
     working_dir: /app
     volumes:
-      - .:/app
+      - ./backend:/app
       - node_modules:/app/node_modules
     command: >
       sh -c "
