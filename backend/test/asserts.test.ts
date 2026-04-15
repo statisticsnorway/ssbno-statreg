@@ -108,7 +108,7 @@ describe('asserts', () => {
   test('assertShortnameExistsAndIsAvailable throws when shortname is already in use', async () => {
     prismaMock.shortname.findUnique = vi.fn(() => Promise.resolve(null))
 
-    await expect(() => assertShortnameExistsAndIsAvailable('KPI', prismaMock)).rejects.contains({
+    await expect(() => assertShortnameExistsAndIsAvailable('KPI', prismaMock)).rejects.toMatchObject({
       status: 400,
       statregError: "Shortname 'KPI' is already in use",
     })

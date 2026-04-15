@@ -60,7 +60,7 @@ describe('entraReaderClient ', () => {
     })
     test('returns null when required Entra env vars are missing', async () => {
       process.env = {}
-      await expect(() => getAccessToken()).rejects.contain({
+      await expect(() => getAccessToken()).rejects.toMatchObject({
         message:
           'Missing Azure Entra configuration. Ensure AZURE_TENANT_ID, AZURE_CLIENT_ID, and AZURE_CLIENT_SECRET are set.',
       })
@@ -68,7 +68,7 @@ describe('entraReaderClient ', () => {
 
     test('throws error if fetch from api fails', async () => {
       fetchMock.mockReturnValueOnce(mockFetchError(500, 'api error'))
-      await expect(() => getAccessToken()).rejects.contain({
+      await expect(() => getAccessToken()).rejects.toMatchObject({
         status: 500,
         text: 'api error',
       })
@@ -115,7 +115,7 @@ describe('entraReaderClient ', () => {
 
     test('throws error if missing token', async () => {
       expect(fetchMock).toHaveBeenCalledTimes(0)
-      await expect(() => fetchUserByEmail(TEST_EMAIL, '')).rejects.contain({
+      await expect(() => fetchUserByEmail(TEST_EMAIL, '')).rejects.toMatchObject({
         message: 'Missing token',
       })
     })
@@ -141,11 +141,11 @@ describe('entraReaderClient ', () => {
 
     test('returns rejected Promise when Graph returns 404', async () => {
       fetchMock.mockReturnValueOnce(mockFetchError(404, 'user not found'))
-      await expect(() => fetchUserByEmail('NonExistingUser', 'token')).rejects.contain({
+      await expect(() => fetchUserByEmail('NonExistingUser', 'token')).rejects.toMatchObject({
         status: 404,
         text: 'user not found',
       })
-      await expect(fetchMock).toHaveBeenCalledExactlyOnceWith(
+      expect(fetchMock).toHaveBeenCalledExactlyOnceWith(
         expect.stringContaining(
           `/${encodeURIComponent('NonExistingUser')}?$select=displayName,businessPhones,mail,userPrincipalName`
         ),
@@ -155,7 +155,7 @@ describe('entraReaderClient ', () => {
 
     test('throws error if fetch from api fails', async () => {
       fetchMock.mockReturnValueOnce(mockFetchError(500, 'api error'))
-      await expect(() => fetchUserByEmail('admin', 'token')).rejects.contain({
+      await expect(() => fetchUserByEmail('admin', 'token')).rejects.toMatchObject({
         status: 500,
         text: 'api error',
       })
