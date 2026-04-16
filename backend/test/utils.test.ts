@@ -9,64 +9,63 @@ import {
   ensureRequiredFieldsExists,
   isNumber,
 } from '@/lib/utils'
-import { describe, test } from 'node:test'
-import assert from 'node:assert/strict'
+import { describe, test, expect } from 'vitest'
 
 describe('utils', () => {
   describe('dateToISOString ', () => {
     test('returns ISO string for valid date', () => {
       const date = new Date('2020-01-01T12:00:00Z')
       const result = dateToISOString(date)
-      assert.equal(result, '2020-01-01T12:00:00.000Z')
+      expect(result).toBe('2020-01-01T12:00:00.000Z')
     })
 
     test('returns undefined when date is null', () => {
       const result = dateToISOString(null)
-      assert.equal(result, undefined)
+      expect(result).toBeUndefined
     })
   })
 
   describe('sanitize', () => {
     test('handles empty string', async () => {
       const result = sanitize('')
-      assert.equal(result, '')
+      expect(result).toBe('')
     })
     test('handles input that is not string', async () => {
       const result = sanitize(Number(8) as any)
-      assert.equal(result, '')
+      expect(result).toBe('')
     })
     test('returning same string if all characters are legal', async () => {
       const input = 'Alt her er lovlige bokstaver inkl. ÆæÅ!/'
       const result = sanitize(input)
-      assert.equal(result, input)
+      expect(result).toBe(input)
     })
     test('removes illigal characters', async () => {
       const input = `Fjerner alle ulovlige tegn: é\\<>{}`
       const result = sanitize(input)
-      assert.equal(result, 'Fjerner alle ulovlige tegn: ')
+      expect(result).toBe('Fjerner alle ulovlige tegn: ')
     })
   })
 
   describe('validateDateOnly', () => {
     test('accepts and returns valid Date', () => {
       const result = parseDateOnly('2026-12-24')
-      assert.deepStrictEqual(result, new Date('2026-12-24'))
+      expect(result).toStrictEqual(new Date('2026-12-24'))
     })
 
     test('returns 400 for date ISO format', async () => {
-      assert.throws(() => parseDateOnly('2026-03-25T12:30:00Z'), {
+      await expect(() => parseDateOnly('2026-03-25T12:30:00Z')).toThrow({
         statregError: 'Invalid date format: 2026-03-25T12:30:00Z',
       })
     })
 
     test('returns 400 for invalid date string format', async () => {
-      assert.throws(() => parseDateOnly('24. des'), {
+      expect(() => parseDateOnly('24. des')).toThrow({
         statregError: 'Invalid date format: 24. des',
       })
     })
 
     test('returns 400 if date parsing fails', async () => {
-      assert.throws(() => parseDateOnly('9999-11-00'), {
+      expect(() => parseDateOnly('9999-11-00')).toThrow({
         statregError: 'Invalid date format: 9999-11-00',
       })
     })
@@ -75,33 +74,33 @@ describe('utils', () => {
   describe('validateDateISO ', () => {
     test('accepts and returns valid date ISO format with Z', () => {
       const result = parseDateISO('2026-03-25T12:30:00Z')
-      assert.deepStrictEqual(result, new Date('2026-03-25T12:30:00Z'))
+      expect(result).toStrictEqual(new Date('2026-03-25T12:30:00Z'))
     })
 
     test('accepts and returns valid date ISO format with offset', () => {
       const result = parseDateISO('2026-03-25T12:30:00+01:00')
-      assert.deepStrictEqual(result, new Date('2026-03-25T12:30:00+01:00'))
+      expect(result).toStrictEqual(new Date('2026-03-25T12:30:00+01:00'))
     })
 
     test('accepts and returns valid date ISO format with milliseconds', () => {
       const result = parseDateISO('2026-03-25T12:30:00.123Z')
-      assert.deepStrictEqual(result, new Date('2026-03-25T12:30:00.123Z'))
+      expect(result).toStrictEqual(new Date('2026-03-25T12:30:00.123Z'))
     })
 
     test('returns 400 for invalid date only format', () => {
-      assert.throws(() => parseDateISO('2026-03-25', 'publish_time'), {
+      expect(() => parseDateISO('2026-03-25', 'publish_time')).toThrow({
         statregError: 'Invalid publish_time date format: 2026-03-25',
       })
     })
 
     test('returns 400 for invalid date with missing timezone', () => {
-      assert.throws(() => parseDateISO('2026-03-25T12:30:00'), {
+      expect(() => parseDateISO('2026-03-25T12:30:00')).toThrow({
         statregError: 'Invalid date format: 2026-03-25T12:30:00',
       })
     })
 
     test('returns 400 for invalid date with space instead of T', () => {
-      assert.throws(() => parseDateISO('2026-03-25 12:30:00Z'), {
+      expect(() => parseDateISO('2026-03-25 12:30:00Z')).toThrow({
         statregError: 'Invalid date format: 2026-03-25 12:30:00Z',
       })
     })
@@ -112,17 +111,17 @@ describe('utils', () => {
 
     test('returns Date for valid input', () => {
       const result = parseDate('2026-03-25', '', dateRegEx)
-      assert.deepStrictEqual(result, new Date('2026-03-25'))
+      expect(result).toStrictEqual(new Date('2026-03-25'))
     })
 
     test('returns 400 for missing date', () => {
-      assert.throws(() => parseDate(undefined, 'test', dateRegEx), {
+      expect(() => parseDate(undefined, 'test', dateRegEx)).toThrow({
         statregError: 'Invalid test date format:',
       })
     })
 
     test('returns 400 for date array input', () => {
-      assert.throws(() => parseDate(['2026-03-25', '2026-03-26'], '', dateRegEx), {
+      expect(() => parseDate(['2026-03-25', '2026-03-26'], '', dateRegEx)).toThrow({
         statregError: 'Invalid date format: 2026-03-25,2026-03-26',
       })
     })
@@ -131,37 +130,37 @@ describe('utils', () => {
   describe('ensureString', () => {
     test('returns passed string', () => {
       const result = ensureString('value')
-      assert.equal(result, 'value')
+      expect(result).toBe('value')
     })
 
     test('returns first element if passed value is an array of string', () => {
       const result = ensureString(['value1', 'value2'])
-      assert.equal(result, 'value1')
+      expect(result).toBe('value1')
     })
 
     test('returns empty string if string is undefined', () => {
       const result = ensureString(undefined)
-      assert.equal(result, '')
+      expect(result).toBe('')
     })
   })
 
   describe('ensureIdIsNumber', () => {
     test('returns parsed number for valid string id', () => {
       const result = parseId('123')
-      assert.equal(result, 123)
+      expect(result).toBe(123)
     })
 
     test('returns parsed number for valid number id', () => {
       const result = parseId(123)
-      assert.equal(result, 123)
+      expect(result).toBe(123)
     })
 
     test('throws error for invalid numeric format', () => {
-      assert.throws(() => parseId('abc'), { statregError: 'Invalid id format' })
+      expect(() => parseId('abc')).toThrow({ statregError: 'Invalid id format' })
     })
 
     test('throws error for negative number', () => {
-      assert.throws(() => parseId('-1', 'variant'), { statregError: 'Invalid variant id format' })
+      expect(() => parseId('-1', 'variant')).toThrow({ statregError: 'Invalid variant id format' })
     })
   })
 
@@ -172,19 +171,19 @@ describe('utils', () => {
         field_1: 'test',
         field_2: null,
       }
-      assert.deepStrictEqual(body, ensureRequiredFieldsExists(body, requiredFields))
+      expect(body).toBe(ensureRequiredFieldsExists(body, requiredFields))
     })
 
     test('return 400 when body is undefined', () => {
       const requiredFields = ['field_1', 'field_2']
-      assert.throws(() => ensureRequiredFieldsExists(undefined, requiredFields), {
+      expect(() => ensureRequiredFieldsExists(undefined, requiredFields)).toThrow({
         statregError: 'Missing required field(s): field_1, field_2',
       })
     })
 
     test('return 400 when body object is empty', () => {
       const requiredFields = ['field_1', 'field_2']
-      assert.throws(() => ensureRequiredFieldsExists({}, requiredFields as never[]), {
+      expect(() => ensureRequiredFieldsExists({}, requiredFields as never[])).toThrow({
         statregError: 'Missing required field(s): field_1, field_2',
       })
     })
@@ -192,13 +191,13 @@ describe('utils', () => {
 
   describe('isNumber', () => {
     test('a number is a number', () => {
-      assert.equal(true, isNumber(42))
+      expect(true).toBe(isNumber(42))
     })
     test('a string with a number is castable as number', () => {
-      assert.equal(true, isNumber('9000'))
+      expect(true).toBe(isNumber('9000'))
     })
     test('a string of text is not a number', () => {
-      assert.equal(false, isNumber('text in a string'))
+      expect(false).toBe(isNumber('text in a string'))
     })
   })
 })

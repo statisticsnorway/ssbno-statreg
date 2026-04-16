@@ -1,5 +1,4 @@
-import { describe, test, mock, beforeEach } from 'node:test'
-import assert from 'node:assert/strict'
+import { vi, describe, test, expect, beforeEach } from 'vitest'
 import { releaseAsserts } from '@/lib/asserts'
 import {
   getReleases,
@@ -25,20 +24,20 @@ describe('releasesService ', async () => {
     releasesResult = null
     prismaMock = {
       release: {
-        findMany: mock.fn(() => Promise.resolve(releasesResult)),
-        findFirst: mock.fn(() => Promise.resolve(releasesResult)),
-        create: mock.fn(() => Promise.resolve({ ...releasesResult })),
-        update: mock.fn(() => Promise.resolve({ ...releasesResult })),
+        findMany: vi.fn(() => Promise.resolve(releasesResult)),
+        findFirst: vi.fn(() => Promise.resolve(releasesResult)),
+        create: vi.fn(() => Promise.resolve({ ...releasesResult })),
+        update: vi.fn(() => Promise.resolve({ ...releasesResult })),
       },
-      statistic: { findFirst: mock.fn(() => Promise.resolve({ id: 1 })) },
+      statistic: { findFirst: vi.fn(() => Promise.resolve({ id: 1 })) },
       variant: {
-        findUnique: mock.fn(() => Promise.resolve({ id: 1 })),
-        findFirst: mock.fn(() => Promise.resolve({ id: 1 })),
+        findUnique: vi.fn(() => Promise.resolve({ id: 1 })),
+        findFirst: vi.fn(() => Promise.resolve({ id: 1 })),
       },
     }
-    releaseAsserts.assertStatisticExists = mock.fn(async () => undefined) as any
-    releaseAsserts.assertVariantExists = mock.fn(async () => undefined) as any
-    releaseAsserts.assertVariantMatchesShortname = mock.fn(async () => undefined) as any
+    releaseAsserts.assertStatisticExists = vi.fn(async () => undefined) as any
+    releaseAsserts.assertVariantExists = vi.fn(async () => undefined) as any
+    releaseAsserts.assertVariantMatchesShortname = vi.fn(async () => undefined) as any
   })
 
   describe('getReleases ', () => {
@@ -47,9 +46,8 @@ describe('releasesService ', async () => {
 
       const result = await getReleases({ start: 1, count: 2 }, prismaMock)
 
-      assert.deepEqual(result, mockedReleasesResult)
-      assert.equal(prismaMock.release.findMany.mock.calls[0].arguments[0]['skip'], 1)
-      assert.equal(prismaMock.release.findMany.mock.calls[0].arguments[0]['take'], 2)
+      expect(result).toStrictEqual(mockedReleasesResult)
+      expect(prismaMock.release.findMany).toHaveBeenCalledWith(expect.objectContaining({ skip: 1, take: 2 }))
     })
 
     test('uses default start and count if not provided', async () => {
@@ -57,9 +55,9 @@ describe('releasesService ', async () => {
 
       const result = await getReleases({}, prismaMock)
 
-      assert.deepEqual(result, mockedReleasesResult)
-      assert.equal(prismaMock.release.findMany.mock.calls[0].arguments[0]['skip'], 0)
-      assert.equal(prismaMock.release.findMany.mock.calls[0].arguments[0]['take'], 10)
+      expect(result).toStrictEqual(mockedReleasesResult)
+
+      expect(prismaMock.release.findMany).toHaveBeenCalledWith(expect.objectContaining({ skip: 0, take: 10 }))
     })
 
     test('returns empty list if no results', async () => {
@@ -67,7 +65,7 @@ describe('releasesService ', async () => {
 
       const result = await getReleases({}, prismaMock)
 
-      assert.deepEqual(result, [])
+      expect(result).toStrictEqual([])
     })
   })
 
@@ -75,88 +73,77 @@ describe('releasesService ', async () => {
     test('returns undefined when neither shortname nor variantId is provided', async () => {
       const where = await buildReleaseFilter({}, prismaMock)
 
-      assert.equal(where, undefined)
-      assert.equal((releaseAsserts.assertStatisticExists as any).mock.calls.length, 0)
-      assert.equal((releaseAsserts.assertVariantExists as any).mock.calls.length, 0)
-      assert.equal((releaseAsserts.assertVariantMatchesShortname as any).mock.calls.length, 0)
+      expect(where).toBeUndefined
+      expect(releaseAsserts.assertStatisticExists).toHaveBeenCalledTimes(0)
+      expect(releaseAsserts.assertVariantExists).toHaveBeenCalledTimes(0)
+      expect(releaseAsserts.assertVariantMatchesShortname).toHaveBeenCalledTimes(0)
     })
 
     test('applies filter when only shortname is provided', async () => {
       const where = await buildReleaseFilter({ shortname: 'KPI' }, prismaMock)
 
-      assert.deepEqual(where, {
+      expect(where).toStrictEqual({
         variant: { statistic: { shortname: { name: 'KPI' } } },
       })
 
-      assert.equal((releaseAsserts.assertStatisticExists as any).mock.calls.length, 1)
-      assert.deepEqual((releaseAsserts.assertStatisticExists as any).mock.calls[0].arguments, ['KPI', prismaMock])
-
-      assert.equal((releaseAsserts.assertVariantExists as any).mock.calls.length, 0)
-      assert.equal((releaseAsserts.assertVariantMatchesShortname as any).mock.calls.length, 0)
+      expect(releaseAsserts.assertStatisticExists).toHaveBeenCalledExactlyOnceWith('KPI', prismaMock)
+      expect(releaseAsserts.assertVariantExists).toHaveBeenCalledTimes(0)
+      expect(releaseAsserts.assertVariantMatchesShortname).toHaveBeenCalledTimes(0)
     })
 
     test('applies filter when only variantId is provided', async () => {
       const where = await buildReleaseFilter({ variantId: 1 }, prismaMock)
 
-      assert.deepEqual(where, {
+      expect(where).toStrictEqual({
         variant: { id: 1 },
       })
 
-      assert.equal((releaseAsserts.assertStatisticExists as any).mock.calls.length, 0)
-      assert.equal((releaseAsserts.assertVariantExists as any).mock.calls.length, 1)
-      assert.deepEqual((releaseAsserts.assertVariantExists as any).mock.calls[0].arguments, [1, prismaMock])
-      assert.equal((releaseAsserts.assertVariantMatchesShortname as any).mock.calls.length, 0)
+      expect(releaseAsserts.assertStatisticExists).toHaveBeenCalledTimes(0)
+      expect(releaseAsserts.assertVariantExists).toHaveBeenCalledExactlyOnceWith(1, prismaMock)
+      expect(releaseAsserts.assertVariantMatchesShortname).toHaveBeenCalledTimes(0)
     })
 
     test('applies combined filter when both inputs are provided', async () => {
       const where = await buildReleaseFilter({ shortname: 'KPI', variantId: 1 }, prismaMock)
 
-      assert.deepEqual(where, {
+      expect(where).toStrictEqual({
         variant: { id: 1, statistic: { shortname: { name: 'KPI' } } },
       })
 
-      assert.equal((releaseAsserts.assertStatisticExists as any).mock.calls.length, 1)
-      assert.deepEqual((releaseAsserts.assertStatisticExists as any).mock.calls[0].arguments, ['KPI', prismaMock])
+      expect(releaseAsserts.assertStatisticExists).toHaveBeenCalledExactlyOnceWith('KPI', prismaMock)
+      expect(releaseAsserts.assertVariantExists).toHaveBeenCalledExactlyOnceWith(1, prismaMock)
 
-      assert.equal((releaseAsserts.assertVariantExists as any).mock.calls.length, 1)
-      assert.deepEqual((releaseAsserts.assertVariantExists as any).mock.calls[0].arguments, [1, prismaMock])
-
-      assert.equal((releaseAsserts.assertVariantMatchesShortname as any).mock.calls.length, 1)
-      assert.deepEqual((releaseAsserts.assertVariantMatchesShortname as any).mock.calls[0].arguments, [
-        1,
-        'KPI',
-        prismaMock,
-      ])
+      expect(releaseAsserts.assertVariantMatchesShortname).toHaveBeenCalledExactlyOnceWith(1, 'KPI', prismaMock)
     })
 
     test('throws when statistic does not exist', async () => {
-      releaseAsserts.assertStatisticExists = mock.fn(async () => {
+      releaseAsserts.assertStatisticExists = vi.fn(async () => {
         throw { status: 404, statregError: "Statistic 'BAD' not found" }
       }) as any
 
-      await assert.rejects(() => buildReleaseFilter({ shortname: 'BAD' }, prismaMock), {
+      await expect(() => buildReleaseFilter({ shortname: 'BAD' }, prismaMock)).rejects.toMatchObject({
         status: 404,
         statregError: "Statistic 'BAD' not found",
       })
     })
 
     test('throws when variant does not exist', async () => {
-      releaseAsserts.assertVariantExists = mock.fn(async () => {
+      releaseAsserts.assertVariantExists = vi.fn(async () => {
         throw { status: 404, statregError: "Variant '999' not found" }
       }) as any
 
-      await assert.rejects(() => buildReleaseFilter({ variantId: 999 }, prismaMock), {
+      await expect(() => buildReleaseFilter({ variantId: 999 }, prismaMock)).rejects.toMatchObject({
         status: 404,
         statregError: "Variant '999' not found",
       })
     })
 
     test('throws when variant does not belong to statistic', async () => {
-      releaseAsserts.assertVariantMatchesShortname = mock.fn(async () => {
+      releaseAsserts.assertVariantMatchesShortname = vi.fn(async () => {
         throw { status: 404, statregError: "Variant does not belong to statistic 'KPI'" }
       }) as any
 
-      await assert.rejects(() => buildReleaseFilter({ shortname: 'KPI', variantId: 1 }, prismaMock), {
+      await expect(() => buildReleaseFilter({ shortname: 'KPI', variantId: 1 }, prismaMock)).rejects.toMatchObject({
         status: 404,
         statregError: "Variant does not belong to statistic 'KPI'",
       })
@@ -167,27 +154,30 @@ describe('releasesService ', async () => {
     test('returns mocked data on correct form', async () => {
       setPrismaResult(mockedSingleReleasePrismaResult)
       const result = await getReleaseById('1', prismaMock)
-      assert.deepEqual(result, mockedSingleReleaseResult)
+      expect(result).toStrictEqual(mockedSingleReleaseResult)
     })
 
     test('evaluates has_versions correctly', async () => {
       setPrismaResult({ ...mockedSingleReleasePrismaResult, version: 2 })
       const result1 = await getReleaseById('1', prismaMock)
-      assert.deepEqual(result1.has_versions, true)
+      expect(result1.has_versions).toBe(true)
       setPrismaResult({ ...mockedSingleReleasePrismaResult, version: 1 })
       const result2 = await getReleaseById('1', prismaMock)
-      assert.deepEqual(result2.has_versions, false)
+      expect(result2.has_versions).toBe(false)
     })
 
     test('returns 400 if id is not a number', async () => {
-      await assert.rejects(() => getReleaseById('test', prismaMock), {
+      await expect(() => getReleaseById('test', prismaMock)).rejects.toMatchObject({
         statregError: 'Invalid release id format',
       })
     })
 
     test('returns 404 if no release found', async () => {
       setPrismaResult(null)
-      await assert.rejects(() => getReleaseById('1', prismaMock), { status: 404, statregError: 'Release 1 not found' })
+      await expect(() => getReleaseById('1', prismaMock)).rejects.toMatchObject({
+        status: 404,
+        statregError: 'Release 1 not found',
+      })
     })
   })
 
@@ -208,8 +198,7 @@ describe('releasesService ', async () => {
 
       await updateRelease(prismaMock, '1', releaseUpdateInput, now)
 
-      assert.deepStrictEqual(prismaMock.release.update.mock.callCount(), 1)
-      assert.deepStrictEqual(prismaMock.release.update.mock.calls[0].arguments[0], {
+      expect(prismaMock.release.update).toHaveBeenCalledExactlyOnceWith({
         include: ReleaseDetailsIncludes,
         where: { id: 1 },
         data: {
@@ -225,11 +214,11 @@ describe('releasesService ', async () => {
     })
 
     test('rejects with error message if request body is empty', async () => {
-      await assert.rejects(() => updateRelease(prismaMock, '1', undefined, now), {
+      await expect(() => updateRelease(prismaMock, '1', undefined, now)).rejects.toMatchObject({
         statregError:
           'Missing required field(s): publish_time, period_from, period_to, release_date_precision, comment',
       })
-      assert.strictEqual(prismaMock.release.update.mock.callCount(), 0)
+      expect(prismaMock.release.update).toHaveBeenCalledTimes(0)
     })
 
     test('rejects with error message if comment is missing', async () => {
@@ -239,11 +228,11 @@ describe('releasesService ', async () => {
         period_from: '2026-03-19T11:52:38.903Z',
         release_date_precision: 'string',
       }
-      await assert.rejects(() => updateRelease(prismaMock, '1', releaseUpdateInputWithoutComment, now), {
+      await expect(() => updateRelease(prismaMock, '1', releaseUpdateInputWithoutComment, now)).rejects.toMatchObject({
         statregError: 'Missing required field(s): comment',
       })
 
-      assert.deepStrictEqual(prismaMock.release.update.mock.callCount(), 0)
+      expect(prismaMock.release.update).toHaveBeenCalledTimes(0)
     })
   })
 
@@ -260,7 +249,7 @@ describe('releasesService ', async () => {
     test('returns correct releaseDetails when all conditionals succeed', () => {
       const result = mapToReleaseDetails(input)
 
-      assert.deepEqual(result, expectedResult)
+      expect(result).toStrictEqual(expectedResult)
     })
 
     test('falls back to has_versions false when version is 1', () => {
@@ -269,7 +258,7 @@ describe('releasesService ', async () => {
 
       const result = mapToReleaseDetails(input)
 
-      assert.deepEqual(result, expectedResult)
+      expect(result).toStrictEqual(expectedResult)
     })
 
     test('falls back to empty english name when name_en is missing', () => {
@@ -278,7 +267,7 @@ describe('releasesService ', async () => {
 
       const result = mapToReleaseDetails(input)
 
-      assert.deepEqual(result, expectedResult)
+      expect(result).toStrictEqual(expectedResult)
     })
   })
 
@@ -297,8 +286,7 @@ describe('releasesService ', async () => {
 
       await createRelease(prismaMock, 'kpi', '1', mockCreateReleaseInput, now)
 
-      assert.deepStrictEqual(prismaMock.release.create.mock.callCount(), 1)
-      assert.deepStrictEqual(prismaMock.release.create.mock.calls[0].arguments[0], {
+      expect(prismaMock.release.create).toHaveBeenCalledExactlyOnceWith({
         data: {
           publish_time: new Date('2024-10-15T08:00:00Z'),
           period_to: new Date('2024-12-31T00:00:00Z'),
@@ -321,10 +309,10 @@ describe('releasesService ', async () => {
     })
 
     test('returns 400 if request body is empty', async () => {
-      await assert.rejects(() => createRelease(prismaMock, 'kpi', '1', undefined, now), {
+      await expect(() => createRelease(prismaMock, 'kpi', '1', undefined, now)).rejects.toMatchObject({
         statregError: 'Missing required field(s): publish_time, period_from, period_to, release_date_precision',
       })
-      assert.strictEqual(prismaMock.release.create.mock.callCount(), 0)
+      expect(prismaMock.release.create).toHaveBeenCalledTimes(0)
     })
 
     test('returns 400 if any of the required fields are missing', async () => {
@@ -333,10 +321,10 @@ describe('releasesService ', async () => {
         release_date_precision: 'dag',
       }
 
-      await assert.rejects(() => createRelease(prismaMock, 'kpi', '1', newReleaseInput, now), {
+      await expect(() => createRelease(prismaMock, 'kpi', '1', newReleaseInput, now)).rejects.toMatchObject({
         statregError: 'Missing required field(s): period_from, period_to',
       })
-      assert.strictEqual(prismaMock.release.create.mock.callCount(), 0)
+      expect(prismaMock.release.create).toHaveBeenCalledTimes(0)
     })
   })
 })
