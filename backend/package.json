@@ -45,7 +45,10 @@
     "pkgroll": "^2.27.0",
     "prisma": "^7.5.0",
     "typescript-eslint": "^8.57.2",
-    "vitest": "^4.1.4"
+    "vitest": "^4.1.4",
+     "vite": {
+      "rollup": "npm:@rollup/wasm-node"
+    }
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.5.0",
