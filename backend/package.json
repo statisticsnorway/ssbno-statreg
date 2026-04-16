@@ -28,7 +28,10 @@
     "body-parser": "^2.2.1",
     "fastify": "^5.7.4",
     "qs": "^6.14.1",
-    "lodash": "^4.17.23"
+    "lodash": "^4.17.23",
+    "vite": {
+      "rollup": "npm:@rollup/wasm-node"
+    }
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
