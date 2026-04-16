@@ -19,6 +19,7 @@
     "db:deploy": "prisma migrate deploy",
     "ci-test": "tsx --test --experimental-test-module-mocks 'test/**.test.ts' 'src/**.test.ts'",
     "test": "tsx --test --experimental-test-module-mocks 'test/**.test.ts' 'src/**.test.ts' ",
+    "test:integration": "tsx --test 'test/integration/**.test.ts'",
     "generate:api-types": "openapi-typescript ./openapi/openapi.yaml | prettier --parser typescript > src/types/api-types.d.ts"
   },
   "overrides": {
