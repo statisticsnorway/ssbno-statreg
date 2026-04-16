@@ -50,6 +50,7 @@
     "@prisma/adapter-pg": "^7.5.0",
     "@prisma/client": "^7.5.0",
     "express": "^5.1.0",
+    "dotenv": "^16.6.1",
     "express-prom-bundle": "^8.0.0",
     "helmet": "^8.1.0",
     "jose": "^6.2.2",
