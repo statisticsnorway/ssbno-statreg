@@ -10,10 +10,12 @@ import controllerRouter from './api/core/controllerRouter'
 import { prisma } from './lib/prisma'
 import { initializeDepartments } from './services/klassService'
 import * as dotenv from 'dotenv'
+import cors from 'cors'
 
 dotenv.config()
 const auth = requireAuthorization()
 const app = express()
+app.use(cors())
 app.use(helmet())
 app.use(promBundleMetrics)
 app.use(express.json())
