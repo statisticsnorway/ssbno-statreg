@@ -17,9 +17,9 @@
     "generate": "prisma generate",
     "seed": "prisma db seed",
     "db:deploy": "prisma migrate deploy",
+    "ci-test": "tsx --test --experimental-test-module-mocks 'test/**.test.ts' 'src/**.test.ts'",
     "test": "tsx --test --experimental-test-module-mocks 'test/**.test.ts' 'src/**.test.ts' ",
     "test:integration": "tsx --test 'test/integration/**.test.ts'",
-    "ci-test": "tsx --test --experimental-test-module-mocks 'test/**.test.ts' 'src/**.test.ts'",
     "generate:api-types": "openapi-typescript ./openapi/openapi.yaml | prettier --parser typescript > src/types/api-types.d.ts"
   },
   "overrides": {
@@ -49,6 +49,7 @@
     "@prisma/adapter-pg": "^7.5.0",
     "@prisma/client": "^7.5.0",
     "express": "^5.1.0",
+    "dotenv": "^16.6.1",
     "express-prom-bundle": "^8.0.0",
     "helmet": "^8.1.0",
     "jose": "^6.2.2",
