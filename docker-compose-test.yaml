@@ -28,6 +28,7 @@ services:
       "
     environment:
       NODE_ENV: test
+      NODE_OPTIONS: --trace-deprecation
       PGURL: postgresql://test_user:test_pass@db:5432/statreg_db?sslmode=disable
       AUTH_ENABLED: 'false'
       MOCK_ENTRA_USERS: 'true'
