@@ -7,7 +7,7 @@
   ],
   "scripts": {
     "dev": "concurrently \"npm run dev -w backend\" \"npm run dev -w frontend\"",
-    "build": "npm run build -w backend",
+    "build": "npm run build --workspaces && cp -Rf frontend/dist/* backend/dist",
     "start": "npm run start -w backend",
     "ci-test": "npm run ci-test -w backend",
     "test": "npm run test -w backend",

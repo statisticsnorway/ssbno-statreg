@@ -1,4 +1,5 @@
 import fs from 'node:fs'
+import path from 'node:path'
 import express, { Request, Response } from 'express'
 import helmet from 'helmet'
 import swaggerUi from 'swagger-ui-express'
@@ -19,7 +20,6 @@ app.use(promBundleMetrics)
 app.use(express.json())
 const swaggerDocument = YAML.parse(fs.readFileSync('./openapi/openapi.yaml', 'utf8'))
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
-app.get('/', (_: Request, res: Response) => res.send('STATREG-API-V1'))
 app.get('/auth/me', auth, (req, res) => {
   // For local testing, add requireUserAuthentication here
   res.json({
@@ -28,7 +28,17 @@ app.get('/auth/me', auth, (req, res) => {
     email: req.auth?.email,
   })
 })
+
+// TODO: Use the correct URLs for production, /statreg probably.
+// if (process.env.NODE_ENV == "production") {
+app.use(express.static(path.resolve(__dirname)))
+app.get('/', (req, res) => {
+  res.sendFile(path.resolve(__dirname, 'index.html'))
+})
+// }
+
 app.use(controllerRouter(auth))
+
 await prisma.$connect()
 initializeDepartments()
 startServer(app, prisma)
