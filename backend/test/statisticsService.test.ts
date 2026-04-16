@@ -1,23 +1,23 @@
-import { describe, mock, test, before, beforeEach } from 'node:test'
-import assert from 'node:assert/strict'
+import { vi, describe, test, expect, beforeEach } from 'vitest'
 import { ApprovalStatus, StatisticStatus } from '@/types/enums'
 import { Users } from '@/types/entra'
+import {
+  getAllStatistics,
+  getStatisticByShortname,
+  parseStatisticVariants,
+  mapStatisticDetails,
+  parseStatisticInput,
+  updateStatistic,
+  createStatistic,
+  StatisticsDetailedIncludes,
+  parseDivision,
+  parseStatusCode,
+  parseRelation,
+} from '@/services/statisticsService'
+import { StatisticCreate, StatisticUpdate } from '@/types'
 
-let prismaMock: any
-let statisticsResult: object | null
-let updateStatisticsResult: object | null
-let now: Date
-
-function setStatisticsResult(next: object | null) {
-  statisticsResult = next
-}
-
-function setUpdateStatisticsResult(next: object | null) {
-  updateStatisticsResult = next
-}
-
-describe('statisticService ', async () => {
-  const fetchUsersMock: any = mock.fn(async (users: Users[]) => {
+const { fetchUsersMock, fetchDivisionMock } = vi.hoisted(() => ({
+  fetchUsersMock: vi.fn(async (users: Users[]) => {
     if (!users?.length) return []
     return [
       {
@@ -30,71 +30,60 @@ describe('statisticService ', async () => {
         },
       },
     ]
-  })
-
-  const fetchDivisionMock = mock.fn((code: number, language?: string) => {
+  }),
+  fetchDivisionMock: vi.fn((code: number, language?: string) => {
     if (code === 104 && language === 'en') return { code: 104, name: 'Division A1' }
     if (code === 104) return { code: 104, name: 'Seksjon A1' }
     if (code === 105) return { code: 105, name: 'Seksjon B1' }
-  })
+  }),
+}))
 
-  let getStatisticByShortname: Function
-  let getAllStatistics: Function
-  let updateStatistic: Function
-  let createStatistic: Function
-  let parseStatisticVariants: Function
-  let mapStatisticDetails: Function
-  let parseStatisticInput: Function
-  let parseDivision: Function
-  let parseStatusCode: Function
-  let parseRelation: Function
-  let StatisticsDetailedIncludes: any
+vi.mock(import('@/services/entraUserService'), async (importOriginal) => {
+  const original = await importOriginal<typeof import('@/services/entraUserService')>()
+  return {
+    ...original,
+    fetchUsers: fetchUsersMock,
+  }
+})
 
-  before(async () => {
-    // eslint-disable-next-line no-unused-vars
-    const entraUser = await import('@/services/entraUserService').then(({ fetchUsers: _, ...rest }) => rest)
-    mock.module('@/services/entraUserService', {
-      namedExports: {
-        fetchUsers: fetchUsersMock,
-        entraUser,
-      },
-    })
+vi.mock(import('@/services/klassService'), async (importOriginal) => {
+  const original = await importOriginal<typeof import('@/services/klassService')>()
+  return {
+    ...original,
+    getDivisionFromCode: fetchDivisionMock,
+  }
+})
 
-    // eslint-disable-next-line no-unused-vars
-    const klassService = await import('@/services/klassService').then(({ getDivisionFromCode: _, ...rest }) => rest)
-    mock.module('@/services/klassService', {
-      namedExports: {
-        getDivisionFromCode: fetchDivisionMock,
-        klassService,
-        isNumber: (val: string) => !isNaN(Number(val)),
-        parseId: (id: string) => Number(id),
-      },
-    })
-    ;({
-      getAllStatistics,
-      getStatisticByShortname,
-      parseStatisticVariants,
-      mapStatisticDetails,
-      parseStatisticInput,
-      updateStatistic,
-      createStatistic,
-      StatisticsDetailedIncludes,
-      parseDivision,
-      parseStatusCode,
-      parseRelation,
-    } = await import('@/services/statisticsService'))
-  })
+vi.mock(import('@/lib/utils'), async (importOriginal) => {
+  const original = await importOriginal<typeof import('@/lib/utils')>()
+  return {
+    ...original,
+  }
+})
 
-  beforeEach(async () => {
+let prismaMock: any
+let statisticsResult: object | null
+let updateStatisticsResult: object | null
+
+function setStatisticsResult(next: object | null) {
+  statisticsResult = next
+}
+
+function setUpdateStatisticsResult(next: object | null) {
+  updateStatisticsResult = next
+}
+
+describe('statisticService', () => {
+  beforeEach(() => {
     prismaMock = {
       statistic: {
-        findMany: mock.fn(() => Promise.resolve(statisticsResult)),
-        findFirst: mock.fn(() => Promise.resolve(statisticsResult)),
-        update: mock.fn(() => Promise.resolve(updateStatisticsResult)),
-        create: mock.fn(() => Promise.resolve(statisticsResult)),
+        findMany: vi.fn(() => Promise.resolve(statisticsResult)),
+        findFirst: vi.fn(() => Promise.resolve(statisticsResult)),
+        update: vi.fn(() => Promise.resolve(updateStatisticsResult)),
+        create: vi.fn(() => Promise.resolve(statisticsResult)),
       },
       shortname: {
-        findUnique: mock.fn(() => Promise.resolve({ name: 'kpi', id: 1 })),
+        findUnique: vi.fn(() => Promise.resolve({ name: 'kpi', id: 1 })),
       },
     }
   })
@@ -105,9 +94,8 @@ describe('statisticService ', async () => {
 
       const result = await getAllStatistics({ start: 1, count: 2 }, prismaMock)
 
-      assert.deepEqual(result, mockedStatisticsResult)
-      assert.equal(prismaMock.statistic.findMany.mock.calls[0].arguments[0]['skip'], 1)
-      assert.equal(prismaMock.statistic.findMany.mock.calls[0].arguments[0]['take'], 2)
+      expect(result).toStrictEqual(mockedStatisticsResult)
+      expect(prismaMock.statistic.findMany).toHaveBeenCalledWith(expect.objectContaining({ skip: 1, take: 2 }))
     })
 
     test('uses default start and count if not provided', async () => {
@@ -115,9 +103,8 @@ describe('statisticService ', async () => {
 
       const result = await getAllStatistics({}, prismaMock)
 
-      assert.deepEqual(result, mockedStatisticsResult)
-      assert.equal(prismaMock.statistic.findMany.mock.calls[0].arguments[0]['skip'], 0)
-      assert.equal(prismaMock.statistic.findMany.mock.calls[0].arguments[0]['take'], 10)
+      expect(result).toStrictEqual(mockedStatisticsResult)
+      expect(prismaMock.statistic.findMany).toHaveBeenCalledWith(expect.objectContaining({ skip: 0, take: 10 }))
     })
 
     test('returns empty list if no results', async () => {
@@ -125,7 +112,7 @@ describe('statisticService ', async () => {
 
       const result = await getAllStatistics({}, prismaMock)
 
-      assert.deepEqual(result, [])
+      expect(result).toStrictEqual([])
     })
   })
 
@@ -135,12 +122,14 @@ describe('statisticService ', async () => {
 
       const result = await getStatisticByShortname('helse', prismaMock)
 
-      assert.deepEqual(result, mockedStatisticDetailedResult)
+      expect(result).toStrictEqual(mockedStatisticDetailedResult)
     })
 
     test('throws Error when shortname is not found', async () => {
       setStatisticsResult(null)
-      await assert.rejects(() => getStatisticByShortname('', prismaMock), { statregError: 'Shortname not found' })
+      await expect(() => getStatisticByShortname('', prismaMock)).rejects.toMatchObject({
+        statregError: 'Shortname not found',
+      })
     })
   })
 
@@ -201,8 +190,7 @@ describe('statisticService ', async () => {
 
       await updateStatistic('helse', input, prismaMock)
 
-      assert.deepStrictEqual(prismaMock.statistic.update.mock.callCount(), 1)
-      assert.deepStrictEqual(prismaMock.statistic.update.mock.calls[0].arguments[0], {
+      expect(prismaMock.statistic.update).toHaveBeenCalledExactlyOnceWith({
         ...mockUpdateStatisticPrismaUpdateData,
         include: StatisticsDetailedIncludes,
       })
@@ -211,15 +199,16 @@ describe('statisticService ', async () => {
     test('throws Error when shortname is not found', async () => {
       setStatisticsResult(null)
 
-      await assert.rejects(() => updateStatistic('test', input, prismaMock), {
+      await expect(() => updateStatistic('test', input, prismaMock)).rejects.toMatchObject({
         status: 404,
-        statregError: `Shortname test not found`,
+        statregError: 'Shortname test not found',
       })
-      assert.deepStrictEqual(prismaMock.statistic.update.mock.callCount(), 0)
+      expect(prismaMock.statistic.update).toHaveBeenCalledTimes(0)
     })
   })
 
   describe('createStatistic ', () => {
+    let now: Date
     beforeEach(() => {
       now = new Date('2026-03-23T08:00:00Z')
     })
@@ -245,8 +234,7 @@ describe('statisticService ', async () => {
         now
       )
 
-      assert.deepStrictEqual(prismaMock.statistic.create.mock.callCount(), 1)
-      assert.deepStrictEqual(prismaMock.statistic.create.mock.calls[0].arguments[0], {
+      expect(prismaMock.statistic.create).toHaveBeenCalledExactlyOnceWith({
         data: {
           name: 'Konsumprisindeksen',
           priority: 1,
@@ -271,18 +259,18 @@ describe('statisticService ', async () => {
     })
 
     test('reject with error message if body is missing', async () => {
-      await assert.rejects(() => createStatistic(prismaMock, 'kpi', undefined, now), {
+      await expect(() => createStatistic(prismaMock, 'kpi', undefined, now)).rejects.toMatchObject({
         statregError: 'Missing required field(s): division, name, name_en, first_released_at',
       })
-      assert.strictEqual(prismaMock.statistic.create.mock.callCount(), 0)
+      expect(prismaMock.statistic.create).toHaveBeenCalledTimes(0)
     })
 
     test('rejects with error message any of the required fields are missing', async () => {
       // TODO: Add more fields to this test when validation logic are in place
-      await assert.rejects(() => createStatistic(prismaMock, 'kpi', {}, now), {
+      await expect(() => createStatistic(prismaMock, 'kpi', {}, now)).rejects.toMatchObject({
         statregError: 'Missing required field(s): division, name, name_en, first_released_at',
       })
-      assert.strictEqual(prismaMock.statistic.create.mock.callCount(), 0)
+      expect(prismaMock.statistic.create).toHaveBeenCalledTimes(0)
     })
   })
 
@@ -302,9 +290,9 @@ describe('statisticService ', async () => {
             code: 'M',
           },
         },
-      ])
+      ] as any)
 
-      assert.deepEqual(result, [
+      expect(result).toStrictEqual([
         {
           id: 1,
           updated_at: '2025-06-20T10:39:51.621Z',
@@ -323,7 +311,7 @@ describe('statisticService ', async () => {
     test('returns empty array when variants is empty', () => {
       const result = parseStatisticVariants([])
 
-      assert.deepEqual(result, [])
+      expect(result).toStrictEqual([])
     })
   })
 
@@ -347,7 +335,7 @@ describe('statisticService ', async () => {
           },
         },
       ]
-      fetchUsersMock.mock.mockImplementation(async () => {
+      fetchUsersMock.mockImplementation(async () => {
         return fetchUsersResult
       })
 
@@ -359,7 +347,7 @@ describe('statisticService ', async () => {
     test('returns valid statisticDetails when all conditionals succeed', async () => {
       const result = await mapStatisticDetails(input)
 
-      assert.deepEqual(result, expectedResult)
+      expect(result).toStrictEqual(expectedResult)
     })
 
     test('falls back to empty relation object when related statistic is missing', async () => {
@@ -368,7 +356,7 @@ describe('statisticService ', async () => {
 
       const result = await mapStatisticDetails(input)
 
-      assert.deepEqual(result, expectedResult)
+      expect(result).toStrictEqual(expectedResult)
     })
 
     test('falls back to pending approval status when desk approval status is missing', async () => {
@@ -377,7 +365,7 @@ describe('statisticService ', async () => {
 
       const result = await mapStatisticDetails(input)
 
-      assert.deepEqual(result, expectedResult)
+      expect(result).toStrictEqual(expectedResult)
     })
 
     test('falls back to undefined division name when division lookup does not find a match', async () => {
@@ -386,7 +374,7 @@ describe('statisticService ', async () => {
 
       const result = await mapStatisticDetails(input)
 
-      assert.deepEqual(result, expectedResult)
+      expect(result).toStrictEqual(expectedResult)
     })
 
     test('falls back to empty english name when name_en is missing', async () => {
@@ -395,7 +383,7 @@ describe('statisticService ', async () => {
 
       const result = await mapStatisticDetails(input)
 
-      assert.deepEqual(result, expectedResult)
+      expect(result).toStrictEqual(expectedResult)
     })
 
     test('falls back to lookupEmail when fetched user email is missing', async () => {
@@ -404,17 +392,17 @@ describe('statisticService ', async () => {
 
       const result = await mapStatisticDetails(input)
 
-      assert.deepEqual(result, expectedResult)
+      expect(result).toStrictEqual(expectedResult)
     })
 
     test('falls back to responsible person data when fetchUsers returns Users[] instead of lookupUsers[]', async () => {
       input.responsiblePersons = [{ username: 'bcd', email: 'bob_fallback@ssb.no' }]
-      fetchUsersMock.mock.mockImplementation(async (users: Users[]) => users)
+      fetchUsersMock.mockImplementationOnce((users: Users[]) => Promise.resolve(users as any))
       expectedResult.contacts[0] = { name: undefined, email: 'bob_fallback@ssb.no', username: 'bcd' }
 
       const result = await mapStatisticDetails(input)
 
-      assert.deepEqual(result, expectedResult)
+      expect(result).toStrictEqual(expectedResult)
     })
 
     test('falls back to empty contact array when responsible persons is empty', async () => {
@@ -424,7 +412,7 @@ describe('statisticService ', async () => {
 
       const result = await mapStatisticDetails(input)
 
-      assert.deepEqual(result, expectedResult)
+      expect(result).toStrictEqual(expectedResult)
     })
 
     test('falls back to empty region level code when code is missing', async () => {
@@ -433,7 +421,7 @@ describe('statisticService ', async () => {
 
       const result = await mapStatisticDetails(input)
 
-      assert.deepEqual(result, expectedResult)
+      expect(result).toStrictEqual(expectedResult)
     })
   })
 
@@ -441,7 +429,7 @@ describe('statisticService ', async () => {
     describe('create', async () => {
       let input: any
       let expectedResult: any
-      const requiredCreateFields = ['division', 'name', 'name_en', 'first_released_at']
+      const requiredCreateFields = ['division', 'name', 'name_en', 'first_released_at'] as (keyof StatisticCreate)[]
 
       beforeEach(() => {
         input = {
@@ -466,13 +454,13 @@ describe('statisticService ', async () => {
       test('returns validated statistic input when all conditionals succeed', () => {
         const result = parseStatisticInput(input, requiredCreateFields)
 
-        assert.deepEqual(result, expectedResult)
+        expect(result).toStrictEqual(expectedResult)
       })
 
       test('throws error when name is an empty string', () => {
         input.name = ''
 
-        assert.throws(() => parseStatisticInput(input, requiredCreateFields), {
+        expect(() => parseStatisticInput(input, requiredCreateFields)).toThrow({
           statregError: "Field 'name' must be a non-empty string.",
         })
       })
@@ -480,7 +468,7 @@ describe('statisticService ', async () => {
       test('throws error when division is not a number', () => {
         input.division = 'division-a'
 
-        assert.throws(() => parseStatisticInput(input, requiredCreateFields), {
+        expect(() => parseStatisticInput(input, requiredCreateFields)).toThrow({
           statregError: "Field 'division' must be a number.",
         })
       })
@@ -488,7 +476,7 @@ describe('statisticService ', async () => {
       test('throws error when division lookup does not find a match', () => {
         input.division = '106'
 
-        assert.throws(() => parseStatisticInput(input, requiredCreateFields), {
+        expect(() => parseStatisticInput(input, requiredCreateFields)).toThrow({
           statregError: "Field 'division' does not correspond to an existing division.",
         })
       })
@@ -497,7 +485,7 @@ describe('statisticService ', async () => {
         input.main_language = 'en'
         expectedResult.main_language = 'nb'
 
-        assert.throws(() => parseStatisticInput(input, requiredCreateFields), {
+        expect(() => parseStatisticInput(input, requiredCreateFields)).toThrow({
           statregError: "Field 'main_language' must be either 'nb' or 'nn'.",
         })
       })
@@ -508,7 +496,7 @@ describe('statisticService ', async () => {
 
         const result = parseStatisticInput(input, requiredCreateFields)
 
-        assert.deepEqual(result, expectedResult)
+        expect(result).toStrictEqual(expectedResult)
       })
     })
 
@@ -527,7 +515,7 @@ describe('statisticService ', async () => {
         'first_released_at',
         'main_language',
         'comment',
-      ]
+      ] as (keyof StatisticUpdate)[]
 
       beforeEach(() => {
         input = {
@@ -562,13 +550,13 @@ describe('statisticService ', async () => {
       test('returns validated statistic input when all conditionals succeed', () => {
         const result = parseStatisticInput(input, requiredUpdateFields, 'update')
 
-        assert.deepEqual(result, expectedResult)
+        expect(result).toStrictEqual(expectedResult)
       })
 
       test('throws error when comment is an empty string', () => {
         input.comment = ''
 
-        assert.throws(() => parseStatisticInput(input, requiredUpdateFields, 'update'), {
+        expect(() => parseStatisticInput(input, requiredUpdateFields, 'update')).toThrow({
           statregError: "Field 'comment' must be a non-empty string.",
         })
       })
@@ -576,7 +564,7 @@ describe('statisticService ', async () => {
       test('throws error when yearly_reporting is not a valid boolean', () => {
         input.yearly_reporting = 'not-a-boolean'
 
-        assert.throws(() => parseStatisticInput(input, requiredUpdateFields, 'update'), {
+        expect(() => parseStatisticInput(input, requiredUpdateFields, 'update')).toThrow({
           statregError: "Field 'yearly_reporting' must be a boolean.",
         })
       })
@@ -584,7 +572,7 @@ describe('statisticService ', async () => {
       test('throws error when relation id is an invalid format', () => {
         input.relation = 'abc'
 
-        assert.throws(() => parseStatisticInput(input, requiredUpdateFields, 'update'), {
+        expect(() => parseStatisticInput(input, requiredUpdateFields, 'update')).toThrow({
           statregError: 'Invalid relation id format',
         })
       })
@@ -592,7 +580,7 @@ describe('statisticService ', async () => {
       test('throws error when status is not valid value', () => {
         input.status = 'ABC'
 
-        assert.throws(() => parseStatisticInput(input, requiredUpdateFields, 'update'), {
+        expect(() => parseStatisticInput(input, requiredUpdateFields, 'update')).toThrow({
           statregError: "Field 'status' must be one of these: K, A, IA, UT, SA, SP.",
         })
       })
@@ -601,23 +589,23 @@ describe('statisticService ', async () => {
 
   describe('parseDivision ', () => {
     test('returns division as string when valid', () => {
-      assert.equal(parseDivision('104'), '104')
+      expect(parseDivision('104')).toBe('104')
     })
 
     test('throws when division is undefined', () => {
-      assert.throws(() => parseDivision(undefined), { statregError: "Field 'division' must be a number." })
+      expect(() => parseDivision(undefined)).toThrow({ statregError: "Field 'division' must be a number." })
     })
 
     test('throws when division is null', () => {
-      assert.throws(() => parseDivision(null), { statregError: "Field 'division' must be a number." })
+      expect(() => parseDivision(null)).toThrow({ statregError: "Field 'division' must be a number." })
     })
 
     test('throws when division is not a number', () => {
-      assert.throws(() => parseDivision('abc'), { statregError: "Field 'division' must be a number." })
+      expect(() => parseDivision('abc')).toThrow({ statregError: "Field 'division' must be a number." })
     })
 
     test('throws when division does not correspond to an existing division', () => {
-      assert.throws(() => parseDivision('999'), {
+      expect(() => parseDivision('999')).toThrow({
         statregError: "Field 'division' does not correspond to an existing division.",
       })
     })
@@ -627,45 +615,45 @@ describe('statisticService ', async () => {
     const expectedError = `Field 'status' must be one of these: ${Object.keys(StatisticStatus).join(', ')}.`
 
     test('returns statusCode when valid', () => {
-      assert.equal(parseStatusCode('K'), 'K')
+      expect(parseStatusCode('K')).toBe('K')
     })
 
     test('throws when statusCode is undefined', () => {
-      assert.throws(() => parseStatusCode(undefined), { statregError: expectedError })
+      expect(() => parseStatusCode(undefined)).toThrow({ statregError: expectedError })
     })
 
     test('throws when statusCode is empty string', () => {
-      assert.throws(() => parseStatusCode(''), { statregError: expectedError })
+      expect(() => parseStatusCode('')).toThrow({ statregError: expectedError })
     })
 
     test('throws when statusCode is not a valid status', () => {
-      assert.throws(() => parseStatusCode('INVALID_STATUS'), { statregError: expectedError })
+      expect(() => parseStatusCode('INVALID_STATUS')).toThrow({ statregError: expectedError })
     })
 
     test('is case-sensitive', () => {
-      assert.throws(() => parseStatusCode('k'), { statregError: expectedError })
+      expect(() => parseStatusCode('k')).toThrow({ statregError: expectedError })
     })
   })
 
   describe('parseRelation', () => {
     test('returns null when relationId is undefined', () => {
-      assert.equal(parseRelation(undefined), null)
+      expect(parseRelation(undefined)).toBeNull
     })
 
     test('returns null when relationId is null', () => {
-      assert.equal(parseRelation(null), null)
+      expect(parseRelation(null)).toBeNull
     })
 
     test('returns null when relationId is empty string', () => {
-      assert.equal(parseRelation(''), null)
+      expect(parseRelation('')).toBeNull
     })
 
     test('returns parsed number when relationId is valid', () => {
-      assert.equal(parseRelation('42'), 42)
+      expect(parseRelation('42')).toBe(42)
     })
 
     test('throws when relationId is not a valid id', () => {
-      assert.throws(() => parseRelation('abc'), { statregError: 'Invalid relation id format' })
+      expect(() => parseRelation('abc')).toThrow({ statregError: 'Invalid relation id format' })
     })
   })
 })
