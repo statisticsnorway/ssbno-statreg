@@ -1,30 +1,22 @@
-import { useEffect, useState } from 'react'
-import client from './api'
-import type { components } from '../../shared/api-types'
-
-type Release = components['schemas']['Release_details']
+import { $api } from './api'
 
 function App() {
-  const [release, setReleases] = useState<Release>({})
+  const { data, error, isLoading } = $api.useQuery('get', '/releases/{id}', { params: { path: { id: '1' } } })
 
-  useEffect(() => {
-    async function fetchRelease() {
-      const { data, error } = await client.GET('/releases/{id}', { params: { path: { id: '1' } } })
-      if (error) {
-        // handle error
-      } else {
-        setReleases(data)
-      }
-    }
-    fetchRelease()
-  }, [])
+  if (isLoading || !data) {
+    return <p>Loading release...</p>
+  }
+
+  if (error) {
+    //handle error
+  }
 
   return (
     <div>
-      <h1>Release {release.id}</h1>
+      <h1>Release {data.id}</h1>
       <ul>
-        <li>From {release.period_from}</li>
-        <li>To {release.period_to}</li>
+        <li>From {data.period_from}</li>
+        <li>To {data.period_to}</li>
       </ul>
     </div>
   )
