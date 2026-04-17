@@ -1,5 +1,4 @@
-import { describe, test } from 'node:test'
-import assert from 'node:assert/strict'
+import { describe, expect, test } from 'vitest'
 
 const BASE_URL = process.env.API_URL ?? 'http://localhost:8080'
 
@@ -23,25 +22,25 @@ describe('release data is persisted when ', () => {
       headers: headers,
       body: JSON.stringify(body),
     })
-    assert.equal(response.status, 200)
+    expect(response.status).toBe(200)
     const created = await response.json()
 
     // GET release
     response = await fetch(`${BASE_URL}/releases/${created.id}`)
-    assert.equal(response.status, 200)
+    expect(response.status).toBe(200)
     const fetched = await response.json()
 
     // test persistence
-    assert.equal(fetched.id, created.id)
+    expect(fetched.id).toBe(created.id)
     assertEqualReleaseData(fetched, body)
   })
 
   test('client picks release and updates fields', async () => {
     // GET release listing and pick release
     let response = await fetch(`${BASE_URL}/statistics/${shortname}/variants/${variantId}/releases`)
-    assert.equal(response.status, 200)
+    expect(response.status).toBe(200)
     const list = await response.json()
-    assert.ok(list.length > 0)
+    expect(list.length).toBeGreaterThan(1)
     const picked = list[0]
 
     // PUT release with updated fields
@@ -57,15 +56,15 @@ describe('release data is persisted when ', () => {
       headers: headers,
       body: JSON.stringify(body),
     })
-    assert.equal(response.status, 200)
+    expect(response.status).toBe(200)
 
     // GET release
     response = await fetch(`${BASE_URL}/releases/${picked.id}`)
-    assert.equal(response.status, 200)
+    expect(response.status).toBe(200)
     const fetched = await response.json()
 
     // test persistence
-    assert.equal(fetched.id, picked.id)
+    expect(fetched.id, picked.id)
     assertEqualReleaseData(fetched, body)
   })
 })
@@ -77,8 +76,8 @@ function addMonthsToDate(date: string, months: number): string {
 }
 
 function assertEqualReleaseData(fetched: any, expected: any) {
-  assert.deepEqual(new Date(fetched.publish_time), new Date(expected.publish_time))
-  assert.deepEqual(new Date(fetched.period_from), new Date(expected.period_from))
-  assert.deepEqual(new Date(fetched.period_to), new Date(expected.period_to))
-  assert.equal(fetched.release_date_precision, expected.release_date_precision)
+  expect(new Date(fetched.publish_time)).toStrictEqual(new Date(expected.publish_time))
+  expect(new Date(fetched.period_from)).toStrictEqual(new Date(expected.period_from))
+  expect(new Date(fetched.period_to)).toStrictEqual(new Date(expected.period_to))
+  expect(fetched.release_date_precision).toStrictEqual(expected.release_date_precision)
 }

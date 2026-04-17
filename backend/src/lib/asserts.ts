@@ -53,7 +53,7 @@ export async function assertShortnameExists(shortname: string, prisma: Statistic
   })
 
   if (!foundShortname) {
-    throw { status: 400, statregError: `Shortname '${shortname}' does not exist` }
+    throw { status: 404, statregError: `Shortname '${shortname}' does not exist` }
   }
 
   return true
