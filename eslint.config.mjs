@@ -22,4 +22,14 @@ export default defineConfig([
       'prettier/prettier': ['warn'],
     },
   },
+  {
+    files: ['frontend/**/*.{ts,tsx}'],
+    languageOptions: {
+      parser: tseslint.parser,
+      parserOptions: {
+        project: './frontend/tsconfig.json',
+        tsconfigRootDir: __dirname,
+      },
+    },
+  }
 ])
