@@ -2,30 +2,29 @@ import { useEffect, useState } from 'react'
 import client from './api'
 import type { components } from '../../shared/api-types'
 
-type Release = components['schemas']['Release_listing'] 
+type Release = components['schemas']['Release_details']
 
 function App() {
-  const [releases, setReleases] = useState<Release[]>([])
+  const [release, setReleases] = useState<Release>({})
 
   useEffect(() => {
-    async function fetchReleases() {
-      const { data, error } = await client.GET('/releases')
+    async function fetchRelease() {
+      const { data, error } = await client.GET('/releases/{id}', { params: { path: { id: '1' } } })
       if (error) {
-        // TODO handle error
+        // handle error
       } else {
         setReleases(data)
       }
     }
-    fetchReleases()
+    fetchRelease()
   }, [])
 
   return (
     <div>
-      <h1>Releases</h1>
+      <h1>Release {release.id}</h1>
       <ul>
-        {releases.map((release) => (
-          <li key={release.id}>{release.period_from} - {release.period_to}</li>
-        ))}
+        <li>From {release.period_from}</li>
+        <li>To {release.period_to}</li>
       </ul>
     </div>
   )
