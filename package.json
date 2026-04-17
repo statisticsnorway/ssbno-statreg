@@ -19,7 +19,7 @@
     "lint:fix": "eslint --fix '**/*.{js,mjs,cjs,ts}'",
     "seed": "npm run seed -w backend",
     "generate": "npm run generate -w backend",
-    "generate:api-types": "openapi-typescript ./backend/openapi/openapi.yaml | prettier --parser typescript > ./shared/api-types.d.ts"
+    "generate:api-types": "openapi-typescript ./shared/openapi/openapi.yaml | prettier --parser typescript > ./shared/src/api-types.d.ts"
   },
   "devDependencies": {
     "concurrently": "^8.2.0",
