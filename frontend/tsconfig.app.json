@@ -4,7 +4,11 @@
     "target": "es2023",
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "module": "esnext",
-    "types": ["vite/client"],
+    "types": [
+      "vite/client",
+      "@digdir/designsystemet-react/react-types",
+      "@digdir/designsystemet-css/theme"
+    ],
     "skipLibCheck": true,
 
     /* Bundler mode */
