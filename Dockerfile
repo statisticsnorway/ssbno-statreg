@@ -9,14 +9,11 @@ RUN apt-get update -y && apt-get install -y openssl
 # Set the working directory
 WORKDIR /app
 
-# Copy package files first to cache dependency installation
-COPY package*.json ./
+# Copy the application source code
+COPY . .
 
 # Install all dependencies (including devDependencies for the build)
 RUN npm ci
-
-# Copy the application source code
-COPY . .
 
 # Set temporary placeholder database URL for building
 ENV PGURL=postgresql://placeholder@localhost:5432/statreg_db
