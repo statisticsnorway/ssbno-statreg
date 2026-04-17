@@ -1,6 +1,6 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import express, { Request, Response } from 'express'
+import express from 'express'
 import helmet from 'helmet'
 import swaggerUi from 'swagger-ui-express'
 import YAML from 'yaml'
