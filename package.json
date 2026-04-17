@@ -9,6 +9,7 @@
     "dev": "concurrently \"npm run dev -w backend\" \"npm run dev -w frontend\"",
     "build": "npm run build -w backend",
     "start": "npm run start -w backend",
+    "db:deploy": "npm run db:deploy -w backend",
     "ci-test": "npm run ci-test -w backend",
     "test": "npm run test -w backend",
     "test:integration:docker": "docker-compose -f docker-compose-test.yaml down --remove-orphans --volumes && docker-compose -f docker-compose-test.yaml up --build --abort-on-container-exit --exit-code-from tests --remove-orphans ; docker-compose -f docker-compose-test.yaml down --remove-orphans --volumes",
