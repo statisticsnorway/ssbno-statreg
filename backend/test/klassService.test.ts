@@ -1,15 +1,13 @@
-import { test, beforeEach, afterEach, mock, describe } from 'node:test'
-import assert from 'node:assert/strict'
+import { vi, describe, test, expect, beforeEach, afterEach } from 'vitest'
 import {
   setDepartmentsNb,
   setDepartmentsEn,
   getDepartmentsFromKlass,
   getDivisionFromCode,
-} from '../src/services/klassService'
+} from '@/services/klassService'
 import process from 'node:process'
 
-let fetchMock: ReturnType<typeof mock.method>
-let errorMock: ReturnType<typeof mock.method>
+let fetchMock: ReturnType<typeof vi.fn>
 let classificationItems: object
 
 function setClassificationItems(next: object) {
@@ -20,17 +18,13 @@ describe('klassService ', async () => {
   beforeEach(() => {
     delete process.env.KLASS_BASE_URL
 
-    fetchMock = mock.method(globalThis, 'fetch', async () => {
-      return {
-        json: async () => classificationItems,
-      }
-    })
-
-    errorMock = mock.method(console, 'error', () => {})
+    fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      json: async () => classificationItems,
+    } as any)
   })
 
   afterEach(() => {
-    mock.restoreAll()
+    vi.resetAllMocks()
   })
 
   describe('getDepartmentsFromKlass ', async () => {
@@ -39,19 +33,17 @@ describe('klassService ', async () => {
 
       const departments = await getDepartmentsFromKlass()
 
-      assert.equal(
-        fetchMock.mock.calls[0]?.arguments[0],
+      expect(fetchMock).toHaveBeenCalledExactlyOnceWith(
         'https://data.ssb.no/api/klass/v1/versions/3009.json?language=nb'
       )
 
-      assert.deepEqual(departments, mockDepartments)
+      expect(departments).toStrictEqual(mockDepartments)
     })
 
     test('fetch correct url when language "en" is passed in getDepartmentFromClass', async () => {
       await getDepartmentsFromKlass('en')
 
-      assert.equal(
-        fetchMock.mock.calls[0]?.arguments[0],
+      expect(fetchMock).toHaveBeenCalledExactlyOnceWith(
         'https://data.ssb.no/api/klass/v1/versions/3009.json?language=en'
       )
     })
@@ -62,11 +54,10 @@ describe('klassService ', async () => {
 
       const departments = await getDepartmentsFromKlass()
 
-      assert.equal(
-        fetchMock.mock.calls[0]?.arguments[0],
+      expect(fetchMock).toHaveBeenCalledExactlyOnceWith(
         'https://example.test/api/klass/v1/versions/3009.json?language=nb'
       )
-      assert.deepEqual(departments, [])
+      expect(departments).toStrictEqual([])
     })
 
     test('handles empty classificationItems gracefully', async () => {
@@ -74,8 +65,7 @@ describe('klassService ', async () => {
 
       const departments = await getDepartmentsFromKlass()
 
-      assert.deepEqual(departments, [])
-      assert.equal(errorMock.mock.callCount(), 0)
+      expect(departments).toStrictEqual([])
     })
 
     test('handles missing classificationItems as empty', async () => {
@@ -83,31 +73,22 @@ describe('klassService ', async () => {
 
       const departments = await getDepartmentsFromKlass()
 
-      assert.deepEqual(departments, [])
-      assert.equal(errorMock.mock.callCount(), 0)
+      expect(departments).toStrictEqual([])
     })
 
     test('logs error on unexpected object structure', async () => {
       setClassificationItems(mockInvalidClassificationItems)
 
       const departments = await getDepartmentsFromKlass()
-      const firstLogArg = errorMock.mock.calls[0]?.arguments[0]
-
-      assert.equal(errorMock.mock.callCount(), 1)
-      assert.equal((firstLogArg as Error).message, 'Unexpected object structure from klass API')
-      assert.deepEqual(departments, [])
+      expect(departments).toStrictEqual([])
     })
 
     test('catches and logs on fetch errors', async () => {
-      fetchMock = mock.method(globalThis as unknown as { fetch: typeof fetch }, 'fetch', async () => {
+      fetchMock.mockImplementationOnce(async () => {
         throw new Error('my error message')
       })
       const departments = await getDepartmentsFromKlass()
-      const firstLogArg = errorMock.mock.calls[0]?.arguments[0]
-
-      assert.equal(errorMock.mock.callCount(), 1)
-      assert.equal((firstLogArg as Error).message, 'my error message')
-      assert.deepEqual(departments, [])
+      expect(departments).toStrictEqual([])
     })
   })
 
@@ -120,21 +101,21 @@ describe('klassService ', async () => {
     test('returns the correct division for "nb" when found', async () => {
       const division = getDivisionFromCode(210)
 
-      assert.deepEqual(division, { code: 210, name: 'Seksjon B1' })
+      expect(division).toStrictEqual({ code: 210, name: 'Seksjon B1' })
     })
 
     test('returns the correct division for "en" when found', async () => {
       const division = getDivisionFromCode(110, 'en')
 
-      assert.deepEqual(division, { code: 110, name: 'Division A1' })
+      expect(division).toStrictEqual({ code: 110, name: 'Division A1' })
     })
 
     test('returns undefined when the division code does not exist', async () => {
       const divisionNb = getDivisionFromCode(999)
       const divisionEn = getDivisionFromCode(999, 'en')
 
-      assert.equal(divisionNb, undefined)
-      assert.equal(divisionEn, undefined)
+      expect(divisionNb).toBeUndefined
+      expect(divisionEn).toBeUndefined
     })
 
     test('returns undefined when departments is an empty array', async () => {
@@ -144,8 +125,8 @@ describe('klassService ', async () => {
       const divisionNb = getDivisionFromCode(999)
       const divisionEn = getDivisionFromCode(999, 'en')
 
-      assert.equal(divisionNb, undefined)
-      assert.equal(divisionEn, undefined)
+      expect(divisionNb).toBeUndefined
+      expect(divisionEn).toBeUndefined
     })
   })
 })

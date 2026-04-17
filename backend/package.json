@@ -17,9 +17,9 @@
     "generate": "prisma generate",
     "seed": "prisma db seed",
     "db:deploy": "prisma migrate deploy",
-    "ci-test": "tsx --test --experimental-test-module-mocks 'test/**.test.ts' 'src/**.test.ts'",
-    "test": "tsx --test --experimental-test-module-mocks 'test/**.test.ts' 'src/**.test.ts' ",
-    "test:integration": "tsx --test 'test/integration/**.test.ts'",
+    "test": "vitest --exclude 'test/integration/**'",
+    "ci-test": "vitest run --exclude 'test/integration/**'",
+    "test:integration": "vitest run test/integration",
     "generate:api-types": "openapi-typescript ./openapi/openapi.yaml | prettier --parser typescript > src/types/api-types.d.ts"
   },
   "overrides": {
@@ -39,6 +39,7 @@
     "@types/node": "^24.12.0",
     "@types/swagger-ui-express": "^4.1.8",
     "@vitejs/plugin-react": "^6.0.1",
+    "dotenv": "^16.6.1",
     "eslint": "^9.39.2",
     "eslint-plugin-prettier": "^5.5.5",
     "node-mocks-http": "^1.17.2",
@@ -46,14 +47,15 @@
     "openapi-typescript": "^7.12.0",
     "pkgroll": "^2.27.0",
     "prisma": "^7.5.0",
-    "typescript-eslint": "^8.57.2"
+    "rollup": "^4.52.5",
+    "typescript-eslint": "^8.57.2",
+    "vitest": "^4.1.4"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.5.0",
     "@prisma/client": "^7.5.0",
     "dotenv": "^16.6.1",
     "express": "^5.1.0",
-    "dotenv": "^16.6.1",
     "express-prom-bundle": "^8.0.0",
     "helmet": "^8.1.0",
     "jose": "^6.2.2",

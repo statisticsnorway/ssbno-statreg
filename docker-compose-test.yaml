@@ -19,7 +19,7 @@ services:
       - root_node_modules:/app/node_modules
     command: >
       sh -c "
-      npm ci &&
+      npm i &&
       npm run generate &&
       npm run build &&
       npm run db:deploy -w backend &&

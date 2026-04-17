@@ -92,15 +92,6 @@ export async function fetchUserByEmail(userEmail: string, token: string): Promis
     }
   )
 
-  if (response.status === 404) {
-    console.log(`Got 404 fetching user: ${userEmail}`)
-    return null
-  }
-
-  if (!response.ok) {
-    throw new Error(`Graph request failed: ${response.status} ${await response.text()}`)
-  }
-
   const user = (await response.json()) as GraphUserResponse
 
   return {
