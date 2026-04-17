@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import client from '../api'
-import type { components } from '../../../shared/api-types'
+import type { components } from '../../../shared/src/api-types'
 
 type Release = components['schemas']['Release_details']
 
