@@ -1,6 +1,6 @@
 import './App.css'
 
-import { Heading } from '@digdir/designsystemet-react'
+import { Heading, Paragraph } from '@digdir/designsystemet-react'
 
 function App() {
   return (
@@ -11,6 +11,7 @@ function App() {
       </div>
 
       <section id="content">
+          <Paragraph>Lorem ipsum dolor sit amet</Paragraph>
           {/* TODO: Add components */}
       </section>
     </>

@@ -1,7 +1,14 @@
 #header {
-  /* TODO */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--ds-size-0); /* TODO: Setup design-tokens */
+  align-self: stretch;
 }
 
 #content {
-  /* TODO */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ds-size-13);
 }
