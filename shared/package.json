@@ -1,12 +1,15 @@
 {
   "name": "@ssbno-statreg/shared",
   "version": "0.0.0",
-    "type": "module",
+  "type": "module",
   "exports": {
-    ".": "./src/index.ts",
+    ".": "./src/index.d.ts",
     "./openapi": "./openapi.yaml"
   },
-  "files": ["src", "openapi.yaml"],
+  "files": [
+    "src",
+    "openapi.yaml"
+  ],
   "devDependencies": {
     "typescript": "^5.0.0"
   }
