@@ -8,10 +8,6 @@ jobs:
     env:
       # placeholder URL, needed to generate client and build application
       PGURL: postgresql://user@localhost:5432/statreg_db
-    strategy:
-      matrix:
-        node-version: [22.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
     steps:
       - uses: actions/checkout@v6
 
@@ -35,7 +31,7 @@ jobs:
             echo "❌ There's a mismatch between generated api types and openapi spec. Please run 'npm run generate:api-types' to update types, or revert changes to the spec."
             exit 1
           fi
-  
+
   integration-test:
     runs-on: ubuntu-latest
     steps:
