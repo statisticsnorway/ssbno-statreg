@@ -1,6 +1,6 @@
 # Testing
 
-Bort unit tests and integration tests runs in our ci pipeline and shall always pass before merging pull requests.
+Both unit tests and integration tests runs in our ci pipeline and shall always pass before merging pull requests.
 
 ## Unit tests
 
