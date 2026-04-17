@@ -1,5 +1,16 @@
 # Testing
 
+Bort unit tests and integration tests runs in our ci pipeline and shall always pass before merging pull requests.
+
+## Unit tests
+
+All buisness shall be covered by unit tests. We are using vitest for unit testing.
+
+To run tests:
+```
+npm run test
+```
+
 ## Integration tests
 
 ### Running locally
