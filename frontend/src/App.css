@@ -1,17 +1,16 @@
+/* TODO: Consider using scss mixins for flex styling */
 #header {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--ds-size-0); /* TODO: Double check all gaps as they're not doing anything */
   align-self: stretch;
 
   .header-content {
     display: flex;
-    padding: 26px 161px; /* TODO: Double check */
+    padding: 26px 161px;
     justify-content: space-between;
     align-items: center;
     align-self: stretch;
-    border-bottom: 1px solid var(--ds-color-border-subtle);
 
     .logo {
       width: 262px;
@@ -25,7 +24,7 @@
   margin-right: auto;
 
   .content {
-    margin-top: var(--ds-size-13);
+    margin-top: var(--ds-size-2);
     display: flex;
     flex-direction: column;
     align-self: start;
