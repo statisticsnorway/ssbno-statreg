@@ -1,17 +1,16 @@
 import { useState, useEffect } from 'react'
 import { Heading, Link, Paragraph, Details, Card, Button } from '@digdir/designsystemet-react'
 import { PencilWritingIcon } from '@navikt/aksel-icons'
-import {ApprovalStatusTag} from './ApprovalStatusTag'
+import {ApprovalStatusTag, ApprovalStatus } from './ApprovalStatusTag'
 import client from '../api'
-import { type ReleaseDetails, ApprovalStatus } from '@ssbno-statreg/shared'
-
+import { type ReleaseDetails } from '@ssbno-statreg/shared'
 
 export function ReleaseDetails() {
   const [release, setReleases] = useState<ReleaseDetails>({})
 
   useEffect(() => {
     async function fetchRelease() {
-      const { data, error } = await client.GET('/releases/{id}', { params: { path: { id: '1' } } })
+      const { data, error } = await client.GET('/releases/{id}', { params: { path: { id: '4' } } })
       if (error) {
         console.log(error)
         alert(error)
