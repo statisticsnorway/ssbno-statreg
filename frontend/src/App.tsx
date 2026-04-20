@@ -2,22 +2,25 @@ import './App.css'
 
 import { Heading, Paragraph } from '@digdir/designsystemet-react'
 
+{/* TODO: This is only placeholder; create own Header component if necessary */}
+const Header = () => (
+  <div id="header">
+        <div className="header-content">
+          <Heading level={1} data-size="md">Statistisk sentralbyrå</Heading>
+        </div>
+      </div>
+)
+
 function App() {
   return (
     <>
-      {/* TODO: This is a placeholder; create own Header component */}
-      <div id="header">
-        <div className="header-content">
-          <Heading level={1} data-size="lg">Statistisk sentralbyrå</Heading>
-        </div>
-      </div>
-
-      <section id="content">
-        <div className=''>
+      <Header />
+      <main id="page-content">
+        <div className='content' data-color='brand1'>
           {/* TODO: Add components */}
           <Paragraph>Lorem ipsum dolor sit amet</Paragraph>
         </div>
-      </section>
+      </main>
     </>
   )
 }

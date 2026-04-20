@@ -2,23 +2,28 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--ds-size-0); /* TODO: Double check */
+  gap: var(--ds-size-0); /* TODO: Double check all gaps as they're not doing anything */
   align-self: stretch;
 
   .header-content {
     display: flex;
-    padding: 26px 161px;
+    padding: 26px 161px; /* TODO: Double check */
     justify-content: space-between;
     align-items: center;
     align-self: stretch;
     border-bottom: 1px solid var(--ds-color-border-subtle);
-    background: #FFF;
   }
 }
 
-#content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--ds-size-13);
+#page-content {
+  width: 85%;
+  margin-left: auto;
+  margin-right: auto;
+
+  .content {
+    margin-top: var(--ds-size-13);
+    display: flex;
+    flex-direction: column;
+    align-self: start;
+  }
 }
