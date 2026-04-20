@@ -57,7 +57,7 @@ function ReleaseDetail() {
   )
 }
 
-function parseApprovalStatus(status: string | undefined | null): ApprovalStatus | null {
+function parseApprovalStatus(status?: string | null): ApprovalStatus | null {
   const validStatuses = Object.values(ApprovalStatus) as string[]
   if (!status || !validStatuses.includes(status)) return null
   return status as ApprovalStatus
