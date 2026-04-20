@@ -2,8 +2,18 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--ds-size-0); /* TODO: Setup design-tokens */
+  gap: var(--ds-size-0); /* TODO: Double check */
   align-self: stretch;
+
+  .header-content {
+    display: flex;
+    padding: 26px 161px;
+    justify-content: space-between;
+    align-items: center;
+    align-self: stretch;
+    border-bottom: 1px solid var(--ds-color-border-subtle);
+    background: #FFF;
+  }
 }
 
 #content {

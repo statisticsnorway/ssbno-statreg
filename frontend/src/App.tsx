@@ -5,14 +5,18 @@ import { Heading, Paragraph } from '@digdir/designsystemet-react'
 function App() {
   return (
     <>
+      {/* TODO: This is a placeholder; create own Header component */}
       <div id="header">
-        {/* TODO: Add Header component */}
-        <Heading level={1} data-size="lg">Statistisk sentralbyrå</Heading>
+        <div className="header-content">
+          <Heading level={1} data-size="lg">Statistisk sentralbyrå</Heading>
+        </div>
       </div>
 
       <section id="content">
-          <Paragraph>Lorem ipsum dolor sit amet</Paragraph>
+        <div className=''>
           {/* TODO: Add components */}
+          <Paragraph>Lorem ipsum dolor sit amet</Paragraph>
+        </div>
       </section>
     </>
   )
