@@ -50,7 +50,7 @@ function ReleaseDetail() {
         </Details>
       </Card>
 
-      <Button data-size='sm' variant='tertiary'>
+      <Button onClick={() => alert('Redigering er ikke implementert ennå.')} data-size='sm' variant='tertiary'>
         <PencilWritingIcon aria-hidden /> Rediger
       </Button>
     </div>
