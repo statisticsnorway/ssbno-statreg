@@ -4,6 +4,7 @@
   "type": "module",
   "exports": {
     ".": "./src/index.d.ts",
+    "./enums": "./src/enums.ts",
     "./openapi": "./openapi.yaml"
   },
   "files": [

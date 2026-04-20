@@ -1,5 +1,5 @@
 import type { ReleaseDetails, ReleaseListing, ReleaseCreate, ReleaseUpdate } from '@ssbno-statreg/shared'
-import { ApprovalStatus } from '@ssbno-statreg/shared'
+import { ApprovalStatus } from '@ssbno-statreg/shared/enums'
 import { dateToISOString, sanitize, parseDateISO, parseId, ensureRequiredFieldsExists } from '@/lib/utils'
 import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
 import type { Prisma } from '@/generated/prisma/client'
