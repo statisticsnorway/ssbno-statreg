@@ -1,5 +1,5 @@
 import './App.css'
-import ReleaseDetail from './views/releaseDetail'
+import ReleaseDetail from './views/ReleaseDetail'
 import StatisticDetail from './views/StatisticDetail'
 import ssbLogo from './assets/SSB_logo_black.svg'
 
