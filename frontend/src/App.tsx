@@ -3,6 +3,7 @@ import { Routes, Route } from "react-router";
 import ReleaseDetail from './views/ReleaseDetail'
 import StatisticDetail from './views/StatisticDetail'
 import Header from './views/Header'
+import Startpage from './views/Starpage';
 
 import './App.css'
 
@@ -10,7 +11,9 @@ import './App.css'
 function App() {
   return (
     <Routes>
-      <Route element={<Header />} >
+      <Route path="" element={<Header />} >
+        <Route index element={<Startpage />} />
+
         <Route path="release" element={<ReleaseDetail />} />
         <Route path="statistic" element={<StatisticDetail />} />
         {/* Eventually we should do like this, when statisticList and statisticDeail is more ready! */}
