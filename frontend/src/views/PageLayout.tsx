@@ -1,7 +1,7 @@
 import './PageLayout.css'
 import ssbLogo from '../assets/SSB_logo_black.svg'
 
-import { Outlet } from "react-router";
+import { Outlet } from 'react-router'
 
 {/* TODO: This is only placeholder; create own Header component if necessary */}
 const Header = () => (

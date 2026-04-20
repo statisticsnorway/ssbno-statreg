@@ -1,9 +1,9 @@
-import { Routes, Route } from "react-router";
+import { Routes, Route } from 'react-router'
 
 import ReleaseDetail from './views/ReleaseDetail'
 import StatisticDetail from './views/StatisticDetail'
 import PageLayout from './views/PageLayout'
-import Startpage from './views/Starpage';
+import Startpage from './views/Starpage'
 
 function App() {
   return (
