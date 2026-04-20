@@ -11,7 +11,6 @@ const Header = () => (
     <div className="header-content">
       <img src={ssbLogo} className="logo" alt="SSB logo"  />
     </div>
-    <Divider />
   </div>
 )
 
