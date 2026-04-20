@@ -3,7 +3,8 @@
   "private": true,
   "workspaces": [
     "backend",
-    "frontend"
+    "frontend",
+    "shared"
   ],
   "scripts": {
     "dev": "concurrently \"npm run dev -w backend\" \"npm run dev -w frontend\"",
@@ -18,7 +19,7 @@
     "lint:fix": "eslint --fix '**/*.{js,mjs,cjs,ts}'",
     "seed": "npm run seed -w backend",
     "generate": "npm run generate -w backend",
-    "generate:api-types": "npm run generate:api-types -w backend"
+    "generate:api-types": "openapi-typescript ./shared/openapi/openapi.yaml | prettier --parser typescript > ./shared/src/api-types.d.ts"
   },
   "devDependencies": {
     "concurrently": "^8.2.0",
