@@ -95,13 +95,13 @@ function formatDate(isoString?: string): string {
 
 function formatVariant(variant?: ReleaseDetails["variant"]): string {
   const frequency = variant?.frequency?.name ?? '-'
-  const revision = formatRevisionName(variant?.revision?.code)
+  const revision = formatRevisionName(variant?.revision?.name)
   return `${frequency}, ${revision}`
 }
 
-function formatRevisionName(revisionCode?: string): string {
-  if (!revisionCode || !(revisionCode in revisionNames)) return '-'
-  return revisionNames[revisionCode]
+function formatRevisionName(revision?: string): string {
+  if (!revision || !(revision in revisionNames)) return '-'
+  return revisionNames[revision]
 }
 
 const revisionNames: Record<string, string> = {
