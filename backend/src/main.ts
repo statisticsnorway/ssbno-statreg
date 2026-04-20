@@ -1,5 +1,4 @@
 import fs from 'node:fs'
-import path from 'node:path'
 import express from 'express'
 import helmet from 'helmet'
 import swaggerUi from 'swagger-ui-express'
@@ -28,14 +27,6 @@ app.get('/auth/me', auth, (req, res) => {
     email: req.auth?.email,
   })
 })
-
-// TODO: Use the correct URLs for production, /statreg probably.
-// if (process.env.NODE_ENV == "production") {
-app.use(express.static(path.resolve(__dirname)))
-app.get('/', (req, res) => {
-  res.sendFile(path.resolve(__dirname, 'index.html'))
-})
-// }
 
 app.use(controllerRouter(auth))
 

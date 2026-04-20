@@ -1,7 +1,7 @@
 import './PageLayout.css'
 import ssbLogo from '../assets/SSB_logo_black.svg'
 
-import type { ReactNode } from 'react'
+import { Outlet } from "react-router";
 
 {/* TODO: This is only placeholder; create own Header component if necessary */}
 const Header = () => (
@@ -13,13 +13,13 @@ const Header = () => (
   </div>
 )
 
-const PageLayout = ({ children }: {children: ReactNode}) => {
+const PageLayout = () => {
   return (
     <>
       <Header />
       <main id="page-content" data-color='brand1'>
         <div className='content'>
-          {children}
+        <Outlet />
         </div>
       </main>
     </>
