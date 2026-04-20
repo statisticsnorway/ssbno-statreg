@@ -1,5 +1,5 @@
 import { vi, describe, test, expect, beforeEach } from 'vitest'
-import { ApprovalStatus, StatisticStatus } from '@ssbno-statreg/shared/enums'
+import { ApprovalStatus, StatisticStatus } from '@ssbno-statreg/shared'
 import { Users } from '@/types/entra'
 import {
   getAllStatistics,

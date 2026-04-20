@@ -9,7 +9,7 @@ import {
   ReleaseDetailsIncludes,
   mapToReleaseDetails,
 } from '@/services/releasesService'
-import { ApprovalStatus } from '@ssbno-statreg/shared/enums'
+import { ApprovalStatus } from '@ssbno-statreg/shared'
 
 let prismaMock: any
 let releasesResult: object | null
