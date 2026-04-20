@@ -17,3 +17,19 @@ export type StatisticUpdate = components['schemas']['Statistic_update']
 export type StatisticListing = components['schemas']['Statistic_listing']
 export type Translations = components['schemas']['Translations']
 export type Variant = components['schemas']['Variant']
+
+/* eslint-disable no-unused-vars */
+export enum ApprovalStatus {
+  ACCEPTED = 'GODKJENT',
+  PENDING = 'FORSLAG',
+  DECLINED = 'AVVIST',
+}
+
+export enum StatisticStatus {
+  K = 'Kommende',
+  A = 'Aktiv',
+  IA = 'Ikke-aktiv',
+  UT = 'Opphørt',
+  SA = 'Sammenslått',
+  SP = 'Splittet',
+}

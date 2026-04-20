@@ -1,9 +1,10 @@
-import ReleaseDetail from './views/releaseDetail'
+import { ReleaseDetails } from './views/ReleaseDetails'
+import { Heading } from '@digdir/designsystemet-react'
 
 function App() {
   return <>
   <Heading level={1} data-size="xl">Statreg</Heading>
-  <ReleaseDetail></ReleaseDetail>
+  <ReleaseDetails></ReleaseDetails>
   </>
 }
 export default App

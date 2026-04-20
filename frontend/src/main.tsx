@@ -1,3 +1,4 @@
+import '@digdir/designsystemet-css'
 import '@digdir/designsystemet-css/theme'
 
 import { StrictMode } from 'react'
