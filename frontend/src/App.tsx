@@ -1,14 +1,13 @@
 import './App.css'
 import ReleaseDetail from './views/releaseDetail'
 import StatisticDetail from './views/statisticDetail'
-
-import { Heading } from '@digdir/designsystemet-react'
+import ssbLogo from './assets/SSB_logo_black.svg'
 
 {/* TODO: This is only placeholder; create own Header component if necessary */}
 const Header = () => (
   <div id="header">
     <div className="header-content">
-      <Heading level={1} data-size="md">Statistisk sentralbyrå</Heading>
+      <img src={ssbLogo} className="logo" alt="SSB logo"  />
     </div>
   </div>
 )
