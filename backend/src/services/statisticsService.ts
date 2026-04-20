@@ -1,4 +1,4 @@
-import type { StatisticListing, StatisticDetails, StatisticUpdate, StatisticCreate } from '@/types/index'
+import type { StatisticListing, StatisticDetails, StatisticUpdate, StatisticCreate } from '@ssbno-statreg/shared'
 import { dateToISOString, sanitize, parseDateOnly, ensureRequiredFieldsExists, isNumber, parseId } from '@/lib/utils'
 import type { Prisma } from '@/generated/prisma/client'
 import { getDivisionFromCode } from '@/services/klassService'
