@@ -1,0 +1,34 @@
+#header {
+  display: grid;
+  grid-area: header;
+  justify-items: center;
+  border-bottom: 1px solid var(--ds-color-neutral-border-subtle);
+
+  .header-content {
+    width: 80%;
+    padding: 26px 0;
+
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+
+    .logo {
+      width: 262px;
+    }
+  }
+}
+
+#page-content {
+  display: grid;
+  grid-area: main;
+  justify-items: center;
+  grid-template-columns: 1fr;
+  margin-top: var(--ds-size-13);
+  
+  .content {
+    width: 80%;
+    display: grid;
+    justify-items: start;
+    row-gap: var(--ds-size-12);
+  }
+}
