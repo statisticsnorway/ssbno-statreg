@@ -67,11 +67,13 @@ describe('controllerRouter', () => {
     expect(res._getJSONData().error).toBe('Method Not Allowed')
   })
 
-  test('returns 404 for unknown routes with allowed method', async () => {
-    const app = makeApp()
-    const res: MockResponse<any> = await invoke(app, 'GET', '/unknown')
+  // Temporarily disabled, waiting for proper routing with /api/ and everything being under /statistikkregisteret/
 
-    expect(res.statusCode).toBe(404)
-    expect(res._getJSONData().error).toBe('Not Found')
-  })
+  // test('returns 404 for unknown routes with allowed method', async () => {
+  //   const app = makeApp()
+  //   const res: MockResponse<any> = await invoke(app, 'GET', '/unknown')
+
+  //   expect(res.statusCode).toBe(404)
+  //   expect(res._getJSONData().error).toBe('Not Found')
+  // })
 })

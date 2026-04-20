@@ -21,7 +21,7 @@ function StatisticDetail() {
   return (
     <div>
       <h1>Statistic {statistic.shortname}</h1>
-      Navn: {statistic.name}<br/>
+      Navn: {statistic.name}<br />
       Status: {statistic.status?.code}
     </div>
   )
