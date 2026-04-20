@@ -32,68 +32,88 @@ export default function StatisticDetail() {
   const cancelledVariants = formatCancelledVariants(statistic.variants)
 
   return (
-    <div>
+    <>
+      <div>
       <Heading>{statistic.name}</Heading>
       <Paragraph variant="short" >{statistic.shortname}</Paragraph>
-
       {statusCode && <StatisticStatusTag status={statusCode} />}
+      </div>
 
       <Divider />
 
-      <Paragraph>Velg variant for å melde publiseringsdato</Paragraph>
-
-      <Card>
-        <Details>
-          <Details.Summary>Kommende publiseringer</Details.Summary>
-          <Details.Content>Kommer snart.</Details.Content>
-        </Details>
-      </Card>
+      <div>
+        <Paragraph>Velg variant for å melde publiseringsdato</Paragraph>
+        <Card>
+          <Details>
+            <Details.Summary>Kommende publiseringer</Details.Summary>
+            <Details.Content>Kommer snart.</Details.Content>
+          </Details>
+        </Card>
+      </div>
 
       <Divider />
 
-      <Heading data-size="xs">Engelsk statistikknavn</Heading>
-      <Paragraph>{englishName}</Paragraph>
+      <div>
+        <Heading data-size="xs">Engelsk statistikknavn</Heading>
+        <Paragraph>{englishName}</Paragraph>
+      </div>
 
-      <Heading data-size="xs">Ansvarlig seksjon</Heading>
-      <Paragraph>{division}</Paragraph>
+      <div>
+        <Heading data-size="xs">Ansvarlig seksjon</Heading>
+        <Paragraph>{division}</Paragraph>
+      </div>
 
-      <Heading data-size="xs">Kontaktpersoner</Heading>
-      <Paragraph>Kontaktpersoner kan endres uten godkjenning</Paragraph>
-      {(contacts).map((contact) => (
-        <Paragraph>{contact}</Paragraph>
-      ))}
-      <Button variant='tertiary' onClick={() => alert('Rediger kontakter er ikke implementert ennå.')}>
-        <PersonPencilIcon /> Rediger kontakt
-      </Button>
-
-      <Heading data-size="xs">Videreføres av</Heading>
-      {mockContinuedBy.map((shortname) => (
-        <Paragraph><Link href="#">{shortname}</Link></Paragraph>
-      ))}
-
-      <Heading data-size="xs">Regionale nivåer</Heading>
-      <List.Unordered>
-        {regionLevels.map((level) => (
-          <List.Item >{level.name} </List.Item>
+      <div>
+        <Heading data-size="xs">Kontaktpersoner</Heading>
+        <Paragraph>Kontaktpersoner kan endres uten godkjenning</Paragraph>
+        {(contacts).map((contact) => (
+          <Paragraph>{contact}</Paragraph>
         ))}
-      </List.Unordered>
+        <Button variant='tertiary' onClick={() => alert('Rediger kontakter er ikke implementert ennå.')}>
+          <PersonPencilIcon /> Rediger kontakt
+        </Button>
+      </div>
 
-      <Heading data-size="xs">Målform</Heading>
-      <Paragraph>{mainLanguage}</Paragraph>
-
-      <Heading data-size="xs">Statistikkens startår</Heading>
-      <Paragraph>{startYear}</Paragraph>
-
-      <Heading data-size="xs">Opphørte varianter</Heading>
-      <List.Unordered>
-        {cancelledVariants.map((variant) => (
-          <List.Item>{variant}</List.Item>
+      <div>
+        <Heading data-size="xs">Videreføres av</Heading>
+        {mockContinuedBy.map((shortname) => (
+          <Paragraph><Link href="#">{shortname}</Link></Paragraph>
         ))}
-      </List.Unordered>
+      </div>
 
-      <Heading data-size="xs">Endringer</Heading>
-      <Paragraph><Link href="#">Se versjonshistorikken til statistikken</Link></Paragraph>
-    </div>
+      <div>
+        <Heading data-size="xs">Regionale nivåer</Heading>
+        <List.Unordered>
+          {regionLevels.map((level) => (
+            <List.Item >{level.name} </List.Item>
+          ))}
+        </List.Unordered>
+      </div>
+
+      <div>
+        <Heading data-size="xs">Målform</Heading>
+        <Paragraph>{mainLanguage}</Paragraph>
+      </div>
+
+      <div>
+        <Heading data-size="xs">Statistikkens startår</Heading>
+        <Paragraph>{startYear}</Paragraph>
+      </div>
+
+      <div>
+        <Heading data-size="xs">Opphørte varianter</Heading>
+        <List.Unordered>
+          {cancelledVariants.map((variant) => (
+            <List.Item>{variant}</List.Item>
+          ))}
+        </List.Unordered>
+      </div>
+
+      <div>
+        <Heading data-size="xs">Endringer</Heading>
+        <Paragraph><Link href="#">Se versjonshistorikken til statistikken</Link></Paragraph>
+      </div>
+    </>
   )
 }
 
