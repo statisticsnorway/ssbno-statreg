@@ -1,14 +1,13 @@
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
+import { Heading, Link, Paragraph, Details, Card, Button } from '@digdir/designsystemet-react'
+import { PencilWritingIcon } from '@navikt/aksel-icons'
+import {ApprovalStatusTag} from './ApprovalStatusTag'
 import client from '../api'
-import type { components } from '../../../shared/src/api-types'
-import { Heading } from '@digdir/designsystemet-react'
-import { Tag } from "@digdir/designsystemet-react";
+import { type ReleaseDetails, ApprovalStatus } from '@ssbno-statreg/shared'
 
 
-type Release = components['schemas']['Release_details']
-
-function ReleaseDetail() {
-  const [release, setReleases] = useState<Release>({})
+export function ReleaseDetails() {
+  const [release, setReleases] = useState<ReleaseDetails>({})
 
   useEffect(() => {
     async function fetchRelease() {
@@ -23,28 +22,78 @@ function ReleaseDetail() {
     fetchRelease()
   }, [])
 
+  const approvalStatus = parseApprovalStatus(release.approval_status)
+  const statisticName = formatStatisticName(release.statistic)
+  const period = formatPeriod(release.period_from, release.period_to)
+  const publishTime = formatPublishTime(release.publish_time)
+  const variant = formatVariant(release.variant)
+
   return (
     <div>
-      <Heading level={2}>Publiseringsdato</Heading>
-      <Heading level={3}>{format_datestring(release.publish_time)}</Heading>
-      <Tag variant={'outline'} data-color={'danger'}>Ikke godkjent</Tag>
-    </div> 
+      <Heading data-size="md">Publiseringsdato</Heading>
+      <Heading data-size="xs">{publishTime}</Heading>
+
+      {approvalStatus && <ApprovalStatusTag status={approvalStatus} />}
+
+      <Heading data-size="xs">Statistikk</Heading>
+      <Link href="#">{statisticName}</Link>
+
+      <Heading data-size="xs">Variant</Heading>
+      <Paragraph>{variant}</Paragraph>
+
+      <Heading data-size="xs">Måleperiode</Heading>
+      <Paragraph>{period}</Paragraph>
+
+      <Card>
+        <Details>
+          <Details.Summary>Versjonshistorikk</Details.Summary>
+          <Details.Content>Kommmer snart.</Details.Content>
+        </Details>
+      </Card>
+
+      <Button variant='tertiary'>
+        <PencilWritingIcon /> Rediger
+      </Button>
+    </div>
   )
 }
 
-export default ReleaseDetail
+function parseApprovalStatus(status: string | undefined | null): ApprovalStatus | null {
+  const validStatuses = Object.values(ApprovalStatus) as string[]
+  if (!status || !validStatuses.includes(status)) return null
+  return status as ApprovalStatus
+}
 
-function format_datestring(dateString: string | undefined): string {
-  if (!dateString) return ""
-  const date = new Date(dateString)
-  
-  const formatted = new Intl.DateTimeFormat("no-NO", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(date).replace(",", " kl");
+function formatStatisticName(statistic: ReleaseDetails['statistic']): string {
+  if (!statistic || !statistic.name || !statistic.shortname) return '-'
+  return `${statistic.name} (${statistic.shortname})`
+}
 
-  return formatted
+function formatPublishTime(publishTime: string | undefined): string {
+  if (!publishTime) return '-'
+  return new Date(publishTime).toLocaleString('nb-NO', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).replace(',', ' kl')
+}
+
+function formatPeriod(from: string | undefined, to: string | undefined): string {
+  if (!from || !to) return '-'
+  return `${formatDate(from)} – ${formatDate(to)}`
+}
+
+function formatDate(isoString: string): string {
+  return new Date(isoString).toLocaleDateString('nb-NO', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  })
+}
+
+function formatVariant(variant: ReleaseDetails['variant']): string {
+  if (!variant?.frequency?.name || !variant?.revision?.name) return '-'
+  return `${variant.frequency.name}, ${variant.revision.name}`
 }

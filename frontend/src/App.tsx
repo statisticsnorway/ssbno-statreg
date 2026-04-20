@@ -1,4 +1,4 @@
-import { ReleaseDetails } from './views/ReleaseDetails'
+import { ReleaseDetails } from './views/releaseDetail'
 import { Heading } from '@digdir/designsystemet-react'
 
 function App() {
