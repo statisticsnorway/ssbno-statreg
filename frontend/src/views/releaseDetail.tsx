@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react'
 import client from '../api'
-import type { components } from '../../../shared/src/api-types'
-
-type Release = components['schemas']['Release_details']
+import type { ReleaseDetails } from '@ssbno-statreg/shared'
 
 function ReleaseDetail() {
-  const [release, setReleases] = useState<Release>({})
+  const [release, setReleases] = useState<ReleaseDetails>({})
 
   useEffect(() => {
     async function fetchRelease() {

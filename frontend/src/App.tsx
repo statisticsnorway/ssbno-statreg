@@ -1,5 +1,6 @@
 import './App.css'
 import ReleaseDetail from './views/releaseDetail'
+import StatisticDetail from './views/statisticDetail'
 
 import { Heading } from '@digdir/designsystemet-react'
 
@@ -19,9 +20,12 @@ function App() {
       <main id="page-content">
         <div className='content' data-color='brand1'>
           <ReleaseDetail></ReleaseDetail>
+          <hr />
+          <StatisticDetail></StatisticDetail>
         </div>
       </main>
     </>
   )
 }
+
 export default App
