@@ -1,5 +1,5 @@
-import ReleaseDetail from './views/releaseDetail'
-import StatisticDetail from './views/statisticDetail'
+import ReleaseDetail from './views/ReleaseDetail'
+import StatisticDetail from './views/StatisticDetail'
 import PageLayout from './views/PageLayout'
 
 import { Divider } from '@digdir/designsystemet-react'
