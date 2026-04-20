@@ -13,7 +13,7 @@ WORKDIR /app
 COPY . .
 
 # Install all dependencies (including devDependencies for the build)
-RUN npm ci
+RUN npm i
 
 # Set temporary placeholder database URL for building
 ENV PGURL=postgresql://placeholder@localhost:5432/statreg_db
