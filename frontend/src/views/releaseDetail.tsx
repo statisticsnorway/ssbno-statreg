@@ -5,7 +5,7 @@ import {ApprovalStatusTag, ApprovalStatus } from './ApprovalStatusTag'
 import client from '../api'
 import { type ReleaseDetails } from '@ssbno-statreg/shared'
 
-export function ReleaseDetails() {
+function ReleaseDetail() {
   const [release, setReleases] = useState<ReleaseDetails>({})
 
   useEffect(() => {
@@ -96,3 +96,5 @@ function formatVariant(variant: ReleaseDetails['variant']): string {
   if (!variant?.frequency?.name || !variant?.revision?.name) return '-'
   return `${variant.frequency.name}, ${variant.revision.name}`
 }
+
+export default ReleaseDetail
