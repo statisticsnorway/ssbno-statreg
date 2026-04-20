@@ -1,6 +1,7 @@
 import './App.css'
+import ReleaseDetail from './views/releaseDetail'
 
-import { Heading, Paragraph } from '@digdir/designsystemet-react'
+import { Heading } from '@digdir/designsystemet-react'
 
 {/* TODO: This is only placeholder; create own Header component if necessary */}
 const Header = () => (
@@ -17,12 +18,10 @@ function App() {
       <Header />
       <main id="page-content">
         <div className='content' data-color='brand1'>
-          {/* TODO: Add components */}
-          <Paragraph>Lorem ipsum dolor sit amet</Paragraph>
+          <ReleaseDetail></ReleaseDetail>
         </div>
       </main>
     </>
   )
 }
-
 export default App

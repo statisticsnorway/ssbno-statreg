@@ -1,7 +1,7 @@
 import { isDateBlocked } from '@/lib/blockedDates'
 import type { ExtendedPrismaClient } from '@/lib/prisma'
 import { dateToISOString, sanitize, parseDateOnly, ensureRequiredFieldsExists } from '@/lib/utils'
-import type { BlockedReleaseDate } from '@/types'
+import type { BlockedReleaseDate } from '@ssbno-statreg/shared'
 
 export type CalendarDatePrisma = Pick<ExtendedPrismaClient, 'calender_date'>
 
