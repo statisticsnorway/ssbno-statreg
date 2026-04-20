@@ -5,7 +5,7 @@ import { getDivisionFromCode } from '@/services/klassService'
 import { fetchUsers } from '@/services/entraUserService'
 import type { UserLookupItem, Users } from '@/types/entra'
 import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
-import { ApprovalStatus, StatisticStatus } from '@ssbno-statreg/shared'
+import { ApprovalStatus, StatisticStatus } from '@/types/enums'
 import { statisticsAsserts } from '@/lib/asserts'
 
 export type StatisticPrisma = Pick<PrismaClient, 'statistic' | 'shortname'>
