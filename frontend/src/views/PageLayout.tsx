@@ -6,7 +6,7 @@ import type { ReactNode } from 'react'
 {/* TODO: This is only placeholder; create own Header component if necessary */}
 const Header = () => (
   <div id="header">
-    <div className="header-content">
+    <div className="header-content container">
       <img src={ssbLogo} className="logo" alt="SSB logo"  />
       {/* TODO: Add links etc */}
     </div>
@@ -18,7 +18,7 @@ const PageLayout = ({ children }: {children: ReactNode}) => {
     <>
       <Header />
       <main id="page-content">
-        <div className='content' data-color='brand1'>
+        <div className='content container'>
           {children}
         </div>
       </main>

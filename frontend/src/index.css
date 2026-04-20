@@ -2,3 +2,12 @@ body {
   margin: 0;
   font-family: var(--ds-font-family);
 }
+
+:root {
+  display: grid;
+  grid-template-areas:
+    "header"
+    "main";   
+  grid-template-rows: auto 1fr auto;
+  row-gap: var(--ds-size-13);
+}
