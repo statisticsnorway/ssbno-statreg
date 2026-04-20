@@ -35,7 +35,8 @@ function ReleaseDetail() {
       {approvalStatus && <ApprovalStatusTag status={approvalStatus} />}
 
       <Heading data-size="xs">Statistikk</Heading>
-      <Link href="#">{statisticName}</Link> //TODO link should point to the statistic page, routing must be implemented first
+      <Link href="#">{statisticName}</Link>
+      {/* TODO link should point to the statistic page, routing must be implemented first */}
 
       <Heading data-size="xs">Variant</Heading>
       <Paragraph>{variant}</Paragraph>
