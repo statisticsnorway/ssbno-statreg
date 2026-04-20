@@ -67,7 +67,7 @@ describe('controllerRouter', () => {
     expect(res._getJSONData().error).toBe('Method Not Allowed')
   })
 
-  // Temporarily disabled, waiting for proper routing with /api/ and everything behing /statistikkregisteret/
+  // Temporarily disabled, waiting for proper routing with /api/ and everything being under /statistikkregisteret/
 
   // test('returns 404 for unknown routes with allowed method', async () => {
   //   const app = makeApp()
