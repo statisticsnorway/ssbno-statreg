@@ -5,8 +5,6 @@ import StatisticDetail from './views/StatisticDetail'
 import PageLayout from './views/PageLayout'
 import Startpage from './views/Starpage';
 
-import './App.css'
-
 function App() {
   return (
     <Routes>
