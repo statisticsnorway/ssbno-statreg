@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// TODO: Fix proxy after routing strategy is desided
+// TODO: Fix proxy after routing strategy is decided
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
