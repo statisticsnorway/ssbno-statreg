@@ -1,6 +1,6 @@
 import './App.css'
 import ReleaseDetail from './views/releaseDetail'
-import StatisticDetail from './views/statisticDetail'
+import StatisticDetail from './views/StatisticDetail'
 import ssbLogo from './assets/SSB_logo_black.svg'
 
 import { Divider } from '@digdir/designsystemet-react'

@@ -35,7 +35,7 @@ function ReleaseDetail() {
       {approvalStatus && <ApprovalStatusTag status={approvalStatus} />}
 
       <Heading data-size="xs">Statistikk</Heading>
-      <Link href="#">{statisticName}</Link>
+      <Link href="#">{statisticName}</Link> //TODO link should point to the statistic page, routing must be implemented first
 
       <Heading data-size="xs">Variant</Heading>
       <Paragraph>{variant}</Paragraph>
@@ -50,8 +50,8 @@ function ReleaseDetail() {
         </Details>
       </Card>
 
-      <Button variant='tertiary'>
-        <PencilWritingIcon /> Rediger
+      <Button data-size='sm' variant='tertiary'>
+        <PencilWritingIcon aria-hidden /> Rediger
       </Button>
     </div>
   )
@@ -79,12 +79,12 @@ function formatPublishTime(publishTime: string | undefined): string {
   }).replace(',', ' kl')
 }
 
-function formatPeriod(from: string | undefined, to: string | undefined): string {
-  if (!from || !to) return '-'
+function formatPeriod(from?: string, to?: string): string {
   return `${formatDate(from)} – ${formatDate(to)}`
 }
 
-function formatDate(isoString: string): string {
+function formatDate(isoString?: string): string {
+  if(!isoString) return ''
   return new Date(isoString).toLocaleDateString('nb-NO', {
     day: '2-digit',
     month: '2-digit',
@@ -92,9 +92,27 @@ function formatDate(isoString: string): string {
   })
 }
 
-function formatVariant(variant: ReleaseDetails['variant']): string {
-  if (!variant?.frequency?.name || !variant?.revision?.name) return '-'
-  return `${variant.frequency.name}, ${variant.revision.name}`
+
+function formatVariant(variant?: ReleaseDetails["variant"]): string {
+  const frequency = variant?.frequency?.name ?? '-'
+  const revision = formatRevisionName(variant?.revision?.code)
+  return `${frequency}, ${revision}`
 }
+
+function formatRevisionName(revisionCode?: string): string {
+  if (!revisionCode || !(revisionCode in revisionNames)) return '-'
+  return revisionNames[revisionCode]
+}
+
+const revisionNames: Record<string, string> = {
+  I: 'Ingen',
+  B: 'Beregnede',
+  E: 'Endelige',
+  F: 'Foreløpige',
+  R: 'Reviderte',
+  IG: 'Integrert',
+}
+
+
 
 export default ReleaseDetail
