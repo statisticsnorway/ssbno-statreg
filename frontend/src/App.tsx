@@ -5,10 +5,10 @@ import { Heading, Paragraph } from '@digdir/designsystemet-react'
 {/* TODO: This is only placeholder; create own Header component if necessary */}
 const Header = () => (
   <div id="header">
-        <div className="header-content">
-          <Heading level={1} data-size="md">Statistisk sentralbyrå</Heading>
-        </div>
-      </div>
+    <div className="header-content">
+      <Heading level={1} data-size="md">Statistisk sentralbyrå</Heading>
+    </div>
+  </div>
 )
 
 function App() {
