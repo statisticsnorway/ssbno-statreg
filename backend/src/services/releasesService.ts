@@ -1,4 +1,4 @@
-import type { ReleaseDetails, ReleaseListing, ReleaseCreate, ReleaseUpdate } from '@/types/index'
+import type { ReleaseDetails, ReleaseListing, ReleaseCreate, ReleaseUpdate } from '@ssbno-statreg/shared'
 import { ApprovalStatus } from '@/types/enums'
 import { dateToISOString, sanitize, parseDateISO, parseId, ensureRequiredFieldsExists } from '@/lib/utils'
 import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
