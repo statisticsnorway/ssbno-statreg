@@ -1,10 +1,10 @@
 import { Tag } from '@digdir/designsystemet-react'
 
-export const statisticStatusCodes = ['K', 'A', 'IA', 'UT', 'SA', 'SP'] as const
+export const StatisticStatusCodes = ['K', 'A', 'IA', 'UT', 'SA', 'SP'] as const
 
-export type StatisticStatusCode = typeof statisticStatusCodes[number]
+export type StatisticStatusCode = typeof StatisticStatusCodes[number]
 
-const statusConfig = {
+const StatusAttributes = {
   A: {
     color: 'success',
     text: 'Aktiv',
@@ -32,7 +32,7 @@ const statusConfig = {
 } as const
 
 export function StatisticStatusTag({ status }: { status: StatisticStatusCode }) {
-  const config = statusConfig[status]
+  const config = StatusAttributes[status]
   return (
     <Tag data-color={config.color}>
       {config.text}

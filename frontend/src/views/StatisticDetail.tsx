@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Heading, Paragraph, List, Link, Button, Divider, Details, Card } from '@digdir/designsystemet-react'
 import { PersonPencilIcon } from '@navikt/aksel-icons'
-import { StatisticStatusTag, statisticStatusCodes, type StatisticStatusCode } from './StatisticStatusTag'
+import { StatisticStatusTag, StatisticStatusCodes, type StatisticStatusCode } from './StatisticStatusTag'
 import client from '../api'
 import type { StatisticDetails, Variant } from '@ssbno-statreg/shared'
 
@@ -119,7 +119,7 @@ export default function StatisticDetail() {
 
 function parseStatisticStatus(code?: string): StatisticStatusCode | null {
   if (!code) return null
-  return statisticStatusCodes.find(c => c === code) ?? null
+  return StatisticStatusCodes.find(c => c === code) ?? null
 }
 
 function formatMainLanguage(language?: string): string {
