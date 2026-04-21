@@ -8,18 +8,17 @@ import Startpage from './views/Starpage'
 function App() {
   return (
     <Routes>
-      <Route path="" element={<PageLayout />} >
+      <Route path='' element={<PageLayout />}>
         <Route index element={<Startpage />} />
 
         {/* TODO: Replace with ReleaseListing */}
-        <Route path="release" element={<ReleaseDetail />}> 
-          <Route path=":id" element={<ReleaseDetail />} />
+        <Route path='release' element={<ReleaseDetail />}>
+          <Route path=':id' element={<ReleaseDetail />} />
         </Route>
 
         {/* TODO: Replace with StatisticListing */}
-        <Route path="statistic" element={<StatisticDetail />}> 
-          <Route path=":shortname" element={<StatisticDetail />}>
-        </Route>
+        <Route path='statistic' element={<StatisticDetail />}>
+          <Route path=':shortname' element={<StatisticDetail />}/>
         </Route>
       </Route>
     </Routes>
