@@ -1,17 +1,14 @@
-import { Routes, Route } from "react-router";
+import { Routes, Route } from 'react-router'
 
 import ReleaseDetail from './views/ReleaseDetail'
 import StatisticDetail from './views/StatisticDetail'
-import Header from './views/Header'
-import Startpage from './views/Starpage';
-
-import './App.css'
-
+import PageLayout from './views/PageLayout'
+import Startpage from './views/Starpage'
 
 function App() {
   return (
     <Routes>
-      <Route path="" element={<Header />} >
+      <Route path="" element={<PageLayout />} >
         <Route index element={<Startpage />} />
 
         <Route path="release" element={<ReleaseDetail />} />
