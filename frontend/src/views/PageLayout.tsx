@@ -11,8 +11,8 @@ const Header = () => (
       <img src={ssbLogo} className='logo' alt='SSB logo' />
       <div className='header-links'>
         {/* TODO: Placeholder links */}
-        <Link href='/release/11159'>Publisering</Link>
-        <Link href='/statistic/kpi'>Statistikk</Link>
+        <Link href='/statistikkregisteret/release/11159'>Publisering</Link>
+        <Link href='/statistikkregisteret/statistic/kpi'>Statistikk</Link>
       </div>
     </div>
   </div>

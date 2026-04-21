@@ -56,9 +56,9 @@ export default function controllerRouter(
   outer.use('/api', inner)
 
   // Display react app when application is bundled and ran
-  outer.use(staticExpress(path.resolve(__dirname, 'statistikkregisteret')))
+  outer.use(staticExpress(path.resolve(__dirname)))
   outer.get('/*splat', (req, res) => {
-    res.sendFile(path.resolve(__dirname, 'statistikkregisteret', 'index.html'))
+    res.sendFile(path.resolve(__dirname, 'index.html'))
   })
 
   outer.use((req, res) => {

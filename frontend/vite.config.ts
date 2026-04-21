@@ -5,18 +5,15 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-  build: {
-    assetsDir: 'assets',
-    outDir: 'dist/statistikkregisteret',
-  },
+  base: '/statistikkregisteret/',
   server: {
     port: 5173,
     proxy: {
-      '/statistikkregisteret/releases': {
+      '/statistikkregisteret/api/releases': {
         target: 'http://localhost:8080',
         changeOrigin: true,
       },
-      '/statistikkregisteret/statistics': {
+      '/statistikkregisteret/api/statistics': {
         target: 'http://localhost:8080',
         changeOrigin: true,
       },
