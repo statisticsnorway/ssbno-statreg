@@ -1,7 +1,8 @@
-import { Router, type RequestHandler } from 'express'
+import { static as staticExpress, Router, type RequestHandler } from 'express'
 import statisticsController from '@/api/controllers/statisticsController'
 import releasesController from '../controllers/releasesController'
 import calendarController from '../controllers/calendarController'
+import path from 'node:path'
 
 const CONTROLLERS = [statisticsController, releasesController, calendarController]
 
@@ -52,6 +53,12 @@ export default function controllerRouter(
   })
 
   outer.use(inner)
+
+  // Display react app when application is bundled and ran
+  outer.use(staticExpress(path.resolve(__dirname)))
+  outer.get('/{*splat}', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'index.html'))
+  })
 
   outer.use((req, res) => {
     if (!ALLOWED_METHODS.includes(req.method) && knownPaths.has(req.path)) {

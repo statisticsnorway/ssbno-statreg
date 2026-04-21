@@ -1,5 +1,5 @@
 import fs from 'node:fs'
-import express, { Request, Response } from 'express'
+import express from 'express'
 import helmet from 'helmet'
 import swaggerUi from 'swagger-ui-express'
 import YAML from 'yaml'
@@ -19,7 +19,6 @@ app.use(promBundleMetrics)
 app.use(express.json())
 const swaggerDocument = YAML.parse(fs.readFileSync('../shared/openapi/openapi.yaml', 'utf8'))
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
-app.get('/', (_: Request, res: Response) => res.send('STATREG-API-V1'))
 app.get('/auth/me', auth, (req, res) => {
   // For local testing, add requireUserAuthentication here
   res.json({
@@ -28,7 +27,9 @@ app.get('/auth/me', auth, (req, res) => {
     email: req.auth?.email,
   })
 })
+
 app.use(controllerRouter(auth))
+
 await prisma.$connect()
 initializeDepartments()
 startServer(app, prisma)
