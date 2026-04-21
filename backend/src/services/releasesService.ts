@@ -1,4 +1,10 @@
-import { ReleaseDetails, ReleaseListing, ReleaseCreate, ReleaseUpdate, ApprovalStatus } from '@ssbno-statreg/shared'
+import {
+  type ReleaseDetails,
+  type ReleaseListing,
+  type ReleaseCreate,
+  type ReleaseUpdate,
+  ApprovalStatus,
+} from '@ssbno-statreg/shared'
 import { dateToISOString, sanitize, parseDateISO, parseId, ensureRequiredFieldsExists } from '@/lib/utils'
 import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
 import type { Prisma } from '@/generated/prisma/client'
