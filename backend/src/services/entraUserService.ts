@@ -5,6 +5,23 @@ import * as entraClient from '@/../plugins/entraReaderClient'
 export async function fetchUsers(users: Users[]) {
   if (!users?.length) return Promise.resolve([])
 
+  // Used by integration tests to avoid external Entra calls
+  if (process.env.MOCK_ENTRA_USERS === 'true') {
+    return Promise.resolve(
+      users.map(
+        (): UserLookupItem => ({
+          lookupEmail: 'bob@ssb.no',
+          user: {
+            displayName: 'Bob',
+            username: 'bcd',
+            email: 'bob@ssb.no',
+            businessPhone: '11223344',
+          },
+        })
+      )
+    )
+  }
+
   const token = await entraClient.getAccessToken()
 
   // Using initials to compose email on shortform, fallback on provided email for ie. infotjenesten@ssb.no
