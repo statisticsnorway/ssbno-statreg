@@ -2,7 +2,7 @@ import { Tag } from '@digdir/designsystemet-react'
 
 export const StatisticStatusCodes = ['K', 'A', 'IA', 'UT', 'SA', 'SP'] as const
 
-export type StatisticStatusCode = typeof StatisticStatusCodes[number]
+export type StatisticStatusCode = (typeof StatisticStatusCodes)[number]
 
 const StatusAttributes = {
   A: {
@@ -33,9 +33,5 @@ const StatusAttributes = {
 
 export function StatisticStatusTag({ status }: { status: StatisticStatusCode }) {
   const config = StatusAttributes[status]
-  return (
-    <Tag data-color={config.color}>
-      {config.text}
-    </Tag>
-  )
+  return <Tag data-color={config.color}>{config.text}</Tag>
 }

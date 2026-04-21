@@ -34,9 +34,9 @@ export default function StatisticDetail() {
   return (
     <>
       <div>
-      <Heading level={1}>{statistic.name}</Heading>
-      <Paragraph variant="short" >{statistic.shortname}</Paragraph>
-      {statusCode && <StatisticStatusTag status={statusCode} />}
+        <Heading level={1}>{statistic.name}</Heading>
+        <Paragraph variant='short'>{statistic.shortname}</Paragraph>
+        {statusCode && <StatisticStatusTag status={statusCode} />}
       </div>
 
       <Divider />
@@ -54,19 +54,19 @@ export default function StatisticDetail() {
       <Divider />
 
       <div>
-        <Heading data-size="xs">Engelsk statistikknavn</Heading>
+        <Heading data-size='xs'>Engelsk statistikknavn</Heading>
         <Paragraph>{englishName}</Paragraph>
       </div>
 
       <div>
-        <Heading data-size="xs">Ansvarlig seksjon</Heading>
+        <Heading data-size='xs'>Ansvarlig seksjon</Heading>
         <Paragraph>{division}</Paragraph>
       </div>
 
       <div>
-        <Heading data-size="xs">Kontaktpersoner</Heading>
+        <Heading data-size='xs'>Kontaktpersoner</Heading>
         <Paragraph>Kontaktpersoner kan endres uten godkjenning</Paragraph>
-        {(contacts).map((contact) => (
+        {contacts.map((contact) => (
           <Paragraph>{contact}</Paragraph>
         ))}
         <Button variant='tertiary' onClick={() => alert('Rediger kontakter er ikke implementert ennå.')}>
@@ -75,33 +75,35 @@ export default function StatisticDetail() {
       </div>
 
       <div>
-        <Heading data-size="xs">Videreføres av</Heading>
+        <Heading data-size='xs'>Videreføres av</Heading>
         {mockContinuedBy.map((shortname) => (
-          <Paragraph><Link href="#">{shortname}</Link></Paragraph>
+          <Paragraph>
+            <Link href='#'>{shortname}</Link>
+          </Paragraph>
         ))}
       </div>
 
       <div>
-        <Heading data-size="xs">Regionale nivåer</Heading>
+        <Heading data-size='xs'>Regionale nivåer</Heading>
         <List.Unordered>
           {regionLevels.map((level) => (
-            <List.Item >{level.name} </List.Item>
+            <List.Item>{level.name} </List.Item>
           ))}
         </List.Unordered>
       </div>
 
       <div>
-        <Heading data-size="xs">Målform</Heading>
+        <Heading data-size='xs'>Målform</Heading>
         <Paragraph>{mainLanguage}</Paragraph>
       </div>
 
       <div>
-        <Heading data-size="xs">Statistikkens startår</Heading>
+        <Heading data-size='xs'>Statistikkens startår</Heading>
         <Paragraph>{startYear}</Paragraph>
       </div>
 
       <div>
-        <Heading data-size="xs">Opphørte varianter</Heading>
+        <Heading data-size='xs'>Opphørte varianter</Heading>
         <List.Unordered>
           {cancelledVariants.map((variant) => (
             <List.Item>{variant}</List.Item>
@@ -110,8 +112,10 @@ export default function StatisticDetail() {
       </div>
 
       <div>
-        <Heading data-size="xs">Endringer</Heading>
-        <Paragraph><Link href="#">Se versjonshistorikken til statistikken</Link></Paragraph>
+        <Heading data-size='xs'>Endringer</Heading>
+        <Paragraph>
+          <Link href='#'>Se versjonshistorikken til statistikken</Link>
+        </Paragraph>
       </div>
     </>
   )
@@ -119,7 +123,7 @@ export default function StatisticDetail() {
 
 function parseStatisticStatus(code?: string): StatisticStatusCode | null {
   if (!code) return null
-  return StatisticStatusCodes.find(c => c === code) ?? null
+  return StatisticStatusCodes.find((c) => c === code) ?? null
 }
 
 function formatMainLanguage(language?: string): string {
@@ -142,9 +146,7 @@ function formatStartYear(dateString: string | null | undefined): string {
 
 function formatCancelledVariants(variants: StatisticDetails['variants']): string[] {
   if (!variants) return []
-  return variants
-    .filter((variant) => variant.cancelled)
-    .map(formatVariant)
+  return variants.filter((variant) => variant.cancelled).map(formatVariant)
 }
 
 function formatVariant(variant: Variant): string {
