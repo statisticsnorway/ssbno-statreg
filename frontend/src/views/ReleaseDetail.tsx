@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useParams } from 'react-router'
 import { Heading, Link, Paragraph, Details, Card, Button } from '@digdir/designsystemet-react'
 import { PencilWritingIcon } from '@navikt/aksel-icons'
 import { ApprovalStatusTag, ApprovalStatus } from './ApprovalStatusTag'
@@ -7,10 +8,11 @@ import { type ReleaseDetails } from '@ssbno-statreg/shared'
 
 function ReleaseDetail() {
   const [release, setReleases] = useState<ReleaseDetails>({})
+  const { id } = useParams()
 
   useEffect(() => {
     async function fetchRelease() {
-      const { data, error } = await client.GET('/releases/{id}', { params: { path: { id: '4' } } })
+      const { data, error } = await client.GET('/releases/{id}', { params: { path: { id: id as string } } })
       if (error) {
         console.log(error)
         alert(error)
