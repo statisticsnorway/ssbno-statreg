@@ -11,6 +11,8 @@ import { prisma } from './lib/prisma'
 import { initializeDepartments } from './services/klassService'
 import * as dotenv from 'dotenv'
 
+const BASE_ROUTE = '/statistikkregisteret'
+
 dotenv.config()
 const auth = requireAuthorization()
 const app = express()
@@ -28,7 +30,8 @@ app.get('/auth/me', auth, (req, res) => {
   })
 })
 
-app.use(controllerRouter(auth))
+// Ensure entire application is served on /statistikkregisteret
+app.use(BASE_ROUTE, controllerRouter(auth))
 
 await prisma.$connect()
 initializeDepartments()

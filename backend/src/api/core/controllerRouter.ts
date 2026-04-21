@@ -52,12 +52,13 @@ export default function controllerRouter(
     return requireAuth(req, res, next)
   })
 
-  outer.use(inner)
+  // Ensure ALL controllers are placed under path /api
+  outer.use('/api', inner)
 
   // Display react app when application is bundled and ran
-  outer.use(staticExpress(path.resolve(__dirname)))
-  outer.get('/{*splat}', (req, res) => {
-    res.sendFile(path.resolve(__dirname, 'index.html'))
+  outer.use(staticExpress(path.resolve(__dirname, 'statistikkregisteret')))
+  outer.get('/*splat', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'statistikkregisteret', 'index.html'))
   })
 
   outer.use((req, res) => {
