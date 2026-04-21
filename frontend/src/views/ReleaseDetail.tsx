@@ -30,7 +30,7 @@ function ReleaseDetail() {
   return (
     <>
       <div>
-        <Heading data-size="md">Publiseringsdato</Heading>
+        <Heading data-size="md" level={1}>Publiseringsdato</Heading>
         <Heading data-size="xs">{publishTime}</Heading>
         {approvalStatus && <ApprovalStatusTag status={approvalStatus} />}
       </div>

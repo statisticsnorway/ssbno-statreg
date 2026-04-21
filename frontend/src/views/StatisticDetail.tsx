@@ -34,7 +34,7 @@ export default function StatisticDetail() {
   return (
     <>
       <div>
-      <Heading>{statistic.name}</Heading>
+      <Heading level={1}>{statistic.name}</Heading>
       <Paragraph variant="short" >{statistic.shortname}</Paragraph>
       {statusCode && <StatisticStatusTag status={statusCode} />}
       </div>
