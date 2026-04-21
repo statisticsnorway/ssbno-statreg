@@ -1,5 +1,5 @@
 import { afterAll, describe, expect, test } from 'vitest'
-import type { components } from '../../../shared/src/api-types.d.ts'
+import { StatisticDetails, StatisticListing } from '@ssbno-statreg/shared'
 import { prisma } from '@/lib/prisma'
 import {
   cleanupCreatedStatisticAndShortname,
@@ -9,8 +9,7 @@ import {
   readStatisticFromDb,
 } from './integrationUtils'
 
-type StatisticDetailsResponse = components['schemas']['Statistic_details']
-type StatisticListingResponse = components['schemas']['Statistic_listing'][]
+type StatisticListingResponse = StatisticListing[]
 
 let createdShortnameName: string | null = null
 let createdStatisticId: number | null = null
@@ -47,7 +46,7 @@ describe('statisticsController integration', () => {
 
     expect(response.status).toBe(200)
 
-    const statistic = body as StatisticDetailsResponse
+    const statistic = body as StatisticDetails
 
     expect(statistic.shortname).toBe(seededStatistic.shortname.name)
     expect(statistic.name).toBe(seededStatistic.name)
@@ -88,7 +87,7 @@ describe('statisticsController integration', () => {
 
     expect(response.status).toBe(200)
 
-    const statistic = body as StatisticDetailsResponse
+    const statistic = body as StatisticDetails
 
     expect(statistic.shortname).toBe(createdShortnameName)
     expect(statistic.name).toBe(createPayload.name)
@@ -141,7 +140,7 @@ describe('statisticsController integration', () => {
 
     expect(response.status).toBe(200)
 
-    const statistic = body as StatisticDetailsResponse
+    const statistic = body as StatisticDetails
 
     expect(statistic.shortname).toBe(seededStatistic.shortname.name)
     expect(statistic.name).toBe(updatePayload.name)
