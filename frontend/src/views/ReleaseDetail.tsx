@@ -28,33 +28,39 @@ function ReleaseDetail() {
   const variant = formatVariant(release.variant)
 
   return (
-    <div>
-      <Heading data-size="md">Publiseringsdato</Heading>
-      <Heading data-size="xs">{publishTime}</Heading>
-
-      {approvalStatus && <ApprovalStatusTag status={approvalStatus} />}
-
-      <Heading data-size="xs">Statistikk</Heading>
-      <Link href="#">{statisticName}</Link>
-      {/* TODO link should point to the statistic page, routing must be implemented first */}
-
-      <Heading data-size="xs">Variant</Heading>
-      <Paragraph>{variant}</Paragraph>
-
-      <Heading data-size="xs">Måleperiode</Heading>
-      <Paragraph>{period}</Paragraph>
-
-      <Card>
-        <Details>
-          <Details.Summary>Versjonshistorikk</Details.Summary>
-          <Details.Content>Kommmer snart.</Details.Content>
-        </Details>
-      </Card>
-
-      <Button onClick={() => alert('Redigering er ikke implementert ennå.')} data-size='sm' variant='tertiary'>
-        <PencilWritingIcon aria-hidden /> Rediger
-      </Button>
-    </div>
+    <>
+      <div>
+        <Heading data-size="md">Publiseringsdato</Heading>
+        <Heading data-size="xs">{publishTime}</Heading>
+        {approvalStatus && <ApprovalStatusTag status={approvalStatus} />}
+      </div>
+      <div>
+        <Heading data-size="xs">Statistikk</Heading>
+        <Link href="#">{statisticName}</Link>
+        {/* TODO link should point to the statistic page, routing must be implemented first */}
+      </div>
+      <div>
+        <Heading data-size="xs">Variant</Heading>
+        <Paragraph>{variant}</Paragraph>
+      </div>
+      <div>
+        <Heading data-size="xs">Måleperiode</Heading>
+        <Paragraph>{period}</Paragraph>
+      </div>
+      <div>
+        <Card>
+          <Details>
+            <Details.Summary>Versjonshistorikk</Details.Summary>
+            <Details.Content>Kommmer snart.</Details.Content>
+          </Details>
+        </Card>
+      </div>
+      <div>
+        <Button onClick={() => alert('Redigering er ikke implementert ennå.')} data-size='sm' variant='tertiary'>
+          <PencilWritingIcon aria-hidden /> Rediger
+        </Button>
+      </div>
+    </>
   )
 }
 
