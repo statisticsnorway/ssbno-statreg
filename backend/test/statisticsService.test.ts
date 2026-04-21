@@ -1,5 +1,5 @@
 import { vi, describe, test, expect, beforeEach } from 'vitest'
-import { ApprovalStatus, StatisticStatus, StatisticCreate, StatisticUpdate } from '@ssbno-statreg/shared'
+import { ApprovalStatus, StatisticStatus, type StatisticCreate, type StatisticUpdate } from '@ssbno-statreg/shared'
 import { Users } from '@/types/entra'
 import {
   getAllStatistics,

@@ -1,8 +1,8 @@
-import type {
-  StatisticListing,
-  StatisticDetails,
-  StatisticUpdate,
-  StatisticCreate,
+import {
+  type StatisticListing,
+  type StatisticDetails,
+  type StatisticUpdate,
+  type StatisticCreate,
   ApprovalStatus,
   StatisticStatus,
 } from '@ssbno-statreg/shared'

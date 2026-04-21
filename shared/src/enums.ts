@@ -1,15 +1,14 @@
-/* eslint-disable no-unused-vars */
-export enum ApprovalStatus {
-  ACCEPTED = 'GODKJENT',
-  PENDING = 'FORSLAG',
-  DECLINED = 'AVVIST',
-}
+export const ApprovalStatus = {
+  ACCEPTED: 'GODKJENT',
+  PENDING: 'FORSLAG',
+  DECLINED: 'AVVIST',
+} as const
 
-export enum StatisticStatus {
-  K = 'Kommende',
-  A = 'Aktiv',
-  IA = 'Ikke-aktiv',
-  UT = 'Opphørt',
-  SA = 'Sammenslått',
-  SP = 'Splittet',
-}
+export const StatisticStatus = {
+  K: 'Kommende',
+  A: 'Aktiv',
+  IA: 'Ikke-aktiv',
+  UT: 'Opphørt',
+  SA: 'Sammenslått',
+  SP: 'Splittet',
+} as const
