@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useParams } from 'react-router'
 import { Heading, Paragraph, List, Link, Button, Divider, Details, Card } from '@digdir/designsystemet-react'
 import { PersonPencilIcon } from '@navikt/aksel-icons'
 import { StatisticStatusTag, StatisticStatusCodes, type StatisticStatusCode } from './StatisticStatusTag'
@@ -7,10 +8,11 @@ import type { StatisticDetails, Variant } from '@ssbno-statreg/shared'
 
 export default function StatisticDetail() {
   const [statistic, setStatistics] = useState<StatisticDetails>({})
+  const { shortname } = useParams()
 
   useEffect(() => {
     async function fetchStatistic() {
-      const { data, error } = await client.GET('/statistics/{shortname}', { params: { path: { shortname: 'energ' } } })
+      const { data, error } = await client.GET('/statistics/{shortname}', { params: { path: { shortname: shortname as string } } })
       if (error) {
         console.log(error)
         alert(error)
