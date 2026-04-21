@@ -12,8 +12,9 @@ function ReleaseDetail() {
     async function fetchRelease() {
       const { data, error } = await client.GET('/releases/{id}', { params: { path: { id: '4' } } })
       if (error) {
-        console.log(error)
-        alert(error)
+        const errorMessage = (error as any).error
+        console.log(errorMessage)
+        alert(errorMessage)
       } else {
         setReleases(data)
       }

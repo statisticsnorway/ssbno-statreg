@@ -7,10 +7,11 @@ function StatisticDetail() {
 
   useEffect(() => {
     async function fetchStatistic() {
-      const { data, error } = await client.GET('/statistics/{shortname}', { params: { path: { shortname: 'energ' } } })
+      const { data, error } = await client.GET('/statistics/{shortname}', { params: { path: { shortname: 'kpi' } } })
       if (error) {
-        console.log(error)
-        alert(error)
+        const errorMessage = (error as any).error
+        console.log(errorMessage)
+        alert(errorMessage)
       } else {
         setStatistics(data)
       }
