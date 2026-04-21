@@ -39,5 +39,9 @@
     flex-direction: column;
     row-gap: var(--ds-size-12);
     align-items: start;
+
+    div > *:not(:last-child) {
+      margin-bottom: var(--ds-size-3);
+    }
   }
 }

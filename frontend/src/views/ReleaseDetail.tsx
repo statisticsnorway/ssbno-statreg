@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Heading, Link, Paragraph, Details, Card, Button } from '@digdir/designsystemet-react'
 import { PencilWritingIcon } from '@navikt/aksel-icons'
-import {ApprovalStatusTag, ApprovalStatus } from './ApprovalStatusTag'
+import { ApprovalStatusTag, ApprovalStatus } from './ApprovalStatusTag'
 import client from '../api'
 import { type ReleaseDetails } from '@ssbno-statreg/shared'
 
@@ -30,21 +30,23 @@ function ReleaseDetail() {
   return (
     <>
       <div>
-        <Heading data-size="md">Publiseringsdato</Heading>
-        <Heading data-size="xs">{publishTime}</Heading>
+        <Heading data-size='md' level={1}>
+          Publiseringsdato
+        </Heading>
+        <Heading data-size='xs'>{publishTime}</Heading>
         {approvalStatus && <ApprovalStatusTag status={approvalStatus} />}
       </div>
       <div>
-        <Heading data-size="xs">Statistikk</Heading>
-        <Link href="#">{statisticName}</Link>
+        <Heading data-size='xs'>Statistikk</Heading>
+        <Link href='#'>{statisticName}</Link>
         {/* TODO link should point to the statistic page, routing must be implemented first */}
       </div>
       <div>
-        <Heading data-size="xs">Variant</Heading>
+        <Heading data-size='xs'>Variant</Heading>
         <Paragraph>{variant}</Paragraph>
       </div>
       <div>
-        <Heading data-size="xs">Måleperiode</Heading>
+        <Heading data-size='xs'>Måleperiode</Heading>
         <Paragraph>{period}</Paragraph>
       </div>
       <div>
@@ -77,13 +79,15 @@ function formatStatisticName(statistic: ReleaseDetails['statistic']): string {
 
 function formatPublishTime(publishTime: string | undefined): string {
   if (!publishTime) return '-'
-  return new Date(publishTime).toLocaleString('nb-NO', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).replace(',', ' kl')
+  return new Date(publishTime)
+    .toLocaleString('nb-NO', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+    .replace(',', ' kl')
 }
 
 function formatPeriod(from?: string, to?: string): string {
@@ -91,7 +95,7 @@ function formatPeriod(from?: string, to?: string): string {
 }
 
 function formatDate(isoString?: string): string {
-  if(!isoString) return ''
+  if (!isoString) return ''
   return new Date(isoString).toLocaleDateString('nb-NO', {
     day: '2-digit',
     month: '2-digit',
@@ -99,8 +103,7 @@ function formatDate(isoString?: string): string {
   })
 }
 
-
-function formatVariant(variant?: ReleaseDetails["variant"]): string {
+function formatVariant(variant?: ReleaseDetails['variant']): string {
   const frequency = variant?.frequency?.name ?? '-'
   const revision = formatRevisionName(variant?.revision?.name)
   return `${frequency}, ${revision}`
@@ -119,7 +122,5 @@ const revisionNames: Record<string, string> = {
   R: 'Reviderte',
   IG: 'Integrert',
 }
-
-
 
 export default ReleaseDetail
