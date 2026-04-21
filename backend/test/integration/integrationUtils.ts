@@ -15,17 +15,6 @@ export async function fetchJson(path: string, init?: Parameters<typeof fetch>[1]
   return { response, body }
 }
 
-export async function getSeededStatisticWithShortname(): Promise<StatisticWithShortname> {
-  return prisma.statistic.findFirstOrThrow({
-    include: {
-      shortname: true,
-    },
-    orderBy: {
-      id: 'asc',
-    },
-  })
-}
-
 export async function createTestShortname(prefix = 'it-stat'): Promise<string> {
   const now = new Date()
   const shortname = `${prefix}-${now.getTime()}`
@@ -55,23 +44,24 @@ export async function readStatisticFromDb(shortname: string): Promise<StatisticW
   })
 }
 
-export async function cleanupCreatedStatisticAndShortname(
-  statisticId: number | null,
-  shortname: string | null
+export async function cleanupCreatedStatistics(
+  createdStatistics: Array<{ statisticId: number | null; shortname: string | null }>
 ): Promise<void> {
-  if (statisticId !== null) {
-    await prisma.statistic.delete({
-      where: {
-        id: statisticId,
-      },
-    })
-  }
+  for (const created of createdStatistics) {
+    if (created.statisticId !== null) {
+      await prisma.statistic.delete({
+        where: {
+          id: created.statisticId,
+        },
+      })
+    }
 
-  if (shortname !== null) {
-    await prisma.shortname.delete({
-      where: {
-        name: shortname,
-      },
-    })
+    if (created.shortname !== null) {
+      await prisma.shortname.delete({
+        where: {
+          name: created.shortname,
+        },
+      })
+    }
   }
 }

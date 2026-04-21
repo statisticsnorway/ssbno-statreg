@@ -2,20 +2,61 @@ import { afterAll, describe, expect, test } from 'vitest'
 import { StatisticDetails, StatisticListing } from '@ssbno-statreg/shared'
 import { prisma } from '@/lib/prisma'
 import {
-  cleanupCreatedStatisticAndShortname,
+  cleanupCreatedStatistics,
   createTestShortname,
   fetchJson,
-  getSeededStatisticWithShortname,
   readStatisticFromDb,
+  type StatisticWithShortname,
 } from './integrationUtils'
 
 type StatisticListingResponse = StatisticListing[]
 
-let createdShortnameName: string | null = null
-let createdStatisticId: number | null = null
+const SEEDED_STATISTIC = {
+  shortname: 'helse',
+  name: 'Helse og helsetjenester',
+  name_en: 'Health and health services',
+  main_language: 'nb',
+  comment: 'statistikk over befolkningens helse og tjenestebruk',
+  division_code: '104',
+  yearly_reporting: true,
+  status: 'IA',
+  first_released_at: '1970-01-01T00:00:00.000Z',
+}
+
+const createdStatistics: Array<{ statisticId: number | null; shortname: string | null }> = []
+
+function toStatisticResponseShape(statistic: StatisticDetails) {
+  return {
+    shortname: statistic.shortname,
+    name: statistic.name,
+    name_en: statistic.name_en,
+    main_language: statistic.main_language,
+    comment: statistic.comment,
+    division_code: statistic.division?.code,
+    yearly_reporting: statistic.yearly_reporting,
+    status_code: statistic.status?.code,
+    first_released_at: statistic.first_released_at,
+  }
+}
+
+function toStatisticDbShape(statistic: StatisticWithShortname) {
+  return {
+    shortname: statistic.shortname.name,
+    name: statistic.name,
+    name_en: statistic.name_en,
+    language: statistic.language,
+    comment: statistic.comment,
+    division_code: statistic.division_code,
+    yearly_reporting: statistic.yearly_reporting,
+    status: statistic.status,
+    legacy_topic_codes: statistic.legacy_topic_codes,
+    related_statistic_id: statistic.related_statistic_id,
+    first_release: statistic.first_release?.toISOString(),
+  }
+}
 
 afterAll(async () => {
-  await cleanupCreatedStatisticAndShortname(createdStatisticId, createdShortnameName)
+  await cleanupCreatedStatistics(createdStatistics)
   await prisma.$disconnect()
 })
 
@@ -32,41 +73,46 @@ describe('statisticsController integration', () => {
 
     const first = statistics[0]!
 
-    expect(typeof first.shortname).toBe('string')
-    expect(typeof first.name).toBe('string')
-    expect(typeof first.main_language).toBe('string')
-    expect(typeof first.status?.code).toBe('string')
+    expect(first).toMatchObject({
+      shortname: expect.any(String),
+      name: expect.any(String),
+      main_language: expect.any(String),
+      status: {
+        code: expect.any(String),
+      },
+    })
     expect(Array.isArray(first.contacts)).toBe(true)
   })
 
   test('GET /statistics/:shortname returns statistic details', async () => {
-    const seededStatistic = await getSeededStatisticWithShortname()
-
-    const { response, body } = await fetchJson(`/statistics/${seededStatistic.shortname.name}`)
+    const { response, body } = await fetchJson(`/statistics/${SEEDED_STATISTIC.shortname}`)
 
     expect(response.status).toBe(200)
 
     const statistic = body as StatisticDetails
 
-    expect(statistic.shortname).toBe(seededStatistic.shortname.name)
-    expect(statistic.name).toBe(seededStatistic.name)
-    expect(statistic.name_en).toBe(seededStatistic.name_en ?? '')
-    expect(statistic.main_language).toBe(seededStatistic.language)
-    expect(statistic.comment).toBe(seededStatistic.comment)
-    expect(statistic.division?.code).toBe(seededStatistic.division_code ?? undefined)
-    expect(statistic.yearly_reporting).toBe(seededStatistic.yearly_reporting)
-    expect(statistic.status?.code).toBe(seededStatistic.status)
+    expect(toStatisticResponseShape(statistic)).toStrictEqual({
+      shortname: SEEDED_STATISTIC.shortname,
+      name: SEEDED_STATISTIC.name,
+      name_en: SEEDED_STATISTIC.name_en,
+      main_language: SEEDED_STATISTIC.main_language,
+      comment: SEEDED_STATISTIC.comment,
+      division_code: SEEDED_STATISTIC.division_code,
+      yearly_reporting: SEEDED_STATISTIC.yearly_reporting,
+      status_code: SEEDED_STATISTIC.status,
+      first_released_at: SEEDED_STATISTIC.first_released_at,
+    })
+
     expect(Array.isArray(statistic.contacts)).toBe(true)
     expect(Array.isArray(statistic.variants)).toBe(true)
 
     if (statistic.contacts && statistic.contacts.length > 0) {
-      const firstContact = statistic.contacts[0]!
-      expect(firstContact).toBeDefined()
+      expect(statistic.contacts[0]).toBeDefined()
     }
   })
 
   test('POST /statistics/:shortname creates a new statistic in the database', async () => {
-    createdShortnameName = await createTestShortname()
+    const createdShortnameName = await createTestShortname()
 
     const createPayload = {
       division: '101',
@@ -89,48 +135,82 @@ describe('statisticsController integration', () => {
 
     const statistic = body as StatisticDetails
 
-    expect(statistic.shortname).toBe(createdShortnameName)
-    expect(statistic.name).toBe(createPayload.name)
-    expect(statistic.name_en).toBe(createPayload.name_en)
-    expect(statistic.main_language).toBe(createPayload.main_language)
-    expect(statistic.comment).toBe(createPayload.comment)
-    expect(statistic.division?.code).toBe(createPayload.division)
-    expect(statistic.yearly_reporting).toBe(false)
-    expect(statistic.status?.code).toBe('K')
+    expect(toStatisticResponseShape(statistic)).toStrictEqual({
+      shortname: createdShortnameName,
+      name: createPayload.name,
+      name_en: createPayload.name_en,
+      main_language: createPayload.main_language,
+      comment: createPayload.comment,
+      division_code: createPayload.division,
+      yearly_reporting: false,
+      status_code: 'K',
+      first_released_at: '2024-01-01T00:00:00.000Z',
+    })
 
     const createdStatistic = await readStatisticFromDb(createdShortnameName)
-    createdStatisticId = createdStatistic.id
+    createdStatistics.push({
+      statisticId: createdStatistic.id,
+      shortname: createdShortnameName,
+    })
 
-    expect(createdStatistic.shortname.name).toBe(createdShortnameName)
-    expect(createdStatistic.name).toBe(createPayload.name)
-    expect(createdStatistic.name_en).toBe(createPayload.name_en)
-    expect(createdStatistic.language).toBe(createPayload.main_language)
-    expect(createdStatistic.comment).toBe(createPayload.comment)
-    expect(createdStatistic.division_code).toBe(createPayload.division)
-    expect(createdStatistic.yearly_reporting).toBe(false)
-    expect(createdStatistic.status).toBe('K')
-    expect(createdStatistic.first_release).toBeTruthy()
-    expect(createdStatistic.first_release?.toISOString()).toBe('2024-01-01T00:00:00.000Z')
+    expect(toStatisticDbShape(createdStatistic)).toStrictEqual({
+      shortname: createdShortnameName,
+      name: createPayload.name,
+      name_en: createPayload.name_en,
+      language: createPayload.main_language,
+      comment: createPayload.comment,
+      division_code: createPayload.division,
+      yearly_reporting: false,
+      status: 'K',
+      legacy_topic_codes: null,
+      related_statistic_id: null,
+      first_release: '2024-01-01T00:00:00.000Z',
+    })
   })
 
   test('PUT /statistics/:shortname updates an existing statistic in the database', async () => {
-    const seededStatistic = await getSeededStatisticWithShortname()
+    const createdShortnameName = await createTestShortname()
+
+    const createPayload = {
+      division: '101',
+      name: 'Integration Test Statistic To Update',
+      name_en: 'Integration Test Statistic To Update EN',
+      first_released_at: '2024-01-01',
+      main_language: 'nb',
+      comment: 'Created for update integration test',
+    }
+
+    const createResponse = await fetchJson(`/statistics/${createdShortnameName}`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify(createPayload),
+    })
+
+    expect(createResponse.response.status).toBe(200)
+
+    const createdStatistic = await readStatisticFromDb(createdShortnameName)
+    createdStatistics.push({
+      statisticId: createdStatistic.id,
+      shortname: createdShortnameName,
+    })
 
     const updatePayload = {
-      division: seededStatistic.division_code ?? '101',
+      division: '101',
       statistic_region_levels: [],
-      status: { code: seededStatistic.status === 'A' ? 'IA' : 'A' },
-      name: `${seededStatistic.name} Updated`,
-      name_en: `${seededStatistic.name_en ?? seededStatistic.name} Updated`,
+      status: { code: 'IA' },
+      name: 'Integration Test Statistic Updated',
+      name_en: 'Integration Test Statistic Updated EN',
       relation: null,
-      previous_topic_codes: seededStatistic.legacy_topic_codes ?? '99.99.99',
-      yearly_reporting: !seededStatistic.yearly_reporting,
+      previous_topic_codes: '02.01.01',
+      yearly_reporting: false,
       first_released_at: '2024-02-01',
-      main_language: seededStatistic.language === 'nn' ? 'nb' : 'nn',
+      main_language: 'nn',
       comment: 'Updated by integration test',
     }
 
-    const { response, body } = await fetchJson(`/statistics/${seededStatistic.shortname.name}`, {
+    const { response, body } = await fetchJson(`/statistics/${createdShortnameName}`, {
       method: 'PUT',
       headers: {
         'content-type': 'application/json',
@@ -142,29 +222,32 @@ describe('statisticsController integration', () => {
 
     const statistic = body as StatisticDetails
 
-    expect(statistic.shortname).toBe(seededStatistic.shortname.name)
-    expect(statistic.name).toBe(updatePayload.name)
-    expect(statistic.name_en).toBe(updatePayload.name_en)
-    expect(statistic.main_language).toBe(updatePayload.main_language)
-    expect(statistic.comment).toBe(updatePayload.comment)
-    expect(statistic.division?.code).toBe(updatePayload.division)
-    expect(statistic.yearly_reporting).toBe(updatePayload.yearly_reporting)
-    expect(statistic.status?.code).toBe(updatePayload.status.code)
-    expect(statistic.first_released_at).toBe('2024-02-01T00:00:00.000Z')
+    expect(toStatisticResponseShape(statistic)).toStrictEqual({
+      shortname: createdShortnameName,
+      name: updatePayload.name,
+      name_en: updatePayload.name_en,
+      main_language: updatePayload.main_language,
+      comment: updatePayload.comment,
+      division_code: updatePayload.division,
+      yearly_reporting: updatePayload.yearly_reporting,
+      status_code: updatePayload.status.code,
+      first_released_at: '2024-02-01T00:00:00.000Z',
+    })
 
-    const updatedStatistic = await readStatisticFromDb(seededStatistic.shortname.name)
+    const updatedStatistic = await readStatisticFromDb(createdShortnameName)
 
-    expect(updatedStatistic.shortname.name).toBe(seededStatistic.shortname.name)
-    expect(updatedStatistic.name).toBe(updatePayload.name)
-    expect(updatedStatistic.name_en).toBe(updatePayload.name_en)
-    expect(updatedStatistic.language).toBe(updatePayload.main_language)
-    expect(updatedStatistic.comment).toBe(updatePayload.comment)
-    expect(updatedStatistic.division_code).toBe(updatePayload.division)
-    expect(updatedStatistic.yearly_reporting).toBe(updatePayload.yearly_reporting)
-    expect(updatedStatistic.status).toBe(updatePayload.status.code)
-    expect(updatedStatistic.legacy_topic_codes).toBe(updatePayload.previous_topic_codes)
-    expect(updatedStatistic.related_statistic_id).toBeNull()
-    expect(updatedStatistic.first_release).toBeTruthy()
-    expect(updatedStatistic.first_release?.toISOString()).toBe('2024-02-01T00:00:00.000Z')
+    expect(toStatisticDbShape(updatedStatistic)).toStrictEqual({
+      shortname: createdShortnameName,
+      name: updatePayload.name,
+      name_en: updatePayload.name_en,
+      language: updatePayload.main_language,
+      comment: updatePayload.comment,
+      division_code: updatePayload.division,
+      yearly_reporting: updatePayload.yearly_reporting,
+      status: updatePayload.status.code,
+      legacy_topic_codes: updatePayload.previous_topic_codes,
+      related_statistic_id: null,
+      first_release: '2024-02-01T00:00:00.000Z',
+    })
   })
 })
