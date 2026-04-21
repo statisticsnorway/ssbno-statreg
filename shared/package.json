@@ -9,8 +9,5 @@
   "files": [
     "src",
     "openapi.yaml"
-  ],
-  "devDependencies": {
-    "typescript": "^5.0.0"
-  }
+  ]
 }
