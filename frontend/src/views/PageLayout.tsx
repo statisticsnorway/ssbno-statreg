@@ -10,8 +10,7 @@ const Header = () => (
     <div className='header-content' data-color='brand1'>
       <img src={ssbLogo} className='logo' alt='SSB logo' />
       <div className='header-links'>
-        {/* TODO: Placeholder links */}
-        <Link href='/release/11159'>Publisering</Link>
+        <Link href='/'>Publisering</Link>
         <Link href='/statistic/kpi'>Statistikk</Link>
       </div>
     </div>

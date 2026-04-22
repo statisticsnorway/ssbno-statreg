@@ -3,16 +3,15 @@ import { Routes, Route } from 'react-router'
 import ReleaseDetail from './views/ReleaseDetail'
 import StatisticDetail from './views/StatisticDetail'
 import PageLayout from './views/PageLayout'
-import Startpage from './views/Starpage'
+import ReleaseListing from './views/ReleaseListing'
 
 function App() {
   return (
     <Routes>
       <Route path='' element={<PageLayout />}>
-        <Route index element={<Startpage />} />
+        <Route index element={<ReleaseListing />} />
 
-        {/* TODO: Replace with ReleaseListing */}
-        <Route path='release' element={<ReleaseDetail />}>
+        <Route path='release' element={<ReleaseListing />}> {/* TODO: Double check /release page, and consider changing path to norwegian */}
           <Route path=':id' element={<ReleaseDetail />} />
         </Route>
 
