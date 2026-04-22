@@ -1,9 +1,15 @@
 import { Routes, Route } from 'react-router'
 
-import ReleaseDetail from './views/ReleaseDetail'
-import StatisticDetail from './views/StatisticDetail'
-import PageLayout from './views/PageLayout'
+import PageLayout from './layouts/PageLayout'
+import ShowRelease from './views/ShowRelease'
+import ShowStatistic from './views/ShowStatistic'
 import Startpage from './views/Starpage'
+import ListStatistics from './views/ListStatistics'
+import ListReleases from './views/ListReleases'
+import CreateRelease from './views/CreateRelease'
+import CreateStatistic from './views/CreateStatistic'
+import ListBlockedDates from './views/ListBlockedDates'
+import CreateBlockedDate from './views/CreateBlockedDate'
 
 function App() {
   return (
@@ -11,14 +17,17 @@ function App() {
       <Route path='' element={<PageLayout />}>
         <Route index element={<Startpage />} />
 
-        {/* TODO: Replace with ReleaseListing */}
-        <Route path='release' element={<ReleaseDetail />}>
-          <Route path=':id' element={<ReleaseDetail />} />
+        <Route path='release' element={<ListReleases />}>
+          <Route path=':id' element={<ShowRelease />} />
+          <Route path='create' element={<CreateRelease />} />
         </Route>
 
-        {/* TODO: Replace with StatisticListing */}
-        <Route path='statistic' element={<StatisticDetail />}>
-          <Route path=':shortname' element={<StatisticDetail />}/>
+        <Route path='statistic' element={<ListStatistics />}>
+          <Route path=':shortname' element={<ShowStatistic />} />
+          <Route path='create' element={<CreateStatistic />} />
+        </Route>
+        <Route path='blocked-dates' element={<ListBlockedDates />} >
+          <Route path='create' element={<CreateBlockedDate />} />
         </Route>
       </Route>
     </Routes>
