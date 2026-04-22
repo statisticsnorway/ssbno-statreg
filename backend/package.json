@@ -22,35 +22,6 @@
     "test:integration": "vitest run test/integration",
     "generate:api-types": "openapi-typescript ./openapi/openapi.yaml | prettier --parser typescript > src/types/api-types.d.ts"
   },
-  "overrides": {
-    "hono": "^4.12.9",
-    "valibot": "^1.2.0",
-    "body-parser": "^2.2.1",
-    "fastify": "^5.7.4",
-    "qs": "^6.14.1",
-    "lodash": "^4.17.23",
-    "vite": {
-      "rollup": "npm:@rollup/wasm-node"
-    }
-  },
-  "devDependencies": {
-    "@eslint/js": "^9.39.2",
-    "@types/express": "^5.0.6",
-    "@types/node": "^24.12.0",
-    "@types/swagger-ui-express": "^4.1.8",
-    "@vitejs/plugin-react": "^6.0.1",
-    "dotenv": "^16.6.1",
-    "eslint": "^9.39.2",
-    "eslint-plugin-prettier": "^5.5.5",
-    "node-mocks-http": "^1.17.2",
-    "nodemon": "^3.1.14",
-    "openapi-typescript": "^7.12.0",
-    "pkgroll": "^2.27.0",
-    "prisma": "^7.5.0",
-    "rollup": "^4.52.5",
-    "typescript-eslint": "^8.57.2",
-    "vitest": "^4.1.4"
-  },
   "dependencies": {
     "@prisma/adapter-pg": "^7.5.0",
     "@prisma/client": "^7.5.0",
@@ -64,7 +35,18 @@
     "lightship": "^9.0.3",
     "swagger-ui-express": "^5.0.1",
     "tsx": "^4.20.6",
-    "typescript": "^5.9.3",
     "yaml": "^2.8.3"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/swagger-ui-express": "^4.1.8",
+    "dotenv": "^16.6.1",
+    "eslint-plugin-prettier": "^5.5.5",
+    "node-mocks-http": "^1.17.2",
+    "nodemon": "^3.1.14",
+    "openapi-typescript": "^7.12.0",
+    "pkgroll": "^2.27.0",
+    "prisma": "^7.5.0",
+    "rollup": "^4.52.5"
   }
 }

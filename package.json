@@ -21,8 +21,25 @@
     "generate": "npm run generate -w backend",
     "generate:api-types": "openapi-typescript ./shared/openapi/openapi.yaml | prettier --parser typescript > ./shared/src/api-types.d.ts"
   },
+  "overrides": {
+    "hono": "^4.12.9",
+    "valibot": "^1.2.0",
+    "body-parser": "^2.2.1",
+    "fastify": "^5.7.4",
+    "qs": "^6.14.1",
+    "lodash": "^4.17.23",
+    "vite": {
+      "rollup": "npm:@rollup/wasm-node"
+    }
+  },
   "devDependencies": {
+    "@eslint/js": "^9.39.4",
+    "@types/node": "^24.12.2",
+    "@vitejs/plugin-react": "^6.0.1",
     "concurrently": "^8.2.0",
-    "typescript": "^5.4.0"
+    "eslint": "^9.39.4",
+    "typescript": "^5.4.0",
+    "typescript-eslint": "^8.58.0",
+    "vitest": "^4.1.4"
   }
 }
