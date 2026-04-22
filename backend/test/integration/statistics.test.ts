@@ -23,11 +23,6 @@ const SEEDED_STATISTIC = {
   first_released_at: '1970-01-01T00:00:00.000Z',
 }
 
-const SEEDED_STATISTIC_RESPONSE = (({ status, ...rest }) => ({
-  ...rest,
-  status_code: status,
-}))(SEEDED_STATISTIC)
-
 const createdStatistics: Array<{ statisticId: number | null; shortname: string | null }> = []
 
 function toStatisticResponseShape(statistic: StatisticDetails) {
@@ -96,7 +91,7 @@ describe('statisticsController integration', () => {
 
     const statistic = body as StatisticDetails
 
-    expect(toStatisticResponseShape(statistic)).toStrictEqual(SEEDED_STATISTIC_RESPONSE)
+    expect(toStatisticResponseShape(statistic)).toStrictEqual({ ...SEEDED_STATISTIC, status: 200 })
 
     expect(Array.isArray(statistic.contacts)).toBe(true)
     expect(Array.isArray(statistic.variants)).toBe(true)
