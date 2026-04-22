@@ -91,7 +91,7 @@ describe('statisticsController integration', () => {
 
     const statistic = body as StatisticDetails
 
-    expect(toStatisticResponseShape(statistic)).toStrictEqual({ ...SEEDED_STATISTIC, status: 200 })
+    expect(toStatisticResponseShape(statistic)).toStrictEqual({ ...SEEDED_STATISTIC, status_code: 'IA' })
 
     expect(Array.isArray(statistic.contacts)).toBe(true)
     expect(Array.isArray(statistic.variants)).toBe(true)
