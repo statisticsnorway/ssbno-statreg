@@ -11,7 +11,7 @@ function App() {
       <Route path='' element={<PageLayout />}>
         <Route index element={<ReleaseListing />} />
 
-        <Route path='release' element={<ReleaseListing />}> {/* TODO: Double check /release page, and consider changing path to norwegian */}
+        <Route path='release'> {/* TODO: Double check /release page, and consider changing path to norwegian */}
           <Route path=':id' element={<ReleaseDetail />} />
         </Route>
 
