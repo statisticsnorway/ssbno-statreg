@@ -5,7 +5,7 @@ import { PencilWritingIcon } from '@navikt/aksel-icons'
 import { ApprovalStatusTag } from '../components/ApprovalStatus'
 import client from '../api'
 import { type ReleaseDetails } from '@ssbno-statreg/shared'
-import { parseApprovalStatus, formatPublishTime, formatDate } from '../lib/utils'
+import { formatPublishTime, formatDate } from '../lib/utils'
 
 function ShowRelease() {
   const [release, setReleases] = useState<ReleaseDetails>({})
@@ -24,7 +24,7 @@ function ShowRelease() {
     fetchRelease()
   }, [])
 
-  const approvalStatus = parseApprovalStatus(release.approval_status)
+  const approvalStatus = release.approval_status
   const statisticName = formatStatisticName(release.statistic)
   const period = formatPeriod(release.period_from, release.period_to)
   const publishTime = formatPublishTime(release.publish_time)

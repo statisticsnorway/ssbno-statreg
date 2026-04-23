@@ -28,8 +28,15 @@ const statusConfig = {
   },
 }
 
-export function ApprovalStatusTag({ status }: { status: ApprovalStatus }) {
-  const config = statusConfig[status]
+function parseApprovalStatus(status?: string | null): ApprovalStatus | null {
+  const validStatuses = Object.values(ApprovalStatus) as string[]
+  if (!status || !validStatuses.includes(status)) return null
+  return status as ApprovalStatus
+}
+
+export function ApprovalStatusTag(props: { status?: string | null }) {
+  const parsedStatus = parseApprovalStatus(props.status) as ApprovalStatus
+  const config = statusConfig[parsedStatus]
   const Icon = config.icon
   return (
     <Tag
@@ -42,8 +49,9 @@ export function ApprovalStatusTag({ status }: { status: ApprovalStatus }) {
   )
 }
 
-export function ApprovalStatusBadge({ status }: { status: ApprovalStatus }) {
-  const config = statusConfig[status]
+export function ApprovalStatusBadge(props: { status?: string | null }) {
+  const parsedStatus = parseApprovalStatus(props.status) as ApprovalStatus
+  const config = statusConfig[parsedStatus]
   return (
     <>
       <Badge data-color={config.color}/> {config.text.split(' ')[0]}

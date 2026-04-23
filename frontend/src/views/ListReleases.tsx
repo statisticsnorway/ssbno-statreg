@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Heading, Paragraph, Table } from '@digdir/designsystemet-react'
 import { type ReleaseListing } from '@ssbno-statreg/shared'
-import { parseApprovalStatus, formatPublishTime, formatDate } from '../lib/utils'
+import { formatPublishTime, formatDate } from '../lib/utils'
 import { ApprovalStatusBadge } from '../components/ApprovalStatus'
 
 import client from '../api'
@@ -11,7 +11,7 @@ function ListReleases() {
 
   useEffect(() => {
     async function fetchReleases() {
-      const { data, error } = await client.GET('/releases', { params: {} })
+      const { data, error } = await client.GET('/releases', { params: {} }) // TODO: Default start 0 and count 15 until pagination is implemented
       if (error) {
         console.log(error)
         alert(error)
@@ -28,11 +28,11 @@ function ListReleases() {
         <Table.Cell>{release.statistic?.shortname}</Table.Cell> {/* TODO: Truncate values */}
         <Table.Cell>{release.statistic?.name}</Table.Cell>
         <Table.Cell>{release.frequency?.name}</Table.Cell>
-        <Table.Cell>-</Table.Cell> {/* TODO: Add måleperiodetittel after logic is implemented */}
+        <Table.Cell>TBA</Table.Cell> {/* TODO: Add måleperiodetittel after logic is implemented */}
         <Table.Cell>{formatDate(release.period_from)}</Table.Cell>
         <Table.Cell>{formatDate(release.period_to)}</Table.Cell>
         <Table.Cell>{formatPublishTime(release.publish_time)}</Table.Cell>
-        <Table.Cell><ApprovalStatusBadge status={parseApprovalStatus(release.approval_status)} /></Table.Cell>
+        <Table.Cell><ApprovalStatusBadge status={release.approval_status} /></Table.Cell>
       </Table.Row>
     ))
   }

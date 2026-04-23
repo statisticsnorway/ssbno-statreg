@@ -1,11 +1,3 @@
-import { ApprovalStatus } from '../components/ApprovalStatus'
-
-export function parseApprovalStatus(status?: string | null): ApprovalStatus | null {
-  const validStatuses = Object.values(ApprovalStatus) as string[]
-  if (!status || !validStatuses.includes(status)) return null
-  return status as ApprovalStatus
-}
-
 export function formatPublishTime(publishTime: string | undefined): string {
   if (!publishTime) return '-'
   return new Date(publishTime)
