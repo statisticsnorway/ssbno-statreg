@@ -3,7 +3,7 @@ import { Routes, Route } from 'react-router'
 import ReleaseDetail from './views/ReleaseDetail'
 import StatisticDetail from './views/StatisticDetail'
 import PageLayout from './views/PageLayout'
-import ReleaseListing from './views/ReleaseListing'
+import ReleaseListing from './views/ReleaseList'
 
 function App() {
   return (
