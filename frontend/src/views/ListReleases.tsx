@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Heading, Paragraph, Table } from '@digdir/designsystemet-react'
 import { type ReleaseListing } from '@ssbno-statreg/shared'
 import { parseApprovalStatus, formatPublishTime, formatDate } from '../lib/utils'
-import { ApprovalStatusTag } from '../components/ApprovalStatusTag'
+import { ApprovalStatusBadge } from '../components/ApprovalStatus'
 
 import client from '../api'
 
@@ -32,7 +32,7 @@ function ListReleases() {
         <Table.Cell>{formatDate(release.period_from)}</Table.Cell>
         <Table.Cell>{formatDate(release.period_to)}</Table.Cell>
         <Table.Cell>{formatPublishTime(release.publish_time)}</Table.Cell>
-        <Table.Cell><ApprovalStatusTag status={parseApprovalStatus(release.approval_status)} /></Table.Cell>
+        <Table.Cell><ApprovalStatusBadge status={parseApprovalStatus(release.approval_status)} /></Table.Cell>
       </Table.Row>
     ))
   }

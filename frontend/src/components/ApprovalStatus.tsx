@@ -1,4 +1,4 @@
-import { Tag } from '@digdir/designsystemet-react'
+import { Tag, Badge } from '@digdir/designsystemet-react'
 import { CheckmarkCircleIcon, ExclamationmarkTriangleIcon, ClockDashedIcon } from '@navikt/aksel-icons'
 
 // TODO ApprovalStatus should be imported from shared, but needs more setup
@@ -39,5 +39,14 @@ export function ApprovalStatusTag({ status }: { status: ApprovalStatus }) {
       <Icon aria-hidden style={{ marginInlineEnd: 'var(--ds-size-1)' }} />
       {config.text}
     </Tag>
+  )
+}
+
+export function ApprovalStatusBadge({ status }: { status: ApprovalStatus }) {
+  const config = statusConfig[status]
+  return (
+    <>
+      <Badge data-color={config.color}/> {config.text}
+    </>
   )
 }
