@@ -17,21 +17,21 @@ function App() {
       <Route path='' element={<PageLayout />}>
         <Route index element={<Startpage />} />
 
-        <Route path='release' >
+        <Route path='publisering' >
           <Route index element={<ListReleases />} />
           <Route path=':id' element={<ShowRelease />} />
-          <Route path='create' element={<CreateRelease />} />
+          <Route path='opprett' element={<CreateRelease />} />
         </Route>
 
-        <Route path='statistic' >
+        <Route path='statistikk' >
           <Route index element={<ListStatistics />} />
           <Route path=':shortname' element={<ShowStatistic />} />
-          <Route path='create' element={<CreateStatistic />} />
+          <Route path='opprett' element={<CreateStatistic />} />
         </Route>
 
-        <Route path='blocked-dates' >
+        <Route path='sperredato' >
           <Route index element={<ListBlockedDates />} />
-          <Route path='create' element={<CreateBlockedDate />} />
+          <Route path='opprett' element={<CreateBlockedDate />} />
         </Route>
       </Route>
     </Routes>
