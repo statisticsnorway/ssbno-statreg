@@ -2,13 +2,12 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'react-router'
 import { Heading, Link, Paragraph, Details, Card, Button } from '@digdir/designsystemet-react'
 import { PencilWritingIcon } from '@navikt/aksel-icons'
-import { ApprovalStatusTag } from './ApprovalStatusTag'
+import { ApprovalStatusTag } from '../components/ApprovalStatusTag'
 import client from '../api'
 import { type ReleaseDetails } from '@ssbno-statreg/shared'
-
 import { parseApprovalStatus, formatPublishTime, formatDate } from '../lib/utils'
 
-function ReleaseDetail() {
+function ShowRelease() {
   const [release, setReleases] = useState<ReleaseDetails>({})
   const { id } = useParams()
 
@@ -99,4 +98,4 @@ const revisionNames: Record<string, string> = {
   IG: 'Integrert',
 }
 
-export default ReleaseDetail
+export default ShowRelease

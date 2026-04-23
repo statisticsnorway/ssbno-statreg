@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'react-router'
 import { Heading, Paragraph, List, Link, Button, Divider, Details, Card } from '@digdir/designsystemet-react'
 import { PersonPencilIcon } from '@navikt/aksel-icons'
-import { StatisticStatusTag, StatisticStatusCodes, type StatisticStatusCode } from './StatisticStatusTag'
+import { StatisticStatusTag, StatisticStatusCodes, type StatisticStatusCode } from '../components/StatisticStatusTag'
 import client from '../api'
 import type { StatisticDetails, Variant } from '@ssbno-statreg/shared'
 
-export default function StatisticDetail() {
+export default function ShowStatistic() {
   const [statistic, setStatistics] = useState<StatisticDetails>({})
   const { shortname } = useParams()
 

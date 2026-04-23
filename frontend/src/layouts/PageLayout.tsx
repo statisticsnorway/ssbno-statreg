@@ -4,14 +4,15 @@ import ssbLogo from '../assets/SSB_logo_black.svg'
 import { Outlet } from 'react-router'
 import { Link } from '@digdir/designsystemet-react'
 
-{/* TODO: This is only placeholder; create own Header component if necessary */}
+{/* TODO: This is only placeholder; create own Header component if necessary */ }
 const Header = () => (
   <div id='header'>
     <div className='header-content' data-color='brand1'>
       <img src={ssbLogo} className='logo' alt='SSB logo' />
       <div className='header-links'>
-        <Link href='/'>Publisering</Link>
-        <Link href='/statistic/kpi'>Statistikk</Link>
+        {/* TODO: Placeholder links */}
+        <Link href='/publisering/11159'>Publisering</Link>
+        <Link href='/statistikk/kpi'>Statistikk</Link>
       </div>
     </div>
   </div>

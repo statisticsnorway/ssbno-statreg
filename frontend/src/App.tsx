@@ -1,23 +1,35 @@
 import { Routes, Route } from 'react-router'
 
-import ReleaseDetail from './views/ReleaseDetail'
-import StatisticDetail from './views/StatisticDetail'
-import PageLayout from './views/PageLayout'
-import ReleaseListing from './views/ReleaseList'
+import PageLayout from './layouts/PageLayout'
+import ShowRelease from './views/ShowRelease'
+import ShowStatistic from './views/ShowStatistic'
+import ListStatistics from './views/ListStatistics'
+import ListReleases from './views/ListReleases'
+import CreateRelease from './views/CreateRelease'
+import CreateStatistic from './views/CreateStatistic'
+import ListBlockedDates from './views/ListBlockedDates'
+import CreateBlockedDate from './views/CreateBlockedDate'
 
 function App() {
   return (
     <Routes>
       <Route path='' element={<PageLayout />}>
-        <Route index element={<ReleaseListing />} />
+        <Route index element={<ListReleases />} />
 
-        <Route path='release'> {/* TODO: Double check /release page, and consider changing path to norwegian */}
-          <Route path=':id' element={<ReleaseDetail />} />
+        <Route path='publisering' >
+          <Route path=':id' element={<ShowRelease />} />
+          <Route path='opprett' element={<CreateRelease />} />
         </Route>
 
-        {/* TODO: Replace with StatisticListing */}
-        <Route path='statistic' element={<StatisticDetail />}>
-          <Route path=':shortname' element={<StatisticDetail />}/>
+        <Route path='statistikk' >
+          <Route index element={<ListStatistics />} />
+          <Route path=':shortname' element={<ShowStatistic />} />
+          <Route path='opprett' element={<CreateStatistic />} />
+        </Route>
+
+        <Route path='sperredato' >
+          <Route index element={<ListBlockedDates />} />
+          <Route path='opprett' element={<CreateBlockedDate />} />
         </Route>
       </Route>
     </Routes>
