@@ -1,4 +1,4 @@
-export { StatisticStatus, ApprovalStatus } from './enums'
+export { StatisticStatus, ApprovalStatus } from './enums.js'
 import type { components } from './api-types'
 
 export type BlockedReleaseDate = components['schemas']['Blocked_release_date']
