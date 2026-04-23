@@ -25,7 +25,7 @@ function ListReleases() {
   function renderReleaseListTableRows() {
     return Object.entries(releases).map(([key, release]) => (
       <Table.Row key={key}> {/* TODO: Use a proper unique key */}
-        <Table.Cell>{release.statistic?.shortname}</Table.Cell>
+        <Table.Cell>{release.statistic?.shortname}</Table.Cell> {/* TODO: Truncate values */}
         <Table.Cell>{release.statistic?.name}</Table.Cell>
         <Table.Cell>{release.frequency?.name}</Table.Cell>
         <Table.Cell>-</Table.Cell> {/* TODO: Add måleperiodetittel after logic is implemented */}
@@ -39,7 +39,7 @@ function ListReleases() {
 
   function renderReleaseListingTable() {
     return (
-      <div>
+      <div style={{ minWidth: '100%' }}>
         <Table>
           <Table.Head>
             <Table.Row>

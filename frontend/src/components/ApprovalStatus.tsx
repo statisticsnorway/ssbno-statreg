@@ -46,7 +46,7 @@ export function ApprovalStatusBadge({ status }: { status: ApprovalStatus }) {
   const config = statusConfig[status]
   return (
     <>
-      <Badge data-color={config.color}/> {config.text}
+      <Badge data-color={config.color}/> {config.text.split(' ')[0]}
     </>
   )
 }
