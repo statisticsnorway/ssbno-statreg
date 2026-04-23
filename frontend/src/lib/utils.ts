@@ -1,4 +1,4 @@
-import { ApprovalStatus } from '../views/ApprovalStatusTag'
+import { ApprovalStatus } from '../components/ApprovalStatusTag'
 
 export function parseApprovalStatus(status?: string | null): ApprovalStatus | null {
   const validStatuses = Object.values(ApprovalStatus) as string[]
