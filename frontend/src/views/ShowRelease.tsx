@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'react-router'
 import { Heading, Link, Paragraph, Details, Card, Button } from '@digdir/designsystemet-react'
 import { PencilWritingIcon } from '@navikt/aksel-icons'
-import { ApprovalStatusTag, ApprovalStatus } from '../components/ApprovalStatusTag'
+import { ApprovalStatusTag } from '../components/ApprovalStatusTag'
 import client from '../api'
-import { type ReleaseDetails } from '@ssbno-statreg/shared'
+import { type ReleaseDetails, ApprovalStatus } from '@ssbno-statreg/shared'
 
 function ShowRelease() {
   const [release, setReleases] = useState<ReleaseDetails>({})
@@ -69,10 +69,10 @@ function ShowRelease() {
   )
 }
 
-function parseApprovalStatus(status?: string | null): ApprovalStatus | null {
+function parseApprovalStatus(status?: string | null): keyof typeof ApprovalStatus | null {
   const validStatuses = Object.values(ApprovalStatus) as string[]
   if (!status || !validStatuses.includes(status)) return null
-  return status as ApprovalStatus
+  return status as keyof typeof ApprovalStatus
 }
 
 function formatStatisticName(statistic: ReleaseDetails['statistic']): string {

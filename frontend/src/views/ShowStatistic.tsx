@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'react-router'
 import { Heading, Paragraph, List, Link, Button, Divider, Details, Card } from '@digdir/designsystemet-react'
 import { PersonPencilIcon } from '@navikt/aksel-icons'
-import { StatisticStatusTag, StatisticStatusCodes, type StatisticStatusCode } from '../components/StatisticStatusTag'
+import { StatisticStatusTag } from '../components/StatisticStatusTag'
 import client from '../api'
-import type { StatisticDetails, Variant } from '@ssbno-statreg/shared'
+import {type Contact, type RegionLevel, type StatisticDetails, type Variant } from '@ssbno-statreg/shared'
 
 export default function ShowStatistic() {
   const [statistic, setStatistics] = useState<StatisticDetails>({})
@@ -24,7 +24,7 @@ export default function ShowStatistic() {
     fetchStatistic()
   }, [])
 
-  const statusCode = parseStatisticStatus(statistic.status?.code)
+  const statusCode = statistic.status?.code
   const englishName = statistic.name_en ?? '-'
   const division = formatDivision(statistic.division)
   const regionLevels = statistic.statistic_region_levels ?? []
@@ -89,7 +89,7 @@ export default function ShowStatistic() {
       <div>
         <Heading data-size='xs'>Regionale nivåer</Heading>
         <List.Unordered>
-          {regionLevels.map((level) => (
+          {regionLevels.map((level: RegionLevel) => (
             <List.Item>{level.name} </List.Item>
           ))}
         </List.Unordered>
@@ -124,11 +124,6 @@ export default function ShowStatistic() {
   )
 }
 
-function parseStatisticStatus(code?: string): StatisticStatusCode | null {
-  if (!code) return null
-  return StatisticStatusCodes.find((c) => c === code) ?? null
-}
-
 function formatMainLanguage(language?: string): string {
   if (!language) return '-'
   if (language === 'nb') return 'Bokmål'
@@ -149,7 +144,7 @@ function formatStartYear(dateString: string | null | undefined): string {
 
 function formatCancelledVariants(variants: StatisticDetails['variants']): string[] {
   if (!variants) return []
-  return variants.filter((variant) => variant.cancelled).map(formatVariant)
+  return variants.filter((variant: Variant) => variant.cancelled).map(formatVariant)
 }
 
 function formatVariant(variant: Variant): string {
@@ -175,7 +170,7 @@ const revisionNames: Record<string, string> = {
 
 function formatContacts(contacts: StatisticDetails['contacts']): string[] {
   if (!contacts) return []
-  return contacts.map((contact) => {
+  return contacts.map((contact: Contact) => {
     const name = contact.name ?? '-'
     const initials = contact.email ? contact.email.split('@')[0] : '-'
     return `${name} (${initials})`

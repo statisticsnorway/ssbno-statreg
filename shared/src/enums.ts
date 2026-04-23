@@ -12,3 +12,12 @@ export const StatisticStatus = {
   SA: 'Sammenslått',
   SP: 'Splittet',
 } as const
+
+export const RevisionNames = {
+  I: 'Ingen',
+  B: 'Beregnede',
+  E: 'Endelige',
+  F: 'Foreløpige',
+  R: 'Reviderte',
+  IG: 'Integrert',
+} as const
