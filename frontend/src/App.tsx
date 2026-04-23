@@ -1,24 +1,38 @@
 import { Routes, Route } from 'react-router'
 
-import ReleaseDetail from './views/ReleaseDetail'
-import StatisticDetail from './views/StatisticDetail'
-import PageLayout from './views/PageLayout'
+import PageLayout from './layouts/PageLayout'
+import ShowRelease from './views/ShowRelease'
+import ShowStatistic from './views/ShowStatistic'
 import Startpage from './views/Starpage'
+import ListStatistics from './views/ListStatistics'
+import ListReleases from './views/ListReleases'
+import CreateRelease from './views/CreateRelease'
+import CreateStatistic from './views/CreateStatistic'
+import ListBlockedDates from './views/ListBlockedDates'
+import CreateBlockedDate from './views/CreateBlockedDate'
 
 function App() {
   return (
     <Routes>
-      <Route path="" element={<PageLayout />} >
+      <Route path='' element={<PageLayout />}>
         <Route index element={<Startpage />} />
 
-        <Route path="release" element={<ReleaseDetail />} />
-        <Route path="statistic" element={<StatisticDetail />} />
-        {/* Eventually we should do like this, when statisticList and statisticDeail is more ready! */}
-        {/* <Route path="statistics" element={StatisticList} >
-              <Route path=":shorname" element={StatisticDetails} >
-            // StatisticDetail will get `params.shortname` as a paramenter from the router!
-          </Route>
-        </Route> */}
+        <Route path='publisering' >
+          <Route index element={<ListReleases />} />
+          <Route path=':id' element={<ShowRelease />} />
+          <Route path='opprett' element={<CreateRelease />} />
+        </Route>
+
+        <Route path='statistikk' >
+          <Route index element={<ListStatistics />} />
+          <Route path=':shortname' element={<ShowStatistic />} />
+          <Route path='opprett' element={<CreateStatistic />} />
+        </Route>
+
+        <Route path='sperredato' >
+          <Route index element={<ListBlockedDates />} />
+          <Route path='opprett' element={<CreateBlockedDate />} />
+        </Route>
       </Route>
     </Routes>
   )
