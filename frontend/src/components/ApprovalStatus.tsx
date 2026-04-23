@@ -6,6 +6,7 @@ export const ApprovalStatus  = {
   ACCEPTED: 'GODKJENT',
   PENDING: 'FORSLAG',
   DECLINED: 'AVVIST',
+  DELAYED: 'UTSATT' 
 } as const
 
 export type ApprovalStatus = typeof ApprovalStatus[keyof typeof ApprovalStatus]
@@ -13,7 +14,7 @@ export type ApprovalStatus = typeof ApprovalStatus[keyof typeof ApprovalStatus]
 const statusConfig = {
   [ApprovalStatus.PENDING]: {
     color: 'warning' as const,
-    text: 'Venter på godkjenning',
+    text: 'Forslag til godkjenning',
     icon: ExclamationmarkTriangleIcon,
   },
   [ApprovalStatus.ACCEPTED]: {
@@ -21,9 +22,14 @@ const statusConfig = {
     text: 'Godkjent',
     icon: CheckmarkCircleIcon,
   },
-  [ApprovalStatus.DECLINED]: {
+  [ApprovalStatus.DELAYED]: {
     color: 'neutral' as const,
     text: 'Utsatt',
+    icon: ClockDashedIcon,
+  },
+  [ApprovalStatus.DECLINED]: {
+    color: 'danger' as const,
+    text: 'Avvist',
     icon: ClockDashedIcon,
   },
 }

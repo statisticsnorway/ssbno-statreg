@@ -23,7 +23,6 @@ function ListReleases() {
     fetchReleases()
   }, [])
 
-  // TODO: Value will show up on hovr regardless of whether the cell is truncated or not
   const TruncatedTableCell = ({ value, maxWidth = '340px' }: { value: string | undefined, maxWidth?: string}) => (
     <Table.Cell style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth }} title={value}>
       {value}
@@ -34,9 +33,9 @@ function ListReleases() {
   function renderReleaseListTableRows() {
     return Object.entries(releases).map(([__, release]) => (
       <Table.Row key={`${release.publish_time}-${release.id}`}>
-        <Table.Cell>{release.statistic?.shortname}</Table.Cell>
+        <Table.Cell>{release.statistic?.shortname ?? ''}</Table.Cell>
         <TruncatedTableCell value={release.statistic?.name} />
-        <Table.Cell>{release.frequency?.name}</Table.Cell>
+        <Table.Cell>{release.frequency?.name ?? ''}</Table.Cell>
         <Table.Cell>TBA</Table.Cell>
         <Table.Cell>{formatDate(release.period_from)}</Table.Cell>
         <Table.Cell>{formatDate(release.period_to)}</Table.Cell>
