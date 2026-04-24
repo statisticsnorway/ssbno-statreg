@@ -25,8 +25,8 @@
   "dependencies": {
     "@prisma/adapter-pg": "^7.5.0",
     "@prisma/client": "^7.5.0",
-    "dotenv": "^17.4.2",
     "@ssbno-statreg/shared": "*",
+    "dotenv": "^17.4.2",
     "express": "^5.1.0",
     "express-prom-bundle": "^8.0.0",
     "helmet": "^8.1.0",
@@ -44,7 +44,6 @@
     "eslint-plugin-prettier": "^5.5.5",
     "node-mocks-http": "^1.17.2",
     "nodemon": "^3.1.14",
-    "openapi-typescript": "^7.12.0",
     "pkgroll": "^2.27.0",
     "prisma": "^7.5.0",
     "rollup": "^4.52.5"
