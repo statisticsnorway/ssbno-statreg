@@ -4,6 +4,7 @@ import StatisticDetail from './views/StatisticDetail'
 import ssbLogo from './assets/SSB_logo_black.svg'
 
 import { Divider } from '@digdir/designsystemet-react'
+import ExampleDatePicker from './views/ExampleDatePicker'
 
 {/* TODO: This is only placeholder; create own Header component if necessary */}
 const Header = () => (
@@ -23,6 +24,8 @@ function App() {
           <ReleaseDetail></ReleaseDetail>
           <Divider />
           <StatisticDetail></StatisticDetail>
+          <Divider />
+          <ExampleDatePicker />
         </div>
       </main>
     </>
