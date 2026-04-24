@@ -2,13 +2,13 @@
   "name": "ssbno-statreg",
   "private": true,
   "workspaces": [
+    "shared",
     "backend",
-    "frontend",
-    "shared"
+    "frontend"
   ],
   "scripts": {
     "dev": "concurrently \"npm run dev -w backend\" \"npm run dev -w frontend\"",
-    "build": "npm run build -w backend && npm run build -w frontend && cp -Rf frontend/dist/* backend/dist",
+    "build": "npm run build --ws && cp -Rf frontend/dist/* backend/dist",
     "start": "npm run start -w backend",
     "db:deploy": "npm run db:deploy -w backend",
     "ci-test": "npm run ci-test -w backend",

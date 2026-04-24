@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'react-router'
 import { Heading, Link, Paragraph, Details, Card, Button } from '@digdir/designsystemet-react'
 import { PencilWritingIcon } from '@navikt/aksel-icons'
-import { ApprovalStatusTag, ApprovalStatus } from '../components/ApprovalStatusTag'
+import { ApprovalStatusTag } from '../components/ApprovalStatusTag'
 import client from '../api'
-import { type ReleaseDetails } from '@ssbno-statreg/shared'
+import { type ReleaseDetails, ApprovalStatus } from '@ssbno-statreg/shared'
 
 function ShowRelease() {
   const [release, setReleases] = useState<ReleaseDetails>({})
@@ -14,8 +14,9 @@ function ShowRelease() {
     async function fetchRelease() {
       const { data, error } = await client.GET('/releases/{id}', { params: { path: { id: id as string } } })
       if (error) {
-        console.log(error)
-        alert(error)
+        const errorMessage = (error as any).error
+        console.log(errorMessage)
+        alert(errorMessage)
       } else {
         setReleases(data)
       }
@@ -68,10 +69,12 @@ function ShowRelease() {
   )
 }
 
-function parseApprovalStatus(status?: string | null): ApprovalStatus | null {
-  const validStatuses = Object.values(ApprovalStatus) as string[]
-  if (!status || !validStatuses.includes(status)) return null
-  return status as ApprovalStatus
+function parseApprovalStatus(status?: string | null): keyof typeof ApprovalStatus {
+  for(let keyString of Object.keys(ApprovalStatus)){
+  const key = keyString as keyof typeof ApprovalStatus
+    if(ApprovalStatus[key] === status) return key
+  }
+  return "PENDING"
 }
 
 function formatStatisticName(statistic: ReleaseDetails['statistic']): string {
