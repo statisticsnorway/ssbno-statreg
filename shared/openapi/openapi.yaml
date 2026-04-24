@@ -37,22 +37,17 @@ components:
 
     Calender_date:
       type: object
-      properties:
-        date: { type: string, format: date-time }
-        is_blocked: { type: boolean, readOnly: true }
-        blocked_comment: { type: string, nullable: true, readOnly: true }
-        releases:
-          type: array
-          items:
-            type: object
-            properties:
-              release_id: { type: integer, readOnly: true }
-              statistic:
-                type: object
-                properties:
-                  shortname: { type: string, readOnly: true }
-                  name: { type: string, readOnly: true }
-                  name_en: { type: string, readOnly: true }
+      description: Map of ISO date (YYYY-MM-DD) to day information, ie status
+      patternProperties:
+        '^\d{4}-\d{2}-\d{2}$':
+          type: object
+          properties:
+            status:
+              type: string
+              description: Can be one of "blocked", "free", "few", "more", "full"
+          required:
+            - status
+      additionalProperties: false
 
     Contact:
       type: object
@@ -527,20 +522,18 @@ paths:
 
   /calendar:
     get:
-      summary: List all days within date range with releases, statuses, nonreleaseing days and reasons using defult parameters
+      summary: Get object with days in range including status. 
       security: []
       tags: [calendar]
       responses:
         '200':
-          description: List of days
+          description: Object with days in range
           content:
             application/json:
-              schema:
-                type: array
-                items: { $ref: '#/components/schemas/Calender_date' }
+              schema: { $ref: '#/components/schemas/Calender_date' }
   /calendar/{fromdate}-{todate}:
     get:
-      summary: List all days within date range with releases, statuses, nonreleaseing days and reasons
+      summary: Get object with days in range including status. 
       security: []
       tags: [calendar]
       parameters:
@@ -558,12 +551,10 @@ paths:
             format: date
       responses:
         '200':
-          description: List of days in range
+          description: Object with days in range
           content:
             application/json:
-              schema:
-                type: array
-                items: { $ref: '#/components/schemas/Calender_date' }
+              schema: { $ref: '#/components/schemas/Calender_date' }
   /calendar/blocked-release-days:
     get:
       summary: List with all manually added blocked days
