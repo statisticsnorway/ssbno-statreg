@@ -17,3 +17,11 @@ export type StatisticCreate = components['schemas']['Statistic_create']
 export type StatisticUpdate = components['schemas']['Statistic_update']
 export type StatisticListing = components['schemas']['Statistic_listing']
 export type Variant = components['schemas']['Variant']
+
+export type CalendarDateStatus = 'blocked' | 'free' | 'few' | 'more' | 'full'
+
+export type CalendarDates = {
+  [key: string]: {
+    status: CalendarDateStatus
+  }
+}
