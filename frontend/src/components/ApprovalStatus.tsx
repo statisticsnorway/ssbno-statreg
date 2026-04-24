@@ -13,12 +13,12 @@ const statusConfig = {
     text: 'Godkjent',
     icon: CheckmarkCircleIcon,
   },
-  [ApprovalStatus.DELAYED]: {
+  DELAYED: {
     color: 'neutral' as const,
     text: 'Utsatt',
     icon: ClockDashedIcon,
   },
-  [ApprovalStatus.DECLINED]: {
+  DECLINED: {
     color: 'danger' as const,
     text: 'Avvist',
     icon: ClockDashedIcon,
@@ -34,7 +34,7 @@ function parseApprovalStatus(status?: string | null): keyof typeof ApprovalStatu
 }
 
 export function ApprovalStatusTag(props: { status?: string | null }) {
-  const parsedStatus = parseApprovalStatus(props.status) as ApprovalStatus
+  const parsedStatus = parseApprovalStatus(props.status)
   const config = statusConfig[parsedStatus]
   const Icon = config.icon
   return (
@@ -49,7 +49,7 @@ export function ApprovalStatusTag(props: { status?: string | null }) {
 }
 
 export function ApprovalStatusBadge(props: { status?: string | null }) {
-  const parsedStatus = parseApprovalStatus(props.status) as ApprovalStatus
+  const parsedStatus = parseApprovalStatus(props.status)
   const config = statusConfig[parsedStatus]
   return (
     <>
