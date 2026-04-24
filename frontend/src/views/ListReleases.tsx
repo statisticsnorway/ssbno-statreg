@@ -16,8 +16,9 @@ function ListReleases() {
     async function fetchReleases() {
       const { data, error } = await client.GET('/releases', { params: { query: { start: 0, count: showRowCount } } })
       if (error) {
-        console.log(error)
-        alert(error)
+        const errorMessage = (error as any).error
+        console.log(errorMessage)
+        alert(errorMessage)
       } else {
         setReleases(data)
       }

@@ -23,8 +23,7 @@ jobs:
       - run: npm i
       - run: npm run generate
       - run: npm run build --if-present
-      - run: npm run ci-test:backend
-      - run: npm run ci-test:frontend
+      - run: npm run ci-test
       - run: npm run lint
       - run: npm run generate:api-types
 
