@@ -535,7 +535,7 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    /** List all days within date range with releases, statuses, nonreleaseing days and reasons using defult parameters */
+    /** Get object with days in range including status. */
     get: {
       parameters: {
         query?: never
@@ -545,13 +545,13 @@ export interface paths {
       }
       requestBody?: never
       responses: {
-        /** @description List of days */
+        /** @description Object with days in range */
         200: {
           headers: {
             [name: string]: unknown
           }
           content: {
-            'application/json': components['schemas']['Calender_date'][]
+            'application/json': components['schemas']['Calender_date']
           }
         }
       }
@@ -571,7 +571,7 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    /** List all days within date range with releases, statuses, nonreleaseing days and reasons */
+    /** Get object with days in range including status. */
     get: {
       parameters: {
         query?: never
@@ -584,13 +584,13 @@ export interface paths {
       }
       requestBody?: never
       responses: {
-        /** @description List of days in range */
+        /** @description Object with days in range */
         200: {
           headers: {
             [name: string]: unknown
           }
           content: {
-            'application/json': components['schemas']['Calender_date'][]
+            'application/json': components['schemas']['Calender_date']
           }
         }
       }
@@ -714,19 +714,12 @@ export interface components {
       date?: string
       blocked_comment?: string
     }
+    /** @description Map of ISO date (YYYY-MM-DD) to day information, ie status */
     Calender_date: {
-      /** Format: date-time */
-      date?: string
-      readonly is_blocked?: boolean
-      readonly blocked_comment?: string | null
-      releases?: {
-        readonly release_id?: number
-        statistic?: {
-          readonly shortname?: string
-          readonly name?: string
-          readonly name_en?: string
-        }
-      }[]
+      [key: string]: {
+        /** @description Can be one of "blocked", "free", "few", "more", "full" */
+        status: string
+      }
     }
     Contact: {
       readonly name?: string
