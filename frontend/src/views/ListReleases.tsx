@@ -47,20 +47,17 @@ function ListReleases() {
     ))
   }
 
+  const tableHeaderCells = ['Kortnavn', 'Statistikknavn', 'Variant', 'Måleperiodetittel', 'Målperiode fra', 'Måleperiode til', 'Publiseringsdato', 'Status']
+
   function renderReleaseListingTable() {
     return (
       <div style={{ minWidth: '100%' }}>
         <Table>
           <Table.Head>
             <Table.Row>
-              <Table.HeaderCell>Kortnavn</Table.HeaderCell>
-              <Table.HeaderCell>Statistikknavn</Table.HeaderCell>
-              <Table.HeaderCell>Variant</Table.HeaderCell>
-              <Table.HeaderCell>Måleperiodetittel</Table.HeaderCell>
-              <Table.HeaderCell>Målperiode fra</Table.HeaderCell>
-              <Table.HeaderCell>Måleperiode til</Table.HeaderCell>
-              <Table.HeaderCell>Publiseringsdato</Table.HeaderCell>
-              <Table.HeaderCell>Status</Table.HeaderCell>
+              {tableHeaderCells.map((header) => (
+                <Table.HeaderCell key={header}>{header}</Table.HeaderCell>
+              ))}
             </Table.Row>
           </Table.Head>
           <Table.Body>{renderReleaseListTableRows()}</Table.Body>
