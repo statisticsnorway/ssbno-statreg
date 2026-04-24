@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Heading, Paragraph, Table } from '@digdir/designsystemet-react'
+import { Heading, Paragraph, Table, Field, Label, Select } from '@digdir/designsystemet-react'
 import { type ReleaseListing } from '@ssbno-statreg/shared'
 import { formatPublishTime, formatDate } from '../lib/utils'
 import { ApprovalStatusBadge } from '../components/ApprovalStatus'
@@ -8,11 +8,11 @@ import client from '../api'
 
 function ListReleases() {
   const [releases, setReleases] = useState<ReleaseListing[]>([])
+  const [showRowCount, setShowRowCount] = useState(10)
 
   useEffect(() => {
     async function fetchReleases() {
-      // TODO: MIM-2660: Default start 0 and count 15 until pagination is implemented; tweak "params"
-      const { data, error } = await client.GET('/releases', { params: {} })
+      const { data, error } = await client.GET('/releases', { params: { query: { start: 0, count: showRowCount } } })
       if (error) {
         console.log(error)
         alert(error)
@@ -21,7 +21,7 @@ function ListReleases() {
       }
     }
     fetchReleases()
-  }, [])
+  }, [showRowCount])
 
   const TruncatedTableCell = ({ value, maxWidth = '340px' }: { value: string | undefined; maxWidth?: string }) => (
     <Table.Cell style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth }} title={value}>
@@ -62,16 +62,44 @@ function ListReleases() {
     return tableHeaderCells.map((header) => <Table.HeaderCell key={header}>{header}</Table.HeaderCell>)
   }
 
+  function handleShowRowChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    setShowRowCount(e.target.value)
+  }
+
   function renderReleaseListingTable() {
     return (
-      <div style={{ minWidth: '100%' }}>
-        <Table>
-          <Table.Head>
-            <Table.Row>{renderReleaseListTableHeaderCells()}</Table.Row>
-          </Table.Head>
-          <Table.Body>{renderReleaseListTableRows()}</Table.Body>
-        </Table>
-      </div>
+      <>
+        <div style={{ minWidth: '100%' }}>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'end',
+              marginBottom: 'var(--ds-size-8)',
+            }}
+          >
+            <Field>
+              <Label>Vis antall rader</Label>
+              <Select defaultValue={showRowCount} onChange={handleShowRowChange}>
+                <Select.Option value='' disabled>
+                  Vis antall rader
+                </Select.Option>
+                <Select.Option value={5}>5</Select.Option>
+                <Select.Option value={10}>10</Select.Option>
+                <Select.Option value={50}>50</Select.Option>
+                <Select.Option value={100}>100</Select.Option>
+              </Select>
+            </Field>
+          </div>
+          <Table>
+            <Table.Head>
+              <Table.Row>{renderReleaseListTableHeaderCells()}</Table.Row>
+            </Table.Head>
+            <Table.Body>{renderReleaseListTableRows()}</Table.Body>
+          </Table>
+        </div>
+      </>
     )
   }
 
