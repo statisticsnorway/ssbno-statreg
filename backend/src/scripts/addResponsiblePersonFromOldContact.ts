@@ -38,7 +38,7 @@ async function main() {
       where: { email: contact.email },
       update: {},
       create: {
-        email: contact.email,
+        email: email,
         username: contact.initials ?? null,
       },
     })
