@@ -2,9 +2,9 @@
   "name": "ssbno-statreg",
   "private": true,
   "workspaces": [
+    "shared",
     "backend",
-    "frontend",
-    "shared"
+    "frontend"
   ],
   "scripts": {
     "dev": "concurrently \"npm run dev -w backend\" \"npm run dev -w frontend\"",
