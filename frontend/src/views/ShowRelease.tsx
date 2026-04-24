@@ -69,10 +69,12 @@ function ShowRelease() {
   )
 }
 
-function parseApprovalStatus(status?: string | null): keyof typeof ApprovalStatus | null {
-  const validStatuses = Object.values(ApprovalStatus) as string[]
-  if (!status || !validStatuses.includes(status)) return null
-  return status as keyof typeof ApprovalStatus
+function parseApprovalStatus(status?: string | null): keyof typeof ApprovalStatus {
+  for(let keyString of Object.keys(ApprovalStatus)){
+  const key = keyString as keyof typeof ApprovalStatus
+    if(ApprovalStatus[key] === status) return key
+  }
+  return "PENDING"
 }
 
 function formatStatisticName(statistic: ReleaseDetails['statistic']): string {
