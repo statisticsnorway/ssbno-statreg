@@ -714,23 +714,10 @@ export interface components {
       date?: string
       blocked_comment?: string
     }
-    /**
-     * @description Map of ISO date (YYYY-MM-DD) to day information, ie status
-     * @example {
-     *       "2026-01-01": {
-     *         "status": "blocked"
-     *       },
-     *       "2026-01-02": {
-     *         "status": "free"
-     *       }
-     *     }
-     */
+    /** @description Map of ISO date (YYYY-MM-DD) to day information, ie status */
     Calender_date: {
       [key: string]: {
-        /**
-         * @description Can be one of "blocked", "free", "few", "more", "full"
-         * @example blocked
-         */
+        /** @description Can be one of "blocked", "free", "few", "more", "full" */
         status: string
       }
     }
