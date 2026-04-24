@@ -1,4 +1,4 @@
-export function formatPublishTime(publishTime: string | undefined, timeZone = 'UTC'): string {
+export function formatPublishTime(publishTime: string | undefined): string {
   if (!publishTime) return '-'
   return new Date(publishTime)
     .toLocaleString('nb-NO', {
@@ -8,17 +8,17 @@ export function formatPublishTime(publishTime: string | undefined, timeZone = 'U
       hour: '2-digit',
       minute: '2-digit',
       hour12: false,
-      timeZone,
+      timeZone: 'Europe/Oslo',
     })
     .replace(',', ' kl')
 }
 
-export function formatDate(isoString?: string, timeZone = 'UTC'): string {
+export function formatDate(isoString?: string): string {
   if (!isoString) return ''
   return new Date(isoString).toLocaleDateString('nb-NO', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
-    timeZone,
+    timeZone: 'Europe/Oslo',
   })
 }
