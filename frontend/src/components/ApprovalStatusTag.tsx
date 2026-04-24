@@ -1,34 +1,26 @@
 import { Tag } from '@digdir/designsystemet-react'
 import { CheckmarkCircleIcon, ExclamationmarkTriangleIcon, ClockDashedIcon } from '@navikt/aksel-icons'
-
-// TODO ApprovalStatus should be imported from shared, but needs more setup
-export const ApprovalStatus  = {
-  ACCEPTED: 'GODKJENT',
-  PENDING: 'FORSLAG',
-  DECLINED: 'AVVIST',
-} as const
-
-export type ApprovalStatus = typeof ApprovalStatus[keyof typeof ApprovalStatus]
+import { ApprovalStatus } from '@ssbno-statreg/shared'
 
 const statusConfig = {
-  [ApprovalStatus.PENDING]: {
+  PENDING: {
     color: 'warning' as const,
     text: 'Venter på godkjenning',
     icon: ExclamationmarkTriangleIcon,
   },
-  [ApprovalStatus.ACCEPTED]: {
+  ACCEPTED: {
     color: 'success' as const,
     text: 'Godkjent',
     icon: CheckmarkCircleIcon,
   },
-  [ApprovalStatus.DECLINED]: {
+  DECLINED: {
     color: 'neutral' as const,
     text: 'Utsatt',
     icon: ClockDashedIcon,
   },
 }
 
-export function ApprovalStatusTag({ status }: { status: ApprovalStatus }) {
+export function ApprovalStatusTag({ status }: { status: keyof typeof ApprovalStatus }) {
   const config = statusConfig[status]
   const Icon = config.icon
   return (

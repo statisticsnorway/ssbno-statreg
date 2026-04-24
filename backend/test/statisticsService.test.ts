@@ -1,5 +1,5 @@
 import { vi, describe, test, expect, beforeEach } from 'vitest'
-import { ApprovalStatus, StatisticStatus } from '@/types/enums'
+import { ApprovalStatus, StatisticStatus, type StatisticCreate, type StatisticUpdate } from '@ssbno-statreg/shared'
 import { Users } from '@/types/entra'
 import {
   getAllStatistics,
@@ -14,7 +14,6 @@ import {
   parseStatusCode,
   parseRelation,
 } from '@/services/statisticsService'
-import { StatisticCreate, StatisticUpdate } from '@/types'
 
 const { fetchUsersMock, fetchDivisionMock } = vi.hoisted(() => ({
   fetchUsersMock: vi.fn(async (users: Users[]) => {

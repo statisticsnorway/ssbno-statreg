@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "outDir": "dist",
+    "declaration": true,
+    "module": "ES2022",
+    "target": "ES2022",
+    "moduleResolution": "bundler",
+    "emitDeclarationOnly": false,
+    "rootDir": "src",
+    "composite": true
+  },
+  "include": ["src"]
+}

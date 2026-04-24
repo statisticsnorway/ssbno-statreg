@@ -19,5 +19,5 @@
     "noEmit": false,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src", "test", "plugins", "../shared/src/index.d.ts"]
+  "include": ["src", "test", "plugins"]
 }

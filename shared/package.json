@@ -3,11 +3,16 @@
   "version": "0.0.0",
   "type": "module",
   "exports": {
-    ".": "./src/index.d.ts",
+    ".": "./dist/index.js",
     "./openapi": "./openapi.yaml"
   },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "files": [
-    "src",
+    "dist",
     "openapi.yaml"
-  ]
+  ],  
+    "scripts": {
+    "build": "tsc"
+  }
 }

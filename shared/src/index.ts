@@ -1,3 +1,4 @@
+export { ApprovalStatus, StatisticStatus, RevisionNames } from './enums.js'
 import type { components } from './api-types'
 
 export type BlockedReleaseDate = components['schemas']['Blocked_release_date']
@@ -15,5 +16,4 @@ export type StatisticDetails = components['schemas']['Statistic_details']
 export type StatisticCreate = components['schemas']['Statistic_create']
 export type StatisticUpdate = components['schemas']['Statistic_update']
 export type StatisticListing = components['schemas']['Statistic_listing']
-export type Translations = components['schemas']['Translations']
 export type Variant = components['schemas']['Variant']
