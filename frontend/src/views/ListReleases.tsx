@@ -26,7 +26,7 @@ function ListReleases() {
   }, [showRowCount])
 
   function handleChangeShowRowCount(e: React.ChangeEvent<HTMLSelectElement>) {
-    setShowRowCount(e.target.value)
+    setShowRowCount(Number(e.target.value))
   }
 
   const TruncatedTableCell = ({ value, maxWidth = '340px' }: { value: string | undefined; maxWidth?: string }) => (
@@ -84,11 +84,11 @@ function ListReleases() {
             <Field>
               <Label>Vis antall rader</Label>
               <Select defaultValue={defaultRowCount} onChange={handleChangeShowRowCount}>
-                <Select.Option value={5}>5</Select.Option>
-                <Select.Option value={10}>10</Select.Option>
-                <Select.Option value={20}>20</Select.Option>
-                <Select.Option value={50}>50</Select.Option>
-                <Select.Option value={100}>100</Select.Option>
+                <Select.Option value='5'>5</Select.Option>
+                <Select.Option value='10'>10</Select.Option>
+                <Select.Option value='20'>20</Select.Option>
+                <Select.Option value='50'>50</Select.Option>
+                <Select.Option value='100'>100</Select.Option>
               </Select>
             </Field>
           </div>
