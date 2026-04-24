@@ -8,7 +8,9 @@ import client from '../api'
 
 function ListReleases() {
   const [releases, setReleases] = useState<ReleaseListing[]>([])
-  const [showRowCount, setShowRowCount] = useState(10)
+
+  const defaultRowCount = 10
+  const [showRowCount, setShowRowCount] = useState(defaultRowCount)
 
   useEffect(() => {
     async function fetchReleases() {
@@ -22,6 +24,10 @@ function ListReleases() {
     }
     fetchReleases()
   }, [showRowCount])
+
+  function handleChangeShowRowCount(e: React.ChangeEvent<HTMLSelectElement>) {
+    setShowRowCount(e.target.value)
+  }
 
   const TruncatedTableCell = ({ value, maxWidth = '340px' }: { value: string | undefined; maxWidth?: string }) => (
     <Table.Cell style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth }} title={value}>
@@ -62,10 +68,6 @@ function ListReleases() {
     return tableHeaderCells.map((header) => <Table.HeaderCell key={header}>{header}</Table.HeaderCell>)
   }
 
-  function handleShowRowChange(e: React.ChangeEvent<HTMLSelectElement>) {
-    setShowRowCount(e.target.value)
-  }
-
   function renderReleaseListingTable() {
     return (
       <>
@@ -81,12 +83,10 @@ function ListReleases() {
           >
             <Field>
               <Label>Vis antall rader</Label>
-              <Select defaultValue={showRowCount} onChange={handleShowRowChange}>
-                <Select.Option value='' disabled>
-                  Vis antall rader
-                </Select.Option>
+              <Select defaultValue={defaultRowCount} onChange={handleChangeShowRowCount}>
                 <Select.Option value={5}>5</Select.Option>
                 <Select.Option value={10}>10</Select.Option>
+                <Select.Option value={20}>20</Select.Option>
                 <Select.Option value={50}>50</Select.Option>
                 <Select.Option value={100}>100</Select.Option>
               </Select>
