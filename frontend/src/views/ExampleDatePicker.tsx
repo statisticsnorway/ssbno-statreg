@@ -1,6 +1,6 @@
 // TODO this is just an example and should later be removed
 
-import { DatePicker } from './DatePicker'
+import { DatePicker } from '../components/DatePicker'
 import type { CalendarDates } from '@ssbno-statreg/shared'
 
 const exampleCalendarDates: CalendarDates = {
