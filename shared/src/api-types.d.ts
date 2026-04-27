@@ -156,7 +156,10 @@ export interface paths {
             [name: string]: unknown
           }
           content: {
-            'application/json': components['schemas']['Release_listing'][]
+            'application/json': {
+              total?: number
+              items?: components['schemas']['Release_listing'][]
+            }
           }
         }
       }
@@ -281,7 +284,10 @@ export interface paths {
             [name: string]: unknown
           }
           content: {
-            'application/json': components['schemas']['Release_listing'][]
+            'application/json': {
+              total?: number
+              items?: components['schemas']['Release_listing'][]
+            }
           }
         }
       }

@@ -337,8 +337,13 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items: { $ref: '#/components/schemas/Release_listing' }
+                type: object
+                properties:
+                  total:
+                    type: integer
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/Release_listing' }
 
   /statistics/{shortname}/variants:
     post:
@@ -413,8 +418,13 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items: { $ref: '#/components/schemas/Release_listing' }
+                type: object
+                properties:
+                  total:
+                    type: integer
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/Release_listing' }
     post:
       summary: Create a new release
       tags: [statistics]
