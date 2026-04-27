@@ -108,6 +108,7 @@ describe('entraReaderClient ', () => {
 
   describe('fetchUserByEmail ', async () => {
     test('returns null if email is missing', async () => {
+      fetchMock.mockReturnValueOnce(null as any)
       const user = await fetchUserByEmail('', 'token')
       expect(fetchMock).toHaveBeenCalledTimes(0)
       expect(user).toBeNull

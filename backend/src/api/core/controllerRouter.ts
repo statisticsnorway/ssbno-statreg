@@ -18,7 +18,7 @@ function registerRoutesAndCollectMetadata(router: Router, publicPaths: RegExp[],
 
       const isPublicRoute = handlers.some((h) => (h as any).__skipAuth)
       if (isPublicRoute && typeof path === 'string') {
-        const pattern = '^' + path.replace(/:[^/]+/g, '[^/]+') + '$' // Convert Express-style route params (e.g. /statistics/:shortname) into a regex, that matches the same URL structure (e.g. /statistics/boliger) for public route checks
+        const pattern = '^/statistikkregisteret/api' + path.replace(/:[^/]+/g, '[^/]+') + '$' // Convert Express-style route params (e.g. /statistics/:shortname) into a regex, that matches the same URL structure (e.g. /statistics/boliger) for public route checks
         publicPaths.push(new RegExp(pattern))
       }
 
@@ -65,8 +65,6 @@ export default function controllerRouter(
     if (!ALLOWED_METHODS.includes(req.method) && knownPaths.has(req.path)) {
       return res.status(405).json({ error: 'Method Not Allowed' })
     }
-
-    return res.status(404).json({ error: 'Not Found' })
   })
 
   return outer
