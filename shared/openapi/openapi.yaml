@@ -460,8 +460,13 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items: { $ref: '#/components/schemas/Release_listing' }
+                type: object
+                properties:
+                  total:
+                    type: integer
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/Release_listing' }
   /releases/{id}:
     get:
       summary: Get release by id
