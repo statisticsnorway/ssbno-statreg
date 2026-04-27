@@ -1,9 +1,9 @@
 import { isDateBlocked } from '@/lib/blockedDates'
 import type { ExtendedPrismaClient } from '@/lib/prisma'
 import { dateToISOString, sanitize, parseDateOnly, ensureRequiredFieldsExists } from '@/lib/utils'
-import type { BlockedReleaseDate } from '@ssbno-statreg/shared'
+import type { BlockedReleaseDate, CalenderDate } from '@ssbno-statreg/shared'
 
-export type CalendarDatePrisma = Pick<ExtendedPrismaClient, 'calender_date'>
+export type CalendarDatePrisma = Pick<ExtendedPrismaClient, 'calender_date' | 'release'>
 
 export async function createBlockedReleaseDay(
   prisma: CalendarDatePrisma,
@@ -44,4 +44,52 @@ export async function createBlockedReleaseDay(
     blocked_comment: blockedDay.comment,
     date: dateToISOString(blockedDay.day),
   }))
+}
+
+export async function getDateStatusForRange(
+  prisma: CalendarDatePrisma,
+  fromDate?: string | string[],
+  toDate?: string | string[]
+): Promise<CalenderDate> {
+  // TODO MIM-2661: Check for covering input validation
+  // TODO MIM-2661: fromDate have to be time 00:00 and toDate have to be time 23:59
+  const from = parseDateOnly(fromDate)
+  const to = parseDateOnly(toDate)
+
+  const releasesInTimerange = await prisma.release.findMany({
+    where: { publish_time: { gt: from, lte: to } },
+    select: {
+      publish_time: true,
+    },
+  })
+
+  const releaseCountsPerDate: Record<string, number> = {}
+
+  for (const release of releasesInTimerange) {
+    const date = release.publish_time.toISOString().slice(0, 10) // YYYY-MM-DD
+    releaseCountsPerDate[date] = (releaseCountsPerDate[date] || 0) + 1
+  }
+
+  const result: { [key: string]: { status: string } } = {}
+
+  //TODO MIM-2661: Look at this code. Refactoring? Separate function?
+  const d = new Date(from)
+  while (d <= to) {
+    const key = d.toISOString().slice(0, 10)
+    result[key] = { status: await getStatus(new Date(key), releaseCountsPerDate[key]) }
+    d.setDate(d.getDate() + 1)
+  }
+
+  return Promise.resolve(result)
+}
+
+// TODO MIM-2661: Get all blocked days in one call instead of checking one at a time?
+// TODO MIM-2661: Move statuses to shared
+async function getStatus(date: Date, noOfReleases?: number): Promise<string> {
+  const isBlocked = await isDateBlocked(date)
+  if (isBlocked) return 'blocked'
+  if (!noOfReleases) return 'free'
+  if (noOfReleases === 1) return 'few'
+  if (noOfReleases <= 3) return 'many'
+  return 'full'
 }
