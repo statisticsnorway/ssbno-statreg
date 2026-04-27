@@ -40,8 +40,8 @@ describe('release data is persisted when ', () => {
     let response = await fetch(`${BASE_URL}/statistics/${shortname}/variants/${variantId}/releases`)
     expect(response.status).toBe(200)
     const list = await response.json()
-    expect(list.length).toBeGreaterThan(1)
-    const picked = list[0]
+    expect(list.total).toBeGreaterThan(1)
+    const picked = list.items[0]
 
     // PUT release with updated fields
     const body = {
