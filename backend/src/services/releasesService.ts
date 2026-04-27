@@ -1,8 +1,8 @@
 import {
   type ReleaseDetails,
-  type ReleaseListing,
   type ReleaseCreate,
   type ReleaseUpdate,
+  type ReleaseListingResponse,
   ApprovalStatus,
 } from '@ssbno-statreg/shared'
 import { dateToISOString, sanitize, parseDateISO, parseId, ensureRequiredFieldsExists } from '@/lib/utils'
@@ -25,7 +25,7 @@ export async function getReleases(
     variantId?: number
   },
   prisma: ReleasePrisma
-): Promise<ReleaseListing[]> {
+): Promise<ReleaseListingResponse> {
   const safeShortname = sanitize(shortname)
   const parsedVariantId = variantId ? parseId(variantId) : undefined
 
