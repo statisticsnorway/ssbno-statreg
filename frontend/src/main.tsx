@@ -7,9 +7,11 @@ import { BrowserRouter } from "react-router";
 import './index.css'
 import App from './App.tsx'
 
+export const BASE_ROUTE = '/statistikkregisteret'
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BrowserRouter basename='/'>
+    <BrowserRouter basename='/statistikkregisteret'>
       <App />
     </BrowserRouter>
   </StrictMode>,

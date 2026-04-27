@@ -62,12 +62,9 @@ spec:
     enforce:
       enabled: true
       excludePaths:
-        - /docs
-        - /docs/**
-        - /statistics
-        - /statistics/**
-        - /releases
-        - /releases/**
+        - /statistikkregisteret/docs
+        - /statistikkregisteret/api
+        - /statistikkregisteret/api/**
 
   postgres:
     clusterName: statreg-api-test-db
