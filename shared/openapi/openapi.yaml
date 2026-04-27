@@ -38,6 +38,13 @@ components:
     Calender_date:
       type: object
       description: Map of ISO date (YYYY-MM-DD) to day information, ie status
+      example:      
+        "2026-05-03": 
+          status: "blocked"
+        "2026-05-04":
+          status: "free"
+        "2026-05-05":
+          status: "few" 
       patternProperties:
         '^\d{4}-\d{2}-\d{2}$':
           type: object
@@ -546,39 +553,31 @@ paths:
 
   /calendar:
     get:
-      summary: Get object with days in range including status. 
-      security: []
-      tags: [calendar]
-      responses:
-        '200':
-          description: Object with days in range
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/Calender_date' }
-  /calendar/{fromdate}-{todate}:
-    get:
-      summary: Get object with days in range including status. 
+      summary: Get status for all days in a period
       security: []
       tags: [calendar]
       parameters:
-        - name: fromdate
-          in: path
-          required: true
+        - name: fromDate
+          in: query
           schema:
             type: string
             format: date
-        - name: todate
-          in: path
-          required: true
+            description: "Defaults to first day of current month"
+            example: '2025-04-01'
+        - name: toDate
+          in: query
           schema:
             type: string
             format: date
+            description: "Defaults to end of second next month"
+            example: '2025-04-27'
       responses:
         '200':
-          description: Object with days in range
+          description: Object with days in range and their status
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Calender_date' }
+ 
   /calendar/blocked-release-days:
     get:
       summary: List with all manually added blocked days
