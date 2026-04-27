@@ -14,11 +14,11 @@ function registerRoutesAndCollectMetadata(router: Router, publicPaths: RegExp[],
     const original = router[method].bind(router)
 
     router[method] = ((path: any, ...handlers: any[]) => {
-      if (typeof path === 'string') knownPaths.add(path)
+      if (typeof path === 'string') knownPaths.add('/api' + path)
 
       const isPublicRoute = handlers.some((h) => (h as any).__skipAuth)
       if (isPublicRoute && typeof path === 'string') {
-        const pattern = '^' + path.replace(/:[^/]+/g, '[^/]+') + '$' // Convert Express-style route params (e.g. /statistics/:shortname) into a regex, that matches the same URL structure (e.g. /statistics/boliger) for public route checks
+        const pattern = '^/statistikkregisteret/api' + path.replace(/:[^/]+/g, '[^/]+') + '$' // Convert Express-style route params (e.g. /statistics/:shortname) into a regex, that matches the same URL structure (e.g. /statistics/boliger) for public route checks
         publicPaths.push(new RegExp(pattern))
       }
 
@@ -52,11 +52,12 @@ export default function controllerRouter(
     return requireAuth(req, res, next)
   })
 
-  outer.use(inner)
+  // Ensure ALL controllers are placed under path /api
+  outer.use('/api', inner)
 
   // Display react app when application is bundled and ran
   outer.use(staticExpress(path.resolve(__dirname)))
-  outer.get('/{*splat}', (req, res) => {
+  outer.get('/*splat', (__, res) => {
     res.sendFile(path.resolve(__dirname, 'index.html'))
   })
 
@@ -64,8 +65,6 @@ export default function controllerRouter(
     if (!ALLOWED_METHODS.includes(req.method) && knownPaths.has(req.path)) {
       return res.status(405).json({ error: 'Method Not Allowed' })
     }
-
-    return res.status(404).json({ error: 'Not Found' })
   })
 
   return outer
