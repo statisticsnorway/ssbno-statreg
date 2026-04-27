@@ -14,7 +14,7 @@ function registerRoutesAndCollectMetadata(router: Router, publicPaths: RegExp[],
     const original = router[method].bind(router)
 
     router[method] = ((path: any, ...handlers: any[]) => {
-      if (typeof path === 'string') knownPaths.add(path)
+      if (typeof path === 'string') knownPaths.add('/api' + path)
 
       const isPublicRoute = handlers.some((h) => (h as any).__skipAuth)
       if (isPublicRoute && typeof path === 'string') {
@@ -57,7 +57,7 @@ export default function controllerRouter(
 
   // Display react app when application is bundled and ran
   outer.use(staticExpress(path.resolve(__dirname)))
-  outer.get('/*splat', (req, res) => {
+  outer.get('/*splat', (__, res) => {
     res.sendFile(path.resolve(__dirname, 'index.html'))
   })
 

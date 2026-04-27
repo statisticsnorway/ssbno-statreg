@@ -11,8 +11,7 @@ export const BASE_ROUTE = '/statistikkregisteret'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BrowserRouter basename={BASE_ROUTE}>
-      {/* <BrowserRouter basename='/'> */}
+    <BrowserRouter basename='/statistikkregisteret'>
       <App />
     </BrowserRouter>
   </StrictMode>,
