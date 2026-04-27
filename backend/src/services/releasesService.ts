@@ -69,26 +69,30 @@ export async function getReleases(
       },
     },
   })
+  const total = await prisma.release.count()
 
-  return releases.map((release) => {
-    const { statistic, frequency } = release.variant ?? {}
-    return {
-      id: release.id,
-      publish_time: dateToISOString(release.publish_time),
-      approval_status: release.desk_appoval_status,
-      period_to: dateToISOString(release.period_to),
-      period_from: dateToISOString(release.period_from),
-      statistic: {
-        shortname: statistic.shortname.name,
-        name: statistic.name,
-        name_en: statistic.name_en ?? '',
-      },
-      frequency: {
-        name: frequency.name,
-        code: frequency.code,
-      },
-    }
-  })
+  return {
+    total,
+    items: releases.map((release) => {
+      const { statistic, frequency } = release.variant ?? {}
+      return {
+        id: release.id,
+        publish_time: dateToISOString(release.publish_time),
+        approval_status: release.desk_appoval_status,
+        period_to: dateToISOString(release.period_to),
+        period_from: dateToISOString(release.period_from),
+        statistic: {
+          shortname: statistic.shortname.name,
+          name: statistic.name,
+          name_en: statistic.name_en ?? '',
+        },
+        frequency: {
+          name: frequency.name,
+          code: frequency.code,
+        },
+      }
+    }),
+  }
 }
 
 export async function getReleaseById(id: string, prisma: ReleasePrisma): Promise<ReleaseDetails> {
