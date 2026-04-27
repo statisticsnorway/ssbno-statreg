@@ -35,10 +35,10 @@ async function main() {
 
     // Upsert responsible person by unique email
     const responsible = await prisma.responsiblePerson.upsert({
-      where: { email: contact.email },
+      where: { email: email },
       update: {},
       create: {
-        email: contact.email,
+        email: email,
         username: contact.initials ?? null,
       },
     })
