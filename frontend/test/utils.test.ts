@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest'
 import { formatPublishTime, formatDate } from '../src/lib/utils'
 
+const timeZone = 'Europe/Oslo'
+
 describe('utils', () => {
   describe('formatPublishTime', () => {
     it('returns "-" when publishTime is undefined', () => {
@@ -12,7 +14,7 @@ describe('utils', () => {
     it('formats ISO datetime correctly in nb-NO locale', () => {
       const iso = '2024-01-15T10:30:00Z'
 
-      const result = formatPublishTime(iso)
+      const result = formatPublishTime(iso, timeZone)
 
       expect(result).toBe('15.01.2024 kl 11:30')
     })
@@ -20,7 +22,7 @@ describe('utils', () => {
     it('formats single-digit day and month with leading zeros', () => {
       const iso = '2024-03-04T08:05:00Z'
 
-      const result = formatPublishTime(iso)
+      const result = formatPublishTime(iso, timeZone)
 
       expect(result).toBe('04.03.2024 kl 09:05')
     })
@@ -36,7 +38,7 @@ describe('utils', () => {
     it('formats ISO date correctly in nb-NO locale', () => {
       const iso = '2024-06-01T00:00:00Z'
 
-      const result = formatDate(iso)
+      const result = formatDate(iso, timeZone)
 
       expect(result).toBe('01.06.2024')
     })
@@ -44,7 +46,7 @@ describe('utils', () => {
     it('formats single-digit day and month with leading zeros', () => {
       const iso = '2024-02-03T12:00:00Z'
 
-      const result = formatDate(iso)
+      const result = formatDate(iso, timeZone)
 
       expect(result).toBe('03.02.2024')
     })
