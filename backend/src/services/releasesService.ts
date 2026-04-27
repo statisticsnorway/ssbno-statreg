@@ -1,5 +1,10 @@
-import type { ReleaseDetails, ReleaseListing, ReleaseCreate, ReleaseUpdate } from '@ssbno-statreg/shared'
-import { ApprovalStatus } from '@/types/enums'
+import {
+  type ReleaseDetails,
+  type ReleaseListing,
+  type ReleaseCreate,
+  type ReleaseUpdate,
+  ApprovalStatus,
+} from '@ssbno-statreg/shared'
 import { dateToISOString, sanitize, parseDateISO, parseId, ensureRequiredFieldsExists } from '@/lib/utils'
 import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
 import type { Prisma } from '@/generated/prisma/client'
@@ -30,6 +35,9 @@ export async function getReleases(
     skip: start,
     take: count,
     where,
+    orderBy: {
+      publish_time: 'desc',
+    },
     select: {
       id: true,
       version: true,

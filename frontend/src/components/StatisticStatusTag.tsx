@@ -1,37 +1,34 @@
 import { Tag } from '@digdir/designsystemet-react'
-
-export const StatisticStatusCodes = ['K', 'A', 'IA', 'UT', 'SA', 'SP'] as const
-
-export type StatisticStatusCode = (typeof StatisticStatusCodes)[number]
+import{StatisticStatus} from '@ssbno-statreg/shared'
 
 const StatusAttributes = {
   A: {
     color: 'success',
-    text: 'Aktiv',
+    text: StatisticStatus.A,
   },
   K: {
     color: 'neutral',
-    text: 'Utkast',
+    text: StatisticStatus.K,
   },
   IA: {
     color: 'danger',
-    text: 'Ikke-aktiv',
+    text: StatisticStatus.IA,
   },
   UT: {
     color: 'danger',
-    text: 'Opphørt',
+    text: StatisticStatus.UT,
   },
   SA: {
     color: 'warning',
-    text: 'Sammenslått',
+    text: StatisticStatus.SA,
   },
   SP: {
     color: 'warning',
-    text: 'Splittet',
+    text: StatisticStatus.SP,
   },
 } as const
 
-export function StatisticStatusTag({ status }: { status: StatisticStatusCode }) {
+export function StatisticStatusTag({ status }: { status: keyof typeof StatusAttributes }) {
   const config = StatusAttributes[status]
   return <Tag data-color={config.color}>{config.text}</Tag>
 }

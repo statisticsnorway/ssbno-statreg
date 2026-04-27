@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'react-router'
 import { Heading, Link, Paragraph, Details, Card, Button } from '@digdir/designsystemet-react'
 import { PencilWritingIcon } from '@navikt/aksel-icons'
-import { ApprovalStatusTag, ApprovalStatus } from '../components/ApprovalStatusTag'
+import { ApprovalStatusTag } from '../components/ApprovalStatus'
 import client from '../api'
 import { type ReleaseDetails } from '@ssbno-statreg/shared'
+import { formatPublishTime, formatDate } from '../lib/utils'
 
 function ShowRelease() {
   const [release, setReleases] = useState<ReleaseDetails>({})
@@ -14,8 +15,9 @@ function ShowRelease() {
     async function fetchRelease() {
       const { data, error } = await client.GET('/releases/{id}', { params: { path: { id: id as string } } })
       if (error) {
-        console.log(error)
-        alert(error)
+        const errorMessage = (error as any).error
+        console.log(errorMessage)
+        alert(errorMessage)
       } else {
         setReleases(data)
       }
@@ -23,7 +25,7 @@ function ShowRelease() {
     fetchRelease()
   }, [])
 
-  const approvalStatus = parseApprovalStatus(release.approval_status)
+  const approvalStatus = release.approval_status
   const statisticName = formatStatisticName(release.statistic)
   const period = formatPeriod(release.period_from, release.period_to)
   const publishTime = formatPublishTime(release.publish_time)
@@ -55,7 +57,7 @@ function ShowRelease() {
         <Card>
           <Details>
             <Details.Summary>Versjonshistorikk</Details.Summary>
-            <Details.Content>Kommmer snart.</Details.Content>
+            <Details.Content>Kommer snart.</Details.Content>
           </Details>
         </Card>
       </div>
@@ -68,41 +70,13 @@ function ShowRelease() {
   )
 }
 
-function parseApprovalStatus(status?: string | null): ApprovalStatus | null {
-  const validStatuses = Object.values(ApprovalStatus) as string[]
-  if (!status || !validStatuses.includes(status)) return null
-  return status as ApprovalStatus
-}
-
 function formatStatisticName(statistic: ReleaseDetails['statistic']): string {
   if (!statistic || !statistic.name || !statistic.shortname) return '-'
   return `${statistic.name} (${statistic.shortname})`
 }
 
-function formatPublishTime(publishTime: string | undefined): string {
-  if (!publishTime) return '-'
-  return new Date(publishTime)
-    .toLocaleString('nb-NO', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
-    .replace(',', ' kl')
-}
-
 function formatPeriod(from?: string, to?: string): string {
   return `${formatDate(from)} – ${formatDate(to)}`
-}
-
-function formatDate(isoString?: string): string {
-  if (!isoString) return ''
-  return new Date(isoString).toLocaleDateString('nb-NO', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  })
 }
 
 function formatVariant(variant?: ReleaseDetails['variant']): string {
