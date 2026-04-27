@@ -38,6 +38,13 @@ components:
     Calender_date:
       type: object
       description: Map of ISO date (YYYY-MM-DD) to day information, ie status
+      example:      
+        "2026-05-03": 
+          status: "blocked"
+        "2026-05-04":
+          status: "free"
+        "2026-05-05":
+          status: "few" 
       patternProperties:
         '^\d{4}-\d{2}-\d{2}$':
           type: object
