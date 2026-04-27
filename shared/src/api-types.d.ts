@@ -535,56 +535,20 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    /** Get object with days in range including status. */
+    /** Get status for all days in a period */
     get: {
       parameters: {
-        query?: never
+        query?: {
+          fromDate?: string
+          toDate?: string
+        }
         header?: never
         path?: never
         cookie?: never
       }
       requestBody?: never
       responses: {
-        /** @description Object with days in range */
-        200: {
-          headers: {
-            [name: string]: unknown
-          }
-          content: {
-            'application/json': components['schemas']['Calender_date']
-          }
-        }
-      }
-    }
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/calendar/{fromdate}-{todate}': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /** Get object with days in range including status. */
-    get: {
-      parameters: {
-        query?: never
-        header?: never
-        path: {
-          fromdate: string
-          todate: string
-        }
-        cookie?: never
-      }
-      requestBody?: never
-      responses: {
-        /** @description Object with days in range */
+        /** @description Object with days in range and their status */
         200: {
           headers: {
             [name: string]: unknown
