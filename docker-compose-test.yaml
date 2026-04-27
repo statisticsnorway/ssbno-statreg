@@ -30,9 +30,9 @@ services:
         condition: service_healthy
     healthcheck:
       test: [ "CMD", "wget", "-qO-", "http://localhost:8080/statistikkregisteret/docs" ]
-      interval: 5s
+      interval: 10s
       timeout: 10s
-      retries: 5
+      retries: 10
 
   tests:
     image: node:24
