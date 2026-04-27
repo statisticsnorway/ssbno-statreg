@@ -348,7 +348,7 @@ paths:
                 properties:
                   total:
                     type: integer
-                  items:
+                  releases:
                     type: array
                     items: { $ref: '#/components/schemas/Release_listing' }
 
@@ -429,7 +429,7 @@ paths:
                 properties:
                   total:
                     type: integer
-                  items:
+                  releases:
                     type: array
                     items: { $ref: '#/components/schemas/Release_listing' }
     post:
@@ -481,7 +481,7 @@ paths:
                 properties:
                   total:
                     type: integer
-                  items:
+                  releases:
                     type: array
                     items: { $ref: '#/components/schemas/Release_listing' }
   /releases/{id}:

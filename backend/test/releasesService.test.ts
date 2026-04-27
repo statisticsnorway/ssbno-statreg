@@ -47,7 +47,7 @@ describe('releasesService ', async () => {
 
       const result = await getReleases({ start: 1, count: 2 }, prismaMock)
 
-      expect(result).toStrictEqual({ items: mockedReleasesResult, total: 2 })
+      expect(result).toStrictEqual({ releases: mockedReleasesResult, total: 2 })
       expect(prismaMock.release.findMany).toHaveBeenCalledWith(expect.objectContaining({ skip: 1, take: 2 }))
     })
 
@@ -56,7 +56,7 @@ describe('releasesService ', async () => {
 
       const result = await getReleases({}, prismaMock)
 
-      expect(result).toStrictEqual({ items: mockedReleasesResult, total: 2 })
+      expect(result).toStrictEqual({ releases: mockedReleasesResult, total: 2 })
 
       expect(prismaMock.release.findMany).toHaveBeenCalledWith(expect.objectContaining({ skip: 0, take: 10 }))
     })
@@ -66,7 +66,7 @@ describe('releasesService ', async () => {
 
       const result = await getReleases({}, prismaMock)
 
-      expect(result).toStrictEqual({ items: [], total: 0 })
+      expect(result).toStrictEqual({ releases: [], total: 0 })
     })
   })
 

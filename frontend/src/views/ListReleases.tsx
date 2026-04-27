@@ -38,7 +38,7 @@ function ListReleases() {
         console.log(errorMessage)
         alert(errorMessage)
       } else {
-        setReleases(data?.items ?? [])
+        setReleases(data?.releases ?? [])
         setTotal(data.total ?? 0)
       }
     }

@@ -73,7 +73,7 @@ export async function getReleases(
 
   return {
     total,
-    items: releases.map((release) => {
+    releases: releases.map((release) => {
       const { statistic, frequency } = release.variant ?? {}
       return {
         id: release.id,

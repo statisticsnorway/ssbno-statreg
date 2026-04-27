@@ -158,7 +158,7 @@ export interface paths {
           content: {
             'application/json': {
               total?: number
-              items?: components['schemas']['Release_listing'][]
+              releases?: components['schemas']['Release_listing'][]
             }
           }
         }
@@ -286,7 +286,7 @@ export interface paths {
           content: {
             'application/json': {
               total?: number
-              items?: components['schemas']['Release_listing'][]
+              releases?: components['schemas']['Release_listing'][]
             }
           }
         }
@@ -388,7 +388,7 @@ export interface paths {
           content: {
             'application/json': {
               total?: number
-              items?: components['schemas']['Release_listing'][]
+              releases?: components['schemas']['Release_listing'][]
             }
           }
         }

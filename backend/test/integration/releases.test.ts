@@ -41,7 +41,7 @@ describe('release data is persisted when ', () => {
     expect(response.status).toBe(200)
     const list = await response.json()
     expect(list.total).toBeGreaterThan(1)
-    const picked = list.items[0]
+    const picked = list.releases[0]
 
     // PUT release with updated fields
     const body = {
