@@ -86,6 +86,10 @@ describe('calendarService  ', () => {
       expect(prismaMock.calender_date.findMany).toHaveBeenCalledTimes(0)
     })
   })
+  describe('getDateStatusForRange() ', () => {
+    //TODO MIM-2661: Add unit tests
+    test(expect(true).toBeTruthy)
+  })
 })
 
 // MOCKS
