@@ -1,4 +1,4 @@
-import { isDateBlocked } from '@/lib/blockedDates'
+import { getBlockedDatesInPeriod, isDateBlocked } from '@/lib/blockedDates'
 import type { ExtendedPrismaClient } from '@/lib/prisma'
 import { dateToISOString, sanitize, parseDateOnly, ensureRequiredFieldsExists } from '@/lib/utils'
 import { type BlockedReleaseDate, type CalenderDate, DayStatus } from '@ssbno-statreg/shared'
@@ -70,7 +70,7 @@ export async function getDateStatusForRange(
   }
   to.setHours(23, 59, 59, 999)
 
-  if (to < from) return Promise.reject({ status: 400, statregError: 'todate have to be after fromDate' })
+  if (to < from) throw { status: 400, statregError: 'todate have to be after fromDate' }
 
   const releasesInTimerange = await prisma.release.findMany({
     where: { publish_time: { gt: from, lte: to } },
@@ -81,23 +81,24 @@ export async function getDateStatusForRange(
 
   const releaseCountsPerDate = getReleaseCountByDate(releasesInTimerange)
 
-  const result: { [key: string]: { status: string } } = {}
+  const result: CalenderDate = {}
+  const blockedDates = await getBlockedDatesInPeriod(from, to)
 
-  //TODO MIM-2661: Look at this code. Refactoring? Separate function?
   const d = new Date(from)
   while (d <= to) {
     const key = d.toISOString().slice(0, 10)
-    result[key] = { status: await getStatus(new Date(key), releaseCountsPerDate[key]) }
+    if (blockedDates[key]) {
+      result[key] === blockedDates[key]
+    } else {
+      result[key] = { status: getStatus(releaseCountsPerDate[key]) }
+    }
     d.setDate(d.getDate() + 1)
   }
 
-  return Promise.resolve(result)
+  return result
 }
 
-// TODO MIM-2661: Move statuses to shared
-async function getStatus(date: Date, noOfReleases?: number): Promise<keyof typeof DayStatus> {
-  const isBlocked = await isDateBlocked(date)
-  if (isBlocked) return 'BLOCKED'
+function getStatus(noOfReleases?: number): keyof typeof DayStatus {
   if (!noOfReleases) return 'FREE'
   if (noOfReleases === 1) return 'FEW'
   if (noOfReleases <= 3) return 'MANY'

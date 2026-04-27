@@ -1,27 +1,61 @@
 import { prisma } from '@/lib/prisma'
 import { assertDayNotManuallyBlocked } from '@/lib/asserts'
+import { CalenderDate } from '@ssbno-statreg/shared'
 
 export const HOLIDAYS: Record<number, Date[]> = {}
 
-export async function isDateBlocked(date: Date): Promise<Boolean> {
+export function isDateAutoBlocked(date: Date): Boolean {
   const sunday = 0
   const saturday = 6
   if (date.getDay() == saturday || date.getDay() == sunday) return true
 
   const year = date.getFullYear()
   const holidays = getHolidays(year)
-  //TODO MIM-2661: Make sure timezones are taken correctly into account
+  //TODO MIM-2546: Make sure timezones are taken correctly into account
   if (
     holidays.some(
       (d) =>
         d.getDate() === date.getDate() && d.getMonth() === date.getMonth() && d.getFullYear() === date.getFullYear()
     )
-  )
+  ) {
     return true
+  }
 
+  return false
+}
+
+export async function isDateBlocked(date: Date): Promise<Boolean> {
+  if (isDateAutoBlocked(date)) return true
   if (!(await assertDayNotManuallyBlocked(prisma, date))) return true
 
   return false
+}
+
+export async function getBlockedDatesInPeriod(fromDate: Date, toDate: Date): Promise<CalenderDate> {
+  const manuallyBlockedDates = await prisma.calender_date.findMany({
+    where: {
+      day: {
+        gt: fromDate,
+        lte: toDate,
+      },
+    },
+    select: { day: true },
+  })
+
+  const blockedDates: CalenderDate = {}
+
+  const d = new Date(fromDate)
+  while (d <= toDate) {
+    const key = d.toISOString().slice(0, 10)
+    if (manuallyBlockedDates.find((day) => day.day.toISOString().slice(0, 10) === key)) {
+      blockedDates[key] = { status: 'BLOCKED' }
+    } else if (isDateAutoBlocked(d)) {
+      blockedDates[key] = { status: 'BLOCKED' }
+    }
+    d.setDate(d.getDate() + 1)
+  }
+
+  return blockedDates
 }
 
 export function getHolidays(year: number): Date[] {
