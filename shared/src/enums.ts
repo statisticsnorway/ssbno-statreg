@@ -2,6 +2,7 @@ export const ApprovalStatus = {
   ACCEPTED: 'GODKJENT',
   PENDING: 'FORSLAG',
   DECLINED: 'AVVIST',
+  DELAYED: 'UTSATT',
 } as const
 
 export const StatisticStatus = {

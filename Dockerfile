@@ -2,7 +2,7 @@
 # We want this because we need to run npm commands on startup, inside the container. 
 # In order to inspect the tag associated with this image hash (and verify the version of node), you can run this command
 # docker inspect --format='{{.RepoDigests}}' node@sha256:9632533eda8061fc1e9960cfb3f8762781c07a00ee7317f5dc0e13c05e15166f
-FROM node@sha256:ccfc02deb6abb1b70b6ef21d3d93b3f671c0de6f463ff331cf0ea0a28ad875c9
+FROM node@sha256:03eae3ef7e88a9de535496fb488d67e02b9d96a063a8967bae657744ecd513f2
 
 RUN apt-get update -y && apt-get install -y openssl
 
