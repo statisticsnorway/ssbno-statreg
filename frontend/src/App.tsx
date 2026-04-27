@@ -3,7 +3,6 @@ import { Routes, Route } from 'react-router'
 import PageLayout from './layouts/PageLayout'
 import ShowRelease from './views/ShowRelease'
 import ShowStatistic from './views/ShowStatistic'
-import Startpage from './views/Starpage'
 import ListStatistics from './views/ListStatistics'
 import ListReleases from './views/ListReleases'
 import CreateRelease from './views/CreateRelease'
@@ -15,10 +14,9 @@ function App() {
   return (
     <Routes>
       <Route path='' element={<PageLayout />}>
-        <Route index element={<Startpage />} />
+        <Route index element={<ListReleases />} />
 
         <Route path='publisering' >
-          <Route index element={<ListReleases />} />
           <Route path=':id' element={<ShowRelease />} />
           <Route path='opprett' element={<CreateRelease />} />
         </Route>

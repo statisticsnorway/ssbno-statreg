@@ -364,7 +364,10 @@ export interface paths {
     /** List all releases. TBD; Pagination and filtering in backend or frontend */
     get: {
       parameters: {
-        query?: never
+        query?: {
+          start?: number
+          count?: number
+        }
         header?: never
         path?: never
         cookie?: never

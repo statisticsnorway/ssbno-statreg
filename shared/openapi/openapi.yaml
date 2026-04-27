@@ -445,6 +445,15 @@ paths:
       summary: List all releases. TBD; Pagination and filtering in backend or frontend
       security: []
       tags: [releases]
+      parameters:
+        - in: query
+          name: start
+          schema:
+            type: integer
+        - in: query
+          name: count
+          schema:
+            type: integer
       responses:
         '200':
           description: List of releases
