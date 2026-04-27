@@ -48,8 +48,8 @@ export async function createBlockedReleaseDay(
 
 export async function getDateStatusForRange(
   prisma: CalendarDatePrisma,
-  fromDate?: string | string[],
-  toDate?: string | string[]
+  fromDate?: string,
+  toDate?: string
 ): Promise<CalenderDate> {
   // TODO MIM-2661: Check for covering input validation
   // TODO MIM-2661: fromDate have to be time 00:00 and toDate have to be time 23:59
