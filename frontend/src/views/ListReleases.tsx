@@ -61,7 +61,7 @@ function ListReleases() {
     'Status',
   ]
 
-  function renderReleaseListTableHeaderCells() {
+  function renderListReleasesTableHeaderCells() {
     return tableHeaderCells.map((header) => <Table.HeaderCell key={header}>{header}</Table.HeaderCell>)
   }
 
@@ -72,7 +72,7 @@ function ListReleases() {
   )
 
   // TODO: MIM-2555: Add måleperiodetittel after logic is implemented
-  function renderReleaseListTableRows() {
+  function renderListReleasesTableRows() {
     return Object.entries(releases).map(([__, release]) => (
       <Table.Row key={`${release.publish_time}-${release.id}`}>
         <Table.Cell>{release.statistic?.shortname ?? ''}</Table.Cell>
@@ -103,7 +103,7 @@ function ListReleases() {
     )
   }
 
-  function renderReleaseListPagination() {
+  function renderListReleasesTablePagination() {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', marginTop: 'var(--ds-size-18)' }}>
         <Pagination aria-label='pagineringsmeny'>
@@ -133,7 +133,7 @@ function ListReleases() {
     )
   }
 
-  function renderReleaseListingTable() {
+  function renderListReleasesTable() {
     return (
       <>
         <div style={{ minWidth: '100%' }}>
@@ -142,7 +142,7 @@ function ListReleases() {
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'center',
-              alignItems: 'end',
+              alignItems: 'end', 
               marginBottom: 'var(--ds-size-8)',
             }}
           >
@@ -150,11 +150,11 @@ function ListReleases() {
           </div>
           <Table>
             <Table.Head>
-              <Table.Row>{renderReleaseListTableHeaderCells()}</Table.Row>
+              <Table.Row>{renderListReleasesTableHeaderCells()}</Table.Row>
             </Table.Head>
-            <Table.Body>{renderReleaseListTableRows()}</Table.Body>
+            <Table.Body>{renderListReleasesTableRows()}</Table.Body>
           </Table>
-          {renderReleaseListPagination()}
+          {renderListReleasesTablePagination()}
         </div>
       </>
     )
@@ -167,7 +167,7 @@ function ListReleases() {
         <Paragraph>TBA</Paragraph>
       </div>
 
-      {renderReleaseListingTable()}
+      {renderListReleasesTable()}
     </>
   )
 }
