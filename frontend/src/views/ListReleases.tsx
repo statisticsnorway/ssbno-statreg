@@ -85,7 +85,6 @@ function ListReleases() {
             <Field>
               <Label>Vis antall rader</Label>
               <Select defaultValue={defaultRowCount} onChange={handleChangeShowRowCount}>
-                <Select.Option value='5'>5</Select.Option>
                 <Select.Option value='10'>10</Select.Option>
                 <Select.Option value='20'>20</Select.Option>
                 <Select.Option value='50'>50</Select.Option>
