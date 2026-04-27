@@ -15,7 +15,7 @@ export async function startServer(app: express.Express, prisma: PrismaClient) {
     .listen(port, () => {
       lightship.signalReady()
       if (process.env.NODE_ENV === 'development') {
-        const LOCAL_APP_URL = `http://localhost:${port}`
+        const LOCAL_APP_URL = `http://localhost:${port}/statistikkregisteret`
 
         console.log(`Application running on: ${LOCAL_APP_URL}`)
       }

@@ -48,8 +48,8 @@ export async function createBlockedReleaseDay(
 
 export async function getDateStatusForRange(
   prisma: CalendarDatePrisma,
-  fromDate?: string | string[],
-  toDate?: string | string[]
+  fromDate?: string,
+  toDate?: string
 ): Promise<CalenderDate> {
   let from: Date
   let to: Date

@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 
-const BASE_URL = process.env.API_URL ?? 'http://localhost:8080'
+const BASE_URL = process.env.API_URL ?? 'http://localhost:8080/statistikkregisteret/api'
 
 const headers = {
   'Content-Type': 'application/json',
