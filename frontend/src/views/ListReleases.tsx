@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Heading, Paragraph, Table, Field, Label, Select } from '@digdir/designsystemet-react'
+import { Heading, Paragraph, Table, Field, Label, Select, Pagination } from '@digdir/designsystemet-react'
 import { type ReleaseListing } from '@ssbno-statreg/shared'
 import { formatPublishTime, formatDate } from '../lib/utils'
 import { ApprovalStatusBadge } from '../components/ApprovalStatus'
@@ -84,7 +84,51 @@ function ListReleases() {
   }
 
   function renderReleaseListPagination() {
-    return <></>
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', marginTop: 'var(--ds-size-18)' }}>
+        <Pagination aria-label='pagineringsmeny'>
+          <Pagination.List>
+            <Pagination.Item>
+              <Pagination.Button aria-label='Forrige side' data-variant='tertiary'>
+                Forrige
+              </Pagination.Button>
+            </Pagination.Item>
+
+            <Pagination.Item>
+              <Pagination.Button aria-label='Side 1' data-variant='primary'>
+                1
+              </Pagination.Button>
+            </Pagination.Item>
+
+            <Pagination.Item>
+              <Pagination.Button aria-label='Side 2' data-variant='tertiary'>
+                2
+              </Pagination.Button>
+            </Pagination.Item>
+
+            <Pagination.Item />
+
+            <Pagination.Item>
+              <Pagination.Button aria-label='Side 9' data-variant='tertiary'>
+                9
+              </Pagination.Button>
+            </Pagination.Item>
+
+            <Pagination.Item>
+              <Pagination.Button aria-label='Side 10' data-variant='tertiary'>
+                10
+              </Pagination.Button>
+            </Pagination.Item>
+
+            <Pagination.Item>
+              <Pagination.Button aria-label='Neste side' data-variant='tertiary'>
+                Neste
+              </Pagination.Button>
+            </Pagination.Item>
+          </Pagination.List>
+        </Pagination>
+      </div>
+    )
   }
 
   function renderReleaseListingTable() {
