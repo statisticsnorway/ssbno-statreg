@@ -47,7 +47,7 @@ function ListReleases() {
 
   function handleChangeShowRowCount(e: React.ChangeEvent<HTMLSelectElement>) {
     setShowRowCount(Number(e.target.value))
-    setCurrentPage(1) // TODO
+    setCurrentPage(1)
   }
 
   const tableHeaderCells = [
