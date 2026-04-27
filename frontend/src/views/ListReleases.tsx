@@ -30,6 +30,21 @@ function ListReleases() {
     setShowRowCount(Number(e.target.value))
   }
 
+  const tableHeaderCells = [
+    'Kortnavn',
+    'Statistikknavn',
+    'Variant',
+    'Måleperiodetittel',
+    'Målperiode fra',
+    'Måleperiode til',
+    'Publiseringsdato',
+    'Status',
+  ]
+
+  function renderReleaseListTableHeaderCells() {
+    return tableHeaderCells.map((header) => <Table.HeaderCell key={header}>{header}</Table.HeaderCell>)
+  }
+
   const TruncatedTableCell = ({ value, maxWidth = '340px' }: { value: string | undefined; maxWidth?: string }) => (
     <Table.Cell style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth }} title={value}>
       {value}
@@ -54,19 +69,22 @@ function ListReleases() {
     ))
   }
 
-  const tableHeaderCells = [
-    'Kortnavn',
-    'Statistikknavn',
-    'Variant',
-    'Måleperiodetittel',
-    'Målperiode fra',
-    'Måleperiode til',
-    'Publiseringsdato',
-    'Status',
-  ]
+  function renderShowRowCountSelect() {
+    return (
+      <Field>
+        <Label>Vis antall rader</Label>
+        <Select defaultValue={defaultRowCount} onChange={handleChangeShowRowCount}>
+          <Select.Option value='10'>10</Select.Option>
+          <Select.Option value='20'>20</Select.Option>
+          <Select.Option value='50'>50</Select.Option>
+          <Select.Option value='100'>100</Select.Option>
+        </Select>
+      </Field>
+    )
+  }
 
-  function renderReleaseListTableHeaderCells() {
-    return tableHeaderCells.map((header) => <Table.HeaderCell key={header}>{header}</Table.HeaderCell>)
+  function renderReleaseListPagination() {
+    return <></>
   }
 
   function renderReleaseListingTable() {
@@ -82,15 +100,7 @@ function ListReleases() {
               marginBottom: 'var(--ds-size-8)',
             }}
           >
-            <Field>
-              <Label>Vis antall rader</Label>
-              <Select defaultValue={defaultRowCount} onChange={handleChangeShowRowCount}>
-                <Select.Option value='10'>10</Select.Option>
-                <Select.Option value='20'>20</Select.Option>
-                <Select.Option value='50'>50</Select.Option>
-                <Select.Option value='100'>100</Select.Option>
-              </Select>
-            </Field>
+            {renderShowRowCountSelect()}
           </div>
           <Table>
             <Table.Head>
@@ -98,6 +108,7 @@ function ListReleases() {
             </Table.Head>
             <Table.Body>{renderReleaseListTableRows()}</Table.Body>
           </Table>
+          {renderReleaseListPagination()}
         </div>
       </>
     )
