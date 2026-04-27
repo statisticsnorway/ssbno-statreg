@@ -18,8 +18,8 @@ app.use(helmet())
 app.use(promBundleMetrics)
 app.use(express.json())
 const swaggerDocument = YAML.parse(fs.readFileSync('../shared/openapi/openapi.yaml', 'utf8'))
-app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
-app.get('/auth/me', auth, (req, res) => {
+app.use('/statistikkregisteret/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
+app.get('/statistikkregisteret/auth/me', auth, (req, res) => {
   // For local testing, add requireUserAuthentication here
   res.json({
     claims: req.auth?.claims,
