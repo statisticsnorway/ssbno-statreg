@@ -51,10 +51,26 @@ export async function getDateStatusForRange(
   fromDate?: string | string[],
   toDate?: string | string[]
 ): Promise<CalenderDate> {
-  // TODO MIM-2661: Check for covering input validation
-  // TODO MIM-2661: fromDate have to be time 00:00 and toDate have to be time 23:59
-  const from = parseDateOnly(fromDate)
-  const to = parseDateOnly(toDate)
+  let from: Date
+  let to: Date
+
+  if (fromDate) {
+    from = parseDateOnly(fromDate)
+  } else {
+    from = new Date()
+    from.setDate(1)
+  }
+  from.setHours(0, 0, 0, 0)
+
+  if (toDate) {
+    to = parseDateOnly(toDate)
+  } else {
+    to = new Date()
+    to.setMonth(to.getMonth() + 3, 0)
+  }
+  to.setHours(23, 59, 59, 999)
+
+  if (to < from) return Promise.reject({ status: 400, statregError: 'todate have to be after fromDate' })
 
   const releasesInTimerange = await prisma.release.findMany({
     where: { publish_time: { gt: from, lte: to } },
