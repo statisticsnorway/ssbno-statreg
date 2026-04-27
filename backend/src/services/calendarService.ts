@@ -1,7 +1,7 @@
 import { isDateBlocked } from '@/lib/blockedDates'
 import type { ExtendedPrismaClient } from '@/lib/prisma'
 import { dateToISOString, sanitize, parseDateOnly, ensureRequiredFieldsExists } from '@/lib/utils'
-import type { BlockedReleaseDate, CalenderDate } from '@ssbno-statreg/shared'
+import { type BlockedReleaseDate, type CalenderDate, DayStatus } from '@ssbno-statreg/shared'
 
 export type CalendarDatePrisma = Pick<ExtendedPrismaClient, 'calender_date' | 'release'>
 
@@ -79,12 +79,7 @@ export async function getDateStatusForRange(
     },
   })
 
-  const releaseCountsPerDate: Record<string, number> = {}
-
-  for (const release of releasesInTimerange) {
-    const date = release.publish_time.toISOString().slice(0, 10) // YYYY-MM-DD
-    releaseCountsPerDate[date] = (releaseCountsPerDate[date] || 0) + 1
-  }
+  const releaseCountsPerDate = getReleaseCountByDate(releasesInTimerange)
 
   const result: { [key: string]: { status: string } } = {}
 
@@ -99,13 +94,27 @@ export async function getDateStatusForRange(
   return Promise.resolve(result)
 }
 
-// TODO MIM-2661: Get all blocked days in one call instead of checking one at a time?
 // TODO MIM-2661: Move statuses to shared
-async function getStatus(date: Date, noOfReleases?: number): Promise<string> {
+async function getStatus(date: Date, noOfReleases?: number): Promise<keyof typeof DayStatus> {
   const isBlocked = await isDateBlocked(date)
-  if (isBlocked) return 'blocked'
-  if (!noOfReleases) return 'free'
-  if (noOfReleases === 1) return 'few'
-  if (noOfReleases <= 3) return 'many'
-  return 'full'
+  if (isBlocked) return 'BLOCKED'
+  if (!noOfReleases) return 'FREE'
+  if (noOfReleases === 1) return 'FEW'
+  if (noOfReleases <= 3) return 'MANY'
+  return 'FULL'
+}
+
+function getReleaseCountByDate(
+  releasesInTimerange: {
+    publish_time: Date
+  }[]
+): Record<string, number> {
+  const releaseCountsPerDate: Record<string, number> = {}
+
+  for (const release of releasesInTimerange) {
+    const date = release.publish_time.toISOString().slice(0, 10) // Slice YYYY-MM-DD off from timestamp to get date only
+    releaseCountsPerDate[date] = (releaseCountsPerDate[date] || 0) + 1
+  }
+
+  return releaseCountsPerDate
 }

@@ -22,3 +22,11 @@ export const RevisionNames = {
   R: 'Reviderte',
   IG: 'Integrert',
 } as const
+
+export const DayStatus = {
+  BLOCKED: 'Sperret',
+  FREE: 'Ledig',
+  FEW: 'Noen',
+  MANY: 'Begrenset',
+  FULL: 'Fullt',
+}
