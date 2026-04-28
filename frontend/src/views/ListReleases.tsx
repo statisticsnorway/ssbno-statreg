@@ -186,7 +186,7 @@ function ListReleases() {
         Publiseringsoversikt
       </Heading>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--ds-size-1)' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--ds-size-4)' }}>
         <Heading level={2}>Publiseringskalender</Heading>
         <DatePicker
           calendarDates={exampleCalendarDates}
