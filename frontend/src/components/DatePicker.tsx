@@ -35,9 +35,8 @@ export function DatePicker({ calendarDates, ...props }: DatePickerProps) {
         full: { backgroundColor: 'var(--ds-color-danger-base-default)', color: 'white' },
         more: { backgroundColor: 'var(--ds-color-warning-base-default)', color: 'white' },
         few: { backgroundColor: 'var(--ds-color-success-base-default)', color: 'white' },
-        blocked: { textDecoration: 'line-through' }
+        blocked: { backgroundColor: 'var(--ds-color-neutral-border-subtle)', textDecoration: 'line-through' }
       }}
-      disabled={blocked}
       style={{
         padding: '20px 16px',
         boxShadow: 'var(--ds-shadow-md)',
