@@ -1,6 +1,14 @@
-import { vi, describe, test, expect } from 'vitest'
-import { calculateEasterSunday, calculateMovableHolidays, getHolidays, isDateBlocked } from '@/lib/blockedDates'
+import { vi, describe, test, expect, beforeEach } from 'vitest'
+import {
+  calculateEasterSunday,
+  calculateMovableHolidays,
+  getBlockedDatesInPeriod,
+  getHolidays,
+  isDateAutoBlocked,
+  isDateBlocked,
+} from '@/lib/blockedDates'
 
+let prismaMock: any
 const { assertDayNotManuallyBlockedMock } = vi.hoisted(() => ({
   assertDayNotManuallyBlockedMock: vi.fn(() => Promise.resolve(true)),
 }))
@@ -11,27 +19,80 @@ vi.mock(import('@/lib/asserts'), () => ({
 }))
 
 describe('blockedDates ', () => {
+  beforeEach(() => {
+    prismaMock = {
+      calendar_dates: {
+        findMany: vi.fn(() => Promise.resolve([{ day: new Date('2027-2-5') }])),
+      },
+    }
+  })
+  describe('isDateAutoBlocked()', () => {
+    test('returns false for a regular weekday (Friday 5. feb 2027)', () => {
+      expect(isDateAutoBlocked(new Date('2027-2-5'))).toBe(false)
+    })
+    test('returns true for Saturday', () => {
+      expect(isDateAutoBlocked(new Date('2027-2-6'))).toBe(true)
+    })
+    test('returns true for Sunday', () => {
+      expect(isDateAutoBlocked(new Date('2027-2-7'))).toBe(true)
+    })
+    test('returns true for a static holiday (1. mai 2027)', () => {
+      expect(isDateAutoBlocked(new Date('2027-5-1'))).toBe(true)
+    })
+    test('returns true for a movable holiday ("1. Påskedag" 28. march 2027)', () => {
+      expect(isDateAutoBlocked(new Date('2027-3-28'))).toBe(true)
+    })
+  })
   describe('isDateBlocked() ', () => {
-    test('returns false if date not blocked (Friday 5. feb 2027)', async () => {
-      expect(await isDateBlocked(new Date('2027-2-5'))).toBe(false)
-    })
-    test('returns true for Saturday 6. feb 2027', async () => {
+    test('returns true if date automatically blocked', async () => {
       expect(await isDateBlocked(new Date('2027-2-6'))).toBe(true)
-    })
-    test('returns true for Sunday 7. feb 2027', async () => {
-      expect(await isDateBlocked(new Date('2027-2-7'))).toBe(true)
-    })
-    test('returns true for movable holiday ("1. Påskedag" 28. march 2027)', async () => {
-      expect(await isDateBlocked(new Date('2027-3-28'))).toBe(true)
-    })
-    test('returns true for static holiday', async () => {
-      expect(await isDateBlocked(new Date('2027-5-1'))).toBe(true)
     })
     test('returns true if date is manually blocked', async () => {
       assertDayNotManuallyBlockedMock.mockResolvedValueOnce(false)
       expect(await isDateBlocked(new Date('2027-2-5'))).toBe(true)
     })
+    test('returns false if date neither manually blocked nor aotumatically blocked', async () => {
+      assertDayNotManuallyBlockedMock.mockResolvedValueOnce(true)
+      expect(await isDateBlocked(new Date('2027-2-5'))).toBe(false)
+    })
   })
+
+  describe('getBlockedDatesInPeriod()', () => {
+    test('marks manually blocked weekday as BLOCKED', async () => {
+      const from = new Date('2027-2-5')
+      const to = new Date('2027-2-5')
+      prismaMock.mockResolvedValueOnce([{ day: new Date('2027-2-5') }])
+
+      const result = await getBlockedDatesInPeriod(from, to)
+
+      expect(result).toStrictEqual({ '2027-02-05': { status: 'BLOCKED' } })
+    })
+
+    test('does not include free weekdays in result', async () => {
+      const from = new Date('2027-2-1')
+      const to = new Date('2027-2-5')
+      prismaMock.mockResolvedValueOnce([])
+
+      const result = await getBlockedDatesInPeriod(from, to)
+
+      expect(result).toStrictEqual({})
+    })
+
+    test('handles range spanning both blocked and free days', async () => {
+      const from = new Date('2027-2-1')
+      const to = new Date('2027-2-7')
+      prismaMock.mockResolvedValueOnce([{ day: new Date('2027-2-5') }])
+
+      const result = await getBlockedDatesInPeriod(from, to)
+
+      expect(result['2027-02-05']).toStrictEqual({ status: 'BLOCKED' }) // manually blocked
+      expect(result['2027-02-06']).toStrictEqual({ status: 'BLOCKED' }) // Saturday
+      expect(result['2027-02-07']).toStrictEqual({ status: 'BLOCKED' }) // Sunday
+      expect(result['2027-02-01']).toBeUndefined() // free weekday
+      expect(result['2027-02-04']).toBeUndefined() // free weekday
+    })
+  })
+
   describe('getHolidays() ', () => {
     test('returns correct dates for 2026', () => {
       const holidays = getHolidays(2026)

@@ -31,12 +31,12 @@ export async function isDateBlocked(date: Date): Promise<Boolean> {
   return false
 }
 
-export async function getBlockedDatesInPeriod(fromDate: Date, toDate: Date): Promise<CalenderDate> {
+export async function getBlockedDatesInPeriod(from: Date, to: Date): Promise<CalenderDate> {
   const manuallyBlockedDates = await prisma.calender_date.findMany({
     where: {
       day: {
-        gt: fromDate,
-        lte: toDate,
+        gt: from,
+        lte: to,
       },
     },
     select: { day: true },
@@ -44,8 +44,8 @@ export async function getBlockedDatesInPeriod(fromDate: Date, toDate: Date): Pro
 
   const blockedDates: CalenderDate = {}
 
-  const d = new Date(fromDate)
-  while (d <= toDate) {
+  const d = new Date(from)
+  while (d <= to) {
     const key = d.toISOString().slice(0, 10)
     if (manuallyBlockedDates.find((day) => day.day.toISOString().slice(0, 10) === key)) {
       blockedDates[key] = { status: 'BLOCKED' }
