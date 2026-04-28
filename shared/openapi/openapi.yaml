@@ -5,8 +5,8 @@ info:
   version: 0.1.0
   description: API for managing publications, statistics and metadata for Statistics Norway. This API is under development, and there will be breaking changes.
 servers:
-  - url: https://ssbno-statreg.intern.test.ssb.no
-  - url: http://localhost:8080
+  - url: https://ssbno-statreg.intern.test.ssb.no/statistikkregisteret/api
+  - url: http://localhost:8080/statistikkregisteret/api
 
 tags:
   - name: calendar
