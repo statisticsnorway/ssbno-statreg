@@ -9,7 +9,7 @@ import {
   Pagination,
   usePagination,
 } from '@digdir/designsystemet-react'
-import { type ReleaseListing } from '@ssbno-statreg/shared'
+import type { CalendarDates, ReleaseListing } from '@ssbno-statreg/shared'
 import { formatPublishTime, formatDate } from '../lib/utils'
 import { ApprovalStatusBadge } from '../components/ApprovalStatus'
 import { DatePicker } from '../components/DatePicker'
@@ -170,6 +170,7 @@ function ListReleases() {
     )
   }
 
+  // TODO: MIM-2657: Implement calender logic
   const exampleCalendarDates: CalendarDates = {
     '2026-04-03': { status: 'free' },
     '2026-04-05': { status: 'few' },
@@ -189,7 +190,6 @@ function ListReleases() {
         <Heading level={2}>Publiseringskalender</Heading>
         <DatePicker
           calendarDates={exampleCalendarDates}
-          dropdownCaption
           fromDate={new Date(2025, 0, 1)}
           toDate={new Date(2027, 11, 31)}
         />
