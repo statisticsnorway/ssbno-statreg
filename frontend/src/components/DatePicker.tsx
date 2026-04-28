@@ -30,16 +30,17 @@ export function DatePicker({ calendarDates, ...props }: DatePickerProps) {
   return (
     <AkselDatePicker.Standalone
       // @ts-expect-error: Allow custom "modifiers" prop for color coding
-      modifiers={{ full, more, few }}
+      modifiers={{ full, more, few, blocked }}
       modifiersStyles={{
         full: { backgroundColor: 'var(--ds-color-danger-base-default)', color: 'white' },
         more: { backgroundColor: 'var(--ds-color-warning-base-default)', color: 'white' },
         few: { backgroundColor: 'var(--ds-color-success-base-default)', color: 'white' },
+        blocked: { textDecoration: 'line-through' }
       }}
       disabled={blocked}
       style={{
         padding: '20px 16px',
-        boxShadow: ' 0 0 1px 0 rgba(0, 0, 0, 0.15), 0 1px 3px 0 rgba(0, 0, 0, 0.10), 0 5px 12px 0 rgba(0, 0, 0, 0.13)',
+        boxShadow: 'var(--ds-shadow-md)',
         borderRadius: '8px',
       }}
       {...props}
