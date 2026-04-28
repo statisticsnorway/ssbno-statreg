@@ -187,7 +187,7 @@ function ListReleases() {
       </Heading>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--ds-size-4)' }}>
-        <Heading level={2}>Publiseringskalender</Heading>
+        <Heading level={2} data-size='xs'>Publiseringskalender</Heading>
         <DatePicker
           calendarDates={exampleCalendarDates}
           fromDate={new Date(2026, 3, 1)}
