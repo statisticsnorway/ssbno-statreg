@@ -16,7 +16,7 @@ Before performing the migration, we need to allow the prisma methods deleteMany 
 4. Verify all JSON files with `json-validation.sh` by running this command in the terminal:
 
 ```
-src/scripts/json-validation.sh ./docs/database-migration/tableStatsExample.json ~/Documents/STATREG_TABLES_JSON
+./src/scripts/json-validation.sh ../docs/database-migration/tableStatsExample.json ~/Documents/STATREG_TABLES_JSON
 ```
 
 ### Load data to PostgreSQL
