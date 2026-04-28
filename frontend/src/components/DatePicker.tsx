@@ -5,7 +5,7 @@ import '@navikt/ds-css/dist/global/baseline.css'
 import '@navikt/ds-css/dist/global/print.css'
 import '@navikt/ds-css/dist/components.css'
 
-import { DatePicker as AkselDatePicker } from '@navikt/ds-react'
+import { DatePicker as AkselDatePicker } from '@navikt/ds-react/DatePicker'
 import type { CalendarDates } from '@ssbno-statreg/shared'
 
 type DatePickerProps = React.ComponentProps<typeof AkselDatePicker.Standalone> & {
