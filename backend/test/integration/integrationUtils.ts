@@ -1,7 +1,7 @@
 import type { Prisma } from '@/generated/prisma/client'
 import { prisma } from '@/lib/prisma'
 
-export const BASE_URL = process.env.API_URL ?? 'http://localhost:8080'
+export const BASE_URL = process.env.API_URL ?? 'http://localhost:8080/statistikkregisteret/api'
 
 export type StatisticWithShortname = Prisma.StatisticGetPayload<{
   include: {

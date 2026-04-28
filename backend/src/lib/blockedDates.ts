@@ -10,7 +10,14 @@ export async function isDateBlocked(date: Date): Promise<Boolean> {
 
   const year = date.getFullYear()
   const holidays = getHolidays(year)
-  if (holidays.some((d) => d === date)) return true
+  //TODO MIM-2661: Make sure timezones are taken correctly into account
+  if (
+    holidays.some(
+      (d) =>
+        d.getDate() === date.getDate() && d.getMonth() === date.getMonth() && d.getFullYear() === date.getFullYear()
+    )
+  )
+    return true
 
   if (!(await assertDayNotManuallyBlocked(prisma, date))) return true
 

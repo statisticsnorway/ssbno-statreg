@@ -35,6 +35,9 @@ export async function getReleases(
     skip: start,
     take: count,
     where,
+    orderBy: {
+      publish_time: 'desc',
+    },
     select: {
       id: true,
       version: true,
