@@ -6,6 +6,7 @@ import {
   Field,
   Label,
   Select,
+  Link,
   Pagination,
   usePagination,
 } from '@digdir/designsystemet-react'
@@ -73,20 +74,29 @@ function ListReleases() {
 
   // TODO: MIM-2555: Add måleperiodetittel after logic is implemented
   function renderListReleasesTableRows() {
-    return Object.entries(releases).map(([__, release]) => (
-      <Table.Row key={`${release.publish_time}-${release.id}`}>
-        <Table.Cell>{release.statistic?.shortname ?? ''}</Table.Cell>
-        <TruncatedTableCell value={release.statistic?.name} />
-        <Table.Cell>{release.frequency?.name ?? ''}</Table.Cell>
-        <Table.Cell>TBA</Table.Cell>
-        <Table.Cell>{formatDate(release.period_from)}</Table.Cell>
-        <Table.Cell>{formatDate(release.period_to)}</Table.Cell>
-        <Table.Cell>{formatPublishTime(release.publish_time)}</Table.Cell>
-        <Table.Cell>
-          <ApprovalStatusBadge status={release.approval_status} />
-        </Table.Cell>
-      </Table.Row>
-    ))
+    return Object.entries(releases).map(([__, release]) => {
+      const statisticsShortname = release.statistic?.shortname ?? ''
+      return (
+        <Table.Row key={`${release.publish_time}-${release.id}`}>
+          <Table.Cell>
+            <Link href={`/statistikkregisteret/statistikk/${statisticsShortname}`}>{statisticsShortname}</Link> {/* TODO: Fix /statistikkregisteret urls with react-router; this applies to the /publisering link as well */}
+          </Table.Cell>
+          <TruncatedTableCell value={release.statistic?.name} />
+          <Table.Cell>{release.frequency?.name ?? ''}</Table.Cell>
+          <Table.Cell>TBA</Table.Cell>
+          <Table.Cell>{formatDate(release.period_from)}</Table.Cell>
+          <Table.Cell>{formatDate(release.period_to)}</Table.Cell>
+          <Table.Cell>
+            <Link href={`/statistikkregisteret/publisering/${release.id}`}>
+              {formatPublishTime(release.publish_time)}
+            </Link>
+          </Table.Cell>
+          <Table.Cell>
+            <ApprovalStatusBadge status={release.approval_status} />
+          </Table.Cell>
+        </Table.Row>
+      )
+    })
   }
 
   function renderShowRowCountSelect() {
@@ -142,7 +152,7 @@ function ListReleases() {
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'center',
-              alignItems: 'end', 
+              alignItems: 'end',
               marginBottom: 'var(--ds-size-8)',
             }}
           >
