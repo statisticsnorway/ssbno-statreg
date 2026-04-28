@@ -1,5 +1,6 @@
 export { ApprovalStatus, StatisticStatus, RevisionNames } from './enums.js'
-import type { components } from './api-types'
+
+import type { components, paths } from './api-types'
 
 export type BlockedReleaseDate = components['schemas']['Blocked_release_date']
 export type CalenderDate = components['schemas']['Calender_date']
@@ -25,3 +26,5 @@ export type CalendarDates = {
     status: CalendarDateStatus
   }
 }
+
+export type ReleaseListingResponse = paths['/releases']['get']['responses']['200']['content']['application/json']

@@ -28,6 +28,7 @@ describe('releasesService ', async () => {
         findFirst: vi.fn(() => Promise.resolve(releasesResult)),
         create: vi.fn(() => Promise.resolve({ ...releasesResult })),
         update: vi.fn(() => Promise.resolve({ ...releasesResult })),
+        count: vi.fn(() => Promise.resolve(releasesResult ? (releasesResult as any).length : 0)),
       },
       statistic: { findFirst: vi.fn(() => Promise.resolve({ id: 1 })) },
       variant: {
@@ -46,7 +47,7 @@ describe('releasesService ', async () => {
 
       const result = await getReleases({ start: 1, count: 2 }, prismaMock)
 
-      expect(result).toStrictEqual(mockedReleasesResult)
+      expect(result).toStrictEqual({ releases: mockedReleasesResult, total: 2 })
       expect(prismaMock.release.findMany).toHaveBeenCalledWith(expect.objectContaining({ skip: 1, take: 2 }))
     })
 
@@ -55,7 +56,7 @@ describe('releasesService ', async () => {
 
       const result = await getReleases({}, prismaMock)
 
-      expect(result).toStrictEqual(mockedReleasesResult)
+      expect(result).toStrictEqual({ releases: mockedReleasesResult, total: 2 })
 
       expect(prismaMock.release.findMany).toHaveBeenCalledWith(expect.objectContaining({ skip: 0, take: 10 }))
     })
@@ -65,7 +66,7 @@ describe('releasesService ', async () => {
 
       const result = await getReleases({}, prismaMock)
 
-      expect(result).toStrictEqual([])
+      expect(result).toStrictEqual({ releases: [], total: 0 })
     })
   })
 
