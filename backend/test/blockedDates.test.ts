@@ -9,6 +9,11 @@ import {
 } from '@/lib/blockedDates'
 
 let prismaMock: any
+let findManyResult = [{ day: new Date('2027-2-5') }]
+function setFindManyResult(next: { day: Date }[]) {
+  findManyResult = next
+}
+
 const { assertDayNotManuallyBlockedMock } = vi.hoisted(() => ({
   assertDayNotManuallyBlockedMock: vi.fn(() => Promise.resolve(true)),
 }))
@@ -21,75 +26,81 @@ vi.mock(import('@/lib/asserts'), () => ({
 describe('blockedDates ', () => {
   beforeEach(() => {
     prismaMock = {
-      calendar_dates: {
-        findMany: vi.fn(() => Promise.resolve([{ day: new Date('2027-2-5') }])),
+      calender_date: {
+        findMany: vi.fn(() => Promise.resolve(findManyResult)),
       },
     }
   })
   describe('isDateAutoBlocked()', () => {
     test('returns false for a regular weekday (Friday 5. feb 2027)', () => {
-      expect(isDateAutoBlocked(new Date('2027-2-5'))).toBe(false)
+      expect(isDateAutoBlocked(new Date('2027-02-05'))).toBe(false)
     })
     test('returns true for Saturday', () => {
-      expect(isDateAutoBlocked(new Date('2027-2-6'))).toBe(true)
+      expect(isDateAutoBlocked(new Date('2027-02-06'))).toBe(true)
     })
     test('returns true for Sunday', () => {
-      expect(isDateAutoBlocked(new Date('2027-2-7'))).toBe(true)
+      expect(isDateAutoBlocked(new Date('2027-02-07'))).toBe(true)
     })
     test('returns true for a static holiday (1. mai 2027)', () => {
-      expect(isDateAutoBlocked(new Date('2027-5-1'))).toBe(true)
+      expect(isDateAutoBlocked(new Date('2027-05-01'))).toBe(true)
     })
     test('returns true for a movable holiday ("1. Påskedag" 28. march 2027)', () => {
-      expect(isDateAutoBlocked(new Date('2027-3-28'))).toBe(true)
+      expect(isDateAutoBlocked(new Date('2027-03-28'))).toBe(true)
     })
   })
   describe('isDateBlocked() ', () => {
     test('returns true if date automatically blocked', async () => {
-      expect(await isDateBlocked(new Date('2027-2-6'))).toBe(true)
+      expect(await isDateBlocked(new Date('2027-02-06'), prismaMock)).toBe(true)
     })
     test('returns true if date is manually blocked', async () => {
       assertDayNotManuallyBlockedMock.mockResolvedValueOnce(false)
-      expect(await isDateBlocked(new Date('2027-2-5'))).toBe(true)
+      expect(await isDateBlocked(new Date('2027-02-05'), prismaMock)).toBe(true)
     })
     test('returns false if date neither manually blocked nor aotumatically blocked', async () => {
       assertDayNotManuallyBlockedMock.mockResolvedValueOnce(true)
-      expect(await isDateBlocked(new Date('2027-2-5'))).toBe(false)
+      expect(await isDateBlocked(new Date('2027-02-05'), prismaMock)).toBe(false)
     })
   })
 
   describe('getBlockedDatesInPeriod()', () => {
     test('marks manually blocked weekday as BLOCKED', async () => {
-      const from = new Date('2027-2-5')
-      const to = new Date('2027-2-5')
-      prismaMock.mockResolvedValueOnce([{ day: new Date('2027-2-5') }])
+      const from = new Date('2027-02-05')
+      const to = new Date('2027-02-05')
+      to.setHours(23, 59, 59, 999)
+      setFindManyResult([{ day: new Date('2027-02-05') }])
 
-      const result = await getBlockedDatesInPeriod(from, to)
+      const result = await getBlockedDatesInPeriod(from, to, prismaMock)
 
-      expect(result).toStrictEqual({ '2027-02-05': { status: 'BLOCKED' } })
+      const manuallyBlockedKey = new Date('2027-02-05').toISOString().slice(0, 10)
+      expect(result).toStrictEqual({ [manuallyBlockedKey]: { status: 'BLOCKED' } })
     })
 
     test('does not include free weekdays in result', async () => {
-      const from = new Date('2027-2-1')
-      const to = new Date('2027-2-5')
-      prismaMock.mockResolvedValueOnce([])
+      const from = new Date('2027-02-01')
+      const to = new Date('2027-02-05')
+      setFindManyResult([])
 
-      const result = await getBlockedDatesInPeriod(from, to)
+      const result = await getBlockedDatesInPeriod(from, to, prismaMock)
 
       expect(result).toStrictEqual({})
     })
 
     test('handles range spanning both blocked and free days', async () => {
-      const from = new Date('2027-2-1')
-      const to = new Date('2027-2-7')
-      prismaMock.mockResolvedValueOnce([{ day: new Date('2027-2-5') }])
+      const from = new Date('2027-02-01')
+      const to = new Date('2027-02-07')
 
-      const result = await getBlockedDatesInPeriod(from, to)
+      setFindManyResult([{ day: new Date('2027-02-03') }])
 
-      expect(result['2027-02-05']).toStrictEqual({ status: 'BLOCKED' }) // manually blocked
-      expect(result['2027-02-06']).toStrictEqual({ status: 'BLOCKED' }) // Saturday
-      expect(result['2027-02-07']).toStrictEqual({ status: 'BLOCKED' }) // Sunday
-      expect(result['2027-02-01']).toBeUndefined() // free weekday
-      expect(result['2027-02-04']).toBeUndefined() // free weekday
+      const result = await getBlockedDatesInPeriod(from, to, prismaMock)
+
+      const manuallyBlockedKey = new Date('2027-02-03').toISOString().slice(0, 10)
+      const saturdayKey = new Date('2027-02-06').toISOString().slice(0, 10)
+      const sundayKey = new Date('2027-02-07').toISOString().slice(0, 10)
+      expect(result).toStrictEqual({
+        [manuallyBlockedKey]: { status: 'BLOCKED' },
+        [saturdayKey]: { status: 'BLOCKED' },
+        [sundayKey]: { status: 'BLOCKED' },
+      })
     })
   })
 
@@ -100,7 +111,7 @@ describe('blockedDates ', () => {
     })
   })
   describe('calculateMovableHolidays() ', () => {
-    test('returns right movable holidays for 2026-2028', () => {
+    test('returns correct movable holidays for 2026-2028', () => {
       // https://no.wikipedia.org/wiki/Bevegelige_merkedager
 
       expect(calculateMovableHolidays(2026)).toStrictEqual(movableHolidaysByYear['2026'])

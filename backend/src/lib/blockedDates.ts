@@ -1,6 +1,6 @@
-import { prisma } from '@/lib/prisma'
 import { assertDayNotManuallyBlocked } from '@/lib/asserts'
 import { CalenderDate } from '@ssbno-statreg/shared'
+import { CalendarDatePrisma } from '@/services/calendarService'
 
 export const HOLIDAYS: Record<number, Date[]> = {}
 
@@ -24,14 +24,14 @@ export function isDateAutoBlocked(date: Date): Boolean {
   return false
 }
 
-export async function isDateBlocked(date: Date): Promise<Boolean> {
+export async function isDateBlocked(date: Date, prisma: CalendarDatePrisma): Promise<Boolean> {
   if (isDateAutoBlocked(date)) return true
   if (!(await assertDayNotManuallyBlocked(prisma, date))) return true
 
   return false
 }
 
-export async function getBlockedDatesInPeriod(from: Date, to: Date): Promise<CalenderDate> {
+export async function getBlockedDatesInPeriod(from: Date, to: Date, prisma: CalendarDatePrisma): Promise<CalenderDate> {
   const manuallyBlockedDates = await prisma.calender_date.findMany({
     where: {
       day: {
