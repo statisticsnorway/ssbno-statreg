@@ -344,8 +344,13 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items: { $ref: '#/components/schemas/Release_listing' }
+                type: object
+                properties:
+                  total:
+                    type: integer
+                  releases:
+                    type: array
+                    items: { $ref: '#/components/schemas/Release_listing' }
 
   /statistics/{shortname}/variants:
     post:
@@ -420,8 +425,13 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items: { $ref: '#/components/schemas/Release_listing' }
+                type: object
+                properties:
+                  total:
+                    type: integer
+                  releases:
+                    type: array
+                    items: { $ref: '#/components/schemas/Release_listing' }
     post:
       summary: Create a new release
       tags: [statistics]
@@ -467,8 +477,13 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items: { $ref: '#/components/schemas/Release_listing' }
+                type: object
+                properties:
+                  total:
+                    type: integer
+                  releases:
+                    type: array
+                    items: { $ref: '#/components/schemas/Release_listing' }
   /releases/{id}:
     get:
       summary: Get release by id

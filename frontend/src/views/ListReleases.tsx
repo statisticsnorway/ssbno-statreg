@@ -1,5 +1,14 @@
 import { useState, useEffect } from 'react'
-import { Heading, Paragraph, Table, Field, Label, Select } from '@digdir/designsystemet-react'
+import {
+  Heading,
+  Paragraph,
+  Table,
+  Field,
+  Label,
+  Select,
+  Pagination,
+  usePagination,
+} from '@digdir/designsystemet-react'
 import { type ReleaseListing } from '@ssbno-statreg/shared'
 import { formatPublishTime, formatDate } from '../lib/utils'
 import { ApprovalStatusBadge } from '../components/ApprovalStatus'
@@ -9,25 +18,51 @@ import client from '../api'
 function ListReleases() {
   const [releases, setReleases] = useState<ReleaseListing[]>([])
 
-  const defaultRowCount = 10
-  const [showRowCount, setShowRowCount] = useState(defaultRowCount)
+  const [showRowCount, setShowRowCount] = useState(10)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [total, setTotal] = useState(0)
+
+  const { pages, prevButtonProps, nextButtonProps, hasNext, hasPrev } = usePagination({
+    currentPage,
+    setCurrentPage,
+    totalPages: Math.ceil(total / showRowCount),
+    showPages: 6,
+  })
 
   useEffect(() => {
     async function fetchReleases() {
-      const { data, error } = await client.GET('/releases', { params: { query: { start: 0, count: showRowCount } } })
+      const start = (currentPage - 1) * showRowCount
+      const { data, error } = await client.GET('/releases', { params: { query: { start, count: showRowCount } } })
       if (error) {
         const errorMessage = (error as any).error
         console.log(errorMessage)
         alert(errorMessage)
       } else {
-        setReleases(data)
+        setReleases(data?.releases ?? [])
+        setTotal(data.total ?? 0)
       }
     }
     fetchReleases()
-  }, [showRowCount])
+  }, [currentPage, showRowCount])
 
   function handleChangeShowRowCount(e: React.ChangeEvent<HTMLSelectElement>) {
     setShowRowCount(Number(e.target.value))
+    setCurrentPage(1)
+  }
+
+  const tableHeaderCells = [
+    'Kortnavn',
+    'Statistikknavn',
+    'Variant',
+    'Måleperiodetittel',
+    'Målperiode fra',
+    'Måleperiode til',
+    'Publiseringsdato',
+    'Status',
+  ]
+
+  function renderListReleasesTableHeaderCells() {
+    return tableHeaderCells.map((header) => <Table.HeaderCell key={header}>{header}</Table.HeaderCell>)
   }
 
   const TruncatedTableCell = ({ value, maxWidth = '340px' }: { value: string | undefined; maxWidth?: string }) => (
@@ -37,7 +72,7 @@ function ListReleases() {
   )
 
   // TODO: MIM-2555: Add måleperiodetittel after logic is implemented
-  function renderReleaseListTableRows() {
+  function renderListReleasesTableRows() {
     return Object.entries(releases).map(([__, release]) => (
       <Table.Row key={`${release.publish_time}-${release.id}`}>
         <Table.Cell>{release.statistic?.shortname ?? ''}</Table.Cell>
@@ -54,22 +89,51 @@ function ListReleases() {
     ))
   }
 
-  const tableHeaderCells = [
-    'Kortnavn',
-    'Statistikknavn',
-    'Variant',
-    'Måleperiodetittel',
-    'Målperiode fra',
-    'Måleperiode til',
-    'Publiseringsdato',
-    'Status',
-  ]
-
-  function renderReleaseListTableHeaderCells() {
-    return tableHeaderCells.map((header) => <Table.HeaderCell key={header}>{header}</Table.HeaderCell>)
+  function renderShowRowCountSelect() {
+    return (
+      <Field>
+        <Label>Vis antall rader</Label>
+        <Select defaultValue={showRowCount} onChange={handleChangeShowRowCount}>
+          <Select.Option value='10'>10</Select.Option>
+          <Select.Option value='20'>20</Select.Option>
+          <Select.Option value='50'>50</Select.Option>
+          <Select.Option value='100'>100</Select.Option>
+        </Select>
+      </Field>
+    )
   }
 
-  function renderReleaseListingTable() {
+  function renderListReleasesTablePagination() {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', marginTop: 'var(--ds-size-18)' }}>
+        <Pagination aria-label='pagineringsmeny'>
+          <Pagination.List>
+            <Pagination.Item>
+              <Pagination.Button {...prevButtonProps} disabled={!hasPrev}>
+                Forrige
+              </Pagination.Button>
+            </Pagination.Item>
+            {pages.map(({ page, itemKey, buttonProps }) => (
+              <Pagination.Item key={itemKey}>
+                {typeof page === 'number' && (
+                  <Pagination.Button aria-label={`Side ${page}`} {...buttonProps}>
+                    {page}
+                  </Pagination.Button>
+                )}
+              </Pagination.Item>
+            ))}
+            <Pagination.Item>
+              <Pagination.Button {...nextButtonProps} disabled={!hasNext}>
+                Neste
+              </Pagination.Button>
+            </Pagination.Item>
+          </Pagination.List>
+        </Pagination>
+      </div>
+    )
+  }
+
+  function renderListReleasesTable() {
     return (
       <>
         <div style={{ minWidth: '100%' }}>
@@ -78,26 +142,19 @@ function ListReleases() {
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'center',
-              alignItems: 'end',
+              alignItems: 'end', 
               marginBottom: 'var(--ds-size-8)',
             }}
           >
-            <Field>
-              <Label>Vis antall rader</Label>
-              <Select defaultValue={defaultRowCount} onChange={handleChangeShowRowCount}>
-                <Select.Option value='10'>10</Select.Option>
-                <Select.Option value='20'>20</Select.Option>
-                <Select.Option value='50'>50</Select.Option>
-                <Select.Option value='100'>100</Select.Option>
-              </Select>
-            </Field>
+            {renderShowRowCountSelect()}
           </div>
           <Table>
             <Table.Head>
-              <Table.Row>{renderReleaseListTableHeaderCells()}</Table.Row>
+              <Table.Row>{renderListReleasesTableHeaderCells()}</Table.Row>
             </Table.Head>
-            <Table.Body>{renderReleaseListTableRows()}</Table.Body>
+            <Table.Body>{renderListReleasesTableRows()}</Table.Body>
           </Table>
+          {renderListReleasesTablePagination()}
         </div>
       </>
     )
@@ -110,7 +167,7 @@ function ListReleases() {
         <Paragraph>TBA</Paragraph>
       </div>
 
-      {renderReleaseListingTable()}
+      {renderListReleasesTable()}
     </>
   )
 }
