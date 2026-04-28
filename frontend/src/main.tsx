@@ -1,7 +1,5 @@
 import '@digdir/designsystemet-css'
 import '@digdir/designsystemet-css/theme'
-import '@navikt/ds-css'  
-
 
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'

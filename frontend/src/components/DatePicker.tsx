@@ -1,3 +1,5 @@
+import '@navikt/ds-css'
+
 import { DatePicker as AkselDatePicker } from '@navikt/ds-react'
 import type { CalendarDates } from '@ssbno-statreg/shared'
 
