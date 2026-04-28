@@ -1,14 +1,6 @@
 import { useState, useEffect } from 'react'
-import {
-  Heading,
-  Table,
-  Field,
-  Label,
-  Select,
-  Pagination,
-  usePagination,
-} from '@digdir/designsystemet-react'
-import { type ReleaseListing } from '@ssbno-statreg/shared'
+import { Heading, Table, Field, Label, Select, Pagination, usePagination } from '@digdir/designsystemet-react'
+import type { ReleaseListing, CalendarDates } from '@ssbno-statreg/shared'
 import { formatPublishTime, formatDate } from '../lib/utils'
 import { ApprovalStatusBadge } from '../components/ApprovalStatus'
 import { DatePicker } from '../components/DatePicker'
@@ -142,7 +134,7 @@ function ListReleases() {
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'center',
-              alignItems: 'end', 
+              alignItems: 'end',
               marginBottom: 'var(--ds-size-8)',
             }}
           >
@@ -160,13 +152,29 @@ function ListReleases() {
     )
   }
 
+  const exampleCalendarDates: CalendarDates = {
+    '2026-04-03': { status: 'free' },
+    '2026-04-05': { status: 'few' },
+    '2026-04-10': { status: 'more' },
+    '2026-04-15': { status: 'full' },
+    '2026-04-20': { status: 'blocked' },
+    '2026-04-25': { status: 'few' },
+  }
+
   return (
     <>
-      <Heading level={1} data-size='sm'>Publiseringsoversikt</Heading>
+      <Heading level={1} data-size='sm'>
+        Publiseringsoversikt
+      </Heading>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--ds-size-1)' }}>
         <Heading level={2}>Publiseringskalender</Heading>
-        <DatePicker calendarDates={{}} />
+        <DatePicker
+          calendarDates={exampleCalendarDates}
+          dropdownCaption
+          fromDate={new Date(2025, 0, 1)}
+          toDate={new Date(2027, 11, 31)}
+        />
       </div>
 
       {renderListReleasesTable()}
