@@ -1,4 +1,5 @@
-import '@navikt/ds-css'
+import "@navikt/ds-css/dist/global/tokens.css"
+import '@navikt/ds-css/dist/components.css'
 
 import { DatePicker as AkselDatePicker } from '@navikt/ds-react'
 import type { CalendarDates } from '@ssbno-statreg/shared'
@@ -27,6 +28,11 @@ export function DatePicker({ calendarDates, ...props }: DatePickerProps) {
       modifiers={{ full, more, few }}
       modifiersStyles={modifiersStyles}
       disabled={blocked}
+      style={{
+        padding: '20px 16px',
+        boxShadow: ' 0 0 1px 0 rgba(0, 0, 0, 0.15), 0 1px 3px 0 rgba(0, 0, 0, 0.10), 0 5px 12px 0 rgba(0, 0, 0, 0.13)',
+        borderRadius: '8px',
+      }}
       {...props}
     />
   )
