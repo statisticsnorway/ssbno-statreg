@@ -19,6 +19,7 @@ export type StatisticUpdate = components['schemas']['Statistic_update']
 export type StatisticListing = components['schemas']['Statistic_listing']
 export type Variant = components['schemas']['Variant']
 
+// TODO: Remove workaround for CalendarDateStatus and CalendarDates after MIM-2661 has been merged
 export type CalendarDateStatus = 'blocked' | 'free' | 'few' | 'more' | 'full'
 
 export type CalendarDates = {
