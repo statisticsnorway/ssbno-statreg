@@ -1,4 +1,8 @@
-import "@navikt/ds-css/dist/global/tokens.css"
+import '@navikt/ds-css/dist/global/fonts.css'
+import '@navikt/ds-css/dist/global/tokens.css'
+import '@navikt/ds-css/dist/global/reset.css'
+import '@navikt/ds-css/dist/global/baseline.css'
+import '@navikt/ds-css/dist/global/print.css'
 import '@navikt/ds-css/dist/components.css'
 
 import { DatePicker as AkselDatePicker } from '@navikt/ds-react'
