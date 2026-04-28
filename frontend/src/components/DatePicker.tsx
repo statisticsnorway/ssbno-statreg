@@ -12,6 +12,11 @@ type DatePickerProps = React.ComponentProps<typeof AkselDatePicker.Standalone> &
   calendarDates: CalendarDates
 }
 
+function parseDate(dateString: string): Date {
+  const [year, month, day] = dateString.split('-').map(Number)
+  return new Date(year, month - 1, day)
+}
+
 export function DatePicker({ calendarDates, ...props }: DatePickerProps) {
   const full: Date[] = []
   const more: Date[] = []
@@ -28,9 +33,13 @@ export function DatePicker({ calendarDates, ...props }: DatePickerProps) {
 
   return (
     <AkselDatePicker.Standalone
-      // @ts-expect-error modifiers passes through to React's DayPicker
+      // @ts-expect-error: Allow custom "modifiers" prop for color coding
       modifiers={{ full, more, few }}
-      modifiersStyles={modifiersStyles}
+      modifiersStyles={{
+        full: { backgroundColor: 'var(--ds-color-danger-base-default)', color: 'white' },
+        more: { backgroundColor: 'var(--ds-color-warning-base-default)', color: 'white' },
+        few: { backgroundColor: 'var(--ds-color-success-base-default)', color: 'white' },
+      }}
       disabled={blocked}
       style={{
         padding: '20px 16px',
@@ -40,15 +49,4 @@ export function DatePicker({ calendarDates, ...props }: DatePickerProps) {
       {...props}
     />
   )
-}
-
-function parseDate(dateString: string): Date {
-  const [year, month, day] = dateString.split('-').map(Number)
-  return new Date(year, month - 1, day)
-}
-
-const modifiersStyles = {
-  full: { backgroundColor: 'var(--ds-color-danger-base-default)', color: 'white' },
-  more: { backgroundColor: 'var(--ds-color-warning-base-default)', color: 'white' },
-  few: { backgroundColor: 'var(--ds-color-success-base-default)', color: 'white' },
 }

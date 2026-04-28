@@ -190,8 +190,8 @@ function ListReleases() {
         <Heading level={2}>Publiseringskalender</Heading>
         <DatePicker
           calendarDates={exampleCalendarDates}
-          fromDate={new Date(2025, 0, 1)}
-          toDate={new Date(2027, 11, 31)}
+          fromDate={new Date(2026, 3, 1)}
+          toDate={new Date(2026, 3, 30)}
         />
       </div>
 
