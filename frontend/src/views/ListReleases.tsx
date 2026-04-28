@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
-import { Heading, Paragraph, Table, Field, Label, Select } from '@digdir/designsystemet-react'
+import { Heading, Table, Field, Label, Select } from '@digdir/designsystemet-react'
 import { type ReleaseListing } from '@ssbno-statreg/shared'
 import { formatPublishTime, formatDate } from '../lib/utils'
 import { ApprovalStatusBadge } from '../components/ApprovalStatus'
+import { DatePicker } from '../components/DatePicker'
 
 import client from '../api'
 
@@ -105,9 +106,11 @@ function ListReleases() {
 
   return (
     <>
-      <div>
-        <Heading level={1}>Publiseringsoversikt</Heading>
-        <Paragraph>TBA</Paragraph>
+      <Heading level={1} data-size='sm'>Publiseringsoversikt</Heading>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--ds-size-1)' }}>
+        <Heading level={2}>Publiseringskalender</Heading>
+        <DatePicker calendarDates={{}} />
       </div>
 
       {renderReleaseListingTable()}
