@@ -5,8 +5,8 @@ info:
   version: 0.1.0
   description: API for managing publications, statistics and metadata for Statistics Norway. This API is under development, and there will be breaking changes.
 servers:
-  - url: https://ssbno-statreg.intern.test.ssb.no
-  - url: http://localhost:8080
+  - url: https://ssbno-statreg.intern.test.ssb.no/statistikkregisteret/api
+  - url: http://localhost:8080/statistikkregisteret/api
 
 tags:
   - name: calendar
@@ -344,8 +344,13 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items: { $ref: '#/components/schemas/Release_listing' }
+                type: object
+                properties:
+                  total:
+                    type: integer
+                  releases:
+                    type: array
+                    items: { $ref: '#/components/schemas/Release_listing' }
 
   /statistics/{shortname}/variants:
     post:
@@ -420,8 +425,13 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items: { $ref: '#/components/schemas/Release_listing' }
+                type: object
+                properties:
+                  total:
+                    type: integer
+                  releases:
+                    type: array
+                    items: { $ref: '#/components/schemas/Release_listing' }
     post:
       summary: Create a new release
       tags: [statistics]
@@ -467,8 +477,13 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items: { $ref: '#/components/schemas/Release_listing' }
+                type: object
+                properties:
+                  total:
+                    type: integer
+                  releases:
+                    type: array
+                    items: { $ref: '#/components/schemas/Release_listing' }
   /releases/{id}:
     get:
       summary: Get release by id
