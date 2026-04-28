@@ -1,5 +1,5 @@
 export * from './enums.js'
-import type { components } from './api-types'
+import type { components, paths } from './api-types'
 
 export type BlockedReleaseDate = components['schemas']['Blocked_release_date']
 export type CalenderDate = components['schemas']['Calender_date']
@@ -17,3 +17,5 @@ export type StatisticCreate = components['schemas']['Statistic_create']
 export type StatisticUpdate = components['schemas']['Statistic_update']
 export type StatisticListing = components['schemas']['Statistic_listing']
 export type Variant = components['schemas']['Variant']
+
+export type ReleaseListingResponse = paths['/releases']['get']['responses']['200']['content']['application/json']
