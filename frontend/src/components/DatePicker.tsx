@@ -32,7 +32,7 @@ export function DatePicker({ calendarDates, showColorCoding, ...props }: DatePic
   const statusStyles: Record<Exclude<keyof typeof DayStatus, 'NONE'>, { backgroundColor: string }> = {
     FULL: { backgroundColor: 'var(--ds-color-danger-base-default)' },
     MANY: { backgroundColor: 'var(--ds-color-warning-base-default)' },
-    FEW: { backgroundColor: 'var(--ds-color-success-base-default)' },
+    FEW: { backgroundColor: 'var(--ds-color-base-default)' }, // TODO: Our base-default color is green due to the theme
     BLOCKED: { backgroundColor: 'var(--ds-color-neutral-border-subtle)' },
   }
 
