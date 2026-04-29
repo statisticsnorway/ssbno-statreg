@@ -697,7 +697,7 @@ export interface components {
      *         "status": "blocked"
      *       },
      *       "2026-05-04": {
-     *         "status": "free"
+     *         "status": "none"
      *       },
      *       "2026-05-05": {
      *         "status": "few"
@@ -706,7 +706,7 @@ export interface components {
      */
     Calender_date: {
       [key: string]: {
-        /** @description Can be one of "blocked", "free", "few", "more", "full" */
+        /** @description Can be one of "blocked", "none", "few", "many", "full" */
         status: string
       }
     }
