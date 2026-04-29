@@ -47,9 +47,8 @@ export async function getBlockedDatesInPeriod(from: Date, to: Date, prisma: Cale
   const d = new Date(from)
   while (d <= to) {
     const key = d.toISOString().slice(0, 10)
-    if (manuallyBlockedDates.find((day) => day.day.toISOString().slice(0, 10) === key)) {
-      blockedDates[key] = { status: 'BLOCKED' }
-    } else if (isDateAutoBlocked(d)) {
+    const isDateBlockedManually = manuallyBlockedDates.find((day) => day.day.toISOString().slice(0, 10) === key)
+    if (isDateBlockedManually || isDateAutoBlocked(d)) {
       blockedDates[key] = { status: 'BLOCKED' }
     }
     d.setDate(d.getDate() + 1)
