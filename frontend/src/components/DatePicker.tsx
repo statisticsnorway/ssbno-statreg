@@ -43,7 +43,7 @@ export function DatePicker({ calendarDates, showColorCodingExplanation, ...props
   const sharedStyles = {
     color: 'var(--ds-color-accent-background-default)',
     borderRadius: '8px',
-    boxShadow: 'inset 0 0 0 2px var(--ds-color-accent-background-default)'
+    boxShadow: 'inset 0 0 0 2px var(--ds-color-accent-background-default)',
   }
 
   return (
