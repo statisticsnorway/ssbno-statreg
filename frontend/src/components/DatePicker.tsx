@@ -29,11 +29,12 @@ export function DatePicker({ calendarDates, showColorCoding, ...props }: DatePic
     else if (value.status === 'blocked') blocked.push(date)
   }
 
-  const statusStyles: Record<Exclude<keyof typeof DayStatus, 'NONE'>, { backgroundColor: string }> = {
+  const statusColors: Record<keyof typeof DayStatus, { backgroundColor: string }> = {
     FULL: { backgroundColor: 'var(--ds-color-danger-base-default)' },
     MANY: { backgroundColor: 'var(--ds-color-warning-base-default)' },
     FEW: { backgroundColor: 'var(--ds-color-base-default)' }, // TODO: Our base-default color is green due to the theme
     BLOCKED: { backgroundColor: 'var(--ds-color-neutral-border-subtle)' },
+    NONE: { backgroundColor: 'var(--ds-color-base-background)' },
   }
 
   const sharedStyles = {
@@ -47,13 +48,13 @@ export function DatePicker({ calendarDates, showColorCoding, ...props }: DatePic
         // @ts-expect-error: Allow custom "modifiers" prop for color coding
         modifiers={{ full, many, few, blocked }}
         modifiersStyles={{
-          full: { ...statusStyles.FULL, ...sharedStyles },
-          many: { ...statusStyles.MANY, ...sharedStyles },
-          few: { ...statusStyles.FEW, ...sharedStyles },
+          full: { ...statusColors.FULL, ...sharedStyles },
+          many: { ...statusColors.MANY, ...sharedStyles },
+          few: { ...statusColors.FEW, ...sharedStyles },
           blocked: {
-            backgroundColor: 'var(--ds-color-neutral-border-subtle)',
-            textDecoration: 'line-through',
+            ...statusColors.BLOCKED,
             ...sharedStyles,
+            textDecoration: 'line-through',
           },
         }}
         style={{
@@ -63,6 +64,7 @@ export function DatePicker({ calendarDates, showColorCoding, ...props }: DatePic
         }}
         {...props}
       />
+
       {showColorCoding && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--ds-size-2)' }}>
           {Object.entries(DayStatus).map(([key, value]) => (
@@ -74,7 +76,7 @@ export function DatePicker({ calendarDates, showColorCoding, ...props }: DatePic
                   height: '30px',
                   borderRadius: '3px',
                   ...(key === 'NONE' ? { border: '1px solid black' } : {}),
-                  ...statusStyles[key as keyof typeof statusStyles],
+                  ...statusColors[key as keyof typeof statusColors],
                 }}
               />
               <Paragraph data-size='xs'>{key === 'BLOCKED' ? value + ' dato' : value}</Paragraph>
