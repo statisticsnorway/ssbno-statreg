@@ -41,7 +41,7 @@ export default function CreateRelease() {
         <Tabs.Panel style={{ padding: '0' }} value='selected-publish-date'>
           {/* TODO: Placeholder date */}
           <Paragraph>
-            Innmeldte datoer den {formatDate(Object.entries(releases).map(([__, release]) => release)[0]?.publish_time)}
+            Innmeldte datoer den {formatDate(releases[0]?.publish_time)}
           </Paragraph>
           <ReleasesTable releases={releases} />
         </Tabs.Panel>
