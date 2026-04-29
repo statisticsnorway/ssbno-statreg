@@ -31,17 +31,19 @@ export function DatePicker({ calendarDates, showColorCodingExplanation, ...props
     else if (value.status === 'blocked') blocked.push(date)
   }
 
+  // TODO: Overwriting colors onSelect is tricky
   const statusColors: Record<keyof typeof DayStatus, { backgroundColor: string }> = {
     FULL: { backgroundColor: 'var(--ds-color-danger-base-default)' },
     MANY: { backgroundColor: 'var(--ds-color-warning-base-default)' },
-    FEW: { backgroundColor: 'var(--ds-color-base-default)' }, // TODO: Our base-default color is green due to the theme
-    BLOCKED: { backgroundColor: 'var(--ds-color-neutral-border-subtle)' },
-    NONE: { backgroundColor: 'var(--ds-color-base-background)' },
+    FEW: { backgroundColor: 'var(--ds-color-info-border-default)' },
+    BLOCKED: { backgroundColor: 'var(--ds-color-neutral-surface-hover )' },
+    NONE: { backgroundColor: 'var(--ds-color-accent-background-default)' },
   }
 
   const sharedStyles = {
-    color: 'white',
+    color: 'var(--ds-color-accent-background-default)',
     borderRadius: '8px',
+    boxShadow: 'inset 0 0 0 2px var(--ds-color-accent-background-default)'
   }
 
   return (
@@ -56,7 +58,7 @@ export function DatePicker({ calendarDates, showColorCodingExplanation, ...props
           few: { ...statusColors.FEW, ...sharedStyles },
           blocked: {
             ...statusColors.BLOCKED,
-            ...sharedStyles,
+            borderRadius: sharedStyles.borderRadius,
             textDecoration: 'line-through',
           },
         }}
@@ -70,7 +72,7 @@ export function DatePicker({ calendarDates, showColorCodingExplanation, ...props
               <div
                 className='datepicker-explanation-colors'
                 style={{
-                  ...(key === 'NONE' ? { border: '1px solid black' } : {}),
+                  ...(key === 'NONE' ? { border: '1px solid var(--ds-color-text-default)' } : {}),
                   ...statusColors[key as keyof typeof statusColors],
                 }}
               />
