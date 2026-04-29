@@ -27,15 +27,20 @@ export function DatePicker({ calendarDates, ...props }: DatePickerProps) {
     else if (value.status === 'blocked') blocked.push(date)
   }
 
+  const sharedStyles = {
+    color: 'white', 
+    borderRadius: '8px',
+  }
+  
   return (
     <AkselDatePicker.Standalone
       // @ts-expect-error: Allow custom "modifiers" prop for color coding
       modifiers={{ full, more, few, blocked }}
       modifiersStyles={{
-        full: { backgroundColor: 'var(--ds-color-danger-base-default)', color: 'white' },
-        more: { backgroundColor: 'var(--ds-color-warning-base-default)', color: 'white' },
-        few: { backgroundColor: 'var(--ds-color-success-base-default)', color: 'white' },
-        blocked: { backgroundColor: 'var(--ds-color-neutral-border-subtle)', textDecoration: 'line-through' }
+        full: { backgroundColor: 'var(--ds-color-danger-base-default)', ...sharedStyles },
+        more: { backgroundColor: 'var(--ds-color-warning-base-default)', ...sharedStyles },
+        few: { backgroundColor: 'var(--ds-color-success-base-default)', ...sharedStyles },
+        blocked: { backgroundColor: 'var(--ds-color-neutral-border-subtle)', textDecoration: 'line-through', ...sharedStyles }
       }}
       style={{
         padding: '20px 16px',
