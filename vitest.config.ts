@@ -8,4 +8,9 @@ export default defineConfig({
       '@ssbno-statreg/shared': path.resolve(__dirname, 'shared/src'),
     },
   },
+  test: {
+    env: {
+      TZ: 'UTC',
+    },
+  },
 })
