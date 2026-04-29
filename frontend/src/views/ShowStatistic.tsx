@@ -4,7 +4,7 @@ import { Heading, Paragraph, List, Link, Button, Divider, Details, Card } from '
 import { PersonPencilIcon } from '@navikt/aksel-icons'
 import { StatisticStatusTag } from '../components/StatisticStatusTag'
 import client from '../api'
-import {type Contact, type RegionLevel, type StatisticDetails, type Variant } from '@ssbno-statreg/shared'
+import { type RegionLevel, type StatisticDetails, type Variant, type StatisticStatus } from '@ssbno-statreg/shared'
 
 export default function ShowStatistic() {
   const [statistic, setStatistics] = useState<StatisticDetails>({})
@@ -24,7 +24,7 @@ export default function ShowStatistic() {
     fetchStatistic()
   }, [])
 
-  const statusCode = statistic.status?.code
+  const statusCode = statistic.status?.code as keyof typeof StatisticStatus
   const englishName = statistic.name_en ?? '-'
   const division = formatDivision(statistic.division)
   const regionLevels = statistic.statistic_region_levels ?? []
@@ -170,7 +170,7 @@ const revisionNames: Record<string, string> = {
 
 function formatContacts(contacts: StatisticDetails['contacts']): string[] {
   if (!contacts) return []
-  return contacts.map((contact: Contact) => {
+  return contacts.map((contact) => {
     const name = contact.name ?? '-'
     const initials = contact.email ? contact.email.split('@')[0] : '-'
     return `${name} (${initials})`
