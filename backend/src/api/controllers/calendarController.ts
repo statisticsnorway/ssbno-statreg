@@ -14,6 +14,7 @@ export default function calendarController(router: Router) {
     }
   })
 
+  // TODO MIM-2546 Locally the dates are one day off due to inconsistently handleing GMT vs local timezone
   router.get('/calendar', skipAuth, async (req, res) => {
     try {
       const from = req.query?.fromDate?.toString()

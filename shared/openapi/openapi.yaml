@@ -42,7 +42,7 @@ components:
         "2026-05-03": 
           status: "blocked"
         "2026-05-04":
-          status: "free"
+          status: "none"
         "2026-05-05":
           status: "few" 
       patternProperties:
@@ -51,7 +51,7 @@ components:
           properties:
             status:
               type: string
-              description: Can be one of "blocked", "free", "few", "more", "full"
+              description: Can be one of "blocked", "none", "few", "many", "full"
           required:
             - status
       additionalProperties: false
