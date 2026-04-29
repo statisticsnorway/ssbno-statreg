@@ -13,7 +13,7 @@ export default function CreateRelease() {
 
   useEffect(() => {
     async function fetchReleases() {
-      const { data, error } = await client.GET('/releases', { params: { query: { start: 0, count: 20 } } })
+      const { data, error } = await client.GET('/releases', { params: { query: { start: 0, count: 10 } } })
       if (error) {
         const errorMessage = (error as any).error
         console.log(errorMessage)
