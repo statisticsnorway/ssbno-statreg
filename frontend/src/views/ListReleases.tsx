@@ -1,13 +1,5 @@
 import { useState, useEffect } from 'react'
-import {
-  Heading,
-  Paragraph,
-  Field,
-  Label,
-  Select,
-  Pagination,
-  usePagination,
-} from '@digdir/designsystemet-react'
+import { Heading, Paragraph, Field, Label, Select, Pagination, usePagination } from '@digdir/designsystemet-react'
 import { type ReleaseListing } from '@ssbno-statreg/shared'
 import { ReleasesTable } from '../components/ReleasesTable'
 
@@ -48,7 +40,7 @@ function ListReleases() {
     setCurrentPage(1)
   }
 
-  function renderShowRowCountSelect() {
+  const ShowRowCountSelect = () => {
     return (
       <Field>
         <Label>Vis antall rader</Label>
@@ -62,7 +54,7 @@ function ListReleases() {
     )
   }
 
-  function renderListReleasesTablePagination() {
+  const ListReleasesTablePagination = () => {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', marginTop: 'var(--ds-size-18)' }}>
         <Pagination aria-label='pagineringsmeny'>
@@ -92,28 +84,6 @@ function ListReleases() {
     )
   }
 
-  function renderListReleasesTable() {
-    return (
-      <>
-        <div style={{ minWidth: '100%' }}>
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              alignItems: 'end',
-              marginBottom: 'var(--ds-size-8)',
-            }}
-          >
-            {renderShowRowCountSelect()}
-          </div>
-          <ReleasesTable releases={releases} />
-          {renderListReleasesTablePagination()}
-        </div>
-      </>
-    )
-  }
-
   return (
     <>
       <div>
@@ -121,7 +91,11 @@ function ListReleases() {
         <Paragraph>TBA</Paragraph>
       </div>
 
-      {renderListReleasesTable()}
+      <ReleasesTable
+        releases={releases}
+        rowSelection={<ShowRowCountSelect />}
+        pagination={<ListReleasesTablePagination />}
+      />
     </>
   )
 }

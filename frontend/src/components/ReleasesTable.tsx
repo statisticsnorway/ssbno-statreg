@@ -1,9 +1,17 @@
+import type { ReactElement } from 'react'
 import { Table, Link } from '@digdir/designsystemet-react'
-import { formatPublishTime, formatDate } from '../lib/utils'
-import { ApprovalStatusBadge } from '../components/ApprovalStatus'
-import { type ReleaseListing } from '@ssbno-statreg/shared'
 
-export function ReleasesTable({ releases }: { releases: ReleaseListing[]} ) {
+import { type ReleaseListing } from '@ssbno-statreg/shared'
+import { ApprovalStatusBadge } from '../components/ApprovalStatus'
+import { formatPublishTime, formatDate } from '../lib/utils'
+
+type ReleaseTableProps = {
+  releases: ReleaseListing[]
+  rowSelection?: ReactElement
+  pagination?: ReactElement
+}
+
+export function ReleasesTable({ releases, rowSelection, pagination }: ReleaseTableProps) {
   const tableHeaderCells = [
     'Kortnavn',
     'Statistikknavn',
@@ -54,11 +62,25 @@ export function ReleasesTable({ releases }: { releases: ReleaseListing[]} ) {
   }
 
   return (
-    <Table>
-      <Table.Head>
-        <Table.Row>{renderListReleasesTableHeaderCells()}</Table.Row>
-      </Table.Head>
-      <Table.Body>{renderListReleasesTableRows()}</Table.Body>
-    </Table>
+    <div style={{ minWidth: '100%' }}>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'end',
+          marginBottom: 'var(--ds-size-8)',
+        }}
+      >
+        {rowSelection}
+      </div>
+      <Table>
+        <Table.Head>
+          <Table.Row>{renderListReleasesTableHeaderCells()}</Table.Row>
+        </Table.Head>
+        <Table.Body>{renderListReleasesTableRows()}</Table.Body>
+      </Table>
+      {pagination}
+    </div>
   )
 }
