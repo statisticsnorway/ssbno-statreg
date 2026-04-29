@@ -4,7 +4,7 @@ import { Heading, Paragraph, List, Link, Button, Divider, Details, Card } from '
 import { PersonPencilIcon } from '@navikt/aksel-icons'
 import { StatisticStatusTag } from '../components/StatisticStatusTag'
 import client from '../api'
-import { type RegionLevel, type StatisticDetails, type Variant, type Division, type StatisticStatus } from '@ssbno-statreg/shared'
+import { type RegionLevel, type StatisticDetails, type Variant, type StatisticStatus } from '@ssbno-statreg/shared'
 
 export default function ShowStatistic() {
   const [statistic, setStatistics] = useState<StatisticDetails>({})
@@ -131,7 +131,7 @@ function formatMainLanguage(language?: string): string {
   return language
 }
 
-function formatDivision(division: Division): string {
+function formatDivision(division: StatisticDetails["division"]): string {
   if (!division?.name) return '-'
   if (!division.code) return division.name
   return `${division.name} (${division.code})`
