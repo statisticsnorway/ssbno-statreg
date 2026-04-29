@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
-import { Heading, Tabs } from '@digdir/designsystemet-react'
+import { Heading, Paragraph, Tabs } from '@digdir/designsystemet-react'
 import { CalendarIcon } from '@navikt/aksel-icons'
 import { type ReleaseListing } from '@ssbno-statreg/shared'
 
+import { formatDate } from '../lib/utils'
 import { ReleasesTable } from '../components/ReleasesTable'
 import { ApprovalStatusTag } from '../components/ApprovalStatus'
 
@@ -10,12 +11,11 @@ import client from '../api'
 
 export default function CreateRelease() {
   const [releases, setReleases] = useState<ReleaseListing[]>([])
+  const [variantReleases, setVariantReleases] = useState<ReleaseListing[]>([])
 
   useEffect(() => {
-    async function fetchRelease() {
-      const { data, error } = await client.GET('/statistics/{shortname}/variants/{id}/releases', {
-        params: { path: { shortname: 'utlaerling', id: 9024 } },
-      })
+    async function fetchReleases() {
+      const { data, error } = await client.GET('/releases', { params: { query: { start: 0, count: 20 } } })
       if (error) {
         const errorMessage = (error as any).error
         console.log(errorMessage)
@@ -24,14 +24,28 @@ export default function CreateRelease() {
         setReleases(data?.releases ?? [])
       }
     }
-    fetchRelease()
+    fetchReleases()
+
+    async function fetchVariantRelease() {
+      const { data, error } = await client.GET('/statistics/{shortname}/variants/{id}/releases', {
+        params: { path: { shortname: 'utlaerling', id: 9024 } },
+      })
+      if (error) {
+        const errorMessage = (error as any).error
+        console.log(errorMessage)
+        alert(errorMessage)
+      } else {
+        setVariantReleases(data?.releases ?? [])
+      }
+    }
+    fetchVariantRelease()
   }, [])
 
-  const release = Object.entries(releases).map(([__, release]) => release)[0]
-  const statisticName = release?.statistic?.name ?? ''
-  const statisticShortname = release?.statistic?.shortname ?? ''
-  const variant = release?.frequency?.name ?? ''
-  const approvalStatus = release?.approval_status ?? ''
+  const variantRelease = Object.entries(variantReleases).map(([__, variantRelease]) => variantRelease)[0]
+  const statisticName = variantRelease?.statistic?.name ?? ''
+  const statisticShortname = variantRelease?.statistic?.shortname ?? ''
+  const variant = variantRelease?.frequency?.name ?? ''
+  const approvalStatus = variantRelease?.approval_status ?? ''
 
   function renderReleasesTables() {
     return (
@@ -41,17 +55,20 @@ export default function CreateRelease() {
             <CalendarIcon />
             Publiseringer på valgt dato
           </Tabs.Tab>
-          <Tabs.Tab value='all-releases'>
+          <Tabs.Tab value='variant-releases'>
             Alle publiseringer på {statisticShortname}, {variant}
           </Tabs.Tab>
         </Tabs.List>
+        {/* TODO: Padding can be set with classes instead of inline-css */}
         <Tabs.Panel style={{ padding: '0' }} value='selected-publish-date'>
-          {' '}
-          {/* TODO: Padding can be set with classes instead of inline-css */}
-          Innmeldte datoer den ...
+          {/* TODO: Placeholder date */}
+          <Paragraph>
+            Innmeldte datoer den {formatDate(Object.entries(releases).map(([__, release]) => release)[0]?.publish_time)}
+          </Paragraph>
+          <ReleasesTable releases={releases} />
         </Tabs.Panel>
-        <Tabs.Panel style={{ padding: '0' }} value='all-releases'>
-          <ReleasesTable releases={releases} /> {/* TODO: Include pagination and x row selection to component */}
+        <Tabs.Panel style={{ padding: '0' }} value='variant-releases'>
+          <ReleasesTable releases={variantReleases} />
         </Tabs.Panel>
       </Tabs>
     )
