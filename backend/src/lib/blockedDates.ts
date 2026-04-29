@@ -2,26 +2,18 @@ import { assertDayNotManuallyBlocked } from '@/lib/asserts'
 import { CalenderDate } from '@ssbno-statreg/shared'
 import { CalendarDatePrisma } from '@/services/calendarService'
 
-export const HOLIDAYS: Record<number, Date[]> = {}
+export const HOLIDAYS: Record<number, string[]> = {}
 
 export function isDateAutoBlocked(date: Date): Boolean {
   const sunday = 0
   const saturday = 6
-  if (date.getDay() == saturday || date.getDay() == sunday) return true
+  if (date.getUTCDay() === saturday || date.getUTCDay() === sunday) return true
 
-  const year = date.getFullYear()
+  const year = date.getUTCFullYear()
   const holidays = getHolidays(year)
-  //TODO MIM-2546: Make sure timezones are taken correctly into account
-  if (
-    holidays.some(
-      (d) =>
-        d.getDate() === date.getDate() && d.getMonth() === date.getMonth() && d.getFullYear() === date.getFullYear()
-    )
-  ) {
-    return true
-  }
+  const dateKey = date.toISOString().slice(0, 10)
 
-  return false
+  return holidays.includes(dateKey)
 }
 
 export async function isDateBlocked(date: Date, prisma: CalendarDatePrisma): Promise<Boolean> {
@@ -42,55 +34,50 @@ export async function getBlockedDatesInPeriod(from: Date, to: Date, prisma: Cale
     select: { day: true },
   })
 
+  const manuallyBlockedKeys = new Set(manuallyBlockedDates.map((day) => day.day.toISOString().slice(0, 10)))
+
   const blockedDates: CalenderDate = {}
 
-  const d = new Date(from)
+  const d = new Date(Date.UTC(from.getUTCFullYear(), from.getUTCMonth(), from.getUTCDate()))
   while (d <= to) {
     const key = d.toISOString().slice(0, 10)
-    const isDateBlockedManually = manuallyBlockedDates.find((day) => day.day.toISOString().slice(0, 10) === key)
-    if (isDateBlockedManually || isDateAutoBlocked(d)) {
+    if (manuallyBlockedKeys.has(key) || isDateAutoBlocked(d)) {
       blockedDates[key] = { status: 'BLOCKED' }
     }
-    d.setDate(d.getDate() + 1)
+    d.setUTCDate(d.getUTCDate() + 1)
   }
 
   return blockedDates
 }
 
-export function getHolidays(year: number): Date[] {
+export function getHolidays(year: number): string[] {
   if (!HOLIDAYS[year]) {
-    const holidaysOnStaticDates = [
-      new Date(`${year}-1-1`),
-      new Date(`${year}-5-1`),
-      new Date(`${year}-5-17`),
-      new Date(`${year}-12-25`),
-      new Date(`${year}-12-26`),
-    ]
-    HOLIDAYS[year] = holidaysOnStaticDates.concat(calculateMovableHolidays(year))
+    const staticHolidays = [`${year}-01-01`, `${year}-05-01`, `${year}-05-17`, `${year}-12-25`, `${year}-12-26`]
+    HOLIDAYS[year] = staticHolidays.concat(calculateMovableHolidays(year))
   }
   return HOLIDAYS[year]
 }
 
-export function calculateMovableHolidays(year: number): Date[] {
+export function calculateMovableHolidays(year: number): string[] {
   // https://no.wikipedia.org/wiki/Helligdager_i_Norge#Helligdager
 
   const easterSunday = calculateEasterSunday(year)
 
   // prettier-ignore
   const movableHolidays = {
-    "Skjærtorsdag": addDays(easterSunday, -3),
-    "Langfredag": addDays(easterSunday, -2),
-    "Første påskedag": easterSunday,
-    "Andre påskedag": addDays(easterSunday, 1),
-    "Kristi himmelfartsdag": addDays(easterSunday, 39),
-    "Første pinsedag": addDays(easterSunday, 49),
-    "Andre pinsedag": addDays(easterSunday, 50),
+    "Skjærtorsdag":          addAndFormatDays(easterSunday, -3),
+    "Langfredag":            addAndFormatDays(easterSunday, -2),
+    "Første påskedag":       addAndFormatDays(easterSunday,  0),
+    "Andre påskedag":        addAndFormatDays(easterSunday,  1),
+    "Kristi himmelfartsdag": addAndFormatDays(easterSunday, 39),
+    "Første pinsedag":       addAndFormatDays(easterSunday, 49),
+    "Andre pinsedag":        addAndFormatDays(easterSunday, 50),
   }
 
   return Object.values(movableHolidays)
 }
 
-export function calculateEasterSunday(year: number) {
+export function calculateEasterSunday(year: number): Date {
   // https://no.wikipedia.org/wiki/P%C3%A5skeformelen#Meeus/Jones/Butchers_formel_(bare_for_gregoriansk_kalender)
   const a = year % 19
   const b = Math.floor(year / 100)
@@ -107,11 +94,11 @@ export function calculateEasterSunday(year: number) {
   const n = Math.floor((h + l - 7 * m + 114) / 31)
   const p = ((h + l - 7 * m + 114) % 31) + 1
 
-  return new Date(`${year}-${n}-${p}`)
+  return new Date(Date.UTC(year, n - 1, p))
 }
 
-function addDays(date: Date, days: number): Date {
+function addAndFormatDays(date: Date, days: number): string {
   const result = new Date(date)
-  result.setDate(result.getDate() + days)
-  return result
+  result.setUTCDate(result.getUTCDate() + days)
+  return result.toISOString().slice(0, 10)
 }

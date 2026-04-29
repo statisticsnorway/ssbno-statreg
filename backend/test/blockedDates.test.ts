@@ -93,13 +93,10 @@ describe('blockedDates ', () => {
 
       const result = await getBlockedDatesInPeriod(from, to, prismaMock)
 
-      const manuallyBlockedKey = new Date('2027-02-03').toISOString().slice(0, 10)
-      const saturdayKey = new Date('2027-02-06').toISOString().slice(0, 10)
-      const sundayKey = new Date('2027-02-07').toISOString().slice(0, 10)
       expect(result).toStrictEqual({
-        [manuallyBlockedKey]: { status: 'BLOCKED' },
-        [saturdayKey]: { status: 'BLOCKED' },
-        [sundayKey]: { status: 'BLOCKED' },
+        '2027-02-03': { status: 'BLOCKED' },
+        '2027-02-06': { status: 'BLOCKED' },
+        '2027-02-07': { status: 'BLOCKED' },
       })
     })
   })
@@ -121,19 +118,19 @@ describe('blockedDates ', () => {
   })
 
   describe('calculateEasterSunday()', () => {
-    test('returns right easter sunday for years 2026-2036', () => {
+    test('returns correct easter sunday for years 2026-2036', () => {
       // https://no.wikipedia.org/wiki/Bevegelige_merkedager
-      expect(calculateEasterSunday(2026)).toStrictEqual(new Date(`2026-4-5`))
-      expect(calculateEasterSunday(2027)).toStrictEqual(new Date(`2027-3-28`))
-      expect(calculateEasterSunday(2028)).toStrictEqual(new Date(`2028-4-16`))
-      expect(calculateEasterSunday(2029)).toStrictEqual(new Date(`2029-4-1`))
-      expect(calculateEasterSunday(2030)).toStrictEqual(new Date(`2030-4-21`))
-      expect(calculateEasterSunday(2031)).toStrictEqual(new Date(`2031-4-13`))
-      expect(calculateEasterSunday(2032)).toStrictEqual(new Date(`2032-3-28`))
-      expect(calculateEasterSunday(2033)).toStrictEqual(new Date(`2033-4-17`))
-      expect(calculateEasterSunday(2034)).toStrictEqual(new Date(`2034-4-9`))
-      expect(calculateEasterSunday(2035)).toStrictEqual(new Date(`2035-3-25`))
-      expect(calculateEasterSunday(2036)).toStrictEqual(new Date(`2036-4-13`))
+      expect(calculateEasterSunday(2026)).toStrictEqual(new Date(Date.UTC(2026, 3, 5)))
+      expect(calculateEasterSunday(2027)).toStrictEqual(new Date(Date.UTC(2027, 2, 28)))
+      expect(calculateEasterSunday(2028)).toStrictEqual(new Date(Date.UTC(2028, 3, 16)))
+      expect(calculateEasterSunday(2029)).toStrictEqual(new Date(Date.UTC(2029, 3, 1)))
+      expect(calculateEasterSunday(2030)).toStrictEqual(new Date(Date.UTC(2030, 3, 21)))
+      expect(calculateEasterSunday(2031)).toStrictEqual(new Date(Date.UTC(2031, 3, 13)))
+      expect(calculateEasterSunday(2032)).toStrictEqual(new Date(Date.UTC(2032, 2, 28)))
+      expect(calculateEasterSunday(2033)).toStrictEqual(new Date(Date.UTC(2033, 3, 17)))
+      expect(calculateEasterSunday(2034)).toStrictEqual(new Date(Date.UTC(2034, 3, 9)))
+      expect(calculateEasterSunday(2035)).toStrictEqual(new Date(Date.UTC(2035, 2, 25)))
+      expect(calculateEasterSunday(2036)).toStrictEqual(new Date(Date.UTC(2036, 3, 13)))
     })
   })
 })
@@ -142,40 +139,34 @@ describe('blockedDates ', () => {
 
 const movableHolidaysByYear = {
   '2026': [
-    new Date('2026-4-2'), // Skjærtorsdag
-    new Date('2026-4-3'), // Langfredag
-    new Date('2026-4-5'), // Første påskedag
-    new Date('2026-4-6'), // Andre påskedag
-    new Date('2026-5-14'), // Kristi himmelfartsdag
-    new Date('2026-5-24'), // Første pinsedag
-    new Date('2026-5-25'), // Andre pinsedag
+    '2026-04-02', // Skjærtorsdag
+    '2026-04-03', // Langfredag
+    '2026-04-05', // Første påskedag
+    '2026-04-06', // Andre påskedag
+    '2026-05-14', // Kristi himmelfartsdag
+    '2026-05-24', // Første pinsedag
+    '2026-05-25', // Andre pinsedag
   ],
   '2027': [
-    new Date('2027-3-25'), // Skjærtorsdag
-    new Date('2027-3-26'), // Langfredag
-    new Date('2027-3-28'), // Første påskedag
-    new Date('2027-3-29'), // Andre påskedag
-    new Date('2027-5-6'), // Kristi himmelfartsdag
-    new Date('2027-5-16'), // Første pinsedag
-    new Date('2027-5-17'), // Andre pinsedag
+    '2027-03-25', // Skjærtorsdag
+    '2027-03-26', // Langfredag
+    '2027-03-28', // Første påskedag
+    '2027-03-29', // Andre påskedag
+    '2027-05-06', // Kristi himmelfartsdag
+    '2027-05-16', // Første pinsedag
+    '2027-05-17', // Andre pinsedag
   ],
   '2028': [
-    new Date('2028-4-13'), // Skjærtorsdag
-    new Date('2028-4-14'), // Langfredag
-    new Date('2028-4-16'), // Første påskedag
-    new Date('2028-4-17'), // Andre påskedag
-    new Date('2028-5-25'), // Kristi himmelfartsdag
-    new Date('2028-6-4'), // Første pinsedag
-    new Date('2028-6-5'), // Andre pinsedag
+    '2028-04-13', // Skjærtorsdag
+    '2028-04-14', // Langfredag
+    '2028-04-16', // Første påskedag
+    '2028-04-17', // Andre påskedag
+    '2028-05-25', // Kristi himmelfartsdag
+    '2028-06-04', // Første pinsedag
+    '2028-06-05', // Andre pinsedag
   ],
 }
 
 const staticHolidaysByYear = {
-  '2026': [
-    new Date('2026-1-1'),
-    new Date('2026-5-1'),
-    new Date('2026-5-17'),
-    new Date('2026-12-25'),
-    new Date('2026-12-26'),
-  ],
+  '2026': ['2026-01-01', '2026-05-01', '2026-05-17', '2026-12-25', '2026-12-26'],
 }

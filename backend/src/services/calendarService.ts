@@ -58,7 +58,7 @@ export async function getDateStatusForRange(
     from = parseDateOnly(fromDate)
   } else {
     from = new Date()
-    from.setDate(1)
+    from.setUTCDate(1)
   }
   from.setHours(0, 0, 0, 0)
 
@@ -66,9 +66,9 @@ export async function getDateStatusForRange(
     to = parseDateOnly(toDate)
   } else {
     to = new Date()
-    to.setMonth(to.getMonth() + 3, 0)
+    to.setUTCMonth(to.getUTCMonth() + 3, 0)
   }
-  to.setHours(23, 59, 59, 999)
+  to.setUTCHours(23, 59, 59, 999)
 
   if (to < from) throw { status: 400, statregError: 'todate have to be after fromDate' }
 
