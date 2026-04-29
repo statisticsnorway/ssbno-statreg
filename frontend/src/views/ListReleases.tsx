@@ -192,6 +192,7 @@ function ListReleases() {
           calendarDates={exampleCalendarDates}
           fromDate={new Date(2026, 3, 1)}
           toDate={new Date(2026, 3, 30)}
+          showColorCoding
         />
       </div>
 
