@@ -25,7 +25,7 @@ export const RevisionNames = {
 
 export const DayStatus = {
   BLOCKED: 'Sperret',
-  FREE: 'Ledig',
+  NONE: 'Ledig',
   FEW: 'Noen',
   MANY: 'Begrenset',
   FULL: 'Fullt',

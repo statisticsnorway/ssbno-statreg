@@ -99,7 +99,7 @@ export async function getDateStatusForRange(
 }
 
 function getStatus(noOfReleases?: number): keyof typeof DayStatus {
-  if (!noOfReleases) return 'FREE'
+  if (!noOfReleases) return 'NONE'
   if (noOfReleases === 1) return 'FEW'
   if (noOfReleases <= 3) return 'MANY'
   return 'FULL'
