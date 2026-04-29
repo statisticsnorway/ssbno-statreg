@@ -10,7 +10,7 @@ import client from '../api'
 
 export default function CreateRelease() {
   const [releases, setReleases] = useState<ReleaseListing[]>([])
-  
+
   useEffect(() => {
     async function fetchRelease() {
       const { data, error } = await client.GET('/statistics/{shortname}/variants/{id}/releases', {
@@ -28,9 +28,10 @@ export default function CreateRelease() {
   }, [])
 
   const release = Object.entries(releases).map(([__, release]) => release)[0]
-  const statisticShortname = release.statistic.shortname
-  const variant = release.frequency.name
-  const approvalStatus = release.approval_status
+  const statisticName = release?.statistic?.name ?? ''
+  const statisticShortname = release?.statistic?.shortname ?? ''
+  const variant = release?.frequency?.name ?? ''
+  const approvalStatus = release?.approval_status ?? ''
 
   function renderReleasesTables() {
     return (
@@ -44,7 +45,9 @@ export default function CreateRelease() {
             Alle publiseringer på {statisticShortname}, {variant}
           </Tabs.Tab>
         </Tabs.List>
-        <Tabs.Panel style={{ padding: '0' }} value='selected-publish-date'> {/* TODO: Padding can be set with classes instead of inline-css */}
+        <Tabs.Panel style={{ padding: '0' }} value='selected-publish-date'>
+          {' '}
+          {/* TODO: Padding can be set with classes instead of inline-css */}
           Innmeldte datoer den ...
         </Tabs.Panel>
         <Tabs.Panel style={{ padding: '0' }} value='all-releases'>
@@ -60,9 +63,11 @@ export default function CreateRelease() {
         <Heading level={1} data-size='md'>
           Meld publiseringsdato
         </Heading>
-        <Heading level={2} data-size='xs'>
-          {release.statistic.name} ({statisticShortname}) og {variant}
-        </Heading>
+        {statisticName && statisticShortname && variant && (
+          <Heading level={2} data-size='xs'>
+            {statisticName} ({statisticShortname}) og {variant}
+          </Heading>
+        )}
         {approvalStatus && <ApprovalStatusTag status={approvalStatus} />}
       </div>
       {renderReleasesTables()}
