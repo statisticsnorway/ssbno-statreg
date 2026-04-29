@@ -7,7 +7,7 @@ import { Paragraph } from '@digdir/designsystemet-react'
 
 type DatePickerProps = React.ComponentProps<typeof AkselDatePicker.Standalone> & {
   calendarDates: CalenderDate
-  showColorCoding?: boolean
+  showColorCodingExplanation?: boolean
 }
 
 function parseDate(dateString: string): Date {
@@ -15,7 +15,7 @@ function parseDate(dateString: string): Date {
   return new Date(year, month - 1, day)
 }
 
-export function DatePicker({ calendarDates, showColorCoding, ...props }: DatePickerProps) {
+export function DatePicker({ calendarDates, showColorCodingExplanation, ...props }: DatePickerProps) {
   const full: Date[] = []
   const many: Date[] = []
   const few: Date[] = []
@@ -65,7 +65,7 @@ export function DatePicker({ calendarDates, showColorCoding, ...props }: DatePic
         {...props}
       />
 
-      {showColorCoding && (
+      {showColorCodingExplanation && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--ds-size-2)' }}>
           {Object.entries(DayStatus).map(([key, value]) => (
             <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 'var(--ds-size-4)' }}>
