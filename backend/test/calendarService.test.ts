@@ -1,5 +1,5 @@
 import { vi, beforeEach, describe, test, expect } from 'vitest'
-import { createBlockedReleaseDay } from '@/services/calendarService'
+import { createBlockedReleaseDay, getReleaseCountByDate, getStatus } from '@/services/calendarService'
 import { dateToISOString } from '@/lib/utils'
 
 const { isDateBlockedMock } = vi.hoisted(() => ({
@@ -89,6 +89,68 @@ describe('calendarService  ', () => {
   describe('getDateStatusForRange() ', () => {
     //TODO MIM-2662: Add unit tests
     test(expect(true).toBeTruthy)
+  })
+
+  describe('getStatus', () => {
+    test('should return NONE when noOfReleases is undefined', () => {
+      expect(getStatus(undefined)).toBe('NONE')
+    })
+
+    test('should return NONE when noOfReleases is 0', () => {
+      expect(getStatus(0)).toBe('NONE')
+    })
+
+    test('should return FEW when noOfReleases is 1', () => {
+      expect(getStatus(1)).toBe('FEW')
+    })
+
+    test('should return MANY when noOfReleases is 2', () => {
+      expect(getStatus(2)).toBe('MANY')
+    })
+
+    test('should return MANY when noOfReleases is 3', () => {
+      expect(getStatus(3)).toBe('MANY')
+    })
+
+    test('should return FULL when noOfReleases is 4', () => {
+      expect(getStatus(4)).toBe('FULL')
+    })
+
+    test('should return FULL when noOfReleases is a large number', () => {
+      expect(getStatus(100)).toBe('FULL')
+    })
+  })
+
+  describe('getReleaseCountByDate', () => {
+    test('should return an empty object for an empty array', () => {
+      expect(getReleaseCountByDate([])).toEqual({})
+    })
+
+    test('should count a single release correctly', () => {
+      const releases = [{ publish_time: new Date('2024-01-15T10:00:00Z') }]
+      expect(getReleaseCountByDate(releases)).toEqual({ '2024-01-15': 1 })
+    })
+
+    test('should count multiple releases on the same date', () => {
+      const releases = [
+        { publish_time: new Date('2024-01-15T08:00:00Z') },
+        { publish_time: new Date('2024-01-15T14:00:00Z') },
+        { publish_time: new Date('2024-01-15T20:00:00Z') },
+      ]
+      expect(getReleaseCountByDate(releases)).toEqual({ '2024-01-15': 3 })
+    })
+
+    test('should handle mixed dates with multiple releases on some days', () => {
+      const releases = [
+        { publish_time: new Date('2024-01-15T08:00:00Z') },
+        { publish_time: new Date('2024-01-15T18:00:00Z') },
+        { publish_time: new Date('2024-01-16T08:00:00Z') },
+      ]
+      expect(getReleaseCountByDate(releases)).toEqual({
+        '2024-01-15': 2,
+        '2024-01-16': 1,
+      })
+    })
   })
 })
 

@@ -98,14 +98,14 @@ export async function getDateStatusForRange(
   return result
 }
 
-function getStatus(noOfReleases?: number): keyof typeof DayStatus {
+export function getStatus(noOfReleases?: number): keyof typeof DayStatus {
   if (!noOfReleases) return 'NONE'
   if (noOfReleases === 1) return 'FEW'
   if (noOfReleases <= 3) return 'MANY'
   return 'FULL'
 }
 
-function getReleaseCountByDate(
+export function getReleaseCountByDate(
   releasesInTimerange: {
     publish_time: Date
   }[]
