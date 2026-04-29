@@ -68,7 +68,8 @@ export function DatePicker({ calendarDates, showColorCodingExplanation, ...props
       {showColorCodingExplanation && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--ds-size-2)' }}>
           {Object.entries(DayStatus).map(([key, value]) => (
-            <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 'var(--ds-size-4)' }}>
+            <div key={key} style={{ display: 'flex', justifyContent: 'end', alignItems: 'center', gap: 'var(--ds-size-4)' }}>
+              <Paragraph data-size='xs'>{value}</Paragraph>
               <div
                 style={{
                   display: 'inline-block',
