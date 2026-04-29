@@ -87,7 +87,7 @@ describe('calendarService  ', () => {
     })
   })
   describe('getDateStatusForRange() ', () => {
-    //TODO MIM-2661: Add unit tests
+    //TODO MIM-2662: Add unit tests
     test(expect(true).toBeTruthy)
   })
 })
