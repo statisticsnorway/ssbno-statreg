@@ -24,7 +24,7 @@ export function DatePicker({ calendarDates, showColorCodingExplanation, ...props
   for (const [dateString, value] of Object.entries(calendarDates) as [string, CalenderDate[string]][]) {
     const date = parseDate(dateString)
     if (value.status === 'full') full.push(date)
-    else if (value.status === 'more') many.push(date)
+    else if (value.status === 'many') many.push(date)
     else if (value.status === 'few') few.push(date)
     else if (value.status === 'blocked') blocked.push(date)
   }
@@ -68,8 +68,7 @@ export function DatePicker({ calendarDates, showColorCodingExplanation, ...props
       {showColorCodingExplanation && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--ds-size-2)' }}>
           {Object.entries(DayStatus).map(([key, value]) => (
-            <div key={key} style={{ display: 'flex', justifyContent: 'end', alignItems: 'center', gap: 'var(--ds-size-4)' }}>
-              <Paragraph data-size='xs'>{value}</Paragraph>
+            <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 'var(--ds-size-4)' }}>
               <div
                 style={{
                   display: 'inline-block',
@@ -80,7 +79,7 @@ export function DatePicker({ calendarDates, showColorCodingExplanation, ...props
                   ...statusColors[key as keyof typeof statusColors],
                 }}
               />
-              <Paragraph data-size='xs'>{key === 'BLOCKED' ? value + ' dato' : value}</Paragraph>
+              <Paragraph data-size='xs'>{value}</Paragraph>
             </div>
           ))}
         </div>

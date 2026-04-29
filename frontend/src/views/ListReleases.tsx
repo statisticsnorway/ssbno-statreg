@@ -174,7 +174,7 @@ function ListReleases() {
   const exampleCalendarDates: CalenderDate = {
     '2026-04-03': { status: 'free' },
     '2026-04-05': { status: 'few' },
-    '2026-04-10': { status: 'more' },
+    '2026-04-10': { status: 'many' },
     '2026-04-15': { status: 'full' },
     '2026-04-20': { status: 'blocked' },
     '2026-04-25': { status: 'few' },
