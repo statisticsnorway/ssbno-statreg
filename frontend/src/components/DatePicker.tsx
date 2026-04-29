@@ -42,7 +42,7 @@ export function DatePicker({ calendarDates, showColorCoding, ...props }: DatePic
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'row', gap: 'var(--ds-size-8)' }}>
+    <div style={{ display: 'flex', flexDirection: 'row', gap: 'var(--ds-size-10)', alignItems: 'center' }}>
       <AkselDatePicker.Standalone
         // @ts-expect-error: Allow custom "modifiers" prop for color coding
         modifiers={{ full, many, few, blocked }}
@@ -72,6 +72,7 @@ export function DatePicker({ calendarDates, showColorCoding, ...props }: DatePic
                   display: 'inline-block',
                   width: '30px',
                   height: '30px',
+                  borderRadius: '3px',
                   ...(key === 'NONE' ? { border: '1px solid black' } : {}),
                   ...statusStyles[key as keyof typeof statusStyles],
                 }}
