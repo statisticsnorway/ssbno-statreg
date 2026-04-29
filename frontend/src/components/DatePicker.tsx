@@ -1,6 +1,8 @@
 import '@navikt/ds-css/dist/global/tokens.css'
 import '@navikt/ds-css/dist/components.css'
 
+import './DatePicker.css'
+
 import { DatePicker as AkselDatePicker } from '@navikt/ds-react/DatePicker'
 import { type CalenderDate, DayStatus } from '@ssbno-statreg/shared'
 import { Paragraph } from '@digdir/designsystemet-react'
@@ -43,8 +45,9 @@ export function DatePicker({ calendarDates, showColorCodingExplanation, ...props
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'row', gap: 'var(--ds-size-10)', alignItems: 'center' }}>
+    <div className='datepicker-container'>
       <AkselDatePicker.Standalone
+        className='datepicker-wrapper'
         // @ts-expect-error: Allow custom "modifiers" prop for color coding
         modifiers={{ full, many, few, blocked }}
         modifiersStyles={{
@@ -57,24 +60,16 @@ export function DatePicker({ calendarDates, showColorCodingExplanation, ...props
             textDecoration: 'line-through',
           },
         }}
-        style={{
-          padding: '20px 16px',
-          boxShadow: 'var(--ds-shadow-md)',
-          borderRadius: '8px',
-        }}
         {...props}
       />
 
       {showColorCodingExplanation && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--ds-size-2)' }}>
+        <div className='datepicker-explanation'>
           {Object.entries(DayStatus).map(([key, value]) => (
-            <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 'var(--ds-size-4)' }}>
+            <div key={key} className='datepicker-explanation-wrapper'>
               <div
+                className='datepicker-explanation-colors'
                 style={{
-                  display: 'inline-block',
-                  width: '30px',
-                  height: '30px',
-                  borderRadius: '3px',
                   ...(key === 'NONE' ? { border: '1px solid black' } : {}),
                   ...statusColors[key as keyof typeof statusColors],
                 }}
