@@ -63,6 +63,7 @@ spec:
       enabled: true
       excludePaths:
         - /statistikkregisteret/docs
+        - /statistikkregisteret/docs/**
         - /statistikkregisteret/api
         - /statistikkregisteret/api/**
 

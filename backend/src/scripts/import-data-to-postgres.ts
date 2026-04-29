@@ -290,6 +290,7 @@ function mapRelease(raw: any): ReleaseCreate {
     last_updated: parseOsloDate(raw.last_updated)!, // required
     comment: String(raw.intern_kommentar),
     period_to: parseOsloDate(raw.periode_til)!, // required
+    desk_appoval_status: raw.desk_flyt,
     variant_id: Number(raw.variant_id), // FK → Variant
     period_from: parseOsloDate(raw.periode_fra)!, // required
     cancelled: toBool(raw.er_avlyst) ?? false,
