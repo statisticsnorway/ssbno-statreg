@@ -1,17 +1,14 @@
 import { useState, useEffect } from 'react'
+import { ReleasesTable } from '../components/ReleasesTable'
 import {
   Heading,
-  Table,
   Field,
   Label,
   Select,
-  Link,
   Pagination,
   usePagination,
 } from '@digdir/designsystemet-react'
 import type { CalendarDates, ReleaseListing } from '@ssbno-statreg/shared'
-import { formatPublishTime, formatDate } from '../lib/utils'
-import { ApprovalStatusBadge } from '../components/ApprovalStatus'
 import { DatePicker } from '../components/DatePicker'
 
 import client from '../api'
@@ -51,55 +48,7 @@ function ListReleases() {
     setCurrentPage(1)
   }
 
-  const tableHeaderCells = [
-    'Kortnavn',
-    'Statistikknavn',
-    'Variant',
-    'Måleperiodetittel',
-    'Målperiode fra',
-    'Måleperiode til',
-    'Publiseringsdato',
-    'Status',
-  ]
-
-  function renderListReleasesTableHeaderCells() {
-    return tableHeaderCells.map((header) => <Table.HeaderCell key={header}>{header}</Table.HeaderCell>)
-  }
-
-  const TruncatedTableCell = ({ value, maxWidth = '340px' }: { value: string | undefined; maxWidth?: string }) => (
-    <Table.Cell style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth }} title={value}>
-      {value}
-    </Table.Cell>
-  )
-
-  // TODO: MIM-2555: Add måleperiodetittel after logic is implemented
-  function renderListReleasesTableRows() {
-    return Object.entries(releases).map(([__, release]) => {
-      const statisticsShortname = release.statistic?.shortname ?? ''
-      return (
-        <Table.Row key={`${release.publish_time}-${release.id}`}>
-          <Table.Cell>
-            <Link href={`/statistikkregisteret/statistikk/${statisticsShortname}`}>{statisticsShortname}</Link> {/* TODO: Fix /statistikkregisteret urls with react-router; this applies to the /publisering link as well */}
-          </Table.Cell>
-          <TruncatedTableCell value={release.statistic?.name} />
-          <Table.Cell>{release.frequency?.name ?? ''}</Table.Cell>
-          <Table.Cell>TBA</Table.Cell>
-          <Table.Cell>{formatDate(release.period_from)}</Table.Cell>
-          <Table.Cell>{formatDate(release.period_to)}</Table.Cell>
-          <Table.Cell>
-            <Link href={`/statistikkregisteret/publisering/${release.id}`}>
-              {formatPublishTime(release.publish_time)}
-            </Link>
-          </Table.Cell>
-          <Table.Cell>
-            <ApprovalStatusBadge status={release.approval_status} />
-          </Table.Cell>
-        </Table.Row>
-      )
-    })
-  }
-
-  function renderShowRowCountSelect() {
+  const ShowRowCountSelect = () => {
     return (
       <Field>
         <Label>Vis antall rader</Label>
@@ -113,7 +62,7 @@ function ListReleases() {
     )
   }
 
-  function renderListReleasesTablePagination() {
+  const ListReleasesTablePagination = () => {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', marginTop: 'var(--ds-size-18)' }}>
         <Pagination aria-label='pagineringsmeny'>
@@ -143,33 +92,6 @@ function ListReleases() {
     )
   }
 
-  function renderListReleasesTable() {
-    return (
-      <>
-        <div style={{ minWidth: '100%' }}>
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              alignItems: 'end',
-              marginBottom: 'var(--ds-size-8)',
-            }}
-          >
-            {renderShowRowCountSelect()}
-          </div>
-          <Table>
-            <Table.Head>
-              <Table.Row>{renderListReleasesTableHeaderCells()}</Table.Row>
-            </Table.Head>
-            <Table.Body>{renderListReleasesTableRows()}</Table.Body>
-          </Table>
-          {renderListReleasesTablePagination()}
-        </div>
-      </>
-    )
-  }
-
   // TODO: MIM-2657: Implement calender logic
   const exampleCalendarDates: CalendarDates = {
     '2026-04-03': { status: 'free' },
@@ -180,7 +102,8 @@ function ListReleases() {
     '2026-04-25': { status: 'few' },
   }
 
-  return (
+  
+return (
     <>
       <Heading level={1} data-size='sm'>
         Publiseringsoversikt
@@ -195,7 +118,11 @@ function ListReleases() {
         />
       </div>
 
-      {renderListReleasesTable()}
+      <ReleasesTable
+        releases={releases}
+        rowSelection={<ShowRowCountSelect />}
+        pagination={<ListReleasesTablePagination />}
+      />
     </>
   )
 }
