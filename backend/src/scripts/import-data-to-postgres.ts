@@ -79,7 +79,7 @@ export function parseOldOsloDateStringAsUTC(dateString: string): Date | undefine
   const match = dateString.match(/^(\d{2})\.(\d{2})\.(\d{4}) (\d{2})\.(\d{2})\.(\d{2})/)
   if (!match) return
 
-  const [_, dd, mm, yyyy, HH, MM, SS] = match.map(Number)
+  const [_, dd, mm, yyyy, HH, MM, SS] = match
   const isoLocal = `${yyyy}-${mm}-${dd}T${HH}:${MM}:${SS}`
 
   return fromZonedTime(isoLocal, 'Europe/Oslo')
