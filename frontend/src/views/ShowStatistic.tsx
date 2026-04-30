@@ -4,7 +4,7 @@ import { Heading, Paragraph, List, Link, Button, Divider, Details, Card } from '
 import { PersonPencilIcon } from '@navikt/aksel-icons'
 import { StatisticStatusTag } from '../components/StatisticStatusTag'
 import client from '../api'
-import {type Contact, type RegionLevel, type StatisticDetails, type Variant } from '@ssbno-statreg/shared'
+import { type RegionLevel, type StatisticDetails, type Variant, type StatisticStatus } from '@ssbno-statreg/shared'
 
 export default function ShowStatistic() {
   const [statistic, setStatistics] = useState<StatisticDetails>({})
@@ -24,7 +24,7 @@ export default function ShowStatistic() {
     fetchStatistic()
   }, [])
 
-  const statusCode = statistic.status?.code
+  const statusCode = statistic.status?.code as keyof typeof StatisticStatus
   const englishName = statistic.name_en ?? '-'
   const division = formatDivision(statistic.division)
   const regionLevels = statistic.statistic_region_levels ?? []
@@ -32,7 +32,7 @@ export default function ShowStatistic() {
   const startYear = formatStartYear(statistic.first_released_at)
   const contacts = formatContacts(statistic.contacts)
   const mockContinuedBy = ['putegjeld', 'k2', 'k3']
-  const cancelledVariants = formatCancelledVariants(statistic.variants)
+  const cancelledVariants = formatCancelledVariants(statistic.variants ?? [])
 
   return (
     <>
@@ -131,7 +131,7 @@ function formatMainLanguage(language?: string): string {
   return language
 }
 
-function formatDivision(division: StatisticDetails['division']): string {
+function formatDivision(division: StatisticDetails["division"]): string {
   if (!division?.name) return '-'
   if (!division.code) return division.name
   return `${division.name} (${division.code})`
@@ -142,7 +142,7 @@ function formatStartYear(dateString: string | null | undefined): string {
   return new Date(dateString).getFullYear().toString()
 }
 
-function formatCancelledVariants(variants: StatisticDetails['variants']): string[] {
+function formatCancelledVariants(variants: Variant[]): string[] {
   if (!variants) return []
   return variants.filter((variant: Variant) => variant.cancelled).map(formatVariant)
 }
@@ -170,7 +170,7 @@ const revisionNames: Record<string, string> = {
 
 function formatContacts(contacts: StatisticDetails['contacts']): string[] {
   if (!contacts) return []
-  return contacts.map((contact: Contact) => {
+  return contacts.map((contact) => {
     const name = contact.name ?? '-'
     const initials = contact.email ? contact.email.split('@')[0] : '-'
     return `${name} (${initials})`

@@ -19,8 +19,7 @@
     "db:deploy": "prisma migrate deploy",
     "test": "vitest --exclude 'test/integration/**'",
     "ci-test": "vitest run --exclude 'test/integration/**'",
-    "test:integration": "vitest run test/integration",
-    "generate:api-types": "openapi-typescript ./openapi/openapi.yaml | prettier --parser typescript > src/types/api-types.d.ts"
+    "test:integration": "vitest run test/integration"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",
