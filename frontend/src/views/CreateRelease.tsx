@@ -59,12 +59,10 @@ export default function CreateRelease() {
 
   return (
     <>
+      <Heading level={1} data-size='md'>
+        Meld publiseringsdato
+      </Heading>
       <ReleaseForm></ReleaseForm>
-      <div>
-        <Heading level={1} data-size='md'>
-          Meld publiseringsdato
-        </Heading>
-      </div>
       {renderReleasesTables()}
     </>
   )
