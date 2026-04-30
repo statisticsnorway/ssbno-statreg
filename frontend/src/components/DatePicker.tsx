@@ -46,16 +46,16 @@ export function DatePicker({ showColorCodingExplanation, ...props }: DatePickerP
   const few: Date[] = []
   const blocked: Date[] = []
 
-  const dates = Object.entries(calendarDates) as [keyof CalenderDate, CalenderDate[keyof CalenderDate]][]
-  for (const [dateString, value] of dates) {
+  for (const [dateString, value] of Object.entries(calendarDates)) {
     const date = parseDate(dateString as string)
+
     if (value.status === 'FULL') full.push(date)
     else if (value.status === 'MANY') many.push(date)
     else if (value.status === 'FEW') few.push(date)
     else if (value.status === 'BLOCKED') blocked.push(date)
   }
 
-  const statusColors: Record<keyof typeof DayStatus, { backgroundColor: string }> = {
+  const statusColors = {
     FULL: { backgroundColor: 'var(--ds-color-danger-base-default)' },
     MANY: { backgroundColor: 'var(--ds-color-warning-base-default)' },
     FEW: { backgroundColor: 'var(--ds-color-base-default)' }, // TODO: Our base-default color is green due to the theme
