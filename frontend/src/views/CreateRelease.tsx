@@ -5,7 +5,7 @@ import { type ReleaseListing } from '@ssbno-statreg/shared'
 
 import { formatDate } from '../lib/utils'
 import { ReleasesTable } from '../components/ReleasesTable'
-import { Test } from './Test'
+import { Test } from '../components/ReleaseForm'
 
 import client from '../api'
 
@@ -35,15 +35,14 @@ export default function CreateRelease() {
             Publiseringer på valgt dato
           </Tabs.Tab>
           <Tabs.Tab value='variant-releases'>
-            Alle publiseringer på "kortnavn", "variant" {/* TODO: MIM-2664: Implement on variant releases list table view */}
+            Alle publiseringer på "kortnavn", "variant"{' '}
+            {/* TODO: MIM-2664: Implement on variant releases list table view */}
           </Tabs.Tab>
         </Tabs.List>
         {/* TODO: Padding can be set with classes instead of inline-css */}
         <Tabs.Panel style={{ padding: '0' }} value='selected-publish-date'>
           {/* TODO: Placeholder date */}
-          <Paragraph>
-            Innmeldte datoer den {formatDate(releases[0]?.publish_time)}
-          </Paragraph>
+          <Paragraph>Innmeldte datoer den {formatDate(releases[0]?.publish_time)}</Paragraph>
           <ReleasesTable releases={releases} />
         </Tabs.Panel>
         <Tabs.Panel style={{ padding: '0' }} value='variant-releases'>

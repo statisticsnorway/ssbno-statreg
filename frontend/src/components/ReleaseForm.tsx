@@ -1,17 +1,9 @@
 import { useState } from 'react'
 import { Heading, Paragraph, Select, Button, Fieldset, Field, Label, Input } from '@digdir/designsystemet-react'
 import { DatePicker as AkselDatePicker, useDatepicker } from '@navikt/ds-react/DatePicker'
-import { ApprovalStatusTag } from '../components/ApprovalStatus'
-import { DatePicker } from '../components/DatePicker'
+import { ApprovalStatusTag } from './ApprovalStatus'
+import { DatePicker } from './DatePicker'
 import { ApprovalStatus } from '@ssbno-statreg/shared'
-import type { CalenderDate } from '@ssbno-statreg/shared'
-
-const mockCalendarDates: CalenderDate = {
-  '2026-01-15': { status: 'full' },
-  '2026-02-10': { status: 'more' },
-  '2026-03-20': { status: 'few' },
-  '2026-04-05': { status: 'blocked' },
-}
 
 const mockApprovalStatus = ApprovalStatus.PENDING
 
@@ -56,7 +48,8 @@ export function Test() {
         <Field.Description>
           Nye datoer og endringer må meldes minst 3 måneder i forveien. For kortere frister, kontakt desken@ssb.no.
         </Field.Description>
-        <DatePicker calendarDates={mockCalendarDates} showColorCodingExplanation></DatePicker>
+        <Input></Input>
+        <DatePicker calendarDates={{}} showColorCodingExplanation></DatePicker>
       </Field>
 
       <Fieldset>
