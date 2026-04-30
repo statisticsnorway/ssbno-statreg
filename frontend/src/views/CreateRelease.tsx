@@ -5,6 +5,7 @@ import { type ReleaseListing } from '@ssbno-statreg/shared'
 
 import { formatDate } from '../lib/utils'
 import { ReleasesTable } from '../components/ReleasesTable'
+import { Test } from './Test'
 
 import client from '../api'
 
@@ -54,6 +55,7 @@ export default function CreateRelease() {
 
   return (
     <>
+      <Test></Test>
       <div>
         <Heading level={1} data-size='md'>
           Meld publiseringsdato
