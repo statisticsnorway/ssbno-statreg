@@ -58,17 +58,17 @@ export async function getDateStatusForRange(
     from = parseDateOnly(fromDate)
   } else {
     from = new Date()
-    from.setDate(1)
+    from.setUTCDate(1)
   }
-  from.setHours(0, 0, 0, 0)
+  from.setUTCHours(0, 0, 0, 0)
 
   if (toDate) {
     to = parseDateOnly(toDate)
   } else {
     to = new Date()
-    to.setMonth(to.getMonth() + 3, 0)
+    to.setUTCMonth(to.getUTCMonth() + 3, 0)
   }
-  to.setHours(23, 59, 59, 999)
+  to.setUTCHours(23, 59, 59, 999)
 
   if (to < from) throw { status: 400, statregError: 'todate have to be after fromDate' }
 
@@ -113,7 +113,7 @@ function getReleaseCountByDate(
   const releaseCountsPerDate: Record<string, number> = {}
 
   for (const release of releasesInTimerange) {
-    const date = release.publish_time.toISOString().slice(0, 10) // Slice YYYY-MM-DD off from timestamp to get date only
+    const date = release.publish_time.toISOString().slice(0, 10)
     releaseCountsPerDate[date] = (releaseCountsPerDate[date] || 0) + 1
   }
 
