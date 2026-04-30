@@ -44,7 +44,7 @@ export function DatePicker({ showColorCodingExplanation, ...props }: DatePickerP
   const few: Date[] = []
   const blocked: Date[] = []
 
-  for (const [dateString, value] of Object.entries(calendarDates) as [keyof CalenderDate, CalenderDate]) {
+  for (const [dateString, value] of Object.entries(calendarDates) as [keyof CalenderDate, CalenderDate['status']]) {
     const date = parseDate(dateString)
     if (value.status === 'FULL') full.push(date)
     else if (value.status === 'MANY') many.push(date)
