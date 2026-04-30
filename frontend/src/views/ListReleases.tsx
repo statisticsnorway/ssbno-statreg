@@ -101,8 +101,8 @@ return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--ds-size-4)' }}>
         <Heading level={2} data-size='xs'>Publiseringskalender</Heading>
         <DatePicker
-          fromDate={new Date(2026, 3, 1)}
-          toDate={new Date(2026, 3, 30)}
+          fromDate={new Date('2026-04-01')}
+          toDate={new Date('2026-04-30')}
           showColorCodingExplanation
         />
       </div>

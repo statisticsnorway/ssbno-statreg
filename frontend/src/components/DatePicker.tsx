@@ -16,7 +16,6 @@ function parseDate(dateString: string): Date {
   return new Date(year, month - 1, day)
 }
 
-// TODO: Look over
 function formatDate(date: Date | undefined): string {
   if (!date) return ''
   return date.toISOString().split('T')[0]
@@ -24,10 +23,13 @@ function formatDate(date: Date | undefined): string {
 
 export function DatePicker({ showColorCodingExplanation, ...props }: DatePickerProps) {
   const [calendarDates, setCalendarDates] = useState<CalenderDate>({})
+  console.log(props.toDate)
 
   useEffect(() => {
     async function fetchCalendarDates() {
-      const { data, error } = await client.GET('/calendar', { params: { query: { fromDate: formatDate(props?.fromDate), toDate: formatDate(props?.toDate)} } })
+      const { data, error } = await client.GET('/calendar', {
+        params: { query: { fromDate: formatDate(props?.fromDate), toDate: formatDate(props?.toDate) } },
+      })
       if (error) {
         const errorMessage = (error as any).error
         console.log(errorMessage)
@@ -44,8 +46,9 @@ export function DatePicker({ showColorCodingExplanation, ...props }: DatePickerP
   const few: Date[] = []
   const blocked: Date[] = []
 
-  for (const [dateString, value] of Object.entries(calendarDates) as [keyof CalenderDate, CalenderDate['status']]) {
-    const date = parseDate(dateString)
+  const dates = Object.entries(calendarDates) as [keyof CalenderDate, CalenderDate[keyof CalenderDate]][]
+  for (const [dateString, value] of dates) {
+    const date = parseDate(dateString as string)
     if (value.status === 'FULL') full.push(date)
     else if (value.status === 'MANY') many.push(date)
     else if (value.status === 'FEW') few.push(date)
