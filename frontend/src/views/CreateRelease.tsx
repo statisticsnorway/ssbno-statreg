@@ -1,10 +1,13 @@
+import './CreateRelease.css'
+
 import { useState, useEffect } from 'react'
-import { Heading, Paragraph, Tabs } from '@digdir/designsystemet-react'
+import { Heading, Tabs } from '@digdir/designsystemet-react'
 import { CalendarIcon } from '@navikt/aksel-icons'
 import { type ReleaseListing } from '@ssbno-statreg/shared'
 
 import { formatDate } from '../lib/utils'
 import { ReleasesTable } from '../components/ReleasesTable'
+import { DayStatusTag } from '../components/DayStatus'
 
 import client from '../api'
 
@@ -27,25 +30,25 @@ export default function CreateRelease() {
 
   function renderReleasesTables() {
     return (
-      <Tabs defaultValue='selected-publish-date' style={{ width: '100%', rowGap: 'var(--ds-size-10)' }}>
-        <Tabs.List style={{ marginBottom: 'var(--ds-size-10)' }}>
+      <Tabs defaultValue='selected-publish-date' className='create-release-tables-tab'>
+        <Tabs.List>
           <Tabs.Tab value='selected-publish-date'>
             <CalendarIcon />
             Publiseringer på valgt dato
           </Tabs.Tab>
           <Tabs.Tab value='variant-releases'>
-            Alle publiseringer på "kortnavn", "variant" {/* TODO: MIM-2664: Implement on variant releases list table view */}
+            Alle publiseringer på (kortnavn), (variant) {/* TODO: MIM-2664: Implement on variant releases list table view */}
           </Tabs.Tab>
         </Tabs.List>
-        {/* TODO: Padding can be set with classes instead of inline-css */}
-        <Tabs.Panel style={{ padding: '0' }} value='selected-publish-date'>
-          {/* TODO: Placeholder date */}
-          <Paragraph>
-            Innmeldte datoer den {formatDate(releases[0]?.publish_time)}
-          </Paragraph>
+        <Tabs.Panel className='p-0' value='selected-publish-date'>
+          <div className='description-wrapper'>
+          {/* TODO: Placeholder date and day status for description */}
+            <span>Innmeldte datoer den {formatDate(releases[0]?.publish_time)}</span>
+            <DayStatusTag status={'MANY'} />
+          </div>
           <ReleasesTable releases={releases} />
         </Tabs.Panel>
-        <Tabs.Panel style={{ padding: '0' }} value='variant-releases'>
+        <Tabs.Panel className='p-0' value='variant-releases'>
           TBA
         </Tabs.Panel>
       </Tabs>
