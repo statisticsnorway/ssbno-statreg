@@ -147,7 +147,7 @@ describe('blockedDates', () => {
   })
 })
 
-// Fixtures
+// Mocks
 
 const movableHolidaysByYear = {
   '2026': [
