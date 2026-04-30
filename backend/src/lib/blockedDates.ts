@@ -34,7 +34,7 @@ export async function getBlockedDatesInPeriod(from: Date, to: Date, prisma: Cale
     select: { day: true },
   })
 
-  const manuallyBlockedKeys = new Set(manuallyBlockedDates.map((day) => day.day.toISOString().slice(0, 10)))
+  const manuallyBlockedKeys = new Set(manuallyBlockedDates.map(({ day }) => day.toISOString().slice(0, 10)))
 
   const blockedDates: CalenderDate = {}
 
