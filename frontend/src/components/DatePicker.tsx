@@ -1,6 +1,5 @@
 import '@navikt/ds-css/dist/global/tokens.css'
 import '@navikt/ds-css/dist/components.css'
-
 import { useState, useEffect } from 'react'
 import { DatePicker as AkselDatePicker } from '@navikt/ds-react/DatePicker'
 import { type CalenderDate, DayStatus } from '@ssbno-statreg/shared'
@@ -24,7 +23,7 @@ function formatDate(date: Date | undefined): string {
 }
 
 export function DatePicker({ showColorCodingExplanation, ...props }: DatePickerProps) {
-  const [calendarDates, setCalendarDates] = useState<CalenderDate>([])
+  const [calendarDates, setCalendarDates] = useState<CalenderDate>({})
 
   useEffect(() => {
     async function fetchCalendarDates() {
@@ -45,7 +44,7 @@ export function DatePicker({ showColorCodingExplanation, ...props }: DatePickerP
   const few: Date[] = []
   const blocked: Date[] = []
 
-  for (const [dateString, value] of Object.entries(calendarDates)) {
+  for (const [dateString, value] of Object.entries(calendarDates) as [keyof CalenderDate, CalenderDate]) {
     const date = parseDate(dateString)
     if (value.status === 'FULL') full.push(date)
     else if (value.status === 'MANY') many.push(date)
