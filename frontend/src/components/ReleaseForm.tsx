@@ -50,7 +50,7 @@ export function ReleaseForm() {
       </Field>
 
       <Fieldset>
-        <div style={{ display: 'flex', gap: 'var(--ds-size-12MIM 2665 MIM 2665 )' }}>
+        <div style={{ display: 'flex', gap: 'var(--ds-size-12)' }}>
           <Field>
             <Label>Måleperiode fra</Label>
             <Field.Description>dd.mm.åååå</Field.Description>
