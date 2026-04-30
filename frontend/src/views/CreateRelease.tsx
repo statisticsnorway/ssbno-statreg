@@ -7,7 +7,7 @@ import { type ReleaseListing } from '@ssbno-statreg/shared'
 
 import { formatDate } from '../lib/utils'
 import { ReleasesTable } from '../components/ReleasesTable'
-import { DayStatusTag, type VisibleDayStatus } from '../components/DayStatus'
+import { DayStatusTag } from '../components/DayStatus'
 
 import client from '../api'
 
