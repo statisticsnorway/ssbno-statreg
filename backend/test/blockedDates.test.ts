@@ -1,5 +1,6 @@
 import { vi, describe, test, expect, beforeEach } from 'vitest'
 import {
+  HOLIDAYS,
   calculateEasterSunday,
   calculateMovableHolidays,
   getBlockedDatesInPeriod,
@@ -9,7 +10,7 @@ import {
 } from '@/lib/blockedDates'
 
 let prismaMock: any
-let findManyResult = [{ day: new Date('2027-2-5') }]
+let findManyResult = [{ day: new Date('2027-02-05') }]
 function setFindManyResult(next: { day: Date }[]) {
   findManyResult = next
 }
@@ -23,14 +24,17 @@ vi.mock(import('@/lib/asserts'), () => ({
   variable: 'mock',
 }))
 
-describe('blockedDates ', () => {
+describe('blockedDates', () => {
   beforeEach(() => {
+    Object.keys(HOLIDAYS).forEach((key) => delete HOLIDAYS[Number(key)])
+
     prismaMock = {
       calender_date: {
         findMany: vi.fn(() => Promise.resolve(findManyResult)),
       },
     }
   })
+
   describe('isDateAutoBlocked()', () => {
     test('returns false for a regular weekday (Friday 5. feb 2027)', () => {
       expect(isDateAutoBlocked(new Date('2027-02-05'))).toBe(false)
@@ -48,15 +52,16 @@ describe('blockedDates ', () => {
       expect(isDateAutoBlocked(new Date('2027-03-28'))).toBe(true)
     })
   })
-  describe('isDateBlocked() ', () => {
-    test('returns true if date automatically blocked', async () => {
+
+  describe('isDateBlocked()', () => {
+    test('returns true if date is automatically blocked', async () => {
       expect(await isDateBlocked(new Date('2027-02-06'), prismaMock)).toBe(true)
     })
     test('returns true if date is manually blocked', async () => {
       assertDayNotManuallyBlockedMock.mockResolvedValueOnce(false)
       expect(await isDateBlocked(new Date('2027-02-05'), prismaMock)).toBe(true)
     })
-    test('returns false if date neither manually blocked nor aotumatically blocked', async () => {
+    test('returns false if date is neither manually nor automatically blocked', async () => {
       assertDayNotManuallyBlockedMock.mockResolvedValueOnce(true)
       expect(await isDateBlocked(new Date('2027-02-05'), prismaMock)).toBe(false)
     })
@@ -66,13 +71,11 @@ describe('blockedDates ', () => {
     test('marks manually blocked weekday as BLOCKED', async () => {
       const from = new Date('2027-02-05')
       const to = new Date('2027-02-05')
-      to.setHours(23, 59, 59, 999)
       setFindManyResult([{ day: new Date('2027-02-05') }])
 
       const result = await getBlockedDatesInPeriod(from, to, prismaMock)
 
-      const manuallyBlockedKey = new Date('2027-02-05').toISOString().slice(0, 10)
-      expect(result).toStrictEqual({ [manuallyBlockedKey]: { status: 'BLOCKED' } })
+      expect(result).toStrictEqual({ '2027-02-05': { status: 'BLOCKED' } })
     })
 
     test('does not include free weekdays in result', async () => {
@@ -88,7 +91,6 @@ describe('blockedDates ', () => {
     test('handles range spanning both blocked and free days', async () => {
       const from = new Date('2027-02-01')
       const to = new Date('2027-02-07')
-
       setFindManyResult([{ day: new Date('2027-02-03') }])
 
       const result = await getBlockedDatesInPeriod(from, to, prismaMock)
@@ -99,12 +101,22 @@ describe('blockedDates ', () => {
         '2027-02-07': { status: 'BLOCKED' },
       })
     })
+
+    test('does not mutate the from date', async () => {
+      const from = new Date('2027-02-01')
+      const to = new Date('2027-02-03')
+      setFindManyResult([])
+
+      await getBlockedDatesInPeriod(from, to, prismaMock)
+
+      expect(from.toISOString().slice(0, 10)).toBe('2027-02-01')
+    })
   })
 
   describe('getHolidays() ', () => {
     test('returns correct dates for 2026', () => {
       const holidays = getHolidays(2026)
-      expect(holidays).toStrictEqual(staticHolidaysByYear[2026].concat(movableHolidaysByYear[2026]))
+      expect(holidays).toStrictEqual(staticHolidaysFor2026[2026].concat(movableHolidaysByYear[2026]))
     })
   })
   describe('calculateMovableHolidays() ', () => {
@@ -135,7 +147,7 @@ describe('blockedDates ', () => {
   })
 })
 
-// Mocks
+// Fixtures
 
 const movableHolidaysByYear = {
   '2026': [
@@ -167,6 +179,6 @@ const movableHolidaysByYear = {
   ],
 }
 
-const staticHolidaysByYear = {
+const staticHolidaysFor2026 = {
   '2026': ['2026-01-01', '2026-05-01', '2026-05-17', '2026-12-25', '2026-12-26'],
 }

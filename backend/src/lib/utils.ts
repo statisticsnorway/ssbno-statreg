@@ -13,26 +13,19 @@ export function sanitize(input: string | undefined): string {
 type DateString = string | string[] | undefined
 
 export function parseDateOnly(dateString: DateString, fieldName = ''): Date {
-  const dateOnlyRegex = /^\d{4}-\d{2}-\d{2}$/ // e.g. YYYY-MM-dd
-  return parseDate(dateString, fieldName, dateOnlyRegex)
+  return parseDateISO(dateString + 'T00:00:00Z', fieldName)
 }
 
 export function parseDateISO(dateString: DateString, fieldName = ''): Date {
-  // TODO: MIM-2546: Confirm if this regEx covers all our required valid date ISO formats
   const dateISORegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/ // YYYY-MM-DDTHH:mm:ssZ
-  return parseDate(dateString, fieldName, dateISORegex)
-}
-
-export function parseDate(dateString: DateString, fieldName: string, dateRegEx: RegExp): Date {
   const errorMessage = () => ({
     statregError: ['Invalid', fieldName, 'date format:', dateString].filter(Boolean).join(' '),
   })
 
-  if (!dateString || Array.isArray(dateString) || !dateRegEx.test(dateString)) {
+  if (!dateString || Array.isArray(dateString) || dateISORegex.test(dateString)) {
     throw errorMessage()
   }
 
-  // TODO: MIM-2546: Confirm correct date format
   const date = new Date(dateString)
   if (date.toString() === 'Invalid Date') {
     throw errorMessage()

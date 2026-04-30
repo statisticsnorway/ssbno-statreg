@@ -3,7 +3,6 @@ import {
   sanitize,
   parseDateOnly,
   parseDateISO,
-  parseDate,
   ensureString,
   parseId,
   ensureRequiredFieldsExists,
@@ -46,7 +45,7 @@ describe('utils', () => {
     })
   })
 
-  describe('validateDateOnly', () => {
+  describe('parseDateOnly', () => {
     test('accepts and returns valid Date', () => {
       const result = parseDateOnly('2026-12-24')
       expect(result).toStrictEqual(new Date('2026-12-24'))
@@ -71,7 +70,7 @@ describe('utils', () => {
     })
   })
 
-  describe('validateDateISO ', () => {
+  describe('parseDateISO ', () => {
     test('accepts and returns valid date ISO format with Z', () => {
       const result = parseDateISO('2026-03-25T12:30:00Z')
       expect(result).toStrictEqual(new Date('2026-03-25T12:30:00Z'))
@@ -85,6 +84,12 @@ describe('utils', () => {
     test('accepts and returns valid date ISO format with milliseconds', () => {
       const result = parseDateISO('2026-03-25T12:30:00.123Z')
       expect(result).toStrictEqual(new Date('2026-03-25T12:30:00.123Z'))
+    })
+
+    test('returns 400 for missing date', () => {
+      expect(() => parseDateISO(undefined)).toThrow({
+        statregError: 'Invalid date format:',
+      })
     })
 
     test('returns 400 for invalid date only format', () => {
@@ -102,27 +107,6 @@ describe('utils', () => {
     test('returns 400 for invalid date with space instead of T', () => {
       expect(() => parseDateISO('2026-03-25 12:30:00Z')).toThrow({
         statregError: 'Invalid date format: 2026-03-25 12:30:00Z',
-      })
-    })
-  })
-
-  describe('validateAndParseDate', () => {
-    const dateRegEx = /^\d{4}-\d{2}-\d{2}$/ // YYYY-MM-dd
-
-    test('returns Date for valid input', () => {
-      const result = parseDate('2026-03-25', '', dateRegEx)
-      expect(result).toStrictEqual(new Date('2026-03-25'))
-    })
-
-    test('returns 400 for missing date', () => {
-      expect(() => parseDate(undefined, 'test', dateRegEx)).toThrow({
-        statregError: 'Invalid test date format:',
-      })
-    })
-
-    test('returns 400 for date array input', () => {
-      expect(() => parseDate(['2026-03-25', '2026-03-26'], '', dateRegEx)).toThrow({
-        statregError: 'Invalid date format: 2026-03-25,2026-03-26',
       })
     })
   })

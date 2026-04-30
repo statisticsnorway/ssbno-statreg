@@ -60,7 +60,7 @@ export async function getDateStatusForRange(
     from = new Date()
     from.setUTCDate(1)
   }
-  from.setHours(0, 0, 0, 0)
+  from.setUTCHours(0, 0, 0, 0)
 
   if (toDate) {
     to = parseDateOnly(toDate)
@@ -113,7 +113,7 @@ function getReleaseCountByDate(
   const releaseCountsPerDate: Record<string, number> = {}
 
   for (const release of releasesInTimerange) {
-    const date = release.publish_time.toISOString().slice(0, 10) // Slice YYYY-MM-DD off from timestamp to get date only
+    const date = release.publish_time.toISOString().slice(0, 10)
     releaseCountsPerDate[date] = (releaseCountsPerDate[date] || 0) + 1
   }
 
