@@ -9,7 +9,7 @@ const mockApprovalStatus = ApprovalStatus.PENDING
 
 const publishTimePrecisions = ['Dag', 'Måned', 'År']
 
-export function Test() {
+export function ReleaseForm() {
   const [dateType, setDateType] = useState('')
 
   const { datepickerProps: fromProps, inputProps: fromInputProps } = useDatepicker({
