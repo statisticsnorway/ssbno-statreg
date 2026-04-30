@@ -8,7 +8,7 @@ import {
   Pagination,
   usePagination,
 } from '@digdir/designsystemet-react'
-import type { CalenderDate, ReleaseListing } from '@ssbno-statreg/shared'
+import type { ReleaseListing } from '@ssbno-statreg/shared'
 import { DatePicker } from '../components/DatePicker'
 
 import client from '../api'
@@ -91,17 +91,6 @@ function ListReleases() {
       </div>
     )
   }
-
-  // TODO: MIM-2657: Implement calender logic
-  const exampleCalendarDates: CalenderDate = {
-    '2026-04-03': { status: 'free' },
-    '2026-04-05': { status: 'few' },
-    '2026-04-10': { status: 'many' },
-    '2026-04-15': { status: 'full' },
-    '2026-04-20': { status: 'blocked' },
-    '2026-04-25': { status: 'few' },
-  }
-
   
 return (
     <>
@@ -112,9 +101,8 @@ return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--ds-size-4)' }}>
         <Heading level={2} data-size='xs'>Publiseringskalender</Heading>
         <DatePicker
-          calendarDates={exampleCalendarDates}
-          fromDate={new Date(2026, 3, 1)}
-          toDate={new Date(2026, 3, 30)}
+          fromDate={new Date('2026-04-01')}
+          toDate={new Date('2026-04-30')}
           showColorCodingExplanation
         />
       </div>
