@@ -8,6 +8,7 @@ import { type ReleaseListing } from '@ssbno-statreg/shared'
 import { formatDate } from '../lib/utils'
 import { ReleasesTable } from '../components/ReleasesTable'
 import { ReleaseForm } from '../components/ReleaseForm'
+import { DayStatusTag } from '../components/DayStatus'
 
 import client from '../api'
 
