@@ -13,16 +13,18 @@ export function sanitize(input: string | undefined): string {
 type DateString = string | string[] | undefined
 
 export function parseDateOnly(dateString: DateString, fieldName = ''): Date {
-  return parseDateISO(dateString + 'T00:00:00Z', fieldName)
+  return parseDateISO(dateString + 'T00:00:00Z', fieldName, dateString)
 }
 
-export function parseDateISO(dateString: DateString, fieldName = ''): Date {
+export function parseDateISO(dateString: DateString, fieldName = '', originalDateStringValue?: DateString): Date {
   const dateISORegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/ // YYYY-MM-DDTHH:mm:ssZ
   const errorMessage = () => ({
-    statregError: ['Invalid', fieldName, 'date format:', dateString].filter(Boolean).join(' '),
+    statregError: ['Invalid', fieldName, 'date format:', originalDateStringValue ?? dateString]
+      .filter(Boolean)
+      .join(' '),
   })
 
-  if (!dateString || Array.isArray(dateString) || dateISORegex.test(dateString)) {
+  if (!dateString || Array.isArray(dateString) || !dateISORegex.test(dateString)) {
     throw errorMessage()
   }
 
