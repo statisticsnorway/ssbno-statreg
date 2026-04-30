@@ -109,6 +109,11 @@ describe('utils', () => {
         statregError: 'Invalid date format: 2026-03-25 12:30:00Z',
       })
     })
+
+    test('returns 400 for invalid date if not colon in offset', () => {
+      const result = parseDateISO('2026-03-25T12:30:00+01:00')
+      expect(result).toStrictEqual(new Date('2026-03-25T12:30:00+0100'))
+    })
   })
 
   describe('ensureString', () => {

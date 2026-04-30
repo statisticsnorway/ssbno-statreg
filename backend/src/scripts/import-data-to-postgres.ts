@@ -1,11 +1,13 @@
 /* eslint-disable no-unused-vars */
 // Run with: npm exec tsx ./src/scripts/import-data-to-postgres.ts ~/Documents/STATREG_TABLES_JSON
+// Remember to install required packages JSONStream and date-fns-tz in advance
 
 import { prisma } from '../lib/prisma'
 import fs from 'node:fs'
 import path from 'node:path'
 import { pipeline } from 'node:stream/promises'
 import JSONStream from 'JSONStream'
+import { fromZonedTime } from 'date-fns-tz'
 
 const BATCH_SIZE = 1000
 
@@ -71,35 +73,16 @@ function toBool(value: any): boolean | undefined {
   return undefined
 }
 
-// TODO: There's a bug so time is not with correct timezone, but MIM-2546 may change date formatting anyway so hence this is not fixed
-function parseOsloDate(value: string): Date | undefined {
-  if (!value) return undefined
-
-  // match "DD.MM.YYYY HH.MM.SS,xxxxxxxxx"
-  const match = value.match(/^(\d{2})\.(\d{2})\.(\d{4}) (\d{2})\.(\d{2})\.(\d{2})/)
-
-  if (!match) return undefined
+//TODO MIM-2546: Test function
+export function parseOldOsloDateStringAsUTC(dateString: string): Date | undefined {
+  // Match "DD.MM.YYYY HH.MM.SS,xxxxxxxxx"
+  const match = dateString.match(/^(\d{2})\.(\d{2})\.(\d{4}) (\d{2})\.(\d{2})\.(\d{2})/)
+  if (!match) return
 
   const [_, dd, mm, yyyy, HH, MM, SS] = match.map(Number)
+  const isoLocal = `${yyyy}-${mm}-${dd}T${HH}:${MM}:${SS}`
 
-  const year = yyyy
-  const month = mm! - 1
-  const day = dd
-  const hour = HH
-  const minute = MM
-  const second = SS
-
-  // 1. Create the naive UTC timestamp
-  const naiveUtc = Date.UTC(year!, month, day, hour, minute, second)
-
-  // 2. Ask Intl API what the offset is in Europe/Oslo at that time
-  const localeString = new Date(naiveUtc).toLocaleString('en-US', {
-    timeZone: 'Europe/Oslo',
-    hour12: false,
-  })
-
-  const osloDate = new Date(localeString)
-  return osloDate
+  return fromZonedTime(isoLocal, 'Europe/Oslo')
 }
 
 async function runImportStream<T extends Record<string, any>>(
@@ -177,7 +160,7 @@ function mapCalenderDate(raw: any): CalenderDateCreate {
     id: Number(raw.id),
     version: Number(raw.version),
     comment: String(raw.kommentar),
-    day: parseOsloDate(raw.dag)!,
+    day: parseOldOsloDateStringAsUTC(raw.dag)!,
   } as CalenderDateCreate
 }
 
@@ -214,10 +197,10 @@ function mapContact(raw: any): ContactCreate {
     initials: raw.initialer,
     mobile: raw.mobil,
     name: String(raw.navn),
-    last_updated: parseOsloDate(raw.last_updated)!, // required
+    last_updated: parseOldOsloDateStringAsUTC(raw.last_updated)!, // required
     phone: raw.telefon,
     email: String(raw.epost),
-    date_created: parseOsloDate(raw.date_created)!, // required
+    date_created: parseOldOsloDateStringAsUTC(raw.date_created)!, // required
     inactiv: toBool(raw.inaktiv),
     name_en: raw.navn_en ?? undefined,
   } as ContactCreate
@@ -252,8 +235,8 @@ function mapShortname(raw: any): ShortnameCreate {
     id: Number(raw.id),
     version: Number(raw.version),
     name: String(raw.navn),
-    last_updated: parseOsloDate(raw.last_updated)!, // required
-    date_created: parseOsloDate(raw.date_created)!, // required
+    last_updated: parseOldOsloDateStringAsUTC(raw.last_updated)!, // required
+    date_created: parseOldOsloDateStringAsUTC(raw.date_created)!, // required
   } as ShortnameCreate
 }
 
@@ -285,16 +268,16 @@ function mapRelease(raw: any): ReleaseCreate {
   return {
     id: Number(raw.id),
     version: Number(raw.version),
-    publish_time: parseOsloDate(raw.tidspunkt)!, // required
+    publish_time: parseOldOsloDateStringAsUTC(raw.tidspunkt)!, // required
     has_versions: toBool(raw.has_versions ?? raw.har_versjoner) ?? false,
-    last_updated: parseOsloDate(raw.last_updated)!, // required
+    last_updated: parseOldOsloDateStringAsUTC(raw.last_updated)!, // required
     comment: String(raw.intern_kommentar),
-    period_to: parseOsloDate(raw.periode_til)!, // required
+    period_to: parseOldOsloDateStringAsUTC(raw.periode_til)!, // required
     desk_appoval_status: raw.desk_flyt,
     variant_id: Number(raw.variant_id), // FK → Variant
-    period_from: parseOsloDate(raw.periode_fra)!, // required
+    period_from: parseOldOsloDateStringAsUTC(raw.periode_fra)!, // required
     cancelled: toBool(raw.er_avlyst) ?? false,
-    date_created: parseOsloDate(raw.date_created)!, // required
+    date_created: parseOldOsloDateStringAsUTC(raw.date_created)!, // required
     release_date_precision: String(raw.datotype),
     import_flag: toBool(raw.import_flag),
   } as ReleaseCreate
@@ -408,15 +391,15 @@ function mapStatistic(raw: any): StatisticCreate {
     search_phrases_en: raw.triggerord_en,
     division_code: '',
     division_id: raw.eierseksjon_id, // FK → Division_DoNotUse
-    first_release: parseOsloDate(raw.forstegangspublisering),
+    first_release: parseOldOsloDateStringAsUTC(raw.forstegangspublisering),
     yearly_reporting: toBool(raw.arsrapportering) ?? false,
     status: String(raw.status),
     related_statistic_id: Number(raw.relasjon_id), // self-rel
     name: raw.statistikknavn,
-    last_updated: parseOsloDate(raw.last_updated)!, // required
+    last_updated: parseOldOsloDateStringAsUTC(raw.last_updated)!, // required
     comment: String(raw.intern_kommentar),
     name_en: raw.statistikknavn_en,
-    date_created: parseOsloDate(raw.date_created)!, // required
+    date_created: parseOldOsloDateStringAsUTC(raw.date_created)!, // required
     legacy_topic_codes: raw.gamle_emnekoder,
   } as StatisticCreate
 }
@@ -520,8 +503,8 @@ function mapVariant(raw: any): VariantCreate {
   return {
     id: Number(raw.id),
     version: Number(raw.version),
-    last_updated: parseOsloDate(raw.last_updated)!, // required
-    date_created: parseOsloDate(raw.date_created)!, // required
+    last_updated: parseOldOsloDateStringAsUTC(raw.last_updated)!, // required
+    date_created: parseOldOsloDateStringAsUTC(raw.date_created)!, // required
     cancelled: toBool(raw.er_opphort) ?? false,
     freq_id: Number(raw.frekvens_id), // FK → Frequency
     revision: String(raw.revisjon),
@@ -559,8 +542,8 @@ function mapAuditlog(raw: any): AuditlogCreate {
   return {
     id: Number(raw.id),
     property_name: raw.property_name,
-    last_updated: parseOsloDate(raw.last_updated)!,
-    date_created: parseOsloDate(raw.date_created)!,
+    last_updated: parseOldOsloDateStringAsUTC(raw.last_updated)!,
+    date_created: parseOldOsloDateStringAsUTC(raw.date_created)!,
     old_value: raw.old_value,
     actor: raw.actor,
     uri: raw.uri,

@@ -38,7 +38,7 @@ export async function getBlockedDatesInPeriod(from: Date, to: Date, prisma: Cale
 
   const blockedDates: CalenderDate = {}
 
-  const d = new Date(Date.UTC(from.getUTCFullYear(), from.getUTCMonth(), from.getUTCDate()))
+  const d = new Date(from)
   while (d <= to) {
     const key = d.toISOString().slice(0, 10)
     if (manuallyBlockedKeys.has(key) || isDateAutoBlocked(d)) {
@@ -65,13 +65,13 @@ export function calculateMovableHolidays(year: number): string[] {
 
   // prettier-ignore
   const movableHolidays = {
-    "Skjærtorsdag":          addAndFormatDays(easterSunday, -3),
-    "Langfredag":            addAndFormatDays(easterSunday, -2),
-    "Første påskedag":       addAndFormatDays(easterSunday,  0),
-    "Andre påskedag":        addAndFormatDays(easterSunday,  1),
-    "Kristi himmelfartsdag": addAndFormatDays(easterSunday, 39),
-    "Første pinsedag":       addAndFormatDays(easterSunday, 49),
-    "Andre pinsedag":        addAndFormatDays(easterSunday, 50),
+    "Skjærtorsdag":          addDaysAndFormat(easterSunday, -3),
+    "Langfredag":            addDaysAndFormat(easterSunday, -2),
+    "Første påskedag":       addDaysAndFormat(easterSunday,  0),
+    "Andre påskedag":        addDaysAndFormat(easterSunday,  1),
+    "Kristi himmelfartsdag": addDaysAndFormat(easterSunday, 39),
+    "Første pinsedag":       addDaysAndFormat(easterSunday, 49),
+    "Andre pinsedag":        addDaysAndFormat(easterSunday, 50),
   }
 
   return Object.values(movableHolidays)
@@ -97,7 +97,7 @@ export function calculateEasterSunday(year: number): Date {
   return new Date(Date.UTC(year, n - 1, p))
 }
 
-function addAndFormatDays(date: Date, days: number): string {
+function addDaysAndFormat(date: Date, days: number): string {
   const result = new Date(date)
   result.setUTCDate(result.getUTCDate() + days)
   return result.toISOString().slice(0, 10)
