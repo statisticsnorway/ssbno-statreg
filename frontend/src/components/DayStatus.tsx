@@ -1,16 +1,7 @@
 import { Tag } from '@digdir/designsystemet-react'
 import { DayStatus } from '@ssbno-statreg/shared'
 
-export type VisibleDayStatus = Exclude<DayStatusValue, typeof DayStatus.NONE>
-
-type DayStatusValue = typeof DayStatus[keyof typeof DayStatus]
-
-type StatusConfig = {
-  color: 'neutral' | 'accent' | 'warning' | 'danger'
-  text: DayStatusValue
-}
-
-const statusConfig: Record<VisibleDayStatus, StatusConfig> = {
+const statusConfig = {
   BLOCKED: {
     color: 'neutral',
     text: DayStatus.BLOCKED,
@@ -27,13 +18,10 @@ const statusConfig: Record<VisibleDayStatus, StatusConfig> = {
     color: 'danger',
     text: DayStatus.FULL,
   },
-}
+} as const
 
-export function DayStatusTag(props: { status: VisibleDayStatus }) {
-  const config: StatusConfig = statusConfig[props.status]
-  return (
-    <Tag data-color={config.color}>
-      {config.text}
-    </Tag>
-  )
+export function DayStatusTag(props: { status: keyof typeof DayStatus }) {
+  if (props.status == 'NONE') return null
+  const config = statusConfig[props.status]
+  return <Tag data-color={config.color}>{config.text}</Tag>
 }
