@@ -1,5 +1,12 @@
 # Coding practices and conventions in this project
 
+## Datetime
+
+* Frontend uses local datetime
+* Backend handles all datetimes as UTC
+* All datetimes in database are stored in UTC
+* All dates only (_'YYYY-MM-DD'_) are by default handled as strings
+
 ## Sanitation, validation and parsing in service layer
 
 As a rule of thumb we:
