@@ -32,7 +32,7 @@ export default function ShowStatistic() {
   const startYear = formatStartYear(statistic.first_released_at)
   const contacts = formatContacts(statistic.contacts)
   const mockContinuedBy = ['putegjeld', 'k2', 'k3']
-  const cancelledVariants = formatCancelledVariants(statistic.variants)
+  const cancelledVariants = formatCancelledVariants(statistic.variants ?? [])
 
   return (
     <>
@@ -131,7 +131,7 @@ function formatMainLanguage(language?: string): string {
   return language
 }
 
-function formatDivision(division: StatisticDetails['division']): string {
+function formatDivision(division: StatisticDetails["division"]): string {
   if (!division?.name) return '-'
   if (!division.code) return division.name
   return `${division.name} (${division.code})`
@@ -142,7 +142,7 @@ function formatStartYear(dateString: string | null | undefined): string {
   return new Date(dateString).getFullYear().toString()
 }
 
-function formatCancelledVariants(variants: StatisticDetails['variants']): string[] {
+function formatCancelledVariants(variants: Variant[]): string[] {
   if (!variants) return []
   return variants.filter((variant: Variant) => variant.cancelled).map(formatVariant)
 }
