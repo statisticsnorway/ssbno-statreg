@@ -1,12 +1,14 @@
 import '@navikt/ds-css/dist/global/tokens.css'
 import '@navikt/ds-css/dist/components.css'
 
+import { useState, useEffect } from 'react'
 import { DatePicker as AkselDatePicker } from '@navikt/ds-react/DatePicker'
 import { type CalenderDate, DayStatus } from '@ssbno-statreg/shared'
 import { Paragraph } from '@digdir/designsystemet-react'
 
+import client from '../api'
+
 type DatePickerProps = React.ComponentProps<typeof AkselDatePicker.Standalone> & {
-  calendarDates: CalenderDate
   showColorCodingExplanation?: boolean
 }
 
@@ -15,18 +17,40 @@ function parseDate(dateString: string): Date {
   return new Date(year, month - 1, day)
 }
 
-export function DatePicker({ calendarDates, showColorCodingExplanation, ...props }: DatePickerProps) {
+// TODO: Look over
+function formatDate(date: Date | undefined): string {
+  if (!date) return ''
+  return date.toISOString().split('T')[0]
+}
+
+export function DatePicker({ showColorCodingExplanation, ...props }: DatePickerProps) {
+  const [calendarDates, setCalendarDates] = useState<CalenderDate>([])
+
+  useEffect(() => {
+    async function fetchCalendarDates() {
+      const { data, error } = await client.GET('/calendar', { params: { query: { fromDate: formatDate(props?.fromDate), toDate: formatDate(props?.toDate)} } })
+      if (error) {
+        const errorMessage = (error as any).error
+        console.log(errorMessage)
+        alert(errorMessage)
+      } else {
+        setCalendarDates(data)
+      }
+    }
+    fetchCalendarDates()
+  }, [])
+
   const full: Date[] = []
   const many: Date[] = []
   const few: Date[] = []
   const blocked: Date[] = []
 
-  for (const [dateString, value] of Object.entries(calendarDates) as [string, CalenderDate[string]][]) {
+  for (const [dateString, value] of Object.entries(calendarDates)) {
     const date = parseDate(dateString)
-    if (value.status === 'full') full.push(date)
-    else if (value.status === 'many') many.push(date)
-    else if (value.status === 'few') few.push(date)
-    else if (value.status === 'blocked') blocked.push(date)
+    if (value.status === 'FULL') full.push(date)
+    else if (value.status === 'MANY') many.push(date)
+    else if (value.status === 'FEW') few.push(date)
+    else if (value.status === 'BLOCKED') blocked.push(date)
   }
 
   const statusColors: Record<keyof typeof DayStatus, { backgroundColor: string }> = {
