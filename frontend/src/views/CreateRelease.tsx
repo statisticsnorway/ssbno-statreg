@@ -44,7 +44,7 @@ export default function CreateRelease() {
           <div className='description-wrapper'>
           {/* TODO: Placeholder date and day status for description */}
             <span>Innmeldte datoer den {formatDate(releases[0]?.publish_time)}</span>
-            <DayStatusTag status={'MANY' as VisibleDayStatus} />
+            <DayStatusTag status={'MANY'} />
           </div>
           <ReleasesTable releases={releases} />
         </Tabs.Panel>
