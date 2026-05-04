@@ -28,7 +28,7 @@ export default function CreateRelease() {
       }
     }
     fetchReleases()
-  })
+  }, [])
 
   function renderReleasesTables() {
     return (
