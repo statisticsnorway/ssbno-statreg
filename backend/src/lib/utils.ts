@@ -67,3 +67,7 @@ export function ensureRequiredFieldsExists<T extends Record<string, any>>(
 export function isNumber(str: string | number | undefined | null) {
   return Number.isInteger(Number(str))
 }
+
+export function getDateOnlyAsString(date: Date): string {
+  return date.toISOString().slice(0, 10)
+}

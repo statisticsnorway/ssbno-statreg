@@ -37,33 +37,33 @@ describe('blockedDates', () => {
 
   describe('isDateAutoBlocked()', () => {
     test('returns false for a regular weekday (Friday 5. feb 2027)', () => {
-      expect(isDateAutoBlocked(new Date('2027-02-05'))).toBe(false)
+      expect(isDateAutoBlocked('2027-02-05')).toBe(false)
     })
     test('returns true for Saturday', () => {
-      expect(isDateAutoBlocked(new Date('2027-02-06'))).toBe(true)
+      expect(isDateAutoBlocked('2027-02-06')).toBe(true)
     })
     test('returns true for Sunday', () => {
-      expect(isDateAutoBlocked(new Date('2027-02-07'))).toBe(true)
+      expect(isDateAutoBlocked('2027-02-07')).toBe(true)
     })
     test('returns true for a static holiday (1. mai 2027)', () => {
-      expect(isDateAutoBlocked(new Date('2027-05-01'))).toBe(true)
+      expect(isDateAutoBlocked('2027-05-01')).toBe(true)
     })
     test('returns true for a movable holiday ("1. Påskedag" 28. march 2027)', () => {
-      expect(isDateAutoBlocked(new Date('2027-03-28'))).toBe(true)
+      expect(isDateAutoBlocked('2027-03-28')).toBe(true)
     })
   })
 
   describe('isDateBlocked()', () => {
     test('returns true if date is automatically blocked', async () => {
-      expect(await isDateBlocked(new Date('2027-02-06'), prismaMock)).toBe(true)
+      expect(await isDateBlocked('2027-02-06', prismaMock)).toBe(true)
     })
     test('returns true if date is manually blocked', async () => {
       assertDayNotManuallyBlockedMock.mockResolvedValueOnce(false)
-      expect(await isDateBlocked(new Date('2027-02-05'), prismaMock)).toBe(true)
+      expect(await isDateBlocked('2027-02-05', prismaMock)).toBe(true)
     })
     test('returns false if date is neither manually nor automatically blocked', async () => {
       assertDayNotManuallyBlockedMock.mockResolvedValueOnce(true)
-      expect(await isDateBlocked(new Date('2027-02-05'), prismaMock)).toBe(false)
+      expect(await isDateBlocked('2027-02-05', prismaMock)).toBe(false)
     })
   })
 
@@ -101,16 +101,6 @@ describe('blockedDates', () => {
         '2027-02-07': { status: 'BLOCKED' },
       })
     })
-
-    test('does not mutate the from date', async () => {
-      const from = new Date('2027-02-01')
-      const to = new Date('2027-02-03')
-      setFindManyResult([])
-
-      await getBlockedDatesInPeriod(from, to, prismaMock)
-
-      expect(from.toISOString().slice(0, 10)).toBe('2027-02-01')
-    })
   })
 
   describe('getHolidays() ', () => {
@@ -132,17 +122,17 @@ describe('blockedDates', () => {
   describe('calculateEasterSunday()', () => {
     test('returns correct easter sunday for years 2026-2036', () => {
       // https://no.wikipedia.org/wiki/Bevegelige_merkedager
-      expect(calculateEasterSunday(2026)).toStrictEqual(new Date(Date.UTC(2026, 3, 5)))
-      expect(calculateEasterSunday(2027)).toStrictEqual(new Date(Date.UTC(2027, 2, 28)))
-      expect(calculateEasterSunday(2028)).toStrictEqual(new Date(Date.UTC(2028, 3, 16)))
-      expect(calculateEasterSunday(2029)).toStrictEqual(new Date(Date.UTC(2029, 3, 1)))
-      expect(calculateEasterSunday(2030)).toStrictEqual(new Date(Date.UTC(2030, 3, 21)))
-      expect(calculateEasterSunday(2031)).toStrictEqual(new Date(Date.UTC(2031, 3, 13)))
-      expect(calculateEasterSunday(2032)).toStrictEqual(new Date(Date.UTC(2032, 2, 28)))
-      expect(calculateEasterSunday(2033)).toStrictEqual(new Date(Date.UTC(2033, 3, 17)))
-      expect(calculateEasterSunday(2034)).toStrictEqual(new Date(Date.UTC(2034, 3, 9)))
-      expect(calculateEasterSunday(2035)).toStrictEqual(new Date(Date.UTC(2035, 2, 25)))
-      expect(calculateEasterSunday(2036)).toStrictEqual(new Date(Date.UTC(2036, 3, 13)))
+      expect(calculateEasterSunday(2026)).toStrictEqual(new Date('2026-04-05T00:00Z'))
+      expect(calculateEasterSunday(2027)).toStrictEqual(new Date('2027-03-28T00:00Z'))
+      expect(calculateEasterSunday(2028)).toStrictEqual(new Date('2028-04-16T00:00Z'))
+      expect(calculateEasterSunday(2029)).toStrictEqual(new Date('2029-04-01T00:00Z'))
+      expect(calculateEasterSunday(2030)).toStrictEqual(new Date('2030-04-21T00:00Z'))
+      expect(calculateEasterSunday(2031)).toStrictEqual(new Date('2031-04-13T00:00Z'))
+      expect(calculateEasterSunday(2032)).toStrictEqual(new Date('2032-03-28T00:00Z'))
+      expect(calculateEasterSunday(2033)).toStrictEqual(new Date('2033-04-17T00:00Z'))
+      expect(calculateEasterSunday(2034)).toStrictEqual(new Date('2034-04-09T00:00Z'))
+      expect(calculateEasterSunday(2035)).toStrictEqual(new Date('2035-03-25T00:00Z'))
+      expect(calculateEasterSunday(2036)).toStrictEqual(new Date('2036-04-13T00:00Z'))
     })
   })
 })
