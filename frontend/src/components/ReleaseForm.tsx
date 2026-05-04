@@ -26,9 +26,9 @@ export function ReleaseForm() {
         <ApprovalStatusTag status={ApprovalStatus.PENDING} />
       </div>
 
-      <Paragraph>Alle felter må fylles ut</Paragraph>
 
       <Field>
+        <Paragraph style={{ marginBottom: 'var(--ds-size-8)' }} >Alle felter må fylles ut</Paragraph>
         <Label>Datotype for publisering</Label>
         <Select value={dateType} onChange={(e) => setDateType(e.target.value)}>
           <Select.Option value='' disabled>
@@ -43,7 +43,8 @@ export function ReleaseForm() {
       <Field>
         <Label>Publiseringsdato</Label>
         <Field.Description>
-          Nye datoer og endringer må meldes minst 3 måneder i forveien. For kortere frister, kontakt desken@ssb.no.
+          Nye datoer og endringer må meldes minst 3 måneder i forveien. <br />
+          For kortere frister, kontakt desken@ssb.no.
         </Field.Description>
         <Input size={10} {...publishTimeInputProps} />
         <DatePicker fromDate={start} toDate={stop} showColorCodingExplanation {...publishTimePickerProps} />
