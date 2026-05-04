@@ -119,16 +119,15 @@ describe('asserts', () => {
       const blockedDay = new Date('2026-12-24T00:00:00Z')
       prismaMock.calender_date.findUnique = vi.fn(() => Promise.resolve({ comment: 'Julaften', day: blockedDay }))
 
-      const result = await assertDayNotManuallyBlocked(prismaMock, blockedDay)
+      const result = await assertDayNotManuallyBlocked(prismaMock, '2026-12-24')
 
       expect(result).toBe(false)
     })
 
     test('returns true when day is not manually blocked', async () => {
-      const unblockedDay = new Date('2026-12-01T00:00:00Z')
       prismaMock.calender_date.findUnique = vi.fn(() => Promise.resolve(null))
 
-      const result = await assertDayNotManuallyBlocked(prismaMock, unblockedDay)
+      const result = await assertDayNotManuallyBlocked(prismaMock, '2026-12-01')
 
       expect(result).toBe(true)
     })

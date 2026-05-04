@@ -1,6 +1,6 @@
 import { getBlockedDatesInPeriod, isDateBlocked } from '@/lib/blockedDates'
 import type { ExtendedPrismaClient } from '@/lib/prisma'
-import { dateToISOString, sanitize, parseDateOnly, ensureRequiredFieldsExists } from '@/lib/utils'
+import { dateToISOString, sanitize, parseDateOnly, ensureRequiredFieldsExists, getDateOnlyAsString } from '@/lib/utils'
 import { type BlockedReleaseDate, type CalenderDate, DayStatus } from '@ssbno-statreg/shared'
 
 export type CalendarDatePrisma = Pick<ExtendedPrismaClient, 'calender_date' | 'release'>
@@ -86,7 +86,7 @@ export async function getDateStatusForRange(
 
   const d = new Date(from)
   while (d <= to) {
-    const key = d.toISOString().slice(0, 10)
+    const key = getDateOnlyAsString(d)
     if (blockedDates[key]) {
       result[key] = blockedDates[key]
     } else {
@@ -113,7 +113,7 @@ function getReleaseCountByDate(
   const releaseCountsPerDate: Record<string, number> = {}
 
   for (const release of releasesInTimerange) {
-    const date = release.publish_time.toISOString().slice(0, 10)
+    const date = getDateOnlyAsString(release.publish_time)
     releaseCountsPerDate[date] = (releaseCountsPerDate[date] || 0) + 1
   }
 

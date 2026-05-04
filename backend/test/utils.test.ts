@@ -7,6 +7,7 @@ import {
   parseId,
   ensureRequiredFieldsExists,
   isNumber,
+  getDateOnlyAsString,
 } from '@/lib/utils'
 import { describe, test, expect } from 'vitest'
 
@@ -48,7 +49,7 @@ describe('utils', () => {
   describe('parseDateOnly', () => {
     test('accepts and returns valid Date', () => {
       const result = parseDateOnly('2026-12-24')
-      expect(result).toStrictEqual(new Date('2026-12-24'))
+      expect(result.toISOString()).toBe('2026-12-24T00:00:00.000Z')
     })
 
     test('returns 400 for date ISO format', async () => {
@@ -73,17 +74,17 @@ describe('utils', () => {
   describe('parseDateISO ', () => {
     test('accepts and returns valid date ISO format with Z', () => {
       const result = parseDateISO('2026-03-25T12:30:00Z')
-      expect(result).toStrictEqual(new Date('2026-03-25T12:30:00Z'))
+      expect(result.toISOString()).toBe('2026-03-25T12:30:00.000Z')
     })
 
     test('accepts and returns valid date ISO format with offset', () => {
       const result = parseDateISO('2026-03-25T12:30:00+01:00')
-      expect(result).toStrictEqual(new Date('2026-03-25T12:30:00+01:00'))
+      expect(result.toISOString()).toBe('2026-03-25T11:30:00.000Z')
     })
 
     test('accepts and returns valid date ISO format with milliseconds', () => {
       const result = parseDateISO('2026-03-25T12:30:00.123Z')
-      expect(result).toStrictEqual(new Date('2026-03-25T12:30:00.123Z'))
+      expect(result.toISOString()).toBe('2026-03-25T12:30:00.123Z')
     })
 
     test('returns 400 for missing date', () => {
@@ -111,8 +112,9 @@ describe('utils', () => {
     })
 
     test('returns 400 for invalid date if not colon in offset', () => {
-      const result = parseDateISO('2026-03-25T12:30:00+01:00')
-      expect(result).toStrictEqual(new Date('2026-03-25T12:30:00+0100'))
+      expect(() => parseDateISO('2026-03-25T12:30:00+0100')).toThrow({
+        statregError: 'Invalid date format: 2026-03-25T12:30:00+0100',
+      })
     })
   })
 
@@ -187,6 +189,17 @@ describe('utils', () => {
     })
     test('a string of text is not a number', () => {
       expect(false).toBe(isNumber('text in a string'))
+    })
+  })
+
+  describe('getDateOnlyAsString', () => {
+    test('gets the correct datestring from date', () => {
+      const dateString = getDateOnlyAsString(new Date('2026-05-05T00:00Z'))
+      expect(dateString).toBe('2026-05-05')
+    })
+    test('returns iso date if given local date with offset', () => {
+      const dateString = getDateOnlyAsString(new Date('2026-05-05T00:00+01:00'))
+      expect(dateString).toBe('2026-05-04')
     })
   })
 })

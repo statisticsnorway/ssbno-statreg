@@ -1,24 +1,25 @@
 import { assertDayNotManuallyBlocked } from '@/lib/asserts'
 import { CalenderDate } from '@ssbno-statreg/shared'
 import { CalendarDatePrisma } from '@/services/calendarService'
+import { getDateOnlyAsString, parseDateOnly } from '@/lib/utils'
 
 export const HOLIDAYS: Record<number, string[]> = {}
 
-export function isDateAutoBlocked(date: Date): Boolean {
+export function isDateAutoBlocked(dateString: string): Boolean {
+  const date = parseDateOnly(dateString)
   const sunday = 0
   const saturday = 6
   if (date.getUTCDay() === saturday || date.getUTCDay() === sunday) return true
 
-  const year = date.getUTCFullYear()
-  const holidays = getHolidays(year)
-  const dateKey = date.toISOString().slice(0, 10)
+  const year = dateString.slice(0, 4)
+  const holidays = getHolidays(Number(year))
 
-  return holidays.includes(dateKey)
+  return holidays.includes(dateString)
 }
 
-export async function isDateBlocked(date: Date, prisma: CalendarDatePrisma): Promise<Boolean> {
-  if (isDateAutoBlocked(date)) return true
-  if (!(await assertDayNotManuallyBlocked(prisma, date))) return true
+export async function isDateBlocked(dateString: string, prisma: CalendarDatePrisma): Promise<Boolean> {
+  if (isDateAutoBlocked(dateString)) return true
+  if (!(await assertDayNotManuallyBlocked(prisma, dateString))) return true
 
   return false
 }
@@ -34,14 +35,14 @@ export async function getBlockedDatesInPeriod(from: Date, to: Date, prisma: Cale
     select: { day: true },
   })
 
-  const manuallyBlockedKeys = new Set(manuallyBlockedDates.map(({ day }) => day.toISOString().slice(0, 10)))
+  const manuallyBlockedKeys = new Set(manuallyBlockedDates.map(({ day }) => getDateOnlyAsString(day)))
 
   const blockedDates: CalenderDate = {}
 
   const d = new Date(from)
   while (d <= to) {
-    const key = d.toISOString().slice(0, 10)
-    if (manuallyBlockedKeys.has(key) || isDateAutoBlocked(d)) {
+    const key = getDateOnlyAsString(d)
+    if (manuallyBlockedKeys.has(key) || isDateAutoBlocked(key)) {
       blockedDates[key] = { status: 'BLOCKED' }
     }
     d.setUTCDate(d.getUTCDate() + 1)
@@ -100,5 +101,5 @@ export function calculateEasterSunday(year: number): Date {
 function addDaysAndFormat(date: Date, days: number): string {
   const result = new Date(date)
   result.setUTCDate(result.getUTCDate() + days)
-  return result.toISOString().slice(0, 10)
+  return getDateOnlyAsString(result)
 }
