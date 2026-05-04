@@ -100,10 +100,10 @@ function ListReleases() {
           Publiseringskalender
         </Heading>
         <div className='list-releases-calendars-buttons'>
-          <Button variant='tertiary' onClick={() => setCalendarMonth((prev) => prev - 1)}>
+          <Button variant='tertiary' onClick={() => setCalendarMonth((prev) => prev - 3)}>
             <ArrowLeftIcon /> Forrige
           </Button>
-          <Button variant='tertiary' onClick={() => setCalendarMonth((prev) => prev + 1)}>
+          <Button variant='tertiary' onClick={() => setCalendarMonth((prev) => prev + 3)}>
             Neste <ArrowRightIcon />
           </Button>
         </div>
