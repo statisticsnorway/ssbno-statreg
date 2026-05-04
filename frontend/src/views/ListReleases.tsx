@@ -86,16 +86,17 @@ function ListReleases() {
     )
   }
 
-  function calculateDateRange(monthsAhead: number): { fromDate: Date; toDate: Date } {
-    const now = new Date()
-    const from = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + monthsAhead, 1)) // first day of the month
-    const to = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + monthsAhead + 1, 0)) // last day of the month
-
-    return {
-      fromDate: from, 
-      toDate: to, 
-    }
+  // first day of the calculated month
+  function calculateFromDate(now: Date, monthsAhead: number): Date {
+    return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + monthsAhead, 1)) 
   }
+
+  // last day of the calculated month
+  function calculateToDate(now: Date, monthsAhead: number): Date {
+    return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + monthsAhead + 1, 0)) 
+  }
+
+  const now = new Date()
 
   return (
     <>
@@ -108,11 +109,11 @@ function ListReleases() {
           Publiseringskalender
         </Heading>
         <div className='list-releases-calendars-wrapper'>
-          <DatePicker fromDate={calculateDateRange(0).fromDate} toDate={calculateDateRange(0).toDate} />
-          <DatePicker fromDate={calculateDateRange(1).fromDate} toDate={calculateDateRange(1).toDate} />
+          <DatePicker fromDate={calculateFromDate(now, 0)} toDate={calculateToDate(now, 0)} />
+          <DatePicker fromDate={calculateFromDate(now, 1)} toDate={calculateToDate(now, 1)} />
           <DatePicker
-            fromDate={calculateDateRange(2).fromDate}
-            toDate={calculateDateRange(2).toDate}
+            fromDate={calculateFromDate(now, 2)}
+            toDate={calculateToDate(now, 2)}
             showColorCodingExplanation
           />
         </div>
