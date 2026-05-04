@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { ReleasesTable } from '../components/ReleasesTable'
-import { Heading, Field, Label, Select, Pagination, usePagination } from '@digdir/designsystemet-react'
+import { Heading, Field, Label, Select, Pagination, usePagination, Button } from '@digdir/designsystemet-react'
+import { ArrowLeftIcon, ArrowRightIcon } from '@navikt/aksel-icons'
 import type { ReleaseListing } from '@ssbno-statreg/shared'
 import { DatePicker } from '../components/DatePicker'
 
@@ -88,12 +89,12 @@ function ListReleases() {
 
   // first day of the calculated month
   function calculateFromDate(now: Date, monthsAhead: number): Date {
-    return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + monthsAhead, 1)) 
+    return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + monthsAhead, 1))
   }
 
   // last day of the calculated month
   function calculateToDate(now: Date, monthsAhead: number): Date {
-    return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + monthsAhead + 1, 0)) 
+    return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + monthsAhead + 1, 0))
   }
 
   const now = new Date()
@@ -108,6 +109,14 @@ function ListReleases() {
         <Heading level={2} data-size='xs'>
           Publiseringskalender
         </Heading>
+        <div className='list-releases-calendars-buttons'>
+          <Button variant='tertiary'>
+            <ArrowLeftIcon /> Forrige
+          </Button>
+          <Button variant='tertiary'>
+            Neste <ArrowRightIcon />
+          </Button>
+        </div>
         <div className='list-releases-calendars-wrapper'>
           <DatePicker fromDate={calculateFromDate(now, 0)} toDate={calculateToDate(now, 0)} />
           <DatePicker fromDate={calculateFromDate(now, 1)} toDate={calculateToDate(now, 1)} />
