@@ -4,6 +4,7 @@ import { Heading, Field, Label, Select, Pagination, usePagination } from '@digdi
 import type { ReleaseListing } from '@ssbno-statreg/shared'
 import { DatePicker } from '../components/DatePicker'
 
+import './ListReleases.css'
 import client from '../api'
 
 function ListReleases() {
@@ -102,11 +103,11 @@ function ListReleases() {
         Publiseringsoversikt
       </Heading>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--ds-size-4)' }}>
+      <div className='list-releases-calendars-container'>
         <Heading level={2} data-size='xs'>
           Publiseringskalender
         </Heading>
-        <div style={{ display: 'flex', gap: 'var(--ds-size-14)' }}>
+        <div className='list-releases-calendars-wrapper'>
           <DatePicker fromDate={calculateDateRange(0).fromDate} toDate={calculateDateRange(0).toDate} />
           <DatePicker fromDate={calculateDateRange(1).fromDate} toDate={calculateDateRange(1).toDate} />
           <DatePicker
