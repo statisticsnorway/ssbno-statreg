@@ -1,13 +1,6 @@
 import { useState, useEffect } from 'react'
 import { ReleasesTable } from '../components/ReleasesTable'
-import {
-  Heading,
-  Field,
-  Label,
-  Select,
-  Pagination,
-  usePagination,
-} from '@digdir/designsystemet-react'
+import { Heading, Field, Label, Select, Pagination, usePagination } from '@digdir/designsystemet-react'
 import type { ReleaseListing } from '@ssbno-statreg/shared'
 import { DatePicker } from '../components/DatePicker'
 
@@ -91,20 +84,37 @@ function ListReleases() {
       </div>
     )
   }
-  
-return (
+
+  function calculateDateRange(monthsAhead: number): { fromDate: Date; toDate: Date } {
+    const now = new Date()
+    const from = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + monthsAhead, 1)) // first day of the month
+    const to = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + monthsAhead + 1, 0)) // last day of the month
+
+    return {
+      fromDate: from, 
+      toDate: to, 
+    }
+  }
+
+  return (
     <>
       <Heading level={1} data-size='sm'>
         Publiseringsoversikt
       </Heading>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--ds-size-4)' }}>
-        <Heading level={2} data-size='xs'>Publiseringskalender</Heading>
-        <DatePicker
-          fromDate={new Date('2026-04-01')}
-          toDate={new Date('2026-04-30')}
-          showColorCodingExplanation
-        />
+        <Heading level={2} data-size='xs'>
+          Publiseringskalender
+        </Heading>
+        <div style={{ display: 'flex', gap: 'var(--ds-size-14)' }}>
+          <DatePicker fromDate={calculateDateRange(0).fromDate} toDate={calculateDateRange(0).toDate} />
+          <DatePicker fromDate={calculateDateRange(1).fromDate} toDate={calculateDateRange(1).toDate} />
+          <DatePicker
+            fromDate={calculateDateRange(2).fromDate}
+            toDate={calculateDateRange(2).toDate}
+            showColorCodingExplanation
+          />
+        </div>
       </div>
 
       <ReleasesTable
