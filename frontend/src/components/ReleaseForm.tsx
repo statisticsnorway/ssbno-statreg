@@ -1,5 +1,15 @@
 import { useState } from 'react'
-import { Paragraph, Select, Button, Fieldset, Field, Label, Input } from '@digdir/designsystemet-react'
+import {
+  Paragraph,
+  Select,
+  Button,
+  Fieldset,
+  Field,
+  Label,
+  Input,
+  ValidationMessage,
+  ErrorSummary,
+} from '@digdir/designsystemet-react'
 import { DatePicker as AkselDatePicker, useDatepicker } from '@navikt/ds-react/DatePicker'
 import { DatePicker } from './DatePicker'
 import { getFirstDayOfNthMonth, getLastDayOfNthMonth } from '../lib/utils'
@@ -28,6 +38,7 @@ export function ReleaseForm() {
             <Select.Option value={precision}>{precision}</Select.Option>
           ))}
         </Select>
+        <ValidationMessage>Velg en datotype for publisering</ValidationMessage>
       </Field>
 
       <Field>
@@ -38,6 +49,7 @@ export function ReleaseForm() {
         </Field.Description>
         <Input size={10} {...publishTimeInputProps} />
         <DatePicker fromDate={start} toDate={stop} showColorCodingExplanation {...publishTimePickerProps} />
+        <ValidationMessage>Velg en publiseringsdato</ValidationMessage>
       </Field>
 
       <Fieldset>
@@ -47,12 +59,14 @@ export function ReleaseForm() {
             <AkselDatePicker {...periodFromPickerProps}>
               <AkselDatePicker.Input style={{ padding: '0' }} {...periodFromInputProps} label />
             </AkselDatePicker>
+            <ValidationMessage>Velg en fra-dato</ValidationMessage>
           </Field>
           <Field>
             <Label>Måleperiode til</Label>
             <AkselDatePicker {...periodToPickerProps}>
               <AkselDatePicker.Input style={{ padding: '0' }} {...periodToInputProps} label />
             </AkselDatePicker>
+            <ValidationMessage>Velg en til-dato</ValidationMessage>
           </Field>
         </div>
       </Fieldset>
@@ -61,6 +75,15 @@ export function ReleaseForm() {
         <Button>Meld dato</Button>
         <Button variant='tertiary'>Avbryt</Button>
       </div>
+
+      <ErrorSummary>
+        <ErrorSummary.Heading>For å gå videre må du rette opp følgende feil:</ErrorSummary.Heading>
+        <ErrorSummary.List>
+          <ErrorSummary.Item>
+            <ErrorSummary.Link href='#'>Velg en publiseringsdato</ErrorSummary.Link>
+          </ErrorSummary.Item>
+        </ErrorSummary.List>
+      </ErrorSummary>
     </>
   )
 }
