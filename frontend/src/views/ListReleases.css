@@ -14,6 +14,7 @@
   .list-releases-calendars-wrapper {
     display: flex;
     gap: var(--ds-size-14);
+    align-items: flex-start;
 
     /* TODO: Temporarily hide buttons with no functionality */
     .aksel-date__caption-button {
