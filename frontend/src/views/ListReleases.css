@@ -5,7 +5,7 @@
   gap: var(--ds-size-4);
 
   .list-releases-calendars-buttons {
-    width: 85%;
+    width: 92%; /* TODO: Setting the width this way is not optimal */
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -16,7 +16,6 @@
     gap: var(--ds-size-14);
     align-items: flex-start;
 
-    /* TODO: Temporarily hide buttons with no functionality */
     .aksel-date__caption-button {
       visibility: hidden;
     }
