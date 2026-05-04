@@ -1,17 +1,19 @@
-import { describe, it, expect } from 'vitest'
-import { formatPublishTime, formatDate } from '../src/lib/utils'
+import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest'
+import { formatPublishTime, formatDate, getFirstDayOfNthMonth, getLastDayOfNthMonth } from '../src/lib/utils'
 
 const timeZone = 'Europe/Oslo'
+beforeEach(() => vi.useFakeTimers())
+afterEach(() => vi.useRealTimers())
 
 describe('utils', () => {
   describe('formatPublishTime', () => {
-    it('returns "-" when publishTime is undefined', () => {
+    test('returns "-" when publishTime is undefined', () => {
       const result = formatPublishTime(undefined)
 
       expect(result).toBe('-')
     })
 
-    it('formats ISO datetime correctly in nb-NO locale', () => {
+    test('formats ISO datetime correctly in nb-NO locale', () => {
       const iso = '2024-01-15T10:30:00Z'
 
       const result = formatPublishTime(iso, timeZone)
@@ -19,7 +21,7 @@ describe('utils', () => {
       expect(result).toBe('15.01.2024 kl 11:30')
     })
 
-    it('formats single-digit day and month with leading zeros', () => {
+    test('formats single-digit day and month with leading zeros', () => {
       const iso = '2024-03-04T08:05:00Z'
 
       const result = formatPublishTime(iso, timeZone)
@@ -29,13 +31,13 @@ describe('utils', () => {
   })
 
   describe('formatDate', () => {
-    it('returns an empty string when input is undefined', () => {
+    test('returns an empty string when input is undefined', () => {
       const result = formatPublishTime(undefined)
 
       expect(result).toBe('-')
     })
 
-    it('formats ISO date correctly in nb-NO locale', () => {
+    test('formats ISO date correctly in nb-NO locale', () => {
       const iso = '2024-06-01T00:00:00Z'
 
       const result = formatDate(iso, timeZone)
@@ -43,12 +45,56 @@ describe('utils', () => {
       expect(result).toBe('01.06.2024')
     })
 
-    it('formats single-digit day and month with leading zeros', () => {
+    test('formats single-digit day and month with leading zeros', () => {
       const iso = '2024-02-03T12:00:00Z'
 
       const result = formatDate(iso, timeZone)
 
       expect(result).toBe('03.02.2024')
+    })
+  })
+
+  describe('getFirstDayOfNthMonth', () => {
+    test('returns the first day of the current month when monthsAhead is 0', () => {
+      vi.setSystemTime(new Date('2024-03-15'))
+      expect(getFirstDayOfNthMonth(0)).toEqual(new Date('2024-03-01'))
+    })
+
+    test('returns the first day of a future month', () => {
+      vi.setSystemTime(new Date('2024-03-15'))
+      expect(getFirstDayOfNthMonth(2)).toEqual(new Date('2024-05-01'))
+    })
+
+    test('rolls over to next year when month exceeds december', () => {
+      vi.setSystemTime(new Date('2024-12-15'))
+      expect(getFirstDayOfNthMonth(2)).toEqual(new Date('2025-02-01'))
+    })
+  })
+
+  describe('getLastDayOfNthMonth', () => {
+    test('returns the last day of the current month when monthsAhead is 0', () => {
+      vi.setSystemTime(new Date('2024-03-15'))
+      expect(getLastDayOfNthMonth(0)).toEqual(new Date('2024-03-31'))
+    })
+
+    test('returns the last day of a future month', () => {
+      vi.setSystemTime(new Date('2024-03-15'))
+      expect(getLastDayOfNthMonth(2)).toEqual(new Date('2024-05-31'))
+    })
+
+    test('handles february in a leap year', () => {
+      vi.setSystemTime(new Date('2024-01-15'))
+      expect(getLastDayOfNthMonth(1)).toEqual(new Date('2024-02-29'))
+    })
+
+    test('handles february in a non-leap year', () => {
+      vi.setSystemTime(new Date('2023-01-15'))
+      expect(getLastDayOfNthMonth(1)).toEqual(new Date('2023-02-28'))
+    })
+
+    test('rolls over to next year when month exceeds december', () => {
+      vi.setSystemTime(new Date('2024-12-15'))
+      expect(getLastDayOfNthMonth(2)).toEqual(new Date('2025-02-28'))
     })
   })
 })

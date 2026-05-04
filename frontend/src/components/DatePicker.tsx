@@ -11,19 +11,13 @@ type DatePickerProps = React.ComponentProps<typeof AkselDatePicker.Standalone> &
   showColorCodingExplanation?: boolean
 }
 
-function parseDate(dateString: string): Date {
-  const [year, month, day] = dateString.split('-').map(Number)
-  return new Date(year, month - 1, day)
-}
-
 function formatDate(date: Date | undefined): string {
   if (!date) return ''
-  return date.toISOString().split('T')[0]
+  return date.toISOString().slice(0,10)
 }
 
 export function DatePicker({ showColorCodingExplanation, ...props }: DatePickerProps) {
   const [calendarDates, setCalendarDates] = useState<CalenderDate>({})
-  console.log(props.toDate)
 
   useEffect(() => {
     async function fetchCalendarDates() {
@@ -47,7 +41,7 @@ export function DatePicker({ showColorCodingExplanation, ...props }: DatePickerP
   const blocked: Date[] = []
 
   for (const [dateString, value] of Object.entries(calendarDates)) {
-    const date = parseDate(dateString as string)
+    const date = new Date(dateString)
 
     if (value.status === 'FULL') full.push(date)
     else if (value.status === 'MANY') many.push(date)

@@ -7,6 +7,7 @@ import { DatePicker } from '../components/DatePicker'
 
 import './ListReleases.css'
 import client from '../api'
+import { getFirstDayOfNthMonth, getLastDayOfNthMonth } from '../lib/utils'
 
 function ListReleases() {
   const [releases, setReleases] = useState<ReleaseListing[]>([])
@@ -87,18 +88,6 @@ function ListReleases() {
     )
   }
 
-  // first day of the calculated month
-  function calculateFromDate(now: Date, monthsAhead: number): Date {
-    return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + monthsAhead, 1))
-  }
-
-  // last day of the calculated month
-  function calculateToDate(now: Date, monthsAhead: number): Date {
-    return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + monthsAhead + 1, 0))
-  }
-
-  const now = new Date()
-
   return (
     <>
       <Heading level={1} data-size='sm'>
@@ -118,11 +107,11 @@ function ListReleases() {
           </Button>
         </div>
         <div className='list-releases-calendars-wrapper'>
-          <DatePicker fromDate={calculateFromDate(now, 0)} toDate={calculateToDate(now, 0)} />
-          <DatePicker fromDate={calculateFromDate(now, 1)} toDate={calculateToDate(now, 1)} />
+          <DatePicker fromDate={getFirstDayOfNthMonth(0)} toDate={getLastDayOfNthMonth(0)} />
+          <DatePicker fromDate={getFirstDayOfNthMonth(1)} toDate={getLastDayOfNthMonth(1)} />
           <DatePicker
-            fromDate={calculateFromDate(now, 2)}
-            toDate={calculateToDate(now, 2)}
+            fromDate={getFirstDayOfNthMonth(2)}
+            toDate={getLastDayOfNthMonth(2)}
             showColorCodingExplanation
           />
         </div>
