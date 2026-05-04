@@ -1,6 +1,5 @@
 import { vi, beforeEach, describe, test, expect } from 'vitest'
 import { createBlockedReleaseDay } from '@/services/calendarService'
-import { dateToISOString } from '@/lib/utils'
 
 const { isDateBlockedMock } = vi.hoisted(() => ({
   isDateBlockedMock: vi.fn(async () => false),
@@ -97,21 +96,21 @@ describe('calendarService  ', () => {
 const calendar_date_result = [
   {
     blocked_comment: 'Julaften',
-    date: dateToISOString(new Date('2026-12-24T00:00:00')),
+    date: '2026-12-24T00:00:00.000Z',
   },
   {
     blocked_comment: 'Nyttårsaften',
-    date: dateToISOString(new Date('2026-12-31T00:00:00')),
+    date: '2026-12-31T00:00:00.000Z',
   },
 ]
 
 const calendar_date_prisma_list = [
   {
     comment: 'Julaften',
-    day: new Date('2026-12-24T00:00:00'),
+    day: new Date('2026-12-24T00:00Z'),
   },
   {
     comment: 'Nyttårsaften',
-    day: new Date('2026-12-31T00:00:00'),
+    day: new Date('2026-12-31T00:00Z'),
   },
 ]
