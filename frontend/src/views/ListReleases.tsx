@@ -45,11 +45,11 @@ function ListReleases() {
     setCurrentPage(1)
   }
 
-  function handlePrevCalendarNavigationOnClick() {
+  function handlePrevMonthOnClick() {
     setCalendarMonth((prev) => prev - 1)
   }
 
-  function handleNextCalendarNavigationOnClick() {
+  function handleNextMonthOnClick() {
     setCalendarMonth((prev) => prev + 1)
   }
 
@@ -108,10 +108,10 @@ function ListReleases() {
           Publiseringskalender
         </Heading>
         <div className='list-releases-calendars-buttons'>
-          <Button variant='tertiary' onClick={handlePrevCalendarNavigationOnClick}>
+          <Button variant='tertiary' onClick={handlePrevMonthOnClick}>
             <ArrowLeftIcon /> Forrige
           </Button>
-          <Button variant='tertiary' onClick={handleNextCalendarNavigationOnClick}>
+          <Button variant='tertiary' onClick={handleNextMonthOnClick}>
             Neste <ArrowRightIcon />
           </Button>
         </div>
