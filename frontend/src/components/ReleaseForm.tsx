@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Heading, Paragraph, Select, Button, Fieldset, Field, Label, Input } from '@digdir/designsystemet-react'
+import { Paragraph, Select, Button, Fieldset, Field, Label, Input } from '@digdir/designsystemet-react'
 import { DatePicker as AkselDatePicker, useDatepicker } from '@navikt/ds-react/DatePicker'
 import { DatePicker } from './DatePicker'
 
