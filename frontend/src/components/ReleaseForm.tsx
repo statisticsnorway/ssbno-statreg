@@ -56,14 +56,14 @@ export function ReleaseForm() {
             <Label>Måleperiode fra</Label>
             <Field.Description>dd.mm.åååå</Field.Description>
             <AkselDatePicker {...periodFromPickerProps}>
-              <AkselDatePicker.Input {...periodFromInputProps} label />
+              <AkselDatePicker.Input style={{ padding: '0' }} {...periodFromInputProps} label />
             </AkselDatePicker>
           </Field>
           <Field>
             <Label>Måleperiode til</Label>
             <Field.Description>dd.mm.åååå</Field.Description>
             <AkselDatePicker {...periodToPickerProps}>
-              <AkselDatePicker.Input {...periodToInputProps} label />
+              <AkselDatePicker.Input style={{ padding: '0' }} {...periodToInputProps} label />
             </AkselDatePicker>
           </Field>
         </div>
