@@ -3,11 +3,13 @@ import './CreateRelease.css'
 import { useState, useEffect } from 'react'
 import { Heading, Tabs } from '@digdir/designsystemet-react'
 import { CalendarIcon } from '@navikt/aksel-icons'
-import { type ReleaseListing } from '@ssbno-statreg/shared'
+import { type ReleaseListing, ApprovalStatus } from '@ssbno-statreg/shared'
 
 import { formatDate } from '../lib/utils'
 import { ReleasesTable } from '../components/ReleasesTable'
+import { ReleaseForm } from '../components/ReleaseForm'
 import { DayStatusTag } from '../components/DayStatus'
+import { ApprovalStatusTag } from '../components/ApprovalStatus'
 
 import client from '../api'
 
@@ -37,12 +39,13 @@ export default function CreateRelease() {
             Publiseringer på valgt dato
           </Tabs.Tab>
           <Tabs.Tab value='variant-releases'>
-            Alle publiseringer på (kortnavn), (variant) {/* TODO: MIM-2664: Implement on variant releases list table view */}
+            {/* TODO: MIM-2664: Implement on variant releases list table view */}
+            Alle publiseringer på (kortnavn), (variant)
           </Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel className='p-0' value='selected-publish-date'>
           <div className='description-wrapper'>
-          {/* TODO: Placeholder date and day status for description */}
+            {/* TODO: Placeholder date and day status for description */}
             <span>Innmeldte datoer den {formatDate(releases[0]?.publish_time)}</span>
             <DayStatusTag status={'MANY'} />
           </div>
@@ -57,11 +60,16 @@ export default function CreateRelease() {
 
   return (
     <>
-      <div>
+      <div className='release-description-wrapper'>
         <Heading level={1} data-size='md'>
           Meld publiseringsdato
         </Heading>
+        <Heading data-size='xs' level={2}>
+          Statistikknavn (kortnavn) og variant
+        </Heading>
+        <ApprovalStatusTag status={ApprovalStatus.PENDING} />
       </div>
+      <ReleaseForm />
       {renderReleasesTables()}
     </>
   )
