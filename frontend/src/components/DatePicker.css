@@ -3,7 +3,7 @@
   flex-direction: row;
   gap: var(--ds-size-10);
   align-items: center;
-  
+
   .datepicker-wrapper {
     padding: 20px 16px;
     box-shadow: var(--ds-shadow-md);

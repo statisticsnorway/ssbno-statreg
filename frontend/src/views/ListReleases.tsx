@@ -45,14 +45,6 @@ function ListReleases() {
     setCurrentPage(1)
   }
 
-  function handlePrevMonthOnClick() {
-    setCalendarMonth((prev) => prev - 1)
-  }
-
-  function handleNextMonthOnClick() {
-    setCalendarMonth((prev) => prev + 1)
-  }
-
   const ShowRowCountSelect = () => {
     return (
       <Field>
@@ -108,10 +100,10 @@ function ListReleases() {
           Publiseringskalender
         </Heading>
         <div className='list-releases-calendars-buttons'>
-          <Button variant='tertiary' onClick={handlePrevMonthOnClick}>
+          <Button variant='tertiary' onClick={() => setCalendarMonth((prev) => prev - 1)}>
             <ArrowLeftIcon /> Forrige
           </Button>
-          <Button variant='tertiary' onClick={handleNextMonthOnClick}>
+          <Button variant='tertiary' onClick={() => setCalendarMonth((prev) => prev + 1)}>
             Neste <ArrowRightIcon />
           </Button>
         </div>

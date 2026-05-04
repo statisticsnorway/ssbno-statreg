@@ -16,7 +16,7 @@ type DatePickerProps = React.ComponentProps<typeof AkselDatePicker.Standalone> &
 
 function formatDate(date: Date | undefined): string {
   if (!date) return ''
-  return date.toISOString().slice(0,10)
+  return date.toISOString().slice(0, 10)
 }
 
 export function DatePicker({ showColorCodingExplanation, ...props }: DatePickerProps) {
@@ -40,7 +40,6 @@ export function DatePicker({ showColorCodingExplanation, ...props }: DatePickerP
     if (fromDate && toDate) {
       fetchCalendarDates()
     }
-    
   }, [fromDate, toDate])
 
   const full: Date[] = []
