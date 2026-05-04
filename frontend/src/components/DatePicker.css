@@ -1,0 +1,31 @@
+.datepicker-container {
+  display: flex;
+  flex-direction: row;
+  gap: var(--ds-size-10);
+  align-items: center;
+
+  .datepicker-wrapper {
+    padding: 20px 16px;
+    box-shadow: var(--ds-shadow-md);
+    border-radius: 8px;
+  }
+
+  .datepicker-explanation {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-size-2);
+
+    .datepicker-explanation-wrapper {
+      display: flex;
+      align-items: center;
+      gap: var(--ds-size-4);
+    }
+
+    .datepicker-explanation-colors {
+      display: inline-block;
+      width: 30px;
+      height: 30px;
+      border-radius: 3px;
+    }
+  }
+}
