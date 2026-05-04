@@ -38,8 +38,8 @@ export default function CreateRelease() {
             Publiseringer på valgt dato
           </Tabs.Tab>
           <Tabs.Tab value='variant-releases'>
-            Alle publiseringer på (kortnavn), (variant){' '}
             {/* TODO: MIM-2664: Implement on variant releases list table view */}
+            Alle publiseringer på (kortnavn), (variant)
           </Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel className='p-0' value='selected-publish-date'>
