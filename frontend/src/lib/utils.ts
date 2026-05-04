@@ -22,3 +22,17 @@ export function formatDate(isoString?: string, timeZone?: string): string {
     ...(timeZone && { timeZone }),
   })
 }
+
+export function getFirstDayOfNthMonth(monthsAhead: number): Date {
+  const from = new Date()
+  from.setDate(1)
+  from.setMonth(from.getMonth() + monthsAhead)
+  return from
+}
+
+export function getLastDayOfNthMonth(monthsAhead: number): Date {
+  const to = new Date()
+  to.setMonth(to.getMonth() + monthsAhead + 1)
+  to.setDate(0)
+  return to
+}
