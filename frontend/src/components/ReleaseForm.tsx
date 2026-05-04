@@ -1,9 +1,7 @@
 import { useState } from 'react'
 import { Heading, Paragraph, Select, Button, Fieldset, Field, Label, Input } from '@digdir/designsystemet-react'
 import { DatePicker as AkselDatePicker, useDatepicker } from '@navikt/ds-react/DatePicker'
-import { ApprovalStatusTag } from './ApprovalStatus'
 import { DatePicker } from './DatePicker'
-import { ApprovalStatus } from '@ssbno-statreg/shared'
 
 const releaseDatePrecisions = ['Dag', 'Måned', 'År']
 
@@ -19,16 +17,8 @@ export function ReleaseForm() {
 
   return (
     <>
-      <div>
-        <Heading data-size='xs' level={2}>
-          Statistikknavn (kortnavn) og variant
-        </Heading>
-        <ApprovalStatusTag status={ApprovalStatus.PENDING} />
-      </div>
-
-
       <Field>
-        <Paragraph style={{ marginBottom: 'var(--ds-size-8)' }} >Alle felter må fylles ut</Paragraph>
+        <Paragraph style={{ marginBottom: 'var(--ds-size-8)' }}>Alle felter må fylles ut</Paragraph>
         <Label>Datotype for publisering</Label>
         <Select value={dateType} onChange={(e) => setDateType(e.target.value)}>
           <Select.Option value='' disabled>

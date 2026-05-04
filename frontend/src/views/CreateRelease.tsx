@@ -3,12 +3,13 @@ import './CreateRelease.css'
 import { useState, useEffect } from 'react'
 import { Heading, Tabs } from '@digdir/designsystemet-react'
 import { CalendarIcon } from '@navikt/aksel-icons'
-import { type ReleaseListing } from '@ssbno-statreg/shared'
+import { type ReleaseListing, ApprovalStatus } from '@ssbno-statreg/shared'
 
 import { formatDate } from '../lib/utils'
 import { ReleasesTable } from '../components/ReleasesTable'
 import { ReleaseForm } from '../components/ReleaseForm'
 import { DayStatusTag } from '../components/DayStatus'
+import { ApprovalStatusTag } from '../components/ApprovalStatus'
 
 import client from '../api'
 
@@ -59,10 +60,16 @@ export default function CreateRelease() {
 
   return (
     <>
-      <Heading level={1} data-size='md'>
-        Meld publiseringsdato
-      </Heading>
-      <ReleaseForm></ReleaseForm>
+      <div className='release-description-wrapper'>
+        <Heading level={1} data-size='md'>
+          Meld publiseringsdato
+        </Heading>
+        <Heading data-size='xs' level={2}>
+          Statistikknavn (kortnavn) og variant
+        </Heading>
+        <ApprovalStatusTag status={ApprovalStatus.PENDING} />
+      </div>
+      <ReleaseForm />
       {renderReleasesTables()}
     </>
   )
