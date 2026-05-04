@@ -23,7 +23,6 @@ function formatDate(date: Date | undefined): string {
 
 export function DatePicker({ showColorCodingExplanation, ...props }: DatePickerProps) {
   const [calendarDates, setCalendarDates] = useState<CalenderDate>({})
-  console.log(props.toDate)
 
   useEffect(() => {
     async function fetchCalendarDates() {
