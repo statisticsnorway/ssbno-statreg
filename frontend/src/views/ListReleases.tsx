@@ -1,17 +1,12 @@
 import { useState, useEffect } from 'react'
 import { ReleasesTable } from '../components/ReleasesTable'
-import {
-  Heading,
-  Field,
-  Label,
-  Select,
-  Pagination,
-  usePagination,
-} from '@digdir/designsystemet-react'
+import { Heading, Field, Label, Select, Pagination, usePagination } from '@digdir/designsystemet-react'
 import type { ReleaseListing } from '@ssbno-statreg/shared'
 import { DatePicker } from '../components/DatePicker'
 
+import './ListReleases.css'
 import client from '../api'
+import { getFirstDayOfNthMonth, getLastDayOfNthMonth } from '../lib/utils'
 
 function ListReleases() {
   const [releases, setReleases] = useState<ReleaseListing[]>([])
@@ -91,20 +86,26 @@ function ListReleases() {
       </div>
     )
   }
-  
-return (
+
+  return (
     <>
       <Heading level={1} data-size='sm'>
         Publiseringsoversikt
       </Heading>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--ds-size-4)' }}>
-        <Heading level={2} data-size='xs'>Publiseringskalender</Heading>
-        <DatePicker
-          fromDate={new Date('2026-04-01')}
-          toDate={new Date('2026-04-30')}
-          showColorCodingExplanation
-        />
+      <div className='list-releases-calendars-container'>
+        <Heading level={2} data-size='xs'>
+          Publiseringskalender
+        </Heading>
+        <div className='list-releases-calendars-wrapper'>
+          <DatePicker fromDate={getFirstDayOfNthMonth(0)} toDate={getLastDayOfNthMonth(0)} />
+          <DatePicker fromDate={getFirstDayOfNthMonth(1)} toDate={getLastDayOfNthMonth(1)} />
+          <DatePicker
+            fromDate={getFirstDayOfNthMonth(2)}
+            toDate={getLastDayOfNthMonth(2)}
+            showColorCodingExplanation
+          />
+        </div>
       </div>
 
       <ReleasesTable

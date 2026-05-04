@@ -1,0 +1,15 @@
+.list-releases-calendars-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-size-4);
+
+  .list-releases-calendars-wrapper {
+    display: flex;
+    gap: var(--ds-size-14);
+
+    /* TODO: Temporarily hide buttons with no functionality */
+    .aksel-date__caption-button {
+      visibility: hidden;
+    }
+  }
+}

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Paragraph, Select, Button, Fieldset, Field, Label, Input } from '@digdir/designsystemet-react'
 import { DatePicker as AkselDatePicker, useDatepicker } from '@navikt/ds-react/DatePicker'
 import { DatePicker } from './DatePicker'
+import { getFirstDayOfNthMonth, getLastDayOfNthMonth } from '../lib/utils'
 
 const releaseDatePrecisions = ['Dag', 'Måned', 'År']
 
@@ -11,9 +12,8 @@ export function ReleaseForm() {
   const { datepickerProps: periodFromPickerProps, inputProps: periodFromInputProps } = useDatepicker()
   const { datepickerProps: periodToPickerProps, inputProps: periodToInputProps } = useDatepicker()
 
-  const start = new Date()
-  const stop = new Date()
-  stop.setFullYear(start.getFullYear() + 3)
+  const start = getFirstDayOfNthMonth(0)
+  const stop = getLastDayOfNthMonth(0)
 
   return (
     <>
@@ -44,14 +44,12 @@ export function ReleaseForm() {
         <div style={{ display: 'flex', gap: 'var(--ds-size-12)' }}>
           <Field>
             <Label>Måleperiode fra</Label>
-            <Field.Description>dd.mm.åååå</Field.Description>
             <AkselDatePicker {...periodFromPickerProps}>
               <AkselDatePicker.Input style={{ padding: '0' }} {...periodFromInputProps} label />
             </AkselDatePicker>
           </Field>
           <Field>
             <Label>Måleperiode til</Label>
-            <Field.Description>dd.mm.åååå</Field.Description>
             <AkselDatePicker {...periodToPickerProps}>
               <AkselDatePicker.Input style={{ padding: '0' }} {...periodToInputProps} label />
             </AkselDatePicker>
