@@ -14,9 +14,9 @@
   "dependencies": {
     "@digdir/designsystemet-css": "^1.13.3",
     "@digdir/designsystemet-react": "^1.13.3",
-    "@navikt/aksel-icons": "^8.10.2",
-    "@navikt/ds-css": "^8.10.2",
-    "@navikt/ds-react": "^8.10.2",
+    "@navikt/aksel-icons": "^8.10.4",
+    "@navikt/ds-css": "^8.10.4",
+    "@navikt/ds-react": "^8.10.4",
     "@ssbno-statreg/shared": "*",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
