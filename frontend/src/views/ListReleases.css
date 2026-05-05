@@ -5,7 +5,7 @@
   gap: var(--ds-size-4);
 
   .list-releases-calendars-buttons {
-    width: 92%; /* TODO: Setting the width this way is not optimal */
+    width: 1400px; /* TODO: Setting a fixed width for now */
     display: flex;
     flex-direction: row;
     justify-content: space-between;
