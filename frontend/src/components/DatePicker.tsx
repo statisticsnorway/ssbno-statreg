@@ -36,10 +36,7 @@ export function DatePicker({ showColorCodingExplanation, ...props }: DatePickerP
         setCalendarDates(data)
       }
     }
-
-    if (fromDate && toDate) {
-      fetchCalendarDates()
-    }
+    fetchCalendarDates()
   }, [fromDate, toDate])
 
   const full: Date[] = []
