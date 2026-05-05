@@ -1,5 +1,5 @@
 import { Tag } from '@digdir/designsystemet-react'
-import{StatisticStatus} from '@ssbno-statreg/shared'
+import { StatisticStatus } from '@ssbno-statreg/shared'
 
 const StatusAttributes = {
   A: {

@@ -8,22 +8,23 @@ import { type ReleaseDetails } from '@ssbno-statreg/shared'
 import { formatPublishTime, formatDate } from '../lib/utils'
 
 function ShowRelease() {
-  const [release, setReleases] = useState<ReleaseDetails>({})
+  const [release, setRelease] = useState<ReleaseDetails>({})
   const { id } = useParams()
 
   useEffect(() => {
     async function fetchRelease() {
       const { data, error } = await client.GET('/releases/{id}', { params: { path: { id: id as string } } })
       if (error) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const errorMessage = (error as any).error
         console.log(errorMessage)
         alert(errorMessage)
       } else {
-        setReleases(data)
+        setRelease(data)
       }
     }
     fetchRelease()
-  }, [])
+  }, [id])
 
   const approvalStatus = release.approval_status
   const statisticName = formatStatisticName(release.statistic)

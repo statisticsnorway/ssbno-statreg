@@ -4,7 +4,9 @@ import ssbLogo from '../assets/SSB_logo_black.svg'
 import { Outlet } from 'react-router'
 import { Link } from '@digdir/designsystemet-react'
 
-{/* TODO: This is only placeholder; create own Header component if necessary */ }
+{
+  /* TODO: This is only placeholder; create own Header component if necessary */
+}
 const Header = () => (
   <div id='header'>
     <div className='header-content' data-color='brand1' data-size='sm'>

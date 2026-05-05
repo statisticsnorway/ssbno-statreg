@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { vi, describe, test, expect, beforeEach } from 'vitest'
 import { releaseAsserts } from '@/lib/asserts'
 import {
@@ -74,7 +75,7 @@ describe('releasesService ', async () => {
     test('returns undefined when neither shortname nor variantId is provided', async () => {
       const where = await buildReleaseFilter({}, prismaMock)
 
-      expect(where).toBeUndefined
+      expect(where).toBeUndefined()
       expect(releaseAsserts.assertStatisticExists).toHaveBeenCalledTimes(0)
       expect(releaseAsserts.assertVariantExists).toHaveBeenCalledTimes(0)
       expect(releaseAsserts.assertVariantMatchesShortname).toHaveBeenCalledTimes(0)

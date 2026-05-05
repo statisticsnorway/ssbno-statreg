@@ -13,15 +13,18 @@ function registerRoutesAndCollectMetadata(router: Router, publicPaths: RegExp[],
   for (const method of ROUTE_METHODS) {
     const original = router[method].bind(router)
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     router[method] = ((path: any, ...handlers: any[]) => {
       if (typeof path === 'string') knownPaths.add('/api' + path)
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const isPublicRoute = handlers.some((h) => (h as any).__skipAuth)
       if (isPublicRoute && typeof path === 'string') {
         const pattern = '^/statistikkregisteret/api' + path.replace(/:[^/]+/g, '[^/]+') + '$' // Convert Express-style route params (e.g. /statistics/:shortname) into a regex, that matches the same URL structure (e.g. /statistics/boliger) for public route checks
         publicPaths.push(new RegExp(pattern))
       }
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const routeHandlers = handlers.filter((h) => !(h as any).__skipAuth)
 
       return original(path, ...routeHandlers)
@@ -31,7 +34,7 @@ function registerRoutesAndCollectMetadata(router: Router, publicPaths: RegExp[],
 
 export default function controllerRouter(
   requireAuth: RequestHandler,
-  // eslint-disable-next-line no-unused-vars
+
   controllers: ReadonlyArray<(router: Router) => void> = CONTROLLERS
 ) {
   const inner = Router()

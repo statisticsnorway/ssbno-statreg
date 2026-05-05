@@ -1,4 +1,5 @@
-/* eslint-disable no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 // Run with: npm exec tsx ./src/scripts/import-data-to-postgres.ts ~/Documents/STATREG_TABLES_JSON
 // Remember to install required packages JSONStream and date-fns-tz in advance
 
@@ -79,6 +80,7 @@ export function parseOldOsloDateStringAsUTC(dateString: string): Date | undefine
   const match = dateString.match(/^(\d{2})\.(\d{2})\.(\d{4}) (\d{2})\.(\d{2})\.(\d{2})/)
   if (!match) return
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, dd, mm, yyyy, HH, MM, SS] = match
   const isoLocal = `${yyyy}-${mm}-${dd}T${HH}:${MM}:${SS}`
 
@@ -637,4 +639,3 @@ main()
       console.log('Import script failed')
     }
   })
-;``

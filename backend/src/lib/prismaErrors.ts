@@ -22,6 +22,7 @@ function getLastLineFromErrorMessage(message: string): string {
   return message.slice(lastLinebreakIndex + 1)
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function handleErrors(error: any, res: Response) {
   if (error?.statregError) {
     const status = error.status ?? 400

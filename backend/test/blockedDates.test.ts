@@ -9,6 +9,7 @@ import {
   isDateBlocked,
 } from '@/lib/blockedDates'
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let prismaMock: any
 let findManyResult = [{ day: new Date('2027-02-05') }]
 function setFindManyResult(next: { day: Date }[]) {

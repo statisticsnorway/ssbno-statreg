@@ -35,7 +35,7 @@ export function ReleaseForm() {
   const { datepickerProps: publishTimePickerProps, inputProps: publishTimeInputProps } = useDatepicker({
     onDateChange: (publishTime) => {
       if (publishTime) {
-        setPublishTime(publishTime.toLocaleString())
+        setPublishTime(publishTime.toLocaleString('nb-NO'))
         setErrors({ ...errors, publishDate: '' })
       }
     },
@@ -61,6 +61,8 @@ export function ReleaseForm() {
 
   const start = getFirstDayOfNthMonth(0)
   const stop = getLastDayOfNthMonth(0)
+  console.log(start)
+  console.log(stop)
 
   function validateFields() {
     const nextErrors: ReleaseFormErrors = {}
@@ -84,7 +86,7 @@ export function ReleaseForm() {
     if (!validateFields()) return
 
     // TODO: Replace with PUT logic
-    console.log({ dateType, publishTime, periodFrom, periodTo }) 
+    console.log({ dateType, publishTime, periodFrom, periodTo })
   }
 
   return (
@@ -105,7 +107,9 @@ export function ReleaseForm() {
               Velg datotype
             </Select.Option>
             {releaseDatePrecisions.map((precision) => (
-              <Select.Option value={precision}>{precision}</Select.Option>
+              <Select.Option key={precision} value={precision}>
+                {precision}
+              </Select.Option>
             ))}
           </Select>
           {errors.dateType && <ValidationMessage>{errors.dateType}</ValidationMessage>}
@@ -118,7 +122,7 @@ export function ReleaseForm() {
             For kortere frister, kontakt mmj@ssb.no.
           </Field.Description>
           <Input size={10} {...publishTimeInputProps} aria-invalid={!!errors.publishDate} />
-          <DatePicker fromDate={start} toDate={stop} showColorCodingExplanation {...publishTimePickerProps} />
+          <DatePicker fromDate={start} toDate={stop} {...publishTimePickerProps} showColorCodingExplanation />
           {errors.publishDate && <ValidationMessage>{errors.publishDate}</ValidationMessage>}
         </Field>
 

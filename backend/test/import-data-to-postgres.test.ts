@@ -5,7 +5,7 @@ import { describe, test, expect } from 'vitest'
 
 describe('parseOldOsloDateStringAsUTC()', () => {
   test('dummy test to be able to comment out all tests', () => {
-    expect(true).toBeTruthy
+    expect(true).toBeTruthy()
   })
   //   describe('valid strings', () => {
   //     test('parses winter time (UTC+1) correctly', () => {

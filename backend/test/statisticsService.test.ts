@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { vi, describe, test, expect, beforeEach } from 'vitest'
 import { ApprovalStatus, StatisticStatus, type StatisticCreate, type StatisticUpdate } from '@ssbno-statreg/shared'
 import { Users } from '@/types/entra'
@@ -636,15 +637,15 @@ describe('statisticService', () => {
 
   describe('parseRelation', () => {
     test('returns null when relationId is undefined', () => {
-      expect(parseRelation(undefined)).toBeNull
+      expect(parseRelation(undefined)).toBeNull()
     })
 
     test('returns null when relationId is null', () => {
-      expect(parseRelation(null)).toBeNull
+      expect(parseRelation(null)).toBeNull()
     })
 
     test('returns null when relationId is empty string', () => {
-      expect(parseRelation('')).toBeNull
+      expect(parseRelation('')).toBeNull()
     })
 
     test('returns parsed number when relationId is valid', () => {

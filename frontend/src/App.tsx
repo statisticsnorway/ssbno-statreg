@@ -16,18 +16,18 @@ function App() {
       <Route path='' element={<PageLayout />}>
         <Route index element={<ListReleases />} />
 
-        <Route path='publisering' >
+        <Route path='publisering'>
           <Route path=':id' element={<ShowRelease />} />
           <Route path='opprett' element={<CreateRelease />} />
         </Route>
 
-        <Route path='statistikk' >
+        <Route path='statistikk'>
           <Route index element={<ListStatistics />} />
           <Route path=':shortname' element={<ShowStatistic />} />
           <Route path='opprett' element={<CreateStatistic />} />
         </Route>
 
-        <Route path='sperredato' >
+        <Route path='sperredato'>
           <Route index element={<ListBlockedDates />} />
           <Route path='opprett' element={<CreateBlockedDate />} />
         </Route>
