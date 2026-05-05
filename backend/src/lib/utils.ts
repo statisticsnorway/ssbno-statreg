@@ -48,6 +48,7 @@ export function parseId(id: string | number, fieldName?: string): number {
   return Number(id)
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function ensureRequiredFieldsExists<T extends Record<string, any>>(
   body: T | undefined,
   requiredFields: (keyof T)[]

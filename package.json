@@ -11,13 +11,15 @@
     "build": "npm run build --ws && cp -Rf frontend/dist/* backend/dist",
     "start": "npm run start -w backend",
     "db:deploy": "npm run db:deploy -w backend",
-    "ci-test": "npm run ci-test -w backend && npm run ci-test -w frontend",
-    "test:backend": "npm run test -w backend",
-    "test:frontend": "npm run test -w frontend",
+    "test": "vitest --exclude '**/integration/**'",
+    "ci-test": "vitest run  --exclude '**/integration/**'",
+    "test:backend": "vitest --project backend",
+    "test:frontend": "vitest --project frontend",
+    "test:integration": "vitest run --project integration",
     "test:integration:docker": "docker-compose -f docker-compose-test.yaml down --remove-orphans --volumes && docker-compose -f docker-compose-test.yaml up --build --abort-on-container-exit --exit-code-from tests --remove-orphans ; docker-compose -f docker-compose-test.yaml down --remove-orphans --volumes",
     "dev:auth": "docker-compose --env-file ./backend/.env up --build",
-    "lint": "eslint '**/*.{js,mjs,cjs,ts}'",
-    "lint:fix": "eslint --fix '**/*.{js,mjs,cjs,ts}'",
+    "lint": "eslint",
+    "lint:fix": "eslint --fix",
     "seed": "npm run seed -w backend",
     "generate": "npm run generate -w backend",
     "generate:api-types": "openapi-typescript ./shared/openapi/openapi.yaml | prettier --parser typescript > ./shared/src/api-types.ts"
@@ -34,6 +36,7 @@
     }
   },
   "devDependencies": {
+    "@eslint-react/eslint-plugin": "^5.7.1",
     "@eslint/js": "^10.0.1",
     "@types/node": "^24.12.2",
     "@vitejs/plugin-react": "^6.0.1",
@@ -41,7 +44,7 @@
     "eslint": "^10.2.1",
     "openapi-typescript": "^7.13.0",
     "typescript": "^5.4.0",
-    "typescript-eslint": "^8.59.0",
+    "typescript-eslint": "^8.59.1",
     "vitest": "^4.1.5"
   }
 }

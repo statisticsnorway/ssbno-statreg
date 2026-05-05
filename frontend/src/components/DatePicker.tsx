@@ -29,6 +29,7 @@ export function DatePicker({ showColorCodingExplanation, ...props }: DatePickerP
         params: { query: { fromDate: formatDate(fromDate), toDate: formatDate(toDate) } },
       })
       if (error) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const errorMessage = (error as any).error
         console.log(errorMessage)
         alert(errorMessage)

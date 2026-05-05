@@ -5,7 +5,7 @@ import { getDateOnlyAsString, parseDateOnly } from '@/lib/utils'
 
 export const HOLIDAYS: Record<number, string[]> = {}
 
-export function isDateAutoBlocked(dateString: string): Boolean {
+export function isDateAutoBlocked(dateString: string): boolean {
   const date = parseDateOnly(dateString)
   const sunday = 0
   const saturday = 6
@@ -17,7 +17,7 @@ export function isDateAutoBlocked(dateString: string): Boolean {
   return holidays.includes(dateString)
 }
 
-export async function isDateBlocked(dateString: string, prisma: CalendarDatePrisma): Promise<Boolean> {
+export async function isDateBlocked(dateString: string, prisma: CalendarDatePrisma): Promise<boolean> {
   if (isDateAutoBlocked(dateString)) return true
   if (!(await assertDayNotManuallyBlocked(prisma, dateString))) return true
 

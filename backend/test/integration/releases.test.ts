@@ -75,6 +75,7 @@ function addMonthsToDate(date: string, months: number): string {
   return d.toISOString()
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function assertEqualReleaseData(fetched: any, expected: any) {
   expect(new Date(fetched.publish_time)).toStrictEqual(new Date(expected.publish_time))
   expect(new Date(fetched.period_from)).toStrictEqual(new Date(expected.period_from))

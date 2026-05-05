@@ -12,13 +12,14 @@ const { fetchUserByEmailMock, getAccessTokenMock } = vi.hoisted(() => ({
     if (email === 'userWithoutEmailAndPhone@ssb.no')
       return { displayName: 'Demo bruker', email: null, businessPhone: null }
   }),
-  getAccessTokenMock: vi.fn(() => 'token' as any),
+  getAccessTokenMock: vi.fn(() => Promise.resolve('token')),
 }))
 
 vi.mock(import('../plugins/entraReaderClient'), async (importOriginal) => {
   const original = await importOriginal<typeof import('../plugins/entraReaderClient')>()
   return {
     ...original,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     fetchUserByEmail: fetchUserByEmailMock as any,
     getAccessToken: getAccessTokenMock,
   }

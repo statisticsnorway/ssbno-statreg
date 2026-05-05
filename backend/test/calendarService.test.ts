@@ -16,6 +16,7 @@ vi.mock(import('@/lib/blockedDates'), async (importOriginal) => {
 // Uncomment next line to run tests locally with UTC timezone (same as nais cluster)
 // process.env.TZ = 'UTC'
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let prismaMock: any
 let listReturn: object
 

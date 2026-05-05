@@ -25,7 +25,9 @@ export function ReleaseForm() {
             Velg datotype
           </Select.Option>
           {releaseDatePrecisions.map((precision) => (
-            <Select.Option value={precision}>{precision}</Select.Option>
+            <Select.Option key={precision} value={precision}>
+              {precision}
+            </Select.Option>
           ))}
         </Select>
       </Field>

@@ -21,7 +21,7 @@ describe('utils', () => {
 
     test('returns undefined when date is null', () => {
       const result = dateToISOString(null)
-      expect(result).toBeUndefined
+      expect(result).toBeUndefined()
     })
   })
 
@@ -31,6 +31,7 @@ describe('utils', () => {
       expect(result).toBe('')
     })
     test('handles input that is not string', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = sanitize(Number(8) as any)
       expect(result).toBe('')
     })

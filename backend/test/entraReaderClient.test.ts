@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { vi, describe, test, expect, beforeEach, afterEach, assert } from 'vitest'
 import {
   fetchUserByEmail,
@@ -111,7 +112,7 @@ describe('entraReaderClient ', () => {
       fetchMock.mockReturnValueOnce(null as any)
       const user = await fetchUserByEmail('', 'token')
       expect(fetchMock).toHaveBeenCalledTimes(0)
-      expect(user).toBeNull
+      expect(user).toBeNull()
     })
 
     test('throws error if missing token', async () => {

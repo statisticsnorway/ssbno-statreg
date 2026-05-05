@@ -7,22 +7,25 @@ import client from '../api'
 import { type RegionLevel, type StatisticDetails, type Variant, type StatisticStatus } from '@ssbno-statreg/shared'
 
 export default function ShowStatistic() {
-  const [statistic, setStatistics] = useState<StatisticDetails>({})
+  const [statistic, setStatistic] = useState<StatisticDetails>({})
   const { shortname } = useParams()
 
   useEffect(() => {
     async function fetchStatistic() {
-      const { data, error } = await client.GET('/statistics/{shortname}', { params: { path: { shortname: shortname as string } } })
+      const { data, error } = await client.GET('/statistics/{shortname}', {
+        params: { path: { shortname: shortname as string } },
+      })
       if (error) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const errorMessage = (error as any).error
         console.log(errorMessage)
         alert(errorMessage)
       } else {
-        setStatistics(data)
+        setStatistic(data)
       }
     }
     fetchStatistic()
-  }, [])
+  }, [shortname])
 
   const statusCode = statistic.status?.code as keyof typeof StatisticStatus
   const englishName = statistic.name_en ?? '-'
@@ -70,7 +73,7 @@ export default function ShowStatistic() {
         <Heading data-size='xs'>Kontaktpersoner</Heading>
         <Paragraph>Kontaktpersoner kan endres uten godkjenning</Paragraph>
         {contacts.map((contact) => (
-          <Paragraph>{contact}</Paragraph>
+          <Paragraph key={contact}>{contact}</Paragraph>
         ))}
         <Button variant='tertiary' onClick={() => alert('Rediger kontakter er ikke implementert ennå.')}>
           <PersonPencilIcon /> Rediger kontakt
@@ -80,7 +83,7 @@ export default function ShowStatistic() {
       <div>
         <Heading data-size='xs'>Videreføres av</Heading>
         {mockContinuedBy.map((shortname) => (
-          <Paragraph>
+          <Paragraph key={shortname}>
             <Link href='#'>{shortname}</Link>
           </Paragraph>
         ))}
@@ -90,7 +93,7 @@ export default function ShowStatistic() {
         <Heading data-size='xs'>Regionale nivåer</Heading>
         <List.Unordered>
           {regionLevels.map((level: RegionLevel) => (
-            <List.Item>{level.name} </List.Item>
+            <List.Item key={level.name}>{level.name} </List.Item>
           ))}
         </List.Unordered>
       </div>
@@ -109,7 +112,7 @@ export default function ShowStatistic() {
         <Heading data-size='xs'>Opphørte varianter</Heading>
         <List.Unordered>
           {cancelledVariants.map((variant) => (
-            <List.Item>{variant}</List.Item>
+            <List.Item key={variant}>{variant}</List.Item>
           ))}
         </List.Unordered>
       </div>
@@ -131,7 +134,7 @@ function formatMainLanguage(language?: string): string {
   return language
 }
 
-function formatDivision(division: StatisticDetails["division"]): string {
+function formatDivision(division: StatisticDetails['division']): string {
   if (!division?.name) return '-'
   if (!division.code) return division.name
   return `${division.name} (${division.code})`
