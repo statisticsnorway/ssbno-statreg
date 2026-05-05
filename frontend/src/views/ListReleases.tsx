@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { ReleasesTable } from '../components/ReleasesTable'
-import { Heading, Field, Label, Select, Pagination, usePagination } from '@digdir/designsystemet-react'
+import { Heading, Field, Label, Select, Pagination, usePagination, Button } from '@digdir/designsystemet-react'
+import { ArrowLeftIcon, ArrowRightIcon } from '@navikt/aksel-icons'
 import type { ReleaseListing } from '@ssbno-statreg/shared'
 import { DatePicker } from '../components/DatePicker'
 
@@ -76,6 +77,8 @@ function ListReleasesTablePagination({
 
 function ListReleases() {
   const [releases, setReleases] = useState<ReleaseListing[]>([])
+  const [calendarMonth, setCalendarMonth] = useState(0)
+
   const [showRowCount, setShowRowCount] = useState(10)
   const [currentPage, setCurrentPage] = useState(1)
   const [total, setTotal] = useState(0)
@@ -119,10 +122,25 @@ function ListReleases() {
         <Heading level={2} data-size='xs'>
           Publiseringskalender
         </Heading>
+        <div className='list-releases-calendars-buttons'>
+          <Button variant='tertiary' onClick={() => setCalendarMonth((prev) => prev - 3)}>
+            <ArrowLeftIcon /> Forrige
+          </Button>
+          <Button variant='tertiary' onClick={() => setCalendarMonth((prev) => prev + 3)}>
+            Neste <ArrowRightIcon />
+          </Button>
+        </div>
         <div className='list-releases-calendars-wrapper'>
-          <DatePicker fromDate={getFirstDayOfNthMonth(0)} toDate={getLastDayOfNthMonth(0)} />
-          <DatePicker fromDate={getFirstDayOfNthMonth(1)} toDate={getLastDayOfNthMonth(1)} />
-          <DatePicker fromDate={getFirstDayOfNthMonth(2)} toDate={getLastDayOfNthMonth(2)} showColorCodingExplanation />
+          <DatePicker fromDate={getFirstDayOfNthMonth(calendarMonth)} toDate={getLastDayOfNthMonth(calendarMonth)} />
+          <DatePicker
+            fromDate={getFirstDayOfNthMonth(calendarMonth + 1)}
+            toDate={getLastDayOfNthMonth(calendarMonth + 1)}
+          />
+          <DatePicker
+            fromDate={getFirstDayOfNthMonth(calendarMonth + 2)}
+            toDate={getLastDayOfNthMonth(calendarMonth + 2)}
+            showColorCodingExplanation
+          />
         </div>
       </div>
 

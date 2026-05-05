@@ -37,7 +37,10 @@ export function DatePicker({ showColorCodingExplanation, ...props }: DatePickerP
         setCalendarDates(data)
       }
     }
-    fetchCalendarDates()
+
+    if (fromDate && toDate) {
+      fetchCalendarDates()
+    }
   }, [fromDate, toDate])
 
   const full: Date[] = []
@@ -72,6 +75,7 @@ export function DatePicker({ showColorCodingExplanation, ...props }: DatePickerP
     <div className='datepicker-container'>
       <AkselDatePicker.Standalone
         className='datepicker-wrapper'
+        month={fromDate}
         // @ts-expect-error: Allow custom "modifiers" prop for color coding
         modifiers={{ full, many, few, blocked }}
         modifiersStyles={{

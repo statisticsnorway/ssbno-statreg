@@ -8,6 +8,19 @@
     padding: 20px 16px;
     box-shadow: var(--ds-shadow-md);
     border-radius: 8px;
+
+    .rdp-button:focus,
+    .rdp-button:target {
+      .rdp-day__inner {
+        width: 44px;
+        height: 44px;
+        color: inherit;
+        background: transparent;
+        outline: var(--ds-color-base-default) solid 3px;
+        border: var(--ds-color-accent-background-default) solid 2px;
+        border-radius: 8px;
+      }
+    }
   }
 
   .datepicker-explanation {
