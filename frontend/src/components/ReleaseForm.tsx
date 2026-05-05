@@ -18,7 +18,7 @@ const releaseDatePrecisions = ['Dag', 'Måned', 'År']
 
 type ReleaseFormErrors = {
   dateType?: string
-  publishDate?: string
+  publishTime?: string
   periodFrom?: string
   periodTo?: string
 }
@@ -36,7 +36,7 @@ export function ReleaseForm() {
     onDateChange: (publishTime) => {
       if (publishTime) {
         setPublishTime(publishTime.toLocaleString('nb-NO'))
-        setErrors({ ...errors, publishDate: '' })
+        setErrors({ ...errors, publishTime: '' })
       }
     },
   })
@@ -59,19 +59,15 @@ export function ReleaseForm() {
     },
   })
 
-  const start = getFirstDayOfNthMonth(0)
-  const stop = getLastDayOfNthMonth(0)
-  console.log(start)
-  console.log(stop)
-
   function validateFields() {
     const nextErrors: ReleaseFormErrors = {}
 
     if (!dateType) nextErrors.dateType = 'Velg en datotype for publisering'
-    if (!publishTime) nextErrors.publishDate = 'Velg en publiseringsdato'
+    if (!publishTime) nextErrors.publishTime = 'Velg en publiseringsdato'
     if (!periodFrom) nextErrors.periodFrom = 'Velg en fra-dato'
     if (!periodTo) nextErrors.periodTo = 'Velg en til-dato'
 
+    // TODO: Needs to be checked onChange as well
     if (periodFromDate && periodToDate && periodFromDate > periodToDate) {
       nextErrors.periodFrom = 'Fra-dato kan ikke være etter til-dato'
       nextErrors.periodTo = 'Til-dato kan ikke være før fra-dato'
@@ -90,77 +86,81 @@ export function ReleaseForm() {
   }
 
   return (
-    <>
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--ds-size-12)' }}>
-        <Field>
-          <Paragraph style={{ marginBottom: 'var(--ds-size-8)' }}>Alle felter må fylles ut</Paragraph>
-          <Label>Datotype for publisering</Label>
-          <Select
-            value={dateType}
-            onChange={(e) => {
-              setDateType(e.target.value)
-              setErrors({ ...errors, dateType: '' })
-            }}
-            aria-invalid={!!errors.dateType}
-          >
-            <Select.Option value='' disabled>
-              Velg datotype
+    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--ds-size-12)' }}>
+      <Field>
+        <Paragraph style={{ marginBottom: 'var(--ds-size-8)' }}>Alle felter må fylles ut</Paragraph>
+        <Label>Datotype for publisering</Label>
+        <Select
+          id='dateType'
+          value={dateType}
+          onChange={(e) => {
+            setDateType(e.target.value)
+            setErrors({ ...errors, dateType: '' })
+          }}
+          aria-invalid={!!errors.dateType}
+        >
+          <Select.Option value='' disabled>
+            Velg datotype
+          </Select.Option>
+          {releaseDatePrecisions.map((precision) => (
+            <Select.Option key={precision} value={precision}>
+              {precision}
             </Select.Option>
-            {releaseDatePrecisions.map((precision) => (
-              <Select.Option key={precision} value={precision}>
-                {precision}
-              </Select.Option>
-            ))}
-          </Select>
-          {errors.dateType && <ValidationMessage>{errors.dateType}</ValidationMessage>}
-        </Field>
+          ))}
+        </Select>
+        {errors.dateType && <ValidationMessage>{errors.dateType}</ValidationMessage>}
+      </Field>
 
-        <Field>
-          <Label>Publiseringsdato</Label>
-          <Field.Description>
-            Nye datoer og endringer må meldes minst 3 måneder i forveien. <br />
-            For kortere frister, kontakt mmj@ssb.no.
-          </Field.Description>
-          <Input size={10} {...publishTimeInputProps} aria-invalid={!!errors.publishDate} />
-          <DatePicker fromDate={start} toDate={stop} {...publishTimePickerProps} showColorCodingExplanation />
-          {errors.publishDate && <ValidationMessage>{errors.publishDate}</ValidationMessage>}
-        </Field>
+      <Field>
+        <Label>Publiseringsdato</Label>
+        <Field.Description>
+          Nye datoer og endringer må meldes minst 3 måneder i forveien. <br />
+          For kortere frister, kontakt mmj@ssb.no.
+        </Field.Description>
+        <Input id='publishTime' size={10} {...publishTimeInputProps} aria-invalid={!!errors.publishTime} />
+        <DatePicker
+          fromDate={getFirstDayOfNthMonth(0)}
+          toDate={getLastDayOfNthMonth(0)}
+          showColorCodingExplanation
+          {...publishTimePickerProps}
+        />
+        {errors.publishTime && <ValidationMessage>{errors.publishTime}</ValidationMessage>}
+      </Field>
 
-        <Fieldset>
-          <div style={{ display: 'flex', gap: 'var(--ds-size-12)' }}>
-            <Field>
-              <Label>Måleperiode fra</Label>
-              <AkselDatePicker {...periodFromPickerProps}>
-                <AkselDatePicker.Input {...periodFromInputProps} aria-invalid={!!errors.periodFrom} label />
-              </AkselDatePicker>
-              {errors.periodFrom && <ValidationMessage>{errors.periodFrom}</ValidationMessage>}
-            </Field>
+      <Fieldset>
+        <div style={{ display: 'flex', gap: 'var(--ds-size-12)' }}>
+          <Field>
+            <Label>Måleperiode fra</Label>
+            <AkselDatePicker {...periodFromPickerProps}>
+              <AkselDatePicker.Input id='periodFrom' {...periodFromInputProps} aria-invalid={!!errors.periodFrom} label />
+            </AkselDatePicker>
+            {errors.periodFrom && <ValidationMessage>{errors.periodFrom}</ValidationMessage>}
+          </Field>
 
-            <Field>
-              <Label>Måleperiode til</Label>
-              <AkselDatePicker {...periodToPickerProps}>
-                <AkselDatePicker.Input {...periodToInputProps} aria-invalid={!!errors.periodTo} label />
-              </AkselDatePicker>
-              {errors.periodTo && <ValidationMessage>{errors.periodTo}</ValidationMessage>}
-            </Field>
-          </div>
-        </Fieldset>
-
-        <div style={{ display: 'flex', gap: 'var(--ds-size-3)' }}>
-          <Button type='submit'>Meld dato</Button>
-          <Button variant='tertiary'>Avbryt</Button>
+          <Field>
+            <Label>Måleperiode til</Label>
+            <AkselDatePicker {...periodToPickerProps}>
+              <AkselDatePicker.Input id='periodTo' {...periodToInputProps} aria-invalid={!!errors.periodTo} label />
+            </AkselDatePicker>
+            {errors.periodTo && <ValidationMessage>{errors.periodTo}</ValidationMessage>}
+          </Field>
         </div>
-      </form>
+      </Fieldset>
+
+      <div style={{ display: 'flex', gap: 'var(--ds-size-3)' }}>
+        <Button type='submit'>Meld dato</Button>
+        <Button variant='tertiary'>Avbryt</Button>
+      </div>
 
       {Object.values(errors).some(Boolean) && (
         <ErrorSummary>
           <ErrorSummary.Heading>For å gå videre må du rette opp følgende feil:</ErrorSummary.Heading>
           <ErrorSummary.List>
-            {Object.values(errors).map((message, i) => {
+            {Object.entries(errors).map(([key, message]) => {
               if (message) {
                 return (
-                  <ErrorSummary.Item key={i}>
-                    <ErrorSummary.Link href='#'>{message}</ErrorSummary.Link>
+                  <ErrorSummary.Item key={message}>
+                    <ErrorSummary.Link href={`#${key}`}>{message}</ErrorSummary.Link>
                   </ErrorSummary.Item>
                 )
               }
@@ -168,6 +168,6 @@ export function ReleaseForm() {
           </ErrorSummary.List>
         </ErrorSummary>
       )}
-    </>
+    </form>
   )
 }
