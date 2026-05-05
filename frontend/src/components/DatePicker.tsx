@@ -16,16 +16,17 @@ type DatePickerProps = React.ComponentProps<typeof AkselDatePicker.Standalone> &
 
 function formatDate(date: Date | undefined): string {
   if (!date) return ''
-  return date.toISOString().slice(0,10)
+  return date.toISOString().slice(0, 10)
 }
 
 export function DatePicker({ showColorCodingExplanation, ...props }: DatePickerProps) {
   const [calendarDates, setCalendarDates] = useState<CalenderDate>({})
+  const { fromDate, toDate } = props
 
   useEffect(() => {
     async function fetchCalendarDates() {
       const { data, error } = await client.GET('/calendar', {
-        params: { query: { fromDate: formatDate(props?.fromDate), toDate: formatDate(props?.toDate) } },
+        params: { query: { fromDate: formatDate(fromDate), toDate: formatDate(toDate) } },
       })
       if (error) {
         const errorMessage = (error as any).error
@@ -35,8 +36,11 @@ export function DatePicker({ showColorCodingExplanation, ...props }: DatePickerP
         setCalendarDates(data)
       }
     }
-    fetchCalendarDates()
-  }, [])
+
+    if (fromDate && toDate) {
+      fetchCalendarDates()
+    }
+  }, [fromDate, toDate])
 
   const full: Date[] = []
   const many: Date[] = []
@@ -70,6 +74,7 @@ export function DatePicker({ showColorCodingExplanation, ...props }: DatePickerP
     <div className='datepicker-container'>
       <AkselDatePicker.Standalone
         className='datepicker-wrapper'
+        month={fromDate}
         // @ts-expect-error: Allow custom "modifiers" prop for color coding
         modifiers={{ full, many, few, blocked }}
         modifiersStyles={{
