@@ -8,24 +8,35 @@
     padding: 20px 16px;
     box-shadow: var(--ds-shadow-md);
     border-radius: 8px;
+
+    .rdp-button:focus,
+    .rdp-button:target {
+      width: calc(var(--ax-date-button-size) - 4px);
+      height: calc(var(--ax-date-button-size) - 4px);
+      color: inherit;
+      background: transparent;
+      outline: var(--ds-color-base-default) solid 3px;
+      border: var(--ds-color-accent-background-default) solid 2px;
+      border-radius: 8px;
+    }
+  }
+}
+
+.datepicker-explanation {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-size-2);
+
+  .datepicker-explanation-wrapper {
+    display: flex;
+    align-items: center;
+    gap: var(--ds-size-4);
   }
 
-  .datepicker-explanation {
-    display: flex;
-    flex-direction: column;
-    gap: var(--ds-size-2);
-
-    .datepicker-explanation-wrapper {
-      display: flex;
-      align-items: center;
-      gap: var(--ds-size-4);
-    }
-
-    .datepicker-explanation-colors {
-      display: inline-block;
-      width: 30px;
-      height: 30px;
-      border-radius: 3px;
-    }
+  .datepicker-explanation-colors {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    border-radius: 3px;
   }
 }
