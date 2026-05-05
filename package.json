@@ -11,7 +11,7 @@
     "build": "npm run build --ws && cp -Rf frontend/dist/* backend/dist",
     "start": "npm run start -w backend",
     "db:deploy": "npm run db:deploy -w backend",
-    "test": "npm run test -w backend && npm run test -w frontend",
+    "test": "npm run test -w backend & npm run test -w frontend",
     "ci-test": "npm run ci-test -w backend && npm run ci-test -w frontend",
     "test:backend": "npm run test -w backend",
     "test:frontend": "npm run test -w frontend",
