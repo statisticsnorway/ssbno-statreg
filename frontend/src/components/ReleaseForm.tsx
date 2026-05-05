@@ -32,17 +32,26 @@ export function ReleaseForm() {
 
   const { datepickerProps: publishTimePickerProps, inputProps: publishTimeInputProps } = useDatepicker({
     onDateChange: (publishTime) => {
-      if (publishTime) setPublishTime(publishTime.toLocaleString())
+      if (publishTime) {
+        setPublishTime(publishTime.toLocaleString())
+        setErrors({ ...errors, publishDate: '' })
+      }
     },
   })
   const { datepickerProps: periodFromPickerProps, inputProps: periodFromInputProps } = useDatepicker({
     onDateChange: (periodFrom) => {
-      if (periodFrom) setPeriodTo(getDateOnlyAsString(periodFrom))
+      if (periodFrom) {
+        setPeriodTo(getDateOnlyAsString(periodFrom))
+        setErrors({ ...errors, periodFrom: '' })
+      }
     },
   })
   const { datepickerProps: periodToPickerProps, inputProps: periodToInputProps } = useDatepicker({
     onDateChange: (periodTo) => {
-      if (periodTo) setPeriodFrom(getDateOnlyAsString(periodTo))
+      if (periodTo) {
+        setPeriodFrom(getDateOnlyAsString(periodTo))
+        setErrors({ ...errors, periodTo: '' })
+      }
     },
   })
 
@@ -57,7 +66,11 @@ export function ReleaseForm() {
     if (!periodFrom) nextErrors.periodFrom = 'Velg en fra-dato'
     if (!periodTo) nextErrors.periodTo = 'Velg en til-dato'
 
-    // TODO: Add validation for periodFrom and periodTo; one cannot be bigger than the other
+    // TODO: Needs date to do comparisons
+    if (periodFrom && periodTo && periodFrom > periodTo) {
+      nextErrors.periodFrom = 'Fra-dato kan ikke være etter til-dato'
+      nextErrors.periodTo = 'Til-dato kan ikke være før fra-dato'
+    }
 
     setErrors(nextErrors)
     return Object.keys(nextErrors).length === 0
@@ -76,7 +89,14 @@ export function ReleaseForm() {
         <Field>
           <Paragraph style={{ marginBottom: 'var(--ds-size-8)' }}>Alle felter må fylles ut</Paragraph>
           <Label>Datotype for publisering</Label>
-          <Select value={dateType} onChange={(e) => setDateType(e.target.value)} aria-invalid={!!errors.dateType}>
+          <Select
+            value={dateType}
+            onChange={(e) => {
+              setDateType(e.target.value)
+              setErrors({ ...errors, dateType: '' })
+            }}
+            aria-invalid={!!errors.dateType}
+          >
             <Select.Option value='' disabled>
               Velg datotype
             </Select.Option>
@@ -124,15 +144,19 @@ export function ReleaseForm() {
         </div>
       </form>
 
-      {Object.keys(errors).length > 0 && (
+      {Object.values(errors).some(Boolean) && (
         <ErrorSummary>
           <ErrorSummary.Heading>For å gå videre må du rette opp følgende feil:</ErrorSummary.Heading>
           <ErrorSummary.List>
-            {Object.values(errors).map((message, i) => (
-              <ErrorSummary.Item key={i}>
-                <ErrorSummary.Link href='#'>{message}</ErrorSummary.Link>
-              </ErrorSummary.Item>
-            ))}
+            {Object.values(errors).map((message, i) => {
+              if (message) {
+                return (
+                  <ErrorSummary.Item key={i}>
+                    <ErrorSummary.Link href='#'>{message}</ErrorSummary.Link>
+                  </ErrorSummary.Item>
+                )
+              }
+            })}
           </ErrorSummary.List>
         </ErrorSummary>
       )}
