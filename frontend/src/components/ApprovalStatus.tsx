@@ -26,11 +26,11 @@ const statusConfig = {
 }
 
 function parseApprovalStatus(status?: string | null): keyof typeof ApprovalStatus {
-  for(let keyString of Object.keys(ApprovalStatus)){
-  const key = keyString as keyof typeof ApprovalStatus
-    if(ApprovalStatus[key] === status) return key
+  for (const keyString of Object.keys(ApprovalStatus)) {
+    const key = keyString as keyof typeof ApprovalStatus
+    if (ApprovalStatus[key] === status) return key
   }
-  return "PENDING"
+  return 'PENDING'
 }
 
 export function ApprovalStatusTag(props: { status?: string | null }) {
@@ -38,10 +38,7 @@ export function ApprovalStatusTag(props: { status?: string | null }) {
   const config = statusConfig[parsedStatus]
   const Icon = config.icon
   return (
-    <Tag
-      data-color={config.color}
-      style={{ paddingInlineStart: 'var(--ds-size-1)' }}
-    >
+    <Tag data-color={config.color} style={{ paddingInlineStart: 'var(--ds-size-1)' }}>
       <Icon aria-hidden style={{ marginInlineEnd: 'var(--ds-size-1)' }} />
       {config.text}
     </Tag>
@@ -53,7 +50,7 @@ export function ApprovalStatusBadge(props: { status?: string | null }) {
   const config = statusConfig[parsedStatus]
   return (
     <>
-      <Badge data-color={config.color}/> {config.text.split(' ')[0]}
+      <Badge data-color={config.color} /> {config.text.split(' ')[0]}
     </>
   )
 }

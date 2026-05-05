@@ -16,18 +16,20 @@ type DatePickerProps = React.ComponentProps<typeof AkselDatePicker.Standalone> &
 
 function formatDate(date: Date | undefined): string {
   if (!date) return ''
-  return date.toISOString().slice(0,10)
+  return date.toISOString().slice(0, 10)
 }
 
 export function DatePicker({ showColorCodingExplanation, ...props }: DatePickerProps) {
   const [calendarDates, setCalendarDates] = useState<CalenderDate>({})
+  const { fromDate, toDate } = props
 
   useEffect(() => {
     async function fetchCalendarDates() {
       const { data, error } = await client.GET('/calendar', {
-        params: { query: { fromDate: formatDate(props?.fromDate), toDate: formatDate(props?.toDate) } },
+        params: { query: { fromDate: formatDate(fromDate), toDate: formatDate(toDate) } },
       })
       if (error) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const errorMessage = (error as any).error
         console.log(errorMessage)
         alert(errorMessage)
@@ -36,7 +38,7 @@ export function DatePicker({ showColorCodingExplanation, ...props }: DatePickerP
       }
     }
     fetchCalendarDates()
-  }, [])
+  }, [fromDate, toDate])
 
   const full: Date[] = []
   const many: Date[] = []

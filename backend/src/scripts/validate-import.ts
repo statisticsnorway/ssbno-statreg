@@ -75,7 +75,7 @@ const freqMeta = meta.find((o) => o.new_table_name === 'Frequency')
 
 {
   const rows = await prisma.frequency.count()
-  let rowOk = rows === freqMeta!.num_rows
+  const rowOk = rows === freqMeta!.num_rows
 
   const minRec = await prisma.frequency.findMany({ take: 1, orderBy: { id: 'asc' } })
   const maxRec = await prisma.frequency.findMany({ take: 1, orderBy: { id: 'desc' } })

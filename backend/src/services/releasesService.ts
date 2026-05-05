@@ -165,6 +165,7 @@ export async function buildReleaseFilter(
     await releaseAsserts.assertVariantMatchesShortname(variantId, shortname, prisma)
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const where: any = { variant: {} }
 
   if (variantId !== undefined) {
@@ -219,7 +220,7 @@ export function parseReleaseInput(
   body: ReleaseUpdate | undefined,
   type: 'create' | 'update' = 'create'
 ): ValidatedReleaseInput {
-  let createFields: (keyof ReleaseCreate)[] = ['publish_time', 'period_from', 'period_to', 'release_date_precision']
+  const createFields: (keyof ReleaseCreate)[] = ['publish_time', 'period_from', 'period_to', 'release_date_precision']
 
   const requiredFields: (keyof ReleaseUpdate)[] = type === 'create' ? createFields : [...createFields, 'comment']
 

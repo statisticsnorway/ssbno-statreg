@@ -19,6 +19,7 @@ const adapter = new PrismaPg({
 
 const prisma = new PrismaClient({ adapter })
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const fetchCurrentSnapshot = async (args: { where: any }, model: string): Promise<Snapshot | null> => {
   switch (model) {
     case 'Variant':

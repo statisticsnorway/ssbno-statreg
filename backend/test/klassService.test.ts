@@ -20,6 +20,7 @@ describe('klassService ', async () => {
 
     fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
       json: async () => classificationItems,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any)
   })
 
@@ -114,8 +115,8 @@ describe('klassService ', async () => {
       const divisionNb = getDivisionFromCode(999)
       const divisionEn = getDivisionFromCode(999, 'en')
 
-      expect(divisionNb).toBeUndefined
-      expect(divisionEn).toBeUndefined
+      expect(divisionNb).toBeUndefined()
+      expect(divisionEn).toBeUndefined()
     })
 
     test('returns undefined when departments is an empty array', async () => {
@@ -125,8 +126,8 @@ describe('klassService ', async () => {
       const divisionNb = getDivisionFromCode(999)
       const divisionEn = getDivisionFromCode(999, 'en')
 
-      expect(divisionNb).toBeUndefined
-      expect(divisionEn).toBeUndefined
+      expect(divisionNb).toBeUndefined()
+      expect(divisionEn).toBeUndefined()
     })
   })
 })

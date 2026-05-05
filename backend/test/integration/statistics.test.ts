@@ -91,7 +91,7 @@ describe('statisticsController integration', () => {
 
     const statistic = body as StatisticDetails
 
-    // eslint-disable-next-line no-unused-vars
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { status, ...statisticSeeded } = SEEDED_STATISTIC // Removing status from object
     expect(toStatisticResponseShape(statistic)).toStrictEqual({ ...statisticSeeded, status_code: 'IA' })
 

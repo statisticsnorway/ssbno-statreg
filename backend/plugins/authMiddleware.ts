@@ -25,6 +25,7 @@ export function getBearerToken(req: Request): string | null {
 }
 
 export const skipAuth: RequestHandler = (_req, _res, next) => asyncLocalStorage.run({}, next)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 ;(skipAuth as any).__skipAuth = true
 
 export function createKeycloakAuthMiddleware(issuer: string, jwksUri: string, audience: string): RequestHandler {

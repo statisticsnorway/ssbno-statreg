@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, test, expect, beforeEach, vi } from 'vitest'
 import express, { Router, type RequestHandler } from 'express'
 import controllerRouter from '@/api/core/controllerRouter'

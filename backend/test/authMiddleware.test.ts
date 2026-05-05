@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { vi, describe, test, expect, beforeEach, afterEach } from 'vitest'
 import httpMocks, { createResponse, MockResponse } from 'node-mocks-http'
 
@@ -53,7 +54,7 @@ describe('authMiddleWare', () => {
         const { getBearerToken } = await import('../plugins/authMiddleware')
 
         const token = getBearerToken(httpMocks.createRequest())
-        expect(token).toBeNull
+        expect(token).toBeNull()
       })
       test('returns null when authorization header not starting with "Bearer " (including one or more whitespace)', async () => {
         const { getBearerToken } = await import('../plugins/authMiddleware')
@@ -61,7 +62,7 @@ describe('authMiddleWare', () => {
         const token = getBearerToken(
           httpMocks.createRequest({ headers: { authorization: 'bearermyBearerTokenValue' } })
         )
-        expect(token).toBeNull
+        expect(token).toBeNull()
       })
     })
 

@@ -5,11 +5,13 @@ import type { MockResponse } from 'node-mocks-http'
 import type { RequestHandler, Response } from 'express'
 
 export function makeSkipAuthMarker(): RequestHandler & { __skipAuth?: boolean } {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const marker: any = (_req: any, _res: any, next: any) => next()
   marker.__skipAuth = true
   return marker
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function invoke(app: Express, method: string, url: string, body?: any): Promise<MockResponse<Response>> {
   const req = httpMocks.createRequest({ url, body })
   req._setMethod(method)
