@@ -26,7 +26,9 @@ type ReleaseFormErrors = {
 export function ReleaseForm() {
   const [dateType, setDateType] = useState('')
   const [publishTime, setPublishTime] = useState('')
+  const [periodFromDate, setPeriodFromDate] = useState<Date | undefined>()
   const [periodFrom, setPeriodFrom] = useState('')
+  const [periodToDate, setPeriodToDate] = useState<Date | undefined>()
   const [periodTo, setPeriodTo] = useState('')
   const [errors, setErrors] = useState<ReleaseFormErrors>({})
 
@@ -41,7 +43,8 @@ export function ReleaseForm() {
   const { datepickerProps: periodFromPickerProps, inputProps: periodFromInputProps } = useDatepicker({
     onDateChange: (periodFrom) => {
       if (periodFrom) {
-        setPeriodTo(getDateOnlyAsString(periodFrom))
+        setPeriodFromDate(periodFrom)
+        setPeriodFrom(getDateOnlyAsString(periodFrom))
         setErrors({ ...errors, periodFrom: '' })
       }
     },
@@ -49,7 +52,8 @@ export function ReleaseForm() {
   const { datepickerProps: periodToPickerProps, inputProps: periodToInputProps } = useDatepicker({
     onDateChange: (periodTo) => {
       if (periodTo) {
-        setPeriodFrom(getDateOnlyAsString(periodTo))
+        setPeriodToDate(periodTo)
+        setPeriodTo(getDateOnlyAsString(periodTo))
         setErrors({ ...errors, periodTo: '' })
       }
     },
@@ -66,8 +70,7 @@ export function ReleaseForm() {
     if (!periodFrom) nextErrors.periodFrom = 'Velg en fra-dato'
     if (!periodTo) nextErrors.periodTo = 'Velg en til-dato'
 
-    // TODO: Needs date to do comparisons
-    if (periodFrom && periodTo && periodFrom > periodTo) {
+    if (periodFromDate && periodToDate && periodFromDate > periodToDate) {
       nextErrors.periodFrom = 'Fra-dato kan ikke være etter til-dato'
       nextErrors.periodTo = 'Til-dato kan ikke være før fra-dato'
     }
@@ -76,11 +79,12 @@ export function ReleaseForm() {
     return Object.keys(nextErrors).length === 0
   }
 
-  function handleSubmit(e) {
+  function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault()
     if (!validateFields()) return
 
-    console.log({ dateType, publishTime, periodFrom, periodTo }) // TODO: Replace with PUT logic
+    // TODO: Replace with PUT logic
+    console.log({ dateType, publishTime, periodFrom, periodTo }) 
   }
 
   return (
