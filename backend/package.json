@@ -17,9 +17,9 @@
     "generate": "prisma generate",
     "seed": "prisma db seed",
     "db:deploy": "prisma migrate deploy",
-    "test": "vitest --exclude 'test/integration/**'",
-    "ci-test": "vitest run --exclude 'test/integration/**'",
-    "test:integration": "vitest run test/integration"
+    "test": "vitest --project backend ",
+    "ci-test": "vitest run --project backend",
+    "test:integration": "vitest run --project integration"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",

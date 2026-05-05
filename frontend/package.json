@@ -8,8 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "vitest",
-    "ci-test": "vitest run"
+    "test": "vitest --project frontend",
+    "ci-test": "vitest run --project frontend"
   },
   "dependencies": {
     "@digdir/designsystemet-css": "^1.13.3",
