@@ -14,7 +14,7 @@
         color: inherit;
         background: transparent;
         outline: var(--ds-color-base-default) solid 3px;
-        border: white solid 2px;
+        border: var(--ds-color-accent-background-default) solid 2px;
         border-radius: 8px;
       }
     }
