@@ -14,7 +14,7 @@ export default defineProject({
         test: {
           name: 'backend',
           include: ['backend/**/*.test.ts'],
-          exclude: ['backend/**/integration/*.test.ts'],
+          exclude: ['**/integration/*.test.ts'],
           env: {
             TZ: 'UTC',
           },
@@ -29,7 +29,7 @@ export default defineProject({
         },
         test: {
           name: 'integration',
-          include: ['backend/**/integration/*.test.ts'],
+          include: ['**/integration/*.test.ts'],
           env: {
             TZ: 'UTC',
           },
