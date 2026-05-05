@@ -1,5 +1,11 @@
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest'
-import { formatPublishTime, formatDate, getFirstDayOfNthMonth, getLastDayOfNthMonth } from '../src/lib/utils'
+import {
+  formatPublishTime,
+  formatDate,
+  getFirstDayOfNthMonth,
+  getLastDayOfNthMonth,
+  getDateOnlyAsString,
+} from '../src/lib/utils'
 
 const timeZone = 'Europe/Oslo'
 beforeEach(() => vi.useFakeTimers())
@@ -95,6 +101,17 @@ describe('utils', () => {
     test('rolls over to next year when month exceeds december', () => {
       vi.setSystemTime(new Date('2024-12-15'))
       expect(getLastDayOfNthMonth(2)).toEqual(new Date('2025-02-28'))
+    })
+  })
+
+  describe('getDateOnlyAsString', () => {
+    test('gets the correct datestring from date', () => {
+      const dateString = getDateOnlyAsString(new Date('2026-05-05T00:00Z'))
+      expect(dateString).toBe('2026-05-05')
+    })
+    test('returns iso date if given local date with offset', () => {
+      const dateString = getDateOnlyAsString(new Date('2026-05-05T00:00+01:00'))
+      expect(dateString).toBe('2026-05-04')
     })
   })
 })

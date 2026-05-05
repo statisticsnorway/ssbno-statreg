@@ -37,7 +37,6 @@ export function getLastDayOfNthMonth(monthsAhead: number): Date {
   return to
 }
 
-// TODO: Add unit tests
 export function getDateOnlyAsString(date: Date): string {
-  return date.toLocaleDateString()
+  return date.toLocaleDateString('nb-NO')
 }
