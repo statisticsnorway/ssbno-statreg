@@ -7,7 +7,7 @@ import { Link } from '@digdir/designsystemet-react'
 {/* TODO: This is only placeholder; create own Header component if necessary */ }
 const Header = () => (
   <div id='header'>
-    <div className='header-content' data-color='brand1'>
+    <div className='header-content' data-color='brand1' data-size='sm'>
       <img src={ssbLogo} className='logo' alt='SSB logo' />
       <div className='header-links'>
         {/* TODO: Placeholder links */}
@@ -22,7 +22,7 @@ const PageLayout = () => {
   return (
     <>
       <Header />
-      <main id='page-content' data-color='brand1'>
+      <main id='page-content' data-color='brand1' data-size='sm'>
         <div className='content'>
           <Outlet />
         </div>
