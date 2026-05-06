@@ -461,8 +461,8 @@ const mockedSingleReleaseResult = {
     name: 'Konsumprisindeks',
     name_en: 'Consumer Price Index',
   },
-  period_from: '2024-08-01T00:00:00.000Z',
-  period_to: '2024-09-01T00:00:00.000Z',
+  period_from: '2024-08-01',
+  period_to: '2024-09-01',
   release_date_precision: 'dag',
   cancelled: false,
 }

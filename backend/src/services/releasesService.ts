@@ -8,6 +8,7 @@ import {
 import {
   dateToISOString,
   sanitize,
+  getDateOnlyAsString,
   parseDateISO,
   parseDateOnly,
   parseId,
@@ -305,8 +306,8 @@ export function mapToReleaseDetails(
       name: statistic.name,
       name_en: statistic.name_en ?? '',
     },
-    period_from: dateToISOString(prismaRelease.period_from),
-    period_to: dateToISOString(prismaRelease.period_to),
+    period_from: getDateOnlyAsString(prismaRelease.period_from),
+    period_to: getDateOnlyAsString(prismaRelease.period_to),
     release_date_precision: prismaRelease.release_date_precision,
     cancelled: prismaRelease.cancelled,
   }
