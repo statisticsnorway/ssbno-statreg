@@ -17,7 +17,7 @@ export async function createBlockedReleaseDay(
     return Promise.reject({ statregError: `Field 'blocked_comment' must be a non-empty string.` })
   }
 
-  const isAlreadyBlocked = await isDateBlocked(date, prisma)
+  const isAlreadyBlocked = await isDateBlocked(dateString as string, prisma)
   if (isAlreadyBlocked) {
     return Promise.reject({
       statregError: 'Date is already blocked, either manually, weekend or public holiday',
@@ -98,14 +98,14 @@ export async function getDateStatusForRange(
   return result
 }
 
-function getStatus(noOfReleases?: number): keyof typeof DayStatus {
+export function getStatus(noOfReleases?: number): keyof typeof DayStatus {
   if (!noOfReleases) return 'NONE'
   if (noOfReleases === 1) return 'FEW'
   if (noOfReleases <= 3) return 'MANY'
   return 'FULL'
 }
 
-function getReleaseCountByDate(
+export function getReleaseCountByDate(
   releasesInTimerange: {
     publish_time: Date
   }[]
