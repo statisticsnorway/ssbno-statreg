@@ -36,3 +36,9 @@ export function getLastDayOfNthMonth(monthsAhead: number): Date {
   to.setDate(0)
   return to
 }
+
+// Duplicate of a backend utils function; unit tests exist there already
+export function getDateOnlyAsString(date: Date | undefined): string {
+  if (!date) return ''
+  return date.toISOString().slice(0, 10)
+}
