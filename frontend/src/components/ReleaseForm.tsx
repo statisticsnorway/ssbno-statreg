@@ -41,14 +41,12 @@ export function ReleaseForm() {
 
   const { datepickerProps: publishTimePickerProps, inputProps: publishTimeInputProps } = useDatepicker({
     onDateChange: (publishTime) => {
-      if (!publishTime) return
       setValues((values) => ({ ...values, publishTime: getDateOnlyAsString(publishTime) }))
       setErrors((errors) => ({ ...errors, publishTime: '' }))
     },
   })
   const { datepickerProps: periodFromPickerProps, inputProps: periodFromInputProps } = useDatepicker({
     onDateChange: (periodFrom) => {
-      if (!periodFrom) return
       setPeriodFromDate(periodFrom)
       setValues((values) => ({ ...values, periodFrom: getDateOnlyAsString(periodFrom) }))
       setErrors((errors) => ({ ...errors, periodFrom: '' }))
@@ -56,7 +54,6 @@ export function ReleaseForm() {
   })
   const { datepickerProps: periodToPickerProps, inputProps: periodToInputProps } = useDatepicker({
     onDateChange: (periodTo) => {
-      if (!periodTo) return
       setPeriodToDate(periodTo)
       setValues((values) => ({ ...values, periodTo: getDateOnlyAsString(periodTo) }))
       setErrors((errors) => ({ ...errors, periodTo: '' }))
