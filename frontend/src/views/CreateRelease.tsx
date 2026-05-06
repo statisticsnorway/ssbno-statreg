@@ -7,7 +7,7 @@ import { CalendarIcon } from '@navikt/aksel-icons'
 import { type ReleaseListing, ApprovalStatus } from '@ssbno-statreg/shared'
 
 import { formatDate } from '../lib/utils'
-import { ReleasesTable } from '../components/ReleasesTable'
+import { ReleasesTable, PaginatedReleaseTable } from '../components/ReleasesTable'
 import { ReleaseForm } from '../components/ReleaseForm'
 import { DayStatusTag } from '../components/DayStatus'
 import { ApprovalStatusTag } from '../components/ApprovalStatus'
@@ -20,7 +20,27 @@ type CreateReleaseTablesProps = {
   variant: string
 }
 
-function CreateReleaseTables({ releases, shortname, variant }: CreateReleaseTablesProps) {
+function CreateReleaseTables({ releases, variant }: CreateReleaseTablesProps) {
+  const { shortname, variantId } = useParams()
+
+  async function fetchVariantReleases({ start, count }: { start: number; count: number }) {
+    const { data, error } = await client.GET('/statistics/{shortname}/variants/{id}/releases', {
+      params: { path: { shortname: shortname as string, id: Number(variantId) }, query: { start, count } },
+    })
+
+    if (error) {
+      const errorMessage = (error as any).error
+      console.log(errorMessage)
+      alert(errorMessage)
+      return { releases: [], total: 0 }
+    }
+
+    return {
+      releases: data?.releases ?? [],
+      total: data?.total ?? 0,
+    }
+  }
+
   return (
     <Tabs defaultValue='selected-publish-date' className='create-release-tables-tab'>
       <Tabs.List>
@@ -41,7 +61,7 @@ function CreateReleaseTables({ releases, shortname, variant }: CreateReleaseTabl
         <ReleasesTable releases={releases} />
       </Tabs.Panel>
       <Tabs.Panel className='p-0' value='variant-releases'>
-        TBA
+        <PaginatedReleaseTable fetchReleases={fetchVariantReleases} />
       </Tabs.Panel>
     </Tabs>
   )
@@ -53,6 +73,7 @@ function CreateRelease() {
   const { shortname, variantId } = useParams()
 
   useEffect(() => {
+    // TODO we only need to fetch the variant data here (not all releases), since ReleaseTableWithPagination takes care of fetching the releases
     async function fetchVariantRelease() {
       const { data, error } = await client.GET('/statistics/{shortname}/variants/{id}/releases', {
         params: { path: { shortname: shortname as string, id: Number(variantId) } },
