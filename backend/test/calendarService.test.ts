@@ -1,14 +1,21 @@
-import { vi, beforeEach, describe, test, expect } from 'vitest'
-import { createBlockedReleaseDay, getReleaseCountByDate, getStatus } from '@/services/calendarService'
+import { vi, beforeEach, describe, test, expect, afterEach } from 'vitest'
+import {
+  createBlockedReleaseDay,
+  getDateStatusForRange,
+  getReleaseCountByDate,
+  getStatus,
+} from '@/services/calendarService'
 
-const { isDateBlockedMock } = vi.hoisted(() => ({
+const { isDateBlockedMock, getBlockedDatesInPeriodMock } = vi.hoisted(() => ({
   isDateBlockedMock: vi.fn(async () => false),
+  getBlockedDatesInPeriodMock: vi.fn(async () => Promise.resolve({})),
 }))
 
 vi.mock(import('@/lib/blockedDates'), async (importOriginal) => {
   const original = await importOriginal<typeof import('@/lib/blockedDates')>()
   return {
     ...original,
+    getBlockedDatesInPeriod: getBlockedDatesInPeriodMock,
     isDateBlocked: isDateBlockedMock,
   }
 })
@@ -21,12 +28,18 @@ function setListReturn(next: { comment: string; day: Date }[]) {
   listReturn = next
 }
 
+beforeEach(() => vi.useFakeTimers())
+afterEach(() => vi.useRealTimers())
+
 describe('calendarService  ', () => {
   beforeEach(() => {
     prismaMock = {
       calender_date: {
         create: vi.fn((args) => Promise.resolve({ ...args, id: 0 })),
         findMany: vi.fn(() => Promise.resolve(listReturn)),
+      },
+      release: {
+        findMany: vi.fn(() => Promise.resolve([])),
       },
     }
   })
@@ -84,8 +97,65 @@ describe('calendarService  ', () => {
     })
   })
   describe('getDateStatusForRange() ', () => {
-    //TODO MIM-2662: Add unit tests
-    test(expect(true).toBeTruthy)
+    test('works for a single-day range', async () => {
+      const result = await getDateStatusForRange(prismaMock, '2024-06-15', '2024-06-15')
+      expect(result).toStrictEqual({ '2024-06-15': { status: 'NONE' } })
+    })
+
+    test('uses blocked date data when a date is blocked', async () => {
+      getBlockedDatesInPeriodMock.mockResolvedValueOnce({ '2024-06-02': { status: 'BLOCKED' } })
+      const result = await getDateStatusForRange(prismaMock, '2024-06-01', '2024-06-02')
+      expect(result).toStrictEqual({ '2024-06-01': { status: 'NONE' }, '2024-06-02': { status: 'BLOCKED' } })
+    })
+
+    test('returns a result entry for every date in the range (inclusive)', async () => {
+      getBlockedDatesInPeriodMock.mockResolvedValueOnce({ '2024-06-02': { status: 'BLOCKED' } })
+      prismaMock.release.findMany.mockResolvedValueOnce([
+        { publish_time: new Date('2024-06-01T08:00Z') },
+        { publish_time: new Date('2024-06-05T08:00Z') },
+        { publish_time: new Date('2024-06-05T08:00Z') },
+      ])
+      const result = await getDateStatusForRange(prismaMock, '2024-06-01', '2024-06-05')
+      expect(result).toStrictEqual({
+        '2024-06-01': { status: 'FEW' },
+        '2024-06-02': { status: 'BLOCKED' },
+        '2024-06-03': { status: 'NONE' },
+        '2024-06-04': { status: 'NONE' },
+        '2024-06-05': { status: 'MANY' },
+      })
+    })
+
+    test('throws a 400 error when toDate is before fromDate', async () => {
+      await expect(getDateStatusForRange(prismaMock, '2024-06-10', '2024-06-01')).rejects.toMatchObject({
+        status: 400,
+      })
+    })
+
+    test('defaults fromDate to the 1st of the current month when omitted', async () => {
+      vi.setSystemTime(new Date('2024-03-15T00:00+01:00'))
+      await getDateStatusForRange(prismaMock, undefined, '2099-12-31')
+
+      expect(prismaMock.release.findMany).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({
+          where: {
+            publish_time: { gt: new Date('2024-03-01T00:00:00.000Z'), lte: new Date('2099-12-31T23:59:59.999Z') },
+          },
+        })
+      )
+    })
+
+    test('defaults toDate to 3 months ahead when omitted', async () => {
+      vi.setSystemTime(new Date('2024-03-15T00:00+01:00'))
+      await getDateStatusForRange(prismaMock, '2000-01-01', undefined)
+
+      expect(prismaMock.release.findMany).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({
+          where: {
+            publish_time: { gt: new Date('2000-01-01T00:00:00.000Z'), lte: new Date('2024-05-31T23:59:59.999Z') },
+          },
+        })
+      )
+    })
   })
 
   describe('getStatus', () => {
