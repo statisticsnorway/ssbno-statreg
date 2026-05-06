@@ -1,11 +1,5 @@
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest'
-import {
-  formatPublishTime,
-  formatDate,
-  getFirstDayOfNthMonth,
-  getLastDayOfNthMonth,
-  parsePublishDateWithTime,
-} from '../src/lib/utils'
+import { formatPublishTime, formatDate, getFirstDayOfNthMonth, getLastDayOfNthMonth } from '../src/lib/utils'
 
 const timeZone = 'Europe/Oslo'
 beforeEach(() => vi.useFakeTimers())
