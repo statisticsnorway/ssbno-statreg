@@ -36,3 +36,9 @@ export function getLastDayOfNthMonth(monthsAhead: number): Date {
   to.setDate(0)
   return to
 }
+
+export function parsePublishTime(publishTime: Date): string {
+  publishTime.setHours(8, 0, 0, 0)
+  publishTime.toLocaleString('nb-NO')
+  return publishTime.toISOString()
+}
