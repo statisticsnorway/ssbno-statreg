@@ -29,10 +29,10 @@ function CreateReleaseTables({ releases, variant }: CreateReleaseTablesProps) {
     })
 
     if (error) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const errorMessage = (error as any).error
       console.log(errorMessage)
       alert(errorMessage)
-      return { releases: [], total: 0 }
     }
 
     return {
