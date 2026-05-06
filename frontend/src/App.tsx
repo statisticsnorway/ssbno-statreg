@@ -18,12 +18,12 @@ function App() {
 
         <Route path='publisering'>
           <Route path=':id' element={<ShowRelease />} />
-          <Route path='opprett' element={<CreateRelease />} />
         </Route>
 
         <Route path='statistikk'>
           <Route index element={<ListStatistics />} />
           <Route path=':shortname' element={<ShowStatistic />} />
+          <Route path=':shortname/:variantId/opprett' element={<CreateRelease />} />
           <Route path='opprett' element={<CreateStatistic />} />
         </Route>
 
