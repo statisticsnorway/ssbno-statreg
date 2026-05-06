@@ -155,6 +155,7 @@ export function ReleaseForm({ shortname, variantId }: ReleaseFormProps) {
           For kortere frister, kontakt mmj@ssb.no.
         </Field.Description>
         <Input id='publishTime' size={10} {...publishTimeInputProps} aria-invalid={!!errors.publishTime} />
+        {/* TODO: Disable blocked days */}
         <DatePicker
           fromDate={getFirstDayOfNthMonth(0)}
           toDate={getLastDayOfNthMonth(0)}
