@@ -107,28 +107,24 @@ describe('utils', () => {
   describe('parsePublishDateWithTime', () => {
     test('sets the time to 08:00:00.000 local time', () => {
       const date = new Date('2024-05-01')
-
       const result = parsePublishDateWithTime(date)
       expect(result).toBe('2024-05-01T06:00:00.000Z')
     })
 
     test('returns an ISO 8601 string', () => {
       const date = new Date('2024-05-01T00:00:00')
-
       const result = parsePublishDateWithTime(date)
       expect(result).toMatch('2024-05-01T06:00:00.000Z')
     })
 
     test('mutates the original Date object', () => {
       const date = new Date('2024-05-01T01:00:00')
-
       parsePublishDateWithTime(date)
       expect(date.getHours()).toBe(8)
     })
 
     test('overwrites any existing time', () => {
       const date = new Date('2024-05-01T23:59:59.999')
-
       const result = new Date(parsePublishDateWithTime(date))
       expect(result.getHours()).toBe(8)
     })
