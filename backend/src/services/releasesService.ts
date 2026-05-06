@@ -5,7 +5,14 @@ import {
   type ReleaseListingResponse,
   ApprovalStatus,
 } from '@ssbno-statreg/shared'
-import { dateToISOString, sanitize, parseDateISO, parseId, ensureRequiredFieldsExists } from '@/lib/utils'
+import {
+  dateToISOString,
+  sanitize,
+  parseDateISO,
+  parseDateOnly,
+  parseId,
+  ensureRequiredFieldsExists,
+} from '@/lib/utils'
 import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
 import type { Prisma } from '@/generated/prisma/client'
 import { releaseAsserts } from '@/lib/asserts'
@@ -239,8 +246,8 @@ export function parseReleaseInput(
   // TODO: Automatic suggestion of period_to and period_from is going to be solved in a seperate task
   return {
     publishTimeDate: parseDateISO(publish_time, 'publish_time'),
-    periodFromDate: parseDateISO(period_from, 'period_from'),
-    periodToDate: parseDateISO(period_to, 'period_to'),
+    periodFromDate: parseDateOnly(period_from, 'period_from'),
+    periodToDate: parseDateOnly(period_to, 'period_to'),
     releaseDatePrecision: sanitize(release_date_precision!),
     comment: safeComment,
   }
