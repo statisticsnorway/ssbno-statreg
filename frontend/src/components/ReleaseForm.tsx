@@ -42,7 +42,7 @@ export function ReleaseForm() {
   const { datepickerProps: publishTimePickerProps, inputProps: publishTimeInputProps } = useDatepicker({
     onDateChange: (publishTime) => {
       if (!publishTime) return
-      setValues((values) => ({...values, publishTime: getDateOnlyAsString(publishTime)}))
+      setValues((values) => ({ ...values, publishTime: getDateOnlyAsString(publishTime) }))
       setErrors((errors) => ({ ...errors, publishTime: '' }))
     },
   })
@@ -50,14 +50,16 @@ export function ReleaseForm() {
     onDateChange: (periodFrom) => {
       if (!periodFrom) return
       setPeriodFromDate(periodFrom)
-      setValues((values) => ({...values, periodFrom: getDateOnlyAsString(periodFrom)}))
+      setValues((values) => ({ ...values, periodFrom: getDateOnlyAsString(periodFrom) }))
+      setErrors((errors) => ({ ...errors, periodFrom: '' }))
     },
   })
   const { datepickerProps: periodToPickerProps, inputProps: periodToInputProps } = useDatepicker({
     onDateChange: (periodTo) => {
       if (!periodTo) return
       setPeriodToDate(periodTo)
-      setValues((values) => ({...values, periodTo: getDateOnlyAsString(periodTo)}))
+      setValues((values) => ({ ...values, periodTo: getDateOnlyAsString(periodTo) }))
+      setErrors((errors) => ({ ...errors, periodTo: '' }))
     },
   })
 
@@ -69,22 +71,28 @@ export function ReleaseForm() {
     if (!values.periodFrom) nextErrors.periodFrom = 'Velg en fra-dato'
     if (!values.periodTo) nextErrors.periodTo = 'Velg en til-dato'
 
+    // TODO: Review error messages and implement onChange
     if (periodFromDate && periodToDate && periodFromDate > periodToDate) {
-      nextErrors.periodFrom = 'Fra-dato kan ikke være etter til-dato'
-      nextErrors.periodTo = 'Til-dato kan ikke være før fra-dato'
+      errors.periodFrom = 'Fra-dato kan ikke være etter til-dato'
+      errors.periodTo = 'Til-dato kan ikke være før fra-dato'
     }
 
     setErrors(nextErrors)
-    return Object.keys(nextErrors).length === 0
+    return Object.keys(nextErrors).some((key) => nextErrors[key as keyof ReleaseFormTypes]) ? false : true
   }
 
   function handleOnSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault()
-    
+
     if (!validateFields()) return
 
     // TODO: Replace with POST logic
-    console.log({ dateType: values.dateType, publishTime: values.publishTime, periodFrom: values.periodFrom, periodTo: values.periodTo })
+    console.log({
+      dateType: values.dateType,
+      publishTime: values.publishTime,
+      periodFrom: values.periodFrom,
+      periodTo: values.periodTo,
+    })
   }
 
   return (
@@ -96,7 +104,7 @@ export function ReleaseForm() {
           id='dateType'
           value={values.dateType}
           onChange={(e) => {
-            setValues((values) => ({...values, dateType: e.target.value}))
+            setValues((values) => ({ ...values, dateType: e.target.value }))
             setErrors((errors) => ({ ...errors, dateType: '' }))
           }}
           aria-invalid={!!errors.dateType}
