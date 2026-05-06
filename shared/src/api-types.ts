@@ -298,7 +298,10 @@ export interface paths {
       parameters: {
         query?: never
         header?: never
-        path?: never
+        path: {
+          shortname: string
+          id: number
+        }
         cookie?: never
       }
       requestBody: {
