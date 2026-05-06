@@ -49,7 +49,7 @@ async function createRelease(shortname: string, variantId: number, body: Release
     alert(errorMessage)
   } else {
     // TODO: Implement Dialog for created release verification
-    console.log('Release created! ' + JSON.stringify(data, null, 2))
+    alert('Release created: ' + JSON.stringify(data, null, 2))
   }
 }
 

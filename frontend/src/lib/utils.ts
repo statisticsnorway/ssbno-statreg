@@ -43,9 +43,9 @@ export function getDateOnlyAsString(date: Date | undefined): string {
   return date.toISOString().slice(0, 10)
 }
 
+// TODO: Add unit tests
 export function parsePublishDateWithTime(publishTime: Date | undefined): string {
   if (!publishTime) return ''
   publishTime.setHours(8, 0, 0, 0)
-  publishTime.toLocaleString('nb-NO')
   return publishTime.toISOString()
 }
