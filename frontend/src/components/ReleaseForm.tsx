@@ -48,7 +48,7 @@ async function createRelease(shortname: string, variantId: number, body: Release
     console.log(errorMessage)
     alert(errorMessage)
   } else {
-    // TODO: Check flowchart
+    // TODO: Implement Dialog for created release verification
     console.log('Release created! ' + JSON.stringify(data, null, 2))
   }
 }
