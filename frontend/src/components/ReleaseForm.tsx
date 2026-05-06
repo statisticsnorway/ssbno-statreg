@@ -16,7 +16,7 @@ import { getDateOnlyAsString, getFirstDayOfNthMonth, getLastDayOfNthMonth } from
 
 const releaseDatePrecisions = ['Dag', 'Måned', 'År']
 
-type ReleaseFormErrors = {
+type ReleaseFormTypes = {
   dateType?: string
   publishTime?: string
   periodFrom?: string
@@ -24,43 +24,50 @@ type ReleaseFormErrors = {
 }
 
 export function ReleaseForm() {
-  const [dateType, setDateType] = useState('')
-  const [publishTime, setPublishTime] = useState('')
-  const [periodFromDate, setPeriodFromDate] = useState<Date | undefined>()
-  const [periodFrom, setPeriodFrom] = useState('')
+  const [values, setValues] = useState<ReleaseFormTypes>({
+    dateType: '',
+    publishTime: '',
+    periodFrom: '',
+    periodTo: '',
+  })
   const [periodToDate, setPeriodToDate] = useState<Date | undefined>()
-  const [periodTo, setPeriodTo] = useState('')
-  const [errors, setErrors] = useState<ReleaseFormErrors>({})
+  const [periodFromDate, setPeriodFromDate] = useState<Date | undefined>()
+  const [errors, setErrors] = useState<ReleaseFormTypes>({
+    dateType: '',
+    publishTime: '',
+    periodFrom: '',
+    periodTo: '',
+  })
 
   const { datepickerProps: publishTimePickerProps, inputProps: publishTimeInputProps } = useDatepicker({
     onDateChange: (publishTime) => {
       if (!publishTime) return
-      setPublishTime(getDateOnlyAsString(publishTime))
-      setErrors((prev) => ({ ...prev, publishTime: '' }))
+      setValues((values) => ({...values, publishTime: getDateOnlyAsString(publishTime)}))
+      setErrors((errors) => ({ ...errors, publishTime: '' }))
     },
   })
   const { datepickerProps: periodFromPickerProps, inputProps: periodFromInputProps } = useDatepicker({
     onDateChange: (periodFrom) => {
       if (!periodFrom) return
       setPeriodFromDate(periodFrom)
-      setPeriodFrom(getDateOnlyAsString(periodFrom))
+      setValues((values) => ({...values, periodFrom: getDateOnlyAsString(periodFrom)}))
     },
   })
   const { datepickerProps: periodToPickerProps, inputProps: periodToInputProps } = useDatepicker({
     onDateChange: (periodTo) => {
       if (!periodTo) return
       setPeriodToDate(periodTo)
-      setPeriodTo(getDateOnlyAsString(periodTo))
+      setValues((values) => ({...values, periodTo: getDateOnlyAsString(periodTo)}))
     },
   })
 
   function validateFields() {
-    const nextErrors: ReleaseFormErrors = {}
+    const nextErrors: ReleaseFormTypes = {}
 
-    if (!dateType) nextErrors.dateType = 'Velg en datotype for publisering'
-    if (!publishTime) nextErrors.publishTime = 'Velg en publiseringsdato'
-    if (!periodFrom) nextErrors.periodFrom = 'Velg en fra-dato'
-    if (!periodTo) nextErrors.periodTo = 'Velg en til-dato'
+    if (!values.dateType) nextErrors.dateType = 'Velg en datotype for publisering'
+    if (!values.publishTime) nextErrors.publishTime = 'Velg en publiseringsdato'
+    if (!values.periodFrom) nextErrors.periodFrom = 'Velg en fra-dato'
+    if (!values.periodTo) nextErrors.periodTo = 'Velg en til-dato'
 
     if (periodFromDate && periodToDate && periodFromDate > periodToDate) {
       nextErrors.periodFrom = 'Fra-dato kan ikke være etter til-dato'
@@ -71,25 +78,26 @@ export function ReleaseForm() {
     return Object.keys(nextErrors).length === 0
   }
 
-  function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
+  function handleOnSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault()
+    
     if (!validateFields()) return
 
     // TODO: Replace with POST logic
-    console.log({ dateType, publishTime, periodFrom, periodTo })
+    console.log({ dateType: values.dateType, publishTime: values.publishTime, periodFrom: values.periodFrom, periodTo: values.periodTo })
   }
 
   return (
-    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--ds-size-12)' }}>
+    <form onSubmit={handleOnSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--ds-size-12)' }}>
       <Field>
         <Paragraph style={{ marginBottom: 'var(--ds-size-8)' }}>Alle felter må fylles ut</Paragraph>
         <Label>Datotype for publisering</Label>
         <Select
           id='dateType'
-          value={dateType}
+          value={values.dateType}
           onChange={(e) => {
-            setDateType(e.target.value)
-            setErrors({ ...errors, dateType: '' })
+            setValues((values) => ({...values, dateType: e.target.value}))
+            setErrors((errors) => ({ ...errors, dateType: '' }))
           }}
           aria-invalid={!!errors.dateType}
         >
