@@ -14,7 +14,40 @@ import { ApprovalStatusTag } from '../components/ApprovalStatus'
 
 import client from '../api'
 
-export default function CreateRelease() {
+type CreateReleaseTablesProps = {
+  releases: ReleaseListing[]
+  shortname: string
+  variant: string
+}
+
+function CreateReleaseTables({ releases, shortname, variant }: CreateReleaseTablesProps) {
+  return (
+    <Tabs defaultValue='selected-publish-date' className='create-release-tables-tab'>
+      <Tabs.List>
+        <Tabs.Tab value='selected-publish-date'>
+          <CalendarIcon />
+          Publiseringer på valgt dato
+        </Tabs.Tab>
+        <Tabs.Tab value='variant-releases'>
+          Alle publiseringer på {shortname}, {variant}
+        </Tabs.Tab>
+      </Tabs.List>
+      <Tabs.Panel className='p-0' value='selected-publish-date'>
+        <div className='description-wrapper'>
+          {/* TODO: Placeholder date and day status for description */}
+          <span>Innmeldte datoer den {formatDate(releases[0]?.publish_time)}</span>
+          <DayStatusTag status={'MANY'} />
+        </div>
+        <ReleasesTable releases={releases} />
+      </Tabs.Panel>
+      <Tabs.Panel className='p-0' value='variant-releases'>
+        TBA
+      </Tabs.Panel>
+    </Tabs>
+  )
+}
+
+function CreateRelease() {
   const [releases, setReleases] = useState<ReleaseListing[]>([])
   const [variantReleases, setVariantReleases] = useState<ReleaseListing[]>([])
   const { shortname, variantId } = useParams()
@@ -54,33 +87,6 @@ export default function CreateRelease() {
   const variant = variantReleases[0]?.frequency?.name ?? ''
   const approvalStatus = variantReleases[0]?.approval_status ?? ApprovalStatus.PENDING
 
-  function renderReleasesTables() {
-    return (
-      <Tabs defaultValue='selected-publish-date' className='create-release-tables-tab'>
-        <Tabs.List>
-          <Tabs.Tab value='selected-publish-date'>
-            <CalendarIcon />
-            Publiseringer på valgt dato
-          </Tabs.Tab>
-          <Tabs.Tab value='variant-releases'>
-            Alle publiseringer på {statisticShortname}, {variant}
-          </Tabs.Tab>
-        </Tabs.List>
-        <Tabs.Panel className='p-0' value='selected-publish-date'>
-          <div className='description-wrapper'>
-            {/* TODO: Placeholder date and day status for description */}
-            <span>Innmeldte datoer den {formatDate(releases[0]?.publish_time)}</span>
-            <DayStatusTag status={'MANY'} />
-          </div>
-          <ReleasesTable releases={releases} />
-        </Tabs.Panel>
-        <Tabs.Panel className='p-0' value='variant-releases'>
-          TBA
-        </Tabs.Panel>
-      </Tabs>
-    )
-  }
-
   return (
     <>
       <div className='release-description-wrapper'>
@@ -93,7 +99,9 @@ export default function CreateRelease() {
         <ApprovalStatusTag status={approvalStatus} />
       </div>
       <ReleaseForm />
-      {renderReleasesTables()}
+      <CreateReleaseTables releases={releases} shortname={statisticShortname} variant={variant} />
     </>
   )
 }
+
+export default CreateRelease
