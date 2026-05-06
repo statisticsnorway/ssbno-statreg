@@ -685,8 +685,14 @@ export interface paths {
 export type webhooks = Record<string, never>
 export interface components {
   schemas: {
+    /**
+     * @example {
+     *       "date": "2026-12-24",
+     *       "blocked_comment": "Christmas eve"
+     *     }
+     */
     Blocked_release_date: {
-      /** Format: date-time */
+      /** Format: date */
       date?: string
       blocked_comment?: string
     }
