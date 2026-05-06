@@ -73,8 +73,8 @@ export function ReleaseForm() {
 
     // TODO: Review error messages and implement onChange
     if (periodFromDate && periodToDate && periodFromDate > periodToDate) {
-      errors.periodFrom = 'Fra-dato kan ikke være etter til-dato'
-      errors.periodTo = 'Til-dato kan ikke være før fra-dato'
+      nextErrors.periodFrom = 'Fra-dato kan ikke være etter til-dato'
+      nextErrors.periodTo = 'Til-dato kan ikke være før fra-dato'
     }
 
     setErrors(nextErrors)
