@@ -51,11 +51,12 @@ function CreateRelease() {
   const [releases, setReleases] = useState<ReleaseListing[]>([])
   const [variantReleases, setVariantReleases] = useState<ReleaseListing[]>([])
   const { shortname, variantId } = useParams()
+  const variantIdAsNumber = Number(variantId)
 
   useEffect(() => {
     async function fetchVariantRelease() {
       const { data, error } = await client.GET('/statistics/{shortname}/variants/{id}/releases', {
-        params: { path: { shortname: shortname as string, id: Number(variantId) } },
+        params: { path: { shortname: shortname as string, id: variantIdAsNumber } },
       })
       if (error) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -98,7 +99,7 @@ function CreateRelease() {
         </Heading>
         <ApprovalStatusTag status={approvalStatus} />
       </div>
-      <ReleaseForm />
+      <ReleaseForm shortname={shortname as string} variantId={variantIdAsNumber} />
       <CreateReleaseTables releases={releases} shortname={statisticShortname} variant={variant} />
     </>
   )
