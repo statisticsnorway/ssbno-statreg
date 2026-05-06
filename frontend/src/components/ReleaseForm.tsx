@@ -39,6 +39,7 @@ export function ReleaseForm() {
     periodTo: '',
   })
 
+  // TODO: Add validation for Date inputs; it's currently allowed to write anything on the fields
   const { datepickerProps: publishTimePickerProps, inputProps: publishTimeInputProps } = useDatepicker({
     onDateChange: (publishTime) => {
       setValues((values) => ({ ...values, publishTime: getDateOnlyAsString(publishTime) }))
