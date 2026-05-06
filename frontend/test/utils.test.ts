@@ -4,7 +4,6 @@ import {
   formatDate,
   getFirstDayOfNthMonth,
   getLastDayOfNthMonth,
-  getDateOnlyAsString,
 } from '../src/lib/utils'
 
 const timeZone = 'Europe/Oslo'
@@ -101,17 +100,6 @@ describe('utils', () => {
     test('rolls over to next year when month exceeds december', () => {
       vi.setSystemTime(new Date('2024-12-15T00:00+01:00'))
       expect(getLastDayOfNthMonth(2)).toEqual(new Date('2025-02-28T00:00+01:00'))
-    })
-  })
-
-  describe('getDateOnlyAsString', () => {
-    test('gets the correct datestring from date', () => {
-      const dateString = getDateOnlyAsString(new Date('2026-05-05T00:00Z'))
-      expect(dateString).toBe('2026-05-05')
-    })
-    test('returns iso date if given local date with offset', () => {
-      const dateString = getDateOnlyAsString(new Date('2026-05-05T00:00+01:00'))
-      expect(dateString).toBe('2026-05-04')
     })
   })
 })

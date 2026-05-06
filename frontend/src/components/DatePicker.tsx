@@ -9,14 +9,10 @@ import { type CalenderDate, DayStatus } from '@ssbno-statreg/shared'
 import { Paragraph } from '@digdir/designsystemet-react'
 
 import client from '../api'
+import { getDateOnlyAsString } from '../lib/utils'
 
 type DatePickerProps = React.ComponentProps<typeof AkselDatePicker.Standalone> & {
   showColorCodingExplanation?: boolean
-}
-
-function formatDate(date: Date | undefined): string {
-  if (!date) return ''
-  return date.toISOString().slice(0, 10)
 }
 
 export function DatePicker({ showColorCodingExplanation, ...props }: DatePickerProps) {
@@ -26,7 +22,7 @@ export function DatePicker({ showColorCodingExplanation, ...props }: DatePickerP
   useEffect(() => {
     async function fetchCalendarDates() {
       const { data, error } = await client.GET('/calendar', {
-        params: { query: { fromDate: formatDate(fromDate), toDate: formatDate(toDate) } },
+        params: { query: { fromDate: getDateOnlyAsString(fromDate), toDate: getDateOnlyAsString(toDate) } },
       })
       if (error) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any

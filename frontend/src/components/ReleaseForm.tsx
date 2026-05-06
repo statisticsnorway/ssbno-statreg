@@ -34,28 +34,23 @@ export function ReleaseForm() {
 
   const { datepickerProps: publishTimePickerProps, inputProps: publishTimeInputProps } = useDatepicker({
     onDateChange: (publishTime) => {
-      if (publishTime) {
-        setPublishTime(publishTime.toLocaleString('nb-NO'))
-        setErrors({ ...errors, publishTime: '' })
-      }
+      if (!publishTime) return
+      setPublishTime(getDateOnlyAsString(publishTime))
+      setErrors((prev) => ({ ...prev, publishTime: '' }))
     },
   })
   const { datepickerProps: periodFromPickerProps, inputProps: periodFromInputProps } = useDatepicker({
     onDateChange: (periodFrom) => {
-      if (periodFrom) {
-        setPeriodFromDate(periodFrom)
-        setPeriodFrom(getDateOnlyAsString(periodFrom))
-        setErrors({ ...errors, periodFrom: '' })
-      }
+      if (!periodFrom) return
+      setPeriodFromDate(periodFrom)
+      setPeriodFrom(getDateOnlyAsString(periodFrom))
     },
   })
   const { datepickerProps: periodToPickerProps, inputProps: periodToInputProps } = useDatepicker({
     onDateChange: (periodTo) => {
-      if (periodTo) {
-        setPeriodToDate(periodTo)
-        setPeriodTo(getDateOnlyAsString(periodTo))
-        setErrors({ ...errors, periodTo: '' })
-      }
+      if (!periodTo) return
+      setPeriodToDate(periodTo)
+      setPeriodTo(getDateOnlyAsString(periodTo))
     },
   })
 
@@ -67,7 +62,6 @@ export function ReleaseForm() {
     if (!periodFrom) nextErrors.periodFrom = 'Velg en fra-dato'
     if (!periodTo) nextErrors.periodTo = 'Velg en til-dato'
 
-    // TODO: Needs to be checked onChange as well
     if (periodFromDate && periodToDate && periodFromDate > periodToDate) {
       nextErrors.periodFrom = 'Fra-dato kan ikke være etter til-dato'
       nextErrors.periodTo = 'Til-dato kan ikke være før fra-dato'
@@ -81,7 +75,7 @@ export function ReleaseForm() {
     e.preventDefault()
     if (!validateFields()) return
 
-    // TODO: Replace with PUT logic
+    // TODO: Replace with POST logic
     console.log({ dateType, publishTime, periodFrom, periodTo })
   }
 
@@ -132,7 +126,12 @@ export function ReleaseForm() {
           <Field>
             <Label>Måleperiode fra</Label>
             <AkselDatePicker {...periodFromPickerProps}>
-              <AkselDatePicker.Input id='periodFrom' {...periodFromInputProps} aria-invalid={!!errors.periodFrom} label />
+              <AkselDatePicker.Input
+                id='periodFrom'
+                {...periodFromInputProps}
+                aria-invalid={!!errors.periodFrom}
+                label
+              />
             </AkselDatePicker>
             {errors.periodFrom && <ValidationMessage>{errors.periodFrom}</ValidationMessage>}
           </Field>
