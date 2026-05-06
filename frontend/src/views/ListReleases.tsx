@@ -75,6 +75,7 @@ function ListReleasesTablePagination({
   )
 }
 
+// TODO use PaginatedReleaseTable component
 function ListReleases() {
   const [releases, setReleases] = useState<ReleaseListing[]>([])
   const [calendarMonth, setCalendarMonth] = useState(0)
