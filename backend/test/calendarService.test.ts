@@ -1,5 +1,5 @@
 import { vi, beforeEach, describe, test, expect } from 'vitest'
-import { createBlockedReleaseDay } from '@/services/calendarService'
+import { createBlockedReleaseDay, getReleaseCountByDate, getStatus } from '@/services/calendarService'
 
 const { isDateBlockedMock } = vi.hoisted(() => ({
   isDateBlockedMock: vi.fn(async () => false),
@@ -12,9 +12,6 @@ vi.mock(import('@/lib/blockedDates'), async (importOriginal) => {
     isDateBlocked: isDateBlockedMock,
   }
 })
-
-// Uncomment next line to run tests locally with UTC timezone (same as nais cluster)
-// process.env.TZ = 'UTC'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let prismaMock: any
@@ -89,6 +86,72 @@ describe('calendarService  ', () => {
   describe('getDateStatusForRange() ', () => {
     //TODO MIM-2662: Add unit tests
     test(expect(true).toBeTruthy)
+  })
+
+  describe('getStatus', () => {
+    test('returns NONE when called with no argument', () => {
+      expect(getStatus()).toBe('NONE')
+    })
+
+    test('returns NONE when called with 0', () => {
+      expect(getStatus(0)).toBe('NONE')
+    })
+
+    test('returns FEW when called with exactly 1', () => {
+      expect(getStatus(1)).toBe('FEW')
+    })
+
+    test('returns MANY when called with 2', () => {
+      expect(getStatus(2)).toBe('MANY')
+    })
+
+    test('returns MANY when called with exactly 3', () => {
+      expect(getStatus(3)).toBe('MANY')
+    })
+
+    test('returns FULL when called with 4', () => {
+      expect(getStatus(4)).toBe('FULL')
+    })
+
+    test('returns FULL when called with a large number', () => {
+      expect(getStatus(100)).toBe('FULL')
+    })
+  })
+
+  describe('getReleaseCountByDate', () => {
+    test('returns an empty object for an empty input array', () => {
+      expect(getReleaseCountByDate([])).toEqual({})
+    })
+
+    test('counts a single release correctly', () => {
+      const result = getReleaseCountByDate([{ publish_time: new Date('2024-06-01T10:00:00Z') }])
+      expect(result).toStrictEqual({
+        '2024-06-01': 1,
+      })
+    })
+
+    test('counts multiple releases on the same date', () => {
+      const result = getReleaseCountByDate([
+        { publish_time: new Date('2024-06-01T08:00:00Z') },
+        { publish_time: new Date('2024-06-01T12:00:00Z') },
+        { publish_time: new Date('2024-06-01T18:00:00Z') },
+      ])
+      expect(result).toStrictEqual({
+        '2024-06-01': 3,
+      })
+    })
+
+    test('counts releases across different dates independently', () => {
+      const result = getReleaseCountByDate([
+        { publish_time: new Date('2024-06-01T10:00:00Z') },
+        { publish_time: new Date('2024-06-02T10:00:00Z') },
+        { publish_time: new Date('2024-06-02T14:00:00Z') },
+      ])
+      expect(result).toStrictEqual({
+        '2024-06-01': 1,
+        '2024-06-02': 2,
+      })
+    })
   })
 })
 
