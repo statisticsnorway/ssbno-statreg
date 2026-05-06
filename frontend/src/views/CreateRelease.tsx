@@ -1,6 +1,7 @@
 import './CreateRelease.css'
 
 import { useState, useEffect } from 'react'
+import { useParams } from 'react-router'
 import { Heading, Tabs } from '@digdir/designsystemet-react'
 import { CalendarIcon } from '@navikt/aksel-icons'
 import { type ReleaseListing, ApprovalStatus } from '@ssbno-statreg/shared'
@@ -15,8 +16,25 @@ import client from '../api'
 
 export default function CreateRelease() {
   const [releases, setReleases] = useState<ReleaseListing[]>([])
+  const [variantReleases, setVariantReleases] = useState<ReleaseListing[]>([])
+  const { shortname, variantId } = useParams()
 
   useEffect(() => {
+    async function fetchVariantRelease() {
+      const { data, error } = await client.GET('/statistics/{shortname}/variants/{id}/releases', {
+        params: { path: { shortname: shortname as string, id: Number(variantId) } },
+      })
+      if (error) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const errorMessage = (error as any).error
+        console.log(errorMessage)
+        alert(errorMessage)
+      } else {
+        setVariantReleases(data?.releases ?? [])
+      }
+    }
+    fetchVariantRelease()
+
     async function fetchReleases() {
       const { data, error } = await client.GET('/releases', { params: { query: { start: 0, count: 10 } } })
       if (error) {
@@ -29,7 +47,12 @@ export default function CreateRelease() {
       }
     }
     fetchReleases()
-  }, [])
+  }, [shortname, variantId])
+
+  const statisticName = variantReleases[0]?.statistic?.name ?? ''
+  const statisticShortname = variantReleases[0]?.statistic?.shortname ?? ''
+  const variant = variantReleases[0]?.frequency?.name ?? ''
+  const approvalStatus = variantReleases[0]?.approval_status ?? ApprovalStatus.PENDING
 
   function renderReleasesTables() {
     return (
@@ -40,8 +63,7 @@ export default function CreateRelease() {
             Publiseringer på valgt dato
           </Tabs.Tab>
           <Tabs.Tab value='variant-releases'>
-            {/* TODO: MIM-2664: Implement on variant releases list table view */}
-            Alle publiseringer på (kortnavn), (variant)
+            Alle publiseringer på {statisticShortname}, {variant}
           </Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel className='p-0' value='selected-publish-date'>
@@ -66,9 +88,9 @@ export default function CreateRelease() {
           Meld publiseringsdato
         </Heading>
         <Heading data-size='xs' level={2}>
-          Statistikknavn (kortnavn) og variant
+          {statisticName} ({statisticShortname}) og {variant}
         </Heading>
-        <ApprovalStatusTag status={ApprovalStatus.PENDING} />
+        <ApprovalStatusTag status={approvalStatus} />
       </div>
       <ReleaseForm />
       {renderReleasesTables()}
