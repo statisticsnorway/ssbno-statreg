@@ -9,6 +9,23 @@ import { usePagination } from '@digdir/designsystemet-react'
 import '../views/ListReleases.css'
 import { useState, useEffect } from 'react'
 
+type ReleaseTableProps = {
+  releases: ReleaseListing[]
+  rowSelection?: ReactElement
+  pagination?: ReactElement
+}
+
+const TABLE_HEADER_CELLS = [
+  'Kortnavn',
+  'Statistikknavn',
+  'Variant',
+  'Måleperiodetittel',
+  'Målperiode fra',
+  'Måleperiode til',
+  'Publiseringsdato',
+  'Status',
+]
+
 type TruncatedTableCellProps = {
   value: string | undefined
   maxWidth?: string
@@ -47,23 +64,6 @@ function ReleaseRow({ release }: ReleaseRowProps) {
     </Table.Row>
   )
 }
-
-type ReleaseTableProps = {
-  releases: ReleaseListing[]
-  rowSelection?: ReactElement
-  pagination?: ReactElement
-}
-
-const TABLE_HEADER_CELLS = [
-  'Kortnavn',
-  'Statistikknavn',
-  'Variant',
-  'Måleperiodetittel',
-  'Målperiode fra',
-  'Måleperiode til',
-  'Publiseringsdato',
-  'Status',
-]
 
 export function ReleasesTable({ releases, rowSelection, pagination }: ReleaseTableProps) {
   return (
