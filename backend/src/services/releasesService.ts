@@ -87,8 +87,8 @@ export async function getReleases(
         id: release.id,
         publish_time: dateToISOString(release.publish_time),
         approval_status: release.desk_appoval_status,
-        period_to: dateToISOString(release.period_to),
-        period_from: dateToISOString(release.period_from),
+        period_to: getDateOnlyAsString(release.period_to),
+        period_from: getDateOnlyAsString(release.period_from),
         statistic: {
           shortname: statistic.shortname.name,
           name: statistic.name,

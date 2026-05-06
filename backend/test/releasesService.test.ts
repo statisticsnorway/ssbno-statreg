@@ -411,8 +411,8 @@ const mockedReleasesResult = [
     id: 101,
     publish_time: '2024-10-15T08:00:00.000Z',
     approval_status: 'APPROVED',
-    period_to: '2024-09-01T00:00:00.000Z',
-    period_from: '2024-08-01T00:00:00.000Z',
+    period_to: '2024-09-01',
+    period_from: '2024-08-01',
     frequency: {
       name: 'Måned',
       code: 'M',
@@ -427,8 +427,8 @@ const mockedReleasesResult = [
     id: 102,
     publish_time: '2025-04-30T08:00:00.000Z',
     approval_status: 'DRAFT',
-    period_to: '2024-12-31T00:00:00.000Z',
-    period_from: '2024-01-01T00:00:00.000Z',
+    period_to: '2024-12-31',
+    period_from: '2024-01-01',
     frequency: {
       name: 'År',
       code: 'Y',
