@@ -82,7 +82,7 @@ function CreateRelease() {
       }
     }
     fetchReleases()
-  }, [shortname, variantId])
+  }, [shortname, variantIdAsNumber])
 
   const statisticName = variantReleases[0]?.statistic?.name ?? ''
   const statisticShortname = variantReleases[0]?.statistic?.shortname ?? ''
