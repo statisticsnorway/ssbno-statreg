@@ -52,23 +52,9 @@ function CreateRelease() {
   const [releases, setReleases] = useState<ReleaseListing[]>([])
   const [variantReleases, setVariantReleases] = useState<ReleaseListing[]>([])
   const { shortname, variantId } = useParams()
+  const variantIdAsNumber = Number(variantId)
 
   useEffect(() => {
-    async function fetchVariantRelease() {
-      const { data, error } = await client.GET('/statistics/{shortname}/variants/{id}/releases', {
-        params: { path: { shortname: shortname as string, id: Number(variantId) } },
-      })
-      if (error) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const errorMessage = (error as any).error
-        console.log(errorMessage)
-        alert(errorMessage)
-      } else {
-        setVariantReleases(data?.releases ?? [])
-      }
-    }
-    fetchVariantRelease()
-
     async function fetchReleases() {
       const { data, error } = await client.GET('/releases', { params: { query: { start: 0, count: 10 } } })
       if (error) {
@@ -81,7 +67,24 @@ function CreateRelease() {
       }
     }
     fetchReleases()
-  }, [shortname, variantId])
+  }, [])
+
+  useEffect(() => {
+    async function fetchVariantRelease() {
+      const { data, error } = await client.GET('/statistics/{shortname}/variants/{id}/releases', {
+        params: { path: { shortname: shortname as string, id: variantIdAsNumber } },
+      })
+      if (error) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const errorMessage = (error as any).error
+        console.log(errorMessage)
+        alert(errorMessage)
+      } else {
+        setVariantReleases(data?.releases ?? [])
+      }
+    }
+    fetchVariantRelease()
+  }, [shortname, variantIdAsNumber])
 
   const statisticName = variantReleases[0]?.statistic?.name ?? ''
   const statisticShortname = variantReleases[0]?.statistic?.shortname ?? ''
@@ -99,7 +102,7 @@ function CreateRelease() {
         </Heading>
         <ApprovalStatusTag status={approvalStatus} />
       </div>
-      <ReleaseForm />
+      <ReleaseForm shortname={shortname as string} variantId={variantIdAsNumber} />
       <CreateReleaseTables
         releases={releases}
         variantReleases={variantReleases}
