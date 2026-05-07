@@ -16,11 +16,12 @@ import client from '../api'
 
 type CreateReleaseTablesProps = {
   releases: ReleaseListing[]
+  variantReleases: ReleaseListing[]
   shortname: string
   variant: string
 }
 
-function CreateReleaseTables({ releases, shortname, variant }: CreateReleaseTablesProps) {
+function CreateReleaseTables({ releases, variantReleases, shortname, variant }: CreateReleaseTablesProps) {
   return (
     <Tabs defaultValue='selected-publish-date' className='create-release-tables-tab'>
       <Tabs.List>
@@ -41,7 +42,7 @@ function CreateReleaseTables({ releases, shortname, variant }: CreateReleaseTabl
         <ReleasesTable releases={releases} />
       </Tabs.Panel>
       <Tabs.Panel className='p-0' value='variant-releases'>
-        TBA
+        <ReleasesTable releases={variantReleases} />
       </Tabs.Panel>
     </Tabs>
   )
@@ -100,7 +101,12 @@ function CreateRelease() {
         <ApprovalStatusTag status={approvalStatus} />
       </div>
       <ReleaseForm shortname={shortname as string} variantId={variantIdAsNumber} />
-      <CreateReleaseTables releases={releases} shortname={statisticShortname} variant={variant} />
+      <CreateReleaseTables
+        releases={releases}
+        variantReleases={variantReleases}
+        shortname={statisticShortname}
+        variant={variant}
+      />
     </>
   )
 }
