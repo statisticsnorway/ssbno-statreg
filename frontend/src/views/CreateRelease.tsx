@@ -55,6 +55,21 @@ function CreateRelease() {
   const variantIdAsNumber = Number(variantId)
 
   useEffect(() => {
+    async function fetchReleases() {
+      const { data, error } = await client.GET('/releases', { params: { query: { start: 0, count: 10 } } })
+      if (error) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const errorMessage = (error as any).error
+        console.log(errorMessage)
+        alert(errorMessage)
+      } else {
+        setReleases(data?.releases ?? [])
+      }
+    }
+    fetchReleases()
+  }, [])
+
+  useEffect(() => {
     async function fetchVariantRelease() {
       const { data, error } = await client.GET('/statistics/{shortname}/variants/{id}/releases', {
         params: { path: { shortname: shortname as string, id: variantIdAsNumber } },
@@ -69,19 +84,6 @@ function CreateRelease() {
       }
     }
     fetchVariantRelease()
-
-    async function fetchReleases() {
-      const { data, error } = await client.GET('/releases', { params: { query: { start: 0, count: 10 } } })
-      if (error) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const errorMessage = (error as any).error
-        console.log(errorMessage)
-        alert(errorMessage)
-      } else {
-        setReleases(data?.releases ?? [])
-      }
-    }
-    fetchReleases()
   }, [shortname, variantIdAsNumber])
 
   const statisticName = variantReleases[0]?.statistic?.name ?? ''
