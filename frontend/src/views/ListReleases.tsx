@@ -1,117 +1,27 @@
-import { useState, useEffect } from 'react'
-import { ReleasesTable } from '../components/ReleasesTable'
-import { Heading, Field, Label, Select, Pagination, usePagination, Button } from '@digdir/designsystemet-react'
+import { useState } from 'react'
+import { Heading, Button } from '@digdir/designsystemet-react'
 import { ArrowLeftIcon, ArrowRightIcon } from '@navikt/aksel-icons'
-import type { ReleaseListing } from '@ssbno-statreg/shared'
 import { DatePicker } from '../components/DatePicker'
+import { PaginatedReleaseTable, type FetchReleases } from '../components/ReleasesTable'
+import { getFirstDayOfNthMonth, getLastDayOfNthMonth } from '../lib/utils'
+import client from '../api'
 
 import './ListReleases.css'
-import client from '../api'
-import { getFirstDayOfNthMonth, getLastDayOfNthMonth } from '../lib/utils'
 
-const ROW_COUNT_OPTIONS = [10, 20, 50, 100]
-
-type ShowRowCountSelectProps = {
-  showRowCount: number
-  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void
-}
-
-function ShowRowCountSelect({ showRowCount, onChange }: ShowRowCountSelectProps) {
-  return (
-    <Field>
-      <Label>Vis antall rader</Label>
-      <Select defaultValue={showRowCount} onChange={onChange}>
-        {ROW_COUNT_OPTIONS.map((count) => (
-          <Select.Option key={count} value={String(count)}>
-            {count}
-          </Select.Option>
-        ))}
-      </Select>
-    </Field>
-  )
-}
-
-type ListReleasesTablePaginationProps = {
-  pages: ReturnType<typeof usePagination>['pages']
-  prevButtonProps: ReturnType<typeof usePagination>['prevButtonProps']
-  nextButtonProps: ReturnType<typeof usePagination>['nextButtonProps']
-  hasPrev: boolean
-  hasNext: boolean
-}
-
-function ListReleasesTablePagination({
-  pages,
-  prevButtonProps,
-  nextButtonProps,
-  hasPrev,
-  hasNext,
-}: ListReleasesTablePaginationProps) {
-  return (
-    <div style={{ display: 'flex', justifyContent: 'center', marginTop: 'var(--ds-size-18)' }}>
-      <Pagination aria-label='pagineringsmeny'>
-        <Pagination.List>
-          <Pagination.Item>
-            <Pagination.Button {...prevButtonProps} disabled={!hasPrev}>
-              Forrige
-            </Pagination.Button>
-          </Pagination.Item>
-          {pages.map(({ page, itemKey, buttonProps }) => (
-            <Pagination.Item key={itemKey}>
-              {typeof page === 'number' && (
-                <Pagination.Button aria-label={`Side ${page}`} {...buttonProps}>
-                  {page}
-                </Pagination.Button>
-              )}
-            </Pagination.Item>
-          ))}
-          <Pagination.Item>
-            <Pagination.Button {...nextButtonProps} disabled={!hasNext}>
-              Neste
-            </Pagination.Button>
-          </Pagination.Item>
-        </Pagination.List>
-      </Pagination>
-    </div>
-  )
-}
-
-// TODO use PaginatedReleaseTable component
-function ListReleases() {
-  const [releases, setReleases] = useState<ReleaseListing[]>([])
-  const [calendarMonth, setCalendarMonth] = useState(0)
-
-  const [showRowCount, setShowRowCount] = useState(10)
-  const [currentPage, setCurrentPage] = useState(1)
-  const [total, setTotal] = useState(0)
-
-  const { pages, prevButtonProps, nextButtonProps, hasNext, hasPrev } = usePagination({
-    currentPage,
-    setCurrentPage,
-    totalPages: Math.ceil(total / showRowCount),
-    showPages: 6,
-  })
-
-  useEffect(() => {
-    async function fetchReleases() {
-      const start = (currentPage - 1) * showRowCount
-      const { data, error } = await client.GET('/releases', { params: { query: { start, count: showRowCount } } })
-      if (error) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const errorMessage = (error as any).error
-        console.log(errorMessage)
-        alert(errorMessage)
-      } else {
-        setReleases(data?.releases ?? [])
-        setTotal(data.total ?? 0)
-      }
-    }
-    fetchReleases()
-  }, [currentPage, showRowCount])
-
-  function handleChangeShowRowCount(e: React.ChangeEvent<HTMLSelectElement>) {
-    setShowRowCount(Number(e.target.value))
-    setCurrentPage(1)
+const fetchAllReleases: FetchReleases = async ({ start, count }) => {
+  const { data, error } = await client.GET('/releases', { params: { query: { start, count } } })
+  if (error) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const errorMessage = (error as any).error
+    console.log(errorMessage)
+    alert(errorMessage)
+    return { releases: [], total: 0 }
   }
+  return { releases: data?.releases ?? [], total: data?.total ?? 0 }
+}
+
+function ListReleases() {
+  const [calendarMonth, setCalendarMonth] = useState(0)
 
   return (
     <>
@@ -144,20 +54,7 @@ function ListReleases() {
           />
         </div>
       </div>
-
-      <ReleasesTable
-        releases={releases}
-        rowSelection={<ShowRowCountSelect showRowCount={showRowCount} onChange={handleChangeShowRowCount} />}
-        pagination={
-          <ListReleasesTablePagination
-            pages={pages}
-            prevButtonProps={prevButtonProps}
-            nextButtonProps={nextButtonProps}
-            hasPrev={hasPrev}
-            hasNext={hasNext}
-          />
-        }
-      />
+      <PaginatedReleaseTable fetchReleases={fetchAllReleases} />
     </>
   )
 }

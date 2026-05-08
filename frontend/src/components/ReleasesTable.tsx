@@ -4,7 +4,7 @@ import { Table, Link } from '@digdir/designsystemet-react'
 import { type ReleaseListing } from '@ssbno-statreg/shared'
 import { ApprovalStatusBadge } from '../components/ApprovalStatus'
 import { formatPublishTime, formatDate } from '../lib/utils'
-import { ShowRowCountSelect, TablePagination } from './Pagination'
+import { ShowRowCountSelect, TablePagination } from './TablePagination'
 import { usePagination } from '@digdir/designsystemet-react'
 import '../views/ListReleases.css'
 import { useState, useEffect } from 'react'
@@ -98,12 +98,12 @@ export function ReleasesTable({ releases, rowSelection, pagination }: ReleaseTab
   )
 }
 
-type PaginatedReleases = {
+export type PaginatedReleases = {
   releases: ReleaseListing[]
   total: number
 }
 
-type FetchReleases = (args: { start: number; count: number }) => Promise<PaginatedReleases>
+export type FetchReleases = (args: { start: number; count: number }) => Promise<PaginatedReleases>
 
 function useReleases(fetchReleases: FetchReleases, start: number, count: number) {
   const [releases, setReleases] = useState<ReleaseListing[]>([])
