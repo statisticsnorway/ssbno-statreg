@@ -32,6 +32,7 @@ type CreateReleaseModalProps = {
   createdRelease: ReleaseDetails
 }
 
+// TODO: Modal does not re-open when closed for the first time
 function CreateReleaseModal({ openCreateReleaseModal, createdRelease }: CreateReleaseModalProps) {
   const { id, publish_time, variant, statistic } = createdRelease ?? {}
 
@@ -156,7 +157,7 @@ function CreateRelease() {
 
   const statisticName = variantReleases[0]?.statistic?.name ?? ''
   const statisticShortname = variantReleases[0]?.statistic?.shortname ?? ''
-  const variant = variantReleases[0]?.frequency?.name ?? ''
+  const variant = variantReleases[0]?.frequency?.name?.toLowerCase() ?? ''
   const approvalStatus = variantReleases[0]?.approval_status ?? ApprovalStatus.PENDING
 
   return (
