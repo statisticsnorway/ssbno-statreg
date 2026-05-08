@@ -4,7 +4,13 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'react-router'
 import { Heading, Tabs, Dialog, Paragraph, Button } from '@digdir/designsystemet-react'
 import { CalendarIcon } from '@navikt/aksel-icons'
-import { type ReleaseCreate, type ReleaseDetails, type ReleaseListing, ApprovalStatus } from '@ssbno-statreg/shared'
+import {
+  type ReleaseCreate,
+  type ReleaseDetails,
+  type ReleaseListing,
+  ApprovalStatus,
+  RevisionNames,
+} from '@ssbno-statreg/shared'
 
 import { formatDate, formatPublishTime } from '../lib/utils'
 import { ReleasesTable } from '../components/ReleasesTable'
@@ -21,8 +27,17 @@ type CreateReleaseTablesProps = {
   variant: string
 }
 
-function CreateReleaseModal({ openCreateReleaseModal, createdRelease }) {
-  const { publish_time, variant } = createdRelease
+type CreateReleaseModalProps = {
+  openCreateReleaseModal: boolean
+  createdRelease: ReleaseDetails
+}
+
+function CreateReleaseModal({ openCreateReleaseModal, createdRelease }: CreateReleaseModalProps) {
+  const { publish_time, variant } = createdRelease ?? {}
+  const frequency = variant?.frequency?.name
+  const revisionName = variant?.revision?.name ? RevisionNames[variant.revision.name as keyof typeof RevisionNames] : ''
+  const variantInformation = [frequency, revisionName].join(', ').toLowerCase()
+
   return (
     <Dialog id='create-release-modal' open={openCreateReleaseModal}>
       <Dialog.Block>
@@ -30,8 +45,7 @@ function CreateReleaseModal({ openCreateReleaseModal, createdRelease }) {
       </Dialog.Block>
       <Dialog.Block>
         <Paragraph>
-          {/* TODO: Fetch revision text */}
-          Datoen {formatPublishTime(publish_time)} er nå sendt inn for {variant?.frequency?.name}, {variant?.revision}
+          Datoen {formatPublishTime(publish_time)} er nå sendt inn for {variantInformation}
         </Paragraph>
       </Dialog.Block>
       <Dialog.Block>
