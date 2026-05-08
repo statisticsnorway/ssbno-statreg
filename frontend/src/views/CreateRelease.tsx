@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'react-router'
 import { Heading, Tabs } from '@digdir/designsystemet-react'
 import { CalendarIcon } from '@navikt/aksel-icons'
-import { type ReleaseListing, ApprovalStatus } from '@ssbno-statreg/shared'
+import { type ReleaseCreate, type ReleaseListing, ApprovalStatus } from '@ssbno-statreg/shared'
 
 import { formatDate } from '../lib/utils'
 import { ReleasesTable } from '../components/ReleasesTable'
@@ -86,6 +86,23 @@ function CreateRelease() {
     fetchVariantRelease()
   }, [shortname, variantIdAsNumber])
 
+  async function createRelease(body: ReleaseCreate) {
+    const { data, error } = await client.POST('/statistics/{shortname}/variants/{id}/releases', {
+      params: { path: { shortname: shortname as string, id: Number(variantId) } },
+      body,
+    })
+
+    if (error) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const errorMessage = (error as any).error
+      console.log(errorMessage)
+      alert(errorMessage)
+    } else {
+      // TODO: Implement Dialog for created release verification
+      alert('Release created: ' + JSON.stringify(data, null, 2))
+    }
+  }
+
   const statisticName = variantReleases[0]?.statistic?.name ?? ''
   const statisticShortname = variantReleases[0]?.statistic?.shortname ?? ''
   const variant = variantReleases[0]?.frequency?.name ?? ''
@@ -102,7 +119,7 @@ function CreateRelease() {
         </Heading>
         <ApprovalStatusTag status={approvalStatus} />
       </div>
-      <ReleaseForm shortname={shortname as string} variantId={variantIdAsNumber} />
+      <ReleaseForm onSubmitForm={createRelease} />
       <CreateReleaseTables
         releases={releases}
         variantReleases={variantReleases}
