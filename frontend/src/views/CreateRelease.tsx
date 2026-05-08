@@ -33,7 +33,8 @@ type CreateReleaseModalProps = {
 }
 
 function CreateReleaseModal({ openCreateReleaseModal, createdRelease }: CreateReleaseModalProps) {
-  const { publish_time, variant } = createdRelease ?? {}
+  const { id, publish_time, variant, statistic } = createdRelease ?? {}
+
   const frequency = variant?.frequency?.name
   const revisionName = variant?.revision?.name ? RevisionNames[variant.revision.name as keyof typeof RevisionNames] : ''
   const variantInformation = [frequency, revisionName].join(', ').toLowerCase()
@@ -56,11 +57,11 @@ function CreateReleaseModal({ openCreateReleaseModal, createdRelease }: CreateRe
             marginTop: 'var(--ds-size-4)',
           }}
         >
-          <Button variant='primary' command='close' commandfor='create-release-modal'>
-            Ok
+          <Button variant='primary' asChild>
+            <a href={`/statistikkregisteret/statistikk/${statistic?.shortname}`}>Ok</a>
           </Button>
-          <Button variant='tertiary' command='close' commandfor='create-release-modal'>
-            Se detaljer
+          <Button variant='tertiary' asChild>
+            <a href={`/statistikkregisteret/publisering/${id}`}>Se detaljer</a>
           </Button>
         </div>
       </Dialog.Block>
