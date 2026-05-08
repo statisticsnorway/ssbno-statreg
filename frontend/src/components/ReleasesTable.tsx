@@ -105,12 +105,31 @@ type PaginatedReleases = {
 
 type FetchReleases = (args: { start: number; count: number }) => Promise<PaginatedReleases>
 
-export function PaginatedReleaseTable({ fetchReleases }: { fetchReleases: FetchReleases }) {
+function useReleases(fetchReleases: FetchReleases, start: number, count: number) {
   const [releases, setReleases] = useState<ReleaseListing[]>([])
+  const [total, setTotal] = useState(0)
 
+  useEffect(() => {
+    fetchReleases({ start, count })
+      .then(({ releases, total }) => {
+        setReleases(releases)
+        setTotal(total)
+      })
+      .catch((err) => {
+        console.error(err)
+        alert('Failed to fetch releases')
+      })
+  }, [start, count])
+
+  return { releases, total }
+}
+
+export function PaginatedReleaseTable({ fetchReleases }: { fetchReleases: FetchReleases }) {
   const [showRowCount, setShowRowCount] = useState(10)
   const [currentPage, setCurrentPage] = useState(1)
-  const [total, setTotal] = useState(0)
+  const start = (currentPage - 1) * showRowCount
+
+  const { releases, total } = useReleases(fetchReleases, start, showRowCount)
 
   const { pages, prevButtonProps, nextButtonProps, hasNext, hasPrev } = usePagination({
     currentPage,
@@ -118,24 +137,6 @@ export function PaginatedReleaseTable({ fetchReleases }: { fetchReleases: FetchR
     totalPages: Math.ceil(total / showRowCount),
     showPages: 6,
   })
-
-  useEffect(() => {
-    async function loadReleases() {
-      const start = (currentPage - 1) * showRowCount
-      try {
-        const { releases, total } = await fetchReleases({
-          start,
-          count: showRowCount,
-        })
-        setReleases(releases)
-        setTotal(total)
-      } catch (err) {
-        console.error(err)
-        alert('Failed to fetch releases')
-      }
-    }
-    loadReleases()
-  }, [currentPage, showRowCount])
 
   function handleChangeShowRowCount(e: React.ChangeEvent<HTMLSelectElement>) {
     setShowRowCount(Number(e.target.value))
