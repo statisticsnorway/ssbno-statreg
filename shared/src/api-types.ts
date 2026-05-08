@@ -298,7 +298,10 @@ export interface paths {
       parameters: {
         query?: never
         header?: never
-        path?: never
+        path: {
+          shortname: string
+          id: number
+        }
         cookie?: never
       }
       requestBody: {
@@ -736,9 +739,9 @@ export interface components {
       readonly id?: number
       /** Format: date-time */
       publish_time?: string
-      /** Format: date-time */
+      /** Format: date */
       period_to?: string
-      /** Format: date-time */
+      /** Format: date */
       period_from?: string
     }
     Release_create: components['schemas']['Release'] & {

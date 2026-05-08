@@ -89,8 +89,8 @@ components:
       properties:
         id: { type: integer, readOnly: true }
         publish_time: { type: string, format: date-time }
-        period_to: { type: string, format: date-time }
-        period_from: { type: string, format: date-time }
+        period_to: { type: string, format: date }
+        period_from: { type: string, format: date }
 
     Release_create:
       allOf:
@@ -435,6 +435,17 @@ paths:
     post:
       summary: Create a new release
       tags: [statistics]
+      parameters:
+        - name: shortname
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
       requestBody:
         required: true
         content:

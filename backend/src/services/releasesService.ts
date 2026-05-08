@@ -5,7 +5,15 @@ import {
   type ReleaseListingResponse,
   ApprovalStatus,
 } from '@ssbno-statreg/shared'
-import { dateToISOString, sanitize, parseDateISO, parseId, ensureRequiredFieldsExists } from '@/lib/utils'
+import {
+  dateToISOString,
+  sanitize,
+  getDateOnlyAsString,
+  parseDateISO,
+  parseDateOnly,
+  parseId,
+  ensureRequiredFieldsExists,
+} from '@/lib/utils'
 import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
 import type { Prisma } from '@/generated/prisma/client'
 import { releaseAsserts } from '@/lib/asserts'
@@ -79,8 +87,8 @@ export async function getReleases(
         id: release.id,
         publish_time: dateToISOString(release.publish_time),
         approval_status: release.desk_appoval_status,
-        period_to: dateToISOString(release.period_to),
-        period_from: dateToISOString(release.period_from),
+        period_to: getDateOnlyAsString(release.period_to),
+        period_from: getDateOnlyAsString(release.period_from),
         statistic: {
           shortname: statistic.shortname.name,
           name: statistic.name,
@@ -239,8 +247,8 @@ export function parseReleaseInput(
   // TODO: Automatic suggestion of period_to and period_from is going to be solved in a seperate task
   return {
     publishTimeDate: parseDateISO(publish_time, 'publish_time'),
-    periodFromDate: parseDateISO(period_from, 'period_from'),
-    periodToDate: parseDateISO(period_to, 'period_to'),
+    periodFromDate: parseDateOnly(period_from, 'period_from'),
+    periodToDate: parseDateOnly(period_to, 'period_to'),
     releaseDatePrecision: sanitize(release_date_precision!),
     comment: safeComment,
   }
@@ -298,8 +306,8 @@ export function mapToReleaseDetails(
       name: statistic.name,
       name_en: statistic.name_en ?? '',
     },
-    period_from: dateToISOString(prismaRelease.period_from),
-    period_to: dateToISOString(prismaRelease.period_to),
+    period_from: getDateOnlyAsString(prismaRelease.period_from),
+    period_to: getDateOnlyAsString(prismaRelease.period_to),
     release_date_precision: prismaRelease.release_date_precision,
     cancelled: prismaRelease.cancelled,
   }
