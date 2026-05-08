@@ -30,10 +30,15 @@ type CreateReleaseTablesProps = {
 type CreateReleaseModalProps = {
   openCreateReleaseModal: boolean
   createdRelease: ReleaseDetails
+  setOpenCreateReleaseModal: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-// TODO: Modal does not re-open when closed for the first time
-function CreateReleaseModal({ openCreateReleaseModal, createdRelease }: CreateReleaseModalProps) {
+// TODO: Check if react-router has nice functions for page redirects
+function CreateReleaseModal({
+  openCreateReleaseModal,
+  createdRelease,
+  setOpenCreateReleaseModal,
+}: CreateReleaseModalProps) {
   const { id, publish_time, variant, statistic } = createdRelease ?? {}
 
   const frequency = variant?.frequency?.name
@@ -41,7 +46,7 @@ function CreateReleaseModal({ openCreateReleaseModal, createdRelease }: CreateRe
   const variantInformation = [frequency, revisionName].join(', ').toLowerCase()
 
   return (
-    <Dialog id='create-release-modal' open={openCreateReleaseModal}>
+    <Dialog id='create-release-modal' open={openCreateReleaseModal} onClose={() => setOpenCreateReleaseModal(false)}>
       <Dialog.Block>
         <Heading data-size='xs'>Publiseringsdato er registrert</Heading>
       </Dialog.Block>
@@ -172,7 +177,11 @@ function CreateRelease() {
         <ApprovalStatusTag status={approvalStatus} />
       </div>
       <ReleaseForm onFormSubmit={createRelease} />
-      <CreateReleaseModal openCreateReleaseModal={openCreateReleaseModal} createdRelease={createdRelease} />
+      <CreateReleaseModal
+        openCreateReleaseModal={openCreateReleaseModal}
+        createdRelease={createdRelease}
+        setOpenCreateReleaseModal={setOpenCreateReleaseModal}
+      />
       <CreateReleaseTables
         releases={releases}
         variantReleases={variantReleases}
