@@ -23,7 +23,7 @@ import type { ReleaseCreate } from '@ssbno-statreg/shared'
 const releaseDatePrecisions = ['Dag', 'Måned', 'År']
 
 type ReleaseFormProps = {
-  onSubmitForm: (body: ReleaseCreate) => Promise<void>
+  onFormSubmit: (body: ReleaseCreate) => Promise<void>
 }
 
 type ReleaseFormTypes = {
@@ -33,7 +33,7 @@ type ReleaseFormTypes = {
   periodTo?: string
 }
 
-export function ReleaseForm({ onSubmitForm }: ReleaseFormProps) {
+export function ReleaseForm({ onFormSubmit }: ReleaseFormProps) {
   const [values, setValues] = useState<ReleaseFormTypes>({
     dateType: '',
     publishTime: '',
@@ -94,7 +94,7 @@ export function ReleaseForm({ onSubmitForm }: ReleaseFormProps) {
 
     if (!validateFields()) return
 
-    onSubmitForm({
+    onFormSubmit({
       release_date_precision: values.dateType,
       publish_time: values.publishTime,
       period_from: values.periodFrom,

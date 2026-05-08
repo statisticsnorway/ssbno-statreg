@@ -119,7 +119,7 @@ function CreateRelease() {
         </Heading>
         <ApprovalStatusTag status={approvalStatus} />
       </div>
-      <ReleaseForm onSubmitForm={createRelease} />
+      <ReleaseForm onFormSubmit={createRelease} />
       <CreateReleaseTables
         releases={releases}
         variantReleases={variantReleases}
