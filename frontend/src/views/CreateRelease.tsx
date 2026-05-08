@@ -2,11 +2,11 @@ import './CreateRelease.css'
 
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router'
-import { Heading, Tabs } from '@digdir/designsystemet-react'
+import { Heading, Tabs, Dialog, Paragraph, Button } from '@digdir/designsystemet-react'
 import { CalendarIcon } from '@navikt/aksel-icons'
-import { type ReleaseCreate, type ReleaseListing, ApprovalStatus } from '@ssbno-statreg/shared'
+import { type ReleaseCreate, type ReleaseDetails, type ReleaseListing, ApprovalStatus } from '@ssbno-statreg/shared'
 
-import { formatDate } from '../lib/utils'
+import { formatDate, formatPublishTime } from '../lib/utils'
 import { ReleasesTable } from '../components/ReleasesTable'
 import { ReleaseForm } from '../components/ReleaseForm'
 import { DayStatusTag } from '../components/DayStatus'
@@ -19,6 +19,39 @@ type CreateReleaseTablesProps = {
   variantReleases: ReleaseListing[]
   shortname: string
   variant: string
+}
+
+function CreateReleaseModal({ openCreateReleaseModal, createdRelease }) {
+  const { publish_time, variant } = createdRelease
+  return (
+    <Dialog id='create-release-modal' open={openCreateReleaseModal}>
+      <Dialog.Block>
+        <Heading data-size='xs'>Publiseringsdato er registrert</Heading>
+      </Dialog.Block>
+      <Dialog.Block>
+        <Paragraph>
+          {/* TODO: Fetch revision text */}
+          Datoen {formatPublishTime(publish_time)} er nå sendt inn for {variant?.frequency?.name}, {variant?.revision}
+        </Paragraph>
+      </Dialog.Block>
+      <Dialog.Block>
+        <div
+          style={{
+            display: 'flex',
+            gap: 'var(--ds-size-4)',
+            marginTop: 'var(--ds-size-4)',
+          }}
+        >
+          <Button variant='primary' command='close' commandfor='create-release-modal'>
+            Ok
+          </Button>
+          <Button variant='tertiary' command='close' commandfor='create-release-modal'>
+            Se detaljer
+          </Button>
+        </div>
+      </Dialog.Block>
+    </Dialog>
+  )
 }
 
 function CreateReleaseTables({ releases, variantReleases, shortname, variant }: CreateReleaseTablesProps) {
@@ -51,6 +84,9 @@ function CreateReleaseTables({ releases, variantReleases, shortname, variant }: 
 function CreateRelease() {
   const [releases, setReleases] = useState<ReleaseListing[]>([])
   const [variantReleases, setVariantReleases] = useState<ReleaseListing[]>([])
+  const [openCreateReleaseModal, setOpenCreateReleaseModal] = useState(false)
+  const [createdRelease, setCreatedRelease] = useState<ReleaseDetails>({})
+
   const { shortname, variantId } = useParams()
   const variantIdAsNumber = Number(variantId)
 
@@ -98,8 +134,8 @@ function CreateRelease() {
       console.log(errorMessage)
       alert(errorMessage)
     } else {
-      // TODO: Implement Dialog for created release verification
-      alert('Release created: ' + JSON.stringify(data, null, 2))
+      setOpenCreateReleaseModal(true)
+      setCreatedRelease(data)
     }
   }
 
@@ -120,6 +156,7 @@ function CreateRelease() {
         <ApprovalStatusTag status={approvalStatus} />
       </div>
       <ReleaseForm onFormSubmit={createRelease} />
+      <CreateReleaseModal openCreateReleaseModal={openCreateReleaseModal} createdRelease={createdRelease} />
       <CreateReleaseTables
         releases={releases}
         variantReleases={variantReleases}
