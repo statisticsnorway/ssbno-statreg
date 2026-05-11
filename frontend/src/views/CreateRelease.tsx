@@ -136,7 +136,7 @@ function CreateRelease() {
         </Heading>
         <ApprovalStatusTag status={approvalStatus} />
       </div>
-      <ReleaseForm onFormSubmit={createRelease} />
+      <ReleaseForm onFormSubmit={createRelease} shortname={shortname as string} />
       <ReleaseFormModal
         modalHeading='Publiseringsdato er registrert'
         modalDescription={`Datoen ${formatPublishTime(createdRelease?.publish_time)} er nå sendt inn for ${variantInformation}.`}

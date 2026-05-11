@@ -32,9 +32,10 @@ type ReleaseFormTypes = {
 
 type ReleaseFormProps = {
   onFormSubmit: (body: ReleaseCreate) => Promise<void>
+  shortname: string
 }
 
-export function ReleaseForm({ onFormSubmit }: ReleaseFormProps) {
+export function ReleaseForm({ onFormSubmit, shortname }: ReleaseFormProps) {
   const [values, setValues] = useState<ReleaseFormTypes>({
     dateType: '',
     publishTime: '',
