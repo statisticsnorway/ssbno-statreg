@@ -230,11 +230,11 @@ describe('calendarService  ', () => {
 const calendar_date_result = [
   {
     blocked_comment: 'Julaften',
-    date: '2026-12-24T00:00:00.000Z',
+    date: '2026-12-24',
   },
   {
     blocked_comment: 'Nyttårsaften',
-    date: '2026-12-31T00:00:00.000Z',
+    date: '2026-12-31',
   },
 ]
 
