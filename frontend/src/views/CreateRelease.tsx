@@ -1,7 +1,7 @@
 import './CreateRelease.css'
 
 import { useState, useEffect } from 'react'
-import { useParams } from 'react-router'
+import { useParams, Link as ReactRouterLink } from 'react-router'
 import { Heading, Tabs, Dialog, Paragraph, Button } from '@digdir/designsystemet-react'
 import { CalendarIcon } from '@navikt/aksel-icons'
 import {
@@ -33,7 +33,6 @@ type CreateReleaseModalProps = {
   setOpenCreateReleaseModal: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-// TODO: Check if react-router has nice functions for page redirects
 function CreateReleaseModal({
   openCreateReleaseModal,
   createdRelease,
@@ -64,10 +63,10 @@ function CreateReleaseModal({
           }}
         >
           <Button variant='primary' asChild>
-            <a href={`/statistikkregisteret/statistikk/${statistic?.shortname}`}>Ok</a>
+            <ReactRouterLink to={`/statistikk/${statistic?.shortname}`}>Ok</ReactRouterLink>
           </Button>
           <Button variant='tertiary' asChild>
-            <a href={`/statistikkregisteret/publisering/${id}`}>Se detaljer</a>
+            <ReactRouterLink to={`/publisering/${id}`}>Se detaljer</ReactRouterLink>
           </Button>
         </div>
       </Dialog.Block>
