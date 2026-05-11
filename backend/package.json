@@ -33,7 +33,7 @@
     "lightship": "^9.0.4",
     "swagger-ui-express": "^5.0.1",
     "tsx": "^4.21.0",
-    "yaml": "^2.8.4"
+    "yaml": "^2.9.0"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
