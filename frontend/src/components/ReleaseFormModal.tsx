@@ -26,8 +26,6 @@ export default function ReleaseFormModal({
       </Dialog.Block>
       <Dialog.Block>
         <Paragraph>{modalDescription}</Paragraph>
-      </Dialog.Block>
-      <Dialog.Block>
         <div style={{ display: 'flex', gap: 'var(--ds-size-4)', marginTop: ' var(--ds-size-4)' }}>
           <Button variant='primary' asChild>
             <ReactRouterLink to={`/statistikk/${statistic?.shortname}`} reloadDocument>
