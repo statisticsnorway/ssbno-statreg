@@ -31,8 +31,9 @@ components:
   schemas:
     Blocked_release_date:
       type: object
+      example: {date: "2026-12-24", blocked_comment: "Christmas eve"}
       properties:
-        date: { type: string, format: date-time }
+        date: { type: string, format: date }
         blocked_comment: { type: string }
 
     Calender_date:
