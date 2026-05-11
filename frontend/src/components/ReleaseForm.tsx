@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link as ReactRouterLink } from 'react-router'
 import {
   Paragraph,
   Select,
@@ -95,9 +96,9 @@ export function ReleaseForm({ shortname, variantId }: ReleaseFormProps) {
     const nextErrors: ReleaseFormTypes = {}
 
     if (!values.dateType) nextErrors.dateType = 'Velg en datotype for publisering'
-    if (!values.publishTime) nextErrors.publishTime = 'Velg en publiseringsdato'
-    if (!values.periodFrom) nextErrors.periodFrom = 'Velg en fra-dato'
-    if (!values.periodTo) nextErrors.periodTo = 'Velg en til-dato'
+    if (!values.publishTime) nextErrors.publishTime = 'Opprett en gyldig publiseringsdato'
+    if (!values.periodFrom) nextErrors.periodFrom = 'Opprett en gyldig fra-dato'
+    if (!values.periodTo) nextErrors.periodTo = 'Opprett en gyldig til-dato'
 
     // TODO: MIM-2582: Review comparison logic, error messages, and implement onChange
     if (periodFromDate && periodToDate && periodFromDate > periodToDate) {
@@ -192,7 +193,11 @@ export function ReleaseForm({ shortname, variantId }: ReleaseFormProps) {
 
       <div style={{ display: 'flex', gap: 'var(--ds-size-3)' }}>
         <Button type='submit'>Meld dato</Button>
-        <Button variant='tertiary'>Avbryt</Button>
+        <Button variant='tertiary' asChild>
+          <ReactRouterLink to={`/statistikk/${shortname}`} reloadDocument>
+            Avbryt
+          </ReactRouterLink>
+        </Button>
       </div>
 
       {Object.values(errors).some(Boolean) && (
