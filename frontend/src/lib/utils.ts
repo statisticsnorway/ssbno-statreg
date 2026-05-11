@@ -37,8 +37,19 @@ export function getLastDayOfNthMonth(monthsAhead: number): Date {
   return to
 }
 
-// Duplicate of a backend utils function; unit tests exist there already
+// TODO: Add unit tests
 export function getDateOnlyAsString(date: Date | undefined): string {
   if (!date) return ''
-  return date.toISOString().slice(0, 10)
+
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+
+  return `${year}-${month}-${day}`
+}
+
+export function parsePublishDateWithTime(publishTime: Date | undefined): string {
+  if (!publishTime) return ''
+  publishTime.setHours(8, 0, 0, 0)
+  return publishTime.toISOString()
 }

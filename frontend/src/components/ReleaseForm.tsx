@@ -12,9 +12,22 @@ import {
 } from '@digdir/designsystemet-react'
 import { DatePicker as AkselDatePicker, useDatepicker } from '@navikt/ds-react/DatePicker'
 import { DatePicker } from './DatePicker'
-import { getDateOnlyAsString, getFirstDayOfNthMonth, getLastDayOfNthMonth } from '../lib/utils'
+import {
+  getDateOnlyAsString,
+  getFirstDayOfNthMonth,
+  getLastDayOfNthMonth,
+  parsePublishDateWithTime,
+} from '../lib/utils'
+
+import client from '../api'
+import type { ReleaseCreate } from '@ssbno-statreg/shared'
 
 const releaseDatePrecisions = ['Dag', 'Måned', 'År']
+
+type ReleaseFormProps = {
+  shortname: string
+  variantId: number
+}
 
 type ReleaseFormTypes = {
   dateType?: string
@@ -23,7 +36,24 @@ type ReleaseFormTypes = {
   periodTo?: string
 }
 
-export function ReleaseForm() {
+async function createRelease(shortname: string, variantId: number, body: ReleaseCreate) {
+  const { data, error } = await client.POST('/statistics/{shortname}/variants/{id}/releases', {
+    params: { path: { shortname, id: variantId } },
+    body,
+  })
+
+  if (error) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const errorMessage = (error as any).error
+    console.log(errorMessage)
+    alert(errorMessage)
+  } else {
+    // TODO: Implement Dialog for created release verification
+    alert('Release created: ' + JSON.stringify(data, null, 2))
+  }
+}
+
+export function ReleaseForm({ shortname, variantId }: ReleaseFormProps) {
   const [values, setValues] = useState<ReleaseFormTypes>({
     dateType: '',
     publishTime: '',
@@ -42,7 +72,7 @@ export function ReleaseForm() {
   // TODO: Add validation for Date inputs; it's currently allowed to write anything on the fields
   const { datepickerProps: publishTimePickerProps, inputProps: publishTimeInputProps } = useDatepicker({
     onDateChange: (publishTime) => {
-      setValues((values) => ({ ...values, publishTime: getDateOnlyAsString(publishTime) }))
+      setValues((values) => ({ ...values, publishTime: parsePublishDateWithTime(publishTime) }))
       setErrors((errors) => ({ ...errors, publishTime: '' }))
     },
   })
@@ -69,7 +99,7 @@ export function ReleaseForm() {
     if (!values.periodFrom) nextErrors.periodFrom = 'Velg en fra-dato'
     if (!values.periodTo) nextErrors.periodTo = 'Velg en til-dato'
 
-    // TODO: Review error messages and implement onChange
+    // TODO: MIM-2582: Review comparison logic, error messages, and implement onChange
     if (periodFromDate && periodToDate && periodFromDate > periodToDate) {
       nextErrors.periodFrom = 'Fra-dato kan ikke være etter til-dato'
       nextErrors.periodTo = 'Til-dato kan ikke være før fra-dato'
@@ -84,12 +114,11 @@ export function ReleaseForm() {
 
     if (!validateFields()) return
 
-    // TODO: Replace with POST logic
-    console.log({
-      dateType: values.dateType,
-      publishTime: values.publishTime,
-      periodFrom: values.periodFrom,
-      periodTo: values.periodTo,
+    createRelease(shortname, variantId, {
+      release_date_precision: values.dateType,
+      publish_time: values.publishTime,
+      period_from: values.periodFrom,
+      period_to: values.periodTo,
     })
   }
 
@@ -126,6 +155,7 @@ export function ReleaseForm() {
           For kortere frister, kontakt mmj@ssb.no.
         </Field.Description>
         <Input id='publishTime' size={10} {...publishTimeInputProps} aria-invalid={!!errors.publishTime} />
+        {/* TODO: Disable blocked days */}
         <DatePicker
           fromDate={getFirstDayOfNthMonth(0)}
           toDate={getLastDayOfNthMonth(0)}
