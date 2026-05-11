@@ -55,13 +55,7 @@ function CreateReleaseModal({
         </Paragraph>
       </Dialog.Block>
       <Dialog.Block>
-        <div
-          style={{
-            display: 'flex',
-            gap: 'var(--ds-size-4)',
-            marginTop: 'var(--ds-size-4)',
-          }}
-        >
+        <div className='create-realease-modal-button-wrapper '>
           <Button variant='primary' asChild>
             <ReactRouterLink to={`/statistikk/${statistic?.shortname}`}>Ok</ReactRouterLink>
           </Button>
