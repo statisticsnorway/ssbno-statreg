@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link as ReactRouterLink } from 'react-router'
 import {
   Paragraph,
   Select,
@@ -9,6 +10,8 @@ import {
   Input,
   ValidationMessage,
   ErrorSummary,
+  Heading,
+  Dialog,
 } from '@digdir/designsystemet-react'
 import { DatePicker as AkselDatePicker, useDatepicker } from '@navikt/ds-react/DatePicker'
 import { DatePicker } from './DatePicker'
@@ -18,12 +21,17 @@ import {
   getLastDayOfNthMonth,
   parsePublishDateWithTime,
 } from '../lib/utils'
-import type { ReleaseCreate } from '@ssbno-statreg/shared'
+import { type ReleaseCreate, type ReleaseDetails } from '@ssbno-statreg/shared'
 
 const releaseDatePrecisions = ['Dag', 'Måned', 'År']
 
 type ReleaseFormProps = {
   onFormSubmit: (body: ReleaseCreate) => Promise<void>
+  modalHeading: string
+  modalDescription: string
+  openCreateReleaseModal: boolean
+  createdRelease: ReleaseDetails
+  setOpenCreateReleaseModal: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 type ReleaseFormTypes = {
@@ -33,7 +41,45 @@ type ReleaseFormTypes = {
   periodTo?: string
 }
 
-export function ReleaseForm({ onFormSubmit }: ReleaseFormProps) {
+function ReleaseFormModal({
+  modalHeading,
+  modalDescription,
+  openCreateReleaseModal,
+  createdRelease,
+  setOpenCreateReleaseModal,
+}: Omit<ReleaseFormProps, 'onFormSubmit'>) {
+  const { id, statistic } = createdRelease ?? {}
+
+  return (
+    <Dialog id='create-release-modal' open={openCreateReleaseModal} onClose={() => setOpenCreateReleaseModal(false)}>
+      <Dialog.Block>
+        <Heading data-size='xs'>{modalHeading}</Heading>
+      </Dialog.Block>
+      <Dialog.Block>
+        <Paragraph>{modalDescription}</Paragraph>
+      </Dialog.Block>
+      <Dialog.Block>
+        <div style={{ display: 'flex', gap: 'var(--ds-size-4)', marginTop: ' var(--ds-size-4)' }}>
+          <Button variant='primary' asChild>
+            <ReactRouterLink to={`/statistikk/${statistic?.shortname}`}>Ok</ReactRouterLink>
+          </Button>
+          <Button variant='tertiary' asChild>
+            <ReactRouterLink to={`/publisering/${id}`}>Se detaljer</ReactRouterLink>
+          </Button>
+        </div>
+      </Dialog.Block>
+    </Dialog>
+  )
+}
+
+export function ReleaseForm({
+  onFormSubmit,
+  modalHeading,
+  modalDescription,
+  openCreateReleaseModal,
+  createdRelease,
+  setOpenCreateReleaseModal,
+}: ReleaseFormProps) {
   const [values, setValues] = useState<ReleaseFormTypes>({
     dateType: '',
     publishTime: '',
@@ -103,94 +149,103 @@ export function ReleaseForm({ onFormSubmit }: ReleaseFormProps) {
   }
 
   return (
-    <form onSubmit={handleOnSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--ds-size-12)' }}>
-      <Field>
-        <Paragraph style={{ marginBottom: 'var(--ds-size-8)' }}>Alle felter må fylles ut</Paragraph>
-        <Label>Datotype for publisering</Label>
-        <Select
-          id='dateType'
-          value={values.dateType}
-          onChange={(e) => {
-            setValues((values) => ({ ...values, dateType: e.target.value }))
-            setErrors((errors) => ({ ...errors, dateType: '' }))
-          }}
-          aria-invalid={!!errors.dateType}
-        >
-          <Select.Option value='' disabled>
-            Velg datotype
-          </Select.Option>
-          {releaseDatePrecisions.map((precision) => (
-            <Select.Option key={precision} value={precision}>
-              {precision}
+    <>
+      <form onSubmit={handleOnSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--ds-size-12)' }}>
+        <Field>
+          <Paragraph style={{ marginBottom: 'var(--ds-size-8)' }}>Alle felter må fylles ut</Paragraph>
+          <Label>Datotype for publisering</Label>
+          <Select
+            id='dateType'
+            value={values.dateType}
+            onChange={(e) => {
+              setValues((values) => ({ ...values, dateType: e.target.value }))
+              setErrors((errors) => ({ ...errors, dateType: '' }))
+            }}
+            aria-invalid={!!errors.dateType}
+          >
+            <Select.Option value='' disabled>
+              Velg datotype
             </Select.Option>
-          ))}
-        </Select>
-        {errors.dateType && <ValidationMessage>{errors.dateType}</ValidationMessage>}
-      </Field>
+            {releaseDatePrecisions.map((precision) => (
+              <Select.Option key={precision} value={precision}>
+                {precision}
+              </Select.Option>
+            ))}
+          </Select>
+          {errors.dateType && <ValidationMessage>{errors.dateType}</ValidationMessage>}
+        </Field>
 
-      <Field>
-        <Label>Publiseringsdato</Label>
-        <Field.Description>
-          Nye datoer og endringer må meldes minst 3 måneder i forveien. <br />
-          For kortere frister, kontakt mmj@ssb.no.
-        </Field.Description>
-        <Input id='publishTime' size={10} {...publishTimeInputProps} aria-invalid={!!errors.publishTime} />
-        {/* TODO: Disable blocked days */}
-        <DatePicker
-          fromDate={getFirstDayOfNthMonth(0)}
-          toDate={getLastDayOfNthMonth(0)}
-          showColorCodingExplanation
-          {...publishTimePickerProps}
-        />
-        {errors.publishTime && <ValidationMessage>{errors.publishTime}</ValidationMessage>}
-      </Field>
+        <Field>
+          <Label>Publiseringsdato</Label>
+          <Field.Description>
+            Nye datoer og endringer må meldes minst 3 måneder i forveien. <br />
+            For kortere frister, kontakt mmj@ssb.no.
+          </Field.Description>
+          <Input id='publishTime' size={10} {...publishTimeInputProps} aria-invalid={!!errors.publishTime} />
+          {/* TODO: Disable blocked days */}
+          <DatePicker
+            fromDate={getFirstDayOfNthMonth(0)}
+            toDate={getLastDayOfNthMonth(0)}
+            showColorCodingExplanation
+            {...publishTimePickerProps}
+          />
+          {errors.publishTime && <ValidationMessage>{errors.publishTime}</ValidationMessage>}
+        </Field>
 
-      <Fieldset>
-        <div style={{ display: 'flex', gap: 'var(--ds-size-12)' }}>
-          <Field>
-            <Label>Måleperiode fra</Label>
-            <AkselDatePicker {...periodFromPickerProps}>
-              <AkselDatePicker.Input
-                id='periodFrom'
-                {...periodFromInputProps}
-                aria-invalid={!!errors.periodFrom}
-                label
-              />
-            </AkselDatePicker>
-            {errors.periodFrom && <ValidationMessage>{errors.periodFrom}</ValidationMessage>}
-          </Field>
+        <Fieldset>
+          <div style={{ display: 'flex', gap: 'var(--ds-size-12)' }}>
+            <Field>
+              <Label>Måleperiode fra</Label>
+              <AkselDatePicker {...periodFromPickerProps}>
+                <AkselDatePicker.Input
+                  id='periodFrom'
+                  {...periodFromInputProps}
+                  aria-invalid={!!errors.periodFrom}
+                  label
+                />
+              </AkselDatePicker>
+              {errors.periodFrom && <ValidationMessage>{errors.periodFrom}</ValidationMessage>}
+            </Field>
 
-          <Field>
-            <Label>Måleperiode til</Label>
-            <AkselDatePicker {...periodToPickerProps}>
-              <AkselDatePicker.Input id='periodTo' {...periodToInputProps} aria-invalid={!!errors.periodTo} label />
-            </AkselDatePicker>
-            {errors.periodTo && <ValidationMessage>{errors.periodTo}</ValidationMessage>}
-          </Field>
+            <Field>
+              <Label>Måleperiode til</Label>
+              <AkselDatePicker {...periodToPickerProps}>
+                <AkselDatePicker.Input id='periodTo' {...periodToInputProps} aria-invalid={!!errors.periodTo} label />
+              </AkselDatePicker>
+              {errors.periodTo && <ValidationMessage>{errors.periodTo}</ValidationMessage>}
+            </Field>
+          </div>
+        </Fieldset>
+
+        <div style={{ display: 'flex', gap: 'var(--ds-size-3)' }}>
+          <Button type='submit'>Meld dato</Button>
+          <Button variant='tertiary'>Avbryt</Button>
         </div>
-      </Fieldset>
 
-      <div style={{ display: 'flex', gap: 'var(--ds-size-3)' }}>
-        <Button type='submit'>Meld dato</Button>
-        <Button variant='tertiary'>Avbryt</Button>
-      </div>
-
-      {Object.values(errors).some(Boolean) && (
-        <ErrorSummary>
-          <ErrorSummary.Heading>For å gå videre må du rette opp følgende feil:</ErrorSummary.Heading>
-          <ErrorSummary.List>
-            {Object.entries(errors).map(([key, message]) => {
-              if (message) {
-                return (
-                  <ErrorSummary.Item key={message}>
-                    <ErrorSummary.Link href={`#${key}`}>{message}</ErrorSummary.Link>
-                  </ErrorSummary.Item>
-                )
-              }
-            })}
-          </ErrorSummary.List>
-        </ErrorSummary>
-      )}
-    </form>
+        {Object.values(errors).some(Boolean) && (
+          <ErrorSummary>
+            <ErrorSummary.Heading>For å gå videre må du rette opp følgende feil:</ErrorSummary.Heading>
+            <ErrorSummary.List>
+              {Object.entries(errors).map(([key, message]) => {
+                if (message) {
+                  return (
+                    <ErrorSummary.Item key={message}>
+                      <ErrorSummary.Link href={`#${key}`}>{message}</ErrorSummary.Link>
+                    </ErrorSummary.Item>
+                  )
+                }
+              })}
+            </ErrorSummary.List>
+          </ErrorSummary>
+        )}
+      </form>
+      <ReleaseFormModal
+        modalHeading={modalHeading}
+        modalDescription={modalDescription}
+        openCreateReleaseModal={openCreateReleaseModal}
+        createdRelease={createdRelease}
+        setOpenCreateReleaseModal={setOpenCreateReleaseModal}
+      />
+    </>
   )
 }

@@ -16,9 +16,3 @@
     justify-content: space-between;
   }
 }
-
-.create-realease-modal-button-wrapper {
-  display: flex;
-  gap: var(--ds-size-4);
-  margin-top: var(--ds-size-4);
-}

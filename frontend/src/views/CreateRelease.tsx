@@ -1,8 +1,8 @@
 import './CreateRelease.css'
 
 import { useState, useEffect } from 'react'
-import { useParams, Link as ReactRouterLink } from 'react-router'
-import { Heading, Tabs, Dialog, Paragraph, Button } from '@digdir/designsystemet-react'
+import { useParams } from 'react-router'
+import { Heading, Tabs } from '@digdir/designsystemet-react'
 import { CalendarIcon } from '@navikt/aksel-icons'
 import {
   type ReleaseCreate,
@@ -25,47 +25,6 @@ type CreateReleaseTablesProps = {
   variantReleases: ReleaseListing[]
   shortname: string
   variant: string
-}
-
-type CreateReleaseModalProps = {
-  openCreateReleaseModal: boolean
-  createdRelease: ReleaseDetails
-  setOpenCreateReleaseModal: React.Dispatch<React.SetStateAction<boolean>>
-}
-
-function CreateReleaseModal({
-  openCreateReleaseModal,
-  createdRelease,
-  setOpenCreateReleaseModal,
-}: CreateReleaseModalProps) {
-  const { id, publish_time, variant, statistic } = createdRelease ?? {}
-
-  const frequency = variant?.frequency?.name
-  const revisionName = variant?.revision?.name ? RevisionNames[variant.revision.name as keyof typeof RevisionNames] : ''
-  const variantInformation = [frequency, revisionName].join(', ').toLowerCase()
-
-  return (
-    <Dialog id='create-release-modal' open={openCreateReleaseModal} onClose={() => setOpenCreateReleaseModal(false)}>
-      <Dialog.Block>
-        <Heading data-size='xs'>Publiseringsdato er registrert</Heading>
-      </Dialog.Block>
-      <Dialog.Block>
-        <Paragraph>
-          Datoen {formatPublishTime(publish_time)} er nå sendt inn for {variantInformation}
-        </Paragraph>
-      </Dialog.Block>
-      <Dialog.Block>
-        <div className='create-realease-modal-button-wrapper '>
-          <Button variant='primary' asChild>
-            <ReactRouterLink to={`/statistikk/${statistic?.shortname}`}>Ok</ReactRouterLink>
-          </Button>
-          <Button variant='tertiary' asChild>
-            <ReactRouterLink to={`/publisering/${id}`}>Se detaljer</ReactRouterLink>
-          </Button>
-        </div>
-      </Dialog.Block>
-    </Dialog>
-  )
 }
 
 function CreateReleaseTables({ releases, variantReleases, shortname, variant }: CreateReleaseTablesProps) {
@@ -158,6 +117,13 @@ function CreateRelease() {
   const variant = variantReleases[0]?.frequency?.name?.toLowerCase() ?? ''
   const approvalStatus = variantReleases[0]?.approval_status ?? ApprovalStatus.PENDING
 
+  const createdReleaseVariant = createdRelease?.variant
+  const createdReleaseFrequency = createdReleaseVariant?.frequency?.name
+  const createdReleaseRevisionName = createdReleaseVariant?.revision?.name
+    ? RevisionNames[createdReleaseVariant?.revision.name as keyof typeof RevisionNames]
+    : ''
+  const variantInformation = [createdReleaseFrequency, createdReleaseRevisionName].join(', ').toLowerCase()
+
   return (
     <>
       <div className='release-description-wrapper'>
@@ -169,8 +135,10 @@ function CreateRelease() {
         </Heading>
         <ApprovalStatusTag status={approvalStatus} />
       </div>
-      <ReleaseForm onFormSubmit={createRelease} />
-      <CreateReleaseModal
+      <ReleaseForm
+        onFormSubmit={createRelease}
+        modalHeading='Publiseringsdato er registrert'
+        modalDescription={`Datoen ${formatPublishTime(createdRelease?.publish_time)} er nå sendt inn for ${variantInformation}`}
         openCreateReleaseModal={openCreateReleaseModal}
         createdRelease={createdRelease}
         setOpenCreateReleaseModal={setOpenCreateReleaseModal}
