@@ -95,9 +95,9 @@ export function ReleaseForm({ shortname, variantId }: ReleaseFormProps) {
     const nextErrors: ReleaseFormTypes = {}
 
     if (!values.dateType) nextErrors.dateType = 'Velg en datotype for publisering'
-    if (!values.publishTime) nextErrors.publishTime = 'Velg en publiseringsdato'
-    if (!values.periodFrom) nextErrors.periodFrom = 'Velg en fra-dato'
-    if (!values.periodTo) nextErrors.periodTo = 'Velg en til-dato'
+    if (!values.publishTime) nextErrors.publishTime = 'Opprett en gyldig publiseringsdato'
+    if (!values.periodFrom) nextErrors.periodFrom = 'Opprett en gyldig fra-dato'
+    if (!values.periodTo) nextErrors.periodTo = 'Opprett en gyldig til-dato'
 
     // TODO: MIM-2582: Review comparison logic, error messages, and implement onChange
     if (periodFromDate && periodToDate && periodFromDate > periodToDate) {
