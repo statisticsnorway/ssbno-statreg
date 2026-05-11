@@ -491,7 +491,9 @@ paths:
         - in: query
           name: shortname
           schema:
-            type: string
+            type: array
+            items:
+              type: string
         - in: query
           name: publish_time
           schema:

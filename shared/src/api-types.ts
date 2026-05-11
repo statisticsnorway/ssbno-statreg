@@ -377,7 +377,7 @@ export interface paths {
         query?: {
           start?: number
           count?: number
-          shortname?: string
+          shortname?: string[]
           publish_time?: string
         }
         header?: never
