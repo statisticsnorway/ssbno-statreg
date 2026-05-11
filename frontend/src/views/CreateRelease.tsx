@@ -139,7 +139,7 @@ function CreateRelease() {
       <ReleaseForm onFormSubmit={createRelease} />
       <ReleaseFormModal
         modalHeading='Publiseringsdato er registrert'
-        modalDescription={`Datoen ${formatPublishTime(createdRelease?.publish_time)} er nå sendt inn for ${variantInformation}`}
+        modalDescription={`Datoen ${formatPublishTime(createdRelease?.publish_time)} er nå sendt inn for ${variantInformation}.`}
         openCreateReleaseModal={openCreateReleaseModal}
         createdRelease={createdRelease}
         setOpenCreateReleaseModal={setOpenCreateReleaseModal}
