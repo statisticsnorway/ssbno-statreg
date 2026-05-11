@@ -2,7 +2,7 @@ import { Link as ReactRouterLink } from 'react-router'
 import { Paragraph, Button, Heading, Dialog } from '@digdir/designsystemet-react'
 import { type ReleaseDetails } from '@ssbno-statreg/shared'
 
-type ReleaseFormProps = {
+type ReleaseFormModalProps = {
   modalHeading: string
   modalDescription: string
   openCreateReleaseModal: boolean
@@ -16,7 +16,7 @@ export default function ReleaseFormModal({
   openCreateReleaseModal,
   createdRelease,
   setOpenCreateReleaseModal,
-}: Omit<ReleaseFormProps, 'onFormSubmit'>) {
+}: ReleaseFormModalProps) {
   const { id, statistic } = createdRelease ?? {}
 
   return (
