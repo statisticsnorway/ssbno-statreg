@@ -19,6 +19,7 @@ import { DayStatusTag } from '../components/DayStatus'
 import { ApprovalStatusTag } from '../components/ApprovalStatus'
 
 import client from '../api'
+import ReleaseFormModal from '../components/ReleaseFormModal'
 
 type CreateReleaseTablesProps = {
   releases: ReleaseListing[]
@@ -135,8 +136,8 @@ function CreateRelease() {
         </Heading>
         <ApprovalStatusTag status={approvalStatus} />
       </div>
-      <ReleaseForm
-        onFormSubmit={createRelease}
+      <ReleaseForm onFormSubmit={createRelease} />
+      <ReleaseFormModal
         modalHeading='Publiseringsdato er registrert'
         modalDescription={`Datoen ${formatPublishTime(createdRelease?.publish_time)} er nå sendt inn for ${variantInformation}`}
         openCreateReleaseModal={openCreateReleaseModal}

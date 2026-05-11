@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { Link as ReactRouterLink } from 'react-router'
 import {
   Paragraph,
   Select,
@@ -10,8 +9,6 @@ import {
   Input,
   ValidationMessage,
   ErrorSummary,
-  Heading,
-  Dialog,
 } from '@digdir/designsystemet-react'
 import { DatePicker as AkselDatePicker, useDatepicker } from '@navikt/ds-react/DatePicker'
 import { DatePicker } from './DatePicker'
@@ -21,17 +18,12 @@ import {
   getLastDayOfNthMonth,
   parsePublishDateWithTime,
 } from '../lib/utils'
-import { type ReleaseCreate, type ReleaseDetails } from '@ssbno-statreg/shared'
+import { type ReleaseCreate } from '@ssbno-statreg/shared'
 
 const releaseDatePrecisions = ['Dag', 'Måned', 'År']
 
 type ReleaseFormProps = {
   onFormSubmit: (body: ReleaseCreate) => Promise<void>
-  modalHeading: string
-  modalDescription: string
-  openCreateReleaseModal: boolean
-  createdRelease: ReleaseDetails
-  setOpenCreateReleaseModal: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 type ReleaseFormTypes = {
@@ -41,45 +33,7 @@ type ReleaseFormTypes = {
   periodTo?: string
 }
 
-function ReleaseFormModal({
-  modalHeading,
-  modalDescription,
-  openCreateReleaseModal,
-  createdRelease,
-  setOpenCreateReleaseModal,
-}: Omit<ReleaseFormProps, 'onFormSubmit'>) {
-  const { id, statistic } = createdRelease ?? {}
-
-  return (
-    <Dialog id='create-release-modal' open={openCreateReleaseModal} onClose={() => setOpenCreateReleaseModal(false)}>
-      <Dialog.Block>
-        <Heading data-size='xs'>{modalHeading}</Heading>
-      </Dialog.Block>
-      <Dialog.Block>
-        <Paragraph>{modalDescription}</Paragraph>
-      </Dialog.Block>
-      <Dialog.Block>
-        <div style={{ display: 'flex', gap: 'var(--ds-size-4)', marginTop: ' var(--ds-size-4)' }}>
-          <Button variant='primary' asChild>
-            <ReactRouterLink to={`/statistikk/${statistic?.shortname}`}>Ok</ReactRouterLink>
-          </Button>
-          <Button variant='tertiary' asChild>
-            <ReactRouterLink to={`/publisering/${id}`}>Se detaljer</ReactRouterLink>
-          </Button>
-        </div>
-      </Dialog.Block>
-    </Dialog>
-  )
-}
-
-export function ReleaseForm({
-  onFormSubmit,
-  modalHeading,
-  modalDescription,
-  openCreateReleaseModal,
-  createdRelease,
-  setOpenCreateReleaseModal,
-}: ReleaseFormProps) {
+export function ReleaseForm({ onFormSubmit }: ReleaseFormProps) {
   const [values, setValues] = useState<ReleaseFormTypes>({
     dateType: '',
     publishTime: '',
@@ -239,13 +193,6 @@ export function ReleaseForm({
           </ErrorSummary>
         )}
       </form>
-      <ReleaseFormModal
-        modalHeading={modalHeading}
-        modalDescription={modalDescription}
-        openCreateReleaseModal={openCreateReleaseModal}
-        createdRelease={createdRelease}
-        setOpenCreateReleaseModal={setOpenCreateReleaseModal}
-      />
     </>
   )
 }
