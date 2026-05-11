@@ -121,10 +121,16 @@ describe('utils', () => {
       expect(parsePublishDateWithTime(undefined)).toBe('')
     })
 
-    test('sets the local publish time to 08:00', () => {
+    test('sets the local publish time to 08:00 (summer time)', () => {
       const originalDate = new Date('2026-05-11T00:00:00Z')
       const result = parsePublishDateWithTime(originalDate)
       expect(result).toStrictEqual('2026-05-11T06:00:00.000Z')
+    })
+
+    test('sets the local publish time to 08:00 (winter time)', () => {
+      const originalDate = new Date('2026-10-26T00:00:00Z')
+      const result = parsePublishDateWithTime(originalDate)
+      expect(result).toStrictEqual('2026-10-26T07:00:00.000Z')
     })
   })
 })
