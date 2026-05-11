@@ -14,12 +14,12 @@
   "dependencies": {
     "@digdir/designsystemet-css": "^1.13.3",
     "@digdir/designsystemet-react": "^1.13.3",
-    "@navikt/aksel-icons": "^8.10.4",
-    "@navikt/ds-css": "^8.10.4",
-    "@navikt/ds-react": "^8.10.4",
+    "@navikt/aksel-icons": "^8.10.5",
+    "@navikt/ds-css": "^8.10.5",
+    "@navikt/ds-react": "^8.10.5",
     "@ssbno-statreg/shared": "*",
-    "react": "^19.2.5",
-    "react-dom": "^19.2.5",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
     "openapi-fetch": "^0.17.0",
     "react-router": "^7.14.2"
   },
