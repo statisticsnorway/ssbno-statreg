@@ -268,6 +268,7 @@ export interface paths {
         query?: {
           start?: number
           count?: number
+          publish_time?: string
         }
         header?: never
         path: {
@@ -376,6 +377,8 @@ export interface paths {
         query?: {
           start?: number
           count?: number
+          shortname?: string
+          publish_time?: string
         }
         header?: never
         path?: never

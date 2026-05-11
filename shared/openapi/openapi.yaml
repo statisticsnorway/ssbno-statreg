@@ -419,6 +419,11 @@ paths:
           required: false
           schema:
             type: integer
+        - name: publish_time
+          in: query
+          schema:
+            type: string
+            format: date-time
       responses:
         '200':
           description: List of releases based on variant
@@ -482,6 +487,15 @@ paths:
           name: count
           schema:
             type: integer
+        - in: query
+          name: shortname
+          schema:
+            type: string
+        - in: query
+          name: publish_time
+          schema:
+            type: string
+            format: date-time
       responses:
         '200':
           description: List of releases
