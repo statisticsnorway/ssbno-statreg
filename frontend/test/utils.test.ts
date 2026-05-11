@@ -127,6 +127,12 @@ describe('utils', () => {
       expect(result).toStrictEqual('2026-05-11T06:00:00.000Z')
     })
 
+    test('replaces the local publish time (12:30) with 08:00', () => {
+      vi.setSystemTime(new Date('2024-01-15T12:30+01:00'))
+      const result = parsePublishDateWithTime(new Date('2024-01-15T12:30+01:00'))
+      expect(result).toEqual('2024-01-15T07:00:00.000Z')
+    })
+
     test('sets the local publish time to 08:00 (winter time)', () => {
       const originalDate = new Date('2026-10-26T00:00:00Z')
       const result = parsePublishDateWithTime(originalDate)
