@@ -1,6 +1,6 @@
 import { getBlockedDatesInPeriod, isDateBlocked } from '@/lib/blockedDates'
 import type { ExtendedPrismaClient } from '@/lib/prisma'
-import { dateToISOString, sanitize, parseDateOnly, ensureRequiredFieldsExists, getDateOnlyAsString } from '@/lib/utils'
+import { sanitize, parseDateOnly, ensureRequiredFieldsExists, getDateOnlyAsString } from '@/lib/utils'
 import { type BlockedReleaseDate, type CalenderDate, DayStatus } from '@ssbno-statreg/shared'
 
 export type CalendarDatePrisma = Pick<ExtendedPrismaClient, 'calender_date' | 'release'>
@@ -42,7 +42,7 @@ export async function createBlockedReleaseDay(
 
   return blockedDays.map((blockedDay) => ({
     blocked_comment: blockedDay.comment,
-    date: dateToISOString(blockedDay.day),
+    date: getDateOnlyAsString(blockedDay.day),
   }))
 }
 
