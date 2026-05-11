@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link as ReactRouterLink } from 'react-router'
 import {
   Paragraph,
   Select,
@@ -192,7 +193,11 @@ export function ReleaseForm({ shortname, variantId }: ReleaseFormProps) {
 
       <div style={{ display: 'flex', gap: 'var(--ds-size-3)' }}>
         <Button type='submit'>Meld dato</Button>
-        <Button variant='tertiary'>Avbryt</Button>
+        <Button variant='tertiary' asChild>
+          <ReactRouterLink to={`/statistikk/${shortname}`} reloadDocument>
+            Avbryt
+          </ReactRouterLink>
+        </Button>
       </div>
 
       {Object.values(errors).some(Boolean) && (
