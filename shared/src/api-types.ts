@@ -377,8 +377,16 @@ export interface paths {
         query?: {
           start?: number
           count?: number
+          /**
+           * @description Filter releases by shortname(s) separated by comma.
+           * @example ferie,reise
+           */
           shortname?: string
-          publish_time?: string
+          /**
+           * @description Filter releases with publish_time after the specified timestamp in UTC.
+           * @example 2026-05-06 06:00:00
+           */
+          publish_time_after?: string
         }
         header?: never
         path?: never
