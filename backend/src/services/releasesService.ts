@@ -37,7 +37,9 @@ export async function getReleases(
   prisma: ReleasePrisma
 ): Promise<ReleaseListingResponse> {
   const safeShortname = sanitize(shortname)
-  const safeFilterByShortnames = filterByShortnames // TODO: Sanitize
+  const safeFilterByShortnames = Array.isArray(filterByShortnames)
+    ? filterByShortnames.map((shortname) => sanitize(shortname))
+    : [sanitize(filterByShortnames)]
   const parsedVariantId = variantId ? parseId(variantId) : undefined
 
   const where = await buildReleaseFilter(
@@ -166,7 +168,7 @@ export async function buildReleaseFilter(
     shortname,
     variantId,
     filterByShortnames,
-  }: { shortname?: string; variantId?: number; filterByShortnames?: string | string[] },
+  }: { shortname?: string; variantId?: number; filterByShortnames?: string[] },
   prisma: ReleasePrisma
 ) {
   if (!shortname && variantId === undefined && !filterByShortnames) return
@@ -197,9 +199,8 @@ export async function buildReleaseFilter(
   }
 
   if (filterByShortnames) {
-    const shortnames = Array.isArray(filterByShortnames) ? filterByShortnames : [filterByShortnames]
     return {
-      OR: shortnames.map((shortname) => ({
+      OR: filterByShortnames.map((shortname) => ({
         variant: {
           statistic: {
             shortname: {
