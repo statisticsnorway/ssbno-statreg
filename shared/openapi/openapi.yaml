@@ -318,40 +318,6 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Statistic_details' }
-  /statistics/{shortname}/releases:
-    get:
-      summary: List all releases for a statistic
-      security: []
-      tags: [statistics]
-      parameters:
-        - name: shortname
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: start
-          in: query
-          required: false
-          schema:
-            type: integer
-        - name: count
-          in: query
-          required: false
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: List of releases
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  total:
-                    type: integer
-                  releases:
-                    type: array
-                    items: { $ref: '#/components/schemas/Release_listing' }
 
   /statistics/{shortname}/variants:
     post:
@@ -422,11 +388,6 @@ paths:
           schema:
             type: integer
             default: 10
-        - name: publish_time
-          in: query
-          schema:
-            type: string
-            format: date-time
       responses:
         '200':
           description: List of releases based on variant

@@ -268,7 +268,6 @@ export interface paths {
         query?: {
           start?: number
           count?: number
-          publish_time?: string
         }
         header?: never
         path: {
