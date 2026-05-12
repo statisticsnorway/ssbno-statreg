@@ -4,15 +4,22 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'react-router'
 import { Heading, Tabs } from '@digdir/designsystemet-react'
 import { CalendarIcon } from '@navikt/aksel-icons'
-import { type ReleaseListing, ApprovalStatus } from '@ssbno-statreg/shared'
+import {
+  type ReleaseCreate,
+  type ReleaseDetails,
+  type ReleaseListing,
+  ApprovalStatus,
+  RevisionNames,
+} from '@ssbno-statreg/shared'
 
-import { formatDate } from '../lib/utils'
+import { formatDate, formatPublishTime } from '../lib/utils'
 import { ReleasesTable } from '../components/ReleasesTable'
 import { ReleaseForm } from '../components/ReleaseForm'
 import { DayStatusTag } from '../components/DayStatus'
 import { ApprovalStatusTag } from '../components/ApprovalStatus'
 
 import client from '../api'
+import ReleaseFormModal from '../components/ReleaseFormModal'
 
 type CreateReleaseTablesProps = {
   releases: ReleaseListing[]
@@ -51,6 +58,9 @@ function CreateReleaseTables({ releases, variantReleases, shortname, variant }: 
 function CreateRelease() {
   const [releases, setReleases] = useState<ReleaseListing[]>([])
   const [variantReleases, setVariantReleases] = useState<ReleaseListing[]>([])
+  const [openCreateReleaseModal, setOpenCreateReleaseModal] = useState(false)
+  const [createdRelease, setCreatedRelease] = useState<ReleaseDetails>({})
+
   const { shortname, variantId } = useParams()
   const variantIdAsNumber = Number(variantId)
 
@@ -86,10 +96,34 @@ function CreateRelease() {
     fetchVariantRelease()
   }, [shortname, variantIdAsNumber])
 
+  async function createRelease(body: ReleaseCreate) {
+    const { data, error } = await client.POST('/statistics/{shortname}/variants/{id}/releases', {
+      params: { path: { shortname: shortname as string, id: Number(variantId) } },
+      body,
+    })
+
+    if (error) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const errorMessage = (error as any).error
+      console.log(errorMessage)
+      alert(errorMessage)
+    } else {
+      setOpenCreateReleaseModal(true)
+      setCreatedRelease(data)
+    }
+  }
+
   const statisticName = variantReleases[0]?.statistic?.name ?? ''
   const statisticShortname = variantReleases[0]?.statistic?.shortname ?? ''
-  const variant = variantReleases[0]?.frequency?.name ?? ''
+  const variant = variantReleases[0]?.frequency?.name?.toLowerCase() ?? ''
   const approvalStatus = variantReleases[0]?.approval_status ?? ApprovalStatus.PENDING
+
+  const createdReleaseVariant = createdRelease?.variant
+  const createdReleaseFrequency = createdReleaseVariant?.frequency?.name
+  const createdReleaseRevisionName = createdReleaseVariant?.revision?.name
+    ? RevisionNames[createdReleaseVariant?.revision.name as keyof typeof RevisionNames]
+    : ''
+  const variantInformation = [createdReleaseFrequency, createdReleaseRevisionName].join(', ').toLowerCase()
 
   return (
     <>
@@ -102,7 +136,14 @@ function CreateRelease() {
         </Heading>
         <ApprovalStatusTag status={approvalStatus} />
       </div>
-      <ReleaseForm shortname={shortname as string} variantId={variantIdAsNumber} />
+      <ReleaseForm onFormSubmit={createRelease} shortname={shortname as string} />
+      <ReleaseFormModal
+        modalHeading='Publiseringsdato er registrert'
+        modalDescription={`Datoen ${formatPublishTime(createdRelease?.publish_time)} er nå sendt inn for ${variantInformation}.`}
+        openCreateReleaseModal={openCreateReleaseModal}
+        createdRelease={createdRelease}
+        setOpenCreateReleaseModal={setOpenCreateReleaseModal}
+      />
       <CreateReleaseTables
         releases={releases}
         variantReleases={variantReleases}
