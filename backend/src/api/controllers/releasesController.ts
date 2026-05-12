@@ -21,7 +21,8 @@ export default function releasesController(router: Router) {
     try {
       const start = req.query?.start ? Number(req.query.start) : undefined
       const count = req.query?.count ? Number(req.query.count) : undefined
-      const data = await getReleases({ start, count }, prisma)
+      const filterByShortnames = req.query?.shortname?.split(',')
+      const data = await getReleases({ start, count, filterByShortnames }, prisma)
       res.json(data)
     } catch (error) {
       return handleErrors(error, res)
@@ -60,8 +61,9 @@ export default function releasesController(router: Router) {
 
       const start = req.query?.start ? Number(req.query.start) : undefined
       const count = req.query?.count ? Number(req.query.count) : undefined
+      const filterByShortnames = req.query?.shortname
 
-      const data = await getReleases({ start, count, shortname, variantId }, prisma)
+      const data = await getReleases({ start, count, shortname, variantId, filterByShortnames }, prisma)
       res.json(data)
     } catch (error) {
       return handleErrors(error, res)
