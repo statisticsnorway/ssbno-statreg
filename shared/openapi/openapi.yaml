@@ -493,18 +493,24 @@ paths:
             type: integer
             default: 10
         - in: query
-          name: shortname
+          name: sort
+          description: 'Sorting fields separated by comma. Default order is Ascending (ASC), minus(-) should be used in front of field name for Descending (DESC) order.'
+          example: '-publish_time'
           schema:
             type: string
+        - in: query
+          name: shortname
           description: Filter releases by shortname(s) separated by comma.
           example: 'ferie,reise'
+          schema:
+            type: string
         - in: query
           name: publish_time_after
+          description: Filter releases with publish_time after the specified timestamp in UTC.
+          example: '2026-05-06 06:00:00'
           schema:
             type: string
             format: date-time
-          description: Filter releases with publish_time after the specified timestamp in UTC.
-          example: '2026-05-06 06:00:00'
       responses:
         '200':
           description: List of releases

@@ -378,6 +378,11 @@ export interface paths {
           start?: number
           count?: number
           /**
+           * @description Sorting fields separated by comma. Default order is Ascending (ASC), minus(-) should be used in front of field name for Descending (DESC) order.
+           * @example -publish_time
+           */
+          sort?: string
+          /**
            * @description Filter releases by shortname(s) separated by comma.
            * @example ferie,reise
            */
