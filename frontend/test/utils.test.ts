@@ -114,6 +114,11 @@ describe('utils', () => {
       const date = new Date('2026-05-11T00:00:00Z')
       expect(getDateOnlyAsString(date)).toBe('2026-05-11')
     })
+
+    test('formats local date with time 00:00', () => {
+      const date = new Date('2026-05-11T00:00:00+02:00')
+      expect(getDateOnlyAsString(date)).toBe('2026-05-11')
+    })
   })
 
   describe('parsePublishDateWithTime', () => {
