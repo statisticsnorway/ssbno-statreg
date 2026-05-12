@@ -19,16 +19,9 @@ import {
   getLastDayOfNthMonth,
   parsePublishDateWithTime,
 } from '../lib/utils'
-
-import client from '../api'
-import type { ReleaseCreate } from '@ssbno-statreg/shared'
+import { type ReleaseCreate } from '@ssbno-statreg/shared'
 
 const releaseDatePrecisions = ['Dag', 'Måned', 'År']
-
-type ReleaseFormProps = {
-  shortname: string
-  variantId: number
-}
 
 type ReleaseFormTypes = {
   dateType?: string
@@ -37,24 +30,12 @@ type ReleaseFormTypes = {
   periodTo?: string
 }
 
-async function createRelease(shortname: string, variantId: number, body: ReleaseCreate) {
-  const { data, error } = await client.POST('/statistics/{shortname}/variants/{id}/releases', {
-    params: { path: { shortname, id: variantId } },
-    body,
-  })
-
-  if (error) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const errorMessage = (error as any).error
-    console.log(errorMessage)
-    alert(errorMessage)
-  } else {
-    // TODO: Implement Dialog for created release verification
-    alert('Release created: ' + JSON.stringify(data, null, 2))
-  }
+type ReleaseFormProps = {
+  onFormSubmit: (body: ReleaseCreate) => Promise<void>
+  shortname: string
 }
 
-export function ReleaseForm({ shortname, variantId }: ReleaseFormProps) {
+export function ReleaseForm({ onFormSubmit, shortname }: ReleaseFormProps) {
   const [values, setValues] = useState<ReleaseFormTypes>({
     dateType: '',
     publishTime: '',
@@ -115,7 +96,7 @@ export function ReleaseForm({ shortname, variantId }: ReleaseFormProps) {
 
     if (!validateFields()) return
 
-    createRelease(shortname, variantId, {
+    onFormSubmit({
       release_date_precision: values.dateType,
       publish_time: values.publishTime,
       period_from: values.periodFrom,
