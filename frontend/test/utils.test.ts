@@ -135,7 +135,7 @@ describe('utils', () => {
     test('replaces the local publish time (12:30) with 08:00', () => {
       vi.setSystemTime(new Date('2024-01-15T12:30+01:00'))
       const result = parsePublishDateWithTime(new Date('2024-01-15T12:30+01:00'))
-      expect(result).toEqual('2024-01-15T07:00:00.000Z')
+      expect(result).toStrictEqual('2024-01-15T07:00:00.000Z')
     })
 
     test('sets the local publish time to 08:00 (winter time)', () => {
