@@ -3,7 +3,7 @@ import { type Variant } from '@ssbno-statreg/shared'
 
 export function VariantCard({ shortname, variant }: { shortname: string; variant: Variant }) {
   return (
-    <Card data-color='neutral' variant='tinted' style={{ flex: 1, height: '180px' }}>
+    <Card data-color='neutral' variant='tinted' style={{ height: '180px' }}>
       <Card.Block>
         <Heading>
           <Link
