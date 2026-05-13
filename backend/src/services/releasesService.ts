@@ -16,9 +16,9 @@ import {
 } from '@/lib/utils'
 import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
 import type { Prisma } from '@/generated/prisma/client'
-import { releaseAsserts, statisticsAsserts } from '@/lib/asserts'
+import { releaseAsserts } from '@/lib/asserts'
 
-export type ReleasePrisma = Pick<PrismaClient, 'release' | 'statistic' | 'variant'>
+export type ReleasePrisma = Pick<PrismaClient, 'release' | 'statistic' | 'variant' | 'shortname'>
 
 export async function getReleases(
   {
@@ -178,7 +178,7 @@ export async function buildReleaseFilter(
   }
 
   if (filterByShortnames) {
-    await statisticsAsserts.assertFilteredShortnamesExists(filterByShortnames, prisma)
+    await releaseAsserts.assertFilteredShortnamesExists(filterByShortnames, prisma)
   }
 
   if (variantId !== undefined) {

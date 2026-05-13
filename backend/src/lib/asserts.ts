@@ -60,7 +60,7 @@ export async function assertShortnameExists(shortname: string, prisma: Statistic
   return true
 }
 
-export async function assertFilteredShortnamesExists(shortname: string[], prisma: StatisticPrisma): Promise<boolean> {
+export async function assertFilteredShortnamesExists(shortname: string[], prisma: ReleasePrisma): Promise<boolean> {
   const shortnames = await prisma.shortname.findMany({
     where: {
       name: { in: shortname },
@@ -110,6 +110,7 @@ export async function assertDayNotManuallyBlocked(prisma: CalendarDatePrisma, da
 }
 
 export const releaseAsserts = {
+  assertFilteredShortnamesExists,
   assertStatisticExists,
   assertVariantExists,
   assertVariantMatchesShortname,
@@ -118,5 +119,4 @@ export const releaseAsserts = {
 export const statisticsAsserts = {
   assertShortnameExists,
   assertShortnameExistsAndIsAvailable,
-  assertFilteredShortnamesExists,
 }
