@@ -1,12 +1,16 @@
 import { Card, Heading, Link, Paragraph } from '@digdir/designsystemet-react'
 import { type Variant } from '@ssbno-statreg/shared'
 
-export function VariantCard({ variant }: { variant: Variant }) {
+export function VariantCard({ shortname, variant }: { shortname: string; variant: Variant }) {
   return (
     <Card data-color='neutral' variant='tinted' style={{ flex: 1, height: '180px' }}>
       <Card.Block>
         <Heading>
-          <Link href='/statistikkregisteret/statistikk/energ/1/opprett' target='_blank' rel='noopener noreferrer'>
+          <Link
+            href={`/statistikkregisteret/statistikk/${shortname}/${variant.id}/opprett`}
+            target='_blank'
+            rel='noopener noreferrer'
+          >
             {variant.frequency?.name}, {variant.revision}
           </Link>
         </Heading>

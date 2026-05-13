@@ -36,8 +36,11 @@ export default function ShowStatistic() {
   const startYear = formatStartYear(statistic.first_released_at)
   const contacts = formatContacts(statistic.contacts)
   const mockContinuedBy = ['putegjeld', 'k2', 'k3']
-  const cancelledVariants = formatCancelledVariants(statistic.variants ?? [])
   const variants = statistic.variants ?? []
+  const cancelledVariants = formatCancelledVariants(variants)
+  const activeVariants = variants.filter((v) => !v.cancelled)
+
+  if (!shortname) return null
 
   return (
     <>
@@ -61,8 +64,8 @@ export default function ShowStatistic() {
             marginBottom: 'var(--ds-size-6)',
           }}
         >
-          {variants?.map((variant) => (
-            <VariantCard key={variant.id} variant={variant} />
+          {activeVariants.map((variant) => (
+            <VariantCard key={variant.id} shortname={shortname} variant={variant} />
           ))}
         </div>
         <Card>
