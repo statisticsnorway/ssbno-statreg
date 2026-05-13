@@ -1,5 +1,12 @@
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest'
-import { formatPublishTime, formatDate, getFirstDayOfNthMonth, getLastDayOfNthMonth } from '../src/lib/utils'
+import {
+  formatPublishTime,
+  formatDate,
+  getFirstDayOfNthMonth,
+  getLastDayOfNthMonth,
+  getDateOnlyAsString,
+  parsePublishDateWithTime,
+} from '../src/lib/utils'
 
 const timeZone = 'Europe/Oslo'
 beforeEach(() => vi.useFakeTimers())
@@ -95,6 +102,46 @@ describe('utils', () => {
     test('rolls over to next year when month exceeds december', () => {
       vi.setSystemTime(new Date('2024-12-15T00:00+01:00'))
       expect(getLastDayOfNthMonth(2)).toEqual(new Date('2025-02-28T00:00+01:00'))
+    })
+  })
+
+  describe('getDateOnlyAsString', () => {
+    test('returns empty string when date is undefined', () => {
+      expect(getDateOnlyAsString(undefined)).toBe('')
+    })
+
+    test('formats a local date as YYYY-MM-DD', () => {
+      const date = new Date('2026-05-11T00:00:00Z')
+      expect(getDateOnlyAsString(date)).toBe('2026-05-11')
+    })
+
+    test('formats local date with time 00:00', () => {
+      const date = new Date('2026-05-11T00:00:00+02:00')
+      expect(getDateOnlyAsString(date)).toBe('2026-05-11')
+    })
+  })
+
+  describe('parsePublishDateWithTime', () => {
+    test('returns empty string when publishTime is undefined', () => {
+      expect(parsePublishDateWithTime(undefined)).toBe('')
+    })
+
+    test('sets the local publish time to 08:00 (summer time)', () => {
+      const originalDate = new Date('2026-05-11T00:00:00Z')
+      const result = parsePublishDateWithTime(originalDate)
+      expect(result).toStrictEqual('2026-05-11T06:00:00.000Z')
+    })
+
+    test('replaces the local publish time (12:30) with 08:00', () => {
+      vi.setSystemTime(new Date('2024-01-15T12:30+01:00'))
+      const result = parsePublishDateWithTime(new Date('2024-01-15T12:30+01:00'))
+      expect(result).toStrictEqual('2024-01-15T07:00:00.000Z')
+    })
+
+    test('sets the local publish time to 08:00 (winter time)', () => {
+      const originalDate = new Date('2026-10-26T00:00:00Z')
+      const result = parsePublishDateWithTime(originalDate)
+      expect(result).toStrictEqual('2026-10-26T07:00:00.000Z')
     })
   })
 })

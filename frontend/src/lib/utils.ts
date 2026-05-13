@@ -37,7 +37,6 @@ export function getLastDayOfNthMonth(monthsAhead: number): Date {
   return to
 }
 
-// TODO: Add unit tests
 export function getDateOnlyAsString(date: Date | undefined): string {
   if (!date) return ''
 
@@ -50,6 +49,9 @@ export function getDateOnlyAsString(date: Date | undefined): string {
 
 export function parsePublishDateWithTime(publishTime: Date | undefined): string {
   if (!publishTime) return ''
-  publishTime.setHours(8, 0, 0, 0)
-  return publishTime.toISOString()
+
+  const localPublishTime = new Date(publishTime)
+  localPublishTime.setHours(8, 0, 0, 0)
+
+  return localPublishTime.toISOString()
 }

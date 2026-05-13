@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link as ReactRouterLink } from 'react-router'
 import {
   Paragraph,
   Select,
@@ -18,16 +19,9 @@ import {
   getLastDayOfNthMonth,
   parsePublishDateWithTime,
 } from '../lib/utils'
-
-import client from '../api'
-import type { ReleaseCreate } from '@ssbno-statreg/shared'
+import { type ReleaseCreate } from '@ssbno-statreg/shared'
 
 const releaseDatePrecisions = ['Dag', 'Måned', 'År']
-
-type ReleaseFormProps = {
-  shortname: string
-  variantId: number
-}
 
 type ReleaseFormTypes = {
   dateType?: string
@@ -36,24 +30,12 @@ type ReleaseFormTypes = {
   periodTo?: string
 }
 
-async function createRelease(shortname: string, variantId: number, body: ReleaseCreate) {
-  const { data, error } = await client.POST('/statistics/{shortname}/variants/{id}/releases', {
-    params: { path: { shortname, id: variantId } },
-    body,
-  })
-
-  if (error) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const errorMessage = (error as any).error
-    console.log(errorMessage)
-    alert(errorMessage)
-  } else {
-    // TODO: Implement Dialog for created release verification
-    alert('Release created: ' + JSON.stringify(data, null, 2))
-  }
+type ReleaseFormProps = {
+  onFormSubmit: (body: ReleaseCreate) => Promise<void>
+  shortname: string
 }
 
-export function ReleaseForm({ shortname, variantId }: ReleaseFormProps) {
+export function ReleaseForm({ onFormSubmit, shortname }: ReleaseFormProps) {
   const [values, setValues] = useState<ReleaseFormTypes>({
     dateType: '',
     publishTime: '',
@@ -95,9 +77,9 @@ export function ReleaseForm({ shortname, variantId }: ReleaseFormProps) {
     const nextErrors: ReleaseFormTypes = {}
 
     if (!values.dateType) nextErrors.dateType = 'Velg en datotype for publisering'
-    if (!values.publishTime) nextErrors.publishTime = 'Velg en publiseringsdato'
-    if (!values.periodFrom) nextErrors.periodFrom = 'Velg en fra-dato'
-    if (!values.periodTo) nextErrors.periodTo = 'Velg en til-dato'
+    if (!values.publishTime) nextErrors.publishTime = 'Opprett en gyldig publiseringsdato'
+    if (!values.periodFrom) nextErrors.periodFrom = 'Opprett en gyldig fra-dato'
+    if (!values.periodTo) nextErrors.periodTo = 'Opprett en gyldig til-dato'
 
     // TODO: MIM-2582: Review comparison logic, error messages, and implement onChange
     if (periodFromDate && periodToDate && periodFromDate > periodToDate) {
@@ -114,7 +96,7 @@ export function ReleaseForm({ shortname, variantId }: ReleaseFormProps) {
 
     if (!validateFields()) return
 
-    createRelease(shortname, variantId, {
+    onFormSubmit({
       release_date_precision: values.dateType,
       publish_time: values.publishTime,
       period_from: values.periodFrom,
@@ -192,7 +174,11 @@ export function ReleaseForm({ shortname, variantId }: ReleaseFormProps) {
 
       <div style={{ display: 'flex', gap: 'var(--ds-size-3)' }}>
         <Button type='submit'>Meld dato</Button>
-        <Button variant='tertiary'>Avbryt</Button>
+        <Button variant='tertiary' asChild>
+          <ReactRouterLink to={`/statistikk/${shortname}`} reloadDocument>
+            Avbryt
+          </ReactRouterLink>
+        </Button>
       </div>
 
       {Object.values(errors).some(Boolean) && (
