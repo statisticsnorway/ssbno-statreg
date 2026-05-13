@@ -74,6 +74,20 @@ export default function ShowStatistic() {
             <Details.Content>Kommer snart.</Details.Content>
           </Details>
         </Card>
+        {cancelledVariants.length > 0 && (
+          <Card style={{ marginTop: 'var(--ds-size-6)' }}>
+            <Details>
+              <Details.Summary>Opphørte varianter</Details.Summary>
+              <Details.Content>
+                <List.Unordered>
+                  {cancelledVariants.map((variant) => (
+                    <List.Item key={variant}>{variant}</List.Item>
+                  ))}
+                </List.Unordered>
+              </Details.Content>
+            </Details>
+          </Card>
+        )}
       </div>
 
       <Divider />
@@ -125,15 +139,6 @@ export default function ShowStatistic() {
       <div>
         <Heading data-size='xs'>Statistikkens startår</Heading>
         <Paragraph>{startYear}</Paragraph>
-      </div>
-
-      <div>
-        <Heading data-size='xs'>Opphørte varianter</Heading>
-        <List.Unordered>
-          {cancelledVariants.map((variant) => (
-            <List.Item key={variant}>{variant}</List.Item>
-          ))}
-        </List.Unordered>
       </div>
 
       <div>
