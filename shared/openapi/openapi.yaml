@@ -17,6 +17,8 @@ tags:
     description: Releases endpoints
   - name: statistics
     description: Statistics information and manipulation
+  - name: shortnames
+    description: Shortname for a statistic
 
 security:
   - keykloak_token: []
@@ -254,6 +256,20 @@ components:
         revision: { type: string }
 
 paths:
+  /shortnames:
+    get:
+      summary: List of all existing shortnames
+      security: []
+      tags: [shortnames]
+      responses:
+        '200':
+          description: List of shortnames
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
   /statistics:
     get:
       summary: List of all statistics
