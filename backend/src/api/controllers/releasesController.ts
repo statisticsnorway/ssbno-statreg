@@ -39,6 +39,7 @@ export default function releasesController(router: Router) {
     }
   })
 
+  // TODO: MIM-2710: This is removed from openapi spec
   router.get('/statistics/:shortname/releases', skipAuth, async (req, res) => {
     try {
       const shortname = ensureString(req.params.shortname)
