@@ -13,7 +13,7 @@ import {
 } from '@ssbno-statreg/shared'
 
 import { formatDate, formatPublishTime } from '../lib/utils'
-import { ReleasesTable, PaginatedReleaseTable } from '../components/ReleasesTable'
+import { PaginatedReleasesTable, ReleasesTable } from '../components/ReleasesTable'
 import { ReleaseForm } from '../components/ReleaseForm'
 import { DayStatusTag } from '../components/DayStatus'
 import { ApprovalStatusTag } from '../components/ApprovalStatus'
@@ -42,7 +42,7 @@ function CreateReleaseTables({ releases, variant }: CreateReleaseTablesProps) {
     }
 
     return {
-      releases: data?.releases ?? [],
+      tableData: data?.releases ?? [],
       total: data?.total ?? 0,
     }
   }
@@ -67,7 +67,7 @@ function CreateReleaseTables({ releases, variant }: CreateReleaseTablesProps) {
         <ReleasesTable releases={releases} />
       </Tabs.Panel>
       <Tabs.Panel className='p-0' value='variant-releases'>
-        <PaginatedReleaseTable fetchReleases={fetchVariantReleases} />
+        <PaginatedReleasesTable fetchReleases={fetchVariantReleases} />
       </Tabs.Panel>
     </Tabs>
   )

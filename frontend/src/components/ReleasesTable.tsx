@@ -1,19 +1,10 @@
-import type { ReactElement } from 'react'
 import { Table, Link } from '@digdir/designsystemet-react'
 
 import { type ReleaseListing } from '@ssbno-statreg/shared'
 import { ApprovalStatusBadge } from '../components/ApprovalStatus'
 import { formatPublishTime, formatDate } from '../lib/utils'
-import { ShowRowCountSelect, Pagination } from './Pagination'
-import { usePagination } from '@digdir/designsystemet-react'
+import { ShowRowCountSelect, Pagination, useTablePagination, type FetchTableData } from './Pagination'
 import '../views/ListReleases.css'
-import { useState, useEffect } from 'react'
-
-type ReleaseTableProps = {
-  releases: ReleaseListing[]
-  rowSelection?: ReactElement
-  pagination?: ReactElement
-}
 
 const TABLE_HEADER_CELLS = [
   'Kortnavn',
@@ -65,7 +56,37 @@ function ReleaseRow({ release }: ReleaseRowProps) {
   )
 }
 
-export function ReleasesTable({ releases, rowSelection, pagination }: ReleaseTableProps) {
+export function ReleasesTable({ releases }: { releases: ReleaseListing[] }) {
+  return (
+    <Table>
+      <Table.Head>
+        <Table.Row>
+          {TABLE_HEADER_CELLS.map((header) => (
+            <Table.HeaderCell key={header}>{header}</Table.HeaderCell>
+          ))}
+        </Table.Row>
+      </Table.Head>
+      <Table.Body>
+        {releases?.map((release) => (
+          <ReleaseRow key={`${release.publish_time}-${release.id}`} release={release} />
+        ))}
+      </Table.Body>
+    </Table>
+  )
+}
+
+export function PaginatedReleasesTable({ fetchReleases }: { fetchReleases: FetchTableData; pagination?: boolean }) {
+  const {
+    tableData: paginatedReleases,
+    handleChangeShowRowCount,
+    showRowCount,
+    pages,
+    prevButtonProps,
+    nextButtonProps,
+    hasNext,
+    hasPrev,
+  } = useTablePagination({ fetchTableData: fetchReleases })
+
   return (
     <div style={{ minWidth: '100%' }}>
       <div
@@ -77,85 +98,16 @@ export function ReleasesTable({ releases, rowSelection, pagination }: ReleaseTab
           marginBottom: 'var(--ds-size-8)',
         }}
       >
-        {rowSelection}
+        <ShowRowCountSelect showRowCount={showRowCount} onChange={handleChangeShowRowCount} />
       </div>
-      <Table>
-        <Table.Head>
-          <Table.Row>
-            {TABLE_HEADER_CELLS.map((header) => (
-              <Table.HeaderCell key={header}>{header}</Table.HeaderCell>
-            ))}
-          </Table.Row>
-        </Table.Head>
-        <Table.Body>
-          {releases.map((release) => (
-            <ReleaseRow key={`${release.publish_time}-${release.id}`} release={release} />
-          ))}
-        </Table.Body>
-      </Table>
-      {pagination}
+      <ReleasesTable releases={paginatedReleases} />
+      <Pagination
+        pages={pages}
+        prevButtonProps={prevButtonProps}
+        nextButtonProps={nextButtonProps}
+        hasPrev={hasPrev}
+        hasNext={hasNext}
+      />
     </div>
-  )
-}
-
-export type PaginatedReleases = {
-  releases: ReleaseListing[]
-  total: number
-}
-
-export type FetchReleases = (args: { start: number; count: number }) => Promise<PaginatedReleases>
-
-function useReleases(fetchReleases: FetchReleases, start: number, count: number) {
-  const [releases, setReleases] = useState<ReleaseListing[]>([])
-  const [total, setTotal] = useState(0)
-
-  useEffect(() => {
-    fetchReleases({ start, count })
-      .then(({ releases, total }) => {
-        setReleases(releases)
-        setTotal(total)
-      })
-      .catch((err) => {
-        console.error(err)
-        alert('Failed to fetch releases')
-      })
-  }, [start, count])
-
-  return { releases, total }
-}
-
-export function PaginatedReleaseTable({ fetchReleases }: { fetchReleases: FetchReleases }) {
-  const [showRowCount, setShowRowCount] = useState(10)
-  const [currentPage, setCurrentPage] = useState(1)
-  const start = (currentPage - 1) * showRowCount
-
-  const { releases, total } = useReleases(fetchReleases, start, showRowCount)
-
-  const { pages, prevButtonProps, nextButtonProps, hasNext, hasPrev } = usePagination({
-    currentPage,
-    setCurrentPage,
-    totalPages: Math.ceil(total / showRowCount),
-    showPages: 6,
-  })
-
-  function handleChangeShowRowCount(e: React.ChangeEvent<HTMLSelectElement>) {
-    setShowRowCount(Number(e.target.value))
-    setCurrentPage(1)
-  }
-
-  return (
-    <ReleasesTable
-      releases={releases}
-      rowSelection={<ShowRowCountSelect showRowCount={showRowCount} onChange={handleChangeShowRowCount} />}
-      pagination={
-        <Pagination
-          pages={pages}
-          prevButtonProps={prevButtonProps}
-          nextButtonProps={nextButtonProps}
-          hasPrev={hasPrev}
-          hasNext={hasNext}
-        />
-      }
-    />
   )
 }
