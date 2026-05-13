@@ -75,7 +75,7 @@ export function ReleasesTable({ releases }: { releases: ReleaseListing[] }) {
   )
 }
 
-export function PaginatedReleasesTable({ fetchReleases }: { fetchReleases: FetchTableData; pagination?: boolean }) {
+export function PaginatedReleasesTable({ fetchReleases }: { fetchReleases: FetchTableData }) {
   const {
     tableData: paginatedReleases,
     handleChangeShowRowCount,
