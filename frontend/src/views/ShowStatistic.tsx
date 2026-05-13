@@ -5,7 +5,7 @@ import { PersonPencilIcon } from '@navikt/aksel-icons'
 import { StatisticStatusTag } from '../components/StatisticStatusTag'
 import { VariantCard } from '../components/VariantCard'
 import client from '../api'
-import { type RegionLevel, type StatisticDetails, type Variant, type StatisticStatus } from '@ssbno-statreg/shared'
+import { StatisticStatus, type RegionLevel, type StatisticDetails, type Variant } from '@ssbno-statreg/shared'
 
 export default function ShowStatistic() {
   const [statistic, setStatistic] = useState<StatisticDetails>({})
@@ -37,6 +37,7 @@ export default function ShowStatistic() {
   const contacts = formatContacts(statistic.contacts)
   const mockContinuedBy = ['putegjeld', 'k2', 'k3']
   const cancelledVariants = formatCancelledVariants(statistic.variants ?? [])
+  const variants = statistic.variants ?? []
 
   return (
     <>
@@ -48,10 +49,21 @@ export default function ShowStatistic() {
 
       <Divider />
 
-      <div>
+      <div style={{ width: '100%' }}>
+        <Heading data-size='xs'>Varianter</Heading>
         <Paragraph>Velg variant for å melde publiseringsdato</Paragraph>
-        <div>
-          <VariantCard test='test' />
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: 'var(--ds-size-6)',
+            marginTop: 'var(--ds-size-6)',
+            marginBottom: 'var(--ds-size-6)',
+          }}
+        >
+          {variants?.map((variant) => (
+            <VariantCard key={variant.id} variant={variant} />
+          ))}
         </div>
         <Card>
           <Details>
