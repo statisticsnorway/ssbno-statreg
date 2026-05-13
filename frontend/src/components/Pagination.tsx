@@ -1,4 +1,4 @@
-import { Field, Label, Select, Pagination, usePagination } from '@digdir/designsystemet-react'
+import { Field, Label, Select, Pagination as DsPagination, usePagination } from '@digdir/designsystemet-react'
 
 const ROW_COUNT_OPTIONS = [10, 20, 50, 100]
 
@@ -30,32 +30,32 @@ type PaginationProps = {
   hasNext: boolean
 }
 
-export function TablePagination({ pages, prevButtonProps, nextButtonProps, hasPrev, hasNext }: PaginationProps) {
+export function Pagination({ pages, prevButtonProps, nextButtonProps, hasPrev, hasNext }: PaginationProps) {
   return (
     <div style={{ display: 'flex', justifyContent: 'center', marginTop: 'var(--ds-size-18)' }}>
-      <Pagination aria-label='pagineringsmeny'>
-        <Pagination.List>
-          <Pagination.Item>
-            <Pagination.Button {...prevButtonProps} disabled={!hasPrev}>
+      <DsPagination aria-label='pagineringsmeny'>
+        <DsPagination.List>
+          <DsPagination.Item>
+            <DsPagination.Button {...prevButtonProps} disabled={!hasPrev}>
               Forrige
-            </Pagination.Button>
-          </Pagination.Item>
+            </DsPagination.Button>
+          </DsPagination.Item>
           {pages.map(({ page, itemKey, buttonProps }) => (
-            <Pagination.Item key={itemKey}>
+            <DsPagination.Item key={itemKey}>
               {typeof page === 'number' && (
-                <Pagination.Button aria-label={`Side ${page}`} {...buttonProps}>
+                <DsPagination.Button aria-label={`Side ${page}`} {...buttonProps}>
                   {page}
-                </Pagination.Button>
+                </DsPagination.Button>
               )}
-            </Pagination.Item>
+            </DsPagination.Item>
           ))}
-          <Pagination.Item>
-            <Pagination.Button {...nextButtonProps} disabled={!hasNext}>
+          <DsPagination.Item>
+            <DsPagination.Button {...nextButtonProps} disabled={!hasNext}>
               Neste
-            </Pagination.Button>
-          </Pagination.Item>
-        </Pagination.List>
-      </Pagination>
+            </DsPagination.Button>
+          </DsPagination.Item>
+        </DsPagination.List>
+      </DsPagination>
     </div>
   )
 }

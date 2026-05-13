@@ -4,7 +4,7 @@ import { Table, Link } from '@digdir/designsystemet-react'
 import { type ReleaseListing } from '@ssbno-statreg/shared'
 import { ApprovalStatusBadge } from '../components/ApprovalStatus'
 import { formatPublishTime, formatDate } from '../lib/utils'
-import { ShowRowCountSelect, TablePagination } from './TablePagination'
+import { ShowRowCountSelect, Pagination } from './Pagination'
 import { usePagination } from '@digdir/designsystemet-react'
 import '../views/ListReleases.css'
 import { useState, useEffect } from 'react'
@@ -148,7 +148,7 @@ export function PaginatedReleaseTable({ fetchReleases }: { fetchReleases: FetchR
       releases={releases}
       rowSelection={<ShowRowCountSelect showRowCount={showRowCount} onChange={handleChangeShowRowCount} />}
       pagination={
-        <TablePagination
+        <Pagination
           pages={pages}
           prevButtonProps={prevButtonProps}
           nextButtonProps={nextButtonProps}
