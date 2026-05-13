@@ -87,6 +87,13 @@ components:
         code: { type: string }
         name: { type: string }
 
+    Shortname_listing:
+      description: 'Shortnames with its corresponding statistic name'
+      type: object
+      properties:
+        shortname: { type: string }
+        statisticname: { type: string }
+
     Release:
       type: object
       properties:
@@ -269,7 +276,7 @@ paths:
               schema:
                 type: array
                 items:
-                  type: string
+                  type: { $ref: '#/components/schemas/Shortname_listing' }
   /statistics:
     get:
       summary: List of all statistics

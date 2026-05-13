@@ -27,7 +27,7 @@ export interface paths {
             [name: string]: unknown
           }
           content: {
-            'application/json': string[]
+            'application/json': Record<string, never>[]
           }
         }
       }
@@ -747,6 +747,11 @@ export interface components {
     Region_level: {
       code?: string
       name?: string
+    }
+    /** @description Shortnames with its corresponding statistic name */
+    Shortname_listing: {
+      shortname?: string
+      statisticname?: string
     }
     Release: {
       readonly id?: number
