@@ -4,6 +4,42 @@
  */
 
 export interface paths {
+  '/shortnames': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** List of all existing shortnames */
+    get: {
+      parameters: {
+        query?: never
+        header?: never
+        path?: never
+        cookie?: never
+      }
+      requestBody?: never
+      responses: {
+        /** @description List of shortnames */
+        200: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            'application/json': Record<string, never>[]
+          }
+        }
+      }
+    }
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/statistics': {
     parameters: {
       query?: never
@@ -711,6 +747,11 @@ export interface components {
     Region_level: {
       code?: string
       name?: string
+    }
+    /** @description Shortnames with its corresponding statistic name */
+    Shortname_listing: {
+      shortname?: string
+      statistic_name?: string
     }
     Release: {
       readonly id?: number

@@ -13,7 +13,7 @@ import {
 } from '@ssbno-statreg/shared'
 
 import { formatDate, formatPublishTime } from '../lib/utils'
-import { ReleasesTable } from '../components/ReleasesTable'
+import { PaginatedReleasesTable, ReleasesTable } from '../components/ReleasesTable'
 import { ReleaseForm } from '../components/ReleaseForm'
 import { DayStatusTag } from '../components/DayStatus'
 import { ApprovalStatusTag } from '../components/ApprovalStatus'
@@ -23,12 +23,30 @@ import ReleaseFormModal from '../components/ReleaseFormModal'
 
 type CreateReleaseTablesProps = {
   releases: ReleaseListing[]
-  variantReleases: ReleaseListing[]
-  shortname: string
   variant: string
 }
 
-function CreateReleaseTables({ releases, variantReleases, shortname, variant }: CreateReleaseTablesProps) {
+function CreateReleaseTables({ releases, variant }: CreateReleaseTablesProps) {
+  const { shortname, variantId } = useParams()
+
+  async function fetchVariantReleases({ start, count }: { start: number; count: number }) {
+    const { data, error } = await client.GET('/statistics/{shortname}/variants/{id}/releases', {
+      params: { path: { shortname: shortname as string, id: Number(variantId) }, query: { start, count } },
+    })
+
+    if (error) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const errorMessage = (error as any).error
+      console.log(errorMessage)
+      alert(errorMessage)
+    }
+
+    return {
+      tableData: data?.releases ?? [],
+      total: data?.total ?? 0,
+    }
+  }
+
   return (
     <Tabs defaultValue='selected-publish-date' className='create-release-tables-tab'>
       <Tabs.List>
@@ -49,7 +67,7 @@ function CreateReleaseTables({ releases, variantReleases, shortname, variant }: 
         <ReleasesTable releases={releases} />
       </Tabs.Panel>
       <Tabs.Panel className='p-0' value='variant-releases'>
-        <ReleasesTable releases={variantReleases} />
+        <PaginatedReleasesTable fetchReleases={fetchVariantReleases} />
       </Tabs.Panel>
     </Tabs>
   )
@@ -144,12 +162,7 @@ function CreateRelease() {
         createdRelease={createdRelease}
         setOpenCreateReleaseModal={setOpenCreateReleaseModal}
       />
-      <CreateReleaseTables
-        releases={releases}
-        variantReleases={variantReleases}
-        shortname={statisticShortname}
-        variant={variant}
-      />
+      <CreateReleaseTables releases={releases} variant={variant} />
     </>
   )
 }
