@@ -1,15 +1,10 @@
-import type { ReactElement } from 'react'
 import { Table, Link } from '@digdir/designsystemet-react'
 
 import { type ReleaseListing } from '@ssbno-statreg/shared'
 import { ApprovalStatusBadge } from '../components/ApprovalStatus'
 import { formatPublishTime, formatDate } from '../lib/utils'
-
-type ReleaseTableProps = {
-  releases: ReleaseListing[]
-  rowSelection?: ReactElement
-  pagination?: ReactElement
-}
+import { ShowRowCountSelect, Pagination, useTablePagination, type FetchTableData } from './Pagination'
+import '../views/ListReleases.css'
 
 const TABLE_HEADER_CELLS = [
   'Kortnavn',
@@ -61,7 +56,37 @@ function ReleaseRow({ release }: ReleaseRowProps) {
   )
 }
 
-export function ReleasesTable({ releases, rowSelection, pagination }: ReleaseTableProps) {
+export function ReleasesTable({ releases }: { releases: ReleaseListing[] }) {
+  return (
+    <Table>
+      <Table.Head>
+        <Table.Row>
+          {TABLE_HEADER_CELLS.map((header) => (
+            <Table.HeaderCell key={header}>{header}</Table.HeaderCell>
+          ))}
+        </Table.Row>
+      </Table.Head>
+      <Table.Body>
+        {releases?.map((release) => (
+          <ReleaseRow key={`${release.publish_time}-${release.id}`} release={release} />
+        ))}
+      </Table.Body>
+    </Table>
+  )
+}
+
+export function PaginatedReleasesTable({ fetchReleases }: { fetchReleases: FetchTableData }) {
+  const {
+    tableData: paginatedReleases,
+    handleChangeShowRowCount,
+    showRowCount,
+    pages,
+    prevButtonProps,
+    nextButtonProps,
+    hasNext,
+    hasPrev,
+  } = useTablePagination({ fetchTableData: fetchReleases })
+
   return (
     <div style={{ minWidth: '100%' }}>
       <div
@@ -73,23 +98,16 @@ export function ReleasesTable({ releases, rowSelection, pagination }: ReleaseTab
           marginBottom: 'var(--ds-size-8)',
         }}
       >
-        {rowSelection}
+        <ShowRowCountSelect showRowCount={showRowCount} onChange={handleChangeShowRowCount} />
       </div>
-      <Table>
-        <Table.Head>
-          <Table.Row>
-            {TABLE_HEADER_CELLS.map((header) => (
-              <Table.HeaderCell key={header}>{header}</Table.HeaderCell>
-            ))}
-          </Table.Row>
-        </Table.Head>
-        <Table.Body>
-          {releases.map((release) => (
-            <ReleaseRow key={`${release.publish_time}-${release.id}`} release={release} />
-          ))}
-        </Table.Body>
-      </Table>
-      {pagination}
+      <ReleasesTable releases={paginatedReleases} />
+      <Pagination
+        pages={pages}
+        prevButtonProps={prevButtonProps}
+        nextButtonProps={nextButtonProps}
+        hasPrev={hasPrev}
+        hasNext={hasNext}
+      />
     </div>
   )
 }

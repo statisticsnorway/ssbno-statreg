@@ -77,7 +77,7 @@ export async function getReleases(
       },
     },
   })
-  const total = await prisma.release.count()
+  const total = await prisma.release.count({ where })
 
   return {
     total,
