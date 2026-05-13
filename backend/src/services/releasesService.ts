@@ -178,7 +178,7 @@ export async function buildReleaseFilter(
   }
 
   if (filterByShortnames) {
-    await releaseAsserts.assertFilteredShortnamesExists(filterByShortnames, prisma)
+    await releaseAsserts.assertFilteredShortnamesExist(filterByShortnames, prisma)
   }
 
   if (variantId !== undefined) {
