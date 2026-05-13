@@ -3,6 +3,7 @@ import { useParams } from 'react-router'
 import { Heading, Paragraph, List, Link, Button, Divider, Details, Card } from '@digdir/designsystemet-react'
 import { PersonPencilIcon } from '@navikt/aksel-icons'
 import { StatisticStatusTag } from '../components/StatisticStatusTag'
+import { VariantCard } from '../components/VariantCard'
 import client from '../api'
 import { type RegionLevel, type StatisticDetails, type Variant, type StatisticStatus } from '@ssbno-statreg/shared'
 
@@ -49,6 +50,7 @@ export default function ShowStatistic() {
 
       <div>
         <Paragraph>Velg variant for å melde publiseringsdato</Paragraph>
+        <VariantCard test='test' />
         <Card>
           <Details>
             <Details.Summary>Kommende publiseringer</Details.Summary>
