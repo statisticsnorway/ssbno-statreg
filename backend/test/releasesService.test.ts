@@ -138,6 +138,18 @@ describe('releasesService ', async () => {
       expect(releaseAsserts.assertVariantMatchesShortname).toHaveBeenCalledExactlyOnceWith(1, 'KPI', prismaMock)
     })
 
+    test('applies filter when only filterByShortname is provided', async () => {
+      const where = await buildReleaseFilter({ filterByShortnames: ['KPI'] }, prismaMock)
+
+      expect(where).toStrictEqual({
+        OR: [{ variant: { statistic: { shortname: { name: 'KPI' } } } }],
+      })
+
+      expect(releaseAsserts.assertStatisticExists).toHaveBeenCalledTimes(0)
+      expect(releaseAsserts.assertVariantExists).toHaveBeenCalledTimes(0)
+      expect(releaseAsserts.assertVariantMatchesShortname).toHaveBeenCalledTimes(0)
+    })
+
     test('throws when statistic does not exist', async () => {
       releaseAsserts.assertStatisticExists = vi.fn(async () => {
         throw { status: 404, statregError: "Statistic 'BAD' not found" }
