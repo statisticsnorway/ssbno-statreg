@@ -13,7 +13,7 @@ import {
 } from '@ssbno-statreg/shared'
 
 import { formatDate, formatPublishTime } from '../lib/utils'
-import { ReleasesTable } from '../components/ReleasesTable'
+import { ReleasesTable, PaginatedReleaseTable } from '../components/ReleasesTable'
 import { ReleaseForm } from '../components/ReleaseForm'
 import { DayStatusTag } from '../components/DayStatus'
 import { ApprovalStatusTag } from '../components/ApprovalStatus'
@@ -23,8 +23,6 @@ import ReleaseFormModal from '../components/ReleaseFormModal'
 
 type CreateReleaseTablesProps = {
   releases: ReleaseListing[]
-  variantReleases: ReleaseListing[]
-  shortname: string
   variant: string
 }
 
@@ -164,12 +162,7 @@ function CreateRelease() {
         createdRelease={createdRelease}
         setOpenCreateReleaseModal={setOpenCreateReleaseModal}
       />
-      <CreateReleaseTables
-        releases={releases}
-        variantReleases={variantReleases}
-        shortname={statisticShortname}
-        variant={variant}
-      />
+      <CreateReleaseTables releases={releases} variant={variant} />
     </>
   )
 }
