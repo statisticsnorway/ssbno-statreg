@@ -60,6 +60,29 @@ export async function assertShortnameExists(shortname: string, prisma: Statistic
   return true
 }
 
+export async function assertFilteredShortnamesExists(shortname: string[], prisma: StatisticPrisma): Promise<boolean> {
+  const shortnames = await prisma.shortname.findMany({
+    where: {
+      name: { in: shortname },
+    },
+    select: {
+      name: true,
+    },
+  })
+
+  const foundShortnames = shortnames.map((s) => s.name)
+  const missingShortnames = shortname.filter((name) => !foundShortnames.includes(name))
+
+  if (missingShortnames.length) {
+    throw {
+      status: 404,
+      statregError: `Shortname(s) not found: ${missingShortnames.join(', ')}`,
+    }
+  }
+
+  return true
+}
+
 export async function assertShortnameExistsAndIsAvailable(
   shortname: string,
   prisma: StatisticPrisma
@@ -95,4 +118,5 @@ export const releaseAsserts = {
 export const statisticsAsserts = {
   assertShortnameExists,
   assertShortnameExistsAndIsAvailable,
+  assertFilteredShortnamesExists,
 }

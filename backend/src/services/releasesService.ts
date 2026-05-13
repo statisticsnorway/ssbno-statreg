@@ -16,7 +16,7 @@ import {
 } from '@/lib/utils'
 import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
 import type { Prisma } from '@/generated/prisma/client'
-import { releaseAsserts } from '@/lib/asserts'
+import { releaseAsserts, statisticsAsserts } from '@/lib/asserts'
 
 export type ReleasePrisma = Pick<PrismaClient, 'release' | 'statistic' | 'variant'>
 
@@ -177,7 +177,9 @@ export async function buildReleaseFilter(
     await releaseAsserts.assertStatisticExists(shortname, prisma)
   }
 
-  // TODO: Add an assert for filtered shortnames?
+  if (filterByShortnames) {
+    await statisticsAsserts.assertFilteredShortnamesExists(filterByShortnames, prisma)
+  }
 
   if (variantId !== undefined) {
     await releaseAsserts.assertVariantExists(variantId, prisma)
