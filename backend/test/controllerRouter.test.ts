@@ -26,6 +26,10 @@ describe('controllerRouter', () => {
     vi.mock('@/api/controllers/calendarController', () => ({
       default: () => {},
     }))
+
+    vi.mock('@/api/controllers/shortnamesController', () => ({
+      default: () => {},
+    }))
   }
 
   const makeApp = () =>

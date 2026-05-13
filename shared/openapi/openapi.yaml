@@ -92,7 +92,7 @@ components:
       type: object
       properties:
         shortname: { type: string }
-        statisticname: { type: string }
+        statistic_name: { type: string }
 
     Release:
       type: object

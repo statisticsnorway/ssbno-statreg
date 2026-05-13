@@ -751,7 +751,7 @@ export interface components {
     /** @description Shortnames with its corresponding statistic name */
     Shortname_listing: {
       shortname?: string
-      statisticname?: string
+      statistic_name?: string
     }
     Release: {
       readonly id?: number
