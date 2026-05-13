@@ -50,7 +50,9 @@ export default function ShowStatistic() {
 
       <div>
         <Paragraph>Velg variant for å melde publiseringsdato</Paragraph>
-        <VariantCard test='test' />
+        <div>
+          <VariantCard test='test' />
+        </div>
         <Card>
           <Details>
             <Details.Summary>Kommende publiseringer</Details.Summary>
