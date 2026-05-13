@@ -32,14 +32,14 @@ export async function getReleases(
     count?: number
     shortname?: string
     variantId?: number
-    filterByShortnames?: string | string[]
+    filterByShortnames?: string[]
   },
   prisma: ReleasePrisma
 ): Promise<ReleaseListingResponse> {
   const safeShortname = sanitize(shortname)
-  const safeFilterByShortnames = Array.isArray(filterByShortnames)
+  const safeFilterByShortnames = filterByShortnames?.length
     ? filterByShortnames.map((shortname) => sanitize(shortname))
-    : [sanitize(filterByShortnames)]
+    : undefined
   const parsedVariantId = variantId ? parseId(variantId) : undefined
 
   const where = await buildReleaseFilter(
@@ -176,6 +176,8 @@ export async function buildReleaseFilter(
   if (shortname) {
     await releaseAsserts.assertStatisticExists(shortname, prisma)
   }
+
+  // TODO: Add an assert for filtered shortnames?
 
   if (variantId !== undefined) {
     await releaseAsserts.assertVariantExists(variantId, prisma)

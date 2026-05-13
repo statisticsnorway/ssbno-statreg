@@ -48,7 +48,7 @@ describe('releasesService ', async () => {
 
       const result = await getReleases({ start: 1, count: 2 }, prismaMock)
 
-      expect(result).toStrictEqual({ releases: mockedReleasesResult, total: 2 })
+      expect(result).toStrictEqual({ releases: mockedReleasesResult, total: 3 })
       expect(prismaMock.release.findMany).toHaveBeenCalledWith(expect.objectContaining({ skip: 1, take: 2 }))
     })
 
@@ -57,9 +57,29 @@ describe('releasesService ', async () => {
 
       const result = await getReleases({}, prismaMock)
 
-      expect(result).toStrictEqual({ releases: mockedReleasesResult, total: 2 })
+      expect(result).toStrictEqual({ releases: mockedReleasesResult, total: 3 })
 
       expect(prismaMock.release.findMany).toHaveBeenCalledWith(expect.objectContaining({ skip: 0, take: 10 }))
+    })
+
+    test('returns mocked data filtered shortnames', async () => {
+      setPrismaResult([mockedReleasesPrismaResult[0], mockedReleasesPrismaResult[2]])
+
+      const result = await getReleases({ filterByShortnames: ['kpi', 'laks'] }, prismaMock)
+
+      // The total for mocked data is set as releasesResult.length, so it will reflect the length of the filtered data in this test
+      expect(result).toStrictEqual({ releases: [mockedReleasesResult[0], mockedReleasesResult[2]], total: 2 })
+
+      expect(prismaMock.release.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            OR: [
+              { variant: { statistic: { shortname: { name: 'kpi' } } } },
+              { variant: { statistic: { shortname: { name: 'laks' } } } },
+            ],
+          },
+        })
+      )
     })
 
     test('returns empty list if no results', async () => {
@@ -377,6 +397,28 @@ const mockedReleasesPrismaResult = [
       },
     },
   },
+  {
+    id: 103,
+    version: 1,
+    publish_time: new Date('2026-02-25T08:00:00Z'),
+    desk_appoval_status: 'FORSLAG',
+    period_to: new Date('2026-02-21T00:00:00Z'),
+    period_from: new Date('2026-02-15T00:00:00Z'),
+    variant: {
+      frequency: {
+        name: 'Halvår',
+        code: 'H',
+      },
+      statistic: {
+        language: 'nb',
+        name: 'Eksport av laks',
+        name_en: 'Export of salmon',
+        shortname: {
+          name: 'laks',
+        },
+      },
+    },
+  },
 ]
 
 const mockedSingleReleasePrismaResult = {
@@ -437,6 +479,22 @@ const mockedReleasesResult = [
       shortname: 'NR',
       name: 'Nasjonalregnskap',
       name_en: 'National Accounts',
+    },
+  },
+  {
+    id: 103,
+    publish_time: '2026-02-25T08:00:00.000Z',
+    approval_status: 'FORSLAG',
+    period_to: '2026-02-21',
+    period_from: '2026-02-15',
+    frequency: {
+      name: 'Halvår',
+      code: 'H',
+    },
+    statistic: {
+      shortname: 'laks',
+      name: 'Eksport av laks',
+      name_en: 'Export of salmon',
     },
   },
 ]
