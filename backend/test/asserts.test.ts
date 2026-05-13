@@ -4,6 +4,7 @@ import {
   assertDayNotManuallyBlocked,
   assertShortnameExists,
   assertShortnameExistsAndIsAvailable,
+  assertFilteredShortnamesExist,
   assertStatisticExists,
   assertVariantExists,
   assertVariantMatchesShortname,
@@ -131,6 +132,25 @@ describe('asserts', () => {
       const result = await assertDayNotManuallyBlocked(prismaMock, '2026-12-01')
 
       expect(result).toBe(true)
+    })
+  })
+
+  describe('assertFilteredShortnamesExist()', () => {
+    test('returns true when all shortnames exist', async () => {
+      prismaMock.shortname.findMany = vi.fn(() => Promise.resolve([{ name: 'KPI' }, { name: 'LAKS' }]))
+
+      const result = await assertFilteredShortnamesExist(['KPI', 'LAKS'], prismaMock)
+
+      expect(result).toBe(true)
+    })
+
+    test('throws when some shortnames do not exist', async () => {
+      prismaMock.shortname.findMany = vi.fn(() => Promise.resolve([{ name: 'KPI' }, { name: 'LAKS' }]))
+
+      await expect(() => assertFilteredShortnamesExist(['KPI', 'LAKS', 'BAD'], prismaMock)).rejects.toMatchObject({
+        status: 404,
+        statregError: 'Shortname(s) not found: BAD',
+      })
     })
   })
 })

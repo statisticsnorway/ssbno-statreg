@@ -18,7 +18,7 @@ import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
 import type { Prisma } from '@/generated/prisma/client'
 import { releaseAsserts } from '@/lib/asserts'
 
-export type ReleasePrisma = Pick<PrismaClient, 'release' | 'statistic' | 'variant'>
+export type ReleasePrisma = Pick<PrismaClient, 'release' | 'statistic' | 'variant' | 'shortname'>
 
 export async function getReleases(
   {
@@ -26,18 +26,26 @@ export async function getReleases(
     count = 10,
     shortname,
     variantId,
+    filterByShortnames,
   }: {
     start?: number
     count?: number
     shortname?: string
     variantId?: number
+    filterByShortnames?: string[]
   },
   prisma: ReleasePrisma
 ): Promise<ReleaseListingResponse> {
   const safeShortname = sanitize(shortname)
+  const safeFilterByShortnames = filterByShortnames?.length
+    ? filterByShortnames.map((shortname) => sanitize(shortname))
+    : undefined
   const parsedVariantId = variantId ? parseId(variantId) : undefined
 
-  const where = await buildReleaseFilter({ shortname: safeShortname, variantId: parsedVariantId }, prisma)
+  const where = await buildReleaseFilter(
+    { shortname: safeShortname, variantId: parsedVariantId, filterByShortnames: safeFilterByShortnames },
+    prisma
+  )
 
   const releases = await prisma.release.findMany({
     skip: start,
@@ -156,13 +164,21 @@ export async function createRelease(
 }
 
 export async function buildReleaseFilter(
-  { shortname, variantId }: { shortname?: string; variantId?: number },
+  {
+    shortname,
+    variantId,
+    filterByShortnames,
+  }: { shortname?: string; variantId?: number; filterByShortnames?: string[] },
   prisma: ReleasePrisma
 ) {
-  if (!shortname && variantId === undefined) return
+  if (!shortname && variantId === undefined && !filterByShortnames) return
 
   if (shortname) {
     await releaseAsserts.assertStatisticExists(shortname, prisma)
+  }
+
+  if (filterByShortnames) {
+    await releaseAsserts.assertFilteredShortnamesExist(filterByShortnames, prisma)
   }
 
   if (variantId !== undefined) {
@@ -183,6 +199,20 @@ export async function buildReleaseFilter(
   if (shortname) {
     where.variant.statistic = {
       shortname: { name: shortname },
+    }
+  }
+
+  if (filterByShortnames) {
+    return {
+      OR: filterByShortnames.map((shortname) => ({
+        variant: {
+          statistic: {
+            shortname: {
+              name: shortname,
+            },
+          },
+        },
+      })),
     }
   }
 
