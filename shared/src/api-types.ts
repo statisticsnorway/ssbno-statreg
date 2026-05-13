@@ -128,50 +128,6 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  '/statistics/{shortname}/releases': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /** List all releases for a statistic */
-    get: {
-      parameters: {
-        query?: {
-          start?: number
-          count?: number
-        }
-        header?: never
-        path: {
-          shortname: string
-        }
-        cookie?: never
-      }
-      requestBody?: never
-      responses: {
-        /** @description List of releases */
-        200: {
-          headers: {
-            [name: string]: unknown
-          }
-          content: {
-            'application/json': {
-              total?: number
-              releases?: components['schemas']['Release_listing'][]
-            }
-          }
-        }
-      }
-    }
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
   '/statistics/{shortname}/variants': {
     parameters: {
       query?: never
@@ -376,6 +332,21 @@ export interface paths {
         query?: {
           start?: number
           count?: number
+          /**
+           * @description Sorting fields separated by comma. Default order is Ascending (ASC), minus(-) should be used in front of field name for Descending (DESC) order.
+           * @example -publish_time
+           */
+          sort?: string
+          /**
+           * @description Filter releases by shortname(s) separated by comma.
+           * @example ferie,reise
+           */
+          shortname?: string
+          /**
+           * @description Filter releases with publish_time after the specified timestamp in UTC.
+           * @example 2026-05-06 06:00:00
+           */
+          publish_time_after?: string
         }
         header?: never
         path?: never
