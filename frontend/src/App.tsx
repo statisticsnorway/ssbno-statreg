@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router'
 
 import PageLayout from './layouts/PageLayout'
 import ShowRelease from './views/ShowRelease'
+import EditRelease from './views/EditRelease'
 import ShowStatistic from './views/ShowStatistic'
 import ListStatistics from './views/ListStatistics'
 import ListReleases from './views/ListReleases'
@@ -18,6 +19,7 @@ function App() {
 
         <Route path='publisering'>
           <Route path=':id' element={<ShowRelease />} />
+          <Route path=':id/rediger' element={<EditRelease />} />
         </Route>
 
         <Route path='statistikk'>

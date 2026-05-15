@@ -17,9 +17,9 @@ import {
   getDateOnlyAsString,
   getFirstDayOfNthMonth,
   getLastDayOfNthMonth,
-  parsePublishDateWithTime,
+  getDateWithTimeAsString,
 } from '../lib/utils'
-import { type ReleaseCreate } from '@ssbno-statreg/shared'
+import { type ReleaseCreate, type ReleaseUpdate } from '@ssbno-statreg/shared'
 
 const releaseDatePrecisions = ['Dag', 'Måned', 'År']
 
@@ -31,19 +31,30 @@ type ReleaseFormTypes = {
 }
 
 type ReleaseFormProps = {
-  onFormSubmit: (body: ReleaseCreate) => Promise<void>
+  onFormSubmit: (body: ReleaseCreate | ReleaseUpdate) => Promise<void>
   shortname: string
+  initialValues?: ReleaseUpdate
 }
 
-export function ReleaseForm({ onFormSubmit, shortname }: ReleaseFormProps) {
-  const [values, setValues] = useState<ReleaseFormTypes>({
-    dateType: '',
-    publishTime: '',
-    periodFrom: '',
-    periodTo: '',
+function parseDateFromString(dateString: string | undefined): Date | undefined {
+  if (!dateString) return undefined
+  const date = new Date(dateString)
+  return isNaN(date.getTime()) ? undefined : date
+}
+
+export function ReleaseForm({ onFormSubmit, shortname, initialValues }: ReleaseFormProps) {
+  const [values, setValues] = useState<ReleaseUpdate>({
+    dateType: initialValues?.release_date_precision ?? '',
+    publishTime: initialValues?.publish_time ?? '',
+    periodFrom: initialValues?.period_from ?? '',
+    periodTo: initialValues?.period_to ?? '',
   })
-  const [periodToDate, setPeriodToDate] = useState<Date | undefined>()
-  const [periodFromDate, setPeriodFromDate] = useState<Date | undefined>()
+  const [periodToDate, setPeriodToDate] = useState<Date | undefined>(
+    parseDateFromString(initialValues?.period_to)
+  )
+  const [periodFromDate, setPeriodFromDate] = useState<Date | undefined>(
+    parseDateFromString(initialValues?.period_from)
+  )
   const [errors, setErrors] = useState<ReleaseFormTypes>({
     dateType: '',
     publishTime: '',
@@ -54,7 +65,7 @@ export function ReleaseForm({ onFormSubmit, shortname }: ReleaseFormProps) {
   // TODO: Add validation for Date inputs; it's currently allowed to write anything on the fields
   const { datepickerProps: publishTimePickerProps, inputProps: publishTimeInputProps } = useDatepicker({
     onDateChange: (publishTime) => {
-      setValues((values) => ({ ...values, publishTime: parsePublishDateWithTime(publishTime) }))
+      setValues((values) => ({ ...values, publishTime: getDateWithTimeAsString(publishTime) }))
       setErrors((errors) => ({ ...errors, publishTime: '' }))
     },
   })
@@ -96,12 +107,18 @@ export function ReleaseForm({ onFormSubmit, shortname }: ReleaseFormProps) {
 
     if (!validateFields()) return
 
-    onFormSubmit({
+    const baseData = {
       release_date_precision: values.dateType,
       publish_time: values.publishTime,
       period_from: values.periodFrom,
       period_to: values.periodTo,
-    })
+    }
+
+    if (initialValues?.id) {
+      onFormSubmit({ ...values, id: initialValues.id })
+    } else {
+      onFormSubmit(baseData)
+    }
   }
 
   return (
