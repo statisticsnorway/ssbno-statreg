@@ -104,7 +104,7 @@ export function ReleaseForm({ onFormSubmit, shortname, initialValues }: ReleaseF
 
     if (!validateFields()) return
 
-    const baseData = {
+    const data = {
       release_date_precision: values.dateType,
       publish_time: values.publishTime,
       period_from: values.periodFrom,
@@ -114,7 +114,7 @@ export function ReleaseForm({ onFormSubmit, shortname, initialValues }: ReleaseF
     if (initialValues?.id) {
       onFormSubmit({ ...values, id: initialValues.id })
     } else {
-      onFormSubmit(baseData)
+      onFormSubmit(data)
     }
   }
 
