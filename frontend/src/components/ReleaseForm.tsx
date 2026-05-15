@@ -16,7 +16,7 @@ import { DatePicker } from './DatePicker'
 import { getDateOnlyAsString, getFirstDayOfNthMonth, getLastDayOfNthMonth, getDateTimeAsString } from '../lib/utils'
 import { type ReleaseCreate, type ReleaseUpdate } from '@ssbno-statreg/shared'
 
-const releaseDatePrecisions = ['Dag', 'Måned', 'År']
+const releaseDatePrecisions = ['dag', 'måned', 'år']
 
 type ReleaseFormTypes = {
   dateType?: string
@@ -55,14 +55,20 @@ export function ReleaseForm({ onFormSubmit, shortname, initialValues }: ReleaseF
     periodTo: '',
   })
 
+  const [publishTimeDate, setPublishTimeDate] = useState<Date | undefined>(
+    parseDateFromString(initialValues?.publish_time)
+  )
   // TODO: Add validation for Date inputs; it's currently allowed to write anything on the fields
   const { datepickerProps: publishTimePickerProps, inputProps: publishTimeInputProps } = useDatepicker({
+    defaultSelected: publishTimeDate,
     onDateChange: (publishTime) => {
+      setPublishTimeDate(publishTime)
       setValues((values) => ({ ...values, publishTime: getDateTimeAsString(publishTime) }))
       setErrors((errors) => ({ ...errors, publishTime: '' }))
     },
   })
   const { datepickerProps: periodFromPickerProps, inputProps: periodFromInputProps } = useDatepicker({
+    defaultSelected: periodFromDate,
     onDateChange: (periodFrom) => {
       setPeriodFromDate(periodFrom)
       setValues((values) => ({ ...values, periodFrom: getDateOnlyAsString(periodFrom) }))
@@ -70,6 +76,7 @@ export function ReleaseForm({ onFormSubmit, shortname, initialValues }: ReleaseF
     },
   })
   const { datepickerProps: periodToPickerProps, inputProps: periodToInputProps } = useDatepicker({
+    defaultSelected: periodToDate,
     onDateChange: (periodTo) => {
       setPeriodToDate(periodTo)
       setValues((values) => ({ ...values, periodTo: getDateOnlyAsString(periodTo) }))
@@ -133,7 +140,7 @@ export function ReleaseForm({ onFormSubmit, shortname, initialValues }: ReleaseF
           </Select.Option>
           {releaseDatePrecisions.map((precision) => (
             <Select.Option key={precision} value={precision}>
-              {precision}
+              {precision.charAt(0).toUpperCase() + precision.slice(1)}
             </Select.Option>
           ))}
         </Select>
