@@ -7,7 +7,7 @@ import { ReleaseForm } from '../components/ReleaseForm'
 
 import client from '../api'
 
-function UpdateRelease() {
+function EditRelease() {
   const { id } = useParams()
   const navigate = useNavigate()
   const [release, setRelease] = useState<ReleaseDetails>({})
@@ -43,7 +43,6 @@ function UpdateRelease() {
     }
   }
 
-
   const shortname = release.statistic?.shortname ?? ''
 
   return (
@@ -53,9 +52,9 @@ function UpdateRelease() {
           Rediger publiseringsdato
         </Heading>
       </div>
-      <ReleaseForm onFormSubmit={updateRelease} shortname={shortname} initialValues={release} />
+      {release.id && <ReleaseForm onFormSubmit={updateRelease} shortname={shortname} initialValues={release} />}
     </>
   )
 }
 
-export default UpdateRelease
+export default EditRelease
