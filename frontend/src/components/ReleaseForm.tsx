@@ -32,8 +32,7 @@ type ReleaseFormProps = {
 }
 
 function parseDateFromString(dateString: string | undefined): Date | undefined {
-  if (!dateString) return undefined
-  return new Date(dateString)
+  return dateString ? new Date(dateString) : undefined
 }
 
 export function ReleaseForm({ onFormSubmit, shortname, initialValues }: ReleaseFormProps) {
@@ -43,6 +42,9 @@ export function ReleaseForm({ onFormSubmit, shortname, initialValues }: ReleaseF
     periodFrom: initialValues?.period_from ?? '',
     periodTo: initialValues?.period_to ?? '',
   })
+  const [publishTimeDate, setPublishTimeDate] = useState<Date | undefined>(
+    parseDateFromString(initialValues?.publish_time)
+  )
   const [periodToDate, setPeriodToDate] = useState<Date | undefined>(parseDateFromString(initialValues?.period_to))
   const [periodFromDate, setPeriodFromDate] = useState<Date | undefined>(
     parseDateFromString(initialValues?.period_from)
@@ -53,10 +55,6 @@ export function ReleaseForm({ onFormSubmit, shortname, initialValues }: ReleaseF
     periodFrom: '',
     periodTo: '',
   })
-
-  const [publishTimeDate, setPublishTimeDate] = useState<Date | undefined>(
-    parseDateFromString(initialValues?.publish_time)
-  )
   // TODO: Add validation for Date inputs; it's currently allowed to write anything on the fields
   const { datepickerProps: publishTimePickerProps, inputProps: publishTimeInputProps } = useDatepicker({
     defaultSelected: publishTimeDate,
