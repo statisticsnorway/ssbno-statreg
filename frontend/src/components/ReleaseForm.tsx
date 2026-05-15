@@ -13,12 +13,7 @@ import {
 } from '@digdir/designsystemet-react'
 import { DatePicker as AkselDatePicker, useDatepicker } from '@navikt/ds-react/DatePicker'
 import { DatePicker } from './DatePicker'
-import {
-  getDateOnlyAsString,
-  getFirstDayOfNthMonth,
-  getLastDayOfNthMonth,
-  getDateWithTimeAsString,
-} from '../lib/utils'
+import { getDateOnlyAsString, getFirstDayOfNthMonth, getLastDayOfNthMonth, getDateTimeAsString } from '../lib/utils'
 import { type ReleaseCreate, type ReleaseUpdate } from '@ssbno-statreg/shared'
 
 const releaseDatePrecisions = ['Dag', 'Måned', 'År']
@@ -43,15 +38,13 @@ function parseDateFromString(dateString: string | undefined): Date | undefined {
 }
 
 export function ReleaseForm({ onFormSubmit, shortname, initialValues }: ReleaseFormProps) {
-  const [values, setValues] = useState<ReleaseUpdate>({
+  const [values, setValues] = useState<ReleaseFormTypes>({
     dateType: initialValues?.release_date_precision ?? '',
     publishTime: initialValues?.publish_time ?? '',
     periodFrom: initialValues?.period_from ?? '',
     periodTo: initialValues?.period_to ?? '',
   })
-  const [periodToDate, setPeriodToDate] = useState<Date | undefined>(
-    parseDateFromString(initialValues?.period_to)
-  )
+  const [periodToDate, setPeriodToDate] = useState<Date | undefined>(parseDateFromString(initialValues?.period_to))
   const [periodFromDate, setPeriodFromDate] = useState<Date | undefined>(
     parseDateFromString(initialValues?.period_from)
   )
@@ -65,7 +58,7 @@ export function ReleaseForm({ onFormSubmit, shortname, initialValues }: ReleaseF
   // TODO: Add validation for Date inputs; it's currently allowed to write anything on the fields
   const { datepickerProps: publishTimePickerProps, inputProps: publishTimeInputProps } = useDatepicker({
     onDateChange: (publishTime) => {
-      setValues((values) => ({ ...values, publishTime: getDateWithTimeAsString(publishTime) }))
+      setValues((values) => ({ ...values, publishTime: getDateTimeAsString(publishTime) }))
       setErrors((errors) => ({ ...errors, publishTime: '' }))
     },
   })

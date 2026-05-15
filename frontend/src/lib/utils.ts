@@ -47,7 +47,7 @@ export function getDateOnlyAsString(date: Date | undefined): string {
   return `${year}-${month}-${day}`
 }
 
-export function parsePublishDateWithTime(publishTime: Date | undefined): string {
+export function getDateTimeAsString(publishTime: Date | undefined): string {
   if (!publishTime) return ''
 
   const localPublishTime = new Date(publishTime)
