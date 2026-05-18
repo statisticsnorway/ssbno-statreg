@@ -77,8 +77,9 @@ describe('releasesService ', async () => {
   })
 
   describe('getFilteredReleases', () => {
-    test('returns mocked data filtered by shortnames', async () => {
+    test('returns mocked releases filtered by shortnames', async () => {
       setPrismaResult([mockedReleasesPrismaResult[0], mockedReleasesPrismaResult[2]])
+
       const result = await getFilteredReleases({ filterByShortnames: ['KPI', 'laks'] }, prismaMock)
 
       expect(result).toStrictEqual({ releases: [mockedReleasesResult[0], mockedReleasesResult[2]], total: 2 })
@@ -93,10 +94,21 @@ describe('releasesService ', async () => {
         })
       )
     })
+
+    test('returns mocked releases when filterByShortname is undefined', async () => {
+      setPrismaResult(mockedReleasesPrismaResult)
+
+      const result = await getFilteredReleases({}, prismaMock)
+
+      expect(result).toStrictEqual({ releases: mockedReleasesResult, total: 3 })
+      expect(prismaMock.release.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ skip: 0, take: 10, where: { variant: {} } })
+      )
+    })
   })
 
   describe('getVariantReleases', () => {
-    test('returns mocked data', async () => {
+    test('returns mocked releases filtered by variant', async () => {
       setPrismaResult(mockedReleasesPrismaResult)
       const result = await getVariantReleases({ shortname: 'KPI', variantId: 1 }, prismaMock)
 

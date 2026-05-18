@@ -126,8 +126,8 @@ export async function getVariantReleases(
   }: {
     start?: number
     count?: number
-    shortname?: string
-    variantId?: number
+    shortname: string
+    variantId: number
   },
   prisma: ReleasePrisma
 ): Promise<ReleaseListingResponse> {
