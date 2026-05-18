@@ -81,7 +81,7 @@ type PaginatedReleasesTableProps = {
   count: number
   total: number
   releases: ReleaseListing[]
-  updatedRowCount: (numberOfRows: number) => void
+  updateRowCount: (numberOfRows: number) => void
   setCurrentPage: (selectedPage: number) => void
 }
 
@@ -90,7 +90,7 @@ export function PaginatedReleasesTable({
   count,
   total,
   releases,
-  updatedRowCount,
+  updateRowCount,
   setCurrentPage,
 }: PaginatedReleasesTableProps) {
   return (
@@ -102,7 +102,7 @@ export function PaginatedReleasesTable({
           marginBottom: 'var(--ds-size-8)',
         }}
       >
-        <RowCountSelect showRowCount={count} updatedRowCount={updatedRowCount} />
+        <RowCountSelect selectedRowCount={count} updateRowCount={updateRowCount} />
       </div>
       <ReleasesTable releases={releases} />
       <Pagination start={start} count={count} total={total} setCurrentPage={setCurrentPage} />

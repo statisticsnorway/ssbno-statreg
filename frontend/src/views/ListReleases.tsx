@@ -32,7 +32,7 @@ function ListReleases() {
     }
   }
 
-  function updatedRowCount(newCount: number) {
+  function updateRowCount(newCount: number) {
     setRowCount(newCount)
     setStart(1)
   }
@@ -79,7 +79,7 @@ function ListReleases() {
         count={rowCount}
         total={total}
         releases={releases}
-        updatedRowCount={updatedRowCount}
+        updateRowCount={updateRowCount}
         setCurrentPage={setCurrentPage}
       />
     </>
