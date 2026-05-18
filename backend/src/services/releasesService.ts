@@ -132,7 +132,7 @@ export async function getVariantReleases(
   prisma: ReleasePrisma
 ): Promise<ReleaseListingResponse> {
   const safeShortname = sanitize(shortname)
-  const parsedVariantId = variantId ? parseId(variantId) : undefined
+  const parsedVariantId = parseId(variantId)
 
   const where = await buildVariantReleaseFilter({ shortname: safeShortname, variantId: parsedVariantId }, prisma)
 
@@ -215,37 +215,23 @@ export async function buildReleaseFilter(
 }
 
 export async function buildVariantReleaseFilter(
-  { shortname, variantId }: { shortname?: string; variantId?: number },
+  { shortname, variantId }: { shortname: string; variantId: number },
   prisma: ReleasePrisma
 ) {
-  if (!shortname && variantId === undefined) return
+  await releaseAsserts.assertStatisticExists(shortname, prisma)
+  await releaseAsserts.assertVariantExists(variantId, prisma)
+  await releaseAsserts.assertVariantMatchesShortname(variantId, shortname, prisma)
 
-  if (shortname) {
-    await releaseAsserts.assertStatisticExists(shortname, prisma)
+  return {
+    variant: {
+      id: variantId,
+      statistic: {
+        shortname: {
+          name: shortname,
+        },
+      },
+    },
   }
-
-  if (variantId !== undefined) {
-    await releaseAsserts.assertVariantExists(variantId, prisma)
-  }
-
-  if (shortname && variantId !== undefined) {
-    await releaseAsserts.assertVariantMatchesShortname(variantId, shortname, prisma)
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const where: any = { variant: {} }
-
-  if (variantId !== undefined) {
-    where.variant.id = variantId
-  }
-
-  if (shortname) {
-    where.variant.statistic = {
-      shortname: { name: shortname },
-    }
-  }
-
-  return where
 }
 
 export async function updateRelease(

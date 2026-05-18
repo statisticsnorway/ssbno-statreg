@@ -147,39 +147,6 @@ describe('releasesService ', async () => {
   })
 
   describe('buildVariantReleaseFilter', () => {
-    test('returns undefined when neither shortname nor variantId is provided', async () => {
-      const where = await buildVariantReleaseFilter({}, prismaMock)
-
-      expect(where).toBeUndefined()
-      expect(releaseAsserts.assertStatisticExists).toHaveBeenCalledTimes(0)
-      expect(releaseAsserts.assertVariantExists).toHaveBeenCalledTimes(0)
-      expect(releaseAsserts.assertVariantMatchesShortname).toHaveBeenCalledTimes(0)
-    })
-
-    test('applies filter when only shortname is provided', async () => {
-      const where = await buildVariantReleaseFilter({ shortname: 'KPI' }, prismaMock)
-
-      expect(where).toStrictEqual({
-        variant: { statistic: { shortname: { name: 'KPI' } } },
-      })
-
-      expect(releaseAsserts.assertStatisticExists).toHaveBeenCalledExactlyOnceWith('KPI', prismaMock)
-      expect(releaseAsserts.assertVariantExists).toHaveBeenCalledTimes(0)
-      expect(releaseAsserts.assertVariantMatchesShortname).toHaveBeenCalledTimes(0)
-    })
-
-    test('applies filter when only variantId is provided', async () => {
-      const where = await buildVariantReleaseFilter({ variantId: 1 }, prismaMock)
-
-      expect(where).toStrictEqual({
-        variant: { id: 1 },
-      })
-
-      expect(releaseAsserts.assertStatisticExists).toHaveBeenCalledTimes(0)
-      expect(releaseAsserts.assertVariantExists).toHaveBeenCalledExactlyOnceWith(1, prismaMock)
-      expect(releaseAsserts.assertVariantMatchesShortname).toHaveBeenCalledTimes(0)
-    })
-
     test('applies combined filter when both inputs are provided', async () => {
       const where = await buildVariantReleaseFilter({ shortname: 'KPI', variantId: 1 }, prismaMock)
 
@@ -197,7 +164,9 @@ describe('releasesService ', async () => {
         throw { status: 404, statregError: "Statistic 'BAD' not found" }
       }) as any
 
-      await expect(() => buildVariantReleaseFilter({ shortname: 'BAD' }, prismaMock)).rejects.toMatchObject({
+      await expect(() =>
+        buildVariantReleaseFilter({ shortname: 'BAD', variantId: 0 }, prismaMock)
+      ).rejects.toMatchObject({
         status: 404,
         statregError: "Statistic 'BAD' not found",
       })
@@ -208,7 +177,9 @@ describe('releasesService ', async () => {
         throw { status: 404, statregError: "Variant '999' not found" }
       }) as any
 
-      await expect(() => buildVariantReleaseFilter({ variantId: 999 }, prismaMock)).rejects.toMatchObject({
+      await expect(() =>
+        buildVariantReleaseFilter({ shortname: 'KPI', variantId: 999 }, prismaMock)
+      ).rejects.toMatchObject({
         status: 404,
         statregError: "Variant '999' not found",
       })
