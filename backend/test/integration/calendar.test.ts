@@ -7,13 +7,13 @@ const headers = {
 }
 describe('calendarController ', () => {
   test('creates blocked date when client posts', async () => {
-    const response = await fetch(`${BASE_URL}/calendar/blocked-release-days/2026-05-07`, {
+    const response = await fetch(`${BASE_URL}/calendar/blocked-release-days/2027-05-07`, {
       method: 'POST',
       headers: headers,
       body: JSON.stringify({ blocked_comment: 'Inneklemt dag' }),
     })
-    expect(response.status).toBe(200)
     const json = await response.json()
+    expect(response.status).toBe(200)
     expect(json).toContainEqual({
       blocked_comment: 'Inneklemt dag',
       date: '2027-05-07',
