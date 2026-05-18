@@ -1,10 +1,11 @@
-import { Table, Link, usePagination } from '@digdir/designsystemet-react'
+import { Table, Link } from '@digdir/designsystemet-react'
 
 import { type ReleaseListing } from '@ssbno-statreg/shared'
 import { ApprovalStatusBadge } from '../components/ApprovalStatus'
 import { formatPublishTime, formatDate } from '../lib/utils'
-import { ShowRowCountSelect, Pagination } from './Pagination'
+import { Pagination } from './Pagination'
 import '../views/ListReleases.css'
+import { RowCountSelect } from './RowCountSelect'
 
 const TABLE_HEADER_CELLS = [
   'Kortnavn',
@@ -101,7 +102,7 @@ export function PaginatedReleasesTable({
           marginBottom: 'var(--ds-size-8)',
         }}
       >
-        <ShowRowCountSelect showRowCount={count} updatedRowCount={updatedRowCount} />
+        <RowCountSelect showRowCount={count} updatedRowCount={updatedRowCount} />
       </div>
       <ReleasesTable releases={releases} />
       <Pagination start={start} count={count} total={total} setCurrentPage={setCurrentPage} />
