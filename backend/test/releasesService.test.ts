@@ -3,10 +3,13 @@ import { vi, describe, test, expect, beforeEach } from 'vitest'
 import { releaseAsserts } from '@/lib/asserts'
 import {
   getReleases,
+  getFilteredReleases,
+  getVariantReleases,
   getReleaseById,
   updateRelease,
   createRelease,
   buildReleaseFilter,
+  buildVariantReleaseFilter,
   ReleaseDetailsIncludes,
   mapToReleaseDetails,
 } from '@/services/releasesService'
@@ -64,14 +67,21 @@ describe('releasesService ', async () => {
       expect(prismaMock.release.findMany).toHaveBeenCalledWith(expect.objectContaining({ skip: 0, take: 10 }))
     })
 
-    test('returns mocked data filtered shortnames', async () => {
+    test('returns empty list if no results', async () => {
+      setPrismaResult([])
+
+      const result = await getReleases({}, prismaMock)
+
+      expect(result).toStrictEqual({ releases: [], total: 0 })
+    })
+  })
+
+  describe('getFilteredReleases', () => {
+    test('returns mocked data filtered by shortnames', async () => {
       setPrismaResult([mockedReleasesPrismaResult[0], mockedReleasesPrismaResult[2]])
+      const result = await getFilteredReleases({ filterByShortnames: ['KPI', 'laks'] }, prismaMock)
 
-      const result = await getReleases({ filterByShortnames: ['KPI', 'laks'] }, prismaMock)
-
-      // The total for mocked data is set as releasesResult.length, so it will reflect the length of the filtered data in this test
       expect(result).toStrictEqual({ releases: [mockedReleasesResult[0], mockedReleasesResult[2]], total: 2 })
-
       expect(prismaMock.release.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: {
@@ -83,19 +93,50 @@ describe('releasesService ', async () => {
         })
       )
     })
+  })
 
-    test('returns empty list if no results', async () => {
-      setPrismaResult([])
+  describe('getVariantReleases', () => {
+    test('returns mocked data', async () => {
+      setPrismaResult(mockedReleasesPrismaResult)
+      const result = await getVariantReleases({ shortname: 'KPI', variantId: 1 }, prismaMock)
 
-      const result = await getReleases({}, prismaMock)
-
-      expect(result).toStrictEqual({ releases: [], total: 0 })
+      expect(result).toStrictEqual({ releases: mockedReleasesResult, total: 3 })
+      expect(prismaMock.release.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            variant: { id: 1, statistic: { shortname: { name: 'KPI' } } },
+          },
+        })
+      )
     })
   })
 
   describe('buildReleaseFilter', () => {
+    test('applies filter when only filterByShortname is provided', async () => {
+      const where = await buildReleaseFilter({ filterByShortnames: ['KPI'] }, prismaMock)
+
+      expect(where).toStrictEqual({
+        OR: [{ variant: { statistic: { shortname: { name: 'KPI' } } } }],
+      })
+
+      expect(releaseAsserts.assertFilteredShortnamesExist).toHaveBeenCalledExactlyOnceWith(['KPI'], prismaMock)
+    })
+
+    test('throws when shortname does not exist', async () => {
+      releaseAsserts.assertFilteredShortnamesExist = vi.fn(async () => {
+        throw { status: 404, statregError: "Shortname(s) not found: 'BAD'" }
+      }) as any
+
+      await expect(() => buildReleaseFilter({ filterByShortnames: ['BAD', 'KPI'] }, prismaMock)).rejects.toMatchObject({
+        status: 404,
+        statregError: "Shortname(s) not found: 'BAD'",
+      })
+    })
+  })
+
+  describe('buildVariantReleaseFilter', () => {
     test('returns undefined when neither shortname nor variantId is provided', async () => {
-      const where = await buildReleaseFilter({}, prismaMock)
+      const where = await buildVariantReleaseFilter({}, prismaMock)
 
       expect(where).toBeUndefined()
       expect(releaseAsserts.assertStatisticExists).toHaveBeenCalledTimes(0)
@@ -104,7 +145,7 @@ describe('releasesService ', async () => {
     })
 
     test('applies filter when only shortname is provided', async () => {
-      const where = await buildReleaseFilter({ shortname: 'KPI' }, prismaMock)
+      const where = await buildVariantReleaseFilter({ shortname: 'KPI' }, prismaMock)
 
       expect(where).toStrictEqual({
         variant: { statistic: { shortname: { name: 'KPI' } } },
@@ -116,7 +157,7 @@ describe('releasesService ', async () => {
     })
 
     test('applies filter when only variantId is provided', async () => {
-      const where = await buildReleaseFilter({ variantId: 1 }, prismaMock)
+      const where = await buildVariantReleaseFilter({ variantId: 1 }, prismaMock)
 
       expect(where).toStrictEqual({
         variant: { id: 1 },
@@ -128,7 +169,7 @@ describe('releasesService ', async () => {
     })
 
     test('applies combined filter when both inputs are provided', async () => {
-      const where = await buildReleaseFilter({ shortname: 'KPI', variantId: 1 }, prismaMock)
+      const where = await buildVariantReleaseFilter({ shortname: 'KPI', variantId: 1 }, prismaMock)
 
       expect(where).toStrictEqual({
         variant: { id: 1, statistic: { shortname: { name: 'KPI' } } },
@@ -136,21 +177,7 @@ describe('releasesService ', async () => {
 
       expect(releaseAsserts.assertStatisticExists).toHaveBeenCalledExactlyOnceWith('KPI', prismaMock)
       expect(releaseAsserts.assertVariantExists).toHaveBeenCalledExactlyOnceWith(1, prismaMock)
-
       expect(releaseAsserts.assertVariantMatchesShortname).toHaveBeenCalledExactlyOnceWith(1, 'KPI', prismaMock)
-    })
-
-    test('applies filter when only filterByShortname is provided', async () => {
-      const where = await buildReleaseFilter({ filterByShortnames: ['KPI'] }, prismaMock)
-
-      expect(where).toStrictEqual({
-        OR: [{ variant: { statistic: { shortname: { name: 'KPI' } } } }],
-      })
-
-      expect(releaseAsserts.assertFilteredShortnamesExist).toHaveBeenCalledExactlyOnceWith(['KPI'], prismaMock)
-      expect(releaseAsserts.assertStatisticExists).toHaveBeenCalledTimes(0)
-      expect(releaseAsserts.assertVariantExists).toHaveBeenCalledTimes(0)
-      expect(releaseAsserts.assertVariantMatchesShortname).toHaveBeenCalledTimes(0)
     })
 
     test('throws when statistic does not exist', async () => {
@@ -158,7 +185,7 @@ describe('releasesService ', async () => {
         throw { status: 404, statregError: "Statistic 'BAD' not found" }
       }) as any
 
-      await expect(() => buildReleaseFilter({ shortname: 'BAD' }, prismaMock)).rejects.toMatchObject({
+      await expect(() => buildVariantReleaseFilter({ shortname: 'BAD' }, prismaMock)).rejects.toMatchObject({
         status: 404,
         statregError: "Statistic 'BAD' not found",
       })
@@ -169,7 +196,7 @@ describe('releasesService ', async () => {
         throw { status: 404, statregError: "Variant '999' not found" }
       }) as any
 
-      await expect(() => buildReleaseFilter({ variantId: 999 }, prismaMock)).rejects.toMatchObject({
+      await expect(() => buildVariantReleaseFilter({ variantId: 999 }, prismaMock)).rejects.toMatchObject({
         status: 404,
         statregError: "Variant '999' not found",
       })
@@ -180,20 +207,11 @@ describe('releasesService ', async () => {
         throw { status: 404, statregError: "Variant does not belong to statistic 'KPI'" }
       }) as any
 
-      await expect(() => buildReleaseFilter({ shortname: 'KPI', variantId: 1 }, prismaMock)).rejects.toMatchObject({
+      await expect(() =>
+        buildVariantReleaseFilter({ shortname: 'KPI', variantId: 1 }, prismaMock)
+      ).rejects.toMatchObject({
         status: 404,
         statregError: "Variant does not belong to statistic 'KPI'",
-      })
-    })
-
-    test('throws when shortname does not exist', async () => {
-      releaseAsserts.assertFilteredShortnamesExist = vi.fn(async () => {
-        throw { status: 404, statregError: "Shortname(s) not found: 'BAD'" }
-      }) as any
-
-      await expect(() => buildReleaseFilter({ filterByShortnames: ['BAD', 'KPI'] }, prismaMock)).rejects.toMatchObject({
-        status: 404,
-        statregError: "Shortname(s) not found: 'BAD'",
       })
     })
   })
