@@ -8,7 +8,8 @@ export type CalendarDatePrisma = Pick<ExtendedPrismaClient, 'calender_date' | 'r
 export async function createBlockedReleaseDay(
   prisma: CalendarDatePrisma,
   dateString?: string | string[],
-  body?: { blocked_comment?: string }
+  body?: { blocked_comment?: string },
+  now?: Date
 ): Promise<BlockedReleaseDate[]> {
   const date = parseDateOnly(dateString)
   const { blocked_comment } = ensureRequiredFieldsExists(body, ['blocked_comment'])
@@ -34,7 +35,7 @@ export async function createBlockedReleaseDay(
   const blockedDays = await prisma.calender_date.findMany({
     where: {
       day: {
-        gt: new Date(),
+        gt: now,
       },
     },
     select: { comment: true, day: true },

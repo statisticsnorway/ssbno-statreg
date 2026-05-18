@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { handleErrors } from '@/lib/prismaErrors'
+import { ensureString } from '@/lib/utils'
 import { createBlockedReleaseDay, getDateStatusForRange } from '@/services/calendarService'
 import { Router } from 'express'
 import { requireAdminAuthorization, skipAuth } from 'plugins/authMiddleware'
@@ -7,7 +8,9 @@ import { requireAdminAuthorization, skipAuth } from 'plugins/authMiddleware'
 export default function calendarController(router: Router) {
   router.post('/calendar/blocked-release-days/:date', requireAdminAuthorization(), async (req, res) => {
     try {
-      const result = await createBlockedReleaseDay(prisma, req.params.date, req.body)
+      const mockedNow = req?.headers['x-test-now']
+      const now = mockedNow ? new Date(ensureString(mockedNow)) : new Date()
+      const result = await createBlockedReleaseDay(prisma, req.params.date, req.body, now)
       res.json(result)
     } catch (error) {
       handleErrors(error, res)

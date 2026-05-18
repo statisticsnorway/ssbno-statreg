@@ -5,11 +5,15 @@ const BASE_URL = process.env.API_URL ?? 'http://localhost:8080/statistikkregiste
 const headers = {
   'Content-Type': 'application/json',
 }
+
 describe('calendarController ', () => {
   test('creates blocked date when client posts', async () => {
     const response = await fetch(`${BASE_URL}/calendar/blocked-release-days/2026-05-15`, {
       method: 'POST',
-      headers: headers,
+      headers: {
+        ...headers,
+        'x-test-now': '2026-05-01T00:00:00.000Z',
+      },
       body: JSON.stringify({ blocked_comment: 'Inneklemt dag' }),
     })
     expect(response.status).toBe(200)
