@@ -41,10 +41,10 @@ describe('releasesService ', async () => {
         findFirst: vi.fn(() => Promise.resolve({ id: 1 })),
       },
     }
-    releaseAsserts.assertStatisticExists = vi.fn(async () => undefined) as any
-    releaseAsserts.assertVariantExists = vi.fn(async () => undefined) as any
-    releaseAsserts.assertVariantMatchesShortname = vi.fn(async () => undefined) as any
-    releaseAsserts.assertFilteredShortnamesExist = vi.fn(async () => undefined) as any
+    releaseAsserts.assertStatisticExists = vi.fn(async () => true) as any
+    releaseAsserts.assertVariantExists = vi.fn(async () => true) as any
+    releaseAsserts.assertVariantMatchesShortname = vi.fn(async () => true) as any
+    releaseAsserts.assertFilteredShortnamesExist = vi.fn(async () => true) as any
   })
 
   describe('getReleases ', () => {
