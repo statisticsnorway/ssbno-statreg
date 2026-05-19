@@ -9,7 +9,7 @@ import {
 import { requireAdminAuthorization, skipAuth } from 'plugins/authMiddleware'
 import { handleErrors } from '@/lib/prismaErrors'
 import { prisma } from '@/lib/prisma'
-import { ensureString, ensureArray } from '@/lib/utils'
+import { ensureString, ensureStringArray } from '@/lib/utils'
 
 export default function releasesController(router: Router) {
   router.get('/releases/:id', skipAuth, async (req, res) => {
@@ -27,8 +27,10 @@ export default function releasesController(router: Router) {
     try {
       const start = req.query?.start ? Number(req.query.start) : undefined
       const count = req.query?.count ? Number(req.query.count) : undefined
-      const filterByShortnames = ensureArray(req.query.shortname)
-      const sort = ensureArray(req.query.sort)
+
+      const filterByShortnames = ensureStringArray(req.query.shortname as string)
+      const sort = ensureStringArray(req.query.sort as string)
+
       const data = await getFilteredReleases({ start, count, filterByShortnames, sort }, prisma)
       res.json(data)
     } catch (error) {
@@ -53,7 +55,7 @@ export default function releasesController(router: Router) {
 
       const start = req.query?.start ? Number(req.query.start) : undefined
       const count = req.query?.count ? Number(req.query.count) : undefined
-      const sort = ensureArray(req.query.sort)
+      const sort = ensureStringArray(req.query.sort as string)
 
       const data = await getVariantReleases({ start, count, shortname, variantId, sort }, prisma)
       res.json(data)

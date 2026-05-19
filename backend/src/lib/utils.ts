@@ -40,7 +40,7 @@ export function ensureString(value?: string | string[]): string {
   return Array.isArray(value) ? (value[0] ?? '') : (value ?? '')
 }
 
-export function ensureArray(value?: string | string[]): string[] {
+export function ensureStringArray(value?: string): string[] {
   return typeof value === 'string' ? value.split(',') : []
 }
 

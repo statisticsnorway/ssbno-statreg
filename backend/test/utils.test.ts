@@ -4,6 +4,7 @@ import {
   parseDateOnly,
   parseDateISO,
   ensureString,
+  ensureStringArray,
   parseId,
   ensureRequiredFieldsExists,
   isNumber,
@@ -133,6 +134,29 @@ describe('utils', () => {
     test('returns empty string if string is undefined', () => {
       const result = ensureString(undefined)
       expect(result).toBe('')
+    })
+  })
+
+  describe('ensureStringArray', () => {
+    test('returns array of strings when passed a comma-separated string', () => {
+      const result = ensureStringArray('value1,value2,value3')
+      expect(result).toEqual(['value1', 'value2', 'value3'])
+    })
+
+    test('returns array of string when passed string', () => {
+      const result = ensureStringArray('value1')
+      expect(result).toEqual(['value1'])
+    })
+
+    test('returns empty array when passed undefined', () => {
+      const result = ensureStringArray(undefined)
+      expect(result).toEqual([])
+    })
+
+    test('returns empty array when passed a non-string value', () => {
+      // @ts-expect-error testing non-string input
+      const result = ensureStringArray([123])
+      expect(result).toEqual([])
     })
   })
 
