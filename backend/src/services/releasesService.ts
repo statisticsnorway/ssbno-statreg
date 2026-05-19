@@ -248,11 +248,6 @@ export async function buildVariantReleaseFilter(
   return {
     variant: {
       id: variantId,
-      statistic: {
-        shortname: {
-          name: shortname,
-        },
-      },
     },
   }
 }
