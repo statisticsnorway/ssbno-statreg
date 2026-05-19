@@ -218,11 +218,14 @@ export async function buildVariantReleaseFilter(
   { shortname, variantId }: { shortname: string; variantId: number },
   prisma: ReleasePrisma
 ) {
-  await releaseAsserts.assertStatisticExists(shortname, prisma)
-  await releaseAsserts.assertVariantExists(variantId, prisma)
+  await Promise.all([
+    releaseAsserts.assertStatisticExists(shortname, prisma),
+    releaseAsserts.assertVariantExists(variantId, prisma),
+  ])
+
   await releaseAsserts.assertVariantMatchesShortname(variantId, shortname, prisma)
 
-  const where = {
+  return {
     variant: {
       id: variantId,
       statistic: {
@@ -232,8 +235,6 @@ export async function buildVariantReleaseFilter(
       },
     },
   }
-
-  return where
 }
 
 export async function updateRelease(
