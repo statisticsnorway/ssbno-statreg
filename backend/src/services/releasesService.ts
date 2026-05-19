@@ -52,7 +52,7 @@ export async function getReleases(
     skip: start,
     take: count,
     where,
-    orderBy,
+    orderBy: orderBy.length ? orderBy : { publish_time: 'desc' },
     select: {
       id: true,
       version: true,
