@@ -9,7 +9,7 @@ import {
 import { requireAdminAuthorization, skipAuth } from 'plugins/authMiddleware'
 import { handleErrors } from '@/lib/prismaErrors'
 import { prisma } from '@/lib/prisma'
-import { ensureString } from '@/lib/utils'
+import { ensureString, ensureArray } from '@/lib/utils'
 
 export default function releasesController(router: Router) {
   router.get('/releases/:id', skipAuth, async (req, res) => {
@@ -27,8 +27,9 @@ export default function releasesController(router: Router) {
     try {
       const start = req.query?.start ? Number(req.query.start) : undefined
       const count = req.query?.count ? Number(req.query.count) : undefined
-      const filterByShortnames = typeof req.query.shortname === 'string' ? req.query.shortname?.split(',') : undefined
-      const data = await getFilteredReleases({ start, count, filterByShortnames }, prisma)
+      const filterByShortnames = ensureArray(req.query.shortname)
+      const sort = ensureArray(req.query.sort)
+      const data = await getFilteredReleases({ start, count, filterByShortnames, sort }, prisma)
       res.json(data)
     } catch (error) {
       return handleErrors(error, res)
@@ -37,7 +38,7 @@ export default function releasesController(router: Router) {
 
   router.put('/releases/:id', requireAdminAuthorization(), async (req, res) => {
     try {
-      const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id
+      const id = ensureString(req.params.id)
       const result = await updateRelease(prisma, id!, req.body)
       res.json(result)
     } catch (error) {
@@ -52,8 +53,9 @@ export default function releasesController(router: Router) {
 
       const start = req.query?.start ? Number(req.query.start) : undefined
       const count = req.query?.count ? Number(req.query.count) : undefined
+      const sort = ensureArray(req.query.sort)
 
-      const data = await getVariantReleases({ start, count, shortname, variantId }, prisma)
+      const data = await getVariantReleases({ start, count, shortname, variantId, sort }, prisma)
       res.json(data)
     } catch (error) {
       return handleErrors(error, res)
