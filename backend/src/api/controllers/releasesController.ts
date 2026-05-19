@@ -15,7 +15,7 @@ export default function releasesController(router: Router) {
   router.get('/releases/:id', skipAuth, async (req, res) => {
     try {
       // If id is undefined, controller will evaluate '/releases' instead
-      const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id
+      const id = ensureString(req.params.id)
       const data = await getReleaseById(id!, prisma)
       res.json(data)
     } catch (error) {

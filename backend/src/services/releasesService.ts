@@ -34,19 +34,21 @@ export async function getReleases(
   },
   prisma: ReleasePrisma
 ): Promise<ReleaseListingResponse> {
-  const allowedSortingFields = ['publish_time']
+  const allowedSortingFields = new Set<keyof Prisma.ReleaseOrderByWithRelationInput>(['publish_time'])
   const orderBy = (sort ?? [])
     .map((field) => {
       const isDesc = field.startsWith('-')
       const key = isDesc ? field.slice(1) : field
 
-      if (!allowedSortingFields.includes(key)) return null
+      if (!allowedSortingFields.has(key as keyof Prisma.ReleaseOrderByWithRelationInput)) {
+        return null
+      }
 
       return {
         [key]: isDesc ? 'desc' : 'asc',
-      }
+      } as Prisma.ReleaseOrderByWithRelationInput
     })
-    .filter(Boolean) as Prisma.ReleaseOrderByWithRelationInput[]
+    .filter((v): v is Prisma.ReleaseOrderByWithRelationInput => v !== null)
 
   const releases = await prisma.release.findMany({
     skip: start,
