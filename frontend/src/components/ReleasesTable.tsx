@@ -3,8 +3,9 @@ import { Table, Link } from '@digdir/designsystemet-react'
 import { type ReleaseListing } from '@ssbno-statreg/shared'
 import { ApprovalStatusBadge } from '../components/ApprovalStatus'
 import { formatPublishTime, formatDate } from '../lib/utils'
-import { ShowRowCountSelect, Pagination, useTablePagination, type FetchTableData } from './Pagination'
+import { Pagination } from './Pagination'
 import '../views/ListReleases.css'
+import { RowCountSelect } from './RowCountSelect'
 
 const TABLE_HEADER_CELLS = [
   'Kortnavn',
@@ -75,39 +76,36 @@ export function ReleasesTable({ releases }: { releases: ReleaseListing[] }) {
   )
 }
 
-export function PaginatedReleasesTable({ fetchReleases }: { fetchReleases: FetchTableData }) {
-  const {
-    tableData: paginatedReleases,
-    handleChangeShowRowCount,
-    showRowCount,
-    pages,
-    prevButtonProps,
-    nextButtonProps,
-    hasNext,
-    hasPrev,
-  } = useTablePagination({ fetchTableData: fetchReleases })
+type PaginatedReleasesTableProps = {
+  start: number
+  count: number
+  total: number
+  releases: ReleaseListing[]
+  updateRowCount: (numberOfRows: number) => void
+  setCurrentPage: (selectedPage: number) => void
+}
 
+export function PaginatedReleasesTable({
+  start,
+  count,
+  total,
+  releases,
+  updateRowCount,
+  setCurrentPage,
+}: PaginatedReleasesTableProps) {
   return (
     <div style={{ minWidth: '100%' }}>
       <div
         style={{
           display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'end',
+          justifyContent: 'end',
           marginBottom: 'var(--ds-size-8)',
         }}
       >
-        <ShowRowCountSelect showRowCount={showRowCount} onChange={handleChangeShowRowCount} />
+        <RowCountSelect selectedRowCount={count} updateRowCount={updateRowCount} />
       </div>
-      <ReleasesTable releases={paginatedReleases} />
-      <Pagination
-        pages={pages}
-        prevButtonProps={prevButtonProps}
-        nextButtonProps={nextButtonProps}
-        hasPrev={hasPrev}
-        hasNext={hasNext}
-      />
+      <ReleasesTable releases={releases} />
+      <Pagination start={start} count={count} total={total} setCurrentPage={setCurrentPage} />
     </div>
   )
 }
