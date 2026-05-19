@@ -8,6 +8,7 @@ import {
   type ReleaseCreate,
   type ReleaseDetails,
   type ReleaseListing,
+  type StatisticDetails,
   ApprovalStatus,
   RevisionNames,
 } from '@ssbno-statreg/shared'
@@ -21,66 +22,57 @@ import { ApprovalStatusTag } from '../components/ApprovalStatus'
 import client from '../api'
 import ReleaseFormModal from '../components/ReleaseFormModal'
 
-type CreateReleaseTablesProps = {
-  releases: ReleaseListing[]
-  variant: string
-}
-
-function CreateReleaseTables({ releases, variant }: CreateReleaseTablesProps) {
+function OtherReleasesOnThisVariantPanel() {
   const { shortname, variantId } = useParams()
+  const [rowCount, setRowCount] = useState(10)
+  const [start, setStart] = useState(0)
+  const [releases, setReleases] = useState<ReleaseListing[]>([])
+  const [total, setTotal] = useState(0)
 
-  async function fetchVariantReleases({ start, count }: { start: number; count: number }) {
-    const { data, error } = await client.GET('/statistics/{shortname}/variants/{id}/releases', {
-      params: { path: { shortname: shortname as string, id: Number(variantId) }, query: { start, count } },
-    })
-
-    if (error) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const errorMessage = (error as any).error
-      console.log(errorMessage)
-      alert(errorMessage)
+  useEffect(() => {
+    async function fetchVariantRelease() {
+      const variantIdAsNumber = Number(variantId)
+      const { data, error } = await client.GET('/statistics/{shortname}/variants/{id}/releases', {
+        params: { path: { shortname: shortname as string, id: variantIdAsNumber } },
+      })
+      if (error) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const errorMessage = (error as any).error
+        console.log(errorMessage)
+        alert(errorMessage)
+      } else {
+        setReleases(data?.releases ?? [])
+        setTotal(data.total ?? 0)
+      }
     }
+    fetchVariantRelease()
+  }, [shortname, variantId])
 
-    return {
-      tableData: data?.releases ?? [],
-      total: data?.total ?? 0,
-    }
+  function updateRowCount(newCount: number) {
+    setRowCount(newCount)
+    setStart(1)
+  }
+
+  function setCurrentPage(currentPage: number) {
+    setStart((currentPage - 1) * rowCount)
   }
 
   return (
-    <Tabs defaultValue='selected-publish-date' className='create-release-tables-tab'>
-      <Tabs.List>
-        <Tabs.Tab value='selected-publish-date'>
-          <CalendarIcon />
-          Publiseringer på valgt dato
-        </Tabs.Tab>
-        <Tabs.Tab value='variant-releases'>
-          Alle publiseringer på {shortname}, {variant}
-        </Tabs.Tab>
-      </Tabs.List>
-      <Tabs.Panel className='p-0' value='selected-publish-date'>
-        <div className='description-wrapper'>
-          {/* TODO: Placeholder date and day status for description */}
-          <span>Innmeldte datoer den {formatDate(releases[0]?.publish_time)}</span>
-          <DayStatusTag status={'MANY'} />
-        </div>
-        <ReleasesTable releases={releases} />
-      </Tabs.Panel>
-      <Tabs.Panel className='p-0' value='variant-releases'>
-        <PaginatedReleasesTable fetchReleases={fetchVariantReleases} />
-      </Tabs.Panel>
-    </Tabs>
+    <Tabs.Panel className='p-0' value='variant-releases'>
+      <PaginatedReleasesTable
+        start={start}
+        count={rowCount}
+        total={total}
+        releases={releases}
+        updateRowCount={updateRowCount}
+        setCurrentPage={setCurrentPage}
+      />
+    </Tabs.Panel>
   )
 }
 
-function CreateRelease() {
+function OtherReleasesOnThisDatePanel() {
   const [releases, setReleases] = useState<ReleaseListing[]>([])
-  const [variantReleases, setVariantReleases] = useState<ReleaseListing[]>([])
-  const [openCreateReleaseModal, setOpenCreateReleaseModal] = useState(false)
-  const [createdRelease, setCreatedRelease] = useState<ReleaseDetails>({})
-
-  const { shortname, variantId } = useParams()
-  const variantIdAsNumber = Number(variantId)
 
   useEffect(() => {
     async function fetchReleases() {
@@ -95,24 +87,45 @@ function CreateRelease() {
       }
     }
     fetchReleases()
-  }, [])
+  })
+
+  return (
+    <Tabs.Panel className='p-0' value='selected-publish-date'>
+      <div className='description-wrapper'>
+        {/* TODO: Placeholder date and day status for description */}
+        <span>Innmeldte datoer den {formatDate(releases[0]?.publish_time)}</span>
+        {/* TODO: Get status from the calendar response */}
+        <DayStatusTag status={'MANY'} />
+      </div>
+      <ReleasesTable releases={releases} />
+    </Tabs.Panel>
+  )
+}
+
+function CreateRelease() {
+  const [openCreateReleaseModal, setOpenCreateReleaseModal] = useState(false)
+  const [createdRelease, setCreatedRelease] = useState<ReleaseDetails>({})
+  const [statistic, setStatistic] = useState<StatisticDetails>({})
+
+  const { shortname, variantId } = useParams()
 
   useEffect(() => {
-    async function fetchVariantRelease() {
-      const { data, error } = await client.GET('/statistics/{shortname}/variants/{id}/releases', {
-        params: { path: { shortname: shortname as string, id: variantIdAsNumber } },
+    async function fetchStatistic(shortname?: string) {
+      const { data, error } = await client.GET('/statistics/{shortname}', {
+        params: { path: { shortname: shortname as string } },
       })
+
       if (error) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const errorMessage = (error as any).error
         console.log(errorMessage)
         alert(errorMessage)
       } else {
-        setVariantReleases(data?.releases ?? [])
+        setStatistic(data)
       }
     }
-    fetchVariantRelease()
-  }, [shortname, variantIdAsNumber])
+    fetchStatistic(shortname)
+  }, [shortname])
 
   async function createRelease(body: ReleaseCreate) {
     const { data, error } = await client.POST('/statistics/{shortname}/variants/{id}/releases', {
@@ -131,10 +144,10 @@ function CreateRelease() {
     }
   }
 
-  const statisticName = variantReleases[0]?.statistic?.name ?? ''
-  const statisticShortname = variantReleases[0]?.statistic?.shortname ?? ''
-  const variant = variantReleases[0]?.frequency?.name?.toLowerCase() ?? ''
-  const approvalStatus = variantReleases[0]?.approval_status ?? ApprovalStatus.PENDING
+  const statisticName = statistic?.name ?? ''
+  const statisticShortname = shortname
+  const frequency = statistic.variants?.find((variant) => variant.id === variantId)?.frequency ?? ''
+  const approvalStatus = ApprovalStatus.PENDING
 
   const createdReleaseVariant = createdRelease?.variant
   const createdReleaseFrequency = createdReleaseVariant?.frequency?.name
@@ -150,7 +163,7 @@ function CreateRelease() {
           Meld publiseringsdato
         </Heading>
         <Heading data-size='xs' level={2}>
-          {statisticName} ({statisticShortname}) og {variant}
+          {statisticName} ({statisticShortname}) og {frequency.toString()}
         </Heading>
         <ApprovalStatusTag status={approvalStatus} />
       </div>
@@ -162,7 +175,19 @@ function CreateRelease() {
         createdRelease={createdRelease}
         setOpenCreateReleaseModal={setOpenCreateReleaseModal}
       />
-      <CreateReleaseTables releases={releases} variant={variant} />
+      <Tabs defaultValue='selected-publish-date' className='create-release-tables-tab'>
+        <Tabs.List>
+          <Tabs.Tab value='selected-publish-date'>
+            <CalendarIcon />
+            Publiseringer på valgt dato
+          </Tabs.Tab>
+          <Tabs.Tab value='variant-releases'>
+            Alle publiseringer på {shortname}, {frequency.toString()}
+          </Tabs.Tab>
+        </Tabs.List>
+        <OtherReleasesOnThisDatePanel />
+        <OtherReleasesOnThisVariantPanel />
+      </Tabs>
     </>
   )
 }
