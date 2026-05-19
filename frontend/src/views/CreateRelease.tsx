@@ -148,7 +148,7 @@ function CreateRelease() {
 
   const statisticName = statistic?.name ?? ''
   const statisticShortname = shortname
-  const frequency = statistic.variants?.find((variant) => variant.id === variantId)?.frequency ?? ''
+  const frequency = statistic.variants?.find((variant) => variant.id === Number(variantId))?.frequency?.name ?? ''
   const approvalStatus = ApprovalStatus.PENDING
 
   const createdReleaseVariant = createdRelease?.variant
@@ -165,7 +165,7 @@ function CreateRelease() {
           Meld publiseringsdato
         </Heading>
         <Heading data-size='xs' level={2}>
-          {statisticName} ({statisticShortname}) og {frequency.toString()}
+          {statisticName} ({statisticShortname}) og {frequency.toLowerCase()}
         </Heading>
         <ApprovalStatusTag status={approvalStatus} />
       </div>
@@ -184,7 +184,7 @@ function CreateRelease() {
             Publiseringer på valgt dato
           </Tabs.Tab>
           <Tabs.Tab value='variant-releases'>
-            Alle publiseringer på {shortname}, {frequency.toString()}
+            Alle publiseringer på {shortname}, {frequency.toLowerCase()}
           </Tabs.Tab>
         </Tabs.List>
         <OtherReleasesOnThisDatePanel />
