@@ -102,7 +102,7 @@ describe('releasesService ', async () => {
 
       expect(result).toStrictEqual({ releases: mockedReleasesResult, total: 3 })
       expect(prismaMock.release.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({ skip: 0, take: 10, where: { variant: {} } })
+        expect.objectContaining({ skip: 0, take: 10, where: {} })
       )
     })
   })

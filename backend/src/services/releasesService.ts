@@ -195,10 +195,12 @@ export async function buildReleaseFilter(
   { filterByShortnames }: { filterByShortnames?: string[] },
   prisma: ReleasePrisma
 ) {
-  if (filterByShortnames) {
+  if (filterByShortnames?.length) {
     await releaseAsserts.assertFilteredShortnamesExist(filterByShortnames, prisma)
+  }
 
-    return {
+  return {
+    ...(filterByShortnames?.length && {
       OR: filterByShortnames.map((shortname) => ({
         variant: {
           statistic: {
@@ -208,10 +210,8 @@ export async function buildReleaseFilter(
           },
         },
       })),
-    }
+    }),
   }
-
-  return { variant: {} }
 }
 
 export async function buildVariantReleaseFilter(
