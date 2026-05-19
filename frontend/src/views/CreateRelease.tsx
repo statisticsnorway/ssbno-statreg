@@ -30,7 +30,7 @@ function OtherReleasesOnThisVariantPanel() {
   const [total, setTotal] = useState(0)
 
   useEffect(() => {
-    async function fetchVariantRelease() {
+    async function fetchVariantReleases() {
       const variantIdAsNumber = Number(variantId)
       const { data, error } = await client.GET('/statistics/{shortname}/variants/{id}/releases', {
         params: { path: { shortname: shortname as string, id: variantIdAsNumber } },
@@ -45,7 +45,7 @@ function OtherReleasesOnThisVariantPanel() {
         setTotal(data.total ?? 0)
       }
     }
-    fetchVariantRelease()
+    fetchVariantReleases()
   }, [shortname, variantId])
 
   function updateRowCount(newCount: number) {
@@ -76,6 +76,7 @@ function OtherReleasesOnThisDatePanel() {
 
   useEffect(() => {
     async function fetchReleases() {
+      // TODO: Add filter on selected date
       const { data, error } = await client.GET('/releases', { params: { query: { start: 0, count: 10 } } })
       if (error) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -87,7 +88,8 @@ function OtherReleasesOnThisDatePanel() {
       }
     }
     fetchReleases()
-  })
+    // Add selected date as a dependency
+  }, [])
 
   return (
     <Tabs.Panel className='p-0' value='selected-publish-date'>
