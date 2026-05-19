@@ -24,7 +24,7 @@ import ReleaseFormModal from '../components/ReleaseFormModal'
 
 function OtherReleasesOnThisVariantPanel() {
   const { shortname, variantId } = useParams()
-  const [rowCount, setRowCount] = useState(10)
+  const [count, setCount] = useState(10)
   const [start, setStart] = useState(0)
   const [releases, setReleases] = useState<ReleaseListing[]>([])
   const [total, setTotal] = useState(0)
@@ -33,7 +33,7 @@ function OtherReleasesOnThisVariantPanel() {
     async function fetchVariantReleases() {
       const variantIdAsNumber = Number(variantId)
       const { data, error } = await client.GET('/statistics/{shortname}/variants/{id}/releases', {
-        params: { path: { shortname: shortname as string, id: variantIdAsNumber } },
+        params: { path: { shortname: shortname as string, id: variantIdAsNumber }, query: { start, count } },
       })
       if (error) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -46,22 +46,22 @@ function OtherReleasesOnThisVariantPanel() {
       }
     }
     fetchVariantReleases()
-  }, [shortname, variantId])
+  }, [shortname, variantId, count, start])
 
   function updateRowCount(newCount: number) {
-    setRowCount(newCount)
-    setStart(1)
+    setCount(newCount)
+    setStart(0)
   }
 
   function setCurrentPage(currentPage: number) {
-    setStart((currentPage - 1) * rowCount)
+    setStart((currentPage - 1) * count)
   }
 
   return (
     <Tabs.Panel className='p-0' value='variant-releases'>
       <PaginatedReleasesTable
         start={start}
-        count={rowCount}
+        count={count}
         total={total}
         releases={releases}
         updateRowCount={updateRowCount}

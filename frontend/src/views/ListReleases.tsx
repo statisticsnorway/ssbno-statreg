@@ -34,7 +34,7 @@ function ListReleases() {
 
   function updateRowCount(newCount: number) {
     setRowCount(newCount)
-    setStart(1)
+    setStart(0)
   }
 
   function setCurrentPage(currentPage: number) {
