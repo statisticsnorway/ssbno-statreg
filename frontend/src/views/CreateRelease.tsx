@@ -28,12 +28,16 @@ function OtherReleasesOnThisVariantPanel() {
   const [start, setStart] = useState(0)
   const [releases, setReleases] = useState<ReleaseListing[]>([])
   const [total, setTotal] = useState(0)
+  const [sortBy, setSortBy] = useState(undefined)
 
   useEffect(() => {
     async function fetchVariantReleases() {
       const variantIdAsNumber = Number(variantId)
       const { data, error } = await client.GET('/statistics/{shortname}/variants/{id}/releases', {
-        params: { path: { shortname: shortname as string, id: variantIdAsNumber }, query: { start, count } },
+        params: {
+          path: { shortname: shortname as string, id: variantIdAsNumber },
+          query: { start, count, sort: sortBy },
+        },
       })
       if (error) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -46,7 +50,7 @@ function OtherReleasesOnThisVariantPanel() {
       }
     }
     fetchVariantReleases()
-  }, [shortname, variantId, count, start])
+  }, [shortname, variantId, count, start, sortBy])
 
   function updateRowCount(newCount: number) {
     setCount(newCount)
@@ -66,6 +70,7 @@ function OtherReleasesOnThisVariantPanel() {
         releases={releases}
         updateRowCount={updateRowCount}
         setCurrentPage={setCurrentPage}
+        setSortBy={setSortBy}
       />
     </Tabs.Panel>
   )
@@ -73,11 +78,14 @@ function OtherReleasesOnThisVariantPanel() {
 
 function OtherReleasesOnThisDatePanel() {
   const [releases, setReleases] = useState<ReleaseListing[]>([])
+  const [sortBy, setSortBy] = useState(undefined)
 
   useEffect(() => {
     async function fetchReleases() {
       // TODO: Add filter on selected date
-      const { data, error } = await client.GET('/releases', { params: { query: { start: 0, count: 10 } } })
+      const { data, error } = await client.GET('/releases', {
+        params: { query: { start: 0, count: 10, sort: sortBy } },
+      })
       if (error) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const errorMessage = (error as any).error
@@ -89,7 +97,7 @@ function OtherReleasesOnThisDatePanel() {
     }
     fetchReleases()
     // Add selected date as a dependency
-  }, [])
+  }, [sortBy])
 
   return (
     <Tabs.Panel className='p-0' value='selected-publish-date'>
@@ -99,7 +107,7 @@ function OtherReleasesOnThisDatePanel() {
         {/* TODO: Get status from the calendar response */}
         <DayStatusTag status={'MANY'} />
       </div>
-      <ReleasesTable releases={releases} />
+      <ReleasesTable releases={releases} setSortBy={setSortBy} />
     </Tabs.Panel>
   )
 }

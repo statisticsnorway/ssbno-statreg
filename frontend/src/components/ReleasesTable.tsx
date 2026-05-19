@@ -1,3 +1,4 @@
+import { useState, type SetStateAction } from 'react'
 import { Table, Link } from '@digdir/designsystemet-react'
 
 import { type ReleaseListing } from '@ssbno-statreg/shared'
@@ -57,13 +58,32 @@ function ReleaseRow({ release }: ReleaseRowProps) {
   )
 }
 
-export function ReleasesTable({ releases }: { releases: ReleaseListing[] }) {
+export function ReleasesTable({
+  releases,
+  setSortBy,
+}: {
+  releases: ReleaseListing[]
+  setSortBy?: SetStateAction<string>
+}) {
+  const [sortDirection, setSortDirection] = useState<'ascending' | 'descending'>('descending')
+
+  function handleSortOnClick() {
+    setSortDirection((prev) => (prev === 'ascending' ? 'descending' : 'ascending'))
+    setSortBy((prev) => (prev && prev[0] === 'publish_time' ? ['-publish_time'] : ['publish_time']))
+  }
+
   return (
     <Table>
       <Table.Head>
         <Table.Row>
           {TABLE_HEADER_CELLS.map((header) => (
-            <Table.HeaderCell key={header}>{header}</Table.HeaderCell>
+            <Table.HeaderCell
+              key={header}
+              onClick={handleSortOnClick}
+              sort={header === 'Publiseringsdato' ? sortDirection : undefined}
+            >
+              {header}
+            </Table.HeaderCell>
           ))}
         </Table.Row>
       </Table.Head>
@@ -83,6 +103,7 @@ type PaginatedReleasesTableProps = {
   releases: ReleaseListing[]
   updateRowCount: (numberOfRows: number) => void
   setCurrentPage: (selectedPage: number) => void
+  setSortBy: SetStateAction<string[]>
 }
 
 export function PaginatedReleasesTable({
@@ -92,6 +113,7 @@ export function PaginatedReleasesTable({
   releases,
   updateRowCount,
   setCurrentPage,
+  setSortBy,
 }: PaginatedReleasesTableProps) {
   return (
     <div style={{ minWidth: '100%' }}>
@@ -104,7 +126,7 @@ export function PaginatedReleasesTable({
       >
         <RowCountSelect selectedRowCount={count} updateRowCount={updateRowCount} />
       </div>
-      <ReleasesTable releases={releases} />
+      <ReleasesTable releases={releases} setSortBy={setSortBy} />
       <Pagination start={start} count={count} total={total} setCurrentPage={setCurrentPage} />
     </div>
   )

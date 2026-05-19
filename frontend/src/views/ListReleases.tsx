@@ -14,13 +14,14 @@ function ListReleases() {
   const [start, setStart] = useState(0)
   const [releases, setReleases] = useState<ReleaseListing[]>([])
   const [total, setTotal] = useState(0)
+  const [sortBy, setSortBy] = useState(undefined)
 
   useEffect(() => {
-    fetchReleases(start, rowCount)
-  }, [start, rowCount])
+    fetchReleases(start, rowCount, sortBy)
+  }, [start, rowCount, sortBy])
 
-  const fetchReleases = async (start: number, count: number) => {
-    const { data, error } = await client.GET('/releases', { params: { query: { start, count } } })
+  const fetchReleases = async (start: number, count: number, sort: string[] | undefined) => {
+    const { data, error } = await client.GET('/releases', { params: { query: { start, count, sort } } })
     if (error) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const errorMessage = (error as any).error
@@ -81,6 +82,7 @@ function ListReleases() {
         releases={releases}
         updateRowCount={updateRowCount}
         setCurrentPage={setCurrentPage}
+        setSortBy={setSortBy}
       />
     </>
   )
