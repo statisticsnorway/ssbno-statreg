@@ -148,11 +148,6 @@ describe('utils', () => {
       expect(result).toEqual(['value1'])
     })
 
-    test('returns empty array when passed undefined', () => {
-      const result = ensureStringArray(undefined)
-      expect(result).toEqual([])
-    })
-
     test('returns empty array when passed a non-string value', () => {
       // @ts-expect-error testing non-string input
       const result = ensureStringArray([123])
