@@ -28,7 +28,12 @@ export default function releasesController(router: Router) {
       const start = req.query?.start ? Number(req.query.start) : undefined
       const count = req.query?.count ? Number(req.query.count) : undefined
       const filterByShortnames = typeof req.query.shortname === 'string' ? req.query.shortname?.split(',') : undefined
-      const data = await getFilteredReleases({ start, count, filterByShortnames }, prisma)
+      const publishTimeAfter = req.query?.publish_time_after?.toString()
+      const publishTimeBefore = req.query?.publish_time_before?.toString()
+      const data = await getFilteredReleases(
+        { start, count, filterByShortnames, publishTimeAfter, publishTimeBefore },
+        prisma
+      )
       res.json(data)
     } catch (error) {
       return handleErrors(error, res)
