@@ -35,8 +35,8 @@ export async function getReleases(
   prisma: ReleasePrisma
 ): Promise<ReleaseListingResponse> {
   const allowedSortingFields = new Set(['publish_time'])
-  const orderBy = (sort ?? [])
-    .map((field) => {
+  const orderBy = sort
+    ?.map((field) => {
       const isDesc = field.startsWith('-')
       const key = isDesc ? field.slice(1) : field
 
@@ -54,7 +54,7 @@ export async function getReleases(
     skip: start,
     take: count,
     where,
-    orderBy: orderBy.length ? orderBy : { publish_time: 'desc' },
+    orderBy: orderBy?.length ? orderBy : { publish_time: 'desc' },
     select: {
       id: true,
       version: true,
