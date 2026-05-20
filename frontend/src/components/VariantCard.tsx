@@ -8,8 +8,6 @@ export function VariantCard({ shortname, variant }: { shortname: string; variant
         <Heading>
           <Link
             href={`/statistikkregisteret/statistikk/${shortname}/${variant.id}/opprett`}
-            target='_blank'
-            rel='noopener noreferrer'
           >
             {variant.frequency?.name}, {variant.revision}
           </Link>

@@ -7,6 +7,8 @@ import { VariantCard } from '../components/VariantCard'
 import client from '../api'
 import { StatisticStatus, type RegionLevel, type StatisticDetails, type Variant } from '@ssbno-statreg/shared'
 
+import './ShowStatistic.css'
+
 export default function ShowStatistic() {
   const [statistic, setStatistic] = useState<StatisticDetails>({})
   const { shortname } = useParams()
@@ -55,15 +57,7 @@ export default function ShowStatistic() {
       <div style={{ width: '100%' }}>
         <Heading data-size='xs'>Varianter</Heading>
         <Paragraph>Velg variant for å melde publiseringsdato</Paragraph>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: 'var(--ds-size-6)',
-            marginTop: 'var(--ds-size-6)',
-            marginBottom: 'var(--ds-size-6)',
-          }}
-        >
+        <div className='show-statistic-variants-container'>
           {activeVariants.map((variant) => (
             <VariantCard key={variant.id} shortname={shortname} variant={variant} />
           ))}
