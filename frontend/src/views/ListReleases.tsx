@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Heading, Button, Field, Label, EXPERIMENTAL_Suggestion } from '@digdir/designsystemet-react'
+import { Heading, Button, Field, Label, EXPERIMENTAL_Suggestion as Suggestion } from '@digdir/designsystemet-react'
 import { ArrowLeftIcon, ArrowRightIcon } from '@navikt/aksel-icons'
 import { DatePicker } from '../components/DatePicker'
 import { PaginatedReleasesTable } from '../components/ReleasesTable'
@@ -108,25 +108,21 @@ function ListReleases() {
       >
         <Field>
           <Label>Filtrer publiseringer</Label>
-          <EXPERIMENTAL_Suggestion
+          <Suggestion
             multiple
             onSelectedChange={(selected) => setSelectedShortnames(selected.map((selectedItem) => selectedItem.value))}
           >
-            <EXPERIMENTAL_Suggestion.Input />
-            <EXPERIMENTAL_Suggestion.Clear />
-            <EXPERIMENTAL_Suggestion.List>
-              <EXPERIMENTAL_Suggestion.Empty>Ingen treff</EXPERIMENTAL_Suggestion.Empty>
+            <Suggestion.Input />
+            <Suggestion.Clear />
+            <Suggestion.List>
+              <Suggestion.Empty>Ingen treff</Suggestion.Empty>
               {shortnames.map((shortname) => (
-                <EXPERIMENTAL_Suggestion.Option
-                  key={shortname.shortname}
-                  label={shortname.shortname}
-                  value={shortname.shortname}
-                >
+                <Suggestion.Option key={shortname.shortname} label={shortname.shortname} value={shortname.shortname}>
                   {shortname.shortname}, {shortname.statistic_name}
-                </EXPERIMENTAL_Suggestion.Option>
+                </Suggestion.Option>
               ))}
-            </EXPERIMENTAL_Suggestion.List>
-          </EXPERIMENTAL_Suggestion>
+            </Suggestion.List>
+          </Suggestion>
         </Field>
         <RowCountSelect selectedRowCount={rowCount} updateRowCount={updateRowCount} />
       </div>
