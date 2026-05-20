@@ -19,7 +19,7 @@ import { type ReleaseCreate, type ReleaseUpdate } from '@ssbno-statreg/shared'
 
 const releaseDatePrecisions = ['dag', 'måned', 'år']
 
-type ReleaseFormTypes = {
+type ReleaseFormErrors = {
   dateType?: string
   publishTime?: string
   periodFrom?: string
@@ -37,12 +37,7 @@ function parseDateFromString(dateString: string | undefined): Date | undefined {
 }
 
 export function ReleaseForm({ onFormSubmit, shortname, initialValues }: ReleaseFormProps) {
-  const [values, setValues] = useState<ReleaseFormTypes>({
-    dateType: initialValues?.release_date_precision ?? '',
-    publishTime: initialValues?.publish_time ?? '',
-    periodFrom: initialValues?.period_from ?? '',
-    periodTo: initialValues?.period_to ?? '',
-  })
+  const [dateType, setDateType] = useState<string>(initialValues?.release_date_precision ?? '')
   const [publishTimeDate, setPublishTimeDate] = useState<Date | undefined>(
     parseDateFromString(initialValues?.publish_time)
   )
@@ -51,18 +46,16 @@ export function ReleaseForm({ onFormSubmit, shortname, initialValues }: ReleaseF
     parseDateFromString(initialValues?.period_from)
   )
   const [comment, setComment] = useState<string>(initialValues?.comment ?? '')
-  const [errors, setErrors] = useState<ReleaseFormTypes>({
+  const [errors, setErrors] = useState<ReleaseFormErrors>({
     dateType: '',
     publishTime: '',
     periodFrom: '',
     periodTo: '',
   })
-  // TODO: Add validation for Date inputs; it's currently allowed to write anything on the fields
   const { datepickerProps: publishTimePickerProps, inputProps: publishTimeInputProps } = useDatepicker({
     defaultSelected: publishTimeDate,
     onDateChange: (publishTime) => {
       setPublishTimeDate(publishTime)
-      setValues((values) => ({ ...values, publishTime: getDateTimeAsString(publishTime) }))
       setErrors((errors) => ({ ...errors, publishTime: '' }))
     },
   })
@@ -70,7 +63,6 @@ export function ReleaseForm({ onFormSubmit, shortname, initialValues }: ReleaseF
     defaultSelected: periodFromDate,
     onDateChange: (periodFrom) => {
       setPeriodFromDate(periodFrom)
-      setValues((values) => ({ ...values, periodFrom: getDateOnlyAsString(periodFrom) }))
       setErrors((errors) => ({ ...errors, periodFrom: '' }))
     },
   })
@@ -78,18 +70,17 @@ export function ReleaseForm({ onFormSubmit, shortname, initialValues }: ReleaseF
     defaultSelected: periodToDate,
     onDateChange: (periodTo) => {
       setPeriodToDate(periodTo)
-      setValues((values) => ({ ...values, periodTo: getDateOnlyAsString(periodTo) }))
       setErrors((errors) => ({ ...errors, periodTo: '' }))
     },
   })
 
   function validateFields() {
-    const nextErrors: ReleaseFormTypes = {}
+    const nextErrors: ReleaseFormErrors = {}
 
-    if (!values.dateType) nextErrors.dateType = 'Velg en datotype for publisering'
-    if (!values.publishTime) nextErrors.publishTime = 'Opprett en gyldig publiseringsdato'
-    if (!values.periodFrom) nextErrors.periodFrom = 'Opprett en gyldig fra-dato'
-    if (!values.periodTo) nextErrors.periodTo = 'Opprett en gyldig til-dato'
+    if (!dateType) nextErrors.dateType = 'Velg en datotype for publisering'
+    if (!publishTimeDate) nextErrors.publishTime = 'Opprett en gyldig publiseringsdato'
+    if (!periodFromDate) nextErrors.periodFrom = 'Opprett en gyldig fra-dato'
+    if (!periodToDate) nextErrors.periodTo = 'Opprett en gyldig til-dato'
 
     // TODO: MIM-2582: Review comparison logic, error messages, and implement onChange
     if (periodFromDate && periodToDate && periodFromDate > periodToDate) {
@@ -98,7 +89,7 @@ export function ReleaseForm({ onFormSubmit, shortname, initialValues }: ReleaseF
     }
 
     setErrors(nextErrors)
-    return Object.keys(nextErrors).some((key) => nextErrors[key as keyof ReleaseFormTypes]) ? false : true
+    return Object.keys(nextErrors).some((key) => nextErrors[key as keyof ReleaseFormErrors]) ? false : true
   }
 
   function handleOnSubmit(e: React.SubmitEvent<HTMLFormElement>) {
@@ -107,10 +98,10 @@ export function ReleaseForm({ onFormSubmit, shortname, initialValues }: ReleaseF
     if (!validateFields()) return
 
     const data = {
-      release_date_precision: values.dateType,
-      publish_time: values.publishTime,
-      period_from: values.periodFrom,
-      period_to: values.periodTo,
+      release_date_precision: dateType,
+      publish_time: getDateTimeAsString(publishTimeDate),
+      period_from: getDateOnlyAsString(periodFromDate),
+      period_to: getDateOnlyAsString(periodToDate),
     }
 
     if (initialValues) {
@@ -127,9 +118,9 @@ export function ReleaseForm({ onFormSubmit, shortname, initialValues }: ReleaseF
         <Label>Datotype for publisering</Label>
         <Select
           id='dateType'
-          value={values.dateType}
+          value={dateType}
           onChange={(e) => {
-            setValues((values) => ({ ...values, dateType: e.target.value }))
+            setDateType(e.target.value)
             setErrors((errors) => ({ ...errors, dateType: '' }))
           }}
           aria-invalid={!!errors.dateType}
@@ -192,14 +183,17 @@ export function ReleaseForm({ onFormSubmit, shortname, initialValues }: ReleaseF
         <Field>
           <Label>Kommentar</Label>
           <Field.Description>Beskriv kort årsaken til endringen</Field.Description>
-          <Textarea id='comment' rows='6' value={comment} onChange={(e) => setComment(e.target.value)} />
+          <Textarea id='comment' rows={6} value={comment} onChange={(e) => setComment(e.target.value)} />
         </Field>
       )}
 
       <div style={{ display: 'flex', gap: 'var(--ds-size-3)' }}>
-        <Button type='submit'>Meld dato</Button>
+        <Button type='submit'>{initialValues ? 'Lagre' : 'Meld dato'}</Button>
         <Button variant='tertiary' asChild>
-          <ReactRouterLink to={`/statistikk/${shortname}`} reloadDocument>
+          <ReactRouterLink
+            to={initialValues ? `/publisering/{{initialValues.id}}` : `/statistikk/${shortname}`}
+            reloadDocument
+          >
             Avbryt
           </ReactRouterLink>
         </Button>

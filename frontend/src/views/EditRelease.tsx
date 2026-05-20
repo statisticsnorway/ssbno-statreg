@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router'
 import { Heading } from '@digdir/designsystemet-react'
 import { type ReleaseUpdate, type ReleaseDetails } from '@ssbno-statreg/shared'
-
+import { ApprovalStatusTag } from '../components/ApprovalStatus'
 import { ReleaseForm } from '../components/ReleaseForm'
+import { RelatedReleasesTables } from '../components/RelatedReleasesTables'
 
 import client from '../api'
 
@@ -43,7 +44,11 @@ function EditRelease() {
     }
   }
 
-  const shortname = release.statistic?.shortname ?? ''
+  const statisticName = release.statistic?.name
+  const statisticShortname = release.statistic?.shortname
+  const frequency = release.variant?.frequency?.name?.toLowerCase()
+  const approvalStatus = release.approval_status
+  const variantId = release.variant?.id
 
   return (
     <>
@@ -51,8 +56,17 @@ function EditRelease() {
         <Heading level={1} data-size='md'>
           Rediger publiseringsdato
         </Heading>
+        <Heading data-size='xs' level={2}>
+          {statisticName} ({statisticShortname}) og {frequency}
+        </Heading>
+        <ApprovalStatusTag status={approvalStatus} />
       </div>
-      {release.id && <ReleaseForm onFormSubmit={updateRelease} shortname={shortname} initialValues={release} />}
+      {statisticShortname && release && (
+        <ReleaseForm onFormSubmit={updateRelease} shortname={statisticShortname} initialValues={release} />
+      )}
+      {statisticShortname && variantId && (
+        <RelatedReleasesTables shortname={statisticShortname} variantId={variantId} />
+      )}
     </>
   )
 }
