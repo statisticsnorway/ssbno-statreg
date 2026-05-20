@@ -69,7 +69,7 @@ describe('releasesService ', async () => {
       )
     })
 
-    test('sets orderBy when sort is provided', async () => {
+    test('sorts by field when sort is provided', async () => {
       setPrismaResult(mockedReleasesPrismaResult)
 
       const result = await getReleases({ sort: ['publish_time'] }, prismaMock)
@@ -78,6 +78,18 @@ describe('releasesService ', async () => {
 
       expect(prismaMock.release.findMany).toHaveBeenCalledWith(
         expect.objectContaining({ orderBy: [{ publish_time: 'asc' }] })
+      )
+    })
+
+    test('uses default sort when invalid field is passed', async () => {
+      setPrismaResult(mockedReleasesPrismaResult)
+
+      const result = await getReleases({ sort: ['invalid_field'] }, prismaMock)
+
+      expect(result).toStrictEqual({ releases: mockedReleasesResult, total: 3 })
+
+      expect(prismaMock.release.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ orderBy: { publish_time: 'desc' } })
       )
     })
 
