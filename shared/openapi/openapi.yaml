@@ -240,6 +240,11 @@ components:
         - $ref: '#/components/schemas/Statistic'
       type: object
       properties:
+        division:
+          type: object
+          properties:
+            code: { type: string, nullable: true }
+            name: { type: string, readOnly: true }
         contacts:
           type: array
           items:
@@ -247,6 +252,17 @@ components:
             properties:
               username: { type: string, nullable: true }
               email: { type: string }
+      parameters:
+        - in: query
+          name: start
+          schema:
+            type: integer
+          description: Number of items skipped before starting the statistics results list
+        - in: query
+          name: count
+          schema:
+            type: integer
+          description: Maximum number of items returned
 
     Variant:
       type: object

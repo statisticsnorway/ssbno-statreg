@@ -38,7 +38,7 @@ export default function controllerRouter(
 
   controllers: ReadonlyArray<(router: Router) => void> = CONTROLLERS
 ) {
-  const inner = Router()
+  const inner =  Router()
 
   const publicPaths: RegExp[] = []
   const knownPaths = new Set<string>()

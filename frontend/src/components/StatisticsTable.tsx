@@ -1,8 +1,7 @@
 import { Table, Link } from '@digdir/designsystemet-react'
 
-import { type ReleaseListing, type StatisticListing } from '@ssbno-statreg/shared'
+import { type StatisticListing } from '@ssbno-statreg/shared'
 import { ApprovalStatusBadge } from '../components/ApprovalStatus'
-import { formatPublishTime, formatDate } from '../lib/utils'
 import { Pagination } from './Pagination'
 import '../views/ListReleases.css'
 import { RowCountSelect } from './RowCountSelect'
@@ -35,7 +34,7 @@ function StatisticRow({ statistic }: StatisticRowProps) {
         <Link href={`/statistikkregisteret/statistikk/${statisticsShortname}`}>{statisticsShortname}</Link>
       </Table.Cell>
       <TruncatedTableCell value={statistic.name} />
-      <Table.Cell>{'statisticsSection'}</Table.Cell>
+      <Table.Cell>{statistic.division?.name}</Table.Cell>
       <Table.Cell>
         <ApprovalStatusBadge status={statistic.approval_status} />
       </Table.Cell>
@@ -55,7 +54,7 @@ export function StatisticsTable({ statistics }: { statistics: StatisticListing[]
       </Table.Head>
       <Table.Body>
         {statistics?.map((statistic) => (
-          <StatisticRow key={${statistic.name}} statistic={${statistic}} />
+          <StatisticRow key={statistic.name} statistic={statistic} />
         ))}
       </Table.Body>
     </Table>

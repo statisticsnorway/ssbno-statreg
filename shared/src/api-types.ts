@@ -848,6 +848,10 @@ export interface components {
       statistic_region_levels?: components['schemas']['Region_level'][]
     } & components['schemas']['Statistic']
     Statistic_listing: {
+      division?: {
+        code?: string | null
+        readonly name?: string
+      }
       contacts?: {
         username?: string | null
         email?: string

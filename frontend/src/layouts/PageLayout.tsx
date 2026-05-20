@@ -15,6 +15,7 @@ const Header = () => (
         {/* TODO: Placeholder links */}
         <Link href='/statistikkregisteret/'>Publisering</Link>
         <Link href='/statistikkregisteret/statistikk/kpi'>Statistikk</Link>
+        <Link href='/statistikkregisteret/statistikk'>Statistikker</Link>
       </div>
     </div>
   </div>

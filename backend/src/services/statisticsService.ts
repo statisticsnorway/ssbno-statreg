@@ -32,16 +32,23 @@ export async function getAllStatistics(
       name_en: true,
       shortname: { select: { name: true } },
       responsiblePersons: { select: { username: true, email: true } },
+      division_code: true,
+      division_id: true,
     },
   })
 
   return statistics.map((statistic) => {
     const main_language = statistic.language
+    const divisionCode = statistic.division_code ?? ''
     return {
       shortname: statistic.shortname.name,
       main_language,
       status: {
         code: statistic.status,
+      },
+      division: {
+        name: getDivisionFromCode(Number(divisionCode))?.name,
+        code: divisionCode,
       },
       name: statistic.name,
       name_en: statistic.name_en ?? '',
