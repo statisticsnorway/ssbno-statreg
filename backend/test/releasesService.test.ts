@@ -57,14 +57,28 @@ describe('releasesService ', async () => {
       expect(prismaMock.release.findMany).toHaveBeenCalledWith(expect.objectContaining({ skip: 1, take: 2 }))
     })
 
-    test('uses default start and count if not provided', async () => {
+    test('uses default start, count, and sort if not provided', async () => {
       setPrismaResult(mockedReleasesPrismaResult)
 
       const result = await getReleases({}, prismaMock)
 
       expect(result).toStrictEqual({ releases: mockedReleasesResult, total: 3 })
 
-      expect(prismaMock.release.findMany).toHaveBeenCalledWith(expect.objectContaining({ skip: 0, take: 10 }))
+      expect(prismaMock.release.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ skip: 0, take: 10, orderBy: { publish_time: 'desc' } })
+      )
+    })
+
+    test('sets orderBy when sort is provided', async () => {
+      setPrismaResult(mockedReleasesPrismaResult)
+
+      const result = await getReleases({ sort: ['publish_time'] }, prismaMock)
+
+      expect(result).toStrictEqual({ releases: mockedReleasesResult, total: 3 })
+
+      expect(prismaMock.release.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ orderBy: [{ publish_time: 'asc' }] })
+      )
     })
 
     test('returns empty list if no results', async () => {
