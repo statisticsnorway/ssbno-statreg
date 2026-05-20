@@ -10,6 +10,7 @@ import {
   Input,
   ValidationMessage,
   ErrorSummary,
+  Textarea,
 } from '@digdir/designsystemet-react'
 import { DatePicker as AkselDatePicker, useDatepicker } from '@navikt/ds-react/DatePicker'
 import { DatePicker } from './DatePicker'
@@ -49,6 +50,7 @@ export function ReleaseForm({ onFormSubmit, shortname, initialValues }: ReleaseF
   const [periodFromDate, setPeriodFromDate] = useState<Date | undefined>(
     parseDateFromString(initialValues?.period_from)
   )
+  const [comment, setComment] = useState<string>(initialValues?.comment ?? '')
   const [errors, setErrors] = useState<ReleaseFormTypes>({
     dateType: '',
     publishTime: '',
@@ -111,8 +113,8 @@ export function ReleaseForm({ onFormSubmit, shortname, initialValues }: ReleaseF
       period_to: values.periodTo,
     }
 
-    if (initialValues?.id) {
-      onFormSubmit({ ...values, id: initialValues.id })
+    if (initialValues) {
+      onFormSubmit({ ...data, comment })
     } else {
       onFormSubmit(data)
     }
@@ -185,6 +187,14 @@ export function ReleaseForm({ onFormSubmit, shortname, initialValues }: ReleaseF
           </Field>
         </div>
       </Fieldset>
+
+      {initialValues && (
+        <Field>
+          <Label>Kommentar</Label>
+          <Field.Description>Beskriv kort årsaken til endringen</Field.Description>
+          <Textarea id='comment' rows='6' value={comment} onChange={(e) => setComment(e.target.value)} />
+        </Field>
+      )}
 
       <div style={{ display: 'flex', gap: 'var(--ds-size-3)' }}>
         <Button type='submit'>Meld dato</Button>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams, Link as ReactRouterLink } from 'react-router'
+import { useParams } from 'react-router'
 import { Heading, Link, Paragraph, Details, Card, Button } from '@digdir/designsystemet-react'
 import { PencilWritingIcon } from '@navikt/aksel-icons'
 import { ApprovalStatusTag } from '../components/ApprovalStatus'
@@ -64,9 +64,9 @@ function ShowRelease() {
       </div>
       <div>
         <Button asChild data-size='sm' variant='tertiary'>
-          <ReactRouterLink to={`/publisering/${id}/rediger`}>
+          <a href={`/publisering/${id}/rediger`}>
             <PencilWritingIcon aria-hidden /> Rediger
-          </ReactRouterLink>
+          </a>
         </Button>
       </div>
     </>
