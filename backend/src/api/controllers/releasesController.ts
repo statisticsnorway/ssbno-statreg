@@ -1,5 +1,11 @@
 import type { Router } from 'express'
-import { getReleases, getReleaseById, createRelease, updateRelease } from '@/services/releasesService'
+import {
+  getVariantReleases,
+  getFilteredReleases,
+  getReleaseById,
+  createRelease,
+  updateRelease,
+} from '@/services/releasesService'
 import { requireAdminAuthorization, skipAuth } from 'plugins/authMiddleware'
 import { handleErrors } from '@/lib/prismaErrors'
 import { prisma } from '@/lib/prisma'
@@ -22,7 +28,7 @@ export default function releasesController(router: Router) {
       const start = req.query?.start ? Number(req.query.start) : undefined
       const count = req.query?.count ? Number(req.query.count) : undefined
       const filterByShortnames = typeof req.query.shortname === 'string' ? req.query.shortname?.split(',') : undefined
-      const data = await getReleases({ start, count, filterByShortnames }, prisma)
+      const data = await getFilteredReleases({ start, count, filterByShortnames }, prisma)
       res.json(data)
     } catch (error) {
       return handleErrors(error, res)
@@ -39,22 +45,6 @@ export default function releasesController(router: Router) {
     }
   })
 
-  // TODO: MIM-2710: This is removed from openapi spec
-  router.get('/statistics/:shortname/releases', skipAuth, async (req, res) => {
-    try {
-      const shortname = ensureString(req.params.shortname)
-
-      const start = req.query?.start ? Number(req.query.start) : undefined
-      const count = req.query?.count ? Number(req.query.count) : undefined
-
-      const data = await getReleases({ start, count, shortname }, prisma)
-
-      res.json(data)
-    } catch (error) {
-      return handleErrors(error, res)
-    }
-  })
-
   router.get('/statistics/:shortname/variants/:id/releases', skipAuth, async (req, res) => {
     try {
       const shortname = ensureString(req.params.shortname)
@@ -63,7 +53,7 @@ export default function releasesController(router: Router) {
       const start = req.query?.start ? Number(req.query.start) : undefined
       const count = req.query?.count ? Number(req.query.count) : undefined
 
-      const data = await getReleases({ start, count, shortname, variantId }, prisma)
+      const data = await getVariantReleases({ start, count, shortname, variantId }, prisma)
       res.json(data)
     } catch (error) {
       return handleErrors(error, res)

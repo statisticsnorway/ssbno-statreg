@@ -1,27 +1,46 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Heading, Button } from '@digdir/designsystemet-react'
 import { ArrowLeftIcon, ArrowRightIcon } from '@navikt/aksel-icons'
 import { DatePicker } from '../components/DatePicker'
 import { PaginatedReleasesTable } from '../components/ReleasesTable'
-import { type FetchTableData } from '../components/Pagination'
 import { getFirstDayOfNthMonth, getLastDayOfNthMonth } from '../lib/utils'
 import client from '../api'
 
 import './ListReleases.css'
-
-const fetchAllReleases: FetchTableData = async ({ start, count }) => {
-  const { data, error } = await client.GET('/releases', { params: { query: { start, count } } })
-  if (error) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const errorMessage = (error as any).error
-    console.log(errorMessage)
-    alert(errorMessage)
-    return { tableData: [], total: 0 }
-  }
-  return { tableData: data?.releases ?? [], total: data?.total ?? 0 }
-}
+import type { ReleaseListing } from '@ssbno-statreg/shared'
 
 function ListReleases() {
+  const [rowCount, setRowCount] = useState(10)
+  const [start, setStart] = useState(0)
+  const [releases, setReleases] = useState<ReleaseListing[]>([])
+  const [total, setTotal] = useState(0)
+
+  useEffect(() => {
+    fetchReleases(start, rowCount)
+  }, [start, rowCount])
+
+  const fetchReleases = async (start: number, count: number) => {
+    const { data, error } = await client.GET('/releases', { params: { query: { start, count } } })
+    if (error) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const errorMessage = (error as any).error
+      console.log(errorMessage)
+      alert(errorMessage)
+    } else {
+      setReleases(data.releases ?? [])
+      setTotal(data.total ?? 0)
+    }
+  }
+
+  function updateRowCount(newCount: number) {
+    setRowCount(newCount)
+    setStart(0)
+  }
+
+  function setCurrentPage(currentPage: number) {
+    setStart((currentPage - 1) * rowCount)
+  }
+
   const [calendarMonth, setCalendarMonth] = useState(0)
 
   return (
@@ -55,7 +74,14 @@ function ListReleases() {
           />
         </div>
       </div>
-      <PaginatedReleasesTable fetchReleases={fetchAllReleases} />
+      <PaginatedReleasesTable
+        start={start}
+        count={rowCount}
+        total={total}
+        releases={releases}
+        updateRowCount={updateRowCount}
+        setCurrentPage={setCurrentPage}
+      />
     </>
   )
 }

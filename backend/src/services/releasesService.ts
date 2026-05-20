@@ -24,29 +24,14 @@ export async function getReleases(
   {
     start = 0,
     count = 10,
-    shortname,
-    variantId,
-    filterByShortnames,
+    where,
   }: {
     start?: number
     count?: number
-    shortname?: string
-    variantId?: number
-    filterByShortnames?: string[]
+    where?: Prisma.ReleaseWhereInput
   },
   prisma: ReleasePrisma
 ): Promise<ReleaseListingResponse> {
-  const safeShortname = sanitize(shortname)
-  const safeFilterByShortnames = filterByShortnames?.length
-    ? filterByShortnames.map((shortname) => sanitize(shortname))
-    : undefined
-  const parsedVariantId = variantId ? parseId(variantId) : undefined
-
-  const where = await buildReleaseFilter(
-    { shortname: safeShortname, variantId: parsedVariantId, filterByShortnames: safeFilterByShortnames },
-    prisma
-  )
-
   const releases = await prisma.release.findMany({
     skip: start,
     take: count,
@@ -111,6 +96,49 @@ export async function getReleases(
   }
 }
 
+export async function getFilteredReleases(
+  {
+    start = 0,
+    count = 10,
+    filterByShortnames,
+  }: {
+    start?: number
+    count?: number
+    filterByShortnames?: string[]
+  },
+  prisma: ReleasePrisma
+): Promise<ReleaseListingResponse> {
+  const safeFilterByShortnames = filterByShortnames?.length
+    ? filterByShortnames.map((shortname) => sanitize(shortname))
+    : undefined
+
+  const where = await buildReleaseFilter({ filterByShortnames: safeFilterByShortnames }, prisma)
+
+  return getReleases({ start, count, where }, prisma)
+}
+
+export async function getVariantReleases(
+  {
+    start = 0,
+    count = 10,
+    shortname,
+    variantId,
+  }: {
+    start?: number
+    count?: number
+    shortname: string
+    variantId: number
+  },
+  prisma: ReleasePrisma
+): Promise<ReleaseListingResponse> {
+  const safeShortname = sanitize(shortname)
+  const parsedVariantId = parseId(variantId)
+
+  const where = await buildVariantReleaseFilter({ shortname: safeShortname, variantId: parsedVariantId }, prisma)
+
+  return getReleases({ start, count, where }, prisma)
+}
+
 export async function getReleaseById(id: string, prisma: ReleasePrisma): Promise<ReleaseDetails> {
   const idAsNumber = parseId(id, 'release')
   const release = await prisma.release.findFirst({
@@ -164,46 +192,15 @@ export async function createRelease(
 }
 
 export async function buildReleaseFilter(
-  {
-    shortname,
-    variantId,
-    filterByShortnames,
-  }: { shortname?: string; variantId?: number; filterByShortnames?: string[] },
+  { filterByShortnames }: { filterByShortnames?: string[] },
   prisma: ReleasePrisma
 ) {
-  if (!shortname && variantId === undefined && !filterByShortnames) return
-
-  if (shortname) {
-    await releaseAsserts.assertStatisticExists(shortname, prisma)
-  }
-
-  if (filterByShortnames) {
+  if (filterByShortnames?.length) {
     await releaseAsserts.assertFilteredShortnamesExist(filterByShortnames, prisma)
   }
 
-  if (variantId !== undefined) {
-    await releaseAsserts.assertVariantExists(variantId, prisma)
-  }
-
-  if (shortname && variantId !== undefined) {
-    await releaseAsserts.assertVariantMatchesShortname(variantId, shortname, prisma)
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const where: any = { variant: {} }
-
-  if (variantId !== undefined) {
-    where.variant.id = variantId
-  }
-
-  if (shortname) {
-    where.variant.statistic = {
-      shortname: { name: shortname },
-    }
-  }
-
-  if (filterByShortnames) {
-    return {
+  return {
+    ...(filterByShortnames?.length && {
       OR: filterByShortnames.map((shortname) => ({
         variant: {
           statistic: {
@@ -213,10 +210,26 @@ export async function buildReleaseFilter(
           },
         },
       })),
-    }
+    }),
   }
+}
 
-  return where
+export async function buildVariantReleaseFilter(
+  { shortname, variantId }: { shortname: string; variantId: number },
+  prisma: ReleasePrisma
+) {
+  await Promise.all([
+    releaseAsserts.assertStatisticExists(shortname, prisma),
+    releaseAsserts.assertVariantExists(variantId, prisma),
+  ])
+
+  await releaseAsserts.assertVariantMatchesShortname(variantId, shortname, prisma)
+
+  return {
+    variant: {
+      id: variantId,
+    },
+  }
 }
 
 export async function updateRelease(
