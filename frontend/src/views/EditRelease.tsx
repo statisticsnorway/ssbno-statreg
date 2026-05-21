@@ -22,16 +22,20 @@ import {
   getFirstDayOfNthMonth,
   getLastDayOfNthMonth,
   getPublishDateTimeAsString,
+  formatPublishTime,
 } from '../lib/utils'
 import { CalendarIcon } from '@navikt/aksel-icons'
 import { DayStatusTag } from '../components/DayStatus'
 import { RowCountSelect } from '../components/RowCountSelect'
 import { PaginatedReleasesTable, ReleasesTable } from '../components/ReleasesTable'
+import ReleaseFormModal from '../components/ReleaseFormModal'
 import {
   ApprovalStatus,
   type ReleaseByIdResponse,
   type ReleaseListing,
   type ReleaseUpdate,
+  type ReleaseCreate,
+  type ReleaseDetails,
 } from '@ssbno-statreg/shared'
 
 import client from '../api'
@@ -77,7 +81,7 @@ function useDatepicker(
 }
 
 export default function ReleaseForm() {
-  const { id: releaseId } = useParams()
+  const { id: releaseId, shortname, variantId } = useParams()
   const isEditing = !!releaseId
 
   const navigate = useNavigate()
@@ -90,6 +94,9 @@ export default function ReleaseForm() {
   const publishTimePicker = useDatepicker('publishTime', setValues, setErrors)
   const periodFromPicker = useDatepicker('periodFrom', setValues, setErrors)
   const periodToPicker = useDatepicker('periodTo', setValues, setErrors)
+
+  const [createdRelease, setCreatedRelease] = useState<ReleaseDetails>({})
+  const [openCreateReleaseModal, setOpenCreateReleaseModal] = useState(false)
 
   useEffect(() => {
     async function fetchRelease() {
@@ -116,21 +123,12 @@ export default function ReleaseForm() {
     fetchRelease()
   }, [releaseId])
 
-  async function updateRelease(payload: ReleaseUpdate) {
-    const { data, error } = await client.PUT('/releases/{id}', {
-      params: { path: { id: releaseId?.toString() ?? '' } },
-      body: payload,
-    })
-
-    if (error) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const errorMessage = (error as any).error
-      console.log(errorMessage)
-      alert(errorMessage)
-    } else {
-      navigate(`/publisering/${data?.id}`)
+  useEffect(() => {
+    async function fetchVariant() {
+      //TODO fetch variant and use setStatistic and setVariant
     }
-  }
+    fetchVariant()
+  }, [shortname, variantId])
 
   function validateFields() {
     const nextErrors: ReleaseFormErrors = {}
@@ -154,6 +152,39 @@ export default function ReleaseForm() {
     return !nextErrors
   }
 
+  async function updateRelease(body: ReleaseUpdate) {
+    const { data, error } = await client.PUT('/releases/{id}', {
+      params: { path: { id: releaseId?.toString() ?? '' } },
+      body: body,
+    })
+
+    if (error) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const errorMessage = (error as any).error
+      console.log(errorMessage)
+      alert(errorMessage)
+    } else {
+      navigate(`/publisering/${data?.id}`)
+    }
+  }
+
+  async function createRelease(body: ReleaseCreate) {
+    const { data, error } = await client.POST('/statistics/{shortname}/variants/{id}/releases', {
+      params: { path: { shortname: shortname as string, id: Number(variantId) } },
+      body,
+    })
+
+    if (error) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const errorMessage = (error as any).error
+      console.log(errorMessage)
+      alert(errorMessage)
+    } else {
+      setOpenCreateReleaseModal(true)
+      setCreatedRelease(data)
+    }
+  }
+
   function handleOnSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault()
 
@@ -170,7 +201,7 @@ export default function ReleaseForm() {
     if (isEditing) {
       updateRelease(payload)
     } else {
-      return
+      createRelease(payload)
     }
   }
 
@@ -192,7 +223,7 @@ export default function ReleaseForm() {
           <Label>Datotype for publisering</Label>
           <Select
             id='dateType'
-            value={values.dateType}
+            value={values.dateType ?? ''}
             onChange={(e) => {
               setValues((values) => ({ ...values, dateType: e.target.value }))
               setErrors((errors) => ({ ...errors, dateType: '' }))
@@ -301,6 +332,14 @@ export default function ReleaseForm() {
           </ErrorSummary>
         )}
       </form>
+
+      <ReleaseFormModal
+        modalHeading='Publiseringsdato er registrert'
+        modalDescription={`Datoen ${formatPublishTime(createdRelease?.publish_time)} er nå sendt inn for ${createdRelease.variant?.frequency?.name}, ${createdRelease.variant?.revision?.name}.`}
+        openCreateReleaseModal={openCreateReleaseModal}
+        createdRelease={createdRelease}
+        setOpenCreateReleaseModal={setOpenCreateReleaseModal}
+      />
 
       <Tabs defaultValue='selected-publish-date' className='related-releases-tables-tab'>
         <Tabs.List>
