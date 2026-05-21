@@ -4,9 +4,7 @@ import { Heading } from '@digdir/designsystemet-react'
 import { type ReleaseUpdate, type ReleaseDetails } from '@ssbno-statreg/shared'
 import { ApprovalStatusTag } from '../components/ApprovalStatus'
 import { ReleaseForm } from '../components/ReleaseForm'
-import { RelatedReleasesTables } from '../components/RelatedReleasesTables'
-import { VariantReleasesTable } from './VariantReleasesTable'
-import { DateReleasesTable } from './DateReleasesTable'
+import { RelatedReleasesTables } from './RelatedReleasesTables'
 
 import client from '../api'
 
@@ -70,8 +68,7 @@ export function EditRelease() {
         <RelatedReleasesTables
           shortname={shortname}
           date='' //TODO get chosen date
-          dateReleasesTable={DateReleasesTable()}
-          variantReleasesTable={VariantReleasesTable({ shortname, variantId })}
+          variantId={variantId}
         />
       )}
     </>
