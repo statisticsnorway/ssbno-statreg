@@ -2,7 +2,7 @@ import { Routes, Route } from 'react-router'
 
 import PageLayout from './layouts/PageLayout'
 import ShowRelease from './views/ShowRelease'
-import ReleaseForm from './views/EditRelease'
+import ReleaseForm from './views/ReleaseForm'
 import ShowStatistic from './views/ShowStatistic'
 import ListStatistics from './views/ListStatistics'
 import ListReleases from './views/ListReleases'
