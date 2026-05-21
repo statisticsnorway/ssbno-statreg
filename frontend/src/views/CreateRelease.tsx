@@ -21,6 +21,7 @@ import { ApprovalStatusTag } from '../components/ApprovalStatus'
 
 import client from '../api'
 import ReleaseFormModal from '../components/ReleaseFormModal'
+import { RowCountSelect } from '../components/RowCountSelect'
 
 function OtherReleasesOnThisVariantPanel() {
   const { shortname, variantId } = useParams()
@@ -59,12 +60,21 @@ function OtherReleasesOnThisVariantPanel() {
 
   return (
     <Tabs.Panel className='p-0' value='variant-releases'>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'end',
+          marginBottom: 'var(--ds-size-8)',
+          width: '100%',
+        }}
+      >
+        <RowCountSelect selectedRowCount={count} updateRowCount={updateRowCount} />
+      </div>
       <PaginatedReleasesTable
         start={start}
         count={count}
         total={total}
         releases={releases}
-        updateRowCount={updateRowCount}
         setCurrentPage={setCurrentPage}
       />
     </Tabs.Panel>
