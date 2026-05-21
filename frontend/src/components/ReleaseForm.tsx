@@ -24,6 +24,7 @@ type ReleaseFormErrors = {
   publishTime?: string
   periodFrom?: string
   periodTo?: string
+  comment?: string
 }
 
 type ReleaseFormProps = {
@@ -88,6 +89,9 @@ export function ReleaseForm({ onFormSubmit, shortname, initialValues }: ReleaseF
       nextErrors.periodTo = 'Til-dato kan ikke være før fra-dato'
     }
 
+    if (initialValues && !comment) {
+      nextErrors.comment = 'Beskriv endringer som er gjort'
+    }
     setErrors(nextErrors)
     return Object.keys(nextErrors).some((key) => nextErrors[key as keyof ReleaseFormErrors]) ? false : true
   }
@@ -184,6 +188,7 @@ export function ReleaseForm({ onFormSubmit, shortname, initialValues }: ReleaseF
           <Label>Kommentar</Label>
           <Field.Description>Beskriv kort årsaken til endringen</Field.Description>
           <Textarea id='comment' rows={6} value={comment} onChange={(e) => setComment(e.target.value)} />
+          {errors.comment && <ValidationMessage>{errors.comment}</ValidationMessage>}
         </Field>
       )}
 

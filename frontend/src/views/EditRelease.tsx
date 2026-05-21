@@ -8,7 +8,7 @@ import { RelatedReleasesTables } from './RelatedReleasesTables'
 
 import client from '../api'
 
-export function EditRelease() {
+export default function EditRelease() {
   const { id } = useParams()
   const navigate = useNavigate()
   const [release, setRelease] = useState<ReleaseDetails>({})
@@ -44,7 +44,7 @@ export function EditRelease() {
     }
   }
 
-  const shortname = release.statistic?.name
+  const shortname = release.statistic?.shortname
   const statisticShortname = release.statistic?.shortname
   const frequency = release.variant?.frequency?.name?.toLowerCase()
   const approvalStatus = release.approval_status
