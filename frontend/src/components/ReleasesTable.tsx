@@ -1,4 +1,4 @@
-import { useState, type SetStateAction } from 'react'
+import { type SetStateAction, type Dispatch } from 'react'
 import { Table, Link } from '@digdir/designsystemet-react'
 
 import { type ReleaseListing } from '@ssbno-statreg/shared'
@@ -9,14 +9,14 @@ import '../views/ListReleases.css'
 import { RowCountSelect } from './RowCountSelect'
 
 const TABLE_HEADER_CELLS = [
-  'Kortnavn',
-  'Statistikknavn',
-  'Variant',
-  'Måleperiodetittel',
-  'Målperiode fra',
-  'Måleperiode til',
-  'Publiseringsdato',
-  'Status',
+  { label: 'Kortnavn' },
+  { label: 'Statistikknavn' },
+  { label: 'Variant' },
+  { label: 'Måleperiodetittel' },
+  { label: 'Målperiode fra' },
+  { label: 'Måleperiode til' },
+  { label: 'Publiseringsdato', sortable: true, field: 'publish_time' },
+  { label: 'Status' },
 ]
 
 type TruncatedTableCellProps = {
@@ -60,29 +60,49 @@ function ReleaseRow({ release }: ReleaseRowProps) {
 
 export function ReleasesTable({
   releases,
+  sortBy,
   setSortBy,
 }: {
   releases: ReleaseListing[]
-  setSortBy?: SetStateAction<string>
+  sortBy?: string[]
+  setSortBy?: Dispatch<SetStateAction<string[]>>
 }) {
-  const [sortDirection, setSortDirection] = useState<'ascending' | 'descending'>('descending')
+  function toggleSort(field: string) {
+    const existing = sortBy?.find((s) => s.replace('-', '') === field)
 
-  function handleSortOnClick() {
-    setSortDirection((prev) => (prev === 'ascending' ? 'descending' : 'ascending'))
-    setSortBy((prev) => (prev && prev[0] === 'publish_time' ? ['-publish_time'] : ['publish_time']))
+    let newSort: string[]
+
+    if (!existing) {
+      newSort = [field]
+    } else if (!existing.startsWith('-')) {
+      newSort = [`-${field}`]
+    } else {
+      newSort = []
+    }
+
+    setSortBy?.(newSort)
+  }
+
+  function getSortDirection(field: string) {
+    if (sortBy?.length === 0) return 'none'
+
+    const entry = sortBy?.find((s) => s.replace('-', '') === field)
+
+    if (!entry) return undefined
+    return entry.startsWith('-') ? 'descending' : 'ascending'
   }
 
   return (
     <Table>
       <Table.Head>
         <Table.Row>
-          {TABLE_HEADER_CELLS.map((header) => (
+          {TABLE_HEADER_CELLS.map(({ label, field, sortable }) => (
             <Table.HeaderCell
-              key={header}
-              onClick={handleSortOnClick}
-              sort={header === 'Publiseringsdato' ? sortDirection : undefined}
+              key={label}
+              onClick={sortable ? () => toggleSort(field) : undefined}
+              sort={sortable ? getSortDirection(field) : undefined}
             >
-              {header}
+              {label}
             </Table.HeaderCell>
           ))}
         </Table.Row>
@@ -101,9 +121,10 @@ type PaginatedReleasesTableProps = {
   count: number
   total: number
   releases: ReleaseListing[]
+  sortBy?: string[] | undefined
+  setSortBy: Dispatch<SetStateAction<string[]>>
   updateRowCount: (numberOfRows: number) => void
   setCurrentPage: (selectedPage: number) => void
-  setSortBy: SetStateAction<string[]>
 }
 
 export function PaginatedReleasesTable({
@@ -111,9 +132,10 @@ export function PaginatedReleasesTable({
   count,
   total,
   releases,
+  sortBy,
+  setSortBy,
   updateRowCount,
   setCurrentPage,
-  setSortBy,
 }: PaginatedReleasesTableProps) {
   return (
     <div style={{ minWidth: '100%' }}>
@@ -126,7 +148,7 @@ export function PaginatedReleasesTable({
       >
         <RowCountSelect selectedRowCount={count} updateRowCount={updateRowCount} />
       </div>
-      <ReleasesTable releases={releases} setSortBy={setSortBy} />
+      <ReleasesTable releases={releases} sortBy={sortBy} setSortBy={setSortBy} />
       <Pagination start={start} count={count} total={total} setCurrentPage={setCurrentPage} />
     </div>
   )

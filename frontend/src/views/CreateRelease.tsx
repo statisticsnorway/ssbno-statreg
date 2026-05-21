@@ -28,7 +28,7 @@ function OtherReleasesOnThisVariantPanel() {
   const [start, setStart] = useState(0)
   const [releases, setReleases] = useState<ReleaseListing[]>([])
   const [total, setTotal] = useState(0)
-  const [sortBy, setSortBy] = useState(undefined)
+  const [sortBy, setSortBy] = useState<string[]>([])
 
   useEffect(() => {
     async function fetchVariantReleases() {
@@ -36,7 +36,7 @@ function OtherReleasesOnThisVariantPanel() {
       const { data, error } = await client.GET('/statistics/{shortname}/variants/{id}/releases', {
         params: {
           path: { shortname: shortname as string, id: variantIdAsNumber },
-          query: { start, count, sort: sortBy },
+          query: { start, count, sort: sortBy.join(',') },
         },
       })
       if (error) {
@@ -70,6 +70,7 @@ function OtherReleasesOnThisVariantPanel() {
         releases={releases}
         updateRowCount={updateRowCount}
         setCurrentPage={setCurrentPage}
+        sortBy={sortBy}
         setSortBy={setSortBy}
       />
     </Tabs.Panel>
@@ -78,13 +79,13 @@ function OtherReleasesOnThisVariantPanel() {
 
 function OtherReleasesOnThisDatePanel() {
   const [releases, setReleases] = useState<ReleaseListing[]>([])
-  const [sortBy, setSortBy] = useState(undefined)
+  const [sortBy, setSortBy] = useState<string[]>([])
 
   useEffect(() => {
     async function fetchReleases() {
       // TODO: Add filter on selected date
       const { data, error } = await client.GET('/releases', {
-        params: { query: { start: 0, count: 10, sort: sortBy } },
+        params: { query: { start: 0, count: 10, sort: sortBy.join(',') } },
       })
       if (error) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -107,7 +108,7 @@ function OtherReleasesOnThisDatePanel() {
         {/* TODO: Get status from the calendar response */}
         <DayStatusTag status={'MANY'} />
       </div>
-      <ReleasesTable releases={releases} setSortBy={setSortBy} />
+      <ReleasesTable releases={releases} sortBy={sortBy} setSortBy={setSortBy} />
     </Tabs.Panel>
   )
 }
