@@ -14,7 +14,12 @@ import {
 } from '@digdir/designsystemet-react'
 import { DatePicker as AkselDatePicker, useDatepicker } from '@navikt/ds-react/DatePicker'
 import { DatePicker } from './DatePicker'
-import { getDateOnlyAsString, getFirstDayOfNthMonth, getLastDayOfNthMonth, getDateTimeAsString } from '../lib/utils'
+import {
+  getDateOnlyAsString,
+  getFirstDayOfNthMonth,
+  getLastDayOfNthMonth,
+  getPublishDateTimeAsString,
+} from '../lib/utils'
 import { type ReleaseCreate, type ReleaseUpdate } from '@ssbno-statreg/shared'
 
 const releaseDatePrecisions = ['dag', 'måned', 'år']
@@ -98,7 +103,7 @@ export function ReleaseForm({ onFormSubmit, shortname, initialValues }: ReleaseF
 
     const data = {
       release_date_precision: dateType,
-      publish_time: getDateTimeAsString(publishTimeDate),
+      publish_time: getPublishDateTimeAsString(publishTimeDate),
       period_from: getDateOnlyAsString(periodFromDate),
       period_to: getDateOnlyAsString(periodToDate),
     }
