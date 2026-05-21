@@ -4,9 +4,9 @@ import { Table, Link } from '@digdir/designsystemet-react'
 import { type ReleaseListing } from '@ssbno-statreg/shared'
 import { ApprovalStatusBadge } from '../components/ApprovalStatus'
 import { formatPublishTime, formatDate } from '../lib/utils'
-import { Pagination } from './Pagination'
+import { Pagination, type PaginationProps } from './Pagination'
 import '../views/ListReleases.css'
-import { RowCountSelect } from './RowCountSelect'
+import { RowCountSelect, type ShowRowCountSelectProps } from './RowCountSelect'
 
 const TABLE_HEADER_CELLS = [
   { label: 'Kortnavn', field: 'statistic.shortname' },
@@ -58,15 +58,13 @@ function ReleaseRow({ release }: ReleaseRowProps) {
   )
 }
 
-export function ReleasesTable({
-  releases,
-  sortBy,
-  setSortBy,
-}: {
+type ReleaseTableProps = {
   releases: ReleaseListing[]
   sortBy?: string[]
   setSortBy?: Dispatch<SetStateAction<string[]>>
-}) {
+}
+
+export function ReleasesTable({ releases, sortBy, setSortBy }: Readonly<ReleaseTableProps>) {
   function toggleSort(field: string) {
     const existingIndex = sortBy?.findIndex((s) => s.replace('-', '') === field) ?? -1
 
@@ -116,16 +114,7 @@ export function ReleasesTable({
   )
 }
 
-type PaginatedReleasesTableProps = {
-  start: number
-  count: number
-  total: number
-  releases: ReleaseListing[]
-  sortBy?: string[]
-  setSortBy: Dispatch<SetStateAction<string[]>>
-  updateRowCount: (numberOfRows: number) => void
-  setCurrentPage: (selectedPage: number) => void
-}
+type PaginatedReleasesTableProps = ReleaseTableProps & PaginationProps & ShowRowCountSelectProps
 
 export function PaginatedReleasesTable({
   start,
@@ -136,7 +125,7 @@ export function PaginatedReleasesTable({
   setSortBy,
   updateRowCount,
   setCurrentPage,
-}: PaginatedReleasesTableProps) {
+}: Readonly<PaginatedReleasesTableProps>) {
   return (
     <div style={{ minWidth: '100%' }}>
       <div
