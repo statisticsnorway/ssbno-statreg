@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import client from '../api'
 import type { StatisticListing } from '@ssbno-statreg/shared'
 import { PaginatedStatisticsTable } from '../components/StatisticsTable'
+import './ListStatistics.css'
 
 export default function ListStatistics() {
   const [count, setCount] = useState(10)
@@ -35,8 +36,8 @@ export default function ListStatistics() {
   }
 
   return (
-    <div>
-      <h2>We can list many a statistics, in fact!</h2>
+    <div className='list-statistics-container'>
+      <h2>Statistikker</h2>
       <div>
         <PaginatedStatisticsTable
           start={start}
