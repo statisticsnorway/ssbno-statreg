@@ -4,10 +4,9 @@ import type { StatisticListing } from '@ssbno-statreg/shared'
 import { PaginatedStatisticsTable } from '../components/StatisticsTable'
 
 export default function ListStatistics() {
-  const [count, setCount] = useState(20)
+  const [count, setCount] = useState(10)
   const [start, setStart] = useState(0)
-  const [total, setTotal] = useState(10)
-  const [currentPage, setCurrentPage] = useState(1)
+  const [total, setTotal] = useState(0)
   const [statistics, setStatistics] = useState<StatisticListing[]>([])
   useEffect(() => {
     fetchStatistics(start, count)
@@ -21,7 +20,8 @@ export default function ListStatistics() {
       console.log(errorMessage)
       alert(errorMessage)
     } else {
-      setStatistics(data)
+      setStatistics(data.statistics ?? [])
+      setTotal(data.total ?? 0)
     }
   }
 
