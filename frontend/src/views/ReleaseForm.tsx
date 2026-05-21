@@ -21,7 +21,7 @@ import {
   getDateOnlyAsString,
   getFirstDayOfNthMonth,
   getLastDayOfNthMonth,
-  getPublishDateTimeAsString,
+  parsePublishDateWithTime,
 } from '../lib/utils'
 import { CalendarIcon } from '@navikt/aksel-icons'
 import { DayStatusTag } from '../components/DayStatus'
@@ -192,7 +192,7 @@ export default function ReleaseForm() {
 
     const payload = {
       release_date_precision: values.dateType,
-      publish_time: getPublishDateTimeAsString(values.publishTime),
+      publish_time: parsePublishDateWithTime(values.publishTime),
       period_from: getDateOnlyAsString(values.periodFrom),
       period_to: getDateOnlyAsString(values.periodTo),
       comment: values.comment,

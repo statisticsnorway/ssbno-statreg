@@ -17,7 +17,7 @@ import {
   getDateOnlyAsString,
   getFirstDayOfNthMonth,
   getLastDayOfNthMonth,
-  getPublishDateTimeAsString,
+  parsePublishDateWithTime,
 } from '../lib/utils'
 import { type ReleaseCreate } from '@ssbno-statreg/shared'
 
@@ -54,7 +54,7 @@ export function ReleaseForm({ onFormSubmit, shortname }: ReleaseFormProps) {
   // TODO: Add validation for Date inputs; it's currently allowed to write anything on the fields
   const { datepickerProps: publishTimePickerProps, inputProps: publishTimeInputProps } = useDatepicker({
     onDateChange: (publishTime) => {
-      setValues((values) => ({ ...values, publishTime: getPublishDateTimeAsString(publishTime) }))
+      setValues((values) => ({ ...values, publishTime: parsePublishDateWithTime(publishTime) }))
       setErrors((errors) => ({ ...errors, publishTime: '' }))
     },
   })
