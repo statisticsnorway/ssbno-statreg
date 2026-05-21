@@ -252,17 +252,6 @@ components:
             properties:
               username: { type: string, nullable: true }
               email: { type: string }
-      parameters:
-        - in: query
-          name: start
-          schema:
-            type: integer
-          description: Number of items skipped before starting the statistics results list
-        - in: query
-          name: count
-          schema:
-            type: integer
-          description: Maximum number of items returned
 
     Variant:
       type: object
@@ -306,6 +295,18 @@ paths:
               schema:
                 type: array
                 items: { $ref: '#/components/schemas/Statistic_listing' }
+      parameters:
+        - in: query
+          name: start
+          schema:
+            type: integer
+          description: Number of items skipped before starting the statistics results list
+        - in: query
+          name: count
+          schema:
+            type: integer
+          description: Maximum number of items returned
+          
   /statistics/{shortname}:
     get:
       summary: Get a statistic by its shortname

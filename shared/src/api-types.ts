@@ -50,7 +50,12 @@ export interface paths {
     /** List of all statistics */
     get: {
       parameters: {
-        query?: never
+        query?: {
+          /** @description Number of items skipped before starting the statistics results list */
+          start?: number
+          /** @description Maximum number of items returned */
+          count?: number
+        }
         header?: never
         path?: never
         cookie?: never
