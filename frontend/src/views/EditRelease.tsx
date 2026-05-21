@@ -5,10 +5,12 @@ import { type ReleaseUpdate, type ReleaseDetails } from '@ssbno-statreg/shared'
 import { ApprovalStatusTag } from '../components/ApprovalStatus'
 import { ReleaseForm } from '../components/ReleaseForm'
 import { RelatedReleasesTables } from '../components/RelatedReleasesTables'
+import { VariantReleasesTable } from './VariantReleasesTable'
+import { DateReleasesTable } from './DateReleasesTable'
 
 import client from '../api'
 
-function EditRelease() {
+export function EditRelease() {
   const { id } = useParams()
   const navigate = useNavigate()
   const [release, setRelease] = useState<ReleaseDetails>({})
@@ -44,7 +46,7 @@ function EditRelease() {
     }
   }
 
-  const statisticName = release.statistic?.name
+  const shortname = release.statistic?.name
   const statisticShortname = release.statistic?.shortname
   const frequency = release.variant?.frequency?.name?.toLowerCase()
   const approvalStatus = release.approval_status
@@ -57,18 +59,21 @@ function EditRelease() {
           Rediger publiseringsdato
         </Heading>
         <Heading data-size='xs' level={2}>
-          {statisticName} ({statisticShortname}) og {frequency}
+          {shortname} ({statisticShortname}) og {frequency}
         </Heading>
         <ApprovalStatusTag status={approvalStatus} />
       </div>
       {statisticShortname && release && (
         <ReleaseForm onFormSubmit={updateRelease} shortname={statisticShortname} initialValues={release} />
       )}
-      {statisticShortname && variantId && (
-        <RelatedReleasesTables shortname={statisticShortname} variantId={variantId} />
+      {shortname && variantId && (
+        <RelatedReleasesTables
+          shortname={shortname}
+          date='' //TODO get chosen date
+          dateReleasesTable={DateReleasesTable()}
+          variantReleasesTable={VariantReleasesTable({ shortname, variantId })}
+        />
       )}
     </>
   )
 }
-
-export default EditRelease
