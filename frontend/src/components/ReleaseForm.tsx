@@ -47,12 +47,7 @@ export function ReleaseForm({ onFormSubmit, shortname, initialValues }: ReleaseF
     parseDateFromString(initialValues?.period_from)
   )
   const [comment, setComment] = useState<string>(initialValues?.comment ?? '')
-  const [errors, setErrors] = useState<ReleaseFormErrors>({
-    dateType: '',
-    publishTime: '',
-    periodFrom: '',
-    periodTo: '',
-  })
+  const [errors, setErrors] = useState<ReleaseFormErrors>({})
   const { datepickerProps: publishTimePickerProps, inputProps: publishTimeInputProps } = useDatepicker({
     defaultSelected: publishTimeDate,
     onDateChange: (publishTime) => {
@@ -196,7 +191,7 @@ export function ReleaseForm({ onFormSubmit, shortname, initialValues }: ReleaseF
         <Button type='submit'>{initialValues ? 'Lagre' : 'Meld dato'}</Button>
         <Button variant='tertiary' asChild>
           <ReactRouterLink
-            to={initialValues ? `/publisering/{{initialValues.id}}` : `/statistikk/${shortname}`}
+            to={initialValues?.id ? `/publisering/${initialValues.id}` : `/statistikk/${shortname}`}
             reloadDocument
           >
             Avbryt
