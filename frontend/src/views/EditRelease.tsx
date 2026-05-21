@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router'
-import { Heading } from '@digdir/designsystemet-react'
+import { useNavigate, useParams, Link as ReactRouterLink } from 'react-router'
 import { ApprovalStatusTag } from '../components/ApprovalStatus'
-import { Link as ReactRouterLink } from 'react-router'
 import {
+  Heading,
   Tabs,
   Paragraph,
   Select,
@@ -16,7 +15,7 @@ import {
   ErrorSummary,
   Textarea,
 } from '@digdir/designsystemet-react'
-import { DatePicker as AkselDatePicker, useDatepicker } from '@navikt/ds-react/DatePicker'
+import { DatePicker as AkselDatePicker, useDatepicker as useAkselDatePicker } from '@navikt/ds-react/DatePicker'
 import { DatePicker } from '../components/DatePicker'
 import {
   getDateOnlyAsString,
@@ -25,7 +24,6 @@ import {
   getPublishDateTimeAsString,
 } from '../lib/utils'
 import { CalendarIcon } from '@navikt/aksel-icons'
-
 import { DayStatusTag } from '../components/DayStatus'
 import { RowCountSelect } from '../components/RowCountSelect'
 import { PaginatedReleasesTable, ReleasesTable } from '../components/ReleasesTable'
@@ -36,12 +34,12 @@ import {
   type ReleaseUpdate,
 } from '@ssbno-statreg/shared'
 
+import client from '../api'
+
 import './ReleaseForm.css'
 
 type Statistic = ReleaseByIdResponse['statistic']
 type Variant = ReleaseByIdResponse['variant']
-
-import client from '../api'
 
 const releaseDatePrecisions = ['dag', 'måned', 'år'] as const
 
@@ -65,63 +63,62 @@ function parseDateFromString(dateString: string | undefined): Date | undefined {
   return dateString ? new Date(dateString) : undefined
 }
 
-export default function ReleaseForm({ editReleaseId }: { editReleaseId?: number }) {
+function useDatepicker(
+  key: keyof ReleaseFormTypes,
+  setValues: React.Dispatch<React.SetStateAction<ReleaseFormTypes>>,
+  setErrors: React.Dispatch<React.SetStateAction<ReleaseFormErrors>>
+) {
+  return useAkselDatePicker({
+    onDateChange: (date) => {
+      setValues((v) => ({ ...v, [key]: date }))
+      setErrors((e) => ({ ...e, [key]: '' }))
+    },
+  })
+}
+
+export default function ReleaseForm() {
+  const { id: releaseId } = useParams()
+  const isEditing = !!releaseId
+
   const navigate = useNavigate()
+
   const [values, setValues] = useState<ReleaseFormTypes>({})
   const [errors, setErrors] = useState<ReleaseFormErrors>({})
   const [statistic, setStatistic] = useState<Statistic>()
   const [variant, setVariant] = useState<Variant>()
 
-  const { datepickerProps: publishTimePickerProps, inputProps: publishTimeInputProps } = useDatepicker({
-    defaultSelected: values.publishTime,
-    onDateChange: (publishTime) => {
-      setValues((values) => ({ ...values, publishTime: publishTime }))
-      setErrors((errors) => ({ ...errors, publishTime: '' }))
-    },
-  })
-  const { datepickerProps: periodFromPickerProps, inputProps: periodFromInputProps } = useDatepicker({
-    defaultSelected: values.periodFrom,
-    onDateChange: (periodFrom) => {
-      setValues((values) => ({ ...values, periodFrom: periodFrom }))
-      setErrors((errors) => ({ ...errors, periodFrom: '' }))
-    },
-  })
-  const { datepickerProps: periodToPickerProps, inputProps: periodToInputProps } = useDatepicker({
-    defaultSelected: values.periodTo,
-    onDateChange: (periodTo) => {
-      setValues((values) => ({ ...values, periodTo: periodTo }))
-      setErrors((errors) => ({ ...errors, periodTo: '' }))
-    },
-  })
+  const publishTimePicker = useDatepicker('publishTime', setValues, setErrors)
+  const periodFromPicker = useDatepicker('periodFrom', setValues, setErrors)
+  const periodToPicker = useDatepicker('periodTo', setValues, setErrors)
 
   useEffect(() => {
     async function fetchRelease() {
-      const { data: response, error } = await client.GET('/releases/{id}', {
-        params: { path: { id: editReleaseId?.toString() ?? '' } },
+      const { data: response } = await client.GET('/releases/{id}', {
+        params: { path: { id: releaseId!.toString() } },
       })
-      if (error) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const errorMessage = (error as any).error
-        console.log(errorMessage)
-        alert(errorMessage)
-      } else {
-        setStatistic(() => response.statistic)
-        setVariant(() => response.variant)
-        setValues((values) => ({
-          ...values,
-          dateType: response.release_date_precision,
-          publishTime: parseDateFromString(response.publish_time),
-          periodFrom: parseDateFromString(response.period_from),
-          periodTo: parseDateFromString(response.period_to),
-        }))
+
+      const loaded = {
+        dateType: response?.release_date_precision,
+        publishTime: parseDateFromString(response?.publish_time),
+        periodFrom: parseDateFromString(response?.period_from),
+        periodTo: parseDateFromString(response?.period_to),
+        comment: '',
       }
+
+      setValues(loaded)
+      publishTimePicker.setSelected(loaded.publishTime)
+      periodFromPicker.setSelected(loaded.periodFrom)
+      periodToPicker.setSelected(loaded.periodTo)
+      setStatistic(response?.statistic)
+      setVariant(response?.variant)
     }
+
     fetchRelease()
-  }, [editReleaseId])
+  }, [releaseId])
 
   async function updateRelease(payload: ReleaseUpdate) {
     const { data, error } = await client.PUT('/releases/{id}', {
-      params: { path: { id: editReleaseId?.toString() ?? '' } },
+      params: { path: { id: releaseId?.toString() ?? '' } },
       body: payload,
     })
 
@@ -149,7 +146,7 @@ export default function ReleaseForm({ editReleaseId }: { editReleaseId?: number 
       nextErrors.periodTo = 'Til-dato kan ikke være før fra-dato'
     }
 
-    if (editReleaseId && !values.comment) {
+    if (isEditing && !values.comment) {
       nextErrors.comment = 'Beskriv endringer som er gjort'
     }
 
@@ -170,7 +167,7 @@ export default function ReleaseForm({ editReleaseId }: { editReleaseId?: number 
       comment: values.comment,
     }
 
-    if (editReleaseId) {
+    if (isEditing) {
       updateRelease(payload)
     } else {
       return
@@ -188,6 +185,7 @@ export default function ReleaseForm({ editReleaseId }: { editReleaseId?: number 
         </Heading>
         <ApprovalStatusTag status={ApprovalStatus.PENDING} />
       </div>
+
       <form onSubmit={handleOnSubmit} className='release-form'>
         <Field>
           <Paragraph style={{ marginBottom: 'var(--ds-size-8)' }}>Alle felter må fylles ut</Paragraph>
@@ -219,13 +217,13 @@ export default function ReleaseForm({ editReleaseId }: { editReleaseId?: number 
             Nye datoer og endringer må meldes minst 3 måneder i forveien. <br />
             For kortere frister, kontakt mmj@ssb.no.
           </Field.Description>
-          <Input id='publishTime' size={10} {...publishTimeInputProps} aria-invalid={!!errors.publishTime} />
+          <Input id='publishTime' size={10} {...publishTimePicker.inputProps} aria-invalid={!!errors.publishTime} />
           {/* TODO: Disable blocked days */}
           <DatePicker
             fromDate={getFirstDayOfNthMonth(0)}
             toDate={getLastDayOfNthMonth(0)}
             showColorCodingExplanation
-            {...publishTimePickerProps}
+            {...publishTimePicker.datepickerProps}
           />
           {errors.publishTime && <ValidationMessage>{errors.publishTime}</ValidationMessage>}
         </Field>
@@ -234,10 +232,10 @@ export default function ReleaseForm({ editReleaseId }: { editReleaseId?: number 
           <div style={{ display: 'flex', gap: 'var(--ds-size-12)' }}>
             <Field>
               <Label>Måleperiode fra</Label>
-              <AkselDatePicker {...periodFromPickerProps}>
+              <AkselDatePicker {...periodFromPicker.datepickerProps}>
                 <AkselDatePicker.Input
                   id='periodFrom'
-                  {...periodFromInputProps}
+                  {...periodFromPicker.inputProps}
                   aria-invalid={!!errors.periodFrom}
                   label
                 />
@@ -247,15 +245,20 @@ export default function ReleaseForm({ editReleaseId }: { editReleaseId?: number 
 
             <Field>
               <Label>Måleperiode til</Label>
-              <AkselDatePicker {...periodToPickerProps}>
-                <AkselDatePicker.Input id='periodTo' {...periodToInputProps} aria-invalid={!!errors.periodTo} label />
+              <AkselDatePicker {...periodToPicker.datepickerProps}>
+                <AkselDatePicker.Input
+                  id='periodTo'
+                  {...periodToPicker.inputProps}
+                  aria-invalid={!!errors.periodTo}
+                  label
+                />
               </AkselDatePicker>
               {errors.periodTo && <ValidationMessage>{errors.periodTo}</ValidationMessage>}
             </Field>
           </div>
         </Fieldset>
 
-        {editReleaseId && (
+        {isEditing && (
           <Field>
             <Label>Kommentar</Label>
             <Field.Description>Beskriv kort årsaken til endringen</Field.Description>
@@ -273,12 +276,9 @@ export default function ReleaseForm({ editReleaseId }: { editReleaseId?: number 
         )}
 
         <div style={{ display: 'flex', gap: 'var(--ds-size-3)' }}>
-          <Button type='submit'>{editReleaseId ? 'Lagre' : 'Meld dato'}</Button>
+          <Button type='submit'>{isEditing ? 'Lagre' : 'Meld dato'}</Button>
           <Button variant='tertiary' asChild>
-            <ReactRouterLink
-              to={editReleaseId ? `/publisering/${editReleaseId}` : `/statistikk/${statistic}`}
-              reloadDocument
-            >
+            <ReactRouterLink to={isEditing ? `/publisering/${releaseId}` : `/statistikk/${statistic}`} reloadDocument>
               Avbryt
             </ReactRouterLink>
           </Button>
