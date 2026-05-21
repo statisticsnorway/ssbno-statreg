@@ -9,14 +9,14 @@ import '../views/ListReleases.css'
 import { RowCountSelect } from './RowCountSelect'
 
 const TABLE_HEADER_CELLS = [
-  { label: 'Kortnavn' },
-  { label: 'Statistikknavn' },
-  { label: 'Variant' },
+  { label: 'Kortnavn', field: 'statistic.shortname' },
+  { label: 'Statistikknavn', field: 'statistic.name' },
+  { label: 'Variant', field: 'frequency.name' },
   { label: 'Måleperiodetittel' },
-  { label: 'Målperiode fra' },
-  { label: 'Måleperiode til' },
+  { label: 'Målperiode fra', field: 'period_from' },
+  { label: 'Måleperiode til', field: 'period_to' },
   { label: 'Publiseringsdato', sortable: true, field: 'publish_time' },
-  { label: 'Status' },
+  { label: 'Status', field: 'approval_status' },
 ]
 
 type TruncatedTableCellProps = {
@@ -68,19 +68,19 @@ export function ReleasesTable({
   setSortBy?: Dispatch<SetStateAction<string[]>>
 }) {
   function toggleSort(field: string) {
-    const existing = sortBy?.find((s) => s.replace('-', '') === field)
+    const existingIndex = sortBy?.findIndex((s) => s.replace('-', '') === field) ?? -1
 
-    let newSort: string[]
+    const newSort = [...(sortBy ?? [])]
 
-    if (!existing) {
-      newSort = [field]
-    } else if (!existing.startsWith('-')) {
-      newSort = [`-${field}`]
+    if (existingIndex === -1) {
+      newSort.push(field)
+    } else if (!newSort[existingIndex].startsWith('-')) {
+      newSort[existingIndex] = `-${field}`
     } else {
-      newSort = []
+      newSort.splice(existingIndex, 1)
     }
 
-    setSortBy?.(newSort)
+    setSortBy?.(newSort?.length ? newSort : [])
   }
 
   function getSortDirection(field: string) {
@@ -121,7 +121,7 @@ type PaginatedReleasesTableProps = {
   count: number
   total: number
   releases: ReleaseListing[]
-  sortBy?: string[] | undefined
+  sortBy?: string[]
   setSortBy: Dispatch<SetStateAction<string[]>>
   updateRowCount: (numberOfRows: number) => void
   setCurrentPage: (selectedPage: number) => void
