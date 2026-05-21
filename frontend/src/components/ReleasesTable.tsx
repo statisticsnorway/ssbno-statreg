@@ -8,6 +8,23 @@ import { Pagination, type PaginationProps } from './Pagination'
 import '../views/ListReleases.css'
 import { RowCountSelect, type ShowRowCountSelectProps } from './RowCountSelect'
 
+type TruncatedTableCellProps = {
+  value: string | undefined
+  maxWidth?: string
+}
+
+type ReleaseRowProps = {
+  release: ReleaseListing
+}
+
+type ReleaseTableProps = {
+  releases: ReleaseListing[]
+  sortBy?: string[]
+  setSortBy?: Dispatch<SetStateAction<string[]>>
+}
+
+type PaginatedReleasesTableProps = ReleaseTableProps & PaginationProps & ShowRowCountSelectProps
+
 const TABLE_HEADER_CELLS = [
   { label: 'Kortnavn', field: 'statistic.shortname' },
   { label: 'Statistikknavn', field: 'statistic.name' },
@@ -19,21 +36,12 @@ const TABLE_HEADER_CELLS = [
   { label: 'Status', field: 'approval_status' },
 ]
 
-type TruncatedTableCellProps = {
-  value: string | undefined
-  maxWidth?: string
-}
-
 function TruncatedTableCell({ value, maxWidth = '340px' }: TruncatedTableCellProps) {
   return (
     <Table.Cell style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth }} title={value}>
       {value}
     </Table.Cell>
   )
-}
-
-type ReleaseRowProps = {
-  release: ReleaseListing
 }
 
 function ReleaseRow({ release }: ReleaseRowProps) {
@@ -56,12 +64,6 @@ function ReleaseRow({ release }: ReleaseRowProps) {
       </Table.Cell>
     </Table.Row>
   )
-}
-
-type ReleaseTableProps = {
-  releases: ReleaseListing[]
-  sortBy?: string[]
-  setSortBy?: Dispatch<SetStateAction<string[]>>
 }
 
 export function ReleasesTable({ releases, sortBy, setSortBy }: Readonly<ReleaseTableProps>) {
@@ -113,8 +115,6 @@ export function ReleasesTable({ releases, sortBy, setSortBy }: Readonly<ReleaseT
     </Table>
   )
 }
-
-type PaginatedReleasesTableProps = ReleaseTableProps & PaginationProps & ShowRowCountSelectProps
 
 export function PaginatedReleasesTable({
   start,
