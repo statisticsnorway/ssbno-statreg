@@ -9,6 +9,7 @@ import { useState, useEffect } from 'react'
 import { type ReleaseListing } from '@ssbno-statreg/shared'
 import { PaginatedReleasesTable } from '../components/ReleasesTable'
 import { ReleasesTable } from '../components/ReleasesTable'
+import { RowCountSelect } from '../components/RowCountSelect'
 
 import client from '../api'
 
@@ -30,7 +31,9 @@ export function RelatedReleasesTables({ shortname, date, variantId }: RelatedRel
       </Tabs.List>
       <Tabs.Panel className='p-0' value='selected-publish-date'>
         <div className='description-wrapper'>
+          {/* TODO: Placeholder date and day status for description */}
           <span>Innmeldte datoer den {formatDate(date)}</span>
+          {/* TODO: Get status from the calendar response */}
           <DayStatusTag status={'MANY'} />
         </div>
         <DateReleasesTable />
@@ -42,6 +45,7 @@ export function RelatedReleasesTables({ shortname, date, variantId }: RelatedRel
   )
 }
 
+// TODO should take a date prop
 function DateReleasesTable() {
   const [releases, setReleases] = useState<ReleaseListing[]>([])
 
@@ -97,13 +101,24 @@ function VariantReleasesTable({ shortname, variantId }: { shortname: string; var
   }
 
   return (
-    <PaginatedReleasesTable
-      start={start}
-      count={count}
-      total={total}
-      releases={releases}
-      updateRowCount={updateRowCount}
-      setCurrentPage={setCurrentPage}
-    />
+    <>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'end',
+          marginBottom: 'var(--ds-size-8)',
+          width: '100%',
+        }}
+      >
+        <RowCountSelect selectedRowCount={count} updateRowCount={updateRowCount} />
+      </div>
+      <PaginatedReleasesTable
+        start={start}
+        count={count}
+        total={total}
+        releases={releases}
+        setCurrentPage={setCurrentPage}
+      />
+    </>
   )
 }
