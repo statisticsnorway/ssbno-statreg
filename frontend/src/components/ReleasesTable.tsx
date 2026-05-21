@@ -69,15 +69,18 @@ function ReleaseRow({ release }: ReleaseRowProps) {
 export function ReleasesTable({ releases, sortBy, setSortBy }: Readonly<ReleaseTableProps>) {
   function toggleSort(field: string) {
     const existingIndex = sortBy?.findIndex((s) => s.replace('-', '') === field) ?? -1
-
     const newSort = [...(sortBy ?? [])]
 
     if (existingIndex === -1) {
       newSort.push(field)
-    } else if (!newSort[existingIndex].startsWith('-')) {
-      newSort[existingIndex] = `-${field}`
     } else {
-      newSort.splice(existingIndex, 1)
+      const isDescending = newSort[existingIndex].startsWith('-')
+
+      if (isDescending) {
+        newSort.splice(existingIndex, 1)
+      } else {
+        newSort[existingIndex] = `-${field}`
+      }
     }
 
     setSortBy?.(newSort?.length ? newSort : [])
