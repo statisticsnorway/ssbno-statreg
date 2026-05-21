@@ -22,7 +22,6 @@ import {
   getFirstDayOfNthMonth,
   getLastDayOfNthMonth,
   getPublishDateTimeAsString,
-  formatPublishTime,
 } from '../lib/utils'
 import { CalendarIcon } from '@navikt/aksel-icons'
 import { DayStatusTag } from '../components/DayStatus'
@@ -36,6 +35,7 @@ import {
   type ReleaseUpdate,
   type ReleaseCreate,
   type ReleaseDetails,
+  RevisionNames,
 } from '@ssbno-statreg/shared'
 
 import client from '../api'
@@ -125,7 +125,7 @@ export default function ReleaseForm() {
 
   useEffect(() => {
     async function fetchVariant() {
-      //TODO fetch variant and use setStatistic and setVariant
+      //TODO fetch variant and set statistic and variant state
     }
     fetchVariant()
   }, [shortname, variantId])
@@ -335,7 +335,7 @@ export default function ReleaseForm() {
 
       <ReleaseFormModal
         modalHeading='Publiseringsdato er registrert'
-        modalDescription={`Datoen ${formatPublishTime(createdRelease?.publish_time)} er nå sendt inn for ${createdRelease.variant?.frequency?.name}, ${createdRelease.variant?.revision?.name}.`}
+        modalDescription={createdReleaseModalDescription(createdRelease)}
         openCreateReleaseModal={openCreateReleaseModal}
         createdRelease={createdRelease}
         setOpenCreateReleaseModal={setOpenCreateReleaseModal}
@@ -366,6 +366,15 @@ export default function ReleaseForm() {
       </Tabs>
     </>
   )
+}
+
+function createdReleaseModalDescription(createdRelease: ReleaseDetails) {
+  const createdReleaseVariant = createdRelease?.variant
+  const createdReleaseFrequency = createdReleaseVariant?.frequency?.name
+  const createdReleaseRevisionName = createdReleaseVariant?.revision?.name
+    ? RevisionNames[createdReleaseVariant?.revision.name as keyof typeof RevisionNames]
+    : ''
+  return [createdReleaseFrequency, createdReleaseRevisionName].join(', ').toLowerCase()
 }
 
 // TODO should take a date prop
