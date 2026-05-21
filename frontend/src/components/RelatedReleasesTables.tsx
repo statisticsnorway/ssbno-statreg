@@ -4,12 +4,12 @@ import { Tabs } from '@digdir/designsystemet-react'
 import { CalendarIcon } from '@navikt/aksel-icons'
 
 import { formatDate } from '../lib/utils'
-import { DayStatusTag } from '../components/DayStatus'
+import { DayStatusTag } from './DayStatus'
 import { useState, useEffect } from 'react'
 import { type ReleaseListing } from '@ssbno-statreg/shared'
-import { PaginatedReleasesTable } from '../components/ReleasesTable'
-import { ReleasesTable } from '../components/ReleasesTable'
-import { RowCountSelect } from '../components/RowCountSelect'
+import { PaginatedReleasesTable } from './ReleasesTable'
+import { ReleasesTable } from './ReleasesTable'
+import { RowCountSelect } from './RowCountSelect'
 
 import client from '../api'
 

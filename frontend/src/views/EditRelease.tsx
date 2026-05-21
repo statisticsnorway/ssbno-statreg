@@ -4,7 +4,7 @@ import { Heading } from '@digdir/designsystemet-react'
 import { type ReleaseUpdate, type ReleaseDetails } from '@ssbno-statreg/shared'
 import { ApprovalStatusTag } from '../components/ApprovalStatus'
 import { ReleaseForm } from '../components/ReleaseForm'
-import { RelatedReleasesTables } from './RelatedReleasesTables'
+import { RelatedReleasesTables } from '../components/RelatedReleasesTables'
 
 import client from '../api'
 
