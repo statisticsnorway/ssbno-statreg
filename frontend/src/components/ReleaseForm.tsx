@@ -10,7 +10,6 @@ import {
   Input,
   ValidationMessage,
   ErrorSummary,
-  Textarea,
 } from '@digdir/designsystemet-react'
 import { DatePicker as AkselDatePicker, useDatepicker } from '@navikt/ds-react/DatePicker'
 import { DatePicker } from './DatePicker'
@@ -20,68 +19,67 @@ import {
   getLastDayOfNthMonth,
   getPublishDateTimeAsString,
 } from '../lib/utils'
-import { type ReleaseCreate, type ReleaseUpdate } from '@ssbno-statreg/shared'
+import { type ReleaseCreate } from '@ssbno-statreg/shared'
 
-const releaseDatePrecisions = ['dag', 'måned', 'år']
+const releaseDatePrecisions = ['Dag', 'Måned', 'År']
 
-type ReleaseFormErrors = {
+type ReleaseFormTypes = {
   dateType?: string
   publishTime?: string
   periodFrom?: string
   periodTo?: string
-  comment?: string
 }
 
 type ReleaseFormProps = {
-  onFormSubmit: (body: ReleaseCreate | ReleaseUpdate) => Promise<void>
+  onFormSubmit: (body: ReleaseCreate) => Promise<void>
   shortname: string
-  initialValues?: ReleaseUpdate
 }
 
-function parseDateFromString(dateString: string | undefined): Date | undefined {
-  return dateString ? new Date(dateString) : undefined
-}
+export function ReleaseForm({ onFormSubmit, shortname }: ReleaseFormProps) {
+  const [values, setValues] = useState<ReleaseFormTypes>({
+    dateType: '',
+    publishTime: '',
+    periodFrom: '',
+    periodTo: '',
+  })
+  const [periodToDate, setPeriodToDate] = useState<Date | undefined>()
+  const [periodFromDate, setPeriodFromDate] = useState<Date | undefined>()
+  const [errors, setErrors] = useState<ReleaseFormTypes>({
+    dateType: '',
+    publishTime: '',
+    periodFrom: '',
+    periodTo: '',
+  })
 
-export function ReleaseForm({ onFormSubmit, shortname, initialValues }: ReleaseFormProps) {
-  const [dateType, setDateType] = useState<string>(initialValues?.release_date_precision ?? '')
-  const [publishTimeDate, setPublishTimeDate] = useState<Date | undefined>(
-    parseDateFromString(initialValues?.publish_time)
-  )
-  const [periodToDate, setPeriodToDate] = useState<Date | undefined>(parseDateFromString(initialValues?.period_to))
-  const [periodFromDate, setPeriodFromDate] = useState<Date | undefined>(
-    parseDateFromString(initialValues?.period_from)
-  )
-  const [comment, setComment] = useState<string>(initialValues?.comment ?? '')
-  const [errors, setErrors] = useState<ReleaseFormErrors>({})
+  // TODO: Add validation for Date inputs; it's currently allowed to write anything on the fields
   const { datepickerProps: publishTimePickerProps, inputProps: publishTimeInputProps } = useDatepicker({
-    defaultSelected: publishTimeDate,
     onDateChange: (publishTime) => {
-      setPublishTimeDate(publishTime)
+      setValues((values) => ({ ...values, publishTime: getPublishDateTimeAsString(publishTime) }))
       setErrors((errors) => ({ ...errors, publishTime: '' }))
     },
   })
   const { datepickerProps: periodFromPickerProps, inputProps: periodFromInputProps } = useDatepicker({
-    defaultSelected: periodFromDate,
     onDateChange: (periodFrom) => {
       setPeriodFromDate(periodFrom)
+      setValues((values) => ({ ...values, periodFrom: getDateOnlyAsString(periodFrom) }))
       setErrors((errors) => ({ ...errors, periodFrom: '' }))
     },
   })
   const { datepickerProps: periodToPickerProps, inputProps: periodToInputProps } = useDatepicker({
-    defaultSelected: periodToDate,
     onDateChange: (periodTo) => {
       setPeriodToDate(periodTo)
+      setValues((values) => ({ ...values, periodTo: getDateOnlyAsString(periodTo) }))
       setErrors((errors) => ({ ...errors, periodTo: '' }))
     },
   })
 
   function validateFields() {
-    const nextErrors: ReleaseFormErrors = {}
+    const nextErrors: ReleaseFormTypes = {}
 
-    if (!dateType) nextErrors.dateType = 'Velg en datotype for publisering'
-    if (!publishTimeDate) nextErrors.publishTime = 'Opprett en gyldig publiseringsdato'
-    if (!periodFromDate) nextErrors.periodFrom = 'Opprett en gyldig fra-dato'
-    if (!periodToDate) nextErrors.periodTo = 'Opprett en gyldig til-dato'
+    if (!values.dateType) nextErrors.dateType = 'Velg en datotype for publisering'
+    if (!values.publishTime) nextErrors.publishTime = 'Opprett en gyldig publiseringsdato'
+    if (!values.periodFrom) nextErrors.periodFrom = 'Opprett en gyldig fra-dato'
+    if (!values.periodTo) nextErrors.periodTo = 'Opprett en gyldig til-dato'
 
     // TODO: MIM-2582: Review comparison logic, error messages, and implement onChange
     if (periodFromDate && periodToDate && periodFromDate > periodToDate) {
@@ -89,11 +87,8 @@ export function ReleaseForm({ onFormSubmit, shortname, initialValues }: ReleaseF
       nextErrors.periodTo = 'Til-dato kan ikke være før fra-dato'
     }
 
-    if (initialValues && !comment) {
-      nextErrors.comment = 'Beskriv endringer som er gjort'
-    }
     setErrors(nextErrors)
-    return Object.keys(nextErrors).some((key) => nextErrors[key as keyof ReleaseFormErrors]) ? false : true
+    return Object.keys(nextErrors).some((key) => nextErrors[key as keyof ReleaseFormTypes]) ? false : true
   }
 
   function handleOnSubmit(e: React.SubmitEvent<HTMLFormElement>) {
@@ -101,18 +96,12 @@ export function ReleaseForm({ onFormSubmit, shortname, initialValues }: ReleaseF
 
     if (!validateFields()) return
 
-    const data = {
-      release_date_precision: dateType,
-      publish_time: getPublishDateTimeAsString(publishTimeDate),
-      period_from: getDateOnlyAsString(periodFromDate),
-      period_to: getDateOnlyAsString(periodToDate),
-    }
-
-    if (initialValues) {
-      onFormSubmit({ ...data, comment })
-    } else {
-      onFormSubmit(data)
-    }
+    onFormSubmit({
+      release_date_precision: values.dateType,
+      publish_time: values.publishTime,
+      period_from: values.periodFrom,
+      period_to: values.periodTo,
+    })
   }
 
   return (
@@ -122,9 +111,9 @@ export function ReleaseForm({ onFormSubmit, shortname, initialValues }: ReleaseF
         <Label>Datotype for publisering</Label>
         <Select
           id='dateType'
-          value={dateType}
+          value={values.dateType}
           onChange={(e) => {
-            setDateType(e.target.value)
+            setValues((values) => ({ ...values, dateType: e.target.value }))
             setErrors((errors) => ({ ...errors, dateType: '' }))
           }}
           aria-invalid={!!errors.dateType}
@@ -134,7 +123,7 @@ export function ReleaseForm({ onFormSubmit, shortname, initialValues }: ReleaseF
           </Select.Option>
           {releaseDatePrecisions.map((precision) => (
             <Select.Option key={precision} value={precision}>
-              {precision.charAt(0).toUpperCase() + precision.slice(1)}
+              {precision}
             </Select.Option>
           ))}
         </Select>
@@ -183,22 +172,10 @@ export function ReleaseForm({ onFormSubmit, shortname, initialValues }: ReleaseF
         </div>
       </Fieldset>
 
-      {initialValues && (
-        <Field>
-          <Label>Kommentar</Label>
-          <Field.Description>Beskriv kort årsaken til endringen</Field.Description>
-          <Textarea id='comment' rows={6} value={comment} onChange={(e) => setComment(e.target.value)} />
-          {errors.comment && <ValidationMessage>{errors.comment}</ValidationMessage>}
-        </Field>
-      )}
-
       <div style={{ display: 'flex', gap: 'var(--ds-size-3)' }}>
-        <Button type='submit'>{initialValues ? 'Lagre' : 'Meld dato'}</Button>
+        <Button type='submit'>Meld dato</Button>
         <Button variant='tertiary' asChild>
-          <ReactRouterLink
-            to={initialValues?.id ? `/publisering/${initialValues.id}` : `/statistikk/${shortname}`}
-            reloadDocument
-          >
+          <ReactRouterLink to={`/statistikk/${shortname}`} reloadDocument>
             Avbryt
           </ReactRouterLink>
         </Button>
