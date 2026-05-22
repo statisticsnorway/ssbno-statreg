@@ -6,7 +6,7 @@ import {
   createRelease,
   updateRelease,
 } from '@/services/releasesService'
-import { requireAdminAuthorization, skipAuth } from 'plugins/authMiddleware'
+import { skipAuth } from 'plugins/authMiddleware'
 import { handleErrors } from '@/lib/prismaErrors'
 import { prisma } from '@/lib/prisma'
 import { ensureString, ensureStringArray } from '@/lib/utils'
@@ -38,7 +38,7 @@ export default function releasesController(router: Router) {
     }
   })
 
-  router.put('/releases/:id', requireAdminAuthorization(), async (req, res) => {
+  router.put('/releases/:id', skipAuth, async (req, res) => {
     try {
       const id = ensureString(req.params.id)
       const result = await updateRelease(prisma, id!, req.body)
@@ -64,7 +64,7 @@ export default function releasesController(router: Router) {
     }
   })
 
-  router.post('/statistics/:shortname/variants/:id/releases', requireAdminAuthorization(), async (req, res) => {
+  router.post('/statistics/:shortname/variants/:id/releases', skipAuth, async (req, res) => {
     try {
       const result = await createRelease(
         prisma,

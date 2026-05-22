@@ -379,10 +379,15 @@ export interface paths {
            */
           shortname?: string
           /**
-           * @description Filter releases with publish_time after the specified timestamp in UTC.
-           * @example 2026-05-06 06:00:00
+           * @description Filter releases with publish_time after the specified time given in ISO format.
+           * @example 2026-05-06T06:00:00Z
            */
           publish_time_after?: string
+          /**
+           * @description Filter releases with publish_time before the specified timestamp in ISO format.
+           * @example 2026-05-06T06:00:00Z
+           */
+          publish_time_before?: string
         }
         header?: never
         path?: never
