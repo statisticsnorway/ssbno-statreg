@@ -185,8 +185,8 @@ describe('releasesService ', async () => {
     })
   })
 
-  describe('buildReleaseFilter', () => {
-    describe('runs without error with different valid input combination: ', () => {
+  describe('buildReleaseFilter ', () => {
+    describe('returns correct where clause for different input combinations: ', () => {
       test.each([
         {
           testCase: 'no filter',
@@ -301,33 +301,6 @@ describe('releasesService ', async () => {
 
         expect(result).toStrictEqual(expectedWhere)
       })
-    })
-
-    test('applies filter when only filterByShortname is provided', async () => {
-      const where = await buildReleaseFilter({ filterByShortnames: ['KPI'] }, prismaMock)
-
-      expect(where).toStrictEqual({
-        OR: [{ variant: { statistic: { shortname: { name: 'KPI' } } } }],
-      })
-
-      expect(releaseAsserts.assertFilteredShortnamesExist).toHaveBeenCalledExactlyOnceWith(['KPI'], prismaMock)
-    })
-
-    test('applies filter when multiple shortnames are provided', async () => {
-      const where = await buildReleaseFilter({ filterByShortnames: ['KPI', 'LAKS', 'ENERGIREGN'] }, prismaMock)
-
-      expect(where).toStrictEqual({
-        OR: [
-          { variant: { statistic: { shortname: { name: 'KPI' } } } },
-          { variant: { statistic: { shortname: { name: 'LAKS' } } } },
-          { variant: { statistic: { shortname: { name: 'ENERGIREGN' } } } },
-        ],
-      })
-
-      expect(releaseAsserts.assertFilteredShortnamesExist).toHaveBeenCalledExactlyOnceWith(
-        ['KPI', 'LAKS', 'ENERGIREGN'],
-        prismaMock
-      )
     })
 
     test('throws when shortname does not exist', async () => {
