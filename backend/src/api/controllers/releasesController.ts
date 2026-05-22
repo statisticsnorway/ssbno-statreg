@@ -6,16 +6,16 @@ import {
   createRelease,
   updateRelease,
 } from '@/services/releasesService'
-import { requireAdminAuthorization, skipAuth } from 'plugins/authMiddleware'
+import { skipAuth } from 'plugins/authMiddleware'
 import { handleErrors } from '@/lib/prismaErrors'
 import { prisma } from '@/lib/prisma'
-import { ensureString } from '@/lib/utils'
+import { ensureString, ensureStringArray } from '@/lib/utils'
 
 export default function releasesController(router: Router) {
   router.get('/releases/:id', skipAuth, async (req, res) => {
     try {
       // If id is undefined, controller will evaluate '/releases' instead
-      const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id
+      const id = ensureString(req.params.id)
       const data = await getReleaseById(id!, prisma)
       res.json(data)
     } catch (error) {
@@ -27,17 +27,20 @@ export default function releasesController(router: Router) {
     try {
       const start = req.query?.start ? Number(req.query.start) : undefined
       const count = req.query?.count ? Number(req.query.count) : undefined
-      const filterByShortnames = typeof req.query.shortname === 'string' ? req.query.shortname?.split(',') : undefined
-      const data = await getFilteredReleases({ start, count, filterByShortnames }, prisma)
+      const sort = req.query?.sort ? ensureStringArray(req.query.sort as string) : undefined
+
+      const filterByShortnames = ensureStringArray(req.query.shortname as string)
+
+      const data = await getFilteredReleases({ start, count, filterByShortnames, sort }, prisma)
       res.json(data)
     } catch (error) {
       return handleErrors(error, res)
     }
   })
 
-  router.put('/releases/:id', requireAdminAuthorization(), async (req, res) => {
+  router.put('/releases/:id', skipAuth, async (req, res) => {
     try {
-      const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id
+      const id = ensureString(req.params.id)
       const result = await updateRelease(prisma, id!, req.body)
       res.json(result)
     } catch (error) {
@@ -52,15 +55,16 @@ export default function releasesController(router: Router) {
 
       const start = req.query?.start ? Number(req.query.start) : undefined
       const count = req.query?.count ? Number(req.query.count) : undefined
+      const sort = req.query?.sort ? ensureStringArray(req.query.sort as string) : undefined
 
-      const data = await getVariantReleases({ start, count, shortname, variantId }, prisma)
+      const data = await getVariantReleases({ start, count, shortname, variantId, sort }, prisma)
       res.json(data)
     } catch (error) {
       return handleErrors(error, res)
     }
   })
 
-  router.post('/statistics/:shortname/variants/:id/releases', requireAdminAuthorization(), async (req, res) => {
+  router.post('/statistics/:shortname/variants/:id/releases', skipAuth, async (req, res) => {
     try {
       const result = await createRelease(
         prisma,
