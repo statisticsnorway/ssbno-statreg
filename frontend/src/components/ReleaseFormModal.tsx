@@ -6,7 +6,7 @@ type ReleaseFormModalProps = {
   modalHeading: string
   modalDescription: string
   openCreateReleaseModal: boolean
-  createdRelease: ReleaseDetails
+  newOrUpdatedRelease: ReleaseDetails
   setOpenCreateReleaseModal: React.Dispatch<React.SetStateAction<boolean>>
 }
 
@@ -14,7 +14,7 @@ export default function ReleaseFormModal({
   modalHeading,
   modalDescription,
   openCreateReleaseModal,
-  createdRelease,
+  newOrUpdatedRelease: createdRelease,
   setOpenCreateReleaseModal,
 }: ReleaseFormModalProps) {
   const { id, statistic } = createdRelease ?? {}
