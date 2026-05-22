@@ -1,0 +1,31 @@
+.release-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-size-12);
+}
+
+.release-description-wrapper {
+  margin-bottom: var(--ds-size-4);
+}
+
+.related-releases-tables-tab {
+  width: 100%;
+  row-gap: var(--ds-size-10);
+
+  ds-tablist {
+    margin-bottom: var(--ds-size-10);
+  }
+
+  .description-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .row-count-select-wrapper {
+    display: flex;
+    justify-content: end;
+    margin-bottom: var(--ds-size-8);
+    width: 100%;
+  }
+}
