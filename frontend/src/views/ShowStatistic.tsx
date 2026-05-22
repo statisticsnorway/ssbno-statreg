@@ -8,7 +8,7 @@ import client from '../api'
 import { StatisticStatus, type RegionLevel, type StatisticDetails, type Variant } from '@ssbno-statreg/shared'
 
 import './ShowStatistic.css'
-import { formatRevisionName } from '../lib/utils'
+import { formatVariant } from '../lib/utils'
 
 export default function ShowStatistic() {
   const [statistic, setStatistic] = useState<StatisticDetails>({})
@@ -166,14 +166,12 @@ function formatStartYear(dateString: string | null | undefined): string {
 
 function formatCancelledVariants(variants: Variant[]): string[] {
   if (!variants) return []
-  return variants.filter((variant: Variant) => variant.cancelled).map(formatVariant)
+  return variants.filter((variant: Variant) => variant.cancelled).map(formatVariantDetails)
 }
 
-function formatVariant(variant: Variant): string {
+function formatVariantDetails(variant: Variant): string {
   const detail = variant.level_of_detail?.name ?? '-'
-  const frequency = variant.frequency?.name ?? '-'
-  const revision = formatRevisionName(variant.revision)
-  return `${detail}, ${frequency}, ${revision}`
+  return `${detail}, ${formatVariant(variant)}`
 }
 
 function formatContacts(contacts: StatisticDetails['contacts']): string[] {

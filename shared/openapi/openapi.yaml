@@ -260,7 +260,8 @@ components:
         cancelled: { type: boolean }
         frequency:
           $ref: '#/components/schemas/Frequency'
-        revision: { type: string }
+        revision: 
+          $ref: '#/components/schemas/Revision'
 
 paths:
   /shortnames:

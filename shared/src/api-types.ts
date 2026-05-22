@@ -868,7 +868,7 @@ export interface components {
       readonly created_at?: string
       cancelled?: boolean
       frequency?: components['schemas']['Frequency']
-      revision?: string
+      revision?: components['schemas']['Revision']
     }
   }
   responses: never
