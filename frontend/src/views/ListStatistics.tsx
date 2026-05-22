@@ -3,6 +3,7 @@ import client from '../api'
 import type { StatisticListing } from '@ssbno-statreg/shared'
 import { PaginatedStatisticsTable } from '../components/StatisticsTable'
 import './ListStatistics.css'
+import { Heading } from '@digdir/designsystemet-react'
 
 export default function ListStatistics() {
   const [count, setCount] = useState(30)
@@ -37,7 +38,9 @@ export default function ListStatistics() {
 
   return (
     <div className='list-statistics-container'>
-      <h2>Statistikker</h2>
+      <Heading level={1} data-size='sm'>
+        Statistikkoversikt
+      </Heading>
       <div>
         <PaginatedStatisticsTable
           start={start}
