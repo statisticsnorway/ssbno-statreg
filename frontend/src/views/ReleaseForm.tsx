@@ -18,6 +18,7 @@ import {
 import { DatePicker as AkselDatePicker, useDatepicker as useAkselDatePicker } from '@navikt/ds-react/DatePicker'
 import { DatePicker } from '../components/DatePicker'
 import {
+  formatDate,
   getDateOnlyAsString,
   getFirstDayOfNthMonth,
   getLastDayOfNthMonth,
@@ -368,12 +369,14 @@ export default function ReleaseForm() {
             <CalendarIcon />
             Publiseringer på valgt dato
           </Tabs.Tab>
-          <Tabs.Tab value='variant-releases'>Alle publiseringer på {variant?.frequency?.name}</Tabs.Tab>
+          <Tabs.Tab value='variant-releases'>
+            Alle publiseringer på {statistic?.shortname}, {variant?.frequency?.name?.toLowerCase()}
+          </Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel className='p-0' value='selected-publish-date'>
           <div className='description-wrapper'>
             {/* TODO: Placeholder date and day status for description */}
-            <span>Innmeldte datoer den {values.publishTime?.toLocaleDateString()}</span>
+            <span>Innmeldte datoer den {formatDate(values.publishTime?.toISOString())}</span>
             {/* TODO: Get status from the calendar response */}
             <DayStatusTag status={'MANY'} />
           </div>
@@ -405,7 +408,8 @@ function getCreatedReleaseModalDescription(createdRelease: ReleaseDetails) {
   const createdReleaseRevisionName = createdReleaseVariant?.revision?.name
     ? RevisionNames[createdReleaseVariant?.revision.name as keyof typeof RevisionNames]
     : ''
-  return [createdReleaseFrequency, createdReleaseRevisionName].join(', ').toLowerCase()
+  const variantInformation = [createdReleaseFrequency, createdReleaseRevisionName].join(', ').toLowerCase()
+  return `Datoen ${formatDate(createdRelease?.publish_time)} er nå sendt inn for ${variantInformation}.`
 }
 
 // TODO should take a date prop MIM-1740
