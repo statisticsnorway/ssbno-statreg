@@ -142,7 +142,6 @@ function ListReleases() {
           />
         </div>
       </div>
-      Valgt dag: {selectedDate ? selectedDate.toLocaleDateString('no-NO') : 'Ingen dag valgt'}
       <div
         style={{
           display: 'flex',
