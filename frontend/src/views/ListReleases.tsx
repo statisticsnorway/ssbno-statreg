@@ -6,6 +6,7 @@ import {
   Label,
   EXPERIMENTAL_Suggestion as Suggestion,
   type SuggestionItem,
+  Chip,
 } from '@digdir/designsystemet-react'
 import { ArrowLeftIcon, ArrowRightIcon } from '@navikt/aksel-icons'
 import { DatePicker } from '../components/DatePicker'
@@ -24,12 +25,17 @@ function ListReleases() {
   const [total, setTotal] = useState(0)
   const [calendarMonth, setCalendarMonth] = useState(0)
   const [shortnames, setShortnames] = useState<ShortnameListing[]>([])
-  // eslint-disable-next-line @eslint-react/no-unused-state
-  const [selectedShortnames, setSelectedShortnames] = useState<string[]>([])
+
+  const [selectedShortnames, setSelectedShortnames] = useState<SuggestionItem[]>([])
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
 
   useEffect(() => {
-    async function fetchReleases(start: number, count: number, selectedShortnames: string[], selectedDate?: Date) {
+    async function fetchReleases(
+      start: number,
+      count: number,
+      selectedShortnames: SuggestionItem[],
+      selectedDate?: Date
+    ) {
       let publishTimeFilter = {}
       if (selectedDate) {
         const fromTime = new Date(selectedDate)
@@ -43,7 +49,7 @@ function ListReleases() {
       }
       const filter = {
         ...(selectedShortnames.length && {
-          shortname: selectedShortnames.join(','),
+          shortname: selectedShortnames.map((item) => item.value).join(','),
         }),
         ...publishTimeFilter,
       }
@@ -89,17 +95,12 @@ function ListReleases() {
 
   function onSelectDate(date?: Date) {
     setSelectedDate(date ?? undefined)
+    setSelectedShortnames([])
   }
 
   function filterChanged(selected: SuggestionItem[]) {
-    const selectedShortnames: string[] = []
-    selected.forEach((item) => {
-      if (item.value.startsWith('shortname_')) {
-        selectedShortnames.push(item.value.replace('shortname_', ''))
-      }
-      // add handeling for removal of selected date
-    })
-    setSelectedShortnames(selectedShortnames)
+    setSelectedShortnames(selected)
+    setSelectedDate(undefined)
   }
 
   return (
@@ -152,17 +153,21 @@ function ListReleases() {
       >
         <Field>
           <Label>Filtrer publiseringer</Label>
-          <Suggestion multiple onSelectedChange={(selected) => filterChanged(selected)}>
+          {selectedDate && (
+            <Chip.Removable
+              aria-label={`Slett valgt dag: ${selectedDate.toLocaleDateString('no-NO')}`}
+              onClick={() => onSelectDate(undefined)}
+            >
+              {selectedDate.toLocaleDateString('no-NO')}
+            </Chip.Removable>
+          )}
+          <Suggestion multiple onSelectedChange={(selected) => filterChanged(selected)} selected={selectedShortnames}>
             <Suggestion.Input />
             <Suggestion.Clear />
             <Suggestion.List>
               <Suggestion.Empty>Ingen treff</Suggestion.Empty>
               {shortnames.map((shortname) => (
-                <Suggestion.Option
-                  key={shortname.shortname}
-                  label={shortname.shortname}
-                  value={`shortname_${shortname.shortname}`}
-                >
+                <Suggestion.Option key={shortname.shortname} label={shortname.shortname} value={shortname.shortname}>
                   {shortname.shortname}, {shortname.statistic_name}
                 </Suggestion.Option>
               ))}
