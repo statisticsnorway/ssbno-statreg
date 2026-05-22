@@ -45,7 +45,7 @@ import './ReleaseForm.css'
 type Statistic = ReleaseByIdResponse['statistic']
 type Variant = ReleaseByIdResponse['variant']
 
-const releaseDatePrecisions = ['dag', 'måned', 'år'] as const
+const releaseDatePrecisions = ['Dag', 'Måned', 'År'] as const
 
 type ReleaseFormTypes = {
   dateType?: string
@@ -125,7 +125,18 @@ export default function ReleaseForm() {
 
   useEffect(() => {
     async function fetchVariant() {
-      //TODO fetch variant and set statistic and variant state
+      const { data: response } = await client.GET('/statistics/{shortname}', {
+        params: { path: { shortname: shortname! } },
+      })
+      const variant = response?.variants?.find((variant) => variant.id === variantId)
+      setStatistic(response)
+      setVariant({
+        id: variant?.id,
+        frequency: variant?.frequency,
+        revision: {
+          name: variant?.revision,
+        },
+      })
     }
     fetchVariant()
   }, [shortname, variantId])
@@ -234,8 +245,8 @@ export default function ReleaseForm() {
               Velg datotype
             </Select.Option>
             {releaseDatePrecisions.map((precision) => (
-              <Select.Option key={precision} value={precision}>
-                {precision.charAt(0).toUpperCase() + precision.slice(1)}
+              <Select.Option key={precision} value={precision.toLowerCase()}>
+                {precision}
               </Select.Option>
             ))}
           </Select>
@@ -335,7 +346,7 @@ export default function ReleaseForm() {
 
       <ReleaseFormModal
         modalHeading='Publiseringsdato er registrert'
-        modalDescription={createdReleaseModalDescription(createdRelease)}
+        modalDescription={createdReleaseToModalDescription(createdRelease)}
         openCreateReleaseModal={openCreateReleaseModal}
         createdRelease={createdRelease}
         setOpenCreateReleaseModal={setOpenCreateReleaseModal}
@@ -368,7 +379,7 @@ export default function ReleaseForm() {
   )
 }
 
-function createdReleaseModalDescription(createdRelease: ReleaseDetails) {
+function createdReleaseToModalDescription(createdRelease: ReleaseDetails) {
   const createdReleaseVariant = createdRelease?.variant
   const createdReleaseFrequency = createdReleaseVariant?.frequency?.name
   const createdReleaseRevisionName = createdReleaseVariant?.revision?.name
