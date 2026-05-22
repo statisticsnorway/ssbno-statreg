@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate, useParams, Link as ReactRouterLink } from 'react-router'
+import { useParams, Link as ReactRouterLink } from 'react-router'
 import { ApprovalStatusTag } from '../components/ApprovalStatus'
 import {
   Heading,
@@ -85,7 +85,6 @@ export default function ReleaseForm() {
   //for creation, path is /statistikk/:shortname/:variantId/opprett
   //for editing, path is /publisering/:id/rediger
   const { id: releaseId, shortname, variantId } = useParams()
-  const navigate = useNavigate()
 
   //we use this variable when form needs to be different in editing mode
   const isEditing = !!releaseId
@@ -98,10 +97,8 @@ export default function ReleaseForm() {
   const publishTimePicker = useDatepicker('publishTime', setValues, setErrors)
   const periodFromPicker = useDatepicker('periodFrom', setValues, setErrors)
   const periodToPicker = useDatepicker('periodTo', setValues, setErrors)
-
-  //state used in create mode
-  const [createdRelease, setCreatedRelease] = useState<ReleaseDetails>({})
-  const [openCreateReleaseModal, setOpenCreateReleaseModal] = useState(false)
+  const [openReleaseModal, setOpenReleaseModal] = useState(false)
+  const [newOrUpdatedRelease, setNewOrUpdatedRelease] = useState<ReleaseDetails>({})
 
   // when id exists in url-path, fetch release and prefill form
   useEffect(() => {
@@ -187,7 +184,8 @@ export default function ReleaseForm() {
       console.log(errorMessage)
       alert(errorMessage)
     } else {
-      navigate(`/publisering/${data?.id}`)
+      setOpenReleaseModal(true)
+      setNewOrUpdatedRelease(data)
     }
   }
 
@@ -203,8 +201,8 @@ export default function ReleaseForm() {
       console.log(errorMessage)
       alert(errorMessage)
     } else {
-      setOpenCreateReleaseModal(true)
-      setCreatedRelease(data)
+      setOpenReleaseModal(true)
+      setNewOrUpdatedRelease(data)
     }
   }
 
@@ -357,11 +355,11 @@ export default function ReleaseForm() {
       </form>
 
       <ReleaseFormModal
-        modalHeading='Publiseringsdato er registrert'
-        modalDescription={getCreatedReleaseModalDescription(createdRelease)}
-        openCreateReleaseModal={openCreateReleaseModal}
-        createdRelease={createdRelease}
-        setOpenCreateReleaseModal={setOpenCreateReleaseModal}
+        modalHeading={getReleaseModalTitle(isEditing)}
+        modalDescription={getReleaseModalDescription(isEditing, newOrUpdatedRelease)}
+        openCreateReleaseModal={openReleaseModal}
+        newOrUpdatedRelease={newOrUpdatedRelease}
+        setOpenCreateReleaseModal={setOpenReleaseModal}
       />
 
       <Tabs defaultValue='selected-publish-date' className='related-releases-tables-tab'>
@@ -389,6 +387,16 @@ export default function ReleaseForm() {
       </Tabs>
     </>
   )
+}
+
+function getReleaseModalTitle(isEditing: boolean) {
+  return isEditing ? 'Endringer må godkjennes' : 'Publiseringsdato er registrert'
+}
+
+function getReleaseModalDescription(isEditing: boolean, createdRelease: ReleaseDetails) {
+  return isEditing
+    ? 'Endringer på meldt dato må godkjennes på nytt.'
+    : getCreatedReleaseModalDescription(createdRelease)
 }
 
 function getCreatedReleaseModalDescription(createdRelease: ReleaseDetails) {
