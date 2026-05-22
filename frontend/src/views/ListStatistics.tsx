@@ -5,7 +5,7 @@ import { PaginatedStatisticsTable } from '../components/StatisticsTable'
 import './ListStatistics.css'
 
 export default function ListStatistics() {
-  const [count, setCount] = useState(10)
+  const [count, setCount] = useState(30)
   const [start, setStart] = useState(0)
   const [total, setTotal] = useState(0)
   const [statistics, setStatistics] = useState<StatisticListing[]>([])

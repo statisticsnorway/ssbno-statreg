@@ -5,6 +5,7 @@ import { ApprovalStatusBadge } from '../components/ApprovalStatus'
 import { Pagination } from './Pagination'
 import '../views/ListReleases.css'
 import { RowCountSelect } from './RowCountSelect'
+import './StatisticsTable.css'
 
 const TABLE_HEADER_CELLS = ['Kortnavn', 'Statistikknavn', 'Seksjon', 'Status']
 
@@ -15,7 +16,7 @@ type TruncatedTableCellProps = {
 
 function TruncatedTableCell({ value, maxWidth = '340px' }: TruncatedTableCellProps) {
   return (
-    <Table.Cell style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth }} title={value}>
+    <Table.Cell className='truncated-cell' title={value}>
       {value}
     </Table.Cell>
   )
@@ -80,13 +81,7 @@ export function PaginatedStatisticsTable({
 }: PaginatedStatisticsTableProps) {
   return (
     <div style={{ minWidth: '100%' }}>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'end',
-          marginBottom: 'var(--ds-size-8)',
-        }}
-      >
+      <div className='row-count-selector'>
         <RowCountSelect selectedRowCount={count} updateRowCount={updateRowCount} />
       </div>
       <StatisticsTable statistics={statistics} />

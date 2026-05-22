@@ -33,7 +33,7 @@ export async function getAllStatistics(
       shortname: { select: { name: true } },
       responsiblePersons: { select: { username: true, email: true } },
       division_code: true,
-      division_id: true,
+      division: { select: { code: true } },
     },
   })
   const total = await prisma.statistic.count()
@@ -42,7 +42,7 @@ export async function getAllStatistics(
     total,
     statistics: statistics.map((statistic) => {
       const main_language = statistic.language
-      const divisionCode = statistic.division_code ?? ''
+      const divisionCode = statistic.division?.code ?? ''
       return {
         shortname: statistic.shortname.name,
         main_language,
