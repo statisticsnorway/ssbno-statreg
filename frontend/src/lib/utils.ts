@@ -1,3 +1,5 @@
+import { RevisionNames, type Variant } from '@ssbno-statreg/shared'
+
 export function formatPublishTime(publishTime: string | undefined, timeZone?: string): string {
   if (!publishTime) return '-'
   return new Date(publishTime)
@@ -54,4 +56,16 @@ export function parsePublishDateWithTime(publishTime: Date | undefined): string 
   localPublishTime.setHours(8, 0, 0, 0)
 
   return localPublishTime.toISOString()
+}
+
+export function formatRevisionName(revision?: string): string {
+  if (!revision || !(revision in RevisionNames)) return '-'
+  return RevisionNames[revision as keyof typeof RevisionNames]
+}
+
+export function formatVariant(variant?: Variant): string {
+  const frequency = variant?.frequency?.name ?? '-'
+  // @ts-expect-error: TODO: Decide whether to use revision.name or revision directly for statistics and releases so we stay consistent
+  const revision = formatRevisionName(variant?.revision ?? variant?.revision?.name).toLowerCase()
+  return `${frequency}, ${revision}`
 }

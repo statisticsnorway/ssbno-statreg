@@ -5,7 +5,7 @@ import { PencilWritingIcon } from '@navikt/aksel-icons'
 import { ApprovalStatusTag } from '../components/ApprovalStatus'
 import client from '../api'
 import { type ReleaseDetails } from '@ssbno-statreg/shared'
-import { formatPublishTime, formatDate } from '../lib/utils'
+import { formatPublishTime, formatDate, formatVariant } from '../lib/utils'
 
 function ShowRelease() {
   const [release, setRelease] = useState<ReleaseDetails>({})
@@ -78,26 +78,6 @@ function formatStatisticName(statistic: ReleaseDetails['statistic']): string {
 
 function formatPeriod(from?: string, to?: string): string {
   return `${formatDate(from)} – ${formatDate(to)}`
-}
-
-function formatVariant(variant?: ReleaseDetails['variant']): string {
-  const frequency = variant?.frequency?.name ?? '-'
-  const revision = formatRevisionName(variant?.revision?.name)
-  return `${frequency}, ${revision}`
-}
-
-function formatRevisionName(revision?: string): string {
-  if (!revision || !(revision in revisionNames)) return '-'
-  return revisionNames[revision]
-}
-
-const revisionNames: Record<string, string> = {
-  I: 'Ingen',
-  B: 'Beregnede',
-  E: 'Endelige',
-  F: 'Foreløpige',
-  R: 'Reviderte',
-  IG: 'Integrert',
 }
 
 export default ShowRelease

@@ -8,6 +8,7 @@ import client from '../api'
 import { StatisticStatus, type RegionLevel, type StatisticDetails, type Variant } from '@ssbno-statreg/shared'
 
 import './ShowStatistic.css'
+import { formatRevisionName } from '../lib/utils'
 
 export default function ShowStatistic() {
   const [statistic, setStatistic] = useState<StatisticDetails>({})
@@ -173,20 +174,6 @@ function formatVariant(variant: Variant): string {
   const frequency = variant.frequency?.name ?? '-'
   const revision = formatRevisionName(variant.revision)
   return `${detail}, ${frequency}, ${revision}`
-}
-
-function formatRevisionName(revision?: string): string {
-  if (!revision || !(revision in revisionNames)) return '-'
-  return revisionNames[revision]
-}
-
-const revisionNames: Record<string, string> = {
-  I: 'Ingen',
-  B: 'Beregnede',
-  E: 'Endelige',
-  F: 'Foreløpige',
-  R: 'Reviderte',
-  IG: 'Integrert',
 }
 
 function formatContacts(contacts: StatisticDetails['contacts']): string[] {
