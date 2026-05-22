@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Heading, Button } from '@digdir/designsystemet-react'
+import { Heading, Button, Field, Label, EXPERIMENTAL_Suggestion as Suggestion } from '@digdir/designsystemet-react'
 import { ArrowLeftIcon, ArrowRightIcon } from '@navikt/aksel-icons'
 import { DatePicker } from '../components/DatePicker'
 import { PaginatedReleasesTable } from '../components/ReleasesTable'
@@ -7,33 +7,58 @@ import { getFirstDayOfNthMonth, getLastDayOfNthMonth } from '../lib/utils'
 import client from '../api'
 
 import './ListReleases.css'
-import type { ReleaseListing } from '@ssbno-statreg/shared'
+import type { ReleaseListing, ShortnameListing } from '@ssbno-statreg/shared'
+import { RowCountSelect } from '../components/RowCountSelect'
 
 function ListReleases() {
   const [rowCount, setRowCount] = useState(10)
   const [start, setStart] = useState(0)
   const [releases, setReleases] = useState<ReleaseListing[]>([])
   const [total, setTotal] = useState(0)
+  const [calendarMonth, setCalendarMonth] = useState(0)
+  const [shortnames, setShortnames] = useState<ShortnameListing[]>([])
+  // eslint-disable-next-line @eslint-react/no-unused-state
+  const [selectedShortnames, setSelectedShortnames] = useState<string[]>([])
   const [sortBy, setSortBy] = useState<string[]>([])
 
   useEffect(() => {
-    fetchReleases(start, rowCount, sortBy)
-  }, [start, rowCount, sortBy])
-
-  const fetchReleases = async (start: number, count: number, sort: string[]) => {
-    const { data, error } = await client.GET('/releases', {
-      params: { query: { start, count, sort: sort?.join(',') } },
-    })
-    if (error) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const errorMessage = (error as any).error
-      console.log(errorMessage)
-      alert(errorMessage)
-    } else {
-      setReleases(data.releases ?? [])
-      setTotal(data.total ?? 0)
+    async function fetchReleases(start: number, count: number, selectedShortnames: string[], sortBy: string[]) {
+      const filter = {
+        ...(selectedShortnames.length && {
+          shortname: selectedShortnames.join(','),
+        }),
+      }
+      const sort = sortBy.join(',')
+      const { data, error } = await client.GET('/releases', {
+        params: { query: { start, count, ...filter, sort } },
+      })
+      if (error) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const errorMessage = (error as any).error
+        console.log(errorMessage)
+        alert(errorMessage)
+      } else {
+        setReleases(data.releases ?? [])
+        setTotal(data.total ?? 0)
+      }
     }
-  }
+    fetchReleases(start, rowCount, selectedShortnames, sortBy)
+  }, [start, rowCount, selectedShortnames, sortBy])
+
+  useEffect(() => {
+    async function fetchShortnames() {
+      const { data, error } = await client.GET('/shortnames')
+      if (error) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const errorMessage = (error as any).error
+        console.log(errorMessage)
+        alert(errorMessage)
+      } else {
+        setShortnames(data ?? [])
+      }
+    }
+    fetchShortnames()
+  }, [])
 
   function updateRowCount(newCount: number) {
     setRowCount(newCount)
@@ -43,8 +68,6 @@ function ListReleases() {
   function setCurrentPage(currentPage: number) {
     setStart((currentPage - 1) * rowCount)
   }
-
-  const [calendarMonth, setCalendarMonth] = useState(0)
 
   return (
     <>
@@ -77,12 +100,39 @@ function ListReleases() {
           />
         </div>
       </div>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          marginBottom: 'var(--ds-size-8)',
+          width: '100%',
+        }}
+      >
+        <Field>
+          <Label>Filtrer publiseringer</Label>
+          <Suggestion
+            multiple
+            onSelectedChange={(selected) => setSelectedShortnames(selected.map((selectedItem) => selectedItem.value))}
+          >
+            <Suggestion.Input />
+            <Suggestion.Clear />
+            <Suggestion.List>
+              <Suggestion.Empty>Ingen treff</Suggestion.Empty>
+              {shortnames.map((shortname) => (
+                <Suggestion.Option key={shortname.shortname} label={shortname.shortname} value={shortname.shortname}>
+                  {shortname.shortname}, {shortname.statistic_name}
+                </Suggestion.Option>
+              ))}
+            </Suggestion.List>
+          </Suggestion>
+        </Field>
+        <RowCountSelect selectedRowCount={rowCount} updateRowCount={updateRowCount} />
+      </div>
       <PaginatedReleasesTable
         start={start}
         count={rowCount}
         total={total}
         releases={releases}
-        updateRowCount={updateRowCount}
         setCurrentPage={setCurrentPage}
         sortBy={sortBy}
         setSortBy={setSortBy}

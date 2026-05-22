@@ -6,7 +6,6 @@ import { ApprovalStatusBadge } from '../components/ApprovalStatus'
 import { formatPublishTime, formatDate } from '../lib/utils'
 import { Pagination, type PaginationProps } from './Pagination'
 import '../views/ListReleases.css'
-import { RowCountSelect, type ShowRowCountSelectProps } from './RowCountSelect'
 
 type TruncatedTableCellProps = {
   value: string | undefined
@@ -23,7 +22,7 @@ type ReleaseTableProps = {
   setSortBy?: Dispatch<SetStateAction<string[]>>
 }
 
-type PaginatedReleasesTableProps = ReleaseTableProps & PaginationProps & ShowRowCountSelectProps
+type PaginatedReleasesTableProps = ReleaseTableProps & PaginationProps
 
 const TABLE_HEADER_CELLS = [
   { label: 'Kortnavn', field: 'statistic.shortname' },
@@ -126,20 +125,10 @@ export function PaginatedReleasesTable({
   releases,
   sortBy,
   setSortBy,
-  updateRowCount,
   setCurrentPage,
 }: Readonly<PaginatedReleasesTableProps>) {
   return (
     <div style={{ minWidth: '100%' }}>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'end',
-          marginBottom: 'var(--ds-size-8)',
-        }}
-      >
-        <RowCountSelect selectedRowCount={count} updateRowCount={updateRowCount} />
-      </div>
       <ReleasesTable releases={releases} sortBy={sortBy} setSortBy={setSortBy} />
       <Pagination start={start} count={count} total={total} setCurrentPage={setCurrentPage} />
     </div>
