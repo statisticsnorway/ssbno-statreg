@@ -66,5 +66,5 @@ export function formatRevisionName(revision?: string): string {
 export function formatVariant(variant?: Variant): string {
   const frequency = variant?.frequency?.name ?? '-'
   const revision = formatRevisionName(variant?.revision?.code).toLowerCase()
-  return `${frequency}, ${revision}`
+  return [frequency, revision].join(', ')
 }
