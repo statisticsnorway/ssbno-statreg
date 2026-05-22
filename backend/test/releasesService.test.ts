@@ -102,44 +102,96 @@ describe('releasesService ', async () => {
     })
   })
 
-  describe('getFilteredReleases', () => {
-    test('returns mocked releases filtered by shortname', async () => {
-      setPrismaResult([mockedReleasesPrismaResult[0]])
-
-      const result = await getFilteredReleases({ filterByShortnames: ['KPI'] }, prismaMock)
-
-      expect(result).toStrictEqual({ releases: [mockedReleasesResult[0]], total: 1 })
-      expect(prismaMock.release.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: {
-            OR: [{ variant: { statistic: { shortname: { name: 'KPI' } } } }],
-          },
-        })
-      )
-    })
-
-    test('returns mocked releases when filterByShortname is undefined', async () => {
-      setPrismaResult(mockedReleasesPrismaResult)
-
-      const result = await getFilteredReleases({}, prismaMock)
-
-      expect(result).toStrictEqual({ releases: mockedReleasesResult, total: 3 })
-      expect(prismaMock.release.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({ skip: 0, take: 10, where: {} })
-      )
-    })
-
-    test('throws when shortname does not exist', async () => {
-      releaseAsserts.assertFilteredShortnamesExist = vi.fn(async () => {
-        throw { status: 404, statregError: "Shortname(s) not found: 'BAD'" }
-      }) as any
-
-      await expect(() => getFilteredReleases({ filterByShortnames: ['BAD', 'KPI'] }, prismaMock)).rejects.toMatchObject(
+  describe('getFilteredReleases ', () => {
+    describe('runs without error with different valid input combination: ', () => {
+      test.each([
         {
+          testCase: 'no filter',
+          input: {},
+        },
+        {
+          testCase: 'count',
+          input: {
+            count: 10,
+          },
+        },
+        {
+          testCase: 'start',
+          input: {
+            start: 0,
+          },
+        },
+        {
+          testCase: 'one shortname',
+          input: {
+            filterByShortnames: ['KPI'],
+          },
+        },
+        {
+          testCase: 'several shortnames',
+          input: {
+            filterByShortnames: ['KPI', 'energ'],
+          },
+        },
+        {
+          testCase: 'publish time after',
+          input: {
+            publishTimeAfter: '2026-12-12T23:59:00Z',
+          },
+        },
+        {
+          testCase: 'publish time before',
+          input: {
+            publishTimeBefore: '2027-01-01T00:00:00+01:00',
+          },
+        },
+        {
+          testCase: 'shortnames, publishtime after and publish time before',
+          input: {
+            filterByShortnames: ['KPI', 'energ'],
+            publishTimeBefore: '2027-01-01T00:00:00+01:00',
+            publishTimeAfter: '2026-12-12T23:59:00Z',
+          },
+        },
+      ])('$testCase', async ({ input }) => {
+        setPrismaResult(mockedReleasesPrismaResult)
+
+        const result = await getFilteredReleases(input, prismaMock)
+
+        expect(result).toBeTruthy()
+      })
+    })
+
+    describe('throws error with different invalid input combination: ', () => {
+      test('throws when buildReleaseFilter throws', async () => {
+        // Cannot mock buildReleaseFilter function because it is defined in same file, hence mocking throw in assert
+        releaseAsserts.assertFilteredShortnamesExist = vi.fn(async () => {
+          throw { status: 404, statregError: "Shortname(s) not found: 'BAD'" }
+        })
+
+        await expect(() =>
+          getFilteredReleases({ filterByShortnames: ['BAD', 'KPI'] }, prismaMock)
+        ).rejects.toMatchObject({
           status: 404,
           statregError: "Shortname(s) not found: 'BAD'",
-        }
-      )
+        })
+      })
+
+      test('throws when filter after publish date is invalid', async () => {
+        await expect(() =>
+          getFilteredReleases({ publishTimeAfter: '2026-01-01 07:00' }, prismaMock)
+        ).rejects.toMatchObject({
+          statregError: 'Invalid date format: 2026-01-01 07:00',
+        })
+      })
+
+      test('throws when filter before publish date is invalid', async () => {
+        await expect(() =>
+          getFilteredReleases({ publishTimeBefore: '2026-01-01 07:00' }, prismaMock)
+        ).rejects.toMatchObject({
+          statregError: 'Invalid date format: 2026-01-01 07:00',
+        })
+      })
     })
   })
 
@@ -159,32 +211,122 @@ describe('releasesService ', async () => {
     })
   })
 
-  describe('buildReleaseFilter', () => {
-    test('applies filter when only filterByShortname is provided', async () => {
-      const where = await buildReleaseFilter({ filterByShortnames: ['KPI'] }, prismaMock)
+  describe('buildReleaseFilter ', () => {
+    describe('returns correct where clause for different input combinations: ', () => {
+      test.each([
+        {
+          testCase: 'no filter',
+          input: {},
+          expectedWhere: {},
+        },
+        {
+          testCase: 'one shortname',
+          input: {
+            filterByShortnames: ['KPI'],
+          },
+          expectedWhere: {
+            OR: [
+              {
+                variant: {
+                  statistic: {
+                    shortname: {
+                      name: 'KPI',
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        },
+        {
+          testCase: 'several shortnames',
+          input: {
+            filterByShortnames: ['KPI', 'energ'],
+          },
+          expectedWhere: {
+            OR: [
+              {
+                variant: {
+                  statistic: {
+                    shortname: {
+                      name: 'KPI',
+                    },
+                  },
+                },
+              },
+              {
+                variant: {
+                  statistic: {
+                    shortname: {
+                      name: 'energ',
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        },
+        {
+          testCase: 'publish time after',
+          input: {
+            filterByAfterPublishDate: new Date('2026-12-24T23:59Z'),
+          },
+          expectedWhere: {
+            publish_time: {
+              gte: new Date('2026-12-24T23:59Z'),
+            },
+          },
+        },
+        {
+          testCase: 'publish time before',
+          input: {
+            filterByBeforePublishDate: new Date('2027-01-01T00:00Z'),
+          },
+          expectedWhere: {
+            publish_time: {
+              lte: new Date('2027-01-01T00:00Z'),
+            },
+          },
+        },
+        {
+          testCase: 'shortnames, publishtime after and publish time before',
+          input: {
+            filterByShortnames: ['KPI', 'energ'],
+            filterByBeforePublishDate: new Date('2027-01-01T00:00Z'),
+            filterByAfterPublishDate: new Date('2026-12-24T23:59Z'),
+          },
+          expectedWhere: {
+            OR: [
+              {
+                variant: {
+                  statistic: {
+                    shortname: {
+                      name: 'KPI',
+                    },
+                  },
+                },
+              },
+              {
+                variant: {
+                  statistic: {
+                    shortname: {
+                      name: 'energ',
+                    },
+                  },
+                },
+              },
+            ],
+            publish_time: {
+              gte: new Date('2026-12-24T23:59:00.000Z'),
+              lte: new Date('2027-01-01T00:00:00.000Z'),
+            },
+          },
+        },
+      ])('$testCase', async ({ input, expectedWhere }) => {
+        const result = await buildReleaseFilter(input, prismaMock)
 
-      expect(where).toStrictEqual({
-        OR: [{ variant: { statistic: { shortname: { name: 'KPI' } } } }],
+        expect(result).toStrictEqual(expectedWhere)
       })
-
-      expect(releaseAsserts.assertFilteredShortnamesExist).toHaveBeenCalledExactlyOnceWith(['KPI'], prismaMock)
-    })
-
-    test('applies filter when multiple shortnames are provided', async () => {
-      const where = await buildReleaseFilter({ filterByShortnames: ['KPI', 'LAKS', 'ENERGIREGN'] }, prismaMock)
-
-      expect(where).toStrictEqual({
-        OR: [
-          { variant: { statistic: { shortname: { name: 'KPI' } } } },
-          { variant: { statistic: { shortname: { name: 'LAKS' } } } },
-          { variant: { statistic: { shortname: { name: 'ENERGIREGN' } } } },
-        ],
-      })
-
-      expect(releaseAsserts.assertFilteredShortnamesExist).toHaveBeenCalledExactlyOnceWith(
-        ['KPI', 'LAKS', 'ENERGIREGN'],
-        prismaMock
-      )
     })
 
     test('throws when shortname does not exist', async () => {

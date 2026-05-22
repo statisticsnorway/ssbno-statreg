@@ -117,11 +117,15 @@ export async function getFilteredReleases(
     start = 0,
     count = 10,
     filterByShortnames,
+    publishTimeAfter,
+    publishTimeBefore,
     sort,
   }: {
     start?: number
     count?: number
     filterByShortnames?: string[]
+    publishTimeAfter?: string
+    publishTimeBefore?: string
     sort?: string[]
   },
   prisma: ReleasePrisma
@@ -130,7 +134,13 @@ export async function getFilteredReleases(
     ? filterByShortnames.map((shortname) => sanitize(shortname))
     : undefined
 
-  const where = await buildReleaseFilter({ filterByShortnames: safeFilterByShortnames }, prisma)
+  const filterByAfterPublishDate = publishTimeAfter ? parseDateISO(publishTimeAfter) : undefined
+  const filterByBeforePublishDate = publishTimeBefore ? parseDateISO(publishTimeBefore) : undefined
+
+  const where = await buildReleaseFilter(
+    { filterByShortnames: safeFilterByShortnames, filterByAfterPublishDate, filterByBeforePublishDate },
+    prisma
+  )
 
   return getReleases({ start, count, where, sort }, prisma)
 }
@@ -212,7 +222,11 @@ export async function createRelease(
 }
 
 export async function buildReleaseFilter(
-  { filterByShortnames }: { filterByShortnames?: string[] },
+  {
+    filterByShortnames,
+    filterByAfterPublishDate,
+    filterByBeforePublishDate,
+  }: { filterByShortnames?: string[]; filterByAfterPublishDate?: Date; filterByBeforePublishDate?: Date },
   prisma: ReleasePrisma
 ) {
   if (filterByShortnames?.length) {
@@ -230,6 +244,17 @@ export async function buildReleaseFilter(
           },
         },
       })),
+    }),
+    ...((filterByBeforePublishDate || filterByAfterPublishDate) && {
+      publish_time: {
+        ...(filterByBeforePublishDate && {
+          lte: filterByBeforePublishDate,
+        }),
+
+        ...(filterByAfterPublishDate && {
+          gte: filterByAfterPublishDate,
+        }),
+      },
     }),
   }
 }
