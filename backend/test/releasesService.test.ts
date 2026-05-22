@@ -565,7 +565,7 @@ const mockedSingleReleaseResult = {
       code: 'M',
     },
     revision: {
-      name: 'I',
+      code: 'I',
     },
   },
   statistic: {
