@@ -3,8 +3,11 @@ import { useParams } from 'react-router'
 import { Heading, Paragraph, List, Link, Button, Divider, Details, Card } from '@digdir/designsystemet-react'
 import { PersonPencilIcon } from '@navikt/aksel-icons'
 import { StatisticStatusTag } from '../components/StatisticStatusTag'
+import { VariantCard } from '../components/VariantCard'
 import client from '../api'
-import { type RegionLevel, type StatisticDetails, type Variant, type StatisticStatus } from '@ssbno-statreg/shared'
+import { StatisticStatus, type RegionLevel, type StatisticDetails, type Variant } from '@ssbno-statreg/shared'
+
+import './ShowStatistic.css'
 
 export default function ShowStatistic() {
   const [statistic, setStatistic] = useState<StatisticDetails>({})
@@ -35,7 +38,11 @@ export default function ShowStatistic() {
   const startYear = formatStartYear(statistic.first_released_at)
   const contacts = formatContacts(statistic.contacts)
   const mockContinuedBy = ['putegjeld', 'k2', 'k3']
-  const cancelledVariants = formatCancelledVariants(statistic.variants ?? [])
+  const variants = statistic.variants ?? []
+  const cancelledVariants = formatCancelledVariants(variants)
+  const activeVariants = variants.filter((v) => !v.cancelled)
+
+  if (!shortname) return null
 
   return (
     <>
@@ -47,14 +54,34 @@ export default function ShowStatistic() {
 
       <Divider />
 
-      <div>
+      <div style={{ width: '100%' }}>
+        <Heading data-size='xs'>Varianter</Heading>
         <Paragraph>Velg variant for å melde publiseringsdato</Paragraph>
+        <div className='show-statistic-variants-container'>
+          {activeVariants.map((variant) => (
+            <VariantCard key={variant.id} shortname={shortname} variant={variant} />
+          ))}
+        </div>
         <Card>
           <Details>
             <Details.Summary>Kommende publiseringer</Details.Summary>
             <Details.Content>Kommer snart.</Details.Content>
           </Details>
         </Card>
+        {cancelledVariants.length > 0 && (
+          <Card style={{ marginTop: 'var(--ds-size-6)' }}>
+            <Details>
+              <Details.Summary>Opphørte varianter</Details.Summary>
+              <Details.Content>
+                <List.Unordered>
+                  {cancelledVariants.map((variant) => (
+                    <List.Item key={variant}>{variant}</List.Item>
+                  ))}
+                </List.Unordered>
+              </Details.Content>
+            </Details>
+          </Card>
+        )}
       </div>
 
       <Divider />
@@ -106,15 +133,6 @@ export default function ShowStatistic() {
       <div>
         <Heading data-size='xs'>Statistikkens startår</Heading>
         <Paragraph>{startYear}</Paragraph>
-      </div>
-
-      <div>
-        <Heading data-size='xs'>Opphørte varianter</Heading>
-        <List.Unordered>
-          {cancelledVariants.map((variant) => (
-            <List.Item key={variant}>{variant}</List.Item>
-          ))}
-        </List.Unordered>
       </div>
 
       <div>
