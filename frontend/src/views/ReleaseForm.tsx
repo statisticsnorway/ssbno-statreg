@@ -85,6 +85,7 @@ export default function ReleaseForm() {
   //for creation, path is /statistikk/:shortname/:variantId/opprett
   //for editing, path is /publisering/:id/rediger
   const { id: releaseId, shortname, variantId } = useParams()
+  const navigate = useNavigate()
 
   //we use this variable when form needs to be different in editing mode
   const isEditing = !!releaseId
@@ -102,10 +103,11 @@ export default function ReleaseForm() {
   const [createdRelease, setCreatedRelease] = useState<ReleaseDetails>({})
   const [openCreateReleaseModal, setOpenCreateReleaseModal] = useState(false)
 
-  const navigate = useNavigate()
   // when id exists in url-path, fetch release and prefill form
   useEffect(() => {
-    async function fetchRelease() {
+    async function setPrefilledValues() {
+      if (!releaseId) return
+
       const { data: response } = await client.GET('/releases/{id}', {
         params: { path: { id: releaseId!.toString() } },
       })
@@ -126,16 +128,18 @@ export default function ReleaseForm() {
       setVariant(response?.variant)
     }
 
-    fetchRelease()
+    setPrefilledValues()
   }, [releaseId])
 
   // when shortname and variantId exists in url-path, only fetch statistic and variant data
   useEffect(() => {
     async function fetchVariant() {
+      if (!shortname || !variantId) return
+
       const { data: response } = await client.GET('/statistics/{shortname}', {
         params: { path: { shortname: shortname! } },
       })
-      const variant = response?.variants?.find((variant) => variant.id === variantId)
+      const variant = response?.variants?.find((variant) => variant.id?.toString() === variantId)
       setStatistic(response)
       setVariant({
         id: variant?.id,
@@ -148,7 +152,7 @@ export default function ReleaseForm() {
     fetchVariant()
   }, [shortname, variantId])
 
-  function validateFields() {
+  function validateFields(): boolean {
     const nextErrors: ReleaseFormErrors = {}
 
     if (!values.dateType) nextErrors.dateType = 'Velg en datotype for publisering'
@@ -167,7 +171,8 @@ export default function ReleaseForm() {
     }
 
     setErrors(nextErrors)
-    return Object.values(nextErrors).some(Boolean)
+    const hasErrors = Object.values(nextErrors).some(Boolean)
+    return !hasErrors
   }
 
   async function updateRelease(body: ReleaseUpdate) {
@@ -353,7 +358,7 @@ export default function ReleaseForm() {
 
       <ReleaseFormModal
         modalHeading='Publiseringsdato er registrert'
-        modalDescription={createdReleaseToModalDescription(createdRelease)}
+        modalDescription={getCreatedReleaseModalDescription(createdRelease)}
         openCreateReleaseModal={openCreateReleaseModal}
         createdRelease={createdRelease}
         setOpenCreateReleaseModal={setOpenCreateReleaseModal}
@@ -386,7 +391,7 @@ export default function ReleaseForm() {
   )
 }
 
-function createdReleaseToModalDescription(createdRelease: ReleaseDetails) {
+function getCreatedReleaseModalDescription(createdRelease: ReleaseDetails) {
   const createdReleaseVariant = createdRelease?.variant
   const createdReleaseFrequency = createdReleaseVariant?.frequency?.name
   const createdReleaseRevisionName = createdReleaseVariant?.revision?.name
@@ -395,7 +400,7 @@ function createdReleaseToModalDescription(createdRelease: ReleaseDetails) {
   return [createdReleaseFrequency, createdReleaseRevisionName].join(', ').toLowerCase()
 }
 
-// TODO should take a date prop
+// TODO should take a date prop MIM-1740
 function DateReleasesTable() {
   const [releases, setReleases] = useState<ReleaseListing[]>([])
 

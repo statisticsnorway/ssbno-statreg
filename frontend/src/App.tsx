@@ -6,7 +6,6 @@ import ReleaseForm from './views/ReleaseForm'
 import ShowStatistic from './views/ShowStatistic'
 import ListStatistics from './views/ListStatistics'
 import ListReleases from './views/ListReleases'
-import CreateRelease from './views/CreateRelease'
 import CreateStatistic from './views/CreateStatistic'
 import ListBlockedDates from './views/ListBlockedDates'
 import CreateBlockedDate from './views/CreateBlockedDate'
@@ -25,7 +24,7 @@ function App() {
         <Route path='statistikk'>
           <Route index element={<ListStatistics />} />
           <Route path=':shortname' element={<ShowStatistic />} />
-          <Route path=':shortname/:variantId/opprett' element={<CreateRelease />} />
+          <Route path=':shortname/:variantId/opprett' element={<ReleaseForm />} />
           <Route path='opprett' element={<CreateStatistic />} />
         </Route>
 
