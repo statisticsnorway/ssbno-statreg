@@ -25,7 +25,7 @@ type StatisticRowProps = {
   statistic: StatisticListing
 }
 
-function StatisticRow({ statistic }: StatisticRowProps) {
+function StatisticRow({ statistic }: Readonly<StatisticRowProps>) {
   const statisticsShortname = statistic.shortname ?? ''
   // const statisticsSection = statistic.contacts?.username ?? ''
   return (
@@ -42,7 +42,7 @@ function StatisticRow({ statistic }: StatisticRowProps) {
   )
 }
 
-export function StatisticsTable({ statistics }: { statistics: StatisticListing[] }) {
+export function StatisticsTable({ statistics }: Readonly<{ statistics: StatisticListing[] }>) {
   return (
     <Table>
       <Table.Head>
@@ -77,7 +77,7 @@ export function PaginatedStatisticsTable({
   statistics,
   updateRowCount,
   setCurrentPage,
-}: PaginatedStatisticsTableProps) {
+}: Readonly<PaginatedStatisticsTableProps>) {
   return (
     <div style={{ minWidth: '100%' }}>
       <div className='row-count-selector'>
