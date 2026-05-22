@@ -32,7 +32,6 @@ export async function getAllStatistics(
       name_en: true,
       shortname: { select: { name: true } },
       responsiblePersons: { select: { username: true, email: true } },
-      division_code: true,
       division: { select: { code: true } },
     },
   })
