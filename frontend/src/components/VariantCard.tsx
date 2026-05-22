@@ -6,9 +6,7 @@ export function VariantCard({ shortname, variant }: { shortname: string; variant
     <Card data-color='neutral' variant='tinted' style={{ height: '180px' }}>
       <Card.Block>
         <Heading>
-          <Link
-            href={`/statistikkregisteret/statistikk/${shortname}/${variant.id}/opprett`}
-          >
+          <Link href={`/statistikkregisteret/statistikk/${shortname}/${variant.id}/opprett`}>
             {variant.frequency?.name}, {variant.revision}
           </Link>
         </Heading>
