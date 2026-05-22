@@ -80,24 +80,30 @@ function useDatepicker(
   })
 }
 
+//common release form for creating and editing release
 export default function ReleaseForm() {
+  //for creation, path is /statistikk/:shortname/:variantId/opprett
+  //for editing, path is /publisering/:id/rediger
   const { id: releaseId, shortname, variantId } = useParams()
+
+  //we use this variable when form needs to be different in editing mode
   const isEditing = !!releaseId
 
-  const navigate = useNavigate()
-
+  //state used in both create and update mode
   const [values, setValues] = useState<ReleaseFormTypes>({})
   const [errors, setErrors] = useState<ReleaseFormErrors>({})
   const [statistic, setStatistic] = useState<Statistic>()
   const [variant, setVariant] = useState<Variant>()
-
   const publishTimePicker = useDatepicker('publishTime', setValues, setErrors)
   const periodFromPicker = useDatepicker('periodFrom', setValues, setErrors)
   const periodToPicker = useDatepicker('periodTo', setValues, setErrors)
 
+  //state used in create mode
   const [createdRelease, setCreatedRelease] = useState<ReleaseDetails>({})
   const [openCreateReleaseModal, setOpenCreateReleaseModal] = useState(false)
 
+  const navigate = useNavigate()
+  // when id exists in url-path, fetch release and prefill form
   useEffect(() => {
     async function fetchRelease() {
       const { data: response } = await client.GET('/releases/{id}', {
@@ -123,6 +129,7 @@ export default function ReleaseForm() {
     fetchRelease()
   }, [releaseId])
 
+  // when shortname and variantId exists in url-path, only fetch statistic and variant data
   useEffect(() => {
     async function fetchVariant() {
       const { data: response } = await client.GET('/statistics/{shortname}', {
@@ -160,7 +167,7 @@ export default function ReleaseForm() {
     }
 
     setErrors(nextErrors)
-    return !nextErrors
+    return Object.values(nextErrors).some(Boolean)
   }
 
   async function updateRelease(body: ReleaseUpdate) {
