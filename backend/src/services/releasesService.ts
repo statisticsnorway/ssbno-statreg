@@ -25,20 +25,36 @@ export async function getReleases(
     start = 0,
     count = 10,
     where,
+    sort,
   }: {
     start?: number
     count?: number
     where?: Prisma.ReleaseWhereInput
+    sort?: string[]
   },
   prisma: ReleasePrisma
 ): Promise<ReleaseListingResponse> {
+  const allowedSortingFields = new Set(['publish_time'])
+  const orderBy = sort
+    ?.map((field) => {
+      const isDesc = field.startsWith('-')
+      const key = isDesc ? field.slice(1) : field
+
+      if (!allowedSortingFields.has(key)) {
+        return null
+      }
+
+      return {
+        [key]: isDesc ? 'desc' : 'asc',
+      } as Prisma.ReleaseOrderByWithRelationInput
+    })
+    .filter((v): v is Prisma.ReleaseOrderByWithRelationInput => v !== null)
+
   const releases = await prisma.release.findMany({
     skip: start,
     take: count,
     where,
-    orderBy: {
-      publish_time: 'desc',
-    },
+    orderBy: orderBy?.length ? orderBy : { publish_time: 'desc' },
     select: {
       id: true,
       version: true,
@@ -101,10 +117,12 @@ export async function getFilteredReleases(
     start = 0,
     count = 10,
     filterByShortnames,
+    sort,
   }: {
     start?: number
     count?: number
     filterByShortnames?: string[]
+    sort?: string[]
   },
   prisma: ReleasePrisma
 ): Promise<ReleaseListingResponse> {
@@ -114,7 +132,7 @@ export async function getFilteredReleases(
 
   const where = await buildReleaseFilter({ filterByShortnames: safeFilterByShortnames }, prisma)
 
-  return getReleases({ start, count, where }, prisma)
+  return getReleases({ start, count, where, sort }, prisma)
 }
 
 export async function getVariantReleases(
@@ -123,11 +141,13 @@ export async function getVariantReleases(
     count = 10,
     shortname,
     variantId,
+    sort,
   }: {
     start?: number
     count?: number
     shortname: string
     variantId: number
+    sort?: string[]
   },
   prisma: ReleasePrisma
 ): Promise<ReleaseListingResponse> {
@@ -136,7 +156,7 @@ export async function getVariantReleases(
 
   const where = await buildVariantReleaseFilter({ shortname: safeShortname, variantId: parsedVariantId }, prisma)
 
-  return getReleases({ start, count, where }, prisma)
+  return getReleases({ start, count, where, sort }, prisma)
 }
 
 export async function getReleaseById(id: string, prisma: ReleasePrisma): Promise<ReleaseDetails> {
