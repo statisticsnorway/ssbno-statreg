@@ -1,4 +1,4 @@
-import { RevisionNames, type Variant } from '@ssbno-statreg/shared'
+import { RevisionNames, type ReleaseDetails, type Variant } from '@ssbno-statreg/shared'
 
 export function formatPublishTime(publishTime: string | undefined, timeZone?: string): string {
   if (!publishTime) return '-'
@@ -63,9 +63,9 @@ export function formatRevisionName(revision?: string): string {
   return RevisionNames[revision as keyof typeof RevisionNames]
 }
 
-export function formatVariant(variant?: Variant): string {
+// TODO: Ref. revisionCode workaround; We need to decide whether to use revision.name or revision directly for statistics and releases
+export function formatVariant(variant?: Variant | ReleaseDetails['variant'], revisionCode?: string): string {
   const frequency = variant?.frequency?.name ?? '-'
-  // @ts-expect-error: TODO: Decide whether to use revision.name or revision directly for statistics and releases so we stay consistent
-  const revision = formatRevisionName(variant?.revision ?? variant?.revision?.name).toLowerCase()
+  const revision = formatRevisionName(revisionCode ?? (variant as Variant)?.revision).toLowerCase()
   return `${frequency}, ${revision}`
 }

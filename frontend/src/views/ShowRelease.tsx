@@ -30,7 +30,7 @@ function ShowRelease() {
   const statisticName = formatStatisticName(release.statistic)
   const period = formatPeriod(release.period_from, release.period_to)
   const publishTime = formatPublishTime(release.publish_time)
-  const variant = formatVariant(release.variant)
+  const variant = formatVariant(release.variant, release.variant?.revision?.name)
 
   return (
     <>
