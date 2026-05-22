@@ -6,7 +6,7 @@ import './ListStatistics.css'
 import { Heading } from '@digdir/designsystemet-react'
 
 export default function ListStatistics() {
-  const [count, setCount] = useState(30)
+  const [count, setCount] = useState(20)
   const [start, setStart] = useState(0)
   const [total, setTotal] = useState(0)
   const [statistics, setStatistics] = useState<StatisticListing[]>([])
