@@ -69,6 +69,42 @@ describe('release data is persisted when ', () => {
   })
 })
 
+test('/releases are sorted from newest to oldest publish_time by default', async () => {
+  const response = await fetch(`${BASE_URL}/releases`)
+
+  expect(response.status).toBe(200)
+
+  const data = await response.json()
+  const releases = data.releases
+
+  expect(releases.length).toBeGreaterThan(1)
+
+  for (let i = 0; i < releases.length - 1; i++) {
+    const current = new Date(releases[i].publish_time).getTime()
+    const next = new Date(releases[i + 1].publish_time).getTime()
+
+    expect(current).toBeGreaterThanOrEqual(next)
+  }
+})
+
+test('/releases?sort=publish_time are sorted from oldest to newest publish_time', async () => {
+  const response = await fetch(`${BASE_URL}/releases?sort=publish_time`)
+
+  expect(response.status).toBe(200)
+
+  const data = await response.json()
+  const releases = data.releases
+
+  expect(releases.length).toBeGreaterThan(1)
+
+  for (let i = 0; i < releases.length - 1; i++) {
+    const current = new Date(releases[i].publish_time).getTime()
+    const next = new Date(releases[i + 1].publish_time).getTime()
+
+    expect(next).toBeGreaterThanOrEqual(current)
+  }
+})
+
 function addMonthsToDate(date: string, months: number): string {
   const d = new Date(date)
   d.setMonth(d.getMonth() + months)
