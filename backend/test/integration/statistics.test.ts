@@ -1,5 +1,5 @@
 import { afterAll, describe, expect, test } from 'vitest'
-import { StatisticDetails, StatisticListing, StatisticListingResponse } from '@ssbno-statreg/shared'
+import { StatisticDetails, StatisticListingResponse } from '@ssbno-statreg/shared'
 import { prisma } from '@/lib/prisma'
 import {
   cleanupCreatedStatistics,
