@@ -11,10 +11,9 @@ const TABLE_HEADER_CELLS = ['Kortnavn', 'Statistikknavn', 'Seksjon', 'Status']
 
 type TruncatedTableCellProps = {
   value: string | undefined
-  maxWidth?: string
 }
 
-function TruncatedTableCell({ value, maxWidth = '340px' }: TruncatedTableCellProps) {
+function TruncatedTableCell({ value }: Readonly<TruncatedTableCellProps>) {
   return (
     <Table.Cell className='truncated-cell' title={value}>
       {value}
