@@ -10,3 +10,10 @@
   text-overflow: ellipsis;
   max-width: 340px;
 }
+
+.statistic-row {
+  &:hover {
+    background-color: var(--ds-color-surface-hover);
+    cursor: pointer;
+  }
+}

@@ -6,6 +6,7 @@ import { Pagination } from './Pagination'
 import '../views/ListReleases.css'
 import { RowCountSelect } from './RowCountSelect'
 import './StatisticsTable.css'
+import { useNavigate } from 'react-router'
 
 const TABLE_HEADER_CELLS = ['Kortnavn', 'Statistikknavn', 'Seksjon', 'Status']
 
@@ -27,12 +28,16 @@ type StatisticRowProps = {
 
 function StatisticRow({ statistic }: Readonly<StatisticRowProps>) {
   const statisticsShortname = statistic.shortname ?? ''
-  // const statisticsSection = statistic.contacts?.username ?? ''
+  const navigate = useNavigate()
   return (
-    <Table.Row key={`${statistic.shortname}`}>
-      <Table.Cell>
-        <Link href={`/statistikkregisteret/statistikk/${statisticsShortname}`}>{statisticsShortname}</Link>
-      </Table.Cell>
+    <Table.Row
+      key={`${statistic.shortname}`}
+      className='statistic-row'
+      onClick={() => {
+        navigate(`/statistikk/${statisticsShortname}`, {})
+      }}
+    >
+      <Table.Cell>{statisticsShortname}</Table.Cell>
       <TruncatedTableCell value={statistic.name} />
       <Table.Cell>{statistic.division?.name}</Table.Cell>
       <Table.Cell>
