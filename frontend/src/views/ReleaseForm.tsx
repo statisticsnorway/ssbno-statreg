@@ -231,7 +231,7 @@ export default function ReleaseForm() {
     <>
       <div>
         <Heading level={1} data-size='md'>
-          Rediger publiseringsdato
+          {isEditing ? 'Rediger publiseringsdato' : 'Meld publiseringsdato'}
         </Heading>
         <Heading data-size='xs' level={2}>
           {statistic?.name} ({statistic?.shortname}) og {variant?.frequency?.name?.toLowerCase()}
