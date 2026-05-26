@@ -1,5 +1,6 @@
 import { Card, Heading, Link, Paragraph } from '@digdir/designsystemet-react'
 import { type Variant } from '@ssbno-statreg/shared'
+import { formatVariant } from '../lib/utils'
 
 export function VariantCard({ shortname, variant }: { shortname: string; variant: Variant }) {
   return (
@@ -7,7 +8,7 @@ export function VariantCard({ shortname, variant }: { shortname: string; variant
       <Card.Block>
         <Heading>
           <Link href={`/statistikkregisteret/statistikk/${shortname}/${variant.id}/opprett`}>
-            {variant.frequency?.name}, {variant.revision}
+            {formatVariant(variant)}
           </Link>
         </Heading>
         <Paragraph>

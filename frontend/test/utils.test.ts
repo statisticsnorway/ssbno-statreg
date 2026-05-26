@@ -6,6 +6,8 @@ import {
   getLastDayOfNthMonth,
   getDateOnlyAsString,
   parsePublishDateWithTime,
+  formatRevisionName,
+  formatVariant,
 } from '../src/lib/utils'
 
 const timeZone = 'Europe/Oslo'
@@ -142,6 +144,60 @@ describe('utils', () => {
       const originalDate = new Date('2026-10-26T00:00:00Z')
       const result = parsePublishDateWithTime(originalDate)
       expect(result).toStrictEqual('2026-10-26T07:00:00.000Z')
+    })
+  })
+
+  describe('formatRevisionName', () => {
+    test('returns the correct revision name if valid', () => {
+      expect(formatRevisionName('F')).toBe('Foreløpige')
+    })
+
+    test('returns "-" if revision is undefined', () => {
+      expect(formatRevisionName(undefined)).toBe('-')
+    })
+
+    test('returns "-" if revision is not in RevisionNames', () => {
+      expect(formatRevisionName('X')).toBe('-')
+    })
+  })
+
+  describe('formatVariant', () => {
+    test('formats frequency and revision correctly', () => {
+      const variant = {
+        frequency: { name: 'Måned' },
+        revision: { code: 'I' },
+      }
+
+      expect(formatVariant(variant)).toBe('Måned, ingen')
+    })
+
+    test('handles missing frequency', () => {
+      const variant = {
+        revision: { code: 'B' },
+      }
+
+      expect(formatVariant(variant)).toBe('-, beregnede')
+    })
+
+    test('handles missing revision', () => {
+      const variant = {
+        frequency: { name: 'År' },
+      }
+
+      expect(formatVariant(variant)).toBe('År, -')
+    })
+
+    test('returns default values when variant is undefined', () => {
+      expect(formatVariant(undefined)).toBe('-, -')
+    })
+
+    test('handles invalid revision code', () => {
+      const variant = {
+        frequency: { name: 'Kvartal' },
+        revision: { code: 'X' },
+      }
+
+      expect(formatVariant(variant)).toBe('Kvartal, -')
     })
   })
 })
