@@ -234,7 +234,7 @@ export default function ReleaseForm() {
           Rediger publiseringsdato
         </Heading>
         <Heading data-size='xs' level={2}>
-          {statistic?.name} ({statistic?.shortname}) og {variant?.frequency?.name}
+          {statistic?.name} ({statistic?.shortname}) og {variant?.frequency?.name?.toLowerCase()}
         </Heading>
         <ApprovalStatusTag status={ApprovalStatus.PENDING} />
       </div>
