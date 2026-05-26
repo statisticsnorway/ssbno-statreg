@@ -10,18 +10,6 @@ import { useNavigate } from 'react-router'
 
 const TABLE_HEADER_CELLS = ['Kortnavn', 'Statistikknavn', 'Seksjon', 'Status']
 
-type TruncatedTableCellProps = {
-  value: string | undefined
-}
-
-function TruncatedTableCell({ value }: Readonly<TruncatedTableCellProps>) {
-  return (
-    <Table.Cell className='truncated-cell' title={value}>
-      {value}
-    </Table.Cell>
-  )
-}
-
 type StatisticRowProps = {
   statistic: StatisticListing
 }
@@ -38,9 +26,9 @@ function StatisticRow({ statistic }: Readonly<StatisticRowProps>) {
       }}
     >
       <Table.Cell>{statisticsShortname}</Table.Cell>
-      <TruncatedTableCell value={statistic.name} />
+      <Table.Cell>{statistic.name}</Table.Cell>
       <Table.Cell>{statistic.division?.name}</Table.Cell>
-      <Table.Cell>
+      <Table.Cell className='status-column'>
         <ApprovalStatusBadge status={statistic.approval_status} />
       </Table.Cell>
     </Table.Row>

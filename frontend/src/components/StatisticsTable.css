@@ -4,16 +4,13 @@
   margin-bottom: var(--ds-size-8);
 }
 
-.truncated-cell {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 340px;
-}
-
 .statistic-row {
   &:hover {
     background-color: var(--ds-color-surface-hover);
     cursor: pointer;
   }
+}
+
+.status-column {
+  min-width: 6rem;
 }
