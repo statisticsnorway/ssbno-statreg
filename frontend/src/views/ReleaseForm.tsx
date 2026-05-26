@@ -415,10 +415,13 @@ function getCreatedReleaseModalDescription(createdRelease: ReleaseDetails) {
 // TODO should take a date prop MIM-1740
 function DateReleasesTable() {
   const [releases, setReleases] = useState<ReleaseListing[]>([])
+  const [sortBy, setSortBy] = useState<string[]>([])
 
   useEffect(() => {
     async function fetchReleases() {
-      const { data, error } = await client.GET('/releases', { params: { query: { start: 0, count: 10 } } })
+      const { data, error } = await client.GET('/releases', {
+        params: { query: { start: 0, count: 10, sort: sortBy.join(',') } },
+      })
       if (error) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const errorMessage = (error as any).error
@@ -429,9 +432,9 @@ function DateReleasesTable() {
       }
     }
     fetchReleases()
-  }, [])
+  }, [sortBy])
 
-  return <ReleasesTable releases={releases} />
+  return <ReleasesTable releases={releases} sortBy={sortBy} setSortBy={setSortBy} />
 }
 
 function VariantReleasesTable({ shortname, variantId }: { shortname: string; variantId: number }) {
@@ -439,11 +442,12 @@ function VariantReleasesTable({ shortname, variantId }: { shortname: string; var
   const [start, setStart] = useState(0)
   const [releases, setReleases] = useState<ReleaseListing[]>([])
   const [total, setTotal] = useState(0)
+  const [sortBy, setSortBy] = useState<string[]>([])
 
   useEffect(() => {
     async function fetchVariantReleases() {
       const { data, error } = await client.GET('/statistics/{shortname}/variants/{id}/releases', {
-        params: { path: { shortname, id: variantId }, query: { start, count } },
+        params: { path: { shortname, id: variantId }, query: { start, count, sort: sortBy.join(',') } },
       })
       if (error) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -456,7 +460,7 @@ function VariantReleasesTable({ shortname, variantId }: { shortname: string; var
       }
     }
     fetchVariantReleases()
-  }, [shortname, variantId, count, start])
+  }, [shortname, variantId, count, start, sortBy])
 
   function updateRowCount(newCount: number) {
     setCount(newCount)
@@ -478,6 +482,8 @@ function VariantReleasesTable({ shortname, variantId }: { shortname: string; var
         total={total}
         releases={releases}
         setCurrentPage={setCurrentPage}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
       />
     </>
   )
