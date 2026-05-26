@@ -21,3 +21,4 @@ export type Variant = components['schemas']['Variant']
 
 export type StatisticListingResponse = paths['/statistics']['get']['responses']['200']['content']['application/json']
 export type ReleaseListingResponse = paths['/releases']['get']['responses']['200']['content']['application/json']
+export type ReleaseByIdResponse = paths['/releases/{id}']['get']['responses']['200']['content']['application/json']

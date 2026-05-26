@@ -484,7 +484,7 @@ paths:
 
   /releases:
     get:
-      summary: List all releases. TBD; Pagination and filtering in backend or frontend
+      summary: List all releases. Filter and sorting can be specified using query params
       security: []
       tags: [releases]
       parameters:
@@ -512,8 +512,15 @@ paths:
             type: string
         - in: query
           name: publish_time_after
-          description: Filter releases with publish_time after the specified timestamp in UTC.
-          example: '2026-05-06 06:00:00'
+          description: Filter releases with publish_time after the specified time given in ISO format.
+          example: '2026-05-06T06:00:00Z'
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: publish_time_before
+          description: Filter releases with publish_time before the specified timestamp in ISO format.
+          example: '2026-05-06T06:00:00Z'
           schema:
             type: string
             format: date-time

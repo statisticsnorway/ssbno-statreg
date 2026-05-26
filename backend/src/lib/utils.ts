@@ -40,6 +40,10 @@ export function ensureString(value?: string | string[]): string {
   return Array.isArray(value) ? (value[0] ?? '') : (value ?? '')
 }
 
+export function ensureStringArray(value?: string): string[] {
+  return typeof value === 'string' ? value.split(',') : []
+}
+
 export function parseId(id: string | number, fieldName?: string): number {
   if (!isNumber(id) || Number(id) < 0) {
     throw { statregError: ['Invalid', fieldName, 'id format'].filter(Boolean).join(' ') }
