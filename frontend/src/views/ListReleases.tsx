@@ -159,7 +159,7 @@ function ListReleases() {
           {selectedDate && (
             <Chip.Removable
               aria-label={`Slett valgt dag: ${formatDate(selectedDate.toISOString())}`}
-              onClick={() => onSelectDate(undefined)}
+              onClick={() => onSelectDate()}
             >
               {formatDate(selectedDate.toISOString())}
             </Chip.Removable>
