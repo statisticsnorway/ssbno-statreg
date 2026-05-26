@@ -19,16 +19,18 @@ function ListReleases() {
   const [shortnames, setShortnames] = useState<ShortnameListing[]>([])
   // eslint-disable-next-line @eslint-react/no-unused-state
   const [selectedShortnames, setSelectedShortnames] = useState<string[]>([])
+  const [sortBy, setSortBy] = useState<string[]>([])
 
   useEffect(() => {
-    async function fetchReleases(start: number, count: number, selectedShortnames: string[]) {
+    async function fetchReleases(start: number, count: number, selectedShortnames: string[], sortBy: string[]) {
       const filter = {
         ...(selectedShortnames.length && {
           shortname: selectedShortnames.join(','),
         }),
       }
+      const sort = sortBy.join(',')
       const { data, error } = await client.GET('/releases', {
-        params: { query: { start, count, ...filter } },
+        params: { query: { start, count, ...filter, sort } },
       })
       if (error) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -40,8 +42,8 @@ function ListReleases() {
         setTotal(data.total ?? 0)
       }
     }
-    fetchReleases(start, rowCount, selectedShortnames)
-  }, [start, rowCount, selectedShortnames])
+    fetchReleases(start, rowCount, selectedShortnames, sortBy)
+  }, [start, rowCount, selectedShortnames, sortBy])
 
   useEffect(() => {
     async function fetchShortnames() {
@@ -132,6 +134,8 @@ function ListReleases() {
         total={total}
         releases={releases}
         setCurrentPage={setCurrentPage}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
       />
     </>
   )

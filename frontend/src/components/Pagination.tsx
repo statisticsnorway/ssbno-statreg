@@ -1,6 +1,6 @@
 import { Pagination as DsPagination, usePagination } from '@digdir/designsystemet-react'
 
-type PaginationProps = {
+export type PaginationProps = {
   start: number
   count: number
   total: number
