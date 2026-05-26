@@ -245,7 +245,6 @@ describe('utils', () => {
 
     test('should handle multiple valid fields', () => {
       const result = parseSortInput(['publish_time', '-approval_status'], ['publish_time', 'approval_status'])
-
       expect(result).toEqual([{ publish_time: 'asc' }, { approval_status: 'desc' }])
     })
 
@@ -259,7 +258,6 @@ describe('utils', () => {
         ['invalid', '-publish_time', 'approval_status'],
         ['publish_time', 'approval_status']
       )
-
       expect(result).toEqual([{ publish_time: 'desc' }, { approval_status: 'asc' }])
     })
 
@@ -269,7 +267,7 @@ describe('utils', () => {
     })
 
     test('should filter out all invalid fields', () => {
-      const result = parseSortInput(['foo', '-bar'], ['publish_time'])
+      const result = parseSortInput(['invalid', '-field'], ['publish_time'])
       expect(result).toEqual([])
     })
 
