@@ -225,7 +225,7 @@ describe('utils', () => {
   })
 
   describe('parseSortInput', () => {
-    test("should return ascending sort when no '-' prefix", () => {
+    test("return ascending sort when no '-' prefix", () => {
       const result = parseSortInput(['publish_time'], ['publish_time'])
       expect(result).toEqual([
         {
@@ -234,7 +234,7 @@ describe('utils', () => {
       ])
     })
 
-    test("should return descending sort when '-' prefix is used", () => {
+    test("return descending sort when '-' prefix is used", () => {
       const result = parseSortInput(['-publish_time', 'approval_status'], ['approval_status'])
       expect(result).toEqual([
         {
@@ -243,17 +243,17 @@ describe('utils', () => {
       ])
     })
 
-    test('should handle multiple valid fields', () => {
+    test('handle multiple valid fields', () => {
       const result = parseSortInput(['publish_time', '-approval_status'], ['publish_time', 'approval_status'])
       expect(result).toEqual([{ publish_time: 'asc' }, { approval_status: 'desc' }])
     })
 
-    test('should ignore fields not in allowedFields', () => {
+    test('ignore fields not in allowedFields', () => {
       const result = parseSortInput(['publish_time', 'invalid'], ['publish_time'])
       expect(result).toEqual([{ publish_time: 'asc' }])
     })
 
-    test('should handle mix of valid and invalid with correct order preserved', () => {
+    test('handle mix of valid and invalid with correct order preserved', () => {
       const result = parseSortInput(
         ['invalid', '-publish_time', 'approval_status'],
         ['publish_time', 'approval_status']
@@ -261,27 +261,27 @@ describe('utils', () => {
       expect(result).toEqual([{ publish_time: 'desc' }, { approval_status: 'asc' }])
     })
 
-    test('should handle undefined allowedFields safely', () => {
+    test('handle undefined allowedFields safely', () => {
       const result = parseSortInput(['publish_time'], undefined)
       expect(result).toEqual([])
     })
 
-    test('should filter out all invalid fields', () => {
+    test('filter out all invalid fields', () => {
       const result = parseSortInput(['invalid', '-field'], ['publish_time'])
       expect(result).toEqual([])
     })
 
-    test('should return empty array if sortQuery is undefined', () => {
+    test('return empty array if sortQuery is undefined', () => {
       const result = parseSortInput(undefined, ['publish_time'])
       expect(result).toEqual([])
     })
 
-    test('should return empty array if sortQuery is empty', () => {
+    test('return empty array if sortQuery is empty', () => {
       const result = parseSortInput([], ['publish_time'])
       expect(result).toEqual([])
     })
 
-    test('should return empty array if allowedFields is empty', () => {
+    test('return empty array if allowedFields is empty', () => {
       const result = parseSortInput(['publish_time'], [])
       expect(result).toEqual([])
     })
