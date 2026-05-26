@@ -248,7 +248,7 @@ describe('utils', () => {
       expect(result).toEqual([{ publish_time: 'asc' }, { approval_status: 'desc' }])
     })
 
-    test('ignore fields not in allowedFields', () => {
+    test('ignore fields not in allowedFiel ds', () => {
       const result = parseSortInput(['publish_time', 'invalid'], ['publish_time'])
       expect(result).toEqual([{ publish_time: 'asc' }])
     })
