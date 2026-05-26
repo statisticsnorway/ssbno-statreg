@@ -70,14 +70,18 @@ export function ReleasesTable({ releases, sortBy, setSortBy }: Readonly<ReleaseT
     const existingIndex = sortBy?.findIndex((s) => s.replace('-', '') === field) ?? -1
     const newSort = [...(sortBy ?? [])]
 
+    // Example sortBy cycle = ['approval_status'] -> ['approval_status', 'publish_time'] -> ['approval_status', '-publish_time'] -> ['approval_status']
     if (existingIndex === -1) {
+      // case 1: if field was not sorted by already, add to the end:
       newSort.push(field)
     } else {
       const isDescending = newSort[existingIndex].startsWith('-')
 
       if (isDescending) {
+        // case 2: if field was sorted in descending order, change to ascending
         newSort.splice(existingIndex, 1)
       } else {
+        // case 3: if field was sorted in ascending order, change to descending
         newSort[existingIndex] = `-${field}`
       }
     }
