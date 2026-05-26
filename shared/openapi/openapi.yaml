@@ -159,7 +159,6 @@ components:
       description: 'Valid revision codes are:	I (Ingen), B (Beregnede), E (Endelige), F (Foreløpige), R (Reviderte), IG (Integrert)'
       type: object
       properties:
-        name: { type: string }
         code: { type: string }
 
     Statistic:
@@ -260,7 +259,8 @@ components:
         cancelled: { type: boolean }
         frequency:
           $ref: '#/components/schemas/Frequency'
-        revision: { type: string }
+        revision: 
+          $ref: '#/components/schemas/Revision'
 
 paths:
   /shortnames:
