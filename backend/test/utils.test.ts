@@ -262,7 +262,7 @@ describe('utils', () => {
     })
 
     test('handle undefined allowedFields safely', () => {
-      const result = parseSortInput(['publish_time'], undefined)
+      const result = parseSortInput(['publish_time'])
       expect(result).toEqual([])
     })
 
