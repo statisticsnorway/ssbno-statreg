@@ -19,6 +19,7 @@ import { DatePicker as AkselDatePicker, useDatepicker as useAkselDatePicker } fr
 import { DatePicker } from '../components/DatePicker'
 import {
   formatDate,
+  formatVariant,
   getDateOnlyAsString,
   getFirstDayOfNthMonth,
   getLastDayOfNthMonth,
@@ -36,7 +37,6 @@ import {
   type ReleaseUpdate,
   type ReleaseCreate,
   type ReleaseDetails,
-  RevisionNames,
 } from '@ssbno-statreg/shared'
 
 import client from '../api'
@@ -143,7 +143,7 @@ export default function ReleaseForm() {
         id: variant?.id,
         frequency: variant?.frequency,
         revision: {
-          name: variant?.revision,
+          code: variant?.revision?.code,
         },
       })
     }
@@ -403,13 +403,8 @@ function getReleaseModalDescription(isEditing: boolean, createdRelease: ReleaseD
 }
 
 function getCreatedReleaseModalDescription(createdRelease: ReleaseDetails) {
-  const createdReleaseVariant = createdRelease?.variant
-  const createdReleaseFrequency = createdReleaseVariant?.frequency?.name
-  const createdReleaseRevisionName = createdReleaseVariant?.revision?.name
-    ? RevisionNames[createdReleaseVariant?.revision.name as keyof typeof RevisionNames]
-    : ''
-  const variantInformation = [createdReleaseFrequency, createdReleaseRevisionName].join(', ').toLowerCase()
-  return `Datoen ${formatDate(createdRelease?.publish_time)} er nå sendt inn for ${variantInformation}.`
+  const createdReleaseVariant = formatVariant(createdRelease?.variant).toLowerCase()
+  return `Datoen ${formatDate(createdRelease?.publish_time)} er nå sendt inn for ${createdReleaseVariant}.`
 }
 
 // TODO should take a date prop MIM-1740
