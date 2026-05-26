@@ -672,9 +672,7 @@ const mockStatisticsPrismaResult = [
     name: 'Energiregnskap og energibalanse',
     name_en: 'Energy account and energy balance',
     shortname: { name: 'energ' },
-    division: {
-      code: 104,
-    },
+    division_code: 104,
     responsiblePersons: [
       {
         username: 'abc',
@@ -688,9 +686,7 @@ const mockStatisticsPrismaResult = [
     name: 'Befolkning og demografi',
     name_en: 'Population and demography',
     shortname: { name: 'befolk' },
-    division: {
-      code: 105,
-    },
+    division_code: 105,
     responsiblePersons: [
       {
         username: 'bcd',
