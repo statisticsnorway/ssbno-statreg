@@ -13,6 +13,7 @@ import {
   parseDateOnly,
   parseId,
   ensureRequiredFieldsExists,
+  parseSortInput,
 } from '@/lib/utils'
 import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
 import type { Prisma } from '@/generated/prisma/client'
@@ -34,21 +35,7 @@ export async function getReleases(
   },
   prisma: ReleasePrisma
 ): Promise<ReleaseListingResponse> {
-  const allowedSortingFields = new Set(['publish_time'])
-  const orderBy = sort
-    ?.map((field) => {
-      const isDesc = field.startsWith('-')
-      const key = isDesc ? field.slice(1) : field
-
-      if (!allowedSortingFields.has(key)) {
-        return null
-      }
-
-      return {
-        [key]: isDesc ? 'desc' : 'asc',
-      } as Prisma.ReleaseOrderByWithRelationInput
-    })
-    .filter((v): v is Prisma.ReleaseOrderByWithRelationInput => v !== null)
+  const orderBy = parseSortInput(sort, ['publish_time'])
 
   const releases = await prisma.release.findMany({
     skip: start,
