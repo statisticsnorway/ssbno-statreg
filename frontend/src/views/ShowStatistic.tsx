@@ -1,17 +1,27 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router'
-import { Heading, Paragraph, List, Link, Button, Divider, Details, Card } from '@digdir/designsystemet-react'
+import { Heading, Paragraph, List, Link, Button, Divider, Details, Card, Table } from '@digdir/designsystemet-react'
 import { PersonPencilIcon } from '@navikt/aksel-icons'
 import { StatisticStatusTag } from '../components/StatisticStatusTag'
 import { VariantCard } from '../components/VariantCard'
 import client from '../api'
-import { StatisticStatus, type RegionLevel, type StatisticDetails, type Variant } from '@ssbno-statreg/shared'
+import {
+  StatisticStatus,
+  type RegionLevel,
+  type ReleaseListing,
+  type StatisticDetails,
+  type Variant,
+} from '@ssbno-statreg/shared'
 
 import './ShowStatistic.css'
-import { formatVariant } from '../lib/utils'
+import { formatPublishTime, formatVariant } from '../lib/utils'
+import { ApprovalStatusBadge } from '../components/ApprovalStatus'
+
+const TABLE_HEADER_CELLS = [{ label: 'Dato' }, { label: 'Variant' }, { label: 'Status' }]
 
 export default function ShowStatistic() {
   const [statistic, setStatistic] = useState<StatisticDetails>({})
+  const [releases, setReleases] = useState<ReleaseListing[]>([])
   const { shortname } = useParams()
 
   useEffect(() => {
@@ -28,7 +38,22 @@ export default function ShowStatistic() {
         setStatistic(data)
       }
     }
+
+    async function fetchReleases(shortname: string) {
+      const { data, error } = await client.GET('/releases', {
+        params: { query: { shortname, count: 5, publish_time_after: new Date().toISOString() } },
+      })
+      if (error) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const errorMessage = (error as any).error
+        console.log(errorMessage)
+        alert(errorMessage)
+      } else {
+        setReleases(data.releases ?? [])
+      }
+    }
     fetchStatistic()
+    if (shortname) fetchReleases(shortname)
   }, [shortname])
 
   const statusCode = statistic.status?.code as keyof typeof StatisticStatus
@@ -64,9 +89,15 @@ export default function ShowStatistic() {
           ))}
         </div>
         <Card>
-          <Details>
+          <Details defaultOpen>
             <Details.Summary>Kommende publiseringer</Details.Summary>
-            <Details.Content>Kommer snart.</Details.Content>
+            <Details.Content>
+              <SimpleReleasesTable releases={releases} />
+              <p>
+                {/* TODO MIM-2702: Fix link with filter params */}
+                <Link href='/'>Se alle publiseringsdatoene for denne statistikken</Link>
+              </p>
+            </Details.Content>
           </Details>
         </Card>
         {cancelledVariants.length > 0 && (
@@ -181,4 +212,43 @@ function formatContacts(contacts: StatisticDetails['contacts']): string[] {
     const initials = contact.email ? contact.email.split('@')[0] : '-'
     return `${name} (${initials})`
   })
+}
+
+function SimpleReleasesTable({ releases }: { releases: ReleaseListing[] }) {
+  return (
+    <Table>
+      <Table.Head>
+        <Table.Row>
+          {TABLE_HEADER_CELLS.map(({ label }) => (
+            <Table.HeaderCell key={label}>{label}</Table.HeaderCell>
+          ))}
+        </Table.Row>
+      </Table.Head>
+      <Table.Body>
+        {releases?.map((release) => (
+          <SimpleReleaseRow key={`${release.publish_time}-${release.id}`} release={release} />
+        ))}
+      </Table.Body>
+    </Table>
+  )
+}
+
+type ReleaseRowProps = {
+  release: ReleaseListing
+}
+
+function SimpleReleaseRow({ release }: ReleaseRowProps) {
+  return (
+    <Table.Row key={`${release.publish_time}-${release.id}`}>
+      <Table.Cell>
+        <Link href={`/statistikkregisteret/publisering/${release.id}`}>{formatPublishTime(release.publish_time)}</Link>
+      </Table.Cell>
+      {/* TODO: Skal bruke revisjon som ligger på veriant, men den har vi ikke i responsen */}
+      {/* <Table.Cell>{formatVariant(variant)}</Table.Cell> */}
+      <Table.Cell>{release.frequency?.name ?? ''}</Table.Cell>
+      <Table.Cell>
+        <ApprovalStatusBadge status={release.approval_status} />
+      </Table.Cell>
+    </Table.Row>
+  )
 }
