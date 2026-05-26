@@ -386,7 +386,7 @@ export function mapToReleaseDetails(
         code: frequency.code,
       },
       revision: {
-        name: prismaRelease.variant.revision,
+        code: prismaRelease.variant.revision,
       },
     },
     statistic: {

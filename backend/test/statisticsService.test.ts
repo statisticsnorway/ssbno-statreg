@@ -307,7 +307,9 @@ describe('statisticService', () => {
             code: 'M',
             name: 'Måned',
           },
-          revision: 'I',
+          revision: {
+            code: 'I',
+          },
         },
       ])
     })
@@ -841,7 +843,9 @@ const mockedStatisticDetailedResult = {
         name: 'Måned',
         code: 'M',
       },
-      revision: 'I',
+      revision: {
+        code: 'I',
+      },
     },
     {
       id: 2,
@@ -856,7 +860,9 @@ const mockedStatisticDetailedResult = {
         name: 'Uke',
         code: 'W',
       },
-      revision: 'I',
+      revision: {
+        code: 'I',
+      },
     },
   ],
   contacts: [{ username: undefined, name: 'Bob', email: 'bob@ssb.no' }],

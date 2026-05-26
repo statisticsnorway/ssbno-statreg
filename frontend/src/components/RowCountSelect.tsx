@@ -2,8 +2,8 @@ import { Field, Label, Select } from '@digdir/designsystemet-react'
 
 const ROW_COUNT_OPTIONS = [10, 20, 50, 100]
 
-type ShowRowCountSelectProps = {
-  selectedRowCount: number
+export type ShowRowCountSelectProps = {
+  selectedRowCount?: number
   updateRowCount: (rows: number) => void
 }
 

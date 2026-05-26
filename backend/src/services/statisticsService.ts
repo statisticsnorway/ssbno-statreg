@@ -99,7 +99,9 @@ export function parseStatisticVariants(
       name: variant.frequency.name,
       code: variant.frequency.code,
     },
-    revision: variant.revision,
+    revision: {
+      code: variant.revision,
+    },
   }))
 }
 
