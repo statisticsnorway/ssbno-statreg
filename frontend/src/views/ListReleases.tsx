@@ -11,7 +11,7 @@ import {
 import { ArrowLeftIcon, ArrowRightIcon } from '@navikt/aksel-icons'
 import { DatePicker } from '../components/DatePicker'
 import { PaginatedReleasesTable } from '../components/ReleasesTable'
-import { getFirstDayOfNthMonth, getLastDayOfNthMonth } from '../lib/utils'
+import { formatDate, getFirstDayOfNthMonth, getLastDayOfNthMonth } from '../lib/utils'
 import client from '../api'
 
 import './ListReleases.css'
@@ -158,10 +158,10 @@ function ListReleases() {
           <Label>Filtrer publiseringer</Label>
           {selectedDate && (
             <Chip.Removable
-              aria-label={`Slett valgt dag: ${selectedDate.toLocaleDateString('no-NO')}`}
+              aria-label={`Slett valgt dag: ${formatDate(selectedDate.toISOString())}`}
               onClick={() => onSelectDate(undefined)}
             >
-              {selectedDate.toLocaleDateString('no-NO')}
+              {formatDate(selectedDate.toISOString())}
             </Chip.Removable>
           )}
           <Suggestion multiple onSelectedChange={(selected) => filterChanged(selected)} selected={selectedShortnames}>
