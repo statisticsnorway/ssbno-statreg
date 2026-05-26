@@ -797,7 +797,6 @@ export interface components {
     }
     /** @description Valid revision codes are:	I (Ingen), B (Beregnede), E (Endelige), F (Foreløpige), R (Reviderte), IG (Integrert) */
     Revision: {
-      name?: string
       code?: string
     }
     Statistic: {

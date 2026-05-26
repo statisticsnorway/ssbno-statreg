@@ -159,7 +159,6 @@ components:
       description: 'Valid revision codes are:	I (Ingen), B (Beregnede), E (Endelige), F (Foreløpige), R (Reviderte), IG (Integrert)'
       type: object
       properties:
-        name: { type: string }
         code: { type: string }
 
     Statistic:
