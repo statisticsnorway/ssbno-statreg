@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams } from 'react-router'
+import { useParams, Link as ReactRouterLink } from 'react-router'
 import { Heading, Link, Paragraph, Details, Card, Button } from '@digdir/designsystemet-react'
 import { PencilWritingIcon } from '@navikt/aksel-icons'
 import { ApprovalStatusTag } from '../components/ApprovalStatus'
@@ -63,8 +63,10 @@ function ShowRelease() {
         </Card>
       </div>
       <div>
-        <Button onClick={() => alert('Redigering er ikke implementert ennå.')} data-size='sm' variant='tertiary'>
-          <PencilWritingIcon aria-hidden /> Rediger
+        <Button asChild data-size='sm' variant='tertiary'>
+          <ReactRouterLink to={`/publisering/${id}/rediger`}>
+            <PencilWritingIcon aria-hidden /> Rediger
+          </ReactRouterLink>
         </Button>
       </div>
     </>

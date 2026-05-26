@@ -463,7 +463,7 @@ paths:
 
   /releases:
     get:
-      summary: List all releases. TBD; Pagination and filtering in backend or frontend
+      summary: List all releases. Filter and sorting can be specified using query params
       security: []
       tags: [releases]
       parameters:

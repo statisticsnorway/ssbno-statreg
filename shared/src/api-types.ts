@@ -362,7 +362,7 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    /** List all releases. TBD; Pagination and filtering in backend or frontend */
+    /** List all releases. Filter and sorting can be specified using query params */
     get: {
       parameters: {
         query?: {
