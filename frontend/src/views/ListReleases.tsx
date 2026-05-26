@@ -28,12 +28,14 @@ function ListReleases() {
 
   const [selectedShortnames, setSelectedShortnames] = useState<SuggestionItem[]>([])
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
+  const [sortBy, setSortBy] = useState<string[]>([])
 
   useEffect(() => {
     async function fetchReleases(
       start: number,
       count: number,
       selectedShortnames: SuggestionItem[],
+      sortBy: string[],
       selectedDate?: Date
     ) {
       let publishTimeFilter = {}
@@ -47,14 +49,16 @@ function ListReleases() {
           publish_time_before: toTime.toISOString(),
         }
       }
+
       const filter = {
         ...(selectedShortnames.length && {
           shortname: selectedShortnames.map((item) => item.value).join(','),
         }),
         ...publishTimeFilter,
       }
+      const sort = sortBy.join(',')
       const { data, error } = await client.GET('/releases', {
-        params: { query: { start, count, ...filter } },
+        params: { query: { start, count, ...filter, sort } },
       })
       if (error) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -66,8 +70,8 @@ function ListReleases() {
         setTotal(data.total ?? 0)
       }
     }
-    fetchReleases(start, rowCount, selectedShortnames, selectedDate)
-  }, [start, rowCount, selectedShortnames, selectedDate])
+    fetchReleases(start, rowCount, selectedShortnames, sortBy, selectedDate)
+  }, [start, rowCount, selectedShortnames, sortBy, selectedDate])
 
   useEffect(() => {
     async function fetchShortnames() {
@@ -181,6 +185,8 @@ function ListReleases() {
         total={total}
         releases={releases}
         setCurrentPage={setCurrentPage}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
       />
     </>
   )
