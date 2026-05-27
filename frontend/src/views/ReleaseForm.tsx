@@ -250,7 +250,7 @@ export default function ReleaseForm() {
 
       <form onSubmit={handleOnSubmit} className='release-form'>
         <Field>
-          <Paragraph>Alle felter må fylles ut</Paragraph>
+          <Paragraph className='release-form-description'>Alle felter må fylles ut</Paragraph>
           <Label>Datotype for publisering</Label>
           <Select
             id='dateType'
