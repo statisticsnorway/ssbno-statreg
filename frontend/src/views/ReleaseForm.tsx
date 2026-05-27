@@ -328,7 +328,7 @@ export default function ReleaseForm() {
           </Field>
         )}
 
-        <div style={{ display: 'flex', gap: 'var(--ds-size-3)' }}>
+        <div className='release-form-button-wrapper'>
           <Button type='submit'>{isEditing ? 'Lagre' : 'Meld dato'}</Button>
           <Button variant='tertiary' asChild>
             <ReactRouterLink to={isEditing ? `/publisering/${releaseId}` : `/statistikk/${statistic}`} reloadDocument>
@@ -374,13 +374,13 @@ export default function ReleaseForm() {
           </Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel className='p-0' value='selected-publish-date'>
-          <div className='description-wrapper'>
+          <div className='release-description-wrapper'>
             {/* TODO: Placeholder date and day status for description */}
             <span>Innmeldte datoer den {formatDate(values.publishTime?.toISOString())}</span>
             {/* TODO: Get status from the calendar response */}
             <DayStatusTag status={'MANY'} />
           </div>
-          <DateReleasesTable />
+          <DateReleasesTable selectedDate={values.publishTime} />
         </Tabs.Panel>
         <Tabs.Panel className='p-0' value='variant-releases'>
           {statistic && variant && (
@@ -407,15 +407,28 @@ function getCreatedReleaseModalDescription(createdRelease: ReleaseDetails) {
   return `Datoen ${formatDate(createdRelease?.publish_time)} er nå sendt inn for ${createdReleaseVariant}.`
 }
 
-// TODO should take a date prop MIM-1740
-function DateReleasesTable() {
+function DateReleasesTable({ selectedDate }: { selectedDate?: Date }) {
   const [releases, setReleases] = useState<ReleaseListing[]>([])
   const [sortBy, setSortBy] = useState<string[]>([])
 
   useEffect(() => {
+    // TODO: Consider moving to new function
+    let publishTimeFilter = {}
+    if (selectedDate) {
+      const fromTime = new Date(selectedDate)
+      fromTime.setHours(0, 0, 0, 0)
+      const toTime = new Date(selectedDate)
+      toTime.setHours(23, 59, 59, 999)
+
+      publishTimeFilter = {
+        publish_time_after: fromTime.toISOString(),
+        publish_time_before: toTime.toISOString(),
+      }
+    }
+
     async function fetchReleases() {
       const { data, error } = await client.GET('/releases', {
-        params: { query: { start: 0, count: 10, sort: sortBy.join(',') } },
+        params: { query: { sort: sortBy.join(','), ...publishTimeFilter } },
       })
       if (error) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -427,7 +440,7 @@ function DateReleasesTable() {
       }
     }
     fetchReleases()
-  }, [sortBy])
+  }, [sortBy, selectedDate])
 
   return <ReleasesTable releases={releases} sortBy={sortBy} setSortBy={setSortBy} />
 }

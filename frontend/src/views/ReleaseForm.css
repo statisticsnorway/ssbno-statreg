@@ -4,8 +4,15 @@
   gap: var(--ds-size-12);
 }
 
+.release-form-button-wrapper {
+  display: flex;
+  gap: var(--ds-size-3);
+}
+
 .release-description-wrapper {
-  margin-bottom: var(--ds-size-4);
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--ds-size-12);
 }
 
 .related-releases-tables-tab {
