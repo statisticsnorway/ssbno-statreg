@@ -1,10 +1,18 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router'
-import { Heading, Button, Field, Label, EXPERIMENTAL_Suggestion as Suggestion } from '@digdir/designsystemet-react'
+import {
+  Heading,
+  Button,
+  Field,
+  Label,
+  EXPERIMENTAL_Suggestion as Suggestion,
+  type SuggestionItem,
+  Chip,
+} from '@digdir/designsystemet-react'
 import { ArrowLeftIcon, ArrowRightIcon } from '@navikt/aksel-icons'
 import { DatePicker } from '../components/DatePicker'
 import { PaginatedReleasesTable } from '../components/ReleasesTable'
-import { getFirstDayOfNthMonth, getLastDayOfNthMonth } from '../lib/utils'
+import { formatDate, getFirstDayOfNthMonth, getLastDayOfNthMonth } from '../lib/utils'
 import client from '../api'
 
 import './ListReleases.css'
@@ -19,16 +27,36 @@ function ListReleases() {
   const [total, setTotal] = useState(0)
   const [calendarMonth, setCalendarMonth] = useState(0)
   const [shortnames, setShortnames] = useState<ShortnameListing[]>([])
-  // eslint-disable-next-line @eslint-react/no-unused-state
-  const [selectedShortnames, setSelectedShortnames] = useState<string[]>([])
+
+  const [selectedShortnames, setSelectedShortnames] = useState<SuggestionItem[]>([])
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
   const [sortBy, setSortBy] = useState<string[]>([])
 
   useEffect(() => {
-    async function fetchReleases(start: number, count: number, selectedShortnames: string[], sortBy: string[]) {
+    async function fetchReleases(
+      start: number,
+      count: number,
+      selectedShortnames: SuggestionItem[],
+      sortBy: string[],
+      selectedDate?: Date
+    ) {
+      let publishTimeFilter = {}
+      if (selectedDate) {
+        const fromTime = new Date(selectedDate)
+        fromTime.setHours(0, 0, 0, 0)
+        const toTime = new Date(selectedDate)
+        toTime.setHours(23, 59, 59, 999)
+        publishTimeFilter = {
+          publish_time_after: fromTime.toISOString(),
+          publish_time_before: toTime.toISOString(),
+        }
+      }
+
       const filter = {
         ...(selectedShortnames.length && {
-          shortname: selectedShortnames.join(','),
+          shortname: selectedShortnames.map((item) => item.value).join(','),
         }),
+        ...publishTimeFilter,
       }
       const sort = sortBy.join(',')
       const { data, error } = await client.GET('/releases', {
@@ -44,8 +72,8 @@ function ListReleases() {
         setTotal(data.total ?? 0)
       }
     }
-    fetchReleases(start, rowCount, selectedShortnames, sortBy)
-  }, [start, rowCount, selectedShortnames, sortBy])
+    fetchReleases(start, rowCount, selectedShortnames, sortBy, selectedDate)
+  }, [start, rowCount, selectedShortnames, sortBy, selectedDate])
 
   useEffect(() => {
     async function fetchShortnames() {
@@ -78,12 +106,21 @@ function ListReleases() {
     setStart((currentPage - 1) * rowCount)
   }
 
+  function onSelectDate(date?: Date) {
+    setSelectedDate(date ?? undefined)
+    setSelectedShortnames([])
+  }
+
+  function filterChanged(selected: SuggestionItem[]) {
+    setSelectedShortnames(selected)
+    setSelectedDate(undefined)
+  }
+
   return (
     <>
       <Heading level={1} data-size='sm'>
         Publiseringsoversikt
       </Heading>
-
       <div className='list-releases-calendars-container'>
         <Heading level={2} data-size='xs'>
           Publiseringskalender
@@ -97,14 +134,23 @@ function ListReleases() {
           </Button>
         </div>
         <div className='list-releases-calendars-wrapper'>
-          <DatePicker fromDate={getFirstDayOfNthMonth(calendarMonth)} toDate={getLastDayOfNthMonth(calendarMonth)} />
+          <DatePicker
+            fromDate={getFirstDayOfNthMonth(calendarMonth)}
+            toDate={getLastDayOfNthMonth(calendarMonth)}
+            selected={selectedDate}
+            onSelect={onSelectDate}
+          />
           <DatePicker
             fromDate={getFirstDayOfNthMonth(calendarMonth + 1)}
             toDate={getLastDayOfNthMonth(calendarMonth + 1)}
+            selected={selectedDate}
+            onSelect={onSelectDate}
           />
           <DatePicker
             fromDate={getFirstDayOfNthMonth(calendarMonth + 2)}
             toDate={getLastDayOfNthMonth(calendarMonth + 2)}
+            selected={selectedDate}
+            onSelect={onSelectDate}
             showColorCodingExplanation
           />
         </div>
@@ -119,11 +165,15 @@ function ListReleases() {
       >
         <Field>
           <Label>Filtrer publiseringer</Label>
-          <Suggestion
-            multiple
-            selected={selectedShortnames}
-            onSelectedChange={(selected) => setSelectedShortnames(selected.map((selectedItem) => selectedItem.value))}
-          >
+          {selectedDate && (
+            <Chip.Removable
+              aria-label={`Slett valgt dag: ${formatDate(selectedDate.toISOString())}`}
+              onClick={() => onSelectDate()}
+            >
+              {formatDate(selectedDate.toISOString())}
+            </Chip.Removable>
+          )}
+          <Suggestion multiple onSelectedChange={(selected) => filterChanged(selected)} selected={selectedShortnames}>
             <Suggestion.Input />
             <Suggestion.Clear />
             <Suggestion.List>
