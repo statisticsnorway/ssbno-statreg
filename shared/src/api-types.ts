@@ -27,7 +27,7 @@ export interface paths {
             [name: string]: unknown
           }
           content: {
-            'application/json': Record<string, never>[]
+            'application/json': components['schemas']['Shortname_listing'][]
           }
         }
       }
@@ -802,6 +802,7 @@ export interface components {
     }
     Release_listing: components['schemas']['Release_get'] & {
       frequency?: components['schemas']['Frequency']
+      revision?: components['schemas']['Revision']
     }
     /** @description Valid revision codes are:	I (Ingen), B (Beregnede), E (Endelige), F (Foreløpige), R (Reviderte), IG (Integrert) */
     Revision: {

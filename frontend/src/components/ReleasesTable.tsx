@@ -1,11 +1,12 @@
 import { type SetStateAction, type Dispatch } from 'react'
-import { Table, Link } from '@digdir/designsystemet-react'
+import { Table } from '@digdir/designsystemet-react'
 
 import { type ReleaseListing } from '@ssbno-statreg/shared'
 import { ApprovalStatusBadge } from '../components/ApprovalStatus'
 import { formatPublishTime, formatDate } from '../lib/utils'
 import { Pagination, type PaginationProps } from './Pagination'
 import '../views/ListReleases.css'
+import { useNavigate } from 'react-router'
 
 type TruncatedTableCellProps = {
   value: string | undefined
@@ -45,20 +46,23 @@ function TruncatedTableCell({ value, maxWidth = '340px' }: TruncatedTableCellPro
 
 function ReleaseRow({ release }: ReleaseRowProps) {
   const statisticsShortname = release.statistic?.shortname ?? ''
+  const navigate = useNavigate()
   return (
-    <Table.Row key={`${release.publish_time}-${release.id}`}>
-      <Table.Cell>
-        <Link href={`/statistikkregisteret/statistikk/${statisticsShortname}`}>{statisticsShortname}</Link>
-      </Table.Cell>
+    <Table.Row
+      key={`${release.publish_time}-${release.id}`}
+      className='selectable-row'
+      onClick={() => {
+        navigate(`/publisering/${release.id}`, {})
+      }}
+    >
+      <Table.Cell>{statisticsShortname}</Table.Cell>
       <TruncatedTableCell value={release.statistic?.name} />
       <Table.Cell>{release.frequency?.name ?? ''}</Table.Cell>
       <Table.Cell>TBA</Table.Cell>
       <Table.Cell>{formatDate(release.period_from)}</Table.Cell>
       <Table.Cell>{formatDate(release.period_to)}</Table.Cell>
-      <Table.Cell>
-        <Link href={`/statistikkregisteret/publisering/${release.id}`}>{formatPublishTime(release.publish_time)}</Link>
-      </Table.Cell>
-      <Table.Cell>
+      <Table.Cell>{formatPublishTime(release.publish_time)}</Table.Cell>
+      <Table.Cell className='status-column'>
         <ApprovalStatusBadge status={release.approval_status} />
       </Table.Cell>
     </Table.Row>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router'
 import {
   Heading,
   Button,
@@ -19,6 +20,8 @@ import type { ReleaseListing, ShortnameListing } from '@ssbno-statreg/shared'
 import { RowCountSelect } from '../components/RowCountSelect'
 
 function ListReleases() {
+  const [searchParams] = useSearchParams()
+  const shortnamesQuery = searchParams.get('shortname')
   const [rowCount, setRowCount] = useState(10)
   const [start, setStart] = useState(0)
   const [releases, setReleases] = useState<ReleaseListing[]>([])
@@ -75,6 +78,19 @@ function ListReleases() {
     }
     fetchShortnames()
   }, [])
+
+  useEffect(() => {
+    async function setSelectedShortnamesFromQuery() {
+      if (!shortnamesQuery) return
+
+      const newSelectedShortnames = shortnamesQuery.split(',').map((shortname) => ({
+        label: shortname,
+        value: shortname,
+      }))
+      setSelectedShortnames(newSelectedShortnames)
+    }
+    setSelectedShortnamesFromQuery()
+  }, [shortnamesQuery])
 
   function updateRowCount(newCount: number) {
     setRowCount(newCount)
