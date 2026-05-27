@@ -21,6 +21,7 @@ import { RowCountSelect } from '../components/RowCountSelect'
 
 function ListReleases() {
   const [searchParams] = useSearchParams()
+  const shortnamesQuery = searchParams.get('shortnames')
   const [rowCount, setRowCount] = useState(10)
   const [start, setStart] = useState(0)
   const [releases, setReleases] = useState<ReleaseListing[]>([])
@@ -91,18 +92,17 @@ function ListReleases() {
   }, [])
 
   useEffect(() => {
-    async function setFiltersFromQueryParams() {
-      const shortnamesQueryValue = searchParams.get('shortnames')
-      if (!shortnamesQueryValue) return
+    async function setSelectedShortnamesFromQuery() {
+      if (!shortnamesQuery) return
 
-      const newSelectedShortnames = shortnamesQueryValue.split(',').map((shortname) => ({
+      const newSelectedShortnames = shortnamesQuery.split(',').map((shortname) => ({
         label: shortname,
         value: shortname,
       }))
       setSelectedShortnames(newSelectedShortnames)
     }
-    setFiltersFromQueryParams()
-  }, [searchParams])
+    setSelectedShortnamesFromQuery()
+  }, [shortnamesQuery])
 
   function updateRowCount(newCount: number) {
     setRowCount(newCount)
