@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router'
 import { Heading, Paragraph, List, Link, Button, Divider, Details, Card, Table } from '@digdir/designsystemet-react'
 import { PersonPencilIcon } from '@navikt/aksel-icons'
 import { StatisticStatusTag } from '../components/StatisticStatusTag'
@@ -238,15 +238,20 @@ type ReleaseRowProps = {
 }
 
 function SimpleReleaseRow({ release }: ReleaseRowProps) {
+  const navigate = useNavigate()
   return (
-    <Table.Row key={`${release.publish_time}-${release.id}`}>
-      <Table.Cell>
-        <Link href={`/statistikkregisteret/publisering/${release.id}`}>{formatPublishTime(release.publish_time)}</Link>
-      </Table.Cell>
+    <Table.Row
+      key={`${release.publish_time}-${release.id}`}
+      onClick={() => {
+        navigate(`/publisering/${release.id}`, {})
+      }}
+      className='selectable-row'
+    >
+      <Table.Cell>{formatPublishTime(release.publish_time)}</Table.Cell>
       <Table.Cell>
         {release.frequency?.name ?? ''}, {formatRevisionName(release.revision?.code).toLocaleLowerCase()}
       </Table.Cell>
-      <Table.Cell>
+      <Table.Cell className='status-column'>
         <ApprovalStatusBadge status={release.approval_status} />
       </Table.Cell>
     </Table.Row>

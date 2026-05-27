@@ -43,8 +43,7 @@ function ShowRelease() {
       </div>
       <div>
         <Heading data-size='xs'>Statistikk</Heading>
-        <Link href='#'>{statisticName}</Link>
-        {/* TODO link should point to the statistic page, routing must be implemented first */}
+        <Link href={`/statistikkregisteret/statistikk/${release.statistic?.shortname}`}>{statisticName}</Link>
       </div>
       <div>
         <Heading data-size='xs'>Variant</Heading>

@@ -20,7 +20,7 @@ function StatisticRow({ statistic }: Readonly<StatisticRowProps>) {
   return (
     <Table.Row
       key={`${statistic.shortname}`}
-      className='statistic-row'
+      className='selectable-row'
       onClick={() => {
         navigate(`/statistikk/${statisticsShortname}`, {})
       }}
