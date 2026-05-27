@@ -92,7 +92,7 @@ export default function ShowStatistic() {
           <Details defaultOpen>
             <Details.Summary>Kommende publiseringer</Details.Summary>
             <Details.Content>
-              {releases.length > 0 ? (
+              {releases?.length ? (
                 <>
                   <SimpleReleasesTable releases={releases} />
                   <p>
