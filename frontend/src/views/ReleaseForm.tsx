@@ -24,7 +24,7 @@ import {
   getFirstDayOfNthMonth,
   getLastDayOfNthMonth,
   parsePublishDateWithTime,
-  getSelectedPublishTimeFilter,
+  getPublishTimeFilterForDate,
 } from '../lib/utils'
 import { CalendarIcon } from '@navikt/aksel-icons'
 import { DayStatusTag } from '../components/DayStatus'
@@ -285,7 +285,7 @@ export default function ReleaseForm() {
             fromDate={getFirstDayOfNthMonth(0)}
             toDate={getLastDayOfNthMonth(0)}
             showColorCodingExplanation
-            onCalendarDatesLoaded={setCalendarDates}
+            calendarDatesEmit={setCalendarDates}
             {...publishTimePicker.datepickerProps}
           />
           {errors.publishTime && <ValidationMessage>{errors.publishTime}</ValidationMessage>}
@@ -422,7 +422,7 @@ function DateReleasesTable({
     async function fetchReleases() {
       const { data, error } = await client.GET('/releases', {
         params: {
-          query: { start: 0, count: 100, sort: sortBy.join(','), ...getSelectedPublishTimeFilter(selectedDate) },
+          query: { start: 0, count: 100, sort: sortBy.join(','), ...getPublishTimeFilterForDate(selectedDate) },
         },
       })
       if (error) {

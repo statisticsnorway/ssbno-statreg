@@ -12,7 +12,7 @@ import {
 import { ArrowLeftIcon, ArrowRightIcon } from '@navikt/aksel-icons'
 import { DatePicker } from '../components/DatePicker'
 import { PaginatedReleasesTable } from '../components/ReleasesTable'
-import { formatDate, getFirstDayOfNthMonth, getLastDayOfNthMonth, getSelectedPublishTimeFilter } from '../lib/utils'
+import { formatDate, getFirstDayOfNthMonth, getLastDayOfNthMonth, getPublishTimeFilterForDate } from '../lib/utils'
 import client from '../api'
 
 import './ListReleases.css'
@@ -45,7 +45,7 @@ function ListReleases() {
         ...(selectedShortnames.length && {
           shortname: selectedShortnames.map((item) => item.value).join(','),
         }),
-        ...getSelectedPublishTimeFilter(selectedDate),
+        ...getPublishTimeFilterForDate(selectedDate),
       }
       const sort = sortBy.join(',')
       const { data, error } = await client.GET('/releases', {

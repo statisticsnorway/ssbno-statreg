@@ -69,7 +69,7 @@ export function formatVariant(variant?: Variant): string {
   return [frequency, revision].join(', ')
 }
 
-export function getSelectedPublishTimeFilter(selectedDate: Date | undefined) {
+export function getPublishTimeFilterForDate(selectedDate: Date | undefined) {
   if (!selectedDate) return {}
 
   const fromTime = new Date(selectedDate)

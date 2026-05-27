@@ -8,7 +8,7 @@ import {
   parsePublishDateWithTime,
   formatRevisionName,
   formatVariant,
-  getSelectedPublishTimeFilter,
+  getPublishTimeFilterForDate,
 } from '../src/lib/utils'
 
 const timeZone = 'Europe/Oslo'
@@ -202,16 +202,16 @@ describe('utils', () => {
     })
   })
 
-  describe('getSelectedPublishTimeFilter', () => {
+  describe('getPublishTimeFilterForDate', () => {
     test('returns empty object when selectedDate is undefined', () => {
-      const result = getSelectedPublishTimeFilter(undefined)
+      const result = getPublishTimeFilterForDate(undefined)
       expect(result).toEqual({})
     })
 
     test('returns correct ISO range for a fixed date string', () => {
       const input = new Date('2024-05-15')
 
-      const result = getSelectedPublishTimeFilter(input)
+      const result = getPublishTimeFilterForDate(input)
 
       expect(result).toEqual({
         publish_time_after: new Date('2024-05-15T00:00:00').toISOString(),
@@ -222,7 +222,7 @@ describe('utils', () => {
     test('sets time to start and end of day', () => {
       const input = new Date('2024-01-01T18:45:30')
 
-      const result = getSelectedPublishTimeFilter(input)
+      const result = getPublishTimeFilterForDate(input)
 
       expect(result).toEqual({
         publish_time_after: new Date('2024-01-01T00:00:00').toISOString(),
@@ -234,7 +234,7 @@ describe('utils', () => {
       const input = new Date('2024-07-10T12:00:00')
       const originalTime = input.getTime()
 
-      getSelectedPublishTimeFilter(input)
+      getPublishTimeFilterForDate(input)
 
       expect(input.getTime()).toBe(originalTime)
     })
