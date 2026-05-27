@@ -92,7 +92,7 @@ export default function ShowStatistic() {
           <Details defaultOpen>
             <Details.Summary>Kommende publiseringer</Details.Summary>
             <Details.Content>
-              {releases?.length ? (
+              {releases?.length > 0 ? (
                 <>
                   <SimpleReleasesTable releases={releases} />
                   <p>
@@ -107,7 +107,7 @@ export default function ShowStatistic() {
             </Details.Content>
           </Details>
         </Card>
-        {cancelledVariants.length > 0 && (
+        {!!cancelledVariants.length && (
           <Card style={{ marginTop: 'var(--ds-size-6)' }}>
             <Details>
               <Details.Summary>Opphørte varianter</Details.Summary>
