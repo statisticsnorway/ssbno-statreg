@@ -21,7 +21,7 @@ import { RowCountSelect } from '../components/RowCountSelect'
 
 function ListReleases() {
   const [searchParams] = useSearchParams()
-  const shortnamesQuery = searchParams.get('shortnames')
+  const shortnamesQuery = searchParams.get('shortname')
   const [rowCount, setRowCount] = useState(10)
   const [start, setStart] = useState(0)
   const [releases, setReleases] = useState<ReleaseListing[]>([])
