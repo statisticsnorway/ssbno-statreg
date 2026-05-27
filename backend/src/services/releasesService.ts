@@ -70,6 +70,7 @@ export async function getReleases(
               code: true,
             },
           },
+          revision: true,
           statistic: {
             select: {
               language: true,
@@ -107,6 +108,7 @@ export async function getReleases(
           name: frequency.name,
           code: frequency.code,
         },
+        revision: { code: release.variant.revision },
       }
     }),
   }

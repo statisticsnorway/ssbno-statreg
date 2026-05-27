@@ -794,6 +794,7 @@ export interface components {
     }
     Release_listing: components['schemas']['Release_get'] & {
       frequency?: components['schemas']['Frequency']
+      revision?: components['schemas']['Revision']
     }
     /** @description Valid revision codes are:	I (Ingen), B (Beregnede), E (Endelige), F (Foreløpige), R (Reviderte), IG (Integrert) */
     Revision: {

@@ -154,6 +154,8 @@ components:
           properties:
             frequency:
               $ref: '#/components/schemas/Frequency'
+            revision:
+              $ref: '#/components/schemas/Revision'
 
     Revision:
       description: 'Valid revision codes are:	I (Ingen), B (Beregnede), E (Endelige), F (Foreløpige), R (Reviderte), IG (Integrert)'

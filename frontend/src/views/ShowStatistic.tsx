@@ -14,7 +14,7 @@ import {
 } from '@ssbno-statreg/shared'
 
 import './ShowStatistic.css'
-import { formatPublishTime, formatVariant } from '../lib/utils'
+import { formatPublishTime, formatRevisionName, formatVariant } from '../lib/utils'
 import { ApprovalStatusBadge } from '../components/ApprovalStatus'
 
 const TABLE_HEADER_CELLS = [{ label: 'Dato' }, { label: 'Variant' }, { label: 'Status' }]
@@ -41,7 +41,7 @@ export default function ShowStatistic() {
 
     async function fetchReleases(shortname: string) {
       const { data, error } = await client.GET('/releases', {
-        params: { query: { shortname, count: 5, publish_time_after: new Date().toISOString() } },
+        params: { query: { shortname, count: 100, publish_time_after: new Date().toISOString() } },
       })
       if (error) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -243,9 +243,9 @@ function SimpleReleaseRow({ release }: ReleaseRowProps) {
       <Table.Cell>
         <Link href={`/statistikkregisteret/publisering/${release.id}`}>{formatPublishTime(release.publish_time)}</Link>
       </Table.Cell>
-      {/* TODO: Skal bruke revisjon som ligger på veriant, men den har vi ikke i responsen */}
-      {/* <Table.Cell>{formatVariant(variant)}</Table.Cell> */}
-      <Table.Cell>{release.frequency?.name ?? ''}</Table.Cell>
+      <Table.Cell>
+        {release.frequency?.name ?? ''}, {formatRevisionName(release.revision?.code).toLocaleLowerCase()}
+      </Table.Cell>
       <Table.Cell>
         <ApprovalStatusBadge status={release.approval_status} />
       </Table.Cell>
