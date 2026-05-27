@@ -406,7 +406,7 @@ function getCreatedReleaseModalDescription(createdRelease: ReleaseDetails) {
   return `Datoen ${formatDate(createdRelease?.publish_time)} er nå sendt inn for ${createdReleaseVariant}.`
 }
 
-function DateReleasesTable({ selectedDate }: { selectedDate?: Date }) {
+function DateReleasesTable({ selectedDate }: Readonly<{ selectedDate?: Date }>) {
   const [releases, setReleases] = useState<ReleaseListing[]>([])
   const [sortBy, setSortBy] = useState<string[]>([])
 
@@ -414,7 +414,7 @@ function DateReleasesTable({ selectedDate }: { selectedDate?: Date }) {
     async function fetchReleases() {
       const { data, error } = await client.GET('/releases', {
         params: {
-          query: { start: 0, count: 25, sort: sortBy.join(','), ...getSelectedPublishTimeFilter(selectedDate) },
+          query: { start: 0, count: 100, sort: sortBy.join(','), ...getSelectedPublishTimeFilter(selectedDate) },
         },
       })
       if (error) {
@@ -433,7 +433,7 @@ function DateReleasesTable({ selectedDate }: { selectedDate?: Date }) {
     <>
       <div className='description-wrapper'>
         <span>Innmeldte datoer den {formatDate(selectedDate?.toISOString())}</span>
-        {releases?.length ? <DayStatusTag status={'BLOCKED'} /> : null}
+        <DayStatusTag status='MANY' />
       </div>
       <ReleasesTable releases={releases} sortBy={sortBy} setSortBy={setSortBy} />
     </>
