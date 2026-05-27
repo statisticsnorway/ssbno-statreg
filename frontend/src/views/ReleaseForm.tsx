@@ -341,7 +341,10 @@ export default function ReleaseForm() {
         <div className='release-form-button-wrapper'>
           <Button type='submit'>{isEditing ? 'Lagre' : 'Meld dato'}</Button>
           <Button variant='tertiary' asChild>
-            <ReactRouterLink to={isEditing ? `/publisering/${releaseId}` : `/statistikk/${statistic}`} reloadDocument>
+            <ReactRouterLink
+              to={isEditing ? `/publisering/${releaseId}` : `/statistikk/${statistic?.shortname}`}
+              reloadDocument
+            >
               Avbryt
             </ReactRouterLink>
           </Button>
