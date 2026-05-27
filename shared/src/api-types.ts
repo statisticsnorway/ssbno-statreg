@@ -50,7 +50,12 @@ export interface paths {
     /** List of all statistics */
     get: {
       parameters: {
-        query?: never
+        query?: {
+          /** @description Number of items skipped before starting the statistics results list */
+          start?: number
+          /** @description Maximum number of items returned */
+          count?: number
+        }
         header?: never
         path?: never
         cookie?: never
@@ -63,7 +68,10 @@ export interface paths {
             [name: string]: unknown
           }
           content: {
-            'application/json': components['schemas']['Statistic_listing'][]
+            'application/json': {
+              total?: number
+              statistics?: components['schemas']['Statistic_listing'][]
+            }
           }
         }
       }
@@ -852,6 +860,10 @@ export interface components {
       statistic_region_levels?: components['schemas']['Region_level'][]
     } & components['schemas']['Statistic']
     Statistic_listing: {
+      division?: {
+        code?: string | null
+        readonly name?: string
+      }
       contacts?: {
         username?: string | null
         email?: string
