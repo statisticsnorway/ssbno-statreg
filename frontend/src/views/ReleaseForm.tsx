@@ -82,17 +82,19 @@ function useDatepicker(
   })
 }
 
-//common release form for creating and editing release
+// common release form for creating and editing release
 export default function ReleaseForm() {
-  //for creation, path is /statistikk/:shortname/:variantId/opprett
-  //for editing, path is /publisering/:id/rediger
+  // for creation, path is /statistikk/:shortname/:variantId/opprett
+  // for editing, path is /publisering/:id/rediger
   const { id: releaseId, shortname, variantId } = useParams()
 
-  //we use this variable when form needs to be different in editing mode
   const isEditing = !!releaseId
 
-  //state used in both create and update mode
-  const [values, setValues] = useState<ReleaseFormTypes>({})
+  // TODO: MIM-2581: This is a temporary suggested publish time (3 months ahead of date) for create release
+  const [suggestedPublishTime] = useState(() => new Date(new Date().setMonth(new Date().getMonth() + 3)))
+  const [values, setValues] = useState<ReleaseFormTypes>({
+    publishTime: suggestedPublishTime,
+  })
   const [errors, setErrors] = useState<ReleaseFormErrors>({})
   const [statistic, setStatistic] = useState<Statistic>()
   const [variant, setVariant] = useState<Variant>()
@@ -237,7 +239,7 @@ export default function ReleaseForm() {
         <Heading data-size='xs' level={2}>
           {statistic?.name} ({statistic?.shortname}) og {variant?.frequency?.name?.toLowerCase()}
         </Heading>
-        <ApprovalStatusTag status={ApprovalStatus.PENDING} />
+        <ApprovalStatusTag status={statistic?.approval_status ?? ApprovalStatus.PENDING} />
       </div>
 
       <form onSubmit={handleOnSubmit} className='release-form'>
@@ -375,11 +377,6 @@ export default function ReleaseForm() {
           </Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel className='p-0' value='selected-publish-date'>
-          <div className='release-description-wrapper'>
-            <span>Innmeldte datoer den {formatDate(values.publishTime?.toISOString())}</span>
-            {/* TODO: Get status from the calendar response */}
-            <DayStatusTag status={'MANY'} />
-          </div>
           <DateReleasesTable selectedDate={values.publishTime} />
         </Tabs.Panel>
         <Tabs.Panel className='p-0' value='variant-releases'>
@@ -414,7 +411,9 @@ function DateReleasesTable({ selectedDate }: { selectedDate?: Date }) {
   useEffect(() => {
     async function fetchReleases() {
       const { data, error } = await client.GET('/releases', {
-        params: { query: { sort: sortBy.join(','), ...getSelectedPublishTimeFilter(selectedDate) } },
+        params: {
+          query: { start: 0, count: 25, sort: sortBy.join(','), ...getSelectedPublishTimeFilter(selectedDate) },
+        },
       })
       if (error) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -428,7 +427,15 @@ function DateReleasesTable({ selectedDate }: { selectedDate?: Date }) {
     fetchReleases()
   }, [sortBy, selectedDate])
 
-  return <ReleasesTable releases={releases} sortBy={sortBy} setSortBy={setSortBy} />
+  return (
+    <>
+      <div className='release-description-wrapper'>
+        <span>Innmeldte datoer den {formatDate(selectedDate?.toISOString())}</span>
+        {releases?.length ? <DayStatusTag status={'BLOCKED'} /> : null}
+      </div>
+      <ReleasesTable releases={releases} sortBy={sortBy} setSortBy={setSortBy} />
+    </>
+  )
 }
 
 function VariantReleasesTable({ shortname, variantId }: { shortname: string; variantId: number }) {
