@@ -88,7 +88,7 @@ function ListReleases() {
       }
     }
     fetchShortnames()
-  }, [searchParams])
+  }, [])
 
   useEffect(() => {
     async function setFiltersFromQueryParams() {
