@@ -241,6 +241,11 @@ components:
         - $ref: '#/components/schemas/Statistic'
       type: object
       properties:
+        division:
+          type: object
+          properties:
+            code: { type: string, nullable: true }
+            name: { type: string, readOnly: true }
         contacts:
           type: array
           items:
@@ -284,14 +289,31 @@ paths:
       summary: List of all statistics
       security: []
       tags: [statistics]
+      parameters:
+        - in: query
+          name: start
+          schema:
+            type: integer
+          description: Number of items skipped before starting the statistics results list
+        - in: query
+          name: count
+          schema:
+            type: integer
+          description: Maximum number of items returned
       responses:
         '200':
           description: List of statistics
           content:
             application/json:
               schema:
-                type: array
-                items: { $ref: '#/components/schemas/Statistic_listing' }
+                type: object
+                properties:
+                  total:
+                    type: integer
+                  statistics:
+                    type: array
+                    items: { $ref: '#/components/schemas/Statistic_listing' }
+
   /statistics/{shortname}:
     get:
       summary: Get a statistic by its shortname
