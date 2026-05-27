@@ -12,7 +12,7 @@ import {
 import { ArrowLeftIcon, ArrowRightIcon } from '@navikt/aksel-icons'
 import { DatePicker } from '../components/DatePicker'
 import { PaginatedReleasesTable } from '../components/ReleasesTable'
-import { formatDate, getFirstDayOfNthMonth, getLastDayOfNthMonth, getPublishTimeFilterForDate } from '../lib/utils'
+import { formatDate, getFirstDayOfNthMonth, getPublishTimeFilterForDate } from '../lib/utils'
 import client from '../api'
 
 import './ListReleases.css'
@@ -129,21 +129,14 @@ function ListReleases() {
           </Button>
         </div>
         <div className='list-releases-calendars-wrapper'>
+          <DatePicker month={getFirstDayOfNthMonth(calendarMonth)} selected={selectedDate} onSelect={onSelectDate} />
           <DatePicker
-            fromDate={getFirstDayOfNthMonth(calendarMonth)}
-            toDate={getLastDayOfNthMonth(calendarMonth)}
+            month={getFirstDayOfNthMonth(calendarMonth + 1)}
             selected={selectedDate}
             onSelect={onSelectDate}
           />
           <DatePicker
-            fromDate={getFirstDayOfNthMonth(calendarMonth + 1)}
-            toDate={getLastDayOfNthMonth(calendarMonth + 1)}
-            selected={selectedDate}
-            onSelect={onSelectDate}
-          />
-          <DatePicker
-            fromDate={getFirstDayOfNthMonth(calendarMonth + 2)}
-            toDate={getLastDayOfNthMonth(calendarMonth + 2)}
+            month={getFirstDayOfNthMonth(calendarMonth + 2)}
             selected={selectedDate}
             onSelect={onSelectDate}
             showColorCodingExplanation
