@@ -95,7 +95,9 @@ export default function ShowStatistic() {
               <SimpleReleasesTable releases={releases} />
               <p>
                 {/* TODO MIM-2702: Fix link with filter params */}
-                <Link href='/'>Se alle publiseringsdatoene for denne statistikken</Link>
+                <Link href={'/statistikkregisteret/?shortname=' + shortname}>
+                  Se alle publiseringsdatoene for denne statistikken
+                </Link>
               </p>
             </Details.Content>
           </Details>
