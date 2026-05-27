@@ -24,6 +24,7 @@ import {
   getFirstDayOfNthMonth,
   getLastDayOfNthMonth,
   parsePublishDateWithTime,
+  getSelectedPublishTimeFilter,
 } from '../lib/utils'
 import { CalendarIcon } from '@navikt/aksel-icons'
 import { DayStatusTag } from '../components/DayStatus'
@@ -375,7 +376,6 @@ export default function ReleaseForm() {
         </Tabs.List>
         <Tabs.Panel className='p-0' value='selected-publish-date'>
           <div className='release-description-wrapper'>
-            {/* TODO: Placeholder date and day status for description */}
             <span>Innmeldte datoer den {formatDate(values.publishTime?.toISOString())}</span>
             {/* TODO: Get status from the calendar response */}
             <DayStatusTag status={'MANY'} />
@@ -412,22 +412,9 @@ function DateReleasesTable({ selectedDate }: { selectedDate?: Date }) {
   const [sortBy, setSortBy] = useState<string[]>([])
 
   useEffect(() => {
-    let publishTimeFilter = {}
-    if (selectedDate) {
-      const fromTime = new Date(selectedDate)
-      fromTime.setHours(0, 0, 0, 0)
-      const toTime = new Date(selectedDate)
-      toTime.setHours(23, 59, 59, 999)
-
-      publishTimeFilter = {
-        publish_time_after: fromTime.toISOString(),
-        publish_time_before: toTime.toISOString(),
-      }
-    }
-
     async function fetchReleases() {
       const { data, error } = await client.GET('/releases', {
-        params: { query: { sort: sortBy.join(','), ...publishTimeFilter } },
+        params: { query: { sort: sortBy.join(','), ...getSelectedPublishTimeFilter(selectedDate) } },
       })
       if (error) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any

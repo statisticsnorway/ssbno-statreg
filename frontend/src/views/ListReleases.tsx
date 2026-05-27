@@ -11,7 +11,7 @@ import {
 import { ArrowLeftIcon, ArrowRightIcon } from '@navikt/aksel-icons'
 import { DatePicker } from '../components/DatePicker'
 import { PaginatedReleasesTable } from '../components/ReleasesTable'
-import { formatDate, getFirstDayOfNthMonth, getLastDayOfNthMonth } from '../lib/utils'
+import { formatDate, getFirstDayOfNthMonth, getLastDayOfNthMonth, getSelectedPublishTimeFilter } from '../lib/utils'
 import client from '../api'
 
 import './ListReleases.css'
@@ -38,23 +38,11 @@ function ListReleases() {
       sortBy: string[],
       selectedDate?: Date
     ) {
-      let publishTimeFilter = {}
-      if (selectedDate) {
-        const fromTime = new Date(selectedDate)
-        fromTime.setHours(0, 0, 0, 0)
-        const toTime = new Date(selectedDate)
-        toTime.setHours(23, 59, 59, 999)
-        publishTimeFilter = {
-          publish_time_after: fromTime.toISOString(),
-          publish_time_before: toTime.toISOString(),
-        }
-      }
-
       const filter = {
         ...(selectedShortnames.length && {
           shortname: selectedShortnames.map((item) => item.value).join(','),
         }),
-        ...publishTimeFilter,
+        ...getSelectedPublishTimeFilter(selectedDate),
       }
       const sort = sortBy.join(',')
       const { data, error } = await client.GET('/releases', {
