@@ -91,7 +91,7 @@ function ListReleases() {
         const exists = data.some((item) => item.shortname === shortnameFromUrl)
         if (!exists) return
 
-        setSelectedShortnames([shortnameFromUrl])
+        setSelectedShortnames([{ label: shortnameFromUrl, value: shortnameFromUrl }])
       }
     }
     fetchShortnames()
