@@ -3,6 +3,10 @@
   flex-direction: column;
   gap: var(--ds-size-12);
 
+  p {
+    margin-bottom: var(--ds-size-8)
+  }
+
   .release-form-button-wrapper {
     display: flex;
     gap: var(--ds-size-3);
