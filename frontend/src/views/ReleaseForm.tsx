@@ -135,6 +135,7 @@ export default function ReleaseForm() {
     }
 
     setPrefilledValues()
+    // eslint-disable-next-line @eslint-react/exhaustive-deps
   }, [releaseId])
 
   // when shortname and variantId exists in url-path, only fetch statistic and variant data
