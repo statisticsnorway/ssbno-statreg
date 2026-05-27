@@ -159,7 +159,6 @@ components:
       description: 'Valid revision codes are:	I (Ingen), B (Beregnede), E (Endelige), F (Foreløpige), R (Reviderte), IG (Integrert)'
       type: object
       properties:
-        name: { type: string }
         code: { type: string }
 
     Statistic:
@@ -240,6 +239,11 @@ components:
         - $ref: '#/components/schemas/Statistic'
       type: object
       properties:
+        division:
+          type: object
+          properties:
+            code: { type: string, nullable: true }
+            name: { type: string, readOnly: true }
         contacts:
           type: array
           items:
@@ -260,7 +264,8 @@ components:
         cancelled: { type: boolean }
         frequency:
           $ref: '#/components/schemas/Frequency'
-        revision: { type: string }
+        revision: 
+          $ref: '#/components/schemas/Revision'
 
 paths:
   /shortnames:
@@ -282,14 +287,31 @@ paths:
       summary: List of all statistics
       security: []
       tags: [statistics]
+      parameters:
+        - in: query
+          name: start
+          schema:
+            type: integer
+          description: Number of items skipped before starting the statistics results list
+        - in: query
+          name: count
+          schema:
+            type: integer
+          description: Maximum number of items returned
       responses:
         '200':
           description: List of statistics
           content:
             application/json:
               schema:
-                type: array
-                items: { $ref: '#/components/schemas/Statistic_listing' }
+                type: object
+                properties:
+                  total:
+                    type: integer
+                  statistics:
+                    type: array
+                    items: { $ref: '#/components/schemas/Statistic_listing' }
+
   /statistics/{shortname}:
     get:
       summary: Get a statistic by its shortname

@@ -19,6 +19,7 @@ import { DatePicker as AkselDatePicker, useDatepicker as useAkselDatePicker } fr
 import { DatePicker } from '../components/DatePicker'
 import {
   formatDate,
+  formatVariant,
   getDateOnlyAsString,
   getFirstDayOfNthMonth,
   getLastDayOfNthMonth,
@@ -36,7 +37,6 @@ import {
   type ReleaseUpdate,
   type ReleaseCreate,
   type ReleaseDetails,
-  RevisionNames,
 } from '@ssbno-statreg/shared'
 
 import client from '../api'
@@ -143,7 +143,7 @@ export default function ReleaseForm() {
         id: variant?.id,
         frequency: variant?.frequency,
         revision: {
-          name: variant?.revision,
+          code: variant?.revision?.code,
         },
       })
     }
@@ -231,10 +231,10 @@ export default function ReleaseForm() {
     <>
       <div>
         <Heading level={1} data-size='md'>
-          Rediger publiseringsdato
+          {isEditing ? 'Rediger publiseringsdato' : 'Meld publiseringsdato'}
         </Heading>
         <Heading data-size='xs' level={2}>
-          {statistic?.name} ({statistic?.shortname}) og {variant?.frequency?.name}
+          {statistic?.name} ({statistic?.shortname}) og {variant?.frequency?.name?.toLowerCase()}
         </Heading>
         <ApprovalStatusTag status={ApprovalStatus.PENDING} />
       </div>
@@ -403,22 +403,20 @@ function getReleaseModalDescription(isEditing: boolean, createdRelease: ReleaseD
 }
 
 function getCreatedReleaseModalDescription(createdRelease: ReleaseDetails) {
-  const createdReleaseVariant = createdRelease?.variant
-  const createdReleaseFrequency = createdReleaseVariant?.frequency?.name
-  const createdReleaseRevisionName = createdReleaseVariant?.revision?.name
-    ? RevisionNames[createdReleaseVariant?.revision.name as keyof typeof RevisionNames]
-    : ''
-  const variantInformation = [createdReleaseFrequency, createdReleaseRevisionName].join(', ').toLowerCase()
-  return `Datoen ${formatDate(createdRelease?.publish_time)} er nå sendt inn for ${variantInformation}.`
+  const createdReleaseVariant = formatVariant(createdRelease?.variant).toLowerCase()
+  return `Datoen ${formatDate(createdRelease?.publish_time)} er nå sendt inn for ${createdReleaseVariant}.`
 }
 
 // TODO should take a date prop MIM-1740
 function DateReleasesTable() {
   const [releases, setReleases] = useState<ReleaseListing[]>([])
+  const [sortBy, setSortBy] = useState<string[]>([])
 
   useEffect(() => {
     async function fetchReleases() {
-      const { data, error } = await client.GET('/releases', { params: { query: { start: 0, count: 10 } } })
+      const { data, error } = await client.GET('/releases', {
+        params: { query: { start: 0, count: 10, sort: sortBy.join(',') } },
+      })
       if (error) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const errorMessage = (error as any).error
@@ -429,9 +427,9 @@ function DateReleasesTable() {
       }
     }
     fetchReleases()
-  }, [])
+  }, [sortBy])
 
-  return <ReleasesTable releases={releases} />
+  return <ReleasesTable releases={releases} sortBy={sortBy} setSortBy={setSortBy} />
 }
 
 function VariantReleasesTable({ shortname, variantId }: { shortname: string; variantId: number }) {
@@ -439,11 +437,12 @@ function VariantReleasesTable({ shortname, variantId }: { shortname: string; var
   const [start, setStart] = useState(0)
   const [releases, setReleases] = useState<ReleaseListing[]>([])
   const [total, setTotal] = useState(0)
+  const [sortBy, setSortBy] = useState<string[]>([])
 
   useEffect(() => {
     async function fetchVariantReleases() {
       const { data, error } = await client.GET('/statistics/{shortname}/variants/{id}/releases', {
-        params: { path: { shortname, id: variantId }, query: { start, count } },
+        params: { path: { shortname, id: variantId }, query: { start, count, sort: sortBy.join(',') } },
       })
       if (error) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -456,7 +455,7 @@ function VariantReleasesTable({ shortname, variantId }: { shortname: string; var
       }
     }
     fetchVariantReleases()
-  }, [shortname, variantId, count, start])
+  }, [shortname, variantId, count, start, sortBy])
 
   function updateRowCount(newCount: number) {
     setCount(newCount)
@@ -478,6 +477,8 @@ function VariantReleasesTable({ shortname, variantId }: { shortname: string; var
         total={total}
         releases={releases}
         setCurrentPage={setCurrentPage}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
       />
     </>
   )
