@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router'
 import { Heading, Button, Field, Label, EXPERIMENTAL_Suggestion as Suggestion } from '@digdir/designsystemet-react'
 import { ArrowLeftIcon, ArrowRightIcon } from '@navikt/aksel-icons'
 import { DatePicker } from '../components/DatePicker'
@@ -11,6 +12,7 @@ import type { ReleaseListing, ShortnameListing } from '@ssbno-statreg/shared'
 import { RowCountSelect } from '../components/RowCountSelect'
 
 function ListReleases() {
+  const [searchParams] = useSearchParams()
   const [rowCount, setRowCount] = useState(10)
   const [start, setStart] = useState(0)
   const [releases, setReleases] = useState<ReleaseListing[]>([])
@@ -55,10 +57,17 @@ function ListReleases() {
         alert(errorMessage)
       } else {
         setShortnames(data ?? [])
+
+        const shortnameFromUrl = searchParams.get('shortname')
+        if (shortnameFromUrl === null) return
+        const exists = data.some((item) => item.shortname === shortnameFromUrl)
+        if (!exists) return
+
+        setSelectedShortnames([shortnameFromUrl])
       }
     }
     fetchShortnames()
-  }, [])
+  }, [searchParams])
 
   function updateRowCount(newCount: number) {
     setRowCount(newCount)
@@ -112,6 +121,7 @@ function ListReleases() {
           <Label>Filtrer publiseringer</Label>
           <Suggestion
             multiple
+            selected={selectedShortnames}
             onSelectedChange={(selected) => setSelectedShortnames(selected.map((selectedItem) => selectedItem.value))}
           >
             <Suggestion.Input />

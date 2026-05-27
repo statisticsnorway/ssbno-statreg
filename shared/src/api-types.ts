@@ -27,7 +27,7 @@ export interface paths {
             [name: string]: unknown
           }
           content: {
-            'application/json': Record<string, never>[]
+            'application/json': components['schemas']['Shortname_listing'][]
           }
         }
       }
