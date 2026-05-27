@@ -1,3 +1,5 @@
+import type { Prisma } from '@/generated/prisma/client'
+
 export function dateToISOString(date: Date | null): string | undefined {
   if (!date) return
 
@@ -75,4 +77,28 @@ export function isNumber(str: string | number | undefined | null) {
 
 export function getDateOnlyAsString(date: Date): string {
   return date.toISOString().slice(0, 10)
+}
+
+export function parseSortInput(
+  sortQuery?: string[],
+  allowedFields?: string[]
+): Prisma.ReleaseOrderByWithRelationInput[] {
+  const allowedSortingFields = new Set(allowedFields ?? [])
+
+  if (!sortQuery) return []
+
+  return sortQuery
+    .map((field) => {
+      const isDesc = field.startsWith('-')
+      const key = isDesc ? field.slice(1) : field
+
+      if (!allowedSortingFields.has(key)) {
+        return null
+      }
+
+      return {
+        [key]: isDesc ? 'desc' : 'asc',
+      }
+    })
+    .filter((v) => v !== null)
 }
