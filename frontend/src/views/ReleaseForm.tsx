@@ -412,7 +412,6 @@ function DateReleasesTable({ selectedDate }: { selectedDate?: Date }) {
   const [sortBy, setSortBy] = useState<string[]>([])
 
   useEffect(() => {
-    // TODO: Consider moving to new function
     let publishTimeFilter = {}
     if (selectedDate) {
       const fromTime = new Date(selectedDate)
