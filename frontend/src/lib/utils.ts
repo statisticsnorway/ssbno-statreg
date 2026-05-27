@@ -68,3 +68,17 @@ export function formatVariant(variant?: Variant): string {
   const revision = formatRevisionName(variant?.revision?.code).toLowerCase()
   return [frequency, revision].join(', ')
 }
+
+export function getPublishTimeFilterForDate(selectedDate: Date | undefined) {
+  if (!selectedDate) return {}
+
+  const fromTime = new Date(selectedDate)
+  fromTime.setHours(0, 0, 0, 0)
+  const toTime = new Date(selectedDate)
+  toTime.setHours(23, 59, 59, 999)
+
+  return {
+    publish_time_after: fromTime.toISOString(),
+    publish_time_before: toTime.toISOString(),
+  }
+}
