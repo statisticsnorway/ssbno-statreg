@@ -1,10 +1,10 @@
 import {
-  type StatisticListing,
   type StatisticDetails,
   type StatisticUpdate,
   type StatisticCreate,
   ApprovalStatus,
   StatisticStatus,
+  StatisticListingResponse,
 } from '@ssbno-statreg/shared'
 import { dateToISOString, sanitize, parseDateOnly, ensureRequiredFieldsExists, isNumber, parseId } from '@/lib/utils'
 import type { Prisma } from '@/generated/prisma/client'
@@ -21,7 +21,7 @@ export type StatisticPrisma = Pick<PrismaClient, 'statistic' | 'shortname'>
 export async function getAllStatistics(
   { start = 0, count = 10 },
   prisma: StatisticPrisma
-): Promise<StatisticListing[]> {
+): Promise<StatisticListingResponse> {
   const statistics = await prisma.statistic.findMany({
     skip: start,
     take: count,
@@ -32,22 +32,32 @@ export async function getAllStatistics(
       name_en: true,
       shortname: { select: { name: true } },
       responsiblePersons: { select: { username: true, email: true } },
+      division_code: true,
     },
   })
+  const total = await prisma.statistic.count()
 
-  return statistics.map((statistic) => {
-    const main_language = statistic.language
-    return {
-      shortname: statistic.shortname.name,
-      main_language,
-      status: {
-        code: statistic.status,
-      },
-      name: statistic.name,
-      name_en: statistic.name_en ?? '',
-      contacts: statistic.responsiblePersons,
-    }
-  })
+  return {
+    total,
+    statistics: statistics.map((statistic) => {
+      const main_language = statistic.language
+      const divisionCode = statistic.division_code ?? ''
+      return {
+        shortname: statistic.shortname.name,
+        main_language,
+        status: {
+          code: statistic.status,
+        },
+        division: {
+          name: getDivisionFromCode(Number(divisionCode))?.name,
+          code: divisionCode,
+        },
+        name: statistic.name,
+        name_en: statistic.name_en ?? '',
+        contacts: statistic.responsiblePersons,
+      }
+    }),
+  }
 }
 
 // Statistic details

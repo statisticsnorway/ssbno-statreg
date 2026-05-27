@@ -1,5 +1,5 @@
 import { afterAll, describe, expect, test } from 'vitest'
-import { StatisticDetails, StatisticListing } from '@ssbno-statreg/shared'
+import { StatisticDetails, StatisticListingResponse } from '@ssbno-statreg/shared'
 import { prisma } from '@/lib/prisma'
 import {
   cleanupCreatedStatistics,
@@ -8,8 +8,6 @@ import {
   readStatisticFromDb,
   type StatisticWithShortname,
 } from './integrationUtils'
-
-type StatisticListingResponse = StatisticListing[]
 
 const SEEDED_STATISTIC = {
   shortname: 'helse',
@@ -68,10 +66,10 @@ describe('statisticsController integration', () => {
 
     const statistics = body as StatisticListingResponse
 
-    expect(Array.isArray(statistics)).toBe(true)
-    expect(statistics.length).toBeGreaterThan(0)
+    expect(Array.isArray(statistics.statistics)).toBe(true)
+    expect(statistics.statistics?.length).toBeGreaterThan(0)
 
-    const first = statistics[0]!
+    const first = statistics.statistics?.[0]
 
     expect(first).toMatchObject({
       shortname: expect.any(String),
@@ -81,7 +79,7 @@ describe('statisticsController integration', () => {
         code: expect.any(String),
       },
     })
-    expect(Array.isArray(first.contacts)).toBe(true)
+    expect(Array.isArray(first?.contacts)).toBe(true)
   })
 
   test('GET /statistics/:shortname returns statistic details', async () => {
