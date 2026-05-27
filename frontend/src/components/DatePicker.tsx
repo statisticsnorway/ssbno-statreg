@@ -13,9 +13,10 @@ import { getDateOnlyAsString } from '../lib/utils'
 
 type DatePickerProps = React.ComponentProps<typeof AkselDatePicker.Standalone> & {
   showColorCodingExplanation?: boolean
+  onCalendarDatesLoaded?: (data: CalenderDate) => void
 }
 
-export function DatePicker({ showColorCodingExplanation, ...props }: DatePickerProps) {
+export function DatePicker({ showColorCodingExplanation, onCalendarDatesLoaded, ...props }: DatePickerProps) {
   const [calendarDates, setCalendarDates] = useState<CalenderDate>({})
   const { fromDate, toDate } = props
 
@@ -31,10 +32,11 @@ export function DatePicker({ showColorCodingExplanation, ...props }: DatePickerP
         alert(errorMessage)
       } else {
         setCalendarDates(data)
+        onCalendarDatesLoaded?.(data)
       }
     }
     fetchCalendarDates()
-  }, [fromDate, toDate])
+  }, [fromDate, toDate, onCalendarDatesLoaded])
 
   const full: Date[] = []
   const many: Date[] = []

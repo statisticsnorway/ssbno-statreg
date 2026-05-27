@@ -33,11 +33,13 @@ import { PaginatedReleasesTable, ReleasesTable } from '../components/ReleasesTab
 import ReleaseFormModal from '../components/ReleaseFormModal'
 import {
   ApprovalStatus,
+  DayStatus,
   type ReleaseByIdResponse,
   type ReleaseListing,
   type ReleaseUpdate,
   type ReleaseCreate,
   type ReleaseDetails,
+  type CalenderDate,
 } from '@ssbno-statreg/shared'
 
 import client from '../api'
@@ -105,6 +107,7 @@ export default function ReleaseForm() {
   const periodToPicker = useDatepicker('periodTo', setValues, setErrors)
   const [openReleaseModal, setOpenReleaseModal] = useState(false)
   const [newOrUpdatedRelease, setNewOrUpdatedRelease] = useState<ReleaseDetails>({})
+  const [calendarDates, setCalendarDates] = useState<CalenderDate>({})
 
   // when id exists in url-path, fetch release and prefill form
   useEffect(() => {
@@ -281,6 +284,7 @@ export default function ReleaseForm() {
             fromDate={getFirstDayOfNthMonth(0)}
             toDate={getLastDayOfNthMonth(0)}
             showColorCodingExplanation
+            onCalendarDatesLoaded={setCalendarDates}
             {...publishTimePicker.datepickerProps}
           />
           {errors.publishTime && <ValidationMessage>{errors.publishTime}</ValidationMessage>}
@@ -379,7 +383,7 @@ export default function ReleaseForm() {
           </Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel className='p-0' value='selected-publish-date'>
-          <DateReleasesTable selectedDate={values.publishTime} />
+          <DateReleasesTable selectedDate={values.publishTime} calendarDates={calendarDates} />
         </Tabs.Panel>
         <Tabs.Panel className='p-0' value='variant-releases'>
           {statistic && variant && (
@@ -406,7 +410,10 @@ function getCreatedReleaseModalDescription(createdRelease: ReleaseDetails) {
   return `Datoen ${formatDate(createdRelease?.publish_time)} er nå sendt inn for ${createdReleaseVariant}.`
 }
 
-function DateReleasesTable({ selectedDate }: Readonly<{ selectedDate?: Date }>) {
+function DateReleasesTable({
+  selectedDate,
+  calendarDates,
+}: Readonly<{ selectedDate?: Date; calendarDates?: CalenderDate }>) {
   const [releases, setReleases] = useState<ReleaseListing[]>([])
   const [sortBy, setSortBy] = useState<string[]>([])
 
@@ -429,11 +436,16 @@ function DateReleasesTable({ selectedDate }: Readonly<{ selectedDate?: Date }>) 
     fetchReleases()
   }, [sortBy, selectedDate])
 
+  const selectedDateStatus =
+    selectedDate &&
+    calendarDates &&
+    (calendarDates?.[getDateOnlyAsString(selectedDate)]?.status as keyof typeof DayStatus)
+
   return (
     <>
       <div className='description-wrapper'>
         <span>Innmeldte datoer den {formatDate(selectedDate?.toISOString())}</span>
-        <DayStatusTag status='MANY' />
+        <DayStatusTag status={selectedDateStatus ?? 'NONE'} />
       </div>
       <ReleasesTable releases={releases} sortBy={sortBy} setSortBy={setSortBy} />
     </>
