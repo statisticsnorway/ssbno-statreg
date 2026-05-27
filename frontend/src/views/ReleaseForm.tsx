@@ -446,7 +446,7 @@ function DateReleasesTable({
     <>
       <div className='description-wrapper'>
         <span>Innmeldte datoer den {formatDate(selectedDate?.toISOString())}</span>
-        <DayStatusTag status={selectedDateStatus ?? 'NONE'} />
+        <DayStatusTag status={selectedDateStatus || 'NONE'} />
       </div>
       <ReleasesTable releases={releases} sortBy={sortBy} setSortBy={setSortBy} />
     </>
