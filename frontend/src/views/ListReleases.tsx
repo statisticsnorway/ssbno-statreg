@@ -97,6 +97,20 @@ function ListReleases() {
     fetchShortnames()
   }, [searchParams])
 
+  useEffect(() => {
+    async function setFiltersFromQueryParams() {
+      const shortnamesQueryValue = searchParams.get('shortnames')
+      if (!shortnamesQueryValue) return
+
+      const newSelectedShortnames = shortnamesQueryValue.split(',').map((shortname) => ({
+        label: shortname,
+        value: shortname,
+      }))
+      setSelectedShortnames(newSelectedShortnames)
+    }
+    setFiltersFromQueryParams()
+  }, [searchParams])
+
   function updateRowCount(newCount: number) {
     setRowCount(newCount)
     setStart(0)
