@@ -92,13 +92,18 @@ export default function ShowStatistic() {
           <Details defaultOpen>
             <Details.Summary>Kommende publiseringer</Details.Summary>
             <Details.Content>
-              <SimpleReleasesTable releases={releases} />
-              <p>
-                {/* TODO MIM-2702: Fix link with filter params */}
-                <Link href={'/statistikkregisteret/?shortname=' + shortname}>
-                  Se alle publiseringsdatoene for denne statistikken
-                </Link>
-              </p>
+              {releases.length > 0 ? (
+                <>
+                  <SimpleReleasesTable releases={releases} />
+                  <p>
+                    <Link href={`/statistikkregisteret/?shortname=${shortname}`}>
+                      Se alle publiseringsdatoene for denne statistikken
+                    </Link>
+                  </p>
+                </>
+              ) : (
+                <Paragraph>Ingen kommende publiseringer.</Paragraph>
+              )}
             </Details.Content>
           </Details>
         </Card>
