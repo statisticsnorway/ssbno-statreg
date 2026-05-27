@@ -85,13 +85,6 @@ function ListReleases() {
         alert(errorMessage)
       } else {
         setShortnames(data ?? [])
-
-        const shortnameFromUrl = searchParams.get('shortname')
-        if (shortnameFromUrl === null) return
-        const exists = data.some((item) => item.shortname === shortnameFromUrl)
-        if (!exists) return
-
-        setSelectedShortnames([{ label: shortnameFromUrl, value: shortnameFromUrl }])
       }
     }
     fetchShortnames()
