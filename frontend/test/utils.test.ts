@@ -8,6 +8,7 @@ import {
   parsePublishDateWithTime,
   formatRevisionName,
   formatVariant,
+  getSelectedPublishTimeFilter,
 } from '../src/lib/utils'
 
 const timeZone = 'Europe/Oslo'
@@ -198,6 +199,44 @@ describe('utils', () => {
       }
 
       expect(formatVariant(variant)).toBe('Kvartal, -')
+    })
+  })
+
+  describe('getSelectedPublishTimeFilter', () => {
+    test('returns empty object when selectedDate is undefined', () => {
+      const result = getSelectedPublishTimeFilter(undefined)
+      expect(result).toEqual({})
+    })
+
+    test('returns correct ISO range for a fixed date string', () => {
+      const input = new Date('2024-05-15')
+
+      const result = getSelectedPublishTimeFilter(input)
+
+      expect(result).toEqual({
+        publish_time_after: new Date('2024-05-15T00:00:00').toISOString(),
+        publish_time_before: new Date('2024-05-15T23:59:59.999').toISOString(),
+      })
+    })
+
+    test('sets time to start and end of day', () => {
+      const input = new Date('2024-01-01T18:45:30')
+
+      const result = getSelectedPublishTimeFilter(input)
+
+      expect(result).toEqual({
+        publish_time_after: new Date('2024-01-01T00:00:00').toISOString(),
+        publish_time_before: new Date('2024-01-01T23:59:59.999').toISOString(),
+      })
+    })
+
+    test('does not mutate the original date', () => {
+      const input = new Date('2024-07-10T12:00:00')
+      const originalTime = input.getTime()
+
+      getSelectedPublishTimeFilter(input)
+
+      expect(input.getTime()).toBe(originalTime)
     })
   })
 })
