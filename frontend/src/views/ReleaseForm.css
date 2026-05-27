@@ -2,23 +2,23 @@
   display: flex;
   flex-direction: column;
   gap: var(--ds-size-12);
+
+  .release-form-button-wrapper {
+    display: flex;
+    gap: var(--ds-size-3);
+  }
+  
+  .release-form-period-fieldset-wrapper {
+    display: flex;
+    gap: var(--ds-size-12);
+  }
 }
 
-.release-form-button-wrapper {
-  display: flex;
-  gap: var(--ds-size-3);
-}
-
-.release-description-wrapper {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: var(--ds-size-12);
-}
 
 .related-releases-tables-tab {
   width: 100%;
   row-gap: var(--ds-size-10);
-
+  
   ds-tablist {
     margin-bottom: var(--ds-size-10);
   }
@@ -27,6 +27,7 @@
     width: 100%;
     display: flex;
     justify-content: space-between;
+    margin-bottom: var(--ds-size-10);
   }
 
   .row-count-select-wrapper {

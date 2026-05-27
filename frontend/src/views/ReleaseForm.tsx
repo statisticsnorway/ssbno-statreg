@@ -44,7 +44,9 @@ import client from '../api'
 
 import './ReleaseForm.css'
 
-type Statistic = ReleaseByIdResponse['statistic']
+type Statistic = ReleaseByIdResponse['statistic'] & {
+  approval_status?: ReleaseByIdResponse['approval_status']
+}
 type Variant = ReleaseByIdResponse['variant']
 
 const releaseDatePrecisions = ['Dag', 'Måned', 'År'] as const
@@ -285,7 +287,7 @@ export default function ReleaseForm() {
         </Field>
 
         <Fieldset>
-          <div style={{ display: 'flex', gap: 'var(--ds-size-12)' }}>
+          <div className='release-form-period-fieldset-wrapper'>
             <Field>
               <Label>Måleperiode fra</Label>
               <AkselDatePicker {...periodFromPicker.datepickerProps}>
@@ -429,7 +431,7 @@ function DateReleasesTable({ selectedDate }: { selectedDate?: Date }) {
 
   return (
     <>
-      <div className='release-description-wrapper'>
+      <div className='description-wrapper'>
         <span>Innmeldte datoer den {formatDate(selectedDate?.toISOString())}</span>
         {releases?.length ? <DayStatusTag status={'BLOCKED'} /> : null}
       </div>
