@@ -31,7 +31,7 @@ function ListReleases() {
 
   const [selectedShortnames, setSelectedShortnames] = useState<SuggestionItem[]>([])
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
-  const [sortBy, setSortBy] = useState<string[]>([])
+  const [sortBy, setSortBy] = useState<string[]>(['-publish_time'])
 
   useEffect(() => {
     async function fetchReleases(
