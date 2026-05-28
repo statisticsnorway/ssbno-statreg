@@ -32,13 +32,6 @@ export function getFirstDayOfNthMonth(monthsAhead: number): Date {
   return from
 }
 
-export function getLastDayOfNthMonth(monthsAhead: number): Date {
-  const to = new Date()
-  to.setMonth(to.getMonth() + monthsAhead + 1)
-  to.setDate(0)
-  return to
-}
-
 export function getDateOnlyAsString(date: Date | undefined): string {
   if (!date) return ''
 
