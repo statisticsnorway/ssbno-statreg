@@ -415,7 +415,7 @@ function DateReleasesTable({
   calendarDates,
 }: Readonly<{ selectedDate?: Date; calendarDates?: CalenderDate }>) {
   const [releases, setReleases] = useState<ReleaseListing[]>([])
-  const [sortBy, setSortBy] = useState<string[]>([])
+  const [sortBy, setSortBy] = useState<string[]>(['-publish_time'])
 
   useEffect(() => {
     async function fetchReleases() {
@@ -457,7 +457,7 @@ function VariantReleasesTable({ shortname, variantId }: { shortname: string; var
   const [start, setStart] = useState(0)
   const [releases, setReleases] = useState<ReleaseListing[]>([])
   const [total, setTotal] = useState(0)
-  const [sortBy, setSortBy] = useState<string[]>([])
+  const [sortBy, setSortBy] = useState<string[]>(['-publish_time'])
 
   useEffect(() => {
     async function fetchVariantReleases() {
