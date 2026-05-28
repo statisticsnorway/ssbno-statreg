@@ -21,8 +21,6 @@ import {
   formatDate,
   formatVariant,
   getDateOnlyAsString,
-  getFirstDayOfNthMonth,
-  getLastDayOfNthMonth,
   parsePublishDateWithTime,
   getPublishTimeFilterForDate,
 } from '../lib/utils'
@@ -282,11 +280,9 @@ export default function ReleaseForm() {
           <Input id='publishTime' size={10} {...publishTimePicker.inputProps} aria-invalid={!!errors.publishTime} />
           {/* TODO: Disable blocked days */}
           <DatePicker
-            fromDate={getFirstDayOfNthMonth(0)}
-            toDate={getLastDayOfNthMonth(0)}
+            {...publishTimePicker.datepickerProps}
             showColorCodingExplanation
             calendarDatesEmit={setCalendarDates}
-            {...publishTimePicker.datepickerProps}
           />
           {errors.publishTime && <ValidationMessage>{errors.publishTime}</ValidationMessage>}
         </Field>
@@ -341,7 +337,10 @@ export default function ReleaseForm() {
         <div className='release-form-button-wrapper'>
           <Button type='submit'>{isEditing ? 'Lagre' : 'Meld dato'}</Button>
           <Button variant='tertiary' asChild>
-            <ReactRouterLink to={isEditing ? `/publisering/${releaseId}` : `/statistikk/${statistic}`} reloadDocument>
+            <ReactRouterLink
+              to={isEditing ? `/publisering/${releaseId}` : `/statistikk/${statistic?.shortname}`}
+              reloadDocument
+            >
               Avbryt
             </ReactRouterLink>
           </Button>

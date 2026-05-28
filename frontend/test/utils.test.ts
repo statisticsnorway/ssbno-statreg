@@ -3,7 +3,6 @@ import {
   formatPublishTime,
   formatDate,
   getFirstDayOfNthMonth,
-  getLastDayOfNthMonth,
   getDateOnlyAsString,
   parsePublishDateWithTime,
   formatRevisionName,
@@ -78,33 +77,6 @@ describe('utils', () => {
     test('rolls over to next year when month exceeds december', () => {
       vi.setSystemTime(new Date('2024-12-15T00:00+01:00'))
       expect(getFirstDayOfNthMonth(2)).toEqual(new Date('2025-02-01T00:00+01:00'))
-    })
-  })
-
-  describe('getLastDayOfNthMonth', () => {
-    test('returns the last day of the current month when monthsAhead is 0', () => {
-      vi.setSystemTime(new Date('2024-03-15T00:00+01:00'))
-      expect(getLastDayOfNthMonth(0)).toEqual(new Date('2024-03-31T00:00+01:00'))
-    })
-
-    test('returns the last day of a future month', () => {
-      vi.setSystemTime(new Date('2024-03-15T00:00+01:00'))
-      expect(getLastDayOfNthMonth(2)).toEqual(new Date('2024-05-31T00:00+02:00'))
-    })
-
-    test('handles february in a leap year', () => {
-      vi.setSystemTime(new Date('2024-01-15T00:00+01:00'))
-      expect(getLastDayOfNthMonth(1)).toEqual(new Date('2024-02-29T00:00+01:00'))
-    })
-
-    test('handles february in a non-leap year', () => {
-      vi.setSystemTime(new Date('2023-01-15T00:00+01:00'))
-      expect(getLastDayOfNthMonth(1)).toEqual(new Date('2023-02-28T00:00+01:00'))
-    })
-
-    test('rolls over to next year when month exceeds december', () => {
-      vi.setSystemTime(new Date('2024-12-15T00:00+01:00'))
-      expect(getLastDayOfNthMonth(2)).toEqual(new Date('2025-02-28T00:00+01:00'))
     })
   })
 
