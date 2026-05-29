@@ -19,10 +19,10 @@ import { DatePicker as AkselDatePicker, useDatepicker as useAkselDatePicker } fr
 import { DatePicker } from '../components/DatePicker'
 import {
   formatDate,
+  formatVariant,
   getDateOnlyAsString,
-  getFirstDayOfNthMonth,
-  getLastDayOfNthMonth,
   parsePublishDateWithTime,
+  getPublishTimeFilterForDate,
 } from '../lib/utils'
 import { CalendarIcon } from '@navikt/aksel-icons'
 import { DayStatusTag } from '../components/DayStatus'
@@ -31,19 +31,22 @@ import { PaginatedReleasesTable, ReleasesTable } from '../components/ReleasesTab
 import ReleaseFormModal from '../components/ReleaseFormModal'
 import {
   ApprovalStatus,
+  DayStatus,
   type ReleaseByIdResponse,
   type ReleaseListing,
   type ReleaseUpdate,
   type ReleaseCreate,
   type ReleaseDetails,
-  RevisionNames,
+  type CalenderDate,
 } from '@ssbno-statreg/shared'
 
 import client from '../api'
 
 import './ReleaseForm.css'
 
-type Statistic = ReleaseByIdResponse['statistic']
+type Statistic = ReleaseByIdResponse['statistic'] & {
+  approval_status?: ReleaseByIdResponse['approval_status']
+}
 type Variant = ReleaseByIdResponse['variant']
 
 const releaseDatePrecisions = ['Dag', 'Måned', 'År'] as const
@@ -81,17 +84,19 @@ function useDatepicker(
   })
 }
 
-//common release form for creating and editing release
+// common release form for creating and editing release
 export default function ReleaseForm() {
-  //for creation, path is /statistikk/:shortname/:variantId/opprett
-  //for editing, path is /publisering/:id/rediger
+  // for creation, path is /statistikk/:shortname/:variantId/opprett
+  // for editing, path is /publisering/:id/rediger
   const { id: releaseId, shortname, variantId } = useParams()
 
-  //we use this variable when form needs to be different in editing mode
   const isEditing = !!releaseId
 
-  //state used in both create and update mode
-  const [values, setValues] = useState<ReleaseFormTypes>({})
+  // TODO: MIM-2581: This is a temporary suggested publish time (3 months ahead of date) for create release
+  const [suggestedPublishTime] = useState(() => new Date(new Date().setMonth(new Date().getMonth() + 3)))
+  const [values, setValues] = useState<ReleaseFormTypes>({
+    publishTime: suggestedPublishTime,
+  })
   const [errors, setErrors] = useState<ReleaseFormErrors>({})
   const [statistic, setStatistic] = useState<Statistic>()
   const [variant, setVariant] = useState<Variant>()
@@ -100,6 +105,7 @@ export default function ReleaseForm() {
   const periodToPicker = useDatepicker('periodTo', setValues, setErrors)
   const [openReleaseModal, setOpenReleaseModal] = useState(false)
   const [newOrUpdatedRelease, setNewOrUpdatedRelease] = useState<ReleaseDetails>({})
+  const [calendarDates, setCalendarDates] = useState<CalenderDate>({})
 
   // when id exists in url-path, fetch release and prefill form
   useEffect(() => {
@@ -127,6 +133,7 @@ export default function ReleaseForm() {
     }
 
     setPrefilledValues()
+    // eslint-disable-next-line @eslint-react/exhaustive-deps
   }, [releaseId])
 
   // when shortname and variantId exists in url-path, only fetch statistic and variant data
@@ -143,7 +150,7 @@ export default function ReleaseForm() {
         id: variant?.id,
         frequency: variant?.frequency,
         revision: {
-          name: variant?.revision,
+          code: variant?.revision?.code,
         },
       })
     }
@@ -231,17 +238,17 @@ export default function ReleaseForm() {
     <>
       <div>
         <Heading level={1} data-size='md'>
-          Rediger publiseringsdato
+          {isEditing ? 'Rediger publiseringsdato' : 'Meld publiseringsdato'}
         </Heading>
         <Heading data-size='xs' level={2}>
-          {statistic?.name} ({statistic?.shortname}) og {variant?.frequency?.name}
+          {statistic?.name} ({statistic?.shortname}) og {variant?.frequency?.name?.toLowerCase()}
         </Heading>
-        <ApprovalStatusTag status={ApprovalStatus.PENDING} />
+        <ApprovalStatusTag status={statistic?.approval_status ?? ApprovalStatus.PENDING} />
       </div>
 
       <form onSubmit={handleOnSubmit} className='release-form'>
         <Field>
-          <Paragraph style={{ marginBottom: 'var(--ds-size-8)' }}>Alle felter må fylles ut</Paragraph>
+          <Paragraph className='release-form-description'>Alle felter må fylles ut</Paragraph>
           <Label>Datotype for publisering</Label>
           <Select
             id='dateType'
@@ -273,16 +280,15 @@ export default function ReleaseForm() {
           <Input id='publishTime' size={10} {...publishTimePicker.inputProps} aria-invalid={!!errors.publishTime} />
           {/* TODO: Disable blocked days */}
           <DatePicker
-            fromDate={getFirstDayOfNthMonth(0)}
-            toDate={getLastDayOfNthMonth(0)}
-            showColorCodingExplanation
             {...publishTimePicker.datepickerProps}
+            showColorCodingExplanation
+            calendarDatesEmit={setCalendarDates}
           />
           {errors.publishTime && <ValidationMessage>{errors.publishTime}</ValidationMessage>}
         </Field>
 
         <Fieldset>
-          <div style={{ display: 'flex', gap: 'var(--ds-size-12)' }}>
+          <div className='release-form-period-fieldset-wrapper'>
             <Field>
               <Label>Måleperiode fra</Label>
               <AkselDatePicker {...periodFromPicker.datepickerProps}>
@@ -328,10 +334,13 @@ export default function ReleaseForm() {
           </Field>
         )}
 
-        <div style={{ display: 'flex', gap: 'var(--ds-size-3)' }}>
+        <div className='release-form-button-wrapper'>
           <Button type='submit'>{isEditing ? 'Lagre' : 'Meld dato'}</Button>
           <Button variant='tertiary' asChild>
-            <ReactRouterLink to={isEditing ? `/publisering/${releaseId}` : `/statistikk/${statistic}`} reloadDocument>
+            <ReactRouterLink
+              to={isEditing ? `/publisering/${releaseId}` : `/statistikk/${statistic?.shortname}`}
+              reloadDocument
+            >
               Avbryt
             </ReactRouterLink>
           </Button>
@@ -374,13 +383,7 @@ export default function ReleaseForm() {
           </Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel className='p-0' value='selected-publish-date'>
-          <div className='description-wrapper'>
-            {/* TODO: Placeholder date and day status for description */}
-            <span>Innmeldte datoer den {formatDate(values.publishTime?.toISOString())}</span>
-            {/* TODO: Get status from the calendar response */}
-            <DayStatusTag status={'MANY'} />
-          </div>
-          <DateReleasesTable />
+          <DateReleasesTable selectedDate={values.publishTime} calendarDates={calendarDates} />
         </Tabs.Panel>
         <Tabs.Panel className='p-0' value='variant-releases'>
           {statistic && variant && (
@@ -403,22 +406,24 @@ function getReleaseModalDescription(isEditing: boolean, createdRelease: ReleaseD
 }
 
 function getCreatedReleaseModalDescription(createdRelease: ReleaseDetails) {
-  const createdReleaseVariant = createdRelease?.variant
-  const createdReleaseFrequency = createdReleaseVariant?.frequency?.name
-  const createdReleaseRevisionName = createdReleaseVariant?.revision?.name
-    ? RevisionNames[createdReleaseVariant?.revision.name as keyof typeof RevisionNames]
-    : ''
-  const variantInformation = [createdReleaseFrequency, createdReleaseRevisionName].join(', ').toLowerCase()
-  return `Datoen ${formatDate(createdRelease?.publish_time)} er nå sendt inn for ${variantInformation}.`
+  const createdReleaseVariant = formatVariant(createdRelease?.variant).toLowerCase()
+  return `Datoen ${formatDate(createdRelease?.publish_time)} er nå sendt inn for ${createdReleaseVariant}.`
 }
 
-// TODO should take a date prop MIM-1740
-function DateReleasesTable() {
+function DateReleasesTable({
+  selectedDate,
+  calendarDates,
+}: Readonly<{ selectedDate?: Date; calendarDates?: CalenderDate }>) {
   const [releases, setReleases] = useState<ReleaseListing[]>([])
+  const [sortBy, setSortBy] = useState<string[]>(['-publish_time'])
 
   useEffect(() => {
     async function fetchReleases() {
-      const { data, error } = await client.GET('/releases', { params: { query: { start: 0, count: 10 } } })
+      const { data, error } = await client.GET('/releases', {
+        params: {
+          query: { start: 0, count: 100, sort: sortBy.join(','), ...getPublishTimeFilterForDate(selectedDate) },
+        },
+      })
       if (error) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const errorMessage = (error as any).error
@@ -429,9 +434,22 @@ function DateReleasesTable() {
       }
     }
     fetchReleases()
-  }, [])
+  }, [sortBy, selectedDate])
 
-  return <ReleasesTable releases={releases} />
+  const selectedDateStatus =
+    selectedDate &&
+    calendarDates &&
+    (calendarDates?.[getDateOnlyAsString(selectedDate)]?.status as keyof typeof DayStatus)
+
+  return (
+    <>
+      <div className='description-wrapper'>
+        <span>Innmeldte datoer den {formatDate(selectedDate?.toISOString())}</span>
+        <DayStatusTag status={selectedDateStatus || 'NONE'} />
+      </div>
+      <ReleasesTable releases={releases} sortBy={sortBy} setSortBy={setSortBy} />
+    </>
+  )
 }
 
 function VariantReleasesTable({ shortname, variantId }: { shortname: string; variantId: number }) {
@@ -439,11 +457,12 @@ function VariantReleasesTable({ shortname, variantId }: { shortname: string; var
   const [start, setStart] = useState(0)
   const [releases, setReleases] = useState<ReleaseListing[]>([])
   const [total, setTotal] = useState(0)
+  const [sortBy, setSortBy] = useState<string[]>(['-publish_time'])
 
   useEffect(() => {
     async function fetchVariantReleases() {
       const { data, error } = await client.GET('/statistics/{shortname}/variants/{id}/releases', {
-        params: { path: { shortname, id: variantId }, query: { start, count } },
+        params: { path: { shortname, id: variantId }, query: { start, count, sort: sortBy.join(',') } },
       })
       if (error) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -456,7 +475,7 @@ function VariantReleasesTable({ shortname, variantId }: { shortname: string; var
       }
     }
     fetchVariantReleases()
-  }, [shortname, variantId, count, start])
+  }, [shortname, variantId, count, start, sortBy])
 
   function updateRowCount(newCount: number) {
     setCount(newCount)
@@ -478,6 +497,8 @@ function VariantReleasesTable({ shortname, variantId }: { shortname: string; var
         total={total}
         releases={releases}
         setCurrentPage={setCurrentPage}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
       />
     </>
   )

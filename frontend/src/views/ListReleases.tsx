@@ -1,9 +1,18 @@
 import { useEffect, useState } from 'react'
-import { Heading, Button, Field, Label, EXPERIMENTAL_Suggestion as Suggestion } from '@digdir/designsystemet-react'
+import { useSearchParams } from 'react-router'
+import {
+  Heading,
+  Button,
+  Field,
+  Label,
+  EXPERIMENTAL_Suggestion as Suggestion,
+  type SuggestionItem,
+  Chip,
+} from '@digdir/designsystemet-react'
 import { ArrowLeftIcon, ArrowRightIcon } from '@navikt/aksel-icons'
 import { DatePicker } from '../components/DatePicker'
 import { PaginatedReleasesTable } from '../components/ReleasesTable'
-import { getFirstDayOfNthMonth, getLastDayOfNthMonth } from '../lib/utils'
+import { formatDate, getFirstDayOfNthMonth, getPublishTimeFilterForDate } from '../lib/utils'
 import client from '../api'
 
 import './ListReleases.css'
@@ -11,24 +20,36 @@ import type { ReleaseListing, ShortnameListing } from '@ssbno-statreg/shared'
 import { RowCountSelect } from '../components/RowCountSelect'
 
 function ListReleases() {
+  const [searchParams] = useSearchParams()
+  const shortnamesQuery = searchParams.get('shortname')
   const [rowCount, setRowCount] = useState(10)
   const [start, setStart] = useState(0)
   const [releases, setReleases] = useState<ReleaseListing[]>([])
   const [total, setTotal] = useState(0)
   const [calendarMonth, setCalendarMonth] = useState(0)
   const [shortnames, setShortnames] = useState<ShortnameListing[]>([])
-  // eslint-disable-next-line @eslint-react/no-unused-state
-  const [selectedShortnames, setSelectedShortnames] = useState<string[]>([])
+
+  const [selectedShortnames, setSelectedShortnames] = useState<SuggestionItem[]>([])
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
+  const [sortBy, setSortBy] = useState<string[]>(['-publish_time'])
 
   useEffect(() => {
-    async function fetchReleases(start: number, count: number, selectedShortnames: string[]) {
+    async function fetchReleases(
+      start: number,
+      count: number,
+      selectedShortnames: SuggestionItem[],
+      sortBy: string[],
+      selectedDate?: Date
+    ) {
       const filter = {
         ...(selectedShortnames.length && {
-          shortname: selectedShortnames.join(','),
+          shortname: selectedShortnames.map((item) => item.value).join(','),
         }),
+        ...getPublishTimeFilterForDate(selectedDate),
       }
+      const sort = sortBy.join(',')
       const { data, error } = await client.GET('/releases', {
-        params: { query: { start, count, ...filter } },
+        params: { query: { start, count, ...filter, sort } },
       })
       if (error) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -40,8 +61,8 @@ function ListReleases() {
         setTotal(data.total ?? 0)
       }
     }
-    fetchReleases(start, rowCount, selectedShortnames)
-  }, [start, rowCount, selectedShortnames])
+    fetchReleases(start, rowCount, selectedShortnames, sortBy, selectedDate)
+  }, [start, rowCount, selectedShortnames, sortBy, selectedDate])
 
   useEffect(() => {
     async function fetchShortnames() {
@@ -58,6 +79,19 @@ function ListReleases() {
     fetchShortnames()
   }, [])
 
+  useEffect(() => {
+    async function setSelectedShortnamesFromQuery() {
+      if (!shortnamesQuery) return
+
+      const newSelectedShortnames = shortnamesQuery.split(',').map((shortname) => ({
+        label: shortname,
+        value: shortname,
+      }))
+      setSelectedShortnames(newSelectedShortnames)
+    }
+    setSelectedShortnamesFromQuery()
+  }, [shortnamesQuery])
+
   function updateRowCount(newCount: number) {
     setRowCount(newCount)
     setStart(0)
@@ -67,12 +101,21 @@ function ListReleases() {
     setStart((currentPage - 1) * rowCount)
   }
 
+  function onSelectDate(date?: Date) {
+    setSelectedDate(date ?? undefined)
+    setSelectedShortnames([])
+  }
+
+  function filterChanged(selected: SuggestionItem[]) {
+    setSelectedShortnames(selected)
+    setSelectedDate(undefined)
+  }
+
   return (
     <>
       <Heading level={1} data-size='sm'>
         Publiseringsoversikt
       </Heading>
-
       <div className='list-releases-calendars-container'>
         <Heading level={2} data-size='xs'>
           Publiseringskalender
@@ -86,14 +129,16 @@ function ListReleases() {
           </Button>
         </div>
         <div className='list-releases-calendars-wrapper'>
-          <DatePicker fromDate={getFirstDayOfNthMonth(calendarMonth)} toDate={getLastDayOfNthMonth(calendarMonth)} />
+          <DatePicker month={getFirstDayOfNthMonth(calendarMonth)} selected={selectedDate} onSelect={onSelectDate} />
           <DatePicker
-            fromDate={getFirstDayOfNthMonth(calendarMonth + 1)}
-            toDate={getLastDayOfNthMonth(calendarMonth + 1)}
+            month={getFirstDayOfNthMonth(calendarMonth + 1)}
+            selected={selectedDate}
+            onSelect={onSelectDate}
           />
           <DatePicker
-            fromDate={getFirstDayOfNthMonth(calendarMonth + 2)}
-            toDate={getLastDayOfNthMonth(calendarMonth + 2)}
+            month={getFirstDayOfNthMonth(calendarMonth + 2)}
+            selected={selectedDate}
+            onSelect={onSelectDate}
             showColorCodingExplanation
           />
         </div>
@@ -108,10 +153,15 @@ function ListReleases() {
       >
         <Field>
           <Label>Filtrer publiseringer</Label>
-          <Suggestion
-            multiple
-            onSelectedChange={(selected) => setSelectedShortnames(selected.map((selectedItem) => selectedItem.value))}
-          >
+          {selectedDate && (
+            <Chip.Removable
+              aria-label={`Slett valgt dag: ${formatDate(selectedDate.toISOString())}`}
+              onClick={() => onSelectDate()}
+            >
+              {formatDate(selectedDate.toISOString())}
+            </Chip.Removable>
+          )}
+          <Suggestion multiple onSelectedChange={(selected) => filterChanged(selected)} selected={selectedShortnames}>
             <Suggestion.Input />
             <Suggestion.Clear />
             <Suggestion.List>
@@ -132,6 +182,8 @@ function ListReleases() {
         total={total}
         releases={releases}
         setCurrentPage={setCurrentPage}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
       />
     </>
   )

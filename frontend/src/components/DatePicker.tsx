@@ -13,16 +13,22 @@ import { getDateOnlyAsString } from '../lib/utils'
 
 type DatePickerProps = React.ComponentProps<typeof AkselDatePicker.Standalone> & {
   showColorCodingExplanation?: boolean
+  calendarDatesEmit?: (data: CalenderDate) => void
 }
 
-export function DatePicker({ showColorCodingExplanation, ...props }: DatePickerProps) {
+export function DatePicker({ showColorCodingExplanation, calendarDatesEmit, ...props }: DatePickerProps) {
   const [calendarDates, setCalendarDates] = useState<CalenderDate>({})
-  const { fromDate, toDate } = props
+  const displayedMonth = props.month
 
   useEffect(() => {
     async function fetchCalendarDates() {
+      if (!displayedMonth) return
+      const from = new Date(displayedMonth.getFullYear(), displayedMonth.getMonth(), 1)
+      const to = new Date(displayedMonth.getFullYear(), displayedMonth.getMonth() + 1, 0)
       const { data, error } = await client.GET('/calendar', {
-        params: { query: { fromDate: getDateOnlyAsString(fromDate), toDate: getDateOnlyAsString(toDate) } },
+        params: {
+          query: { fromDate: getDateOnlyAsString(from), toDate: getDateOnlyAsString(to) },
+        },
       })
       if (error) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -31,10 +37,11 @@ export function DatePicker({ showColorCodingExplanation, ...props }: DatePickerP
         alert(errorMessage)
       } else {
         setCalendarDates(data)
+        calendarDatesEmit?.(data)
       }
     }
     fetchCalendarDates()
-  }, [fromDate, toDate])
+  }, [displayedMonth, calendarDatesEmit])
 
   const full: Date[] = []
   const many: Date[] = []
@@ -68,7 +75,6 @@ export function DatePicker({ showColorCodingExplanation, ...props }: DatePickerP
     <div className='datepicker-container'>
       <AkselDatePicker.Standalone
         className='datepicker-wrapper'
-        month={fromDate}
         // @ts-expect-error: Allow custom "modifiers" prop for color coding
         modifiers={{ full, many, few, blocked }}
         modifiersStyles={{

@@ -1,16 +1,27 @@
 import { useState, useEffect } from 'react'
-import { useParams } from 'react-router'
-import { Heading, Paragraph, List, Link, Button, Divider, Details, Card } from '@digdir/designsystemet-react'
+import { useNavigate, useParams } from 'react-router'
+import { Heading, Paragraph, List, Link, Button, Divider, Details, Card, Table } from '@digdir/designsystemet-react'
 import { PersonPencilIcon } from '@navikt/aksel-icons'
 import { StatisticStatusTag } from '../components/StatisticStatusTag'
 import { VariantCard } from '../components/VariantCard'
 import client from '../api'
-import { StatisticStatus, type RegionLevel, type StatisticDetails, type Variant } from '@ssbno-statreg/shared'
+import {
+  StatisticStatus,
+  type RegionLevel,
+  type ReleaseListing,
+  type StatisticDetails,
+  type Variant,
+} from '@ssbno-statreg/shared'
 
 import './ShowStatistic.css'
+import { formatPublishTime, formatRevisionName, formatVariant } from '../lib/utils'
+import { ApprovalStatusBadge } from '../components/ApprovalStatus'
+
+const TABLE_HEADER_CELLS = [{ label: 'Dato' }, { label: 'Variant' }, { label: 'Status' }]
 
 export default function ShowStatistic() {
   const [statistic, setStatistic] = useState<StatisticDetails>({})
+  const [releases, setReleases] = useState<ReleaseListing[]>([])
   const { shortname } = useParams()
 
   useEffect(() => {
@@ -27,7 +38,22 @@ export default function ShowStatistic() {
         setStatistic(data)
       }
     }
+
+    async function fetchReleases(shortname: string) {
+      const { data, error } = await client.GET('/releases', {
+        params: { query: { shortname, count: 100, publish_time_after: new Date().toISOString() } },
+      })
+      if (error) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const errorMessage = (error as any).error
+        console.log(errorMessage)
+        alert(errorMessage)
+      } else {
+        setReleases(data.releases ?? [])
+      }
+    }
     fetchStatistic()
+    if (shortname) fetchReleases(shortname)
   }, [shortname])
 
   const statusCode = statistic.status?.code as keyof typeof StatisticStatus
@@ -63,12 +89,25 @@ export default function ShowStatistic() {
           ))}
         </div>
         <Card>
-          <Details>
+          <Details defaultOpen>
             <Details.Summary>Kommende publiseringer</Details.Summary>
-            <Details.Content>Kommer snart.</Details.Content>
+            <Details.Content>
+              {releases?.length ? (
+                <>
+                  <SimpleReleasesTable releases={releases} />
+                  <p>
+                    <Link href={`/statistikkregisteret/?shortname=${shortname}`}>
+                      Se alle publiseringsdatoene for denne statistikken
+                    </Link>
+                  </p>
+                </>
+              ) : (
+                <Paragraph>Ingen kommende publiseringer.</Paragraph>
+              )}
+            </Details.Content>
           </Details>
         </Card>
-        {cancelledVariants.length > 0 && (
+        {!!cancelledVariants.length && (
           <Card style={{ marginTop: 'var(--ds-size-6)' }}>
             <Details>
               <Details.Summary>Opphørte varianter</Details.Summary>
@@ -165,28 +204,12 @@ function formatStartYear(dateString: string | null | undefined): string {
 
 function formatCancelledVariants(variants: Variant[]): string[] {
   if (!variants) return []
-  return variants.filter((variant: Variant) => variant.cancelled).map(formatVariant)
+  return variants.filter((variant: Variant) => variant.cancelled).map(formatVariantDetails)
 }
 
-function formatVariant(variant: Variant): string {
+function formatVariantDetails(variant: Variant): string {
   const detail = variant.level_of_detail?.name ?? '-'
-  const frequency = variant.frequency?.name ?? '-'
-  const revision = formatRevisionName(variant.revision)
-  return `${detail}, ${frequency}, ${revision}`
-}
-
-function formatRevisionName(revision?: string): string {
-  if (!revision || !(revision in revisionNames)) return '-'
-  return revisionNames[revision]
-}
-
-const revisionNames: Record<string, string> = {
-  I: 'Ingen',
-  B: 'Beregnede',
-  E: 'Endelige',
-  F: 'Foreløpige',
-  R: 'Reviderte',
-  IG: 'Integrert',
+  return `${detail}, ${formatVariant(variant)}`
 }
 
 function formatContacts(contacts: StatisticDetails['contacts']): string[] {
@@ -196,4 +219,48 @@ function formatContacts(contacts: StatisticDetails['contacts']): string[] {
     const initials = contact.email ? contact.email.split('@')[0] : '-'
     return `${name} (${initials})`
   })
+}
+
+function SimpleReleasesTable({ releases }: { releases: ReleaseListing[] }) {
+  return (
+    <Table>
+      <Table.Head>
+        <Table.Row>
+          {TABLE_HEADER_CELLS.map(({ label }) => (
+            <Table.HeaderCell key={label}>{label}</Table.HeaderCell>
+          ))}
+        </Table.Row>
+      </Table.Head>
+      <Table.Body>
+        {releases?.map((release) => (
+          <SimpleReleaseRow key={`${release.publish_time}-${release.id}`} release={release} />
+        ))}
+      </Table.Body>
+    </Table>
+  )
+}
+
+type ReleaseRowProps = {
+  release: ReleaseListing
+}
+
+function SimpleReleaseRow({ release }: ReleaseRowProps) {
+  const navigate = useNavigate()
+  return (
+    <Table.Row
+      key={`${release.publish_time}-${release.id}`}
+      onClick={() => {
+        navigate(`/publisering/${release.id}`, {})
+      }}
+      className='selectable-row'
+    >
+      <Table.Cell>{formatPublishTime(release.publish_time)}</Table.Cell>
+      <Table.Cell>
+        {release.frequency?.name ?? ''}, {formatRevisionName(release.revision?.code).toLocaleLowerCase()}
+      </Table.Cell>
+      <Table.Cell className='status-column'>
+        <ApprovalStatusBadge status={release.approval_status} />
+      </Table.Cell>
+    </Table.Row>
+  )
 }

@@ -81,6 +81,7 @@ describe('statisticService', () => {
         findFirst: vi.fn(() => Promise.resolve(statisticsResult)),
         update: vi.fn(() => Promise.resolve(updateStatisticsResult)),
         create: vi.fn(() => Promise.resolve(statisticsResult)),
+        count: vi.fn(() => Promise.resolve(statisticsResult ? (statisticsResult as any).length : 0)),
       },
       shortname: {
         findUnique: vi.fn(() => Promise.resolve({ name: 'kpi', id: 1 })),
@@ -112,7 +113,10 @@ describe('statisticService', () => {
 
       const result = await getAllStatistics({}, prismaMock)
 
-      expect(result).toStrictEqual([])
+      expect(result).toStrictEqual({
+        statistics: [],
+        total: 0,
+      })
     })
   })
 
@@ -303,7 +307,9 @@ describe('statisticService', () => {
             code: 'M',
             name: 'Måned',
           },
-          revision: 'I',
+          revision: {
+            code: 'I',
+          },
         },
       ])
     })
@@ -666,6 +672,7 @@ const mockStatisticsPrismaResult = [
     name: 'Energiregnskap og energibalanse',
     name_en: 'Energy account and energy balance',
     shortname: { name: 'energ' },
+    division_code: 104,
     responsiblePersons: [
       {
         username: 'abc',
@@ -679,6 +686,7 @@ const mockStatisticsPrismaResult = [
     name: 'Befolkning og demografi',
     name_en: 'Population and demography',
     shortname: { name: 'befolk' },
+    division_code: 105,
     responsiblePersons: [
       {
         username: 'bcd',
@@ -767,24 +775,35 @@ const mockStatisticsDetailedPrismaResult = {
   ],
 }
 
-const mockedStatisticsResult = [
-  {
-    shortname: 'energ',
-    main_language: 'nb',
-    status: { code: 'SA' },
-    name: 'Energiregnskap og energibalanse',
-    name_en: 'Energy account and energy balance',
-    contacts: [{ username: 'abc', email: 'alice@ssb.no' }],
-  },
-  {
-    shortname: 'befolk',
-    main_language: 'nb',
-    status: { code: 'SA' },
-    name: 'Befolkning og demografi',
-    name_en: 'Population and demography',
-    contacts: [{ username: 'bcd', email: 'bob@ssb.no' }],
-  },
-]
+const mockedStatisticsResult = {
+  statistics: [
+    {
+      shortname: 'energ',
+      main_language: 'nb',
+      status: { code: 'SA' },
+      division: {
+        name: 'Seksjon A1',
+        code: 104,
+      },
+      name: 'Energiregnskap og energibalanse',
+      name_en: 'Energy account and energy balance',
+      contacts: [{ username: 'abc', email: 'alice@ssb.no' }],
+    },
+    {
+      shortname: 'befolk',
+      main_language: 'nb',
+      status: { code: 'SA' },
+      division: {
+        code: 105,
+        name: 'Seksjon B1',
+      },
+      name: 'Befolkning og demografi',
+      name_en: 'Population and demography',
+      contacts: [{ username: 'bcd', email: 'bob@ssb.no' }],
+    },
+  ],
+  total: 2,
+}
 
 const mockedStatisticDetailedResult = {
   version: 1,
@@ -820,7 +839,9 @@ const mockedStatisticDetailedResult = {
         name: 'Måned',
         code: 'M',
       },
-      revision: 'I',
+      revision: {
+        code: 'I',
+      },
     },
     {
       id: 2,
@@ -835,7 +856,9 @@ const mockedStatisticDetailedResult = {
         name: 'Uke',
         code: 'W',
       },
-      revision: 'I',
+      revision: {
+        code: 'I',
+      },
     },
   ],
   contacts: [{ username: undefined, name: 'Bob', email: 'bob@ssb.no' }],

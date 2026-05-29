@@ -587,6 +587,7 @@ const mockedReleasesPrismaResult = [
         name: 'Måned',
         code: 'M',
       },
+      revision: 'I',
       statistic: {
         language: 'nb',
         name: 'Konsumprisindeks',
@@ -609,6 +610,7 @@ const mockedReleasesPrismaResult = [
         name: 'År',
         code: 'Y',
       },
+      revision: 'E',
       statistic: {
         language: 'nb',
         name: 'Nasjonalregnskap',
@@ -631,6 +633,7 @@ const mockedReleasesPrismaResult = [
         name: 'Halvår',
         code: 'H',
       },
+      revision: 'F',
       statistic: {
         language: 'nb',
         name: 'Eksport av laks',
@@ -681,6 +684,7 @@ const mockedReleasesResult = [
       name: 'Måned',
       code: 'M',
     },
+    revision: { code: 'I' },
     statistic: {
       shortname: 'KPI',
       name: 'Konsumprisindeks',
@@ -697,6 +701,7 @@ const mockedReleasesResult = [
       name: 'År',
       code: 'Y',
     },
+    revision: { code: 'E' },
     statistic: {
       shortname: 'NR',
       name: 'Nasjonalregnskap',
@@ -713,6 +718,7 @@ const mockedReleasesResult = [
       name: 'Halvår',
       code: 'H',
     },
+    revision: { code: 'F' },
     statistic: {
       shortname: 'laks',
       name: 'Eksport av laks',
@@ -733,7 +739,7 @@ const mockedSingleReleaseResult = {
       code: 'M',
     },
     revision: {
-      name: 'I',
+      code: 'I',
     },
   },
   statistic: {
