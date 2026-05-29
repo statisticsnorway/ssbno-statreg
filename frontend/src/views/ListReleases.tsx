@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useSearchParams } from 'react-router'
+import { useSearchParams, Link as ReactRouterLink } from 'react-router'
 import {
   Heading,
   Button,
@@ -9,7 +9,7 @@ import {
   type SuggestionItem,
   Chip,
 } from '@digdir/designsystemet-react'
-import { ArrowLeftIcon, ArrowRightIcon } from '@navikt/aksel-icons'
+import { ArrowLeftIcon, ArrowRightIcon, CalendarIcon } from '@navikt/aksel-icons'
 import { DatePicker } from '../components/DatePicker'
 import { PaginatedReleasesTable } from '../components/ReleasesTable'
 import { formatDate, getFirstDayOfNthMonth, getPublishTimeFilterForDate } from '../lib/utils'
@@ -117,9 +117,16 @@ function ListReleases() {
         Publiseringsoversikt
       </Heading>
       <div className='list-releases-calendars-container'>
-        <Heading level={2} data-size='xs'>
-          Publiseringskalender
-        </Heading>
+        <div className='list-releases-calendars-buttons'>
+          <Heading level={2} data-size='xs'>
+            Publiseringskalender
+          </Heading>
+          <Button asChild variant='primary'>
+            <ReactRouterLink to='/sperredato'>
+              Se sperrede datoer <CalendarIcon />
+            </ReactRouterLink>
+          </Button>
+        </div>
         <div className='list-releases-calendars-buttons'>
           <Button variant='tertiary' onClick={() => setCalendarMonth((prev) => prev - 3)}>
             <ArrowLeftIcon /> Forrige
