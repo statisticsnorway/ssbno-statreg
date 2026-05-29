@@ -3,11 +3,11 @@ import {
   formatPublishTime,
   formatDate,
   getFirstDayOfNthMonth,
-  getLastDayOfNthMonth,
   getDateOnlyAsString,
   parsePublishDateWithTime,
   formatRevisionName,
   formatVariant,
+  getPublishTimeFilterForDate,
 } from '../src/lib/utils'
 
 const timeZone = 'Europe/Oslo'
@@ -77,33 +77,6 @@ describe('utils', () => {
     test('rolls over to next year when month exceeds december', () => {
       vi.setSystemTime(new Date('2024-12-15T00:00+01:00'))
       expect(getFirstDayOfNthMonth(2)).toEqual(new Date('2025-02-01T00:00+01:00'))
-    })
-  })
-
-  describe('getLastDayOfNthMonth', () => {
-    test('returns the last day of the current month when monthsAhead is 0', () => {
-      vi.setSystemTime(new Date('2024-03-15T00:00+01:00'))
-      expect(getLastDayOfNthMonth(0)).toEqual(new Date('2024-03-31T00:00+01:00'))
-    })
-
-    test('returns the last day of a future month', () => {
-      vi.setSystemTime(new Date('2024-03-15T00:00+01:00'))
-      expect(getLastDayOfNthMonth(2)).toEqual(new Date('2024-05-31T00:00+02:00'))
-    })
-
-    test('handles february in a leap year', () => {
-      vi.setSystemTime(new Date('2024-01-15T00:00+01:00'))
-      expect(getLastDayOfNthMonth(1)).toEqual(new Date('2024-02-29T00:00+01:00'))
-    })
-
-    test('handles february in a non-leap year', () => {
-      vi.setSystemTime(new Date('2023-01-15T00:00+01:00'))
-      expect(getLastDayOfNthMonth(1)).toEqual(new Date('2023-02-28T00:00+01:00'))
-    })
-
-    test('rolls over to next year when month exceeds december', () => {
-      vi.setSystemTime(new Date('2024-12-15T00:00+01:00'))
-      expect(getLastDayOfNthMonth(2)).toEqual(new Date('2025-02-28T00:00+01:00'))
     })
   })
 
@@ -198,6 +171,44 @@ describe('utils', () => {
       }
 
       expect(formatVariant(variant)).toBe('Kvartal, -')
+    })
+  })
+
+  describe('getPublishTimeFilterForDate', () => {
+    test('returns empty object when selectedDate is undefined', () => {
+      const result = getPublishTimeFilterForDate(undefined)
+      expect(result).toEqual({})
+    })
+
+    test('returns correct ISO range for a fixed date string', () => {
+      const input = new Date('2024-05-15')
+
+      const result = getPublishTimeFilterForDate(input)
+
+      expect(result).toEqual({
+        publish_time_after: new Date('2024-05-15T00:00:00').toISOString(),
+        publish_time_before: new Date('2024-05-15T23:59:59.999').toISOString(),
+      })
+    })
+
+    test('sets time to start and end of day', () => {
+      const input = new Date('2024-01-01T18:45:30')
+
+      const result = getPublishTimeFilterForDate(input)
+
+      expect(result).toEqual({
+        publish_time_after: new Date('2024-01-01T00:00:00').toISOString(),
+        publish_time_before: new Date('2024-01-01T23:59:59.999').toISOString(),
+      })
+    })
+
+    test('does not mutate the original date', () => {
+      const input = new Date('2024-07-10T12:00:00')
+      const originalTime = input.getTime()
+
+      getPublishTimeFilterForDate(input)
+
+      expect(input.getTime()).toBe(originalTime)
     })
   })
 })

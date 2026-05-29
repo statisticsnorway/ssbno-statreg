@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router'
 import {
   Heading,
   Button,
@@ -11,7 +12,7 @@ import {
 import { ArrowLeftIcon, ArrowRightIcon } from '@navikt/aksel-icons'
 import { DatePicker } from '../components/DatePicker'
 import { PaginatedReleasesTable } from '../components/ReleasesTable'
-import { formatDate, getFirstDayOfNthMonth, getLastDayOfNthMonth } from '../lib/utils'
+import { formatDate, getFirstDayOfNthMonth, getPublishTimeFilterForDate } from '../lib/utils'
 import client from '../api'
 
 import './ListReleases.css'
@@ -19,6 +20,8 @@ import type { ReleaseListing, ShortnameListing } from '@ssbno-statreg/shared'
 import { RowCountSelect } from '../components/RowCountSelect'
 
 function ListReleases() {
+  const [searchParams] = useSearchParams()
+  const shortnamesQuery = searchParams.get('shortname')
   const [rowCount, setRowCount] = useState(10)
   const [start, setStart] = useState(0)
   const [releases, setReleases] = useState<ReleaseListing[]>([])
@@ -28,7 +31,7 @@ function ListReleases() {
 
   const [selectedShortnames, setSelectedShortnames] = useState<SuggestionItem[]>([])
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
-  const [sortBy, setSortBy] = useState<string[]>([])
+  const [sortBy, setSortBy] = useState<string[]>(['-publish_time'])
 
   useEffect(() => {
     async function fetchReleases(
@@ -38,23 +41,11 @@ function ListReleases() {
       sortBy: string[],
       selectedDate?: Date
     ) {
-      let publishTimeFilter = {}
-      if (selectedDate) {
-        const fromTime = new Date(selectedDate)
-        fromTime.setHours(0, 0, 0, 0)
-        const toTime = new Date(selectedDate)
-        toTime.setHours(23, 59, 59, 999)
-        publishTimeFilter = {
-          publish_time_after: fromTime.toISOString(),
-          publish_time_before: toTime.toISOString(),
-        }
-      }
-
       const filter = {
         ...(selectedShortnames.length && {
           shortname: selectedShortnames.map((item) => item.value).join(','),
         }),
-        ...publishTimeFilter,
+        ...getPublishTimeFilterForDate(selectedDate),
       }
       const sort = sortBy.join(',')
       const { data, error } = await client.GET('/releases', {
@@ -87,6 +78,19 @@ function ListReleases() {
     }
     fetchShortnames()
   }, [])
+
+  useEffect(() => {
+    async function setSelectedShortnamesFromQuery() {
+      if (!shortnamesQuery) return
+
+      const newSelectedShortnames = shortnamesQuery.split(',').map((shortname) => ({
+        label: shortname,
+        value: shortname,
+      }))
+      setSelectedShortnames(newSelectedShortnames)
+    }
+    setSelectedShortnamesFromQuery()
+  }, [shortnamesQuery])
 
   function updateRowCount(newCount: number) {
     setRowCount(newCount)
@@ -125,21 +129,14 @@ function ListReleases() {
           </Button>
         </div>
         <div className='list-releases-calendars-wrapper'>
+          <DatePicker month={getFirstDayOfNthMonth(calendarMonth)} selected={selectedDate} onSelect={onSelectDate} />
           <DatePicker
-            fromDate={getFirstDayOfNthMonth(calendarMonth)}
-            toDate={getLastDayOfNthMonth(calendarMonth)}
+            month={getFirstDayOfNthMonth(calendarMonth + 1)}
             selected={selectedDate}
             onSelect={onSelectDate}
           />
           <DatePicker
-            fromDate={getFirstDayOfNthMonth(calendarMonth + 1)}
-            toDate={getLastDayOfNthMonth(calendarMonth + 1)}
-            selected={selectedDate}
-            onSelect={onSelectDate}
-          />
-          <DatePicker
-            fromDate={getFirstDayOfNthMonth(calendarMonth + 2)}
-            toDate={getLastDayOfNthMonth(calendarMonth + 2)}
+            month={getFirstDayOfNthMonth(calendarMonth + 2)}
             selected={selectedDate}
             onSelect={onSelectDate}
             showColorCodingExplanation

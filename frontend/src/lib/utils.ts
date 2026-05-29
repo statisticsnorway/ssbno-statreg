@@ -32,13 +32,6 @@ export function getFirstDayOfNthMonth(monthsAhead: number): Date {
   return from
 }
 
-export function getLastDayOfNthMonth(monthsAhead: number): Date {
-  const to = new Date()
-  to.setMonth(to.getMonth() + monthsAhead + 1)
-  to.setDate(0)
-  return to
-}
-
 export function getDateOnlyAsString(date: Date | undefined): string {
   if (!date) return ''
 
@@ -67,4 +60,18 @@ export function formatVariant(variant?: Variant): string {
   const frequency = variant?.frequency?.name ?? '-'
   const revision = formatRevisionName(variant?.revision?.code).toLowerCase()
   return [frequency, revision].join(', ')
+}
+
+export function getPublishTimeFilterForDate(selectedDate: Date | undefined) {
+  if (!selectedDate) return {}
+
+  const fromTime = new Date(selectedDate)
+  fromTime.setHours(0, 0, 0, 0)
+  const toTime = new Date(selectedDate)
+  toTime.setHours(23, 59, 59, 999)
+
+  return {
+    publish_time_after: fromTime.toISOString(),
+    publish_time_before: toTime.toISOString(),
+  }
 }
