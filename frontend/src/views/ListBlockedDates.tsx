@@ -1,3 +1,4 @@
+import './ListBlockedDates.css'
 import { Button, Heading, Link, Paragraph, Table } from '@digdir/designsystemet-react'
 import { ArrowLeftIcon, TrashIcon } from '@navikt/aksel-icons'
 import { Link as ReactRouterLink } from 'react-router'
@@ -6,16 +7,16 @@ import { type BlockedReleaseDate } from '@ssbno-statreg/shared'
 const TABLE_HEADER_CELLS = [{ label: 'Dato' }, { label: 'Kommentar' }, { label: 'Slett' }]
 
 const mockedDays: BlockedReleaseDate[] = [
-  { date: '2026-12-24', blocked_comment: 'Christmas eve' },
-  { date: '2026-12-25', blocked_comment: 'Christmas day' },
-  { date: '2026-01-01', blocked_comment: 'New year' },
+  { date: '2026-12-24', blocked_comment: 'Julaften' },
+  { date: '2026-12-25', blocked_comment: 'Første juledag' },
+  { date: '2026-01-01', blocked_comment: 'Første nyttårsdag' },
 ]
 
 export default function ListBlockedDates() {
   return (
     <>
       <Link asChild>
-        <ReactRouterLink to='/publisering'>
+        <ReactRouterLink to='/'>
           <ArrowLeftIcon /> Tilbake til publiseringsoversikten
         </ReactRouterLink>
       </Link>
@@ -25,7 +26,7 @@ export default function ListBlockedDates() {
         </Heading>
         <Paragraph>Datoer som er automatisk lagt inn kan ikke redigeres eller slettes</Paragraph>
       </div>
-      <Table>
+      <Table className='blocked-days-table'>
         <Table.Head>
           <Table.Row>
             {TABLE_HEADER_CELLS.map(({ label }) => (
@@ -53,7 +54,7 @@ function BlockedDateRow({ day }: BlockedDateRowProps) {
       <Table.Cell>{day.date}</Table.Cell>
       <Table.Cell>{day.blocked_comment}</Table.Cell>
       <Table.Cell>
-        <Button variant='tertiary' data-color='danger'>
+        <Button variant='tertiary' data-color='danger' className='blocked-days-delete-btn'>
           <TrashIcon />
         </Button>
       </Table.Cell>
