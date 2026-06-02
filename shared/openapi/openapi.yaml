@@ -33,7 +33,7 @@ components:
   schemas:
     Blocked_release_date:
       type: object
-      example: {date: "2026-12-24", blocked_comment: "Christmas eve"}
+      example: { date: '2026-12-24', blocked_comment: 'Christmas eve' }
       properties:
         date: { type: string, format: date }
         blocked_comment: { type: string }
@@ -41,13 +41,13 @@ components:
     Calender_date:
       type: object
       description: Map of ISO date (YYYY-MM-DD) to day information, ie status
-      example:      
-        "2026-05-03": 
-          status: "blocked"
-        "2026-05-04":
-          status: "none"
-        "2026-05-05":
-          status: "few" 
+      example:
+        '2026-05-03':
+          status: 'blocked'
+        '2026-05-04':
+          status: 'none'
+        '2026-05-05':
+          status: 'few'
       patternProperties:
         '^\d{4}-\d{2}-\d{2}$':
           type: object
@@ -154,6 +154,8 @@ components:
           properties:
             frequency:
               $ref: '#/components/schemas/Frequency'
+            revision:
+              $ref: '#/components/schemas/Revision'
 
     Revision:
       description: 'Valid revision codes are:	I (Ingen), B (Beregnede), E (Endelige), F (Foreløpige), R (Reviderte), IG (Integrert)'
@@ -239,6 +241,11 @@ components:
         - $ref: '#/components/schemas/Statistic'
       type: object
       properties:
+        division:
+          type: object
+          properties:
+            code: { type: string, nullable: true }
+            name: { type: string, readOnly: true }
         contacts:
           type: array
           items:
@@ -259,7 +266,7 @@ components:
         cancelled: { type: boolean }
         frequency:
           $ref: '#/components/schemas/Frequency'
-        revision: 
+        revision:
           $ref: '#/components/schemas/Revision'
 
 paths:
@@ -276,20 +283,37 @@ paths:
               schema:
                 type: array
                 items:
-                  type: { $ref: '#/components/schemas/Shortname_listing' }
+                  $ref: '#/components/schemas/Shortname_listing'
   /statistics:
     get:
       summary: List of all statistics
       security: []
       tags: [statistics]
+      parameters:
+        - in: query
+          name: start
+          schema:
+            type: integer
+          description: Number of items skipped before starting the statistics results list
+        - in: query
+          name: count
+          schema:
+            type: integer
+          description: Maximum number of items returned
       responses:
         '200':
           description: List of statistics
           content:
             application/json:
               schema:
-                type: array
-                items: { $ref: '#/components/schemas/Statistic_listing' }
+                type: object
+                properties:
+                  total:
+                    type: integer
+                  statistics:
+                    type: array
+                    items: { $ref: '#/components/schemas/Statistic_listing' }
+
   /statistics/{shortname}:
     get:
       summary: Get a statistic by its shortname
@@ -593,14 +617,14 @@ paths:
           schema:
             type: string
             format: date
-            description: "Defaults to first day of current month"
+            description: 'Defaults to first day of current month'
             example: '2025-04-01'
         - name: toDate
           in: query
           schema:
             type: string
             format: date
-            description: "Defaults to end of second next month"
+            description: 'Defaults to end of second next month'
             example: '2025-04-27'
       responses:
         '200':
@@ -608,7 +632,7 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Calender_date' }
- 
+
   /calendar/blocked-release-days:
     get:
       summary: List with all manually added blocked days
