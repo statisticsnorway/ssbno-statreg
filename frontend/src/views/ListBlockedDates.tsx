@@ -68,6 +68,7 @@ function BlockedDateRow({ day }: BlockedDateRowProps) {
       <Table.Cell>{day.date}</Table.Cell>
       <Table.Cell>{day.blocked_comment}</Table.Cell>
       <Table.Cell>
+        {/* TODO automatically added day should not show trash button, API response must indicate this  */}
         <Button
           variant='tertiary'
           data-color='danger'
