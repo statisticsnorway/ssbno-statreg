@@ -12,6 +12,12 @@
 }
 
 .blocked-days-delete-btn {
-  padding: 1px;
-  min-height: unset;
+  padding: 2px !important;
+  min-height: unset !important;
+}
+
+.blocked-days-delete-placeholder {
+  display: inline-block;
+  width: 71px;
+  height: 24px;
 }

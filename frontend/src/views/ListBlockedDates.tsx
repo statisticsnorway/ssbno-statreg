@@ -5,10 +5,11 @@ import { Link as ReactRouterLink } from 'react-router'
 import { type BlockedReleaseDate } from '@ssbno-statreg/shared'
 
 const mockedDays: BlockedReleaseDate[] = [
-  { date: '2026-12-24', blocked_comment: 'Julaften' },
-  { date: '2026-12-25', blocked_comment: 'Første juledag' },
-  { date: '2026-01-01', blocked_comment: 'Første nyttårsdag' },
-  { date: '2026-05-17', blocked_comment: 'Grunnlovsdagen' },
+  { date: '2026-12-24', blocked_comment: 'Julaften', automatically_blocked: false },
+  { date: '2026-12-25', blocked_comment: 'Første juledag', automatically_blocked: true },
+  { date: '2027-01-01', blocked_comment: 'Første nyttårsdag', automatically_blocked: true },
+  { date: '2027-01-02', blocked_comment: 'Kommentar', automatically_blocked: false },
+  { date: '2026-05-17', blocked_comment: 'Grunnlovsdagen', automatically_blocked: true },
 ]
 
 export default function ListBlockedDates() {
@@ -26,7 +27,12 @@ export default function ListBlockedDates() {
         <Paragraph>Datoer som er automatisk lagt inn kan ikke redigeres eller slettes</Paragraph>
       </div>
       <BlockedDatesTable days={mockedDays} />
-      <Button variant='tertiary' data-color='neutral' onClick={() => alert('Kommer senere')}>
+      <Button
+        variant='tertiary'
+        data-color='neutral'
+        aria-label='Legg til ny sperret dato'
+        onClick={() => alert('Kommer senere')}
+      >
         <PlusCircleIcon aria-hidden /> Legg til ny sperret dato
       </Button>
     </>
@@ -68,15 +74,19 @@ function BlockedDateRow({ day }: BlockedDateRowProps) {
       <Table.Cell>{day.date}</Table.Cell>
       <Table.Cell>{day.blocked_comment}</Table.Cell>
       <Table.Cell>
-        {/* TODO automatically added day should not show trash button, API response must indicate this  */}
-        <Button
-          variant='tertiary'
-          data-color='danger'
-          className='blocked-days-delete-btn'
-          onClick={() => alert('Kommer senere')}
-        >
-          <TrashIcon />
-        </Button>
+        {day.automatically_blocked ? (
+          <span className='blocked-days-delete-placeholder' />
+        ) : (
+          <Button
+            variant='tertiary'
+            data-color='danger'
+            className='blocked-days-delete-btn'
+            aria-label={`Slett sperret dato: ${day.date}`}
+            onClick={() => alert('Kommer senere')}
+          >
+            <TrashIcon />
+          </Button>
+        )}
       </Table.Cell>
     </Table.Row>
   )

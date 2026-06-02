@@ -711,12 +711,14 @@ export interface components {
     /**
      * @example {
      *       "date": "2026-12-24",
+     *       "automatically_blocked": false,
      *       "blocked_comment": "Christmas eve"
      *     }
      */
     Blocked_release_date: {
       /** Format: date */
       date?: string
+      automatically_blocked?: boolean
       blocked_comment?: string
     }
     /**
