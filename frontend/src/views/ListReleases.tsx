@@ -113,20 +113,20 @@ function ListReleases() {
 
   return (
     <>
-      <Heading level={1} data-size='sm'>
-        Publiseringsoversikt
-      </Heading>
+      <div className='list-releases-header-container'>
+        <Heading level={1} data-size='sm'>
+          Publiseringsoversikt
+        </Heading>
+        <Button asChild style={{ backgroundColor: 'base default' }}>
+          <ReactRouterLink to='/sperredato'>
+            Se sperrede datoer <CalendarIcon />
+          </ReactRouterLink>
+        </Button>
+      </div>
       <div className='list-releases-calendars-container'>
-        <div className='list-releases-calendars-buttons'>
-          <Heading level={2} data-size='xs'>
-            Publiseringskalender
-          </Heading>
-          <Button asChild>
-            <ReactRouterLink to='/sperredato'>
-              Se sperrede datoer <CalendarIcon />
-            </ReactRouterLink>
-          </Button>
-        </div>
+        <Heading level={2} data-size='xs'>
+          Publiseringskalender
+        </Heading>
         <div className='list-releases-calendars-buttons'>
           <Button variant='tertiary' onClick={() => setCalendarMonth((prev) => prev - 3)}>
             <ArrowLeftIcon /> Forrige

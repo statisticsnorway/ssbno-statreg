@@ -1,3 +1,9 @@
+.list-releases-header-container {
+  width: 1400px; /* TODO: Setting a fixed width for now */
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
 .list-releases-calendars-container {
   width: 100%;
   display: flex;
