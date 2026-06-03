@@ -668,7 +668,7 @@ paths:
                   type: string
       responses:
         '200':
-          description: Updated list with blocked days
+          description: Updated list with manually blocked days
           content:
             application/json:
               schema:

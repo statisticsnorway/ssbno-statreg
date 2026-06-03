@@ -3,7 +3,11 @@ import { CalenderDate } from '@ssbno-statreg/shared'
 import { CalendarDatePrisma } from '@/services/calendarService'
 import { getDateOnlyAsString, parseDateOnly } from '@/lib/utils'
 
-export const HOLIDAYS: Record<number, string[]> = {}
+type Holiday = {
+  date: string
+  name: string
+}
+export const HOLIDAYS_BY_YEAR: Record<number, Holiday> = {}
 
 export function isDateAutoBlocked(dateString: string): boolean {
   const date = parseDateOnly(dateString)

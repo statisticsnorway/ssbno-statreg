@@ -1,8 +1,8 @@
 import { vi, describe, test, expect, beforeEach } from 'vitest'
 import {
-  HOLIDAYS,
+  HOLIDAYS_BY_YEAR,
   calculateEasterSunday,
-  calculateMovableHolidays,
+  getMovableHolidaysWithComment,
   getBlockedDatesInPeriod,
   getHolidays,
   isDateAutoBlocked,
@@ -27,7 +27,7 @@ vi.mock(import('@/lib/asserts'), () => ({
 
 describe('blockedDates', () => {
   beforeEach(() => {
-    Object.keys(HOLIDAYS).forEach((key) => delete HOLIDAYS[Number(key)])
+    Object.keys(HOLIDAYS_BY_YEAR).forEach((key) => delete HOLIDAYS_BY_YEAR[Number(key)])
 
     prismaMock = {
       calender_date: {
@@ -114,9 +114,9 @@ describe('blockedDates', () => {
     test('returns correct movable holidays for 2026-2028', () => {
       // https://no.wikipedia.org/wiki/Bevegelige_merkedager
 
-      expect(calculateMovableHolidays(2026)).toStrictEqual(movableHolidaysByYear['2026'])
-      expect(calculateMovableHolidays(2027)).toStrictEqual(movableHolidaysByYear['2027'])
-      expect(calculateMovableHolidays(2028)).toStrictEqual(movableHolidaysByYear['2028'])
+      expect(getMovableHolidaysWithComment(2026)).toStrictEqual(movableHolidaysByYear['2026'])
+      expect(getMovableHolidaysWithComment(2027)).toStrictEqual(movableHolidaysByYear['2027'])
+      expect(getMovableHolidaysWithComment(2028)).toStrictEqual(movableHolidaysByYear['2028'])
     })
   })
 

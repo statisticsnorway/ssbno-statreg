@@ -5,6 +5,10 @@ import { type BlockedReleaseDate, type CalenderDate, DayStatus } from '@ssbno-st
 
 export type CalendarDatePrisma = Pick<ExtendedPrismaClient, 'calender_date' | 'release'>
 
+export async function getBlockedReleaseDays(): Promise<BlockedReleaseDate[]> {
+  throw Error()
+}
+
 export async function createBlockedReleaseDay(
   prisma: CalendarDatePrisma,
   dateString?: string | string[],
@@ -42,6 +46,7 @@ export async function createBlockedReleaseDay(
 
   return blockedDays.map((blockedDay) => ({
     blocked_comment: blockedDay.comment,
+    automatically_blocked: false,
     date: getDateOnlyAsString(blockedDay.day),
   }))
 }
