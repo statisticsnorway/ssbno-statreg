@@ -3,6 +3,7 @@ import { CalenderDate } from '@ssbno-statreg/shared'
 import { CalendarDatePrisma } from '@/services/calendarService'
 import { getDateOnlyAsString, parseDateOnly } from '@/lib/utils'
 
+export const HOLIDAYS: Record<number, string[]> = {}
 type Holiday = {
   date: string
   name: string
