@@ -113,16 +113,14 @@ function ListReleases() {
 
   return (
     <>
-      <div className='list-releases-header-container'>
-        <Heading level={1} data-size='sm'>
-          Publiseringsoversikt
-        </Heading>
-        <Button asChild style={{ backgroundColor: 'base default' }}>
-          <ReactRouterLink to='/sperredato'>
-            Se sperrede datoer <CalendarIcon />
-          </ReactRouterLink>
-        </Button>
-      </div>
+      <Heading level={1} data-size='sm'>
+        Publiseringsoversikt
+      </Heading>
+      <Button asChild style={{ backgroundColor: 'base default' }}>
+        <ReactRouterLink to='/sperredato'>
+          Se sperrede datoer <CalendarIcon />
+        </ReactRouterLink>
+      </Button>
       <div className='list-releases-calendars-container'>
         <Heading level={2} data-size='xs'>
           Publiseringskalender
