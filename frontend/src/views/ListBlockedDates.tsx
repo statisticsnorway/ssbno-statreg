@@ -40,7 +40,7 @@ export default function ListBlockedDates() {
 }
 
 type BlockedDatesTableProps = {
-  days: BlockedReleaseDate[]
+  readonly days: readonly BlockedReleaseDate[]
 }
 
 function BlockedDatesTable({ days }: BlockedDatesTableProps) {
@@ -65,7 +65,7 @@ function BlockedDatesTable({ days }: BlockedDatesTableProps) {
 }
 
 type BlockedDateRowProps = {
-  day: BlockedReleaseDate
+  readonly day: BlockedReleaseDate
 }
 
 function BlockedDateRow({ day }: BlockedDateRowProps) {
