@@ -6,9 +6,14 @@ import { type BlockedReleaseDate, type CalenderDate, DayStatus } from '@ssbno-st
 export type CalendarDatePrisma = Pick<ExtendedPrismaClient, 'calender_date' | 'release'>
 
 export async function getBlockedReleaseDays(prisma: CalendarDatePrisma): Promise<BlockedReleaseDate[]> {
-  const holidays = getHolidays()
+  const holidaysNextThreeYears = getHolidays(2026)
+  const automaticallyBlockedDates: BlockedReleaseDate[] = holidaysNextThreeYears.map((holiday) => ({
+    date: holiday.date,
+    blocked_comment: holiday.name,
+    automatically_blocked: true,
+  }))
 
-  const manuallyBlockedDays = await prisma.calender_date.findMany({
+  const prismaResult = await prisma.calender_date.findMany({
     where: {
       day: {
         gt: new Date(),
@@ -16,6 +21,14 @@ export async function getBlockedReleaseDays(prisma: CalendarDatePrisma): Promise
     },
     select: { comment: true, day: true },
   })
+  const manuallyBlockedDates: BlockedReleaseDate[] = prismaResult.map((calendarDate) => ({
+    date: getDateOnlyAsString(calendarDate.day),
+    blocked_comment: calendarDate.comment,
+    automatically_blocked: false,
+  }))
+
+  const blockedDays = [...automaticallyBlockedDates, ...manuallyBlockedDates]
+  return blockedDays
 }
 
 export async function createBlockedReleaseDay(
