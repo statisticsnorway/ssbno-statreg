@@ -1,15 +1,13 @@
-tr {
-  height: 2.7rem;
-}
-
-td {
-  padding: 0 16px;
-}
-
 .blocked-days-table {
   table-layout: fixed;
-}
+  tr {
+    height: 2.7rem;
+  }
 
-.delete-column {
-  width: 90px;
+  td {
+    padding: 0 16px;
+  }
+  .delete-column {
+    width: 90px;
+  }
 }
