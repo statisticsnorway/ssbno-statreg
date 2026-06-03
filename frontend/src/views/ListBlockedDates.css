@@ -3,6 +3,11 @@
   width: 300px;
 }
 
+.blocked-days-table th:nth-child(2),
+.blocked-days-table td:nth-child(2) {
+  width: 1000px;
+}
+
 .blocked-days-table th:last-child,
 .blocked-days-table td:last-child {
   display: flex;
