@@ -39,7 +39,7 @@ export default function ListBlockedDates() {
   )
 }
 
-const TABLE_HEADER_CELLS = [{ label: 'Dato' }, { label: 'Kommentar' }, { label: 'Slett' }]
+const TABLE_HEADER_CELLS = [{ label: 'Dato' }, { label: 'Kommentar' }, { label: 'Slett', class: 'delete-column' }]
 
 type BlockedDatesTableProps = {
   days: BlockedReleaseDate[]
@@ -50,8 +50,10 @@ function BlockedDatesTable({ days }: BlockedDatesTableProps) {
     <Table className='blocked-days-table'>
       <Table.Head>
         <Table.Row>
-          {TABLE_HEADER_CELLS.map(({ label }) => (
-            <Table.HeaderCell key={label}>{label}</Table.HeaderCell>
+          {TABLE_HEADER_CELLS.map(({ label, class: string }) => (
+            <Table.HeaderCell key={label} className='delete-column'>
+              {label}
+            </Table.HeaderCell>
           ))}
         </Table.Row>
       </Table.Head>
@@ -73,7 +75,7 @@ function BlockedDateRow({ day }: BlockedDateRowProps) {
     <Table.Row>
       <Table.Cell>{day.date}</Table.Cell>
       <Table.Cell>{day.blocked_comment}</Table.Cell>
-      <Table.Cell>
+      <Table.Cell className='delete-column'>
         <Button
           style={{ visibility: day.automatically_blocked ? 'hidden' : 'visible' }}
           variant='tertiary'

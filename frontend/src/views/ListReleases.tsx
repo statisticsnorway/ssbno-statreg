@@ -121,7 +121,7 @@ function ListReleases() {
           <Heading level={2} data-size='xs'>
             Publiseringskalender
           </Heading>
-          <Button asChild variant='primary'>
+          <Button asChild>
             <ReactRouterLink to='/sperredato'>
               Se sperrede datoer <CalendarIcon />
             </ReactRouterLink>

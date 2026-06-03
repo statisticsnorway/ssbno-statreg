@@ -1,22 +1,11 @@
-.blocked-days-table th:first-child,
-.blocked-days-table td:first-child {
-  width: 300px;
+tr {
+ height: 42px;
 }
 
-.blocked-days-table th:nth-child(2),
-.blocked-days-table td:nth-child(2) {
-  width: 1000px;
+td {
+  padding: 0 16px;  
 }
 
-.blocked-days-table th:last-child,
-.blocked-days-table td:last-child {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 90px;
-}
-
-.blocked-days-delete-btn {
-  padding: 1px;
-  min-height: unset;
+.delete-column{
+  max-width: 90px;
 }
