@@ -74,19 +74,16 @@ function BlockedDateRow({ day }: BlockedDateRowProps) {
       <Table.Cell>{day.date}</Table.Cell>
       <Table.Cell>{day.blocked_comment}</Table.Cell>
       <Table.Cell>
-        {day.automatically_blocked ? (
-          <span className='blocked-days-delete-placeholder' />
-        ) : (
-          <Button
-            variant='tertiary'
-            data-color='danger'
-            className='blocked-days-delete-btn'
-            aria-label={`Slett sperret dato: ${day.date}`}
-            onClick={() => alert('Kommer senere')}
-          >
-            <TrashIcon />
-          </Button>
-        )}
+        <Button
+          style={{ visibility: day.automatically_blocked ? 'hidden' : 'visible' }}
+          variant='tertiary'
+          data-color='danger'
+          className='blocked-days-delete-btn'
+          aria-label={`Slett sperret dato: ${day.date}`}
+          onClick={() => alert('Kommer senere')}
+        >
+          <TrashIcon />
+        </Button>
       </Table.Cell>
     </Table.Row>
   )
