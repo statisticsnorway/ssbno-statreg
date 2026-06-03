@@ -39,8 +39,6 @@ export default function ListBlockedDates() {
   )
 }
 
-const TABLE_HEADER_CELLS = [{ label: 'Dato' }, { label: 'Kommentar' }, { label: 'Slett', class: 'delete-column' }]
-
 type BlockedDatesTableProps = {
   days: BlockedReleaseDate[]
 }
@@ -50,11 +48,11 @@ function BlockedDatesTable({ days }: BlockedDatesTableProps) {
     <Table className='blocked-days-table'>
       <Table.Head>
         <Table.Row>
-          {TABLE_HEADER_CELLS.map(({ label, class: string }) => (
-            <Table.HeaderCell key={label} className='delete-column'>
-              {label}
-            </Table.HeaderCell>
-          ))}
+          <Table.HeaderCell key='dato'>Dato</Table.HeaderCell>
+          <Table.HeaderCell key='kommentar'>Kommentar</Table.HeaderCell>
+          <Table.HeaderCell key='slett' className='delete-column'>
+            Slett
+          </Table.HeaderCell>
         </Table.Row>
       </Table.Head>
       <Table.Body>
@@ -76,16 +74,16 @@ function BlockedDateRow({ day }: BlockedDateRowProps) {
       <Table.Cell>{day.date}</Table.Cell>
       <Table.Cell>{day.blocked_comment}</Table.Cell>
       <Table.Cell className='delete-column'>
-        <Button
-          style={{ visibility: day.automatically_blocked ? 'hidden' : 'visible' }}
-          variant='tertiary'
-          data-color='danger'
-          className='blocked-days-delete-btn'
-          aria-label={`Slett sperret dato: ${day.date}`}
-          onClick={() => alert('Kommer senere')}
-        >
-          <TrashIcon />
-        </Button>
+        {!day.automatically_blocked && (
+          <Button
+            variant='tertiary'
+            data-color='danger'
+            aria-label={`Slett sperret dato: ${day.date}`}
+            onClick={() => alert('Kommer senere')}
+          >
+            <TrashIcon />
+          </Button>
+        )}
       </Table.Cell>
     </Table.Row>
   )
