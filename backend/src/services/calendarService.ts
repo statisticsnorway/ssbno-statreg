@@ -1,12 +1,21 @@
-import { getBlockedDatesInPeriod, isDateBlocked } from '@/lib/blockedDates'
+import { getBlockedDatesInPeriod, isDateBlocked, getHolidays } from '@/lib/blockedDates'
 import type { ExtendedPrismaClient } from '@/lib/prisma'
 import { sanitize, parseDateOnly, ensureRequiredFieldsExists, getDateOnlyAsString } from '@/lib/utils'
 import { type BlockedReleaseDate, type CalenderDate, DayStatus } from '@ssbno-statreg/shared'
 
 export type CalendarDatePrisma = Pick<ExtendedPrismaClient, 'calender_date' | 'release'>
 
-export async function getBlockedReleaseDays(): Promise<BlockedReleaseDate[]> {
-  throw Error()
+export async function getBlockedReleaseDays(prisma: CalendarDatePrisma): Promise<BlockedReleaseDate[]> {
+  const holidays = getHolidays()
+
+  const manuallyBlockedDays = await prisma.calender_date.findMany({
+    where: {
+      day: {
+        gt: new Date(),
+      },
+    },
+    select: { comment: true, day: true },
+  })
 }
 
 export async function createBlockedReleaseDay(
