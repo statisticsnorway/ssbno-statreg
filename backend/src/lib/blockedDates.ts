@@ -3,12 +3,11 @@ import { CalenderDate } from '@ssbno-statreg/shared'
 import { CalendarDatePrisma } from '@/services/calendarService'
 import { getDateOnlyAsString, parseDateOnly } from '@/lib/utils'
 
-export const HOLIDAYS: Record<number, string[]> = {}
+export const HOLIDAYS_BY_YEAR: Record<number, Holiday[]> = {}
 type Holiday = {
   date: string
   name: string
 }
-export const HOLIDAYS_BY_YEAR: Record<number, Holiday> = {}
 
 export function isDateAutoBlocked(dateString: string): boolean {
   const date = parseDateOnly(dateString)
@@ -19,7 +18,7 @@ export function isDateAutoBlocked(dateString: string): boolean {
   const year = dateString.slice(0, 4)
   const holidays = getHolidays(Number(year))
 
-  return holidays.includes(dateString)
+  return holidays.some((h) => h.date === dateString)
 }
 
 export async function isDateBlocked(dateString: string, prisma: CalendarDatePrisma): Promise<boolean> {
@@ -56,31 +55,37 @@ export async function getBlockedDatesInPeriod(from: Date, to: Date, prisma: Cale
   return blockedDates
 }
 
-export function getHolidays(year: number): string[] {
-  if (!HOLIDAYS[year]) {
-    const staticHolidays = [`${year}-01-01`, `${year}-05-01`, `${year}-05-17`, `${year}-12-25`, `${year}-12-26`]
-    HOLIDAYS[year] = staticHolidays.concat(calculateMovableHolidays(year))
-  }
-  return HOLIDAYS[year]
+export function getHolidays(year: number): Holiday[] {
+  if (HOLIDAYS_BY_YEAR[year]) return HOLIDAYS_BY_YEAR[year]
+
+  const staticHolidays: Holiday[] = [
+    { date: `${year}-01-01`, name: 'Nyttårsdag' },
+    { date: `${year}-05-01`, name: 'Arbeidernes dag' },
+    { date: `${year}-05-17`, name: 'Grunnlovsdag' },
+    { date: `${year}-12-25`, name: 'Første juledag' },
+    { date: `${year}-12-26`, name: 'Andre juledag' },
+  ]
+  HOLIDAYS_BY_YEAR[year] = staticHolidays.concat(calculateMovableHolidays(year))
+  return HOLIDAYS_BY_YEAR[year]
 }
 
-export function calculateMovableHolidays(year: number): string[] {
+export function calculateMovableHolidays(year: number): Holiday[] {
   // https://no.wikipedia.org/wiki/Helligdager_i_Norge#Helligdager
 
   const easterSunday = calculateEasterSunday(year)
 
   // prettier-ignore
-  const movableHolidays = {
-    "Skjærtorsdag":          addDaysAndFormat(easterSunday, -3),
-    "Langfredag":            addDaysAndFormat(easterSunday, -2),
-    "Første påskedag":       addDaysAndFormat(easterSunday,  0),
-    "Andre påskedag":        addDaysAndFormat(easterSunday,  1),
-    "Kristi himmelfartsdag": addDaysAndFormat(easterSunday, 39),
-    "Første pinsedag":       addDaysAndFormat(easterSunday, 49),
-    "Andre pinsedag":        addDaysAndFormat(easterSunday, 50),
-  }
+  const movableHolidays: Holiday[] = [
+    { date: addDaysAndFormat(easterSunday, -3), name: "Skjærtorsdag" },
+    { date: addDaysAndFormat(easterSunday, -2), name: "Langfredag" },
+    { date: addDaysAndFormat(easterSunday,  0), name: "Første påskedag" },
+    { date: addDaysAndFormat(easterSunday,  1), name: "Andre påskedag" },
+    { date: addDaysAndFormat(easterSunday, 39), name: "Kristi himmelfartsdag" },
+    { date: addDaysAndFormat(easterSunday, 49), name: "Første pinsedag" },
+    { date: addDaysAndFormat(easterSunday, 50), name: "Andre pinsedag" },
+  ]
 
-  return Object.values(movableHolidays)
+  return movableHolidays
 }
 
 export function calculateEasterSunday(year: number): Date {
