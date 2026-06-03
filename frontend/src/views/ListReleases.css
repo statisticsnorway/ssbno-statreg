@@ -4,13 +4,6 @@
   flex-direction: column;
   gap: var(--ds-size-4);
 
-  .list-releases-heading-wrapper {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: var(--ds-size-10);
-  }
-
   .list-releases-calendars-buttons {
     width: 1400px; /* TODO: Setting a fixed width for now */
     display: flex;
