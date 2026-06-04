@@ -3,7 +3,7 @@ import { CalenderDate } from '@ssbno-statreg/shared'
 import { CalendarDatePrisma } from '@/services/calendarService'
 import { getDateOnlyAsString, parseDateOnly } from '@/lib/utils'
 
-export const HOLIDAYS_BY_YEAR: Record<number, Holiday[]> = {}
+export const HOLIDAYS: Record<number, Holiday[]> = {}
 type Holiday = {
   date: string
   name: string
@@ -60,7 +60,7 @@ export function getHolidayDates(year: number): string[] {
 }
 
 export function getHolidays(year: number): Holiday[] {
-  if (HOLIDAYS_BY_YEAR[year]) return HOLIDAYS_BY_YEAR[year]
+  if (HOLIDAYS[year]) return HOLIDAYS[year]
 
   const staticHolidays: Holiday[] = [
     { date: `${year}-01-01`, name: 'Første nyttårsdag' },
@@ -69,8 +69,8 @@ export function getHolidays(year: number): Holiday[] {
     { date: `${year}-12-25`, name: 'Første juledag' },
     { date: `${year}-12-26`, name: 'Andre juledag' },
   ]
-  HOLIDAYS_BY_YEAR[year] = staticHolidays.concat(calculateMovableHolidays(year))
-  return HOLIDAYS_BY_YEAR[year]
+  HOLIDAYS[year] = staticHolidays.concat(calculateMovableHolidays(year))
+  return HOLIDAYS[year]
 }
 
 export function getMovableHolidayDates(year: number): string[] {

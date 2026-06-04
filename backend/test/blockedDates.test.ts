@@ -1,6 +1,6 @@
 import { vi, describe, test, expect, beforeEach } from 'vitest'
 import {
-  HOLIDAYS_BY_YEAR,
+  HOLIDAYS,
   calculateEasterSunday,
   getMovableHolidayDates,
   getBlockedDatesInPeriod,
@@ -27,7 +27,7 @@ vi.mock(import('@/lib/asserts'), () => ({
 
 describe('blockedDates', () => {
   beforeEach(() => {
-    Object.keys(HOLIDAYS_BY_YEAR).forEach((key) => delete HOLIDAYS_BY_YEAR[Number(key)])
+    Object.keys(HOLIDAYS).forEach((key) => delete HOLIDAYS[Number(key)])
 
     prismaMock = {
       calender_date: {
