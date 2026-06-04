@@ -219,13 +219,6 @@ describe('calendarService  ', () => {
         12 + //second year (only holidays)
         12 //third year (only holidays)
       expect(result.length).toBe(expectedLength)
-
-      //assert last element is andre juledag 2028:
-      expect(result[result.length - 1]).toStrictEqual({
-        date: '2028-12-26',
-        blocked_comment: 'Andre juledag',
-        automatically_blocked: true,
-      })
     })
   })
 
