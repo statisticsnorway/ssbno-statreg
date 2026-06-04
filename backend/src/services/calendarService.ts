@@ -11,11 +11,11 @@ export async function getFutureBlockedReleaseDates(
 ): Promise<BlockedReleaseDate[]> {
   const currentYear = currentDate.getUTCFullYear()
   const holidaysNextThreeYears = [
-    ...getHolidays(currentYear).filter((holiday) => parseDateOnly(holiday.date) > currentDate),
+    ...getHolidays(currentYear).filter((holiday) => parseDateOnly(holiday.date) > currentDate), //only future dates
     ...getHolidays(currentYear + 1),
     ...getHolidays(currentYear + 2),
   ]
-  const automaticallyBlockedDates: BlockedReleaseDate[] = holidaysNextThreeYears.map((holiday) => ({
+  const automaticallyBlockedDates = holidaysNextThreeYears.map((holiday) => ({
     date: holiday.date,
     blocked_comment: holiday.name,
     automatically_blocked: true,
@@ -29,7 +29,7 @@ export async function getFutureBlockedReleaseDates(
     },
     select: { comment: true, day: true },
   })
-  const manuallyBlockedDates: BlockedReleaseDate[] = prismaResult.map((calendarDate) => ({
+  const manuallyBlockedDates = prismaResult.map((calendarDate) => ({
     date: getDateOnlyAsString(calendarDate.day),
     blocked_comment: calendarDate.comment,
     automatically_blocked: false,
@@ -37,7 +37,7 @@ export async function getFutureBlockedReleaseDates(
 
   const blockedDates = [...automaticallyBlockedDates, ...manuallyBlockedDates]
 
-  return blockedDates.sort((a, b) => a.date!.localeCompare(b.date!))
+  return blockedDates.sort((a, b) => a.date.localeCompare(b.date))
 }
 
 export async function createBlockedReleaseDay(
