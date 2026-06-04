@@ -2,9 +2,9 @@ import { vi, describe, test, expect, beforeEach } from 'vitest'
 import {
   HOLIDAYS_BY_YEAR,
   calculateEasterSunday,
-  getMovableHolidaysWithComment,
+  getMovableHolidayDates,
   getBlockedDatesInPeriod,
-  getHolidays,
+  getHolidayDates,
   isDateAutoBlocked,
   isDateBlocked,
 } from '@/lib/blockedDates'
@@ -106,7 +106,7 @@ describe('blockedDates', () => {
 
   describe('getHolidays() ', () => {
     test('returns correct dates for 2026', () => {
-      const holidays = getHolidays(2026)
+      const holidays = getHolidayDates(2026)
       expect(holidays).toStrictEqual(staticHolidaysFor2026[2026].concat(movableHolidaysByYear[2026]))
     })
   })
@@ -114,9 +114,9 @@ describe('blockedDates', () => {
     test('returns correct movable holidays for 2026-2028', () => {
       // https://no.wikipedia.org/wiki/Bevegelige_merkedager
 
-      expect(getMovableHolidaysWithComment(2026)).toStrictEqual(movableHolidaysByYear['2026'])
-      expect(getMovableHolidaysWithComment(2027)).toStrictEqual(movableHolidaysByYear['2027'])
-      expect(getMovableHolidaysWithComment(2028)).toStrictEqual(movableHolidaysByYear['2028'])
+      expect(getMovableHolidayDates(2026)).toStrictEqual(movableHolidaysByYear['2026'])
+      expect(getMovableHolidayDates(2027)).toStrictEqual(movableHolidaysByYear['2027'])
+      expect(getMovableHolidayDates(2028)).toStrictEqual(movableHolidaysByYear['2028'])
     })
   })
 

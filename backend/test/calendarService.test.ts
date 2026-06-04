@@ -231,10 +231,12 @@ const calendar_date_result = [
   {
     blocked_comment: 'Julaften',
     date: '2026-12-24',
+    automatically_blocked: false,
   },
   {
     blocked_comment: 'Nyttårsaften',
     date: '2026-12-31',
+    automatically_blocked: false,
   },
 ]
 

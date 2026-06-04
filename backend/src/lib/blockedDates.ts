@@ -16,9 +16,9 @@ export function isDateAutoBlocked(dateString: string): boolean {
   if (date.getUTCDay() === saturday || date.getUTCDay() === sunday) return true
 
   const year = dateString.slice(0, 4)
-  const holidays = getHolidays(Number(year))
+  const holidays = getHolidayDates(Number(year))
 
-  return holidays.some((h) => h.date === dateString)
+  return holidays.includes(dateString)
 }
 
 export async function isDateBlocked(dateString: string, prisma: CalendarDatePrisma): Promise<boolean> {
@@ -55,6 +55,10 @@ export async function getBlockedDatesInPeriod(from: Date, to: Date, prisma: Cale
   return blockedDates
 }
 
+export function getHolidayDates(year: number): string[] {
+  return getHolidays(year).map((hoilday) => hoilday.date)
+}
+
 export function getHolidays(year: number): Holiday[] {
   if (HOLIDAYS_BY_YEAR[year]) return HOLIDAYS_BY_YEAR[year]
 
@@ -69,13 +73,17 @@ export function getHolidays(year: number): Holiday[] {
   return HOLIDAYS_BY_YEAR[year]
 }
 
+export function getMovableHolidayDates(year: number): string[] {
+  return calculateMovableHolidays(year).map((holiday) => holiday.date)
+}
+
 export function calculateMovableHolidays(year: number): Holiday[] {
   // https://no.wikipedia.org/wiki/Helligdager_i_Norge#Helligdager
 
   const easterSunday = calculateEasterSunday(year)
 
   // prettier-ignore
-  const movableHolidays: Holiday[] = [
+  return [
     { date: addDaysAndFormat(easterSunday, -3), name: "Skjærtorsdag" },
     { date: addDaysAndFormat(easterSunday, -2), name: "Langfredag" },
     { date: addDaysAndFormat(easterSunday,  0), name: "Første påskedag" },
@@ -84,8 +92,6 @@ export function calculateMovableHolidays(year: number): Holiday[] {
     { date: addDaysAndFormat(easterSunday, 49), name: "Første pinsedag" },
     { date: addDaysAndFormat(easterSunday, 50), name: "Andre pinsedag" },
   ]
-
-  return movableHolidays
 }
 
 export function calculateEasterSunday(year: number): Date {
