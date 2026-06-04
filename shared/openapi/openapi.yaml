@@ -33,9 +33,10 @@ components:
   schemas:
     Blocked_release_date:
       type: object
-      example: { date: '2026-12-24', blocked_comment: 'Christmas eve' }
+      example: { date: '2026-12-24', automatically_blocked: false, blocked_comment: 'Christmas eve' }
       properties:
         date: { type: string, format: date }
+        automatically_blocked: { type: boolean }
         blocked_comment: { type: string }
 
     Calender_date:
