@@ -63,7 +63,7 @@ export function getHolidays(year: number): Holiday[] {
   if (HOLIDAYS_BY_YEAR[year]) return HOLIDAYS_BY_YEAR[year]
 
   const staticHolidays: Holiday[] = [
-    { date: `${year}-01-01`, name: 'Nyttårsdag' },
+    { date: `${year}-01-01`, name: 'Første nyttårsdag' },
     { date: `${year}-05-01`, name: 'Arbeidernes dag' },
     { date: `${year}-05-17`, name: 'Grunnlovsdag' },
     { date: `${year}-12-25`, name: 'Første juledag' },

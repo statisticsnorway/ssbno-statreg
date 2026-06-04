@@ -4,6 +4,7 @@ import {
   getDateStatusForRange,
   getReleaseCountByDate,
   getStatus,
+  getFutureBlockedReleaseDates,
 } from '@/services/calendarService'
 
 const { isDateBlockedMock, getBlockedDatesInPeriodMock } = vi.hoisted(() => ({
@@ -185,6 +186,46 @@ describe('calendarService  ', () => {
 
     test('returns FULL when called with a large number', () => {
       expect(getStatus(100)).toBe('FULL')
+    })
+  })
+
+  describe('getFutureBlockedReleaseDates', () => {
+    test('returns holidays and manual blocks after the current date', async () => {
+      setListReturn([
+        { comment: 'Inneklemt dag', day: new Date('2026-05-15T00:00:00Z') },
+        { comment: 'Julaften', day: new Date('2026-12-24T00:00:00Z') },
+        { comment: 'Nyttårsaften', day: new Date('2026-12-31T00:00:00Z') },
+      ])
+
+      const currentDateMock = new Date('2026-05-13T00:00:00Z')
+      const result = await getFutureBlockedReleaseDates(prismaMock, currentDateMock)
+
+      //assert exact match for the first year:
+      expect(result.slice(0, 9)).toStrictEqual([
+        { date: '2026-05-14', blocked_comment: 'Kristi himmelfartsdag', automatically_blocked: true },
+        { date: '2026-05-15', blocked_comment: 'Inneklemt dag', automatically_blocked: false },
+        { date: '2026-05-17', blocked_comment: 'Grunnlovsdag', automatically_blocked: true },
+        { date: '2026-05-24', blocked_comment: 'Første pinsedag', automatically_blocked: true },
+        { date: '2026-05-25', blocked_comment: 'Andre pinsedag', automatically_blocked: true },
+        { date: '2026-12-24', blocked_comment: 'Julaften', automatically_blocked: false },
+        { date: '2026-12-25', blocked_comment: 'Første juledag', automatically_blocked: true },
+        { date: '2026-12-26', blocked_comment: 'Andre juledag', automatically_blocked: true },
+        { date: '2026-12-31', blocked_comment: 'Nyttårsaften', automatically_blocked: false },
+      ])
+
+      //assert total number of blocked days is correct:
+      const expectedLength =
+        9 + //first year
+        12 + //second year (only holidays)
+        12 //third year (only holidays)
+      expect(result.length).toBe(expectedLength)
+
+      //assert last element is andre juledag 2028:
+      expect(result[result.length - 1]).toStrictEqual({
+        date: '2028-12-26',
+        blocked_comment: 'Andre juledag',
+        automatically_blocked: true,
+      })
     })
   })
 

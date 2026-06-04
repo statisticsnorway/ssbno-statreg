@@ -5,8 +5,16 @@ import { type BlockedReleaseDate, type CalenderDate, DayStatus } from '@ssbno-st
 
 export type CalendarDatePrisma = Pick<ExtendedPrismaClient, 'calender_date' | 'release'>
 
-export async function getBlockedReleaseDays(prisma: CalendarDatePrisma): Promise<BlockedReleaseDate[]> {
-  const holidaysNextThreeYears = getHolidays(2026)
+export async function getFutureBlockedReleaseDates(
+  prisma: CalendarDatePrisma,
+  currentDate: Date
+): Promise<BlockedReleaseDate[]> {
+  const currentYear = currentDate.getUTCFullYear()
+  const holidaysNextThreeYears = [
+    ...getHolidays(currentYear).filter((holiday) => parseDateOnly(holiday.date) > currentDate),
+    ...getHolidays(currentYear + 1),
+    ...getHolidays(currentYear + 2),
+  ]
   const automaticallyBlockedDates: BlockedReleaseDate[] = holidaysNextThreeYears.map((holiday) => ({
     date: holiday.date,
     blocked_comment: holiday.name,
@@ -27,8 +35,9 @@ export async function getBlockedReleaseDays(prisma: CalendarDatePrisma): Promise
     automatically_blocked: false,
   }))
 
-  const blockedDays = [...automaticallyBlockedDates, ...manuallyBlockedDates]
-  return blockedDays
+  const blockedDates = [...automaticallyBlockedDates, ...manuallyBlockedDates]
+
+  return blockedDates.sort((a, b) => a.date!.localeCompare(b.date!))
 }
 
 export async function createBlockedReleaseDay(
