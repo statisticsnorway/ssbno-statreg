@@ -24,7 +24,7 @@ export async function getFutureBlockedReleaseDates(
   const prismaResult = await prisma.calender_date.findMany({
     where: {
       day: {
-        gt: new Date(),
+        gt: currentDate,
       },
     },
     select: { comment: true, day: true },
