@@ -636,19 +636,11 @@ paths:
 
   /calendar/blocked-release-days:
     get:
-      summary: List of blocked release days
+      summary: List of future blocked release days
       tags: [calendar]
-      parameters:
-        - name: fromDate
-          in: query
-          schema:
-            type: string
-            format: date
-            description: Only get blocked days from this date (defaults to current date if not provided)
-            example: '2025-04-01'
       responses:
         '200':
-          description: List of future blocked dates, including all manually blocked days, and automatically blocked days for the next three calendar years
+          description: Includes all manually blocked days, but only automatically blocked days for the next three calendar years. Sorted from earliest to latest date.
           content:
             application/json:
               schema:

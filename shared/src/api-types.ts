@@ -609,7 +609,7 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    /** List with all manually added blocked days */
+    /** List of future blocked release days */
     get: {
       parameters: {
         query?: never
@@ -619,7 +619,7 @@ export interface paths {
       }
       requestBody?: never
       responses: {
-        /** @description List with blocked days */
+        /** @description Includes all manually blocked days, but only automatically blocked days for the next three calendar years. Sorted from earliest to latest date. */
         200: {
           headers: {
             [name: string]: unknown
@@ -665,7 +665,7 @@ export interface paths {
         }
       }
       responses: {
-        /** @description Updated list with blocked days */
+        /** @description Updated list with manually blocked days */
         200: {
           headers: {
             [name: string]: unknown
