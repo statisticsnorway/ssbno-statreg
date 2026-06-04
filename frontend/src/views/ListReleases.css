@@ -1,5 +1,5 @@
 .list-releases-heading-container {
-  width: 1400px; /* TODO: Setting a fixed width for now */
+  width: 100%; /* TODO: Setting a fixed width for now */
   display: flex;
   flex-direction: row;
   justify-content: space-between;
