@@ -15,6 +15,7 @@ describe('calendarController ', () => {
     const json = await response.json()
     expect(response.status).toBe(200)
     expect(json).toContainEqual({
+      automatically_blocked: false,
       blocked_comment: 'Inneklemt dag',
       date: '2027-05-07',
     })
