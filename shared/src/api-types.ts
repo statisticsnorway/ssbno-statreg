@@ -609,7 +609,7 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    /** List of future blocked release days */
+    /** Get list of future blocked release days */
     get: {
       parameters: {
         query?: never
