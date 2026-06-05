@@ -1,12 +1,16 @@
 import { assertDayNotManuallyBlocked } from '@/lib/asserts'
-import { CalenderDate } from '@ssbno-statreg/shared'
+import { CalenderDate, BlockedReleaseDate } from '@ssbno-statreg/shared'
 import { CalendarDatePrisma } from '@/services/calendarService'
 import { getDateOnlyAsString, parseDateOnly } from '@/lib/utils'
 
-export const HOLIDAYS: Record<number, Holiday[]> = {}
-type Holiday = {
-  date: string
-  name: string
+export const HOLIDAYS: Record<number, BlockedReleaseDate[]> = {}
+
+function holiday(date: string, name: string): BlockedReleaseDate {
+  return {
+    date: date,
+    blocked_comment: name,
+    automatically_blocked: true
+  }
 }
 
 export function isDateAutoBlocked(dateString: string): boolean {
@@ -56,41 +60,36 @@ export async function getBlockedDatesInPeriod(from: Date, to: Date, prisma: Cale
 }
 
 export function getHolidayDates(year: number): string[] {
-  return getHolidays(year).map((hoilday) => hoilday.date)
+  return getHolidays(year).map((holiday) => holiday.date!)
 }
 
-export function getHolidays(year: number): Holiday[] {
+export function getHolidays(year: number): BlockedReleaseDate[] {
   if (HOLIDAYS[year]) return HOLIDAYS[year]
 
-  const staticHolidays: Holiday[] = [
-    { date: `${year}-01-01`, name: 'Første nyttårsdag' },
-    { date: `${year}-05-01`, name: 'Arbeidernes dag' },
-    { date: `${year}-05-17`, name: 'Grunnlovsdag' },
-    { date: `${year}-12-25`, name: 'Første juledag' },
-    { date: `${year}-12-26`, name: 'Andre juledag' },
+  const staticHolidays: BlockedReleaseDate[] = [
+    holiday(`${year}-01-01`, 'Første nyttårsdag'),
+    holiday(`${year}-05-01`, 'Arbeidernes dag'),
+    holiday(`${year}-05-17`, 'Grunnlovsdag'),
+    holiday(`${year}-12-25`, 'Første juledag'),
+    holiday(`${year}-12-26`, 'Andre juledag'),
   ]
   HOLIDAYS[year] = staticHolidays.concat(calculateMovableHolidays(year))
   return HOLIDAYS[year]
 }
 
-export function getMovableHolidayDates(year: number): string[] {
-  return calculateMovableHolidays(year).map((holiday) => holiday.date)
-}
-
-export function calculateMovableHolidays(year: number): Holiday[] {
+export function calculateMovableHolidays(year: number): BlockedReleaseDate[] {
   // https://no.wikipedia.org/wiki/Helligdager_i_Norge#Helligdager
 
   const easterSunday = calculateEasterSunday(year)
 
-  // prettier-ignore
   return [
-    { date: addDaysAndFormat(easterSunday, -3), name: "Skjærtorsdag" },
-    { date: addDaysAndFormat(easterSunday, -2), name: "Langfredag" },
-    { date: addDaysAndFormat(easterSunday,  0), name: "Første påskedag" },
-    { date: addDaysAndFormat(easterSunday,  1), name: "Andre påskedag" },
-    { date: addDaysAndFormat(easterSunday, 39), name: "Kristi himmelfartsdag" },
-    { date: addDaysAndFormat(easterSunday, 49), name: "Første pinsedag" },
-    { date: addDaysAndFormat(easterSunday, 50), name: "Andre pinsedag" },
+    holiday(addDaysAndFormat(easterSunday, -3), "Skjærtorsdag"),
+    holiday(addDaysAndFormat(easterSunday, -2), "Langfredag"),
+    holiday(addDaysAndFormat(easterSunday, 0), "Første påskedag"),
+    holiday(addDaysAndFormat(easterSunday, 1), "Andre påskedag"),
+    holiday(addDaysAndFormat(easterSunday, 39), "Kristi himmelfartsdag"),
+    holiday(addDaysAndFormat(easterSunday, 49), "Første pinsedag"),
+    holiday(addDaysAndFormat(easterSunday, 50), "Andre pinsedag"),
   ]
 }
 

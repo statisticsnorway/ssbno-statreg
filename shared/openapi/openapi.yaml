@@ -30,6 +30,15 @@ components:
       scheme: bearer
       description: A token granted by Statistics Norway's Keycloak instance for ssbno-statreg.
 
+  responses:
+    FutureBlockedReleaseDays:
+      description: List of future blocked release days. Includes all manually blocked days, but only automatically blocked days for the next three calendar years. Sorted from earliest to latest date.
+      content:
+        application/json:
+          schema:
+            type: array
+            items: { $ref: '#/components/schemas/Blocked_release_date' }
+
   schemas:
     Blocked_release_date:
       type: object
@@ -636,16 +645,11 @@ paths:
 
   /calendar/blocked-release-days:
     get:
-      summary: List of future blocked release days
+      summary: Get list of future blocked release days
       tags: [calendar]
       responses:
         '200':
-          description: Includes all manually blocked days, but only automatically blocked days for the next three calendar years. Sorted from earliest to latest date.
-          content:
-            application/json:
-              schema:
-                type: array
-                items: { $ref: '#/components/schemas/Blocked_release_date' }
+          $ref: '#/components/responses/FutureBlockedReleaseDays'
   /calendar/blocked-release-days/{date}:
     post:
       summary: Manually block a day
@@ -668,12 +672,7 @@ paths:
                   type: string
       responses:
         '200':
-          description: Updated list with manually blocked days
-          content:
-            application/json:
-              schema:
-                type: array
-                items: { $ref: '#/components/schemas/Blocked_release_date' }
+          $ref: '#/components/responses/FutureBlockedReleaseDays'
     delete:
       summary: Delete a manually blocked day
       tags: [calendar]

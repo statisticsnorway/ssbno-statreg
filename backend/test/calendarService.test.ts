@@ -60,7 +60,7 @@ describe('calendarService  ', () => {
           day: new Date(inputDate),
         },
       })
-      expect(result).toStrictEqual(calendar_date_result)
+      expect(result).toEqual(expect.arrayContaining(calendar_date_result))
     })
 
     test('returns 400 if date already blocked (unique constraint violation)', async () => {
@@ -197,10 +197,9 @@ describe('calendarService  ', () => {
         { comment: 'Nyttårsaften', day: new Date('2026-12-31T00:00:00Z') },
       ])
 
-      const currentDateMock = new Date('2026-05-13T00:00:00Z')
-      const result = await getFutureBlockedReleaseDates(prismaMock, currentDateMock)
+      vi.setSystemTime(new Date('2026-05-13T00:00:00Z'))
+      const result = await getFutureBlockedReleaseDates(prismaMock)
 
-      //assert exact match for the first year:
       expect(result.slice(0, 9)).toStrictEqual([
         { date: '2026-05-14', blocked_comment: 'Kristi himmelfartsdag', automatically_blocked: true },
         { date: '2026-05-15', blocked_comment: 'Inneklemt dag', automatically_blocked: false },
@@ -213,12 +212,7 @@ describe('calendarService  ', () => {
         { date: '2026-12-31', blocked_comment: 'Nyttårsaften', automatically_blocked: false },
       ])
 
-      //assert total number of blocked days is correct:
-      const expectedLength =
-        9 + //first year
-        12 + //second year (only holidays)
-        12 //third year (only holidays)
-      expect(result.length).toBe(expectedLength)
+      expect(result.length).toBe(9 + 12 + 12)
     })
   })
 

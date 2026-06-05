@@ -7,19 +7,14 @@ export type CalendarDatePrisma = Pick<ExtendedPrismaClient, 'calender_date' | 'r
 
 export async function getFutureBlockedReleaseDates(
   prisma: CalendarDatePrisma,
-  currentDate: Date
 ): Promise<BlockedReleaseDate[]> {
+  const currentDate = new Date()
   const currentYear = currentDate.getUTCFullYear()
   const holidaysNextThreeYears = [
-    ...getHolidays(currentYear).filter((holiday) => parseDateOnly(holiday.date) > currentDate), //only future dates
+    ...getHolidays(currentYear).filter((holiday) => parseDateOnly(holiday.date) > currentDate),
     ...getHolidays(currentYear + 1),
     ...getHolidays(currentYear + 2),
   ]
-  const automaticallyBlockedDates = holidaysNextThreeYears.map((holiday) => ({
-    date: holiday.date,
-    blocked_comment: holiday.name,
-    automatically_blocked: true,
-  }))
 
   const prismaResult = await prisma.calender_date.findMany({
     where: {
@@ -35,9 +30,9 @@ export async function getFutureBlockedReleaseDates(
     automatically_blocked: false,
   }))
 
-  const blockedDates = [...automaticallyBlockedDates, ...manuallyBlockedDates]
+  const blockedDates = [...holidaysNextThreeYears, ...manuallyBlockedDates]
 
-  return blockedDates.sort((a, b) => a.date.localeCompare(b.date))
+  return blockedDates.sort((a, b) => a.date!.localeCompare(b.date!))
 }
 
 export async function createBlockedReleaseDay(
@@ -66,20 +61,7 @@ export async function createBlockedReleaseDay(
     },
   })
 
-  const blockedDays = await prisma.calender_date.findMany({
-    where: {
-      day: {
-        gt: new Date(),
-      },
-    },
-    select: { comment: true, day: true },
-  })
-
-  return blockedDays.map((blockedDay) => ({
-    blocked_comment: blockedDay.comment,
-    automatically_blocked: false,
-    date: getDateOnlyAsString(blockedDay.day),
-  }))
+  return getFutureBlockedReleaseDates(prisma)
 }
 
 export async function getDateStatusForRange(

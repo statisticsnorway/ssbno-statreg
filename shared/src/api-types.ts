@@ -619,15 +619,7 @@ export interface paths {
       }
       requestBody?: never
       responses: {
-        /** @description Includes all manually blocked days, but only automatically blocked days for the next three calendar years. Sorted from earliest to latest date. */
-        200: {
-          headers: {
-            [name: string]: unknown
-          }
-          content: {
-            'application/json': components['schemas']['Blocked_release_date'][]
-          }
-        }
+        200: components['responses']['FutureBlockedReleaseDays']
       }
     }
     put?: never
@@ -665,15 +657,7 @@ export interface paths {
         }
       }
       responses: {
-        /** @description Updated list with manually blocked days */
-        200: {
-          headers: {
-            [name: string]: unknown
-          }
-          content: {
-            'application/json': components['schemas']['Blocked_release_date'][]
-          }
-        }
+        200: components['responses']['FutureBlockedReleaseDays']
       }
     }
     /** Delete a manually blocked day */
@@ -885,7 +869,17 @@ export interface components {
       revision?: components['schemas']['Revision']
     }
   }
-  responses: never
+  responses: {
+    /** @description List of future blocked release days. Includes all manually blocked days, but only automatically blocked days for the next three calendar years. Sorted from earliest to latest date. */
+    FutureBlockedReleaseDays: {
+      headers: {
+        [name: string]: unknown
+      }
+      content: {
+        'application/json': components['schemas']['Blocked_release_date'][]
+      }
+    }
+  }
   parameters: never
   requestBodies: never
   headers: never
