@@ -5,9 +5,7 @@ import { type BlockedReleaseDate, type CalenderDate, DayStatus } from '@ssbno-st
 
 export type CalendarDatePrisma = Pick<ExtendedPrismaClient, 'calender_date' | 'release'>
 
-export async function getFutureBlockedReleaseDates(
-  prisma: CalendarDatePrisma,
-): Promise<BlockedReleaseDate[]> {
+export async function getFutureBlockedReleaseDates(prisma: CalendarDatePrisma): Promise<BlockedReleaseDate[]> {
   const currentDate = new Date()
   const currentYear = currentDate.getUTCFullYear()
   const holidaysNextThreeYears = [

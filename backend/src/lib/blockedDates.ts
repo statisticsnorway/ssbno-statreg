@@ -9,7 +9,7 @@ function holiday(date: string, name: string): BlockedReleaseDate {
   return {
     date: date,
     blocked_comment: name,
-    automatically_blocked: true
+    automatically_blocked: true,
   }
 }
 
@@ -83,13 +83,13 @@ export function calculateMovableHolidays(year: number): BlockedReleaseDate[] {
   const easterSunday = calculateEasterSunday(year)
 
   return [
-    holiday(addDaysAndFormat(easterSunday, -3), "Skjærtorsdag"),
-    holiday(addDaysAndFormat(easterSunday, -2), "Langfredag"),
-    holiday(addDaysAndFormat(easterSunday, 0), "Første påskedag"),
-    holiday(addDaysAndFormat(easterSunday, 1), "Andre påskedag"),
-    holiday(addDaysAndFormat(easterSunday, 39), "Kristi himmelfartsdag"),
-    holiday(addDaysAndFormat(easterSunday, 49), "Første pinsedag"),
-    holiday(addDaysAndFormat(easterSunday, 50), "Andre pinsedag"),
+    holiday(addDaysAndFormat(easterSunday, -3), 'Skjærtorsdag'),
+    holiday(addDaysAndFormat(easterSunday, -2), 'Langfredag'),
+    holiday(addDaysAndFormat(easterSunday, 0), 'Første påskedag'),
+    holiday(addDaysAndFormat(easterSunday, 1), 'Andre påskedag'),
+    holiday(addDaysAndFormat(easterSunday, 39), 'Kristi himmelfartsdag'),
+    holiday(addDaysAndFormat(easterSunday, 49), 'Første pinsedag'),
+    holiday(addDaysAndFormat(easterSunday, 50), 'Andre pinsedag'),
   ]
 }
 
