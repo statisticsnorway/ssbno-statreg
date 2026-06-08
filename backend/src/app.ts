@@ -21,6 +21,7 @@ export async function createApp() {
   const swaggerDocument = YAML.parse(fs.readFileSync('../shared/openapi/openapi.yaml', 'utf8'))
   app.use('/statistikkregisteret/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
   app.get('/statistikkregisteret/auth/me', auth, (req, res) => {
+    // For local testing, add requireUserAuthentication here
     res.json({
       claims: req.auth?.claims,
       username: req.auth?.username,
@@ -28,6 +29,7 @@ export async function createApp() {
     })
   })
 
+  // Ensure entire application is served on /statistikkregisteret
   app.use('/statistikkregisteret', controllerRouter(auth))
 
   await prisma.$connect()
