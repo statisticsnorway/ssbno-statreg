@@ -32,17 +32,17 @@
     "jose": "^6.2.3",
     "lightship": "^9.0.4",
     "swagger-ui-express": "^5.0.1",
-    "tsx": "^4.22.3",
+    "tsx": "^4.22.4",
     "yaml": "^2.9.0"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
     "@types/swagger-ui-express": "^4.1.8",
     "dotenv": "^17.4.2",
-    "eslint-plugin-prettier": "^5.5.5",
+    "eslint-plugin-prettier": "^5.5.6",
     "node-mocks-http": "^1.17.2",
     "nodemon": "^3.1.14",
-    "pkgroll": "^2.27.0",
+    "pkgroll": "^2.27.1",
     "prisma": "^7.8.0",
     "rollup": "^4.60.4"
   }
