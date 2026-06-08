@@ -11,7 +11,7 @@ import { requireAdminAuthorization, skipAuth } from 'plugins/authMiddleware'
 export default function calendarController(router: Router) {
   router.get('/calendar/blocked-release-days', skipAuth, async (_req, res) => {
     try {
-      const result = await getFutureBlockedReleaseDates(prisma, new Date())
+      const result = await getFutureBlockedReleaseDates(prisma)
       res.json(result)
     } catch (error) {
       handleErrors(error, res)
