@@ -4,10 +4,15 @@ import {
   calculateEasterSunday,
   calculateMovableHolidays,
   getBlockedDatesInPeriod,
-  getHolidays,
+  getHolidayDates,
   isDateAutoBlocked,
   isDateBlocked,
 } from '@/lib/blockedDates'
+import { type BlockedReleaseDate } from '@ssbno-statreg/shared'
+
+function datesOf(blockedReleaseDate: BlockedReleaseDate[]): string[] {
+  return blockedReleaseDate.map((h) => h.date!)
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let prismaMock: any
@@ -106,7 +111,7 @@ describe('blockedDates', () => {
 
   describe('getHolidays() ', () => {
     test('returns correct dates for 2026', () => {
-      const holidays = getHolidays(2026)
+      const holidays = getHolidayDates(2026)
       expect(holidays).toStrictEqual(staticHolidaysFor2026[2026].concat(movableHolidaysByYear[2026]))
     })
   })
@@ -114,9 +119,9 @@ describe('blockedDates', () => {
     test('returns correct movable holidays for 2026-2028', () => {
       // https://no.wikipedia.org/wiki/Bevegelige_merkedager
 
-      expect(calculateMovableHolidays(2026)).toStrictEqual(movableHolidaysByYear['2026'])
-      expect(calculateMovableHolidays(2027)).toStrictEqual(movableHolidaysByYear['2027'])
-      expect(calculateMovableHolidays(2028)).toStrictEqual(movableHolidaysByYear['2028'])
+      expect(datesOf(calculateMovableHolidays(2026))).toStrictEqual(movableHolidaysByYear['2026'])
+      expect(datesOf(calculateMovableHolidays(2027))).toStrictEqual(movableHolidaysByYear['2027'])
+      expect(datesOf(calculateMovableHolidays(2028))).toStrictEqual(movableHolidaysByYear['2028'])
     })
   })
 

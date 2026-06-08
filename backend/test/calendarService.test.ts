@@ -4,6 +4,7 @@ import {
   getDateStatusForRange,
   getReleaseCountByDate,
   getStatus,
+  getFutureBlockedReleaseDates,
 } from '@/services/calendarService'
 
 const { isDateBlockedMock, getBlockedDatesInPeriodMock } = vi.hoisted(() => ({
@@ -59,7 +60,7 @@ describe('calendarService  ', () => {
           day: new Date(inputDate),
         },
       })
-      expect(result).toStrictEqual(calendar_date_result)
+      expect(result).toEqual(expect.arrayContaining(calendar_date_result))
     })
 
     test('returns 400 if date already blocked (unique constraint violation)', async () => {
@@ -188,6 +189,33 @@ describe('calendarService  ', () => {
     })
   })
 
+  describe('getFutureBlockedReleaseDates', () => {
+    test('returns holidays and manual blocks after the current date', async () => {
+      setListReturn([
+        { comment: 'Inneklemt dag', day: new Date('2026-05-15T00:00:00Z') },
+        { comment: 'Julaften', day: new Date('2026-12-24T00:00:00Z') },
+        { comment: 'Nyttårsaften', day: new Date('2026-12-31T00:00:00Z') },
+      ])
+
+      vi.setSystemTime(new Date('2026-05-13T00:00:00Z'))
+      const result = await getFutureBlockedReleaseDates(prismaMock)
+
+      expect(result.slice(0, 9)).toStrictEqual([
+        { date: '2026-05-14', blocked_comment: 'Kristi himmelfartsdag', automatically_blocked: true },
+        { date: '2026-05-15', blocked_comment: 'Inneklemt dag', automatically_blocked: false },
+        { date: '2026-05-17', blocked_comment: 'Grunnlovsdag', automatically_blocked: true },
+        { date: '2026-05-24', blocked_comment: 'Første pinsedag', automatically_blocked: true },
+        { date: '2026-05-25', blocked_comment: 'Andre pinsedag', automatically_blocked: true },
+        { date: '2026-12-24', blocked_comment: 'Julaften', automatically_blocked: false },
+        { date: '2026-12-25', blocked_comment: 'Første juledag', automatically_blocked: true },
+        { date: '2026-12-26', blocked_comment: 'Andre juledag', automatically_blocked: true },
+        { date: '2026-12-31', blocked_comment: 'Nyttårsaften', automatically_blocked: false },
+      ])
+
+      expect(result.length).toBe(9 + 12 + 12)
+    })
+  })
+
   describe('getReleaseCountByDate', () => {
     test('returns an empty object for an empty input array', () => {
       expect(getReleaseCountByDate([])).toEqual({})
@@ -231,10 +259,12 @@ const calendar_date_result = [
   {
     blocked_comment: 'Julaften',
     date: '2026-12-24',
+    automatically_blocked: false,
   },
   {
     blocked_comment: 'Nyttårsaften',
     date: '2026-12-31',
+    automatically_blocked: false,
   },
 ]
 

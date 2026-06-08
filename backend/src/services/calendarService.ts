@@ -1,9 +1,37 @@
-import { getBlockedDatesInPeriod, isDateBlocked } from '@/lib/blockedDates'
+import { getBlockedDatesInPeriod, isDateBlocked, getHolidays } from '@/lib/blockedDates'
 import type { ExtendedPrismaClient } from '@/lib/prisma'
 import { sanitize, parseDateOnly, ensureRequiredFieldsExists, getDateOnlyAsString } from '@/lib/utils'
 import { type BlockedReleaseDate, type CalenderDate, DayStatus } from '@ssbno-statreg/shared'
 
 export type CalendarDatePrisma = Pick<ExtendedPrismaClient, 'calender_date' | 'release'>
+
+export async function getFutureBlockedReleaseDates(prisma: CalendarDatePrisma): Promise<BlockedReleaseDate[]> {
+  const currentDate = new Date()
+  const currentYear = currentDate.getUTCFullYear()
+  const holidaysNextThreeYears = [
+    ...getHolidays(currentYear).filter((holiday) => parseDateOnly(holiday.date) > currentDate),
+    ...getHolidays(currentYear + 1),
+    ...getHolidays(currentYear + 2),
+  ]
+
+  const prismaResult = await prisma.calender_date.findMany({
+    where: {
+      day: {
+        gt: currentDate,
+      },
+    },
+    select: { comment: true, day: true },
+  })
+  const manuallyBlockedDates = prismaResult.map((calendarDate) => ({
+    date: getDateOnlyAsString(calendarDate.day),
+    blocked_comment: calendarDate.comment,
+    automatically_blocked: false,
+  }))
+
+  const blockedDates = [...holidaysNextThreeYears, ...manuallyBlockedDates]
+
+  return blockedDates.sort((a, b) => a.date!.localeCompare(b.date!))
+}
 
 export async function createBlockedReleaseDay(
   prisma: CalendarDatePrisma,
@@ -31,19 +59,7 @@ export async function createBlockedReleaseDay(
     },
   })
 
-  const blockedDays = await prisma.calender_date.findMany({
-    where: {
-      day: {
-        gt: new Date(),
-      },
-    },
-    select: { comment: true, day: true },
-  })
-
-  return blockedDays.map((blockedDay) => ({
-    blocked_comment: blockedDay.comment,
-    date: getDateOnlyAsString(blockedDay.day),
-  }))
+  return getFutureBlockedReleaseDates(prisma)
 }
 
 export async function getDateStatusForRange(

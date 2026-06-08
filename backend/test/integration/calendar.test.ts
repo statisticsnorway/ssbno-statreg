@@ -15,6 +15,7 @@ describe('calendarController ', () => {
       .send({ blocked_comment: 'Inneklemt dag' })
     expect(response.status).toBe(200)
     expect(response.body).toContainEqual({
+      automatically_blocked: false,
       blocked_comment: 'Inneklemt dag',
       date: '2027-05-07',
     })

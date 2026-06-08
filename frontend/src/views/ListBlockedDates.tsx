@@ -1,18 +1,29 @@
+import { useEffect, useState } from 'react'
 import './ListBlockedDates.css'
 import { Button, Heading, Link, Paragraph, Table } from '@digdir/designsystemet-react'
 import { ArrowLeftIcon, PlusCircleIcon, TrashIcon } from '@navikt/aksel-icons'
 import { Link as ReactRouterLink } from 'react-router'
 import { type BlockedReleaseDate } from '@ssbno-statreg/shared'
-
-const mockedDays: BlockedReleaseDate[] = [
-  { date: '2026-12-24', blocked_comment: 'Julaften', automatically_blocked: false },
-  { date: '2026-12-25', blocked_comment: 'Første juledag', automatically_blocked: true },
-  { date: '2027-01-01', blocked_comment: 'Første nyttårsdag', automatically_blocked: true },
-  { date: '2027-01-02', blocked_comment: 'Kommentar', automatically_blocked: false },
-  { date: '2026-05-17', blocked_comment: 'Grunnlovsdagen', automatically_blocked: true },
-]
+import client from '../api'
 
 export default function ListBlockedDates() {
+  const [blockedDates, setBlockedDates] = useState<BlockedReleaseDate[]>([])
+
+  useEffect(() => {
+    async function fetchBlockedDates() {
+      const { data, error } = await client.GET('/calendar/blocked-release-days')
+      if (error) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const errorMessage = (error as any).error
+        console.log(errorMessage)
+        alert(errorMessage)
+      } else {
+        setBlockedDates(data ?? [])
+      }
+    }
+    fetchBlockedDates()
+  }, [])
+
   return (
     <>
       <Link asChild>
@@ -26,7 +37,7 @@ export default function ListBlockedDates() {
         </Heading>
         <Paragraph>Datoer som er automatisk lagt inn kan ikke redigeres eller slettes</Paragraph>
       </div>
-      <BlockedDatesTable days={mockedDays} />
+      <BlockedDatesTable days={blockedDates} />
       <Button
         variant='tertiary'
         data-color='neutral'
