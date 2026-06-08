@@ -1,19 +1,11 @@
 import type { Prisma } from '@/generated/prisma/client'
 import { prisma } from '@/lib/prisma'
 
-export const BASE_URL = process.env.API_URL ?? 'http://localhost:8080/statistikkregisteret/api'
-
 export type StatisticWithShortname = Prisma.StatisticGetPayload<{
   include: {
     shortname: true
   }
 }>
-
-export async function fetchJson(path: string, init?: Parameters<typeof fetch>[1]) {
-  const response = await fetch(`${BASE_URL}${path}`, init)
-  const body = await response.json()
-  return { response, body }
-}
 
 export async function createTestShortname(prefix = 'it-stat'): Promise<string> {
   const now = new Date()

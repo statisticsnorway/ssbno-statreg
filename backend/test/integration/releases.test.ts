@@ -1,6 +1,8 @@
 import { describe, expect, test } from 'vitest'
+import { createApp } from '@/app'
+import request from 'supertest'
 
-const BASE_URL = process.env.API_URL ?? 'http://localhost:8080/statistikkregisteret/api'
+const app = await createApp()
 
 const headers = {
   'Content-Type': 'application/json',
@@ -17,55 +19,51 @@ const variantId = 1
 describe('release data is persisted when ', () => {
   test('client creates a new release', async () => {
     // POST release
-    let response = await fetch(`${BASE_URL}/statistics/${shortname}/variants/${variantId}/releases`, {
-      method: 'POST',
-      headers: headers,
-      body: JSON.stringify(body),
-    })
-    expect(response.status).toBe(200)
-    const created = await response.json()
+    const created = await request(app)
+      .post(`/statistikkregisteret/api/statistics/${shortname}/variants/${variantId}/releases`)
+      .set(headers)
+      .send(body)
+    expect(created.status).toBe(200)
 
     // GET release
-    response = await fetch(`${BASE_URL}/releases/${created.id}`)
-    expect(response.status).toBe(200)
-    const fetched = await response.json()
+    const fetched = await request(app).get(`/statistikkregisteret/api/releases/${created.body.id}`)
+    expect(fetched.status).toBe(200)
 
     // test persistence
-    expect(fetched.id).toBe(created.id)
-    assertEqualReleaseData(fetched, body)
+    expect(fetched.body.id).toBe(created.body.id)
+    assertEqualReleaseData(fetched.body, body)
   })
 
   test('client picks release and updates fields', async () => {
     // GET release listing and pick release
-    let response = await fetch(`${BASE_URL}/statistics/${shortname}/variants/${variantId}/releases`)
-    expect(response.status).toBe(200)
-    const list = await response.json()
-    expect(list.total).toBeGreaterThan(1)
-    const picked = list.releases[0]
+    const list = await request(app).get(
+      `/statistikkregisteret/api/statistics/${shortname}/variants/${variantId}/releases`
+    )
+    expect(list.status).toBe(200)
+    expect(list.body.total).toBeGreaterThan(1)
+    const picked = list.body.releases[0]
 
     // PUT release with updated fields
-    const body = {
+    const updateBody = {
       publish_time: addMonthsToDate(picked.publish_time, 3),
       period_from: picked.period_from,
       period_to: picked.period_to,
       release_date_precision: 'month',
       comment: 'Postpone release date.',
     }
-    response = await fetch(`${BASE_URL}/releases/${picked.id}`, {
-      method: 'PUT',
-      headers: headers,
-      body: JSON.stringify(body),
-    })
-    expect(response.status).toBe(200)
+    const updated = await request(app)
+      .put(`/statistikkregisteret/api/releases/${picked.id}`)
+      .set(headers)
+      .send(updateBody)
+    expect(updated.status).toBe(200)
 
     // GET release
-    response = await fetch(`${BASE_URL}/releases/${picked.id}`)
-    expect(response.status).toBe(200)
-    const fetched = await response.json()
+    const fetched = await request(app).get(`/statistikkregisteret/api/releases/${picked.id}`)
+    expect(fetched.status).toBe(200)
 
     // test persistence
-    expect(fetched.id, picked.id)
-    assertEqualReleaseData(fetched, body)
+    expect(fetched.body.id, picked.id)
+    assertEqualReleaseData(fetched.body, updateBody)
   })
 })
 

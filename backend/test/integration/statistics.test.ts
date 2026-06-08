@@ -1,13 +1,32 @@
-import { afterAll, describe, expect, test } from 'vitest'
+import { afterAll, describe, expect, test, vi } from 'vitest'
 import { StatisticDetails, StatisticListingResponse } from '@ssbno-statreg/shared'
 import { prisma } from '@/lib/prisma'
+import { createApp } from '@/app'
+import request from 'supertest'
 import {
   cleanupCreatedStatistics,
   createTestShortname,
-  fetchJson,
   readStatisticFromDb,
   type StatisticWithShortname,
 } from './integrationUtils'
+
+vi.mock(import('@/services/entraUserService'), () => ({
+  fetchUsers: vi.fn((users: Array<{ username: string | null; email: string | null }>) =>
+    Promise.resolve(
+      users.map(() => ({
+        lookupEmail: 'bob@ssb.no',
+        user: {
+          displayName: 'Bob',
+          username: 'bob',
+          email: 'bob@ssb.no',
+          businessPhone: '11223344',
+        },
+      }))
+    )
+  ),
+}))
+
+const app = await createApp()
 
 const SEEDED_STATISTIC = {
   shortname: 'helse',
@@ -60,11 +79,11 @@ afterAll(async () => {
 
 describe('statisticsController integration', () => {
   test('GET /statistics returns a list of statistics', async () => {
-    const { response, body } = await fetchJson('/statistics')
+    const response = await request(app).get('/statistikkregisteret/api/statistics')
 
     expect(response.status).toBe(200)
 
-    const statistics = body as StatisticListingResponse
+    const statistics = response.body as StatisticListingResponse
 
     expect(Array.isArray(statistics.statistics)).toBe(true)
     expect(statistics.statistics?.length).toBeGreaterThan(0)
@@ -83,14 +102,14 @@ describe('statisticsController integration', () => {
   })
 
   test('GET /statistics/:shortname returns statistic details', async () => {
-    const { response, body } = await fetchJson(`/statistics/${SEEDED_STATISTIC.shortname}`)
+    const response = await request(app).get(`/statistikkregisteret/api/statistics/${SEEDED_STATISTIC.shortname}`)
 
     expect(response.status).toBe(200)
 
-    const statistic = body as StatisticDetails
+    const statistic = response.body as StatisticDetails
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { status, ...statisticSeeded } = SEEDED_STATISTIC // Removing status from object
+    const { status, ...statisticSeeded } = SEEDED_STATISTIC
     expect(toStatisticResponseShape(statistic)).toStrictEqual({ ...statisticSeeded, status_code: 'IA' })
 
     expect(Array.isArray(statistic.contacts)).toBe(true)
@@ -113,17 +132,14 @@ describe('statisticsController integration', () => {
       comment: 'Created by integration test',
     }
 
-    const { response, body } = await fetchJson(`/statistics/${createdShortnameName}`, {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify(createPayload),
-    })
+    const response = await request(app)
+      .post(`/statistikkregisteret/api/statistics/${createdShortnameName}`)
+      .set('content-type', 'application/json')
+      .send(createPayload)
 
     expect(response.status).toBe(200)
 
-    const statistic = body as StatisticDetails
+    const statistic = response.body as StatisticDetails
 
     expect(toStatisticResponseShape(statistic)).toStrictEqual({
       shortname: createdShortnameName,
@@ -170,15 +186,12 @@ describe('statisticsController integration', () => {
       comment: 'Created for update integration test',
     }
 
-    const createResponse = await fetchJson(`/statistics/${createdShortnameName}`, {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify(createPayload),
-    })
+    const createResponse = await request(app)
+      .post(`/statistikkregisteret/api/statistics/${createdShortnameName}`)
+      .set('content-type', 'application/json')
+      .send(createPayload)
 
-    expect(createResponse.response.status).toBe(200)
+    expect(createResponse.status).toBe(200)
 
     const createdStatistic = await readStatisticFromDb(createdShortnameName)
     createdStatistics.push({
@@ -200,17 +213,14 @@ describe('statisticsController integration', () => {
       comment: 'Updated by integration test',
     }
 
-    const { response, body } = await fetchJson(`/statistics/${createdShortnameName}`, {
-      method: 'PUT',
-      headers: {
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify(updatePayload),
-    })
+    const updateResponse = await request(app)
+      .put(`/statistikkregisteret/api/statistics/${createdShortnameName}`)
+      .set('content-type', 'application/json')
+      .send(updatePayload)
 
-    expect(response.status).toBe(200)
+    expect(updateResponse.status).toBe(200)
 
-    const statistic = body as StatisticDetails
+    const statistic = updateResponse.body as StatisticDetails
 
     expect(toStatisticResponseShape(statistic)).toStrictEqual({
       shortname: createdShortnameName,
