@@ -33,7 +33,7 @@ export async function createApp() {
   app.use('/statistikkregisteret', controllerRouter(auth))
 
   await prisma.$connect()
-  initializeDepartments()
+  await initializeDepartments()
 
   return app
 }
