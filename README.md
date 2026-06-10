@@ -48,7 +48,7 @@ npm run dev
 Or to run with local authentication flow run docker compose:
 ```
 colima start
-docker compose up --watch
+docker compose --env-file ./backend/.env up
 ```
 
 The app is now served on http://localhost:8080
@@ -76,4 +76,3 @@ npm run lint:fix
 ```
 
 Keep in mind that not all types of linting/formatting errors and warnings can be fixed automatically.
-
