@@ -59,6 +59,13 @@ components:
       example: 'ferie,reise'
       schema:
         type: string
+    Contact_filter:
+      in: query
+      name: contact
+      description: Filter by contact initial(s) separated by comma.
+      example: 'abc,xyz'
+      schema:
+        type: string
 
   responses:
     FutureBlockedReleaseDays:
@@ -266,11 +273,7 @@ components:
         contacts:
           type: array
           items:
-            type: object
-            properties:
-              username: { type: string, nullable: true }
-              email: { type: string }
-              name: { type: string }
+            $ref: '#/components/schemas/Contact'
         statistic_region_levels:
           type: array
           items:
@@ -289,10 +292,7 @@ components:
         contacts:
           type: array
           items:
-            type: object
-            properties:
-              username: { type: string }
-              name: { type: string }
+            $ref: '#/components/schemas/Contact'
 
     Variant:
       type: object
@@ -333,6 +333,7 @@ paths:
         - $ref: '#/components/parameters/Pagination_start'
         - $ref: '#/components/parameters/Pagination_count'
         - $ref: '#/components/parameters/Shortname_filter'
+        - $ref: '#/components/parameters/Contact_filter'
         - $ref: '#/components/parameters/Sort'
       responses:
         '200':

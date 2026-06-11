@@ -61,6 +61,11 @@ export interface paths {
            */
           shortname?: components['parameters']['Shortname_filter']
           /**
+           * @description Filter by contact initial(s) separated by comma.
+           * @example abc,xyz
+           */
+          contact?: components['parameters']['Contact_filter']
+          /**
            * @description Sorting fields separated by comma. Default order is Ascending (ASC), minus(-) should be used in front of field name for Descending (DESC) order.
            * @example -publish_time
            */
@@ -742,8 +747,6 @@ export interface components {
     Contact: {
       readonly name?: string
       readonly username?: string
-      /** Format: mobile */
-      readonly mobile?: string
       /** Format: email */
       readonly email?: string
     }
@@ -853,11 +856,7 @@ export interface components {
       /** Format: date-time */
       readonly created_at?: string
       variants?: components['schemas']['Variant'][]
-      contacts?: {
-        username?: string | null
-        email?: string
-        name?: string
-      }[]
+      contacts?: components['schemas']['Contact'][]
       statistic_region_levels?: components['schemas']['Region_level'][]
     } & components['schemas']['Statistic']
     Statistic_listing: {
@@ -865,10 +864,7 @@ export interface components {
         code?: string | null
         readonly name?: string
       }
-      contacts?: {
-        username?: string
-        name?: string
-      }[]
+      contacts?: components['schemas']['Contact'][]
     } & components['schemas']['Statistic']
     Variant: {
       readonly id?: number
@@ -909,6 +905,11 @@ export interface components {
      * @example ferie,reise
      */
     Shortname_filter: string
+    /**
+     * @description Filter by contact initial(s) separated by comma.
+     * @example abc,xyz
+     */
+    Contact_filter: string
   }
   requestBodies: never
   headers: never
