@@ -51,10 +51,20 @@ export interface paths {
     get: {
       parameters: {
         query?: {
-          /** @description Number of items skipped before starting the statistics results list */
-          start?: number
+          /** @description Number of items skipped before starting the results list */
+          start?: components['parameters']['Pagination_start']
           /** @description Maximum number of items returned */
-          count?: number
+          count?: components['parameters']['Pagination_count']
+          /**
+           * @description Filter by shortname(s) separated by comma.
+           * @example ferie,reise
+           */
+          shortname?: components['parameters']['Shortname_filter']
+          /**
+           * @description Sorting fields separated by comma. Default order is Ascending (ASC), minus(-) should be used in front of field name for Descending (DESC) order.
+           * @example -publish_time
+           */
+          sort?: components['parameters']['Sort']
         }
         header?: never
         path?: never
@@ -266,8 +276,10 @@ export interface paths {
     get: {
       parameters: {
         query?: {
-          start?: number
-          count?: number
+          /** @description Number of items skipped before starting the results list */
+          start?: components['parameters']['Pagination_start']
+          /** @description Maximum number of items returned */
+          count?: components['parameters']['Pagination_count']
         }
         header?: never
         path: {
@@ -374,18 +386,20 @@ export interface paths {
     get: {
       parameters: {
         query?: {
-          start?: number
-          count?: number
+          /** @description Number of items skipped before starting the results list */
+          start?: components['parameters']['Pagination_start']
+          /** @description Maximum number of items returned */
+          count?: components['parameters']['Pagination_count']
           /**
            * @description Sorting fields separated by comma. Default order is Ascending (ASC), minus(-) should be used in front of field name for Descending (DESC) order.
            * @example -publish_time
            */
-          sort?: string
+          sort?: components['parameters']['Sort']
           /**
-           * @description Filter releases by shortname(s) separated by comma.
+           * @description Filter by shortname(s) separated by comma.
            * @example ferie,reise
            */
-          shortname?: string
+          shortname?: components['parameters']['Shortname_filter']
           /**
            * @description Filter releases with publish_time after the specified time given in ISO format.
            * @example 2026-05-06T06:00:00Z
@@ -880,7 +894,22 @@ export interface components {
       }
     }
   }
-  parameters: never
+  parameters: {
+    /** @description Number of items skipped before starting the results list */
+    Pagination_start: number
+    /** @description Maximum number of items returned */
+    Pagination_count: number
+    /**
+     * @description Sorting fields separated by comma. Default order is Ascending (ASC), minus(-) should be used in front of field name for Descending (DESC) order.
+     * @example -publish_time
+     */
+    Sort: string
+    /**
+     * @description Filter by shortname(s) separated by comma.
+     * @example ferie,reise
+     */
+    Shortname_filter: string
+  }
   requestBodies: never
   headers: never
   pathItems: never
