@@ -32,7 +32,7 @@ export default function statisticsController(router: Router) {
     try {
       const start = req.query?.start ? Number(req.query.start) : undefined
       const count = req.query?.count ? Number(req.query.count) : undefined
-      const sort = ensureStringArray(req.query.sort as string)
+      const sort = ensureString(req.query.sort as string)
       const filterByShortnames = ensureStringArray(req.query.shortname as string)
 
       const data = await getFilteredStatistics({ start, count, filterByShortnames, sort }, prisma)

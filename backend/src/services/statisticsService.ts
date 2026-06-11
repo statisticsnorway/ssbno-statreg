@@ -6,16 +6,8 @@ import {
   StatisticStatus,
   StatisticListingResponse,
 } from '@ssbno-statreg/shared'
-import {
-  dateToISOString,
-  sanitize,
-  parseDateOnly,
-  ensureRequiredFieldsExists,
-  isNumber,
-  parseId,
-  parseSortInput,
-} from '@/lib/utils'
-import type { Prisma } from '@/generated/prisma/client'
+import { dateToISOString, sanitize, parseDateOnly, ensureRequiredFieldsExists, isNumber, parseId } from '@/lib/utils'
+import { Prisma } from '@/generated/prisma/client'
 import { getDivisionFromCode } from '@/services/klassService'
 import { fetchUsers } from '@/services/entraUserService'
 import type { UserLookupItem, Users } from '@/types/entra'
@@ -36,7 +28,7 @@ export async function getFilteredStatistics(
     start?: number
     count?: number
     filterByShortnames?: string[]
-    sort?: string[]
+    sort?: string
   },
   prisma: StatisticPrisma
 ): Promise<StatisticListingResponse> {
@@ -78,11 +70,16 @@ export async function getStatistics(
     start?: number
     count?: number
     where?: Prisma.StatisticWhereInput
-    sort?: string[]
+    sort?: string
   },
   prisma: StatisticPrisma
 ): Promise<StatisticListingResponse> {
-  const orderBy = parseSortInput(sort, ['shortname'])
+  const sortToOrderByMapping: Record<string, Prisma.StatisticOrderByWithRelationInput> = {
+    shortname: { shortname: { name: 'asc' } },
+    '-shortname': { shortname: { name: 'desc' } },
+  }
+
+  const orderBy = sort ? sortToOrderByMapping[sort] : undefined
 
   const statistics = await prisma.statistic.findMany({
     skip: start,
