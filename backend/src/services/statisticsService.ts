@@ -54,7 +54,10 @@ export async function getAllStatistics(
         },
         name: statistic.name,
         name_en: statistic.name_en ?? '',
-        contacts: statistic.responsiblePersons,
+        contacts: statistic.responsiblePersons.map((person) => ({
+          username: person.username ?? '',
+          name: 'Fornavn Etternavn', // TODO fetch name from cache when MIM-2729 is done
+        })),
       }
     }),
   }

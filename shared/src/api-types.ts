@@ -852,8 +852,8 @@ export interface components {
         readonly name?: string
       }
       contacts?: {
-        username?: string | null
-        email?: string
+        username?: string
+        name?: string
       }[]
     } & components['schemas']['Statistic']
     Variant: {

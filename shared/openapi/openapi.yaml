@@ -261,8 +261,8 @@ components:
           items:
             type: object
             properties:
-              username: { type: string, nullable: true }
-              email: { type: string }
+              username: { type: string }
+              name: { type: string }
 
     Variant:
       type: object
