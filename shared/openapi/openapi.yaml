@@ -30,6 +30,43 @@ components:
       scheme: bearer
       description: A token granted by Statistics Norway's Keycloak instance for ssbno-statreg.
 
+  parameters:
+    Pagination_start:
+      in: query
+      name: start
+      schema:
+        type: integer
+        default: 0
+      description: Number of items skipped before starting the results list
+    Pagination_count:
+      in: query
+      name: count
+      schema:
+        type: integer
+        default: 10
+      description: Maximum number of items returned
+    Sort:
+      in: query
+      name: sort
+      description: 'Sorting fields separated by comma. Default order is Ascending (ASC), minus(-) should be used in front of field name for Descending (DESC) order.'
+      example: '-publish_time'
+      schema:
+        type: string
+    Shortname_filter:
+      in: query
+      name: shortname
+      description: Filter by shortname(s) separated by comma.
+      example: 'ferie,reise'
+      schema:
+        type: string
+    Contact_filter:
+      in: query
+      name: contact
+      description: Filter by contact initial(s) separated by comma.
+      example: 'abc,xyz'
+      schema:
+        type: string
+
   responses:
     FutureBlockedReleaseDays:
       description: List of future blocked release days. Includes all manually blocked days, but only automatically blocked days for the next three calendar years. Sorted from earliest to latest date.
@@ -236,11 +273,7 @@ components:
         contacts:
           type: array
           items:
-            type: object
-            properties:
-              username: { type: string, nullable: true }
-              email: { type: string }
-              name: { type: string }
+            $ref: '#/components/schemas/Contact'
         statistic_region_levels:
           type: array
           items:
@@ -259,10 +292,7 @@ components:
         contacts:
           type: array
           items:
-            type: object
-            properties:
-              username: { type: string, nullable: true }
-              email: { type: string }
+            $ref: '#/components/schemas/Contact'
 
     Variant:
       type: object
@@ -300,16 +330,11 @@ paths:
       security: []
       tags: [statistics]
       parameters:
-        - in: query
-          name: start
-          schema:
-            type: integer
-          description: Number of items skipped before starting the statistics results list
-        - in: query
-          name: count
-          schema:
-            type: integer
-          description: Maximum number of items returned
+        - $ref: '#/components/parameters/Pagination_start'
+        - $ref: '#/components/parameters/Pagination_count'
+        - $ref: '#/components/parameters/Shortname_filter'
+        - $ref: '#/components/parameters/Contact_filter'
+        - $ref: '#/components/parameters/Sort'
       responses:
         '200':
           description: List of statistics
@@ -433,18 +458,8 @@ paths:
           required: true
           schema:
             type: integer
-        - name: start
-          in: query
-          required: false
-          schema:
-            type: integer
-            default: 0
-        - name: count
-          in: query
-          required: false
-          schema:
-            type: integer
-            default: 10
+        - $ref: '#/components/parameters/Pagination_start'
+        - $ref: '#/components/parameters/Pagination_count'
       responses:
         '200':
           description: List of releases based on variant
@@ -500,28 +515,10 @@ paths:
       security: []
       tags: [releases]
       parameters:
-        - in: query
-          name: start
-          schema:
-            type: integer
-            default: 0
-        - in: query
-          name: count
-          schema:
-            type: integer
-            default: 10
-        - in: query
-          name: sort
-          description: 'Sorting fields separated by comma. Default order is Ascending (ASC), minus(-) should be used in front of field name for Descending (DESC) order.'
-          example: '-publish_time'
-          schema:
-            type: string
-        - in: query
-          name: shortname
-          description: Filter releases by shortname(s) separated by comma.
-          example: 'ferie,reise'
-          schema:
-            type: string
+        - $ref: '#/components/parameters/Pagination_start'
+        - $ref: '#/components/parameters/Pagination_count'
+        - $ref: '#/components/parameters/Sort'
+        - $ref: '#/components/parameters/Shortname_filter'
         - in: query
           name: publish_time_after
           description: Filter releases with publish_time after the specified time given in ISO format.
