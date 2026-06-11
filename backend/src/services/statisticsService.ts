@@ -89,12 +89,12 @@ export async function getStatistics(
   },
   prisma: StatisticPrisma
 ): Promise<StatisticListingResponse> {
-  const sortToOrderByMapping: Record<string, Prisma.StatisticOrderByWithRelationInput> = {
+  const sortMapping: Record<string, Prisma.StatisticOrderByWithRelationInput> = {
     shortname: { shortname: { name: 'asc' } },
     '-shortname': { shortname: { name: 'desc' } },
   }
 
-  const orderBy = sort ? sortToOrderByMapping[sort] : undefined
+  const orderBy = sort ? sortMapping[sort] : undefined
 
   const statistics = await prisma.statistic.findMany({
     skip: start,
