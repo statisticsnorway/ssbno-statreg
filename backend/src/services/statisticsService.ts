@@ -23,11 +23,13 @@ export async function getFilteredStatistics(
     start = 0,
     count = 10,
     filterByShortnames,
+    filterByContactInitials,
     sort,
   }: {
     start?: number
     count?: number
     filterByShortnames?: string[]
+    filterByContactInitials?: string[]
     sort?: string
   },
   prisma: StatisticPrisma
@@ -36,13 +38,19 @@ export async function getFilteredStatistics(
     ? filterByShortnames.map((shortname) => sanitize(shortname))
     : undefined
 
-  const where = await buildStatisticFilter({ filterByShortnames: safeFilterByShortnames }, prisma)
+  const where = await buildStatisticFilter(
+    { filterByShortnames: safeFilterByShortnames, filterByContactInitials },
+    prisma
+  )
 
   return getStatistics({ start, count, where, sort }, prisma)
 }
 
 export async function buildStatisticFilter(
-  { filterByShortnames }: { filterByShortnames?: string[] },
+  {
+    filterByShortnames,
+    filterByContactInitials,
+  }: { filterByShortnames?: string[]; filterByContactInitials?: string[] },
   prisma: StatisticPrisma
 ) {
   if (filterByShortnames?.length) {
@@ -56,6 +64,13 @@ export async function buildStatisticFilter(
           name: shortname,
         },
       })),
+    }),
+    ...(filterByContactInitials?.length && {
+      responsiblePersons: {
+        some: {
+          username: { in: filterByContactInitials },
+        },
+      },
     }),
   }
 }
