@@ -24,6 +24,7 @@ export default defineProject({
         resolve: {
           alias: {
             '@': path.resolve(__dirname, 'backend/src'),
+            plugins: path.resolve(__dirname, 'backend/plugins'),
             '@ssbno-statreg/shared': path.resolve(__dirname, 'shared/src'),
           },
         },
