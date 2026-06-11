@@ -708,8 +708,8 @@ paths:
                       example: true
                     email: 
                       type: string
-                      example: mail@example.com
+                      example: alice@example.com
                     fullName:
                       type: string
-                      example: Alice Exampleson
+                      example: Alice Examplesdottir
 
