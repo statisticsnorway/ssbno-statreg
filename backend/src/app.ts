@@ -53,7 +53,7 @@ export async function createApp() {
   app.use('/statistikkregisteret', controllerRouter(auth))
 
   await prisma.$connect()
-  await initializeDepartments() //TODO handle error with caching solution  MIM-2641
+  await initializeDepartments() //TODO handle error with caching solution MIM-2641
 
   return app
 }
