@@ -22,6 +22,7 @@ const swaggerDocument = YAML.parse(fs.readFileSync('../shared/openapi/openapi.ya
 
 app.use('/statistikkregisteret/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
+// TODO: MIM-2824 Remove this endpoint before we go live!
 app.get('/statistikkregisteret/api/auth/me', auth, (req, res) => {
   // For local testing, add requireUserAuthentication here
   res.json({
