@@ -6,7 +6,15 @@ import {
   StatisticStatus,
   StatisticListingResponse,
 } from '@ssbno-statreg/shared'
-import { dateToISOString, sanitize, parseDateOnly, ensureRequiredFieldsExists, isNumber, parseId } from '@/lib/utils'
+import {
+  dateToISOString,
+  sanitize,
+  parseDateOnly,
+  ensureRequiredFieldsExists,
+  isNumber,
+  parseId,
+  parseSortInput,
+} from '@/lib/utils'
 import type { Prisma } from '@/generated/prisma/client'
 import { getDivisionFromCode } from '@/services/klassService'
 import { fetchUsers } from '@/services/entraUserService'
@@ -18,13 +26,27 @@ export type StatisticPrisma = Pick<PrismaClient, 'statistic' | 'shortname'>
 
 // Statistic listing
 
-export async function getAllStatistics(
-  { start = 0, count = 10 },
+export async function getStatistics(
+  {
+    start = 0,
+    count = 10,
+    where,
+    sort,
+  }: {
+    start?: number
+    count?: number
+    where?: Prisma.StatisticWhereInput
+    sort?: string[]
+  },
   prisma: StatisticPrisma
 ): Promise<StatisticListingResponse> {
+  const orderBy = parseSortInput(sort, ['shortname'])
+
   const statistics = await prisma.statistic.findMany({
     skip: start,
     take: count,
+    where,
+    orderBy: orderBy?.length ? orderBy : undefined,
     select: {
       language: true,
       status: true,
@@ -35,7 +57,7 @@ export async function getAllStatistics(
       division_code: true,
     },
   })
-  const total = await prisma.statistic.count()
+  const total = await prisma.statistic.count({ where })
 
   return {
     total,
@@ -62,6 +84,48 @@ export async function getAllStatistics(
       }
     }),
   }
+}
+
+export async function buildStatisticFilter(
+  { filterByShortnames }: { filterByShortnames?: string[] },
+  prisma: StatisticPrisma
+) {
+  if (filterByShortnames?.length) {
+    await statisticsAsserts.assertFilteredShortnamesExist(filterByShortnames, prisma)
+  }
+
+  return {
+    ...(filterByShortnames?.length && {
+      OR: filterByShortnames.map((shortname) => ({
+        shortname: {
+          name: shortname,
+        },
+      })),
+    }),
+  }
+}
+
+export async function getFilteredStatistics(
+  {
+    start = 0,
+    count = 10,
+    filterByShortnames,
+    sort,
+  }: {
+    start?: number
+    count?: number
+    filterByShortnames?: string[]
+    sort?: string[]
+  },
+  prisma: StatisticPrisma
+): Promise<StatisticListingResponse> {
+  const safeFilterByShortnames = filterByShortnames?.length
+    ? filterByShortnames.map((shortname) => sanitize(shortname))
+    : undefined
+
+  const where = await buildStatisticFilter({ filterByShortnames: safeFilterByShortnames }, prisma)
+
+  return getStatistics({ start, count, where, sort }, prisma)
 }
 
 // Statistic details

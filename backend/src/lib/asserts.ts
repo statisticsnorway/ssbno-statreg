@@ -60,7 +60,10 @@ export async function assertShortnameExists(shortname: string, prisma: Statistic
   return true
 }
 
-export async function assertFilteredShortnamesExist(shortname: string[], prisma: ReleasePrisma): Promise<boolean> {
+export async function assertFilteredShortnamesExist(
+  shortname: string[],
+  prisma: ReleasePrisma | StatisticPrisma
+): Promise<boolean> {
   const shortnames = await prisma.shortname.findMany({
     where: {
       name: { in: shortname },
@@ -119,4 +122,5 @@ export const releaseAsserts = {
 export const statisticsAsserts = {
   assertShortnameExists,
   assertShortnameExistsAndIsAvailable,
+  assertFilteredShortnamesExist,
 }
