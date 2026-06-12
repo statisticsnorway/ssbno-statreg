@@ -19,9 +19,11 @@ const Header = () => {
         <div className='header-links'>
           <Link href='/statistikkregisteret/'>Publisering</Link>
           <Link href='/statistikkregisteret/statistikk'>Statistikker</Link>
-          <Button variant='tertiary' onClick={() => alert('Kommer senere')}>
-            Mine saker <Avatar aria-label={auth?.fullName ?? ''} initials={initials} />
-          </Button>
+          {auth?.isAdmin && (
+            <Button variant='tertiary' onClick={() => alert('Kommer senere')}>
+              Mine saker <Avatar aria-label={auth?.fullName ?? ''} initials={initials} />
+            </Button>
+          )}
         </div>
       </div>
     </div>
