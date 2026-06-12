@@ -126,3 +126,31 @@ When adding or changing backend endpoints:
 - `docs/testing.md`
 - `docs/database.md`
 - `docs/auth.md`
+
+## Skills Available
+
+Use these repo skills in chat with `/` commands, or rely on auto-invocation when relevant.
+
+### `change-to-validation`
+
+- Use when deciding which required checks to run from changed files before finishing work.
+- Covers validation mapping for backend, frontend, shared, OpenAPI, Prisma schema, and cross-cutting refactors.
+- File: `.github/skills/change-to-validation/SKILL.md`
+
+### `endpoint-change`
+
+- Use when adding or modifying backend endpoints.
+- Covers Controller -> Service -> Database layering, OpenAPI sync, API type generation, and endpoint-focused test expectations.
+- File: `.github/skills/endpoint-change/SKILL.md`
+
+### `prisma-schema-change`
+
+- Use when editing `backend/prisma/schema.prisma` or handling migrations.
+- Covers safe Prisma workflow, client regeneration, migration guardrails, and backend validation expectations.
+- File: `.github/skills/prisma-schema-change/SKILL.md`
+
+## Skill Usage Tips
+
+- Be specific in prompt wording to improve skill matching (for example: "update endpoint contract", "prisma schema change", "what validation commands are required").
+- Keep skill files updated when scripts or workflows change.
+- Prefer focused skills over one large generic skill.
