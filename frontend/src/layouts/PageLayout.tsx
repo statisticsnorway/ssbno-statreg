@@ -10,7 +10,7 @@ import { useAuth } from '../context/AuthContext'
 }
 const Header = () => {
   const { auth } = useAuth()
-  const initials = auth?.email?.split('@')[0]
+  const firstNameLetter = auth?.fullName?.charAt(0)
 
   return (
     <div id='header'>
@@ -21,7 +21,7 @@ const Header = () => {
           <Link href='/statistikkregisteret/statistikk'>Statistikker</Link>
           {auth?.isAdmin && (
             <Button variant='tertiary' onClick={() => alert('Kommer senere')}>
-              Mine saker <Avatar aria-label={auth?.fullName ?? ''} initials={initials} />
+              Mine saker <Avatar aria-label={auth?.fullName ?? ''} initials={firstNameLetter} />
             </Button>
           )}
         </div>
