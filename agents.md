@@ -1,101 +1,128 @@
-# AGENTS.md — statistikkregisteret (statreg)
+# AGENTS.md - statistikkregisteret (statreg)
 
-Statreg is a fullstack application for statistikkregisteret. It includes an API that provides endpoints for fetching and managing statistics and publications, amongst other things.
+This file contains repo-specific instructions for coding agents working in this monorepo.
+When there is a conflict between generic guidance and this file, follow this file.
 
-This system is a metadata system for registering statistics, their variants (frequency and type of release) and releases belonging to the variants. This data is read by several other internal system and acts as a single-source-of-truth.
+## Purpose
 
-## Tech Stack
+Statreg is a fullstack metadata system for statistikregisteret.
+It manages statistics, variants, and publication releases, and serves as a source of truth for other internal systems.
 
-| Layer    | Technology                                       |
-|----------|--------------------------------------------------|
-| Backend  | Typescript + Node.js + Express                   |
-| Database | PostgreSQL + Prisma                              |
-| Frontend | React 19 + TypeScript + Vite                     |
-| Build    | Npm + Pkgroll (backend) + Tsc & Vite (frontend)  |
-| CI/CD    | GitHub Actions                                   |
+## Stack
 
-## Key Commands
+| Layer | Technology |
+|------|------|
+| Backend | TypeScript, Node.js, Express |
+| Database | PostgreSQL, Prisma |
+| Frontend | React 19, TypeScript, Vite |
+| Build | NPM workspaces, Pkgroll (backend), TSC and Vite (frontend) |
+| CI | GitHub Actions |
+
+## Monorepo Layout
+
+- `backend/`: API, services, Prisma schema and migrations
+- `frontend/`: React application
+- `shared/`: OpenAPI spec and shared types consumed by backend and frontend
+
+## Core Architecture Rules
+
+- Use layered flow: Controller -> Service -> Database.
+- Keep controllers thin; put business logic in services.
+- Reuse shared libraries instead of duplicating logic.
+- Keep API contract changes synchronized with OpenAPI and generated API types.
+
+## Commands
+
+Use these commands from repo root.
 
 ```bash
-# Start with local database (only when we want to test auth)
-docker compose -f docker-compose.yaml --env-file ./backend/.env up -d
-
 # Start full stack (http://localhost:8080)
 npm run dev
 
-# Build API types from the OpenAPI specification (these types are checked in to git)
-npm run generate:api-types
+# Start local auth flow (Keycloak + app)
+npm run dev:auth
 
-# Build Prisma Client
+# Build Prisma client
 npm run generate
 
-# Run backend tests (required before finishing any task)
+# Generate shared API types from OpenAPI
+npm run generate:api-types
+
+# Apply migrations
+npm run db:deploy
+
+# Seed local database
+npm run seed
+
+# Tests
+npm run test
 npm run test:backend
-
-# Run frontend tests
 npm run test:frontend
+npm run test:integration
 
-# Lint (check / fix)
+# Lint
 npm run lint
+npm run lint:fix
 ```
 
-## Project Structure
+## Change-Type Playbook
 
-This application is structured as a monorepo. We use the built in NPM workspaces feature to organize dependencies, running the correct commands from top-level etc. We have split the project into FRONTEND - BACKEND - SHARED
+Run the minimum required checks for the files you changed.
 
-Shared: Common files used in both frontend and backend. Here we have OpenAPI specification and Typescript types, enums and useful typing paths making it easier to use the generated API types.
+| If you changed | Required validation before finishing |
+|------|------|
+| `backend/**` | `npm run test:backend` |
+| `frontend/**` | `npm run test:frontend` |
+| `shared/**` | `npm run test` and `npm run test:frontend` and `npm run test:backend` |
+| `shared/openapi/openapi.yaml` | `npm run generate:api-types` and then relevant tests |
+| `backend/prisma/schema.prisma` | `npm run generate`, apply Prisma workflow from docs, then backend tests |
+| Cross-cutting refactors | `npm run test` and `npm run lint` |
 
-Backend: Node.js application using Express and Prisma for middleware and persistence. This can be viewed as the M and C parts of the MVC pattern. Exposed REST API.
+## Prisma And Database Safety
 
-Frontend: React application, consuming the REST API exposed by the backend application. When the application is built, the payload is copied over to the backend dist catalog, so both the frontend and backend runs as a single Express application on the server. This simplifies authentication and hosting.
+- Never edit an existing migration inside `backend/prisma/migrations/`.
+- Create new migrations using Prisma tooling only.
+- Follow `docs/database.md` and `README.md` for current local migration workflow.
+- If local schema drifts, prefer documented recovery steps over manual migration edits.
 
-### Backend - `backend/`
-| Path | Purpose |
-|------|---------|
-|`backend/src/app.ts`| Main entrypoint for the backend application |
-|`backend/src/api/core/controllerRouter.ts`| Gathers all the controllers and manages application flow |
-|`backend/src/api/controllers/`| Controllers for various API endpoints |
-|`backend/src/services/`| Services for accessing database operations. Uses Prisma. |
-|`backend/src/lib/`| Shared libraries, used across the backend. |
-|`backend/prisma/schema.prisma`| Prisma schema, describing the object model we interact with and how it maps to the Postgres database |
-|`backend/prisma/migrations/`| Prisma migrations. NEVER edit these, ONLY EVER create new migrations, using the Prisma tools. DO NOT create migrations directly, only ever using the Prisma tool commands! |
+## TypeScript Rules
 
+- Frontend `tsconfig` uses `erasableSyntaxOnly`.
+- Do not introduce TypeScript `enum` in frontend code.
+- Use JS-compatible enum pattern: const object + union type.
 
-### Frontend — `frontend/`
+## Testing And Quality Expectations
 
-| Path | Purpose |
-|------|---------|
-| `components/` | Reusable React components |
+- Prefer unit tests; add integration tests for complex interactions.
+- When changing behavior, update or add tests in the same area.
+- Run lint and relevant tests before concluding work.
 
-## Architecture
+## Security And Data Handling
 
-Layered: **Controller → Service → Database**
+- Never hardcode credentials, tokens, secrets, or internal identifiers.
+- Do not log sensitive values.
+- Preserve auth behavior unless explicitly requested to change it.
 
-- Controllers are thin — delegate immediately to services, no logic
-- Services own all business rules
-- Try to avoid duplicate logic using shared libraries
+## Endpoint Change Checklist
 
-## Testing
+When adding or changing backend endpoints:
 
-- Prefer unit tests. Write integration tests only for complex interactions
+1. Update repository/data-access query.
+2. Add or update service logic and validation.
+3. Keep controller focused on request/response mapping.
+4. Update OpenAPI spec in `shared/openapi/openapi.yaml`.
+5. Run `npm run generate:api-types`.
+6. Add or update backend tests.
 
-## Rules
+## Language Conventions
 
-- Never edit an existing Prisma migration file — always create a new one, and only ever using Prisma tools
-- Run backend tests before finishing any backend task
-- Never commit directly to `main` — use feature branches and PRs
-- Never hardcode credentials, secrets, or SSB-internal identifiers
+- Code, symbols, and package names: English.
+- Comments: Norwegian or English, match surrounding style.
 
-## Examples
+## Useful References
 
-**Add a new endpoint:**
-1. Add a query method to the relevant repository
-2. Add a service method that calls the repository and maps to a domain model
-3. Add a controller method that calls the service and maps to a response model
-4. Add the API endpoint to the OpenAPI documentation
-5. Build the API types
-
-## Language
-
-- Code, variable names, packages: English
-- Comments: Norwegian or English — match the surrounding style.
+- `README.md`
+- `docs/coding.md`
+- `docs/testing.md`
+- `docs/database.md`
+- `docs/auth.md`
