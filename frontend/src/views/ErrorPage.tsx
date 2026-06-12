@@ -1,34 +1,31 @@
 import { Heading } from '@digdir/designsystemet-react'
 
-const ErrorType = {
+export const ErrorType = {
   NOTAUTH: 'not_authenticated',
   NOTFOUND: 'not_found',
 } as const
 
-type ErrorType = (typeof ErrorType)[keyof typeof ErrorType]
+export type ErrorType = (typeof ErrorType)[keyof typeof ErrorType]
 
 type ErrorPageProps = Readonly<{
   type: ErrorType
 }>
 
-export { ErrorType as errorType }
-
-function getErrorMessage(error: ErrorType) {
-  switch (error) {
-    case ErrorType.NOTAUTH:
-      return 'Du har ikke tilgang til å bruke denne siden. Kontakt desken om du mener dette er en feil.'
-    case ErrorType.NOTFOUND:
-      return 'Innholdet du prøver å vise finnes ikke'
-    default:
-      return 'Det har oppstått en feil'
-  }
+const errorMessages: Record<ErrorType, string> = {
+  [ErrorType.NOTAUTH]: 'Du har ikke tilgang til å bruke denne siden. Kontakt desken om du mener dette er en feil.',
+  [ErrorType.NOTFOUND]: 'Innholdet du prøver å vise finnes ikke',
 }
 
 export default function ErrorPage({ type }: ErrorPageProps) {
   return (
     <>
-      <Heading level={2}>En feil har oppstått</Heading>
-      <p>{getErrorMessage(type)}</p>
+      <Heading level={1} data-size='xl'>
+        En feil har oppstått
+      </Heading>
+
+      <p className='ds-paragraph' data-variant='default' data-size='xl'>
+        {errorMessages[type]}
+      </p>
     </>
   )
 }

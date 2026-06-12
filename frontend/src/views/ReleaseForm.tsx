@@ -43,7 +43,7 @@ import {
 import client from '../api'
 
 import './ReleaseForm.css'
-import ErrorPage, { errorType } from './ErrorPage'
+import ErrorPage, { ErrorType } from './ErrorPage'
 import { useAuth } from '../context/AuthContext'
 
 type Statistic = ReleaseByIdResponse['statistic'] & {
@@ -161,7 +161,7 @@ export default function ReleaseForm() {
 
   const { auth } = useAuth()
 
-  if (!auth?.isAdmin) return <ErrorPage type={errorType.NOTAUTH} />
+  if (!auth?.isAdmin) return <ErrorPage type={ErrorType.NOTAUTH} />
 
   function validateFields(): boolean {
     const nextErrors: ReleaseFormErrors = {}
