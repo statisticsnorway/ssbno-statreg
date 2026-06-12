@@ -137,15 +137,21 @@ export default function ShowStatistic() {
         <Paragraph>{division}</Paragraph>
       </div>
 
-      <div>
+      <div className='show-statistic-contacts-container'>
         <Heading data-size='xs'>Kontaktpersoner</Heading>
         <Paragraph>Kontaktpersoner kan endres uten godkjenning</Paragraph>
         {contacts.map((contact) => (
           <Paragraph key={contact}>{contact}</Paragraph>
         ))}
-        <Button variant='tertiary' onClick={() => alert('Rediger kontakter er ikke implementert ennå.')}>
-          <PersonPencilIcon /> Rediger kontakt
-        </Button>
+        {!auth?.isAdmin && (
+          <Button
+            variant='tertiary'
+            className='edit-contact-button'
+            onClick={() => alert('Rediger kontakter er ikke implementert ennå.')}
+          >
+            <PersonPencilIcon /> Rediger kontakt
+          </Button>
+        )}
       </div>
 
       <div>
