@@ -43,6 +43,7 @@ import {
 import client from '../api'
 
 import './ReleaseForm.css'
+import ErrorPage, { errorType } from './ErrorPage'
 
 type Statistic = ReleaseByIdResponse['statistic'] & {
   approval_status?: ReleaseByIdResponse['approval_status']
@@ -156,6 +157,10 @@ export default function ReleaseForm() {
     }
     fetchVariant()
   }, [shortname, variantId])
+
+  const auth = false
+
+  if (!auth) return <ErrorPage type={errorType.NOTAUTH} />
 
   function validateFields(): boolean {
     const nextErrors: ReleaseFormErrors = {}
