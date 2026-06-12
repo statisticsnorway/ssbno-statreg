@@ -109,6 +109,15 @@ export default function ReleaseForm() {
 
   const { auth } = useAuth()
 
+  let submitButtonText = 'Meld dato'
+  if (isEditing) {
+    submitButtonText = 'Lagre og godkjenn'
+
+    if (!auth?.isAdmin) {
+      submitButtonText = 'Send endringsforslag'
+    }
+  }
+
   // when id exists in url-path, fetch release and prefill form
   useEffect(() => {
     async function setPrefilledValues() {
@@ -336,9 +345,7 @@ export default function ReleaseForm() {
         )}
 
         <div className='release-form-button-wrapper'>
-          <Button type='submit'>
-            {isEditing ? (auth?.isAdmin ? 'Lagre og godkjenn' : 'Send endringsforslag') : 'Meld dato'}
-          </Button>
+          <Button type='submit'>{submitButtonText}</Button>
           <Button variant='tertiary' asChild>
             <ReactRouterLink
               to={isEditing ? `/publisering/${releaseId}` : `/statistikk/${statistic?.shortname}`}
