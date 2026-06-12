@@ -168,8 +168,6 @@ export default function ReleaseForm() {
     fetchVariant()
   }, [shortname, variantId])
 
-  const { auth } = useAuth()
-
   if (!auth?.isAdmin) return <ErrorPage type={ErrorType.NOTAUTH} />
 
   function validateFields(): boolean {
