@@ -7,8 +7,10 @@ import ShowStatistic from './views/ShowStatistic'
 import ListStatistics from './views/ListStatistics'
 import ListReleases from './views/ListReleases'
 import CreateStatistic from './views/CreateStatistic'
+import EditStatistic from './views/EditStatistic'
 import ListBlockedDates from './views/ListBlockedDates'
 import CreateBlockedDate from './views/CreateBlockedDate'
+import MyPage from './views/MyPage'
 
 function App() {
   return (
@@ -25,12 +27,17 @@ function App() {
           <Route index element={<ListStatistics />} />
           <Route path=':shortname' element={<ShowStatistic />} />
           <Route path=':shortname/:variantId/opprett' element={<ReleaseForm />} />
+          <Route path=':shortname/rediger' element={<EditStatistic />} />
           <Route path='opprett' element={<CreateStatistic />} />
         </Route>
 
         <Route path='sperredato'>
           <Route index element={<ListBlockedDates />} />
           <Route path='opprett' element={<CreateBlockedDate />} />
+        </Route>
+
+        <Route path='mine-saker'>
+          <Route index element={<MyPage />} />
         </Route>
       </Route>
     </Routes>
