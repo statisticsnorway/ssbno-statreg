@@ -1,4 +1,4 @@
-import { createContext, use, useEffect, useState, type ReactNode } from 'react'
+import { createContext, use, useEffect, useState, useMemo, type ReactNode } from 'react'
 import { type AuthResponse } from '@ssbno-statreg/shared'
 import client from '../api'
 
@@ -40,9 +40,10 @@ function writeToSessionStorage(auth: AuthResponse | undefined): void {
   }
 }
 
-export function AuthProvider({ children }: { children: ReactNode }) {
+export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
   const [auth, setAuth] = useState<AuthResponse | undefined | null>(() => readFromSessionStorage())
   const [isLoading, setIsLoading] = useState(auth === null)
+  const authContextProps = useMemo(() => ({ auth, isLoading }), [auth, isLoading])
 
   useEffect(() => {
     if (auth) return
@@ -56,7 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .finally(() => setIsLoading(false))
   }, [auth])
 
-  return <AuthContext value={{ auth, isLoading }}>{children}</AuthContext>
+  return <AuthContext value={authContextProps}>{children}</AuthContext>
 }
 
 export function useAuth(): AuthContextValue {
