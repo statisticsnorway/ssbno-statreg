@@ -18,6 +18,7 @@ import client from '../api'
 import './ListReleases.css'
 import type { ReleaseListing, ShortnameListing } from '@ssbno-statreg/shared'
 import { RowCountSelect } from '../components/RowCountSelect'
+import { useAuth } from '../context/AuthContext'
 
 function ListReleases() {
   const [searchParams] = useSearchParams()
@@ -32,6 +33,8 @@ function ListReleases() {
   const [selectedShortnames, setSelectedShortnames] = useState<SuggestionItem[]>([])
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
   const [sortBy, setSortBy] = useState<string[]>(['-publish_time'])
+
+  const { auth } = useAuth()
 
   useEffect(() => {
     async function fetchReleases(
@@ -117,11 +120,13 @@ function ListReleases() {
         <Heading level={1} data-size='sm'>
           Publiseringsoversikt
         </Heading>
-        <Button asChild style={{ backgroundColor: 'var(--ds-color-base-default)' }}>
-          <ReactRouterLink to='/sperredato'>
-            Se sperrede datoer <CalendarIcon />
-          </ReactRouterLink>
-        </Button>
+        {auth?.isAdmin && (
+          <Button asChild style={{ backgroundColor: 'var(--ds-color-base-default)' }}>
+            <ReactRouterLink to='/sperredato'>
+              Se sperrede datoer <CalendarIcon />
+            </ReactRouterLink>
+          </Button>
+        )}
       </div>
       <div className='list-releases-calendars-container'>
         <Heading level={2} data-size='xs'>
