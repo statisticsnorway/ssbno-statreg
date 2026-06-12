@@ -43,6 +43,7 @@ import {
 import client from '../api'
 
 import './ReleaseForm.css'
+import { useAuth } from '../context/AuthContext'
 
 type Statistic = ReleaseByIdResponse['statistic'] & {
   approval_status?: ReleaseByIdResponse['approval_status']
@@ -84,7 +85,6 @@ function useDatepicker(
   })
 }
 
-// common release form for creating and editing release
 export default function ReleaseForm() {
   // for creation, path is /statistikk/:shortname/:variantId/opprett
   // for editing, path is /publisering/:id/rediger
@@ -106,6 +106,8 @@ export default function ReleaseForm() {
   const [openReleaseModal, setOpenReleaseModal] = useState(false)
   const [newOrUpdatedRelease, setNewOrUpdatedRelease] = useState<ReleaseDetails>({})
   const [calendarDates, setCalendarDates] = useState<CalenderDate>({})
+
+  const { auth } = useAuth()
 
   // when id exists in url-path, fetch release and prefill form
   useEffect(() => {
@@ -136,7 +138,6 @@ export default function ReleaseForm() {
     // eslint-disable-next-line @eslint-react/exhaustive-deps
   }, [releaseId])
 
-  // when shortname and variantId exists in url-path, only fetch statistic and variant data
   useEffect(() => {
     async function fetchVariant() {
       if (!shortname || !variantId) return
@@ -335,7 +336,9 @@ export default function ReleaseForm() {
         )}
 
         <div className='release-form-button-wrapper'>
-          <Button type='submit'>{isEditing ? 'Lagre' : 'Meld dato'}</Button>
+          <Button type='submit'>
+            {isEditing ? (auth?.isAdmin ? 'Lagre og godkjenn' : 'Send endringsforslag') : 'Meld dato'}
+          </Button>
           <Button variant='tertiary' asChild>
             <ReactRouterLink
               to={isEditing ? `/publisering/${releaseId}` : `/statistikk/${statistic?.shortname}`}
