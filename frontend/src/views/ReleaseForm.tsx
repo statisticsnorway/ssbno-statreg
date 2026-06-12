@@ -44,6 +44,7 @@ import client from '../api'
 
 import './ReleaseForm.css'
 import ErrorPage, { errorType } from './ErrorPage'
+import { useAuth } from '../context/AuthContext'
 
 type Statistic = ReleaseByIdResponse['statistic'] & {
   approval_status?: ReleaseByIdResponse['approval_status']
@@ -158,9 +159,9 @@ export default function ReleaseForm() {
     fetchVariant()
   }, [shortname, variantId])
 
-  const auth = false
+  const { auth } = useAuth()
 
-  if (!auth) return <ErrorPage type={errorType.NOTAUTH} />
+  if (!auth?.isAdmin) return <ErrorPage type={errorType.NOTAUTH} />
 
   function validateFields(): boolean {
     const nextErrors: ReleaseFormErrors = {}
