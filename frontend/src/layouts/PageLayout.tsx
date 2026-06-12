@@ -1,7 +1,7 @@
 import './PageLayout.css'
 import ssbLogo from '../assets/SSB_logo_black.svg'
 
-import { Outlet } from 'react-router'
+import { Outlet, Link as ReactRouterLink } from 'react-router'
 import { Link, Button, Avatar } from '@digdir/designsystemet-react'
 import { useAuth } from '../context/AuthContext'
 
@@ -17,8 +17,10 @@ const Header = () => {
           <Link href='/statistikkregisteret/'>Publisering</Link>
           <Link href='/statistikkregisteret/statistikk'>Statistikker</Link>
           {auth?.isAdmin && (
-            <Button variant='tertiary' onClick={() => alert('Kommer senere')}>
-              Mine saker <Avatar aria-label={auth?.fullName ?? ''} initials={firstNameLetter} />
+            <Button variant='tertiary' asChild>
+              <ReactRouterLink to='/mine-saker' reloadDocument>
+                Mine saker <Avatar aria-label={auth?.fullName ?? ''} initials={firstNameLetter} />
+              </ReactRouterLink>
             </Button>
           )}
         </div>
