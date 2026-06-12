@@ -6,7 +6,7 @@ const SESSION_STORAGE_KEY = 'auth'
 
 type AuthContextValue = {
   auth: AuthResponse | null | undefined
-  isLoading: boolean
+  loading: boolean
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
@@ -42,8 +42,8 @@ function writeToSessionStorage(auth: AuthResponse | undefined): void {
 
 export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
   const [auth, setAuth] = useState<AuthResponse | undefined | null>(() => readFromSessionStorage())
-  const [isLoading, setIsLoading] = useState(auth === null)
-  const authContextProps = useMemo(() => ({ auth, isLoading }), [auth, isLoading])
+  const [loading, setLoading] = useState(auth === null)
+  const authContextProps = useMemo(() => ({ auth, loading }), [auth, loading])
 
   useEffect(() => {
     if (auth) return
@@ -54,7 +54,7 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
         setAuth(data)
       })
       .catch(console.error)
-      .finally(() => setIsLoading(false))
+      .finally(() => setLoading(false))
   }, [auth])
 
   return <AuthContext value={authContextProps}>{children}</AuthContext>
