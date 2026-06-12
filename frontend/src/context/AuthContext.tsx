@@ -36,12 +36,14 @@ function writeToSessionStorage(auth: AuthResponse | undefined): void {
     sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(auth))
   } catch {
     // sessionStorage may be unavailable in some private-browsing environments
+    console.warn('Failed to write auth data to sessionStorage')
   }
 }
 
 export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
   const [auth, setAuth] = useState<AuthResponse | undefined | null>(() => readFromSessionStorage())
-  const [loading, setLoading] = useState(auth === null)
+  const [loading, setLoading] = useState(!auth)
+
   const authContextProps = useMemo(() => ({ auth, loading }), [auth, loading])
 
   useEffect(() => {
@@ -61,7 +63,7 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
 
 export function useAuth(): AuthContextValue {
   const context = use(AuthContext)
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useAuth must be used within an AuthProvider')
   }
   return context
