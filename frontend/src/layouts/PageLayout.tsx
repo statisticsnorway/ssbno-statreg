@@ -5,9 +5,6 @@ import { Outlet } from 'react-router'
 import { Link, Button, Avatar } from '@digdir/designsystemet-react'
 import { useAuth } from '../context/AuthContext'
 
-{
-  /* TODO: This is only placeholder; create own Header component if necessary */
-}
 const Header = () => {
   const { auth } = useAuth()
   const firstNameLetter = auth?.fullName?.charAt(0)
