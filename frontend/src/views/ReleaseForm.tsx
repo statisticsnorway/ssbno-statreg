@@ -86,7 +86,6 @@ function useDatepicker(
   })
 }
 
-// common release form for creating and editing release
 export default function ReleaseForm() {
   // for creation, path is /statistikk/:shortname/:variantId/opprett
   // for editing, path is /publisering/:id/rediger
@@ -108,6 +107,17 @@ export default function ReleaseForm() {
   const [openReleaseModal, setOpenReleaseModal] = useState(false)
   const [newOrUpdatedRelease, setNewOrUpdatedRelease] = useState<ReleaseDetails>({})
   const [calendarDates, setCalendarDates] = useState<CalenderDate>({})
+
+  const { auth } = useAuth()
+
+  let submitButtonText = 'Meld dato'
+  if (isEditing) {
+    submitButtonText = 'Lagre og godkjenn'
+
+    if (!auth?.isAdmin) {
+      submitButtonText = 'Send endringsforslag'
+    }
+  }
 
   // when id exists in url-path, fetch release and prefill form
   useEffect(() => {
@@ -138,7 +148,6 @@ export default function ReleaseForm() {
     // eslint-disable-next-line @eslint-react/exhaustive-deps
   }, [releaseId])
 
-  // when shortname and variantId exists in url-path, only fetch statistic and variant data
   useEffect(() => {
     async function fetchVariant() {
       if (!shortname || !variantId) return
@@ -341,7 +350,7 @@ export default function ReleaseForm() {
         )}
 
         <div className='release-form-button-wrapper'>
-          <Button type='submit'>{isEditing ? 'Lagre' : 'Meld dato'}</Button>
+          <Button type='submit'>{submitButtonText}</Button>
           <Button variant='tertiary' asChild>
             <ReactRouterLink
               to={isEditing ? `/publisering/${releaseId}` : `/statistikk/${statistic?.shortname}`}
