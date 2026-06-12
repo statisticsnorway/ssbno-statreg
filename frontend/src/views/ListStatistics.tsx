@@ -1,9 +1,11 @@
+import './ListStatistics.css'
 import { useEffect, useState } from 'react'
 import client from '../api'
 import type { StatisticListing } from '@ssbno-statreg/shared'
 import { PaginatedStatisticsTable } from '../components/StatisticsTable'
-import './ListStatistics.css'
-import { Heading } from '@digdir/designsystemet-react'
+import { Heading, Button } from '@digdir/designsystemet-react'
+import { Link as ReactRouterLink } from 'react-router'
+import { PlusCircleIcon } from '@navikt/aksel-icons'
 
 export default function ListStatistics() {
   const [count, setCount] = useState(20)
@@ -38,9 +40,16 @@ export default function ListStatistics() {
 
   return (
     <div className='list-statistics-container'>
-      <Heading level={1} data-size='sm'>
-        Statistikkoversikt
-      </Heading>
+      <div className='list-statistics-header'>
+        <Heading level={1} data-size='sm'>
+          Statistikkoversikt
+        </Heading>
+        <Button datas-size='md' asChild>
+          <ReactRouterLink to='/statistikk/opprett' reloadDocument>
+            Opprett ny statistikk <PlusCircleIcon />
+          </ReactRouterLink>
+        </Button>
+      </div>
       <div>
         <PaginatedStatisticsTable
           start={start}
