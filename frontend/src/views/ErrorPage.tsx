@@ -16,7 +16,7 @@ function getErrorMessage(error: string) {
   }
 }
 
-export function ErrorPage(error: string) {
+export function ErrorPage(error: string = '') {
   return (
     <>
       <Heading level={2}>En feil har oppstått</Heading>
