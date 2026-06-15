@@ -250,4 +250,20 @@ describe('statisticsController integration', () => {
       first_release: '2024-02-01T00:00:00.000Z',
     })
   })
+
+  test('GET /statistics with shortname filter returns only matching statistics', async () => {
+    const filterShortnames = ['helse', 'energ']
+    const response = await request(app)
+      .get('/statistikkregisteret/api/statistics')
+      .query({ shortname: filterShortnames })
+
+    expect(response.status).toBe(200)
+
+    const statistics = response.body as StatisticListingResponse
+
+    expect(statistics.statistics?.length).toBeGreaterThan(0)
+    statistics.statistics?.forEach((stat) => {
+      expect(filterShortnames).toContain(stat.shortname)
+    })
+  })
 })
