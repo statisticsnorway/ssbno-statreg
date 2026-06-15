@@ -33,6 +33,16 @@ export async function createApp() {
   })
 
   app.get('/statistikkregisteret/api/auth/authenticate', auth, (req, res) => {
+    // We want a default object if auth is not available or not in use.
+    if (!req.auth) {
+      res.json({
+        isAdmin: false,
+        email: '',
+        fullName: '',
+      })
+      return
+    }
+
     const claims = req.auth?.claims as JWTPayload & {
       dapla?: {
         groups?: string[]
