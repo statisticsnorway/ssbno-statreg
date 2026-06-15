@@ -149,7 +149,7 @@ function ListReleases() {
           </Popover.TriggerContext>
         </div>
         <div className='list-releases-calendars-wrapper'>
-          <Button variant='tertiary' onClick={() => setCalendarMonth((prev) => prev - 3)}>
+          <Button variant='tertiary' data-size='lg' onClick={() => setCalendarMonth((prev) => prev - 3)}>
             <ArrowLeftIcon />
           </Button>
           <div className='list-releases-calendars'>
@@ -165,7 +165,7 @@ function ListReleases() {
               onSelect={onSelectDate}
             />
           </div>
-          <Button variant='tertiary' onClick={() => setCalendarMonth((prev) => prev + 3)}>
+          <Button variant='tertiary' data-size='lg' onClick={() => setCalendarMonth((prev) => prev + 3)}>
             <ArrowRightIcon />
           </Button>
         </div>
