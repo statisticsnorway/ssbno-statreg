@@ -89,12 +89,7 @@ export async function getStatistics(
   },
   prisma: StatisticPrisma
 ): Promise<StatisticListingResponse> {
-  const sortMapping: Record<string, Prisma.StatisticOrderByWithRelationInput> = {
-    shortname: { shortname: { name: 'asc' } },
-    '-shortname': { shortname: { name: 'desc' } },
-  }
-
-  const orderBy = sort ? sortMapping[sort] : undefined
+  const orderBy = parseStatisticSortQuery(sort)
 
   const statistics = await prisma.statistic.findMany({
     skip: start,
@@ -474,6 +469,16 @@ export function parseStatusCode(statusCode?: string): string {
     throw { statregError: `Field 'status' must be one of these: ${Object.keys(StatisticStatus).join(', ')}.` }
   }
   return statusCode
+}
+
+export function parseStatisticSortQuery(sort?: string): Prisma.StatisticOrderByWithRelationInput | undefined {
+  if (sort === 'shortname') {
+    return { shortname: { name: 'asc' } }
+  }
+  if (sort === '-shortname') {
+    return { shortname: { name: 'desc' } }
+  }
+  return undefined
 }
 
 export function parseRelation(relationId?: string | null): number | null {

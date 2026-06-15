@@ -251,19 +251,17 @@ describe('statisticsController integration', () => {
     })
   })
 
-  test('GET /statistics with shortname filter returns only matching statistics', async () => {
-    const filterShortnames = ['helse', 'energ']
+  test('GET /statistics with shortname filter and sort', async () => {
     const response = await request(app)
       .get('/statistikkregisteret/api/statistics')
-      .query({ shortname: filterShortnames })
+      .query('shortname=helse,energ&sort=-shortname')
 
     expect(response.status).toBe(200)
 
     const statistics = response.body as StatisticListingResponse
 
-    expect(statistics.statistics?.length).toBeGreaterThan(0)
-    statistics.statistics?.forEach((stat) => {
-      expect(filterShortnames).toContain(stat.shortname)
-    })
+    expect(statistics.statistics?.length).toBe(2)
+    expect(statistics.statistics?.[0]?.shortname).toBe('helse')
+    expect(statistics.statistics?.[1]?.shortname).toBe('energ')
   })
 })
