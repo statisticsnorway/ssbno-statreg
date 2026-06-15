@@ -7,7 +7,7 @@ import {
   StatisticListingResponse,
 } from '@ssbno-statreg/shared'
 import { dateToISOString, sanitize, parseDateOnly, ensureRequiredFieldsExists, isNumber, parseId } from '@/lib/utils'
-import { Prisma } from '@/generated/prisma/client'
+import type { Prisma } from '@/generated/prisma/client'
 import { getDivisionFromCode } from '@/services/klassService'
 import { fetchUsers } from '@/services/entraUserService'
 import type { UserLookupItem, Users } from '@/types/entra'
@@ -43,7 +43,7 @@ export async function getFilteredStatistics(
     prisma
   )
 
-  return getStatistics({ start, count, where, sort }, prisma)
+  return getStatistics({ start, count, where, orderBy: parseStatisticSortQuery(sort) }, prisma)
 }
 
 export async function buildStatisticFilter(
@@ -80,22 +80,20 @@ export async function getStatistics(
     start = 0,
     count = 10,
     where,
-    sort,
+    orderBy,
   }: {
     start?: number
     count?: number
     where?: Prisma.StatisticWhereInput
-    sort?: string
+    orderBy?: Prisma.StatisticOrderByWithRelationInput
   },
   prisma: StatisticPrisma
 ): Promise<StatisticListingResponse> {
-  const orderBy = parseStatisticSortQuery(sort)
-
   const statistics = await prisma.statistic.findMany({
     skip: start,
     take: count,
     where,
-    orderBy: orderBy,
+    orderBy,
     select: {
       language: true,
       status: true,
