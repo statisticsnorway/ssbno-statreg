@@ -20,6 +20,7 @@
     "dev:auth": "docker-compose --env-file ./backend/.env up --build",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
+    "check": "npm run build -w shared && tsc --noEmit -p backend && tsc -b frontend && npm run lint",
     "seed": "npm run seed -w backend",
     "generate": "npm run generate -w backend",
     "generate:api-types": "openapi-typescript ./shared/openapi/openapi.yaml | prettier --parser typescript > ./shared/src/api-types.ts"
