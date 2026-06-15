@@ -14,7 +14,7 @@ import {
 } from '@ssbno-statreg/shared'
 
 import './ShowStatistic.css'
-import { formatPublishTime, formatRevisionName, formatVariant } from '../lib/utils'
+import { formatContacts, formatPublishTime, formatRevisionName, formatVariant } from '../lib/utils'
 import { ApprovalStatusBadge } from '../components/ApprovalStatus'
 
 const TABLE_HEADER_CELLS = [{ label: 'Dato' }, { label: 'Variant' }, { label: 'Status' }]
@@ -210,15 +210,6 @@ function formatCancelledVariants(variants: Variant[]): string[] {
 function formatVariantDetails(variant: Variant): string {
   const detail = variant.level_of_detail?.name ?? '-'
   return `${detail}, ${formatVariant(variant)}`
-}
-
-function formatContacts(contacts: StatisticDetails['contacts']): string[] {
-  if (!contacts) return []
-  return contacts.map((contact) => {
-    const name = contact.name ?? '-'
-    const initials = contact.email ? contact.email.split('@')[0] : '-'
-    return `${name} (${initials})`
-  })
 }
 
 function SimpleReleasesTable({ releases }: { releases: ReleaseListing[] }) {
