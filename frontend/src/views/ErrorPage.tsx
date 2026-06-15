@@ -1,4 +1,4 @@
-import { Heading } from '@digdir/designsystemet-react'
+import { Heading, Paragraph } from '@digdir/designsystemet-react'
 
 export const ErrorType = {
   NOTAUTH: 'not_authenticated',
@@ -23,9 +23,7 @@ export default function ErrorPage({ type }: ErrorPageProps) {
         En feil har oppstått
       </Heading>
 
-      <p className='ds-paragraph' data-variant='default' data-size='xl'>
-        {errorMessages[type]}
-      </p>
+      <Paragraph data-size='xl'>{errorMessages[type]}</Paragraph>
     </>
   )
 }

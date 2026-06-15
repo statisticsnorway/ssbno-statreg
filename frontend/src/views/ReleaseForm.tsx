@@ -43,7 +43,6 @@ import {
 import client from '../api'
 
 import './ReleaseForm.css'
-import ErrorPage, { ErrorType } from './ErrorPage'
 import { useAuth } from '../context/AuthContext'
 
 type Statistic = ReleaseByIdResponse['statistic'] & {
