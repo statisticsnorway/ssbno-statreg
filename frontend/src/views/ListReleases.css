@@ -11,6 +11,21 @@
   flex-direction: column;
   gap: var(--ds-size-4);
 
+  .list-releases-calendars-title {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+
+    .list-releases-color-legend-popover {
+      display: flex;
+      align-items: center;
+
+      svg {
+        color: var(--ds-color-text-subtle);
+      }
+    }
+  }
+
   .list-releases-calendars-buttons {
     width: 1400px; /* TODO: Setting a fixed width for now */
     display: flex;

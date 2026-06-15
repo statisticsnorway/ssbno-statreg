@@ -8,8 +8,10 @@ import {
   EXPERIMENTAL_Suggestion as Suggestion,
   type SuggestionItem,
   Chip,
+  Paragraph,
+  Popover,
 } from '@digdir/designsystemet-react'
-import { ArrowLeftIcon, ArrowRightIcon, CalendarIcon } from '@navikt/aksel-icons'
+import { ArrowLeftIcon, ArrowRightIcon, CalendarIcon, QuestionmarkCircleIcon } from '@navikt/aksel-icons'
 import { DatePicker } from '../components/DatePicker'
 import { PaginatedReleasesTable } from '../components/ReleasesTable'
 import { formatDate, getFirstDayOfNthMonth, getPublishTimeFilterForDate } from '../lib/utils'
@@ -129,9 +131,23 @@ function ListReleases() {
         )}
       </div>
       <div className='list-releases-calendars-container'>
-        <Heading level={2} data-size='xs'>
-          Publiseringskalender
-        </Heading>
+        <div className='list-releases-calendars-title'>
+          <div>
+            <Heading level={2} data-size='xs'>
+              Publiseringskalender
+            </Heading>
+            <Paragraph data-size='md'>Filtrer publiseringsoversikten ved å klikke på dato</Paragraph>
+          </div>
+          <Popover.TriggerContext>
+            <Popover.Trigger inline className='list-releases-color-legend-popover'>
+              Fargeforklaring
+              <QuestionmarkCircleIcon fontSize={24} />
+            </Popover.Trigger>
+            <Popover data-color='neutral' data-placement='right'>
+              {/* TODO */}
+            </Popover>
+          </Popover.TriggerContext>
+        </div>
         <div className='list-releases-calendars-buttons'>
           <Button variant='tertiary' onClick={() => setCalendarMonth((prev) => prev - 3)}>
             <ArrowLeftIcon /> Forrige
@@ -151,7 +167,6 @@ function ListReleases() {
             month={getFirstDayOfNthMonth(calendarMonth + 2)}
             selected={selectedDate}
             onSelect={onSelectDate}
-            showColorCodingExplanation
           />
         </div>
       </div>
