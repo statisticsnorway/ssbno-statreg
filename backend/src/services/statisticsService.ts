@@ -46,6 +46,16 @@ export async function getFilteredStatistics(
   return getStatistics({ start, count, where, orderBy: parseStatisticSortQuery(sort) }, prisma)
 }
 
+function parseStatisticSortQuery(sort?: string): Prisma.StatisticOrderByWithRelationInput | undefined {
+  if (sort === 'shortname') {
+    return { shortname: { name: 'asc' } }
+  }
+  if (sort === '-shortname') {
+    return { shortname: { name: 'desc' } }
+  }
+  return undefined
+}
+
 export async function buildStatisticFilter(
   {
     filterByShortnames,
@@ -467,16 +477,6 @@ export function parseStatusCode(statusCode?: string): string {
     throw { statregError: `Field 'status' must be one of these: ${Object.keys(StatisticStatus).join(', ')}.` }
   }
   return statusCode
-}
-
-export function parseStatisticSortQuery(sort?: string): Prisma.StatisticOrderByWithRelationInput | undefined {
-  if (sort === 'shortname') {
-    return { shortname: { name: 'asc' } }
-  }
-  if (sort === '-shortname') {
-    return { shortname: { name: 'desc' } }
-  }
-  return undefined
 }
 
 export function parseRelation(relationId?: string | null): number | null {
