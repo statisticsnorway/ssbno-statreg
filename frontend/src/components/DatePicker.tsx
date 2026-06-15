@@ -24,7 +24,7 @@ export const DatePickerStatusColors = {
   NONE: { backgroundColor: 'var(--ds-color-accent-background-default)' },
 }
 
-export function DatePickerColorLegend({ statusColors }: { statusColors: typeof DatePickerStatusColors }) {
+export function DatePickerColorLegend({ statusColors }: Readonly<{ statusColors: typeof DatePickerStatusColors }>) {
   return (
     <div className='datepicker-explanation'>
       {Object.entries(DayStatus).map(([key, value]) => (
