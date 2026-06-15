@@ -5,3 +5,9 @@
   margin-top: var(--ds-size-6);
   margin-bottom: var(--ds-size-6);
 }
+
+.show-statistic-contacts-container {
+  .edit-contact-button {
+    margin-top: var(--ds-size-4);
+  }
+}
