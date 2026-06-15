@@ -148,26 +148,26 @@ function ListReleases() {
             </Popover>
           </Popover.TriggerContext>
         </div>
-        <div className='list-releases-calendars-buttons'>
-          <Button variant='tertiary' onClick={() => setCalendarMonth((prev) => prev - 3)}>
-            <ArrowLeftIcon /> Forrige
-          </Button>
-          <Button variant='tertiary' onClick={() => setCalendarMonth((prev) => prev + 3)}>
-            Neste <ArrowRightIcon />
-          </Button>
-        </div>
         <div className='list-releases-calendars-wrapper'>
-          <DatePicker month={getFirstDayOfNthMonth(calendarMonth)} selected={selectedDate} onSelect={onSelectDate} />
-          <DatePicker
-            month={getFirstDayOfNthMonth(calendarMonth + 1)}
-            selected={selectedDate}
-            onSelect={onSelectDate}
-          />
-          <DatePicker
-            month={getFirstDayOfNthMonth(calendarMonth + 2)}
-            selected={selectedDate}
-            onSelect={onSelectDate}
-          />
+          <Button variant='tertiary' onClick={() => setCalendarMonth((prev) => prev - 3)}>
+            <ArrowLeftIcon />
+          </Button>
+          <div className='list-releases-calendars'>
+            <DatePicker month={getFirstDayOfNthMonth(calendarMonth)} selected={selectedDate} onSelect={onSelectDate} />
+            <DatePicker
+              month={getFirstDayOfNthMonth(calendarMonth + 1)}
+              selected={selectedDate}
+              onSelect={onSelectDate}
+            />
+            <DatePicker
+              month={getFirstDayOfNthMonth(calendarMonth + 2)}
+              selected={selectedDate}
+              onSelect={onSelectDate}
+            />
+          </div>
+          <Button variant='tertiary' onClick={() => setCalendarMonth((prev) => prev + 3)}>
+            <ArrowRightIcon />
+          </Button>
         </div>
       </div>
       <div
