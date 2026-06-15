@@ -688,3 +688,25 @@ paths:
               schema:
                 type: array
                 items: { $ref: '#/components/schemas/Blocked_release_date' }
+  /auth/authenticate:
+      get:
+        summary: Check authentication status and information for current user. Used for controlling front-end behaviour, not security.
+        tags: [authentication]
+        responses: 
+          '200': 
+            description: Object with admin-status, user info
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    isAdmin:
+                      type: boolean
+                      example: true
+                    email: 
+                      type: string
+                      example: alice@example.com
+                    fullName:
+                      type: string
+                      example: Alice Examplesdottir
+

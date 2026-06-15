@@ -22,6 +22,7 @@ export async function createApp() {
 
   app.use('/statistikkregisteret/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
+  // TODO: MIM-2824 Remove this endpoint before we go live!
   app.get('/statistikkregisteret/api/auth/me', auth, (req, res) => {
     // For local testing, add requireUserAuthentication here
     res.json({
@@ -32,6 +33,16 @@ export async function createApp() {
   })
 
   app.get('/statistikkregisteret/api/auth/authenticate', auth, (req, res) => {
+    // We want a default object if auth is not available or not in use.
+    if (!req.auth) {
+      res.json({
+        isAdmin: false,
+        email: '',
+        fullName: '',
+      })
+      return
+    }
+
     const claims = req.auth?.claims as JWTPayload & {
       dapla?: {
         groups?: string[]
