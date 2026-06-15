@@ -1,24 +1,33 @@
 import './PageLayout.css'
 import ssbLogo from '../assets/SSB_logo_black.svg'
 
-import { Outlet } from 'react-router'
-import { Link } from '@digdir/designsystemet-react'
+import { Outlet, Link as ReactRouterLink } from 'react-router'
+import { Link, Button, Avatar } from '@digdir/designsystemet-react'
+import { useAuth } from '../context/AuthContext'
 
-{
-  /* TODO: This is only placeholder; create own Header component if necessary */
-}
-const Header = () => (
-  <div id='header'>
-    <div className='header-content' data-color='brand1' data-size='sm'>
-      <img src={ssbLogo} className='logo' alt='SSB logo' />
-      <div className='header-links'>
-        {/* TODO: Placeholder links */}
-        <Link href='/statistikkregisteret/'>Publisering</Link>
-        <Link href='/statistikkregisteret/statistikk'>Statistikker</Link>
+const Header = () => {
+  const { auth } = useAuth()
+  const firstNameLetter = auth?.fullName?.charAt(0)
+
+  return (
+    <div id='header'>
+      <div className='header-content' data-color='brand1' data-size='sm'>
+        <img src={ssbLogo} className='logo' alt='SSB logo' />
+        <div className='header-links'>
+          <Link href='/statistikkregisteret/'>Publisering</Link>
+          <Link href='/statistikkregisteret/statistikk'>Statistikker</Link>
+          {auth?.isAdmin && (
+            <Button variant='tertiary' asChild>
+              <ReactRouterLink to='/mine-saker' reloadDocument>
+                Mine saker <Avatar aria-label={auth?.fullName ?? ''} initials={firstNameLetter} />
+              </ReactRouterLink>
+            </Button>
+          )}
+        </div>
       </div>
     </div>
-  </div>
-)
+  )
+}
 
 const PageLayout = () => {
   return (
