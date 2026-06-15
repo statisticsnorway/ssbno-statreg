@@ -22,23 +22,23 @@
       }
     }
   }
+}
 
-  .datepicker-explanation {
+.datepicker-explanation {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-size-2);
+
+  .datepicker-explanation-wrapper {
     display: flex;
-    flex-direction: column;
-    gap: var(--ds-size-2);
+    align-items: center;
+    gap: var(--ds-size-4);
+  }
 
-    .datepicker-explanation-wrapper {
-      display: flex;
-      align-items: center;
-      gap: var(--ds-size-4);
-    }
-
-    .datepicker-explanation-colors {
-      display: inline-block;
-      width: 30px;
-      height: 30px;
-      border-radius: 3px;
-    }
+  .datepicker-explanation-colors {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    border-radius: 3px;
   }
 }

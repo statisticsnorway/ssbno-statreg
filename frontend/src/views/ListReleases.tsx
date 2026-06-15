@@ -12,7 +12,7 @@ import {
   Popover,
 } from '@digdir/designsystemet-react'
 import { ArrowLeftIcon, ArrowRightIcon, CalendarIcon, QuestionmarkCircleIcon } from '@navikt/aksel-icons'
-import { DatePicker } from '../components/DatePicker'
+import { DatePicker, DatePickerColorLegend, DatePickerStatusColors } from '../components/DatePicker'
 import { PaginatedReleasesTable } from '../components/ReleasesTable'
 import { formatDate, getFirstDayOfNthMonth, getPublishTimeFilterForDate } from '../lib/utils'
 import client from '../api'
@@ -144,7 +144,7 @@ function ListReleases() {
               <QuestionmarkCircleIcon fontSize={24} />
             </Popover.Trigger>
             <Popover data-color='neutral' data-placement='right'>
-              {/* TODO */}
+              <DatePickerColorLegend statusColors={DatePickerStatusColors} />
             </Popover>
           </Popover.TriggerContext>
         </div>
