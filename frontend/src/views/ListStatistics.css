@@ -11,10 +11,4 @@
     justify-content: space-between;
     margin-bottom: var(--ds-size-14);
   }
-
-  .row-count-selector {
-    display: flex;
-    justify-content: end;
-    margin-bottom: var(--ds-size-8);
-  }
 }

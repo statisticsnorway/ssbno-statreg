@@ -140,9 +140,7 @@ export default function ListStatistics() {
             </Suggestion.List>
           </Suggestion>
         </Field>
-        <div className='row-count-selector'>
-          <RowCountSelect selectedRowCount={count} updateRowCount={updateRowCount} />
-        </div>
+        <RowCountSelect selectedRowCount={count} updateRowCount={updateRowCount} />
       </div>
       <div>
         <PaginatedStatisticsTable
