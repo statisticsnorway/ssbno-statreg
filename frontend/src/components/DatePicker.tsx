@@ -58,15 +58,14 @@ export function DatePicker({ showColorCodingExplanation, calendarDatesEmit, ...p
   }
 
   const statusColors = {
-    FULL: { backgroundColor: 'var(--ds-color-danger-base-default)' },
-    MANY: { backgroundColor: 'var(--ds-color-warning-base-default)' },
-    FEW: { backgroundColor: 'var(--ds-color-info-border-default)' },
-    BLOCKED: { backgroundColor: 'var(--ds-color-neutral-surface-hover )' },
+    FULL: { backgroundColor: '#FFCDD2)' },
+    MANY: { backgroundColor: '#CCE1FF' },
+    FEW: { backgroundColor: '#FFE0B2' },
+    BLOCKED: { backgroundColor: 'var(--ds-color-neutral-surface-tinted)' },
     NONE: { backgroundColor: 'var(--ds-color-accent-background-default)' },
   }
 
   const sharedStyles = {
-    color: 'var(--ds-color-accent-background-default)',
     borderRadius: '8px',
     boxShadow: 'inset 0 0 0 2px var(--ds-color-accent-background-default)',
   }
