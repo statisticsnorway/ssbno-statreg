@@ -7,6 +7,7 @@ import {
   parsePublishDateWithTime,
   formatRevisionName,
   formatVariant,
+  formatContact,
   getPublishTimeFilterForDate,
 } from '../src/lib/utils'
 
@@ -171,6 +172,29 @@ describe('utils', () => {
       }
 
       expect(formatVariant(variant)).toBe('Kvartal, -')
+    })
+  })
+
+  describe('formatContact', () => {
+    test('formats contact with name and username', () => {
+      const contact = { name: 'Ola Nordmann', username: 'ola', email: 'ola@example.com' }
+      expect(formatContact(contact)).toBe('Ola Nordmann (ola)')
+    })
+
+    test('formats contact with name, email and no username', () => {
+      const contact = { name: 'Kari Nordmann', email: 'kari.nordmann@example.com' }
+      expect(formatContact(contact)).toBe('Kari Nordmann (kari.nordmann)')
+    })
+    test('formats contact without username or email', () => {
+      const contact = { name: 'Ola Nordmann' }
+      expect(formatContact(contact)).toBe('Ola Nordmann')
+    })
+    test('formats contact without name', () => {
+      const contact = { username: 'abc' }
+      expect(formatContact(contact)).toBe('(abc)')
+    })
+    test('formats contact without username, email, or name', () => {
+      expect(formatContact(undefined)).toBe('-')
     })
   })
 
