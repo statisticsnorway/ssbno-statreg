@@ -18,13 +18,92 @@ export type StatisticPrisma = Pick<PrismaClient, 'statistic' | 'shortname'>
 
 // Statistic listing
 
-export async function getAllStatistics(
-  { start = 0, count = 10 },
+export async function getFilteredStatistics(
+  {
+    start = 0,
+    count = 10,
+    filterByShortnames,
+    filterByContactInitials,
+    sort,
+  }: {
+    start?: number
+    count?: number
+    filterByShortnames?: string[]
+    filterByContactInitials?: string[]
+    sort?: string
+  },
+  prisma: StatisticPrisma
+): Promise<StatisticListingResponse> {
+  const safeFilterByShortnames = filterByShortnames?.length
+    ? filterByShortnames.map((shortname) => sanitize(shortname))
+    : undefined
+
+  const where = await buildStatisticFilter(
+    { filterByShortnames: safeFilterByShortnames, filterByContactInitials },
+    prisma
+  )
+
+  return getStatistics({ start, count, where, orderBy: parseStatisticSortQuery(sort) }, prisma)
+}
+
+function parseStatisticSortQuery(sort?: string): Prisma.StatisticOrderByWithRelationInput | undefined {
+  if (sort === 'shortname') {
+    return { shortname: { name: 'asc' } }
+  }
+  if (sort === '-shortname') {
+    return { shortname: { name: 'desc' } }
+  }
+  return undefined
+}
+
+export async function buildStatisticFilter(
+  {
+    filterByShortnames,
+    filterByContactInitials,
+  }: { filterByShortnames?: string[]; filterByContactInitials?: string[] },
+  prisma: StatisticPrisma
+) {
+  if (filterByShortnames?.length) {
+    await statisticsAsserts.assertFilteredShortnamesExist(filterByShortnames, prisma)
+  }
+
+  return {
+    ...(filterByShortnames?.length && {
+      OR: filterByShortnames.map((shortname) => ({
+        shortname: {
+          name: shortname,
+        },
+      })),
+    }),
+    ...(filterByContactInitials?.length && {
+      responsiblePersons: {
+        some: {
+          username: { in: filterByContactInitials },
+        },
+      },
+    }),
+  }
+}
+
+export async function getStatistics(
+  {
+    start = 0,
+    count = 10,
+    where,
+    orderBy,
+  }: {
+    start?: number
+    count?: number
+    where?: Prisma.StatisticWhereInput
+    orderBy?: Prisma.StatisticOrderByWithRelationInput
+  },
   prisma: StatisticPrisma
 ): Promise<StatisticListingResponse> {
   const statistics = await prisma.statistic.findMany({
     skip: start,
     take: count,
+    where,
+    orderBy,
     select: {
       language: true,
       status: true,
@@ -35,7 +114,7 @@ export async function getAllStatistics(
       division_code: true,
     },
   })
-  const total = await prisma.statistic.count()
+  const total = await prisma.statistic.count({ where })
 
   return {
     total,

@@ -7,8 +7,9 @@ import '../views/ListReleases.css'
 import { RowCountSelect } from './RowCountSelect'
 import './StatisticsTable.css'
 import { useNavigate } from 'react-router'
+import { formatContacts } from '../lib/utils'
 
-const TABLE_HEADER_CELLS = ['Kortnavn', 'Statistikknavn', 'Seksjon', 'Status']
+const TABLE_HEADER_CELLS = ['Kortnavn', 'Statistikknavn', 'Kontakt', 'Status']
 
 type StatisticRowProps = {
   statistic: StatisticListing
@@ -27,7 +28,7 @@ function StatisticRow({ statistic }: Readonly<StatisticRowProps>) {
     >
       <Table.Cell>{statisticsShortname}</Table.Cell>
       <Table.Cell>{statistic.name}</Table.Cell>
-      <Table.Cell>{statistic.division?.name}</Table.Cell>
+      <Table.Cell>{formatContacts(statistic.contacts).join(', ')}</Table.Cell>
       <Table.Cell className='status-column'>
         <ApprovalStatusBadge status={statistic.approval_status} />
       </Table.Cell>

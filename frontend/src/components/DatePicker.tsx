@@ -16,6 +16,33 @@ type DatePickerProps = React.ComponentProps<typeof AkselDatePicker.Standalone> &
   calendarDatesEmit?: (data: CalenderDate) => void
 }
 
+export const DatePickerStatusColors = {
+  FULL: { backgroundColor: '#FFCDD2' },
+  MANY: { backgroundColor: '#CCE1FF' },
+  FEW: { backgroundColor: '#FFE0B2' },
+  BLOCKED: { backgroundColor: 'var(--ds-color-neutral-surface-tinted)' },
+  NONE: { backgroundColor: 'var(--ds-color-accent-background-default)' },
+}
+
+export function DatePickerColorLegend({ statusColors }: Readonly<{ statusColors: typeof DatePickerStatusColors }>) {
+  return (
+    <div className='datepicker-explanation'>
+      {Object.entries(DayStatus).map(([key, value]) => (
+        <div key={key} className='datepicker-explanation-wrapper'>
+          <div
+            className='datepicker-explanation-colors'
+            style={{
+              ...(key === 'NONE' ? { border: '1px solid var(--ds-color-text-default)' } : {}),
+              ...statusColors[key as keyof typeof DatePickerStatusColors],
+            }}
+          />
+          <Paragraph data-size='xs'>{value}</Paragraph>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export function DatePicker({ showColorCodingExplanation, calendarDatesEmit, ...props }: DatePickerProps) {
   const [calendarDates, setCalendarDates] = useState<CalenderDate>({})
   const displayedMonth = props.month
@@ -57,16 +84,7 @@ export function DatePicker({ showColorCodingExplanation, calendarDatesEmit, ...p
     else if (value.status === 'BLOCKED') blocked.push(date)
   }
 
-  const statusColors = {
-    FULL: { backgroundColor: 'var(--ds-color-danger-base-default)' },
-    MANY: { backgroundColor: 'var(--ds-color-warning-base-default)' },
-    FEW: { backgroundColor: 'var(--ds-color-info-border-default)' },
-    BLOCKED: { backgroundColor: 'var(--ds-color-neutral-surface-hover )' },
-    NONE: { backgroundColor: 'var(--ds-color-accent-background-default)' },
-  }
-
   const sharedStyles = {
-    color: 'var(--ds-color-accent-background-default)',
     borderRadius: '8px',
     boxShadow: 'inset 0 0 0 2px var(--ds-color-accent-background-default)',
   }
@@ -78,11 +96,11 @@ export function DatePicker({ showColorCodingExplanation, calendarDatesEmit, ...p
         // @ts-expect-error: Allow custom "modifiers" prop for color coding
         modifiers={{ full, many, few, blocked }}
         modifiersStyles={{
-          full: { ...statusColors.FULL, ...sharedStyles },
-          many: { ...statusColors.MANY, ...sharedStyles },
-          few: { ...statusColors.FEW, ...sharedStyles },
+          full: { ...DatePickerStatusColors.FULL, ...sharedStyles },
+          many: { ...DatePickerStatusColors.MANY, ...sharedStyles },
+          few: { ...DatePickerStatusColors.FEW, ...sharedStyles },
           blocked: {
-            ...statusColors.BLOCKED,
+            ...DatePickerStatusColors.BLOCKED,
             borderRadius: sharedStyles.borderRadius,
             textDecoration: 'line-through',
           },
@@ -90,22 +108,7 @@ export function DatePicker({ showColorCodingExplanation, calendarDatesEmit, ...p
         {...props}
       />
 
-      {showColorCodingExplanation && (
-        <div className='datepicker-explanation'>
-          {Object.entries(DayStatus).map(([key, value]) => (
-            <div key={key} className='datepicker-explanation-wrapper'>
-              <div
-                className='datepicker-explanation-colors'
-                style={{
-                  ...(key === 'NONE' ? { border: '1px solid var(--ds-color-text-default)' } : {}),
-                  ...statusColors[key as keyof typeof statusColors],
-                }}
-              />
-              <Paragraph data-size='xs'>{value}</Paragraph>
-            </div>
-          ))}
-        </div>
-      )}
+      {showColorCodingExplanation && <DatePickerColorLegend statusColors={DatePickerStatusColors} />}
     </div>
   )
 }

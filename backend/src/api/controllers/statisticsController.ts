@@ -1,14 +1,14 @@
 import type { Router } from 'express'
 import {
   createStatistic,
-  getAllStatistics,
   getStatisticByShortname,
   updateStatistic,
+  getFilteredStatistics,
 } from '@/services/statisticsService'
 import { requireAdminAuthorization, skipAuth } from '@/../plugins/authMiddleware'
 import { handleErrors } from '@/lib/prismaErrors'
 import { prisma } from '@/lib/prisma'
-import { ensureString } from '@/lib/utils'
+import { ensureString, ensureStringArray } from '@/lib/utils'
 
 export default function statisticsController(router: Router) {
   router.get('/statistics/:shortname', skipAuth, async (req, res) => {
@@ -32,7 +32,14 @@ export default function statisticsController(router: Router) {
     try {
       const start = req.query?.start ? Number(req.query.start) : undefined
       const count = req.query?.count ? Number(req.query.count) : undefined
-      const data = await getAllStatistics({ start, count }, prisma)
+      const sort = ensureString(req.query.sort as string) || undefined
+      const filterByShortnames = ensureStringArray(req.query.shortname as string)
+      const filterByContactInitials = ensureStringArray(req.query.contact as string)
+
+      const data = await getFilteredStatistics(
+        { start, count, filterByShortnames, filterByContactInitials, sort },
+        prisma
+      )
       res.json(data)
     } catch (error) {
       return handleErrors(error, res)

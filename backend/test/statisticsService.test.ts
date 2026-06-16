@@ -2,8 +2,9 @@
 import { vi, describe, test, expect, beforeEach } from 'vitest'
 import { ApprovalStatus, StatisticStatus, type StatisticCreate, type StatisticUpdate } from '@ssbno-statreg/shared'
 import { Users } from '@/types/entra'
+import { statisticsAsserts } from '@/lib/asserts'
 import {
-  getAllStatistics,
+  getFilteredStatistics,
   getStatisticByShortname,
   parseStatisticVariants,
   mapStatisticDetails,
@@ -14,6 +15,7 @@ import {
   parseDivision,
   parseStatusCode,
   parseRelation,
+  buildStatisticFilter,
 } from '@/services/statisticsService'
 
 const { fetchUsersMock, fetchDivisionMock } = vi.hoisted(() => ({
@@ -87,13 +89,14 @@ describe('statisticService', () => {
         findUnique: vi.fn(() => Promise.resolve({ name: 'kpi', id: 1 })),
       },
     }
+    statisticsAsserts.assertFilteredShortnamesExist = vi.fn(async () => true) as any
   })
 
-  describe('getAllStatistics ', async () => {
+  describe('getAllStatistics ', () => {
     test('returns mocked data', async () => {
       setStatisticsResult(mockStatisticsPrismaResult)
 
-      const result = await getAllStatistics({ start: 1, count: 2 }, prismaMock)
+      const result = await getFilteredStatistics({ start: 1, count: 2 }, prismaMock)
 
       expect(result).toStrictEqual(mockedStatisticsResult)
       expect(prismaMock.statistic.findMany).toHaveBeenCalledWith(expect.objectContaining({ skip: 1, take: 2 }))
@@ -102,20 +105,240 @@ describe('statisticService', () => {
     test('uses default start and count if not provided', async () => {
       setStatisticsResult(mockStatisticsPrismaResult)
 
-      const result = await getAllStatistics({}, prismaMock)
+      const result = await getFilteredStatistics({}, prismaMock)
 
       expect(result).toStrictEqual(mockedStatisticsResult)
       expect(prismaMock.statistic.findMany).toHaveBeenCalledWith(expect.objectContaining({ skip: 0, take: 10 }))
     })
 
+    test('sorts by field when sort is provided', async () => {
+      setStatisticsResult(mockStatisticsPrismaResult)
+
+      const result = await getFilteredStatistics({ sort: 'shortname' }, prismaMock)
+
+      expect(result).toStrictEqual(mockedStatisticsResult)
+
+      expect(prismaMock.statistic.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ orderBy: { shortname: { name: 'asc' } } })
+      )
+    })
+
+    test('uses undefined orderBy when invalid field is passed', async () => {
+      setStatisticsResult(mockStatisticsPrismaResult)
+
+      const result = await getFilteredStatistics({ sort: 'invalid_field' }, prismaMock)
+
+      expect(result).toStrictEqual(mockedStatisticsResult)
+
+      expect(prismaMock.statistic.findMany).toHaveBeenCalledWith(expect.objectContaining({ orderBy: undefined }))
+    })
+
     test('returns empty list if no results', async () => {
       setStatisticsResult([])
 
-      const result = await getAllStatistics({}, prismaMock)
+      const result = await getFilteredStatistics({}, prismaMock)
 
       expect(result).toStrictEqual({
         statistics: [],
         total: 0,
+      })
+    })
+  })
+
+  describe('getFilteredStatistics ', () => {
+    describe('runs without error with different valid input combination: ', () => {
+      test.each([
+        {
+          testCase: 'no filter',
+          input: {},
+        },
+        {
+          testCase: 'count',
+          input: {
+            count: 10,
+          },
+        },
+        {
+          testCase: 'start',
+          input: {
+            start: 0,
+          },
+        },
+        {
+          testCase: 'one shortname',
+          input: {
+            filterByShortnames: ['KPI'],
+          },
+        },
+        {
+          testCase: 'several shortnames',
+          input: {
+            filterByShortnames: ['KPI', 'energ'],
+          },
+        },
+        {
+          testCase: 'one contact initial',
+          input: {
+            filterByContactInitials: ['abc'],
+          },
+        },
+        {
+          testCase: 'several contact initials',
+          input: {
+            filterByContactInitials: ['abc', 'bcd'],
+          },
+        },
+        {
+          testCase: 'shortnames and contact initials',
+          input: {
+            filterByShortnames: ['KPI', 'energ'],
+            filterByContactInitials: ['abc'],
+          },
+        },
+        {
+          testCase: 'shortnames and sort',
+          input: {
+            filterByShortnames: ['KPI'],
+            sort: 'shortname',
+          },
+        },
+      ])('$testCase', async ({ input }) => {
+        setStatisticsResult(mockStatisticsPrismaResult)
+
+        const result = await getFilteredStatistics(input, prismaMock)
+
+        expect(result).toBeTruthy()
+      })
+    })
+
+    describe('throws error with different invalid input combination: ', () => {
+      test('throws when buildStatisticFilter throws', async () => {
+        statisticsAsserts.assertFilteredShortnamesExist = vi.fn(async () => {
+          throw { status: 404, statregError: "Shortname(s) not found: 'BAD'" }
+        })
+
+        await expect(() =>
+          getFilteredStatistics({ filterByShortnames: ['BAD', 'KPI'] }, prismaMock)
+        ).rejects.toMatchObject({
+          status: 404,
+          statregError: "Shortname(s) not found: 'BAD'",
+        })
+      })
+    })
+  })
+
+  describe('buildStatisticFilter ', () => {
+    describe('returns correct where clause for different input combinations: ', () => {
+      test.each([
+        {
+          testCase: 'no filter',
+          input: {},
+          expectedWhere: {},
+        },
+        {
+          testCase: 'one shortname',
+          input: {
+            filterByShortnames: ['KPI'],
+          },
+          expectedWhere: {
+            OR: [
+              {
+                shortname: {
+                  name: 'KPI',
+                },
+              },
+            ],
+          },
+        },
+        {
+          testCase: 'several shortnames',
+          input: {
+            filterByShortnames: ['KPI', 'energ'],
+          },
+          expectedWhere: {
+            OR: [
+              {
+                shortname: {
+                  name: 'KPI',
+                },
+              },
+              {
+                shortname: {
+                  name: 'energ',
+                },
+              },
+            ],
+          },
+        },
+        {
+          testCase: 'one contact initial',
+          input: {
+            filterByContactInitials: ['abc'],
+          },
+          expectedWhere: {
+            responsiblePersons: {
+              some: {
+                username: { in: ['abc'] },
+              },
+            },
+          },
+        },
+        {
+          testCase: 'several contact initials',
+          input: {
+            filterByContactInitials: ['abc', 'bcd'],
+          },
+          expectedWhere: {
+            responsiblePersons: {
+              some: {
+                username: { in: ['abc', 'bcd'] },
+              },
+            },
+          },
+        },
+        {
+          testCase: 'shortnames and contact initials',
+          input: {
+            filterByShortnames: ['KPI', 'energ'],
+            filterByContactInitials: ['abc'],
+          },
+          expectedWhere: {
+            OR: [
+              {
+                shortname: {
+                  name: 'KPI',
+                },
+              },
+              {
+                shortname: {
+                  name: 'energ',
+                },
+              },
+            ],
+            responsiblePersons: {
+              some: {
+                username: { in: ['abc'] },
+              },
+            },
+          },
+        },
+      ])('$testCase', async ({ input, expectedWhere }) => {
+        const result = await buildStatisticFilter(input, prismaMock)
+
+        expect(result).toStrictEqual(expectedWhere)
+      })
+    })
+
+    test('throws when shortname does not exist', async () => {
+      statisticsAsserts.assertFilteredShortnamesExist = vi.fn(async () => {
+        throw { status: 404, statregError: "Shortname(s) not found: 'BAD'" }
+      }) as any
+
+      await expect(() =>
+        buildStatisticFilter({ filterByShortnames: ['BAD', 'KPI'] }, prismaMock)
+      ).rejects.toMatchObject({
+        status: 404,
+        statregError: "Shortname(s) not found: 'BAD'",
       })
     })
   })
