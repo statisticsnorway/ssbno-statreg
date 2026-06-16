@@ -58,7 +58,7 @@ export function DatePicker({ showColorCodingExplanation, calendarDatesEmit, ...p
   }
 
   const statusColors = {
-    FULL: { backgroundColor: '#FFCDD2)' },
+    FULL: { backgroundColor: '#FFCDD2' },
     MANY: { backgroundColor: '#CCE1FF' },
     FEW: { backgroundColor: '#FFE0B2' },
     BLOCKED: { backgroundColor: 'var(--ds-color-neutral-surface-tinted)' },
