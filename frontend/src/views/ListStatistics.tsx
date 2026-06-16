@@ -18,7 +18,7 @@ import { RowCountSelect } from '../components/RowCountSelect'
 
 export default function ListStatistics() {
   const [searchParams, setSearchParams] = useSearchParams()
-  const shortnamesQuery = searchParams.get('shortname')
+  const shortnameQuery = searchParams.get('shortname')
   const [count, setCount] = useState(20)
   const [start, setStart] = useState(0)
   const [total, setTotal] = useState(0)
@@ -68,16 +68,16 @@ export default function ListStatistics() {
 
   useEffect(() => {
     async function setSelectedShortnamesFromQuery() {
-      if (!shortnamesQuery) return
+      if (!shortnameQuery) return
 
-      const newSelectedShortnames = shortnamesQuery.split(',').map((shortname) => ({
+      const newSelectedShortnames = shortnameQuery.split(',').map((shortname) => ({
         label: shortname,
         value: shortname,
       }))
       setSelectedShortnames(newSelectedShortnames)
     }
     setSelectedShortnamesFromQuery()
-  }, [shortnamesQuery])
+  }, [shortnameQuery])
 
   function updateRowCount(newCount: number) {
     setCount(newCount)
