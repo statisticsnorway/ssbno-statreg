@@ -15,6 +15,7 @@
     display: flex;
     align-items: start;
     justify-content: space-between;
+    margin-bottom: var(--ds-size-12);
 
     .list-releases-color-legend-popover {
       display: flex;
@@ -26,17 +27,16 @@
     }
   }
 
-  .list-releases-calendars-buttons {
-    width: 1400px; /* TODO: Setting a fixed width for now */
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-  }
-
   .list-releases-calendars-wrapper {
     display: flex;
-    gap: var(--ds-size-14);
-    align-items: flex-start;
+    align-items: center;
+    justify-content: space-between;
+    
+    .list-releases-calendars {
+      display: flex;
+      gap: var(--ds-size-14);
+      align-items: start;
+    }
 
     .aksel-date__caption-button {
       visibility: hidden;
