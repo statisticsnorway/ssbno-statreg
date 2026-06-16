@@ -116,14 +116,7 @@ export default function ListStatistics() {
           </Button>
         )}
       </div>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          marginBottom: 'var(--ds-size-8)',
-          width: '100%',
-        }}
-      >
+      <div className='list-statistics-filter-container'>
         <Field>
           <Label>Filtrer statistikk</Label>
           <Suggestion multiple onSelectedChange={(selected) => filterChanged(selected)} selected={selectedShortnames}>
