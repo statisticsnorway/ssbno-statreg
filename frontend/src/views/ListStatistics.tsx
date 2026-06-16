@@ -133,7 +133,8 @@ export default function ListStatistics() {
               <Suggestion.Empty>Ingen treff</Suggestion.Empty>
               {shortnames.map((shortname) => (
                 <Suggestion.Option key={shortname.shortname} label={shortname.shortname} value={shortname.shortname}>
-                  {shortname.shortname}, {shortname.statistic_name}
+                  {shortname.shortname}
+                  <div>Kortnavn</div>
                 </Suggestion.Option>
               ))}
             </Suggestion.List>
