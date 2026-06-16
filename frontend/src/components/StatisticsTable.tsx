@@ -60,7 +60,6 @@ type PaginatedStatisticsTableProps = {
   count: number
   total: number
   statistics: StatisticListing[]
-  updateRowCount: (numberOfRows: number) => void
   setCurrentPage: (selectedPage: number) => void
 }
 
@@ -69,14 +68,10 @@ export function PaginatedStatisticsTable({
   count,
   total,
   statistics,
-  updateRowCount,
   setCurrentPage,
 }: Readonly<PaginatedStatisticsTableProps>) {
   return (
     <div style={{ minWidth: '100%' }}>
-      <div className='row-count-selector'>
-        <RowCountSelect selectedRowCount={count} updateRowCount={updateRowCount} />
-      </div>
       <StatisticsTable statistics={statistics} />
       <Pagination start={start} count={count} total={total} setCurrentPage={setCurrentPage} />
     </div>
