@@ -11,6 +11,8 @@ servers:
 tags:
   - name: calendar
     description: Helpers for calendar view and days that are blocked
+  - name: contacts
+    description: Contact persons for statistics
   - name: frequencies
     description: Frequencies for releases, ie. copled to variants of a statistic
   - name: releases
@@ -310,6 +312,19 @@ components:
           $ref: '#/components/schemas/Revision'
 
 paths:
+  /contacts:
+    get:
+      summary: List of all contacts
+      security: []
+      tags: [contacts]
+      responses:
+        '200':
+          description: List of contacts
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Contact' }
   /shortnames:
     get:
       summary: List of all existing shortnames
