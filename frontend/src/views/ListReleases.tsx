@@ -53,7 +53,7 @@ function ListReleases() {
   const [sortBy, setSortBy] = useState<string[]>(['-publish_time'])
 
   const { auth } = useAuth()
-  const isUltraWide = useMediaQuery('(min-width: 1440px)')
+  const isUltraWideDesktop = useMediaQuery('(min-width: 1920px)')
 
   useEffect(() => {
     async function fetchReleases(
@@ -134,7 +134,7 @@ function ListReleases() {
   }
 
   function renderCalendarList() {
-    const count = isUltraWide ? 3 : 2
+    const count = isUltraWideDesktop ? 3 : 2
     return (
       <div className='list-releases-calendars-wrapper'>
         <Button variant='tertiary' data-size='lg' onClick={() => setCalendarMonth((prev) => prev - count)}>
@@ -147,7 +147,7 @@ function ListReleases() {
             selected={selectedDate}
             onSelect={onSelectDate}
           />
-          {isUltraWide && (
+          {isUltraWideDesktop && (
             <DatePicker
               month={getFirstDayOfNthMonth(calendarMonth + 2)}
               selected={selectedDate}
