@@ -9,6 +9,13 @@
     box-shadow: var(--ds-shadow-md);
     border-radius: 8px;
 
+   button.rdp-day {
+      &:active:not(:disabled) .rdp-day__inner {
+        color: inherit;
+        background: transparent;
+      }
+    }
+
     .rdp-day_selected .rdp-day__inner {
       width: 44px;
       height: 44px;
