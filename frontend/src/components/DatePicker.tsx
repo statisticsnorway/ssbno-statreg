@@ -46,6 +46,9 @@ export function DatePickerColorLegend({ statusColors }: Readonly<{ statusColors:
 export function DatePicker({ showColorCodingExplanation, calendarDatesEmit, ...props }: DatePickerProps) {
   const [calendarDates, setCalendarDates] = useState<CalenderDate>({})
   const displayedMonth = props.month
+  const selectedDate = props.selected
+  const selectedDateKey = selectedDate instanceof Date ? getDateOnlyAsString(selectedDate) : 'none'
+  const displayedMonthKey = displayedMonth ? getDateOnlyAsString(displayedMonth) : 'no-month'
 
   useEffect(() => {
     async function fetchCalendarDates() {
@@ -92,6 +95,7 @@ export function DatePicker({ showColorCodingExplanation, calendarDatesEmit, ...p
   return (
     <div className='datepicker-container'>
       <AkselDatePicker.Standalone
+        key={`${displayedMonthKey}-${selectedDateKey}`}
         className='datepicker-wrapper'
         // @ts-expect-error: Allow custom "modifiers" prop for color coding
         modifiers={{ full, many, few, blocked }}
