@@ -134,7 +134,7 @@ export default function ListStatistics() {
 
   return (
     <div className='list-statistics-container'>
-      <div className='list-statistics-header'>
+      <div className='header-container'>
         <Heading level={1} data-size='sm'>
           Statistikkoversikt
         </Heading>
@@ -146,30 +146,30 @@ export default function ListStatistics() {
           </Button>
         )}
       </div>
-      <div className='list-statistics-filter-container'>
+      <div className='suggestion-container'>
         <Field>
           <Label>Filtrer på kortnavn eller kontakt</Label>
           <Suggestion onSelectedChange={(selected) => filterChanged(selected)} selected={selectedFilter}>
             <Suggestion.Input />
             <Suggestion.Clear onClick={() => filterChanged(null)} />
-            <Suggestion.List>
+            <Suggestion.List className='suggestion-list'>
               <Suggestion.Empty>Ingen treff</Suggestion.Empty>
               {shortnames.map((shortname) => {
                 const value = `shortname:${shortname.shortname}`
                 return (
-                  <Suggestion.Option key={value} label={shortname.shortname} value={value}>
+                  <Suggestion.Option className='suggestion-item' key={value} label={shortname.shortname} value={value}>
                     {shortname.shortname}
-                    <div>Kortnavn</div>
+                    <div className='category-label'>Kortnavn</div>
                   </Suggestion.Option>
                 )
               })}
               {contacts.map((contact) => {
                 const value = `contact:${contact.username}`
                 return (
-                  <Suggestion.Option key={value} label={contact.username} value={value}>
+                  <Suggestion.Option className='suggestion-item' key={value} label={contact.username} value={value}>
                     {/* TODO: show "name (username)" when AD caching is done and /contacts endpoint updated MIM-2777 */}
                     {contact.username}
-                    <div>Kontakt</div>
+                    <div className='category-label'>Kontakt</div>
                   </Suggestion.Option>
                 )
               })}
