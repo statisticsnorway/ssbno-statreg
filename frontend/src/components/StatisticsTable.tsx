@@ -4,8 +4,6 @@ import { type StatisticListing } from '@ssbno-statreg/shared'
 import { ApprovalStatusBadge } from '../components/ApprovalStatus'
 import { Pagination } from './Pagination'
 import '../views/ListReleases.css'
-import { RowCountSelect } from './RowCountSelect'
-import './StatisticsTable.css'
 import { Link } from 'react-router'
 import { formatContacts } from '../lib/utils'
 
@@ -66,7 +64,6 @@ type PaginatedStatisticsTableProps = {
   count: number
   total: number
   statistics: StatisticListing[]
-  updateRowCount: (numberOfRows: number) => void
   setCurrentPage: (selectedPage: number) => void
   openInNewTab?: boolean
 }
@@ -76,15 +73,11 @@ export function PaginatedStatisticsTable({
   count,
   total,
   statistics,
-  updateRowCount,
   setCurrentPage,
   openInNewTab,
 }: Readonly<PaginatedStatisticsTableProps>) {
   return (
     <div style={{ minWidth: '100%' }}>
-      <div className='row-count-selector'>
-        <RowCountSelect selectedRowCount={count} updateRowCount={updateRowCount} />
-      </div>
       <StatisticsTable statistics={statistics} openInNewTab={openInNewTab} />
       <Pagination start={start} count={count} total={total} setCurrentPage={setCurrentPage} />
     </div>
