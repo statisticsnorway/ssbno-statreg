@@ -134,25 +134,22 @@ function ListReleases() {
 
   function renderCalendarList() {
     const count = isUltraWideDesktop ? 3 : 2
+    const visibleCalendarOffsets = Array.from({ length: count }, (_, index) => index)
+
     return (
       <div className='list-releases-calendars-wrapper'>
         <Button variant='tertiary' data-size='lg' onClick={() => setCalendarMonth((prev) => prev - count)}>
           <ArrowLeftIcon />
         </Button>
         <div className='list-releases-calendars'>
-          <DatePicker month={getFirstDayOfNthMonth(calendarMonth)} selected={selectedDate} onSelect={onSelectDate} />
-          <DatePicker
-            month={getFirstDayOfNthMonth(calendarMonth + 1)}
-            selected={selectedDate}
-            onSelect={onSelectDate}
-          />
-          {isUltraWideDesktop && (
+          {visibleCalendarOffsets.map((offset) => (
             <DatePicker
-              month={getFirstDayOfNthMonth(calendarMonth + 2)}
+              key={calendarMonth + offset}
+              month={getFirstDayOfNthMonth(calendarMonth + offset)}
               selected={selectedDate}
               onSelect={onSelectDate}
             />
-          )}
+          ))}
         </div>
         <Button variant='tertiary' data-size='lg' onClick={() => setCalendarMonth((prev) => prev + count)}>
           <ArrowRightIcon />
