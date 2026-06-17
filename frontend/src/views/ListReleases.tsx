@@ -23,13 +23,13 @@ import { RowCountSelect } from '../components/RowCountSelect'
 import { useAuth } from '../context/AuthContext'
 
 function useMediaQuery(mediaQuery: string): boolean {
-  const getSnapshot = () => window.matchMedia(mediaQuery).matches
+  const getSnapshot = () => globalThis.matchMedia(mediaQuery).matches
 
   // Server snapshot fallback to prevent hydration errors during SSR
   const getServerSnapshot = () => false
 
   const subscribe = (callback: () => void) => {
-    const matchMediaQueryList = window.matchMedia(mediaQuery)
+    const matchMediaQueryList = globalThis.matchMedia(mediaQuery)
     matchMediaQueryList.addEventListener('change', callback)
     return () => matchMediaQueryList.removeEventListener('change', callback)
   }
