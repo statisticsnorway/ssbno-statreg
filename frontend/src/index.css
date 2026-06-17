@@ -8,9 +8,24 @@ body {
 }
 
 .selectable-row {
+  position: relative;
+
   &:hover {
     background-color: var(--ds-color-surface-hover);
     cursor: pointer;
+  }
+
+  /* Stretch the row link to cover the whole row so the entire row is clickable
+     while still being a real anchor (supports middle-click / cmd-click / open in new tab). */
+  .row-link {
+    color: inherit;
+    text-decoration: none;
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+    }
   }
 }
 
