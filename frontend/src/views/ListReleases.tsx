@@ -23,7 +23,6 @@ import { RowCountSelect } from '../components/RowCountSelect'
 import { useAuth } from '../context/AuthContext'
 
 function useMediaQuery(mediaQuery: string): boolean {
-  // Read the current client-side state
   const getSnapshot = () => window.matchMedia(mediaQuery).matches
 
   // Server snapshot fallback to prevent hydration errors during SSR
