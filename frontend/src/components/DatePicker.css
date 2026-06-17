@@ -9,7 +9,7 @@
     box-shadow: var(--ds-shadow-md);
     border-radius: 8px;
 
-   button.rdp-day {
+    button.rdp-day {
       &:active:not(:disabled) .rdp-day__inner {
         color: inherit;
         background: transparent;
