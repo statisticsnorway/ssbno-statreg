@@ -54,6 +54,9 @@ npm run db:deploy
 # Seed local database
 npm run seed
 
+# Typecheck the whole codebase
+npm run check
+
 # Tests
 npm run test
 npm run test:backend
@@ -71,6 +74,7 @@ Run the minimum required checks for the files you changed.
 
 | If you changed | Required validation before finishing |
 |------|------|
+| Any file | `npm run check` |
 | `backend/**` | `npm run test:backend` |
 | `frontend/**` | `npm run test:frontend` |
 | `shared/**` | `npm run test` and `npm run test:frontend` and `npm run test:backend` |
