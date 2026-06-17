@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 import { useSearchParams, Link as ReactRouterLink } from 'react-router'
 import {
   Heading,
@@ -22,6 +22,22 @@ import type { ReleaseListing, ShortnameListing } from '@ssbno-statreg/shared'
 import { RowCountSelect } from '../components/RowCountSelect'
 import { useAuth } from '../context/AuthContext'
 
+function useMediaQuery(mediaQuery: string): boolean {
+  // Read the current client-side state
+  const getSnapshot = () => window.matchMedia(mediaQuery).matches
+
+  // Server snapshot fallback to prevent hydration errors during SSR
+  const getServerSnapshot = () => false
+
+  function subscribe(callback: () => void) {
+    const matchMediaQueryList = window.matchMedia(mediaQuery)
+    matchMediaQueryList.addEventListener('change', callback)
+    return () => matchMediaQueryList.removeEventListener('change', callback)
+  }
+
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
+}
+
 function ListReleases() {
   const [searchParams] = useSearchParams()
   const shortnamesQuery = searchParams.get('shortname')
@@ -37,6 +53,7 @@ function ListReleases() {
   const [sortBy, setSortBy] = useState<string[]>(['-publish_time'])
 
   const { auth } = useAuth()
+  const isUltraWide = useMediaQuery('(min-width: 1440px)')
 
   useEffect(() => {
     async function fetchReleases(
@@ -116,6 +133,35 @@ function ListReleases() {
     setSelectedDate(undefined)
   }
 
+  function renderCalendarList() {
+    const count = isUltraWide ? 3 : 2
+    return (
+      <div className='list-releases-calendars-wrapper'>
+        <Button variant='tertiary' data-size='lg' onClick={() => setCalendarMonth((prev) => prev - count)}>
+          <ArrowLeftIcon />
+        </Button>
+        <div className='list-releases-calendars'>
+          <DatePicker month={getFirstDayOfNthMonth(calendarMonth)} selected={selectedDate} onSelect={onSelectDate} />
+          <DatePicker
+            month={getFirstDayOfNthMonth(calendarMonth + 1)}
+            selected={selectedDate}
+            onSelect={onSelectDate}
+          />
+          {isUltraWide && (
+            <DatePicker
+              month={getFirstDayOfNthMonth(calendarMonth + 2)}
+              selected={selectedDate}
+              onSelect={onSelectDate}
+            />
+          )}
+        </div>
+        <Button variant='tertiary' data-size='lg' onClick={() => setCalendarMonth((prev) => prev + count)}>
+          <ArrowRightIcon />
+        </Button>
+      </div>
+    )
+  }
+
   return (
     <>
       <div className='list-releases-heading-container'>
@@ -148,27 +194,7 @@ function ListReleases() {
             </Popover>
           </Popover.TriggerContext>
         </div>
-        <div className='list-releases-calendars-wrapper'>
-          <Button variant='tertiary' data-size='lg' onClick={() => setCalendarMonth((prev) => prev - 3)}>
-            <ArrowLeftIcon />
-          </Button>
-          <div className='list-releases-calendars'>
-            <DatePicker month={getFirstDayOfNthMonth(calendarMonth)} selected={selectedDate} onSelect={onSelectDate} />
-            <DatePicker
-              month={getFirstDayOfNthMonth(calendarMonth + 1)}
-              selected={selectedDate}
-              onSelect={onSelectDate}
-            />
-            <DatePicker
-              month={getFirstDayOfNthMonth(calendarMonth + 2)}
-              selected={selectedDate}
-              onSelect={onSelectDate}
-            />
-          </div>
-          <Button variant='tertiary' data-size='lg' onClick={() => setCalendarMonth((prev) => prev + 3)}>
-            <ArrowRightIcon />
-          </Button>
-        </div>
+        {renderCalendarList()}
       </div>
       <div
         style={{
