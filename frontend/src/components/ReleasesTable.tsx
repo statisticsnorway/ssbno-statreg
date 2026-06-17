@@ -6,7 +6,7 @@ import { ApprovalStatusBadge } from '../components/ApprovalStatus'
 import { formatPublishTime, formatDate } from '../lib/utils'
 import { Pagination, type PaginationProps } from './Pagination'
 import '../views/ListReleases.css'
-import { useNavigate } from 'react-router'
+import { Link } from 'react-router'
 
 type TruncatedTableCellProps = {
   value: string | undefined
@@ -15,12 +15,14 @@ type TruncatedTableCellProps = {
 
 type ReleaseRowProps = {
   release: ReleaseListing
+  openInNewTab?: boolean
 }
 
 type ReleaseTableProps = {
   releases: ReleaseListing[]
   sortBy?: string[]
   setSortBy?: Dispatch<SetStateAction<string[]>>
+  openInNewTab?: boolean
 }
 
 type PaginatedReleasesTableProps = ReleaseTableProps & PaginationProps
@@ -44,18 +46,20 @@ function TruncatedTableCell({ value, maxWidth = '340px' }: TruncatedTableCellPro
   )
 }
 
-function ReleaseRow({ release }: ReleaseRowProps) {
+function ReleaseRow({ release, openInNewTab }: Readonly<ReleaseRowProps>) {
   const statisticsShortname = release.statistic?.shortname ?? ''
-  const navigate = useNavigate()
   return (
-    <Table.Row
-      key={`${release.publish_time}-${release.id}`}
-      className='selectable-row'
-      onClick={() => {
-        navigate(`/publisering/${release.id}`, {})
-      }}
-    >
-      <Table.Cell>{statisticsShortname}</Table.Cell>
+    <Table.Row key={`${release.publish_time}-${release.id}`} className='selectable-row'>
+      <Table.Cell>
+        <Link
+          className='row-link'
+          to={`/publisering/${release.id}`}
+          target={openInNewTab ? '_blank' : undefined}
+          rel={openInNewTab ? 'noopener noreferrer' : undefined}
+        >
+          {statisticsShortname}
+        </Link>
+      </Table.Cell>
       <TruncatedTableCell value={release.statistic?.name} />
       <Table.Cell>{release.frequency?.name ?? ''}</Table.Cell>
       <Table.Cell>TBA</Table.Cell>
@@ -69,7 +73,7 @@ function ReleaseRow({ release }: ReleaseRowProps) {
   )
 }
 
-export function ReleasesTable({ releases, sortBy, setSortBy }: Readonly<ReleaseTableProps>) {
+export function ReleasesTable({ releases, sortBy, setSortBy, openInNewTab }: Readonly<ReleaseTableProps>) {
   function toggleSort(field: string) {
     const existingIndex = sortBy?.findIndex((s) => s.replace('-', '') === field) ?? -1
     const newSort = [...(sortBy ?? [])]
@@ -119,7 +123,7 @@ export function ReleasesTable({ releases, sortBy, setSortBy }: Readonly<ReleaseT
       </Table.Head>
       <Table.Body>
         {releases?.map((release) => (
-          <ReleaseRow key={`${release.publish_time}-${release.id}`} release={release} />
+          <ReleaseRow key={`${release.publish_time}-${release.id}`} release={release} openInNewTab={openInNewTab} />
         ))}
       </Table.Body>
     </Table>
@@ -134,10 +138,11 @@ export function PaginatedReleasesTable({
   sortBy,
   setSortBy,
   setCurrentPage,
+  openInNewTab,
 }: Readonly<PaginatedReleasesTableProps>) {
   return (
     <div style={{ minWidth: '100%' }}>
-      <ReleasesTable releases={releases} sortBy={sortBy} setSortBy={setSortBy} />
+      <ReleasesTable releases={releases} sortBy={sortBy} setSortBy={setSortBy} openInNewTab={openInNewTab} />
       <Pagination start={start} count={count} total={total} setCurrentPage={setCurrentPage} />
     </div>
   )
