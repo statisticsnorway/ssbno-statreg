@@ -4,8 +4,15 @@ import releasesController from '../controllers/releasesController'
 import calendarController from '../controllers/calendarController'
 import path from 'node:path'
 import shortnamesController from '../controllers/shortnamesController'
+import contactsController from '../controllers/contactsController'
 
-const CONTROLLERS = [statisticsController, releasesController, calendarController, shortnamesController]
+const CONTROLLERS = [
+  statisticsController,
+  releasesController,
+  calendarController,
+  shortnamesController,
+  contactsController,
+]
 
 const ROUTE_METHODS = ['get', 'post', 'put', 'delete'] as const
 const ALLOWED_METHODS = ROUTE_METHODS.map((m) => m.toUpperCase())
