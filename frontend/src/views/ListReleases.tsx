@@ -29,7 +29,7 @@ function useMediaQuery(mediaQuery: string): boolean {
   // Server snapshot fallback to prevent hydration errors during SSR
   const getServerSnapshot = () => false
 
-  function subscribe(callback: () => void) {
+  const subscribe = (callback: () => void) => {
     const matchMediaQueryList = window.matchMedia(mediaQuery)
     matchMediaQueryList.addEventListener('change', callback)
     return () => matchMediaQueryList.removeEventListener('change', callback)
