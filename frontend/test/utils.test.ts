@@ -7,7 +7,7 @@ import {
   parsePublishDateWithTime,
   formatRevisionName,
   formatVariant,
-  formatContact,
+  formatContacts,
   getPublishTimeFilterForDate,
 } from '../src/lib/utils'
 
@@ -176,25 +176,16 @@ describe('utils', () => {
   })
 
   describe('formatContact', () => {
-    test('formats contact with name and username', () => {
-      const contact = { name: 'Ola Nordmann', username: 'ola', email: 'ola@example.com' }
-      expect(formatContact(contact)).toBe('Ola Nordmann (ola)')
+    test('returns initials', () => {
+      const contacts = [{ username: 'abc' }, { email: 'xyz@ssb.no' }]
+      expect(formatContacts(contacts)).toStrictEqual(['abc', 'xyz'])
     })
 
-    test('formats contact with name, email and no username', () => {
-      const contact = { name: 'Kari Nordmann', email: 'kari.nordmann@example.com' }
-      expect(formatContact(contact)).toBe('Kari Nordmann (kari.nordmann)')
+    test('returns empty array when contacts is undefined', () => {
+      expect(formatContacts(undefined)).toStrictEqual([])
     })
-    test('formats contact without username or email', () => {
-      const contact = { name: 'Ola Nordmann' }
-      expect(formatContact(contact)).toBe('Ola Nordmann')
-    })
-    test('formats contact without name', () => {
-      const contact = { username: 'abc' }
-      expect(formatContact(contact)).toBe('(abc)')
-    })
-    test('formats contact without username, email, or name', () => {
-      expect(formatContact(undefined)).toBe('-')
+    test('returns empty string when contact is empty object', () => {
+      expect(formatContacts([{}])).toStrictEqual([''])
     })
   })
 

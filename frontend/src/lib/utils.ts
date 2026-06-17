@@ -62,14 +62,12 @@ export function formatVariant(variant?: Variant): string {
   return [frequency, revision].join(', ')
 }
 
-export function formatContact(contact?: Contact): string {
-  const name = contact?.name
-  const initials = contact?.username ?? contact?.email?.split('@')[0] ?? ''
-
-  if (initials && name) return `${name} (${initials})`
-  else if (initials && !name) return `(${initials})`
-  else if (!initials && name) return name
-  else return '-'
+export function formatContacts(contacts?: Contact[]): string[] {
+  if (!contacts) return []
+  return contacts.map((contact) => {
+    const initials = (contact.username || contact.email?.split('@')[0]) ?? ''
+    return initials
+  })
 }
 
 export function getPublishTimeFilterForDate(selectedDate: Date | undefined) {

@@ -14,7 +14,7 @@ import {
 } from '@ssbno-statreg/shared'
 
 import './ShowStatistic.css'
-import { formatContact, formatPublishTime, formatRevisionName, formatVariant } from '../lib/utils'
+import { formatContacts, formatPublishTime, formatRevisionName, formatVariant } from '../lib/utils'
 import { ApprovalStatusBadge } from '../components/ApprovalStatus'
 import { useAuth } from '../context/AuthContext'
 
@@ -64,7 +64,7 @@ export default function ShowStatistic() {
   const regionLevels = statistic.statistic_region_levels ?? []
   const mainLanguage = formatMainLanguage(statistic.main_language)
   const startYear = formatStartYear(statistic.first_released_at)
-  const contacts = statistic.contacts?.map(formatContact) ?? []
+  const contacts = formatContacts(statistic.contacts)
   const mockContinuedBy = ['putegjeld', 'k2', 'k3']
   const variants = statistic.variants ?? []
   const cancelledVariants = formatCancelledVariants(variants)
