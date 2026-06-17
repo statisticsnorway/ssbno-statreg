@@ -824,12 +824,12 @@ export interface components {
       }
     }
     Contact: {
-      readonly name?: string
-      readonly username?: string
+      readonly name: string
+      readonly username: string
       /** Format: mobile */
-      readonly mobile?: string
+      readonly mobile: string
       /** Format: email */
-      readonly email?: string
+      readonly email: string
     }
     Frequency: {
       name?: string

@@ -110,6 +110,11 @@ components:
 
     Contact:
       type: object
+      required:
+        - name
+        - username
+        - mobile
+        - email
       properties:
         name: { type: string, readOnly: true }
         username: { type: string, readOnly: true }
