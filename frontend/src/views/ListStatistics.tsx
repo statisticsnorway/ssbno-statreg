@@ -24,17 +24,17 @@ export default function ListStatistics() {
   const [total, setTotal] = useState(0)
   const [statistics, setStatistics] = useState<StatisticListing[]>([])
   const [shortnames, setShortnames] = useState<ShortnameListing[]>([])
-  const [selectedShortnames, setSelectedShortnames] = useState<SuggestionItem[]>([])
+  const [selectedShortname, setSelectedShortname] = useState<SuggestionItem | null>(null)
   const { auth } = useAuth()
 
   useEffect(() => {
-    fetchStatistics(start, count, selectedShortnames)
-  }, [start, count, selectedShortnames])
+    fetchStatistics(start, count, selectedShortname)
+  }, [start, count, selectedShortname])
 
-  const fetchStatistics = async (start: number, count: number, selectedShortnames: SuggestionItem[]) => {
+  const fetchStatistics = async (start: number, count: number, selectedShortname: SuggestionItem | null) => {
     const filter = {
-      ...(selectedShortnames.length && {
-        shortname: selectedShortnames.map((item) => item.value).join(','),
+      ...(selectedShortname && {
+        shortname: selectedShortname.value,
       }),
     }
     const { data, error } = await client.GET('/statistics', {
@@ -67,16 +67,15 @@ export default function ListStatistics() {
   }, [])
 
   useEffect(() => {
-    async function setSelectedShortnamesFromQuery() {
+    async function setSelectedShortnameFromQuery() {
       if (!shortnameQuery) return
 
-      const newSelectedShortnames = shortnameQuery.split(',').map((shortname) => ({
-        label: shortname,
-        value: shortname,
-      }))
-      setSelectedShortnames(newSelectedShortnames)
+      setSelectedShortname({
+        label: shortnameQuery,
+        value: shortnameQuery,
+      })
     }
-    setSelectedShortnamesFromQuery()
+    setSelectedShortnameFromQuery()
   }, [shortnameQuery])
 
   function updateRowCount(newCount: number) {
@@ -88,14 +87,12 @@ export default function ListStatistics() {
     setStart((currentPage - 1) * count)
   }
 
-  function filterChanged(selected: SuggestionItem[]) {
-    setSelectedShortnames(selected)
-    const shortname = selected.map((item) => item.value).join(',')
+  function filterChanged(selected: SuggestionItem | null) {
+    setSelectedShortname(selected)
     setSearchParams(
-      (prev) => {
-        const next = new URLSearchParams(prev)
-        if (shortname) next.set('shortname', shortname)
-        else next.delete('shortname')
+      () => {
+        const next = new URLSearchParams()
+        if (selected) next.set('shortname', selected.value)
         return next
       },
       { replace: true }
@@ -119,9 +116,9 @@ export default function ListStatistics() {
       <div className='list-statistics-filter-container'>
         <Field>
           <Label>Filtrer statistikk</Label>
-          <Suggestion multiple onSelectedChange={(selected) => filterChanged(selected)} selected={selectedShortnames}>
+          <Suggestion onSelectedChange={(selected) => filterChanged(selected)} selected={selectedShortname}>
             <Suggestion.Input />
-            <Suggestion.Clear />
+            <Suggestion.Clear onClick={() => filterChanged(null)} />
             <Suggestion.List>
               <Suggestion.Empty>Ingen treff</Suggestion.Empty>
               {shortnames.map((shortname) => (
