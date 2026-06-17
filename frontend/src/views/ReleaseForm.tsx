@@ -457,7 +457,7 @@ function DateReleasesTable({
         <span>Innmeldte datoer den {formatDate(selectedDate?.toISOString())}</span>
         <DayStatusTag status={selectedDateStatus || 'NONE'} />
       </div>
-      <ReleasesTable releases={releases} sortBy={sortBy} setSortBy={setSortBy} />
+      <ReleasesTable releases={releases} sortBy={sortBy} setSortBy={setSortBy} openInNewTab />
     </>
   )
 }
@@ -509,6 +509,7 @@ function VariantReleasesTable({ shortname, variantId }: { shortname: string; var
         setCurrentPage={setCurrentPage}
         sortBy={sortBy}
         setSortBy={setSortBy}
+        openInNewTab
       />
     </>
   )

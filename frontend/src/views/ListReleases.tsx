@@ -8,9 +8,11 @@ import {
   EXPERIMENTAL_Suggestion as Suggestion,
   type SuggestionItem,
   Chip,
+  Paragraph,
+  Popover,
 } from '@digdir/designsystemet-react'
-import { ArrowLeftIcon, ArrowRightIcon, CalendarIcon } from '@navikt/aksel-icons'
-import { DatePicker } from '../components/DatePicker'
+import { ArrowLeftIcon, ArrowRightIcon, CalendarIcon, QuestionmarkCircleIcon } from '@navikt/aksel-icons'
+import { DatePicker, DatePickerColorLegend, DatePickerStatusColors } from '../components/DatePicker'
 import { PaginatedReleasesTable } from '../components/ReleasesTable'
 import { formatDate, getFirstDayOfNthMonth, getPublishTimeFilterForDate } from '../lib/utils'
 import client from '../api'
@@ -129,30 +131,43 @@ function ListReleases() {
         )}
       </div>
       <div className='list-releases-calendars-container'>
-        <Heading level={2} data-size='xs'>
-          Publiseringskalender
-        </Heading>
-        <div className='list-releases-calendars-buttons'>
-          <Button variant='tertiary' onClick={() => setCalendarMonth((prev) => prev - 3)}>
-            <ArrowLeftIcon /> Forrige
-          </Button>
-          <Button variant='tertiary' onClick={() => setCalendarMonth((prev) => prev + 3)}>
-            Neste <ArrowRightIcon />
-          </Button>
+        <div className='list-releases-calendars-title'>
+          <div>
+            <Heading level={2} data-size='xs'>
+              Publiseringskalender
+            </Heading>
+            <Paragraph data-size='md'>Filtrer publiseringsoversikten ved å klikke på dato</Paragraph>
+          </div>
+          <Popover.TriggerContext>
+            <Popover.Trigger inline className='list-releases-color-legend-popover'>
+              Fargeforklaring
+              <QuestionmarkCircleIcon fontSize={24} />
+            </Popover.Trigger>
+            <Popover data-color='neutral' data-placement='right'>
+              <DatePickerColorLegend statusColors={DatePickerStatusColors} />
+            </Popover>
+          </Popover.TriggerContext>
         </div>
         <div className='list-releases-calendars-wrapper'>
-          <DatePicker month={getFirstDayOfNthMonth(calendarMonth)} selected={selectedDate} onSelect={onSelectDate} />
-          <DatePicker
-            month={getFirstDayOfNthMonth(calendarMonth + 1)}
-            selected={selectedDate}
-            onSelect={onSelectDate}
-          />
-          <DatePicker
-            month={getFirstDayOfNthMonth(calendarMonth + 2)}
-            selected={selectedDate}
-            onSelect={onSelectDate}
-            showColorCodingExplanation
-          />
+          <Button variant='tertiary' data-size='lg' onClick={() => setCalendarMonth((prev) => prev - 3)}>
+            <ArrowLeftIcon />
+          </Button>
+          <div className='list-releases-calendars'>
+            <DatePicker month={getFirstDayOfNthMonth(calendarMonth)} selected={selectedDate} onSelect={onSelectDate} />
+            <DatePicker
+              month={getFirstDayOfNthMonth(calendarMonth + 1)}
+              selected={selectedDate}
+              onSelect={onSelectDate}
+            />
+            <DatePicker
+              month={getFirstDayOfNthMonth(calendarMonth + 2)}
+              selected={selectedDate}
+              onSelect={onSelectDate}
+            />
+          </div>
+          <Button variant='tertiary' data-size='lg' onClick={() => setCalendarMonth((prev) => prev + 3)}>
+            <ArrowRightIcon />
+          </Button>
         </div>
       </div>
       <div

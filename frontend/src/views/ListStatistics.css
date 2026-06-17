@@ -3,4 +3,19 @@
   display: flex;
   flex-direction: column;
   gap: var(--ds-size-4);
+
+  .list-statistics-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--ds-size-14);
+  }
+
+  .list-statistics-filter-container {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: var(--ds-size-8);
+    width: 100%;
+  }
 }
