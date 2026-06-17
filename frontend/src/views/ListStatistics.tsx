@@ -148,7 +148,7 @@ export default function ListStatistics() {
       </div>
       <div className='list-statistics-filter-container'>
         <Field>
-          <Label>Filtrer statistikk</Label>
+          <Label>Filtrer på kortnavn eller kontakt</Label>
           <Suggestion onSelectedChange={(selected) => filterChanged(selected)} selected={selectedFilter}>
             <Suggestion.Input />
             <Suggestion.Clear onClick={() => filterChanged(null)} />
