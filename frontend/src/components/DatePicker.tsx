@@ -4,9 +4,11 @@ import '@navikt/ds-css/dist/global/tokens.css'
 import '@navikt/ds-css/dist/components.css'
 
 import { useState, useEffect } from 'react'
+import { renderToStaticMarkup } from 'react-dom/server'
 import { DatePicker as AkselDatePicker } from '@navikt/ds-react/DatePicker'
 import { type CalenderDate, DayStatus } from '@ssbno-statreg/shared'
 import { Paragraph } from '@digdir/designsystemet-react'
+import { CircleIcon, CircleFillIcon } from '@navikt/aksel-icons'
 
 import client from '../api'
 import { getDateOnlyAsString } from '../lib/utils'
@@ -16,11 +18,36 @@ type DatePickerProps = React.ComponentProps<typeof AkselDatePicker.Standalone> &
   calendarDatesEmit?: (data: CalenderDate) => void
 }
 
+const fewStatusBackgroundImage = `url("data:image/svg+xml,${encodeURIComponent(
+  renderToStaticMarkup(<CircleIcon aria-hidden width={8} height={8} />)
+)}")`
+const fullStatusBackgroundImage = `url("data:image/svg+xml,${encodeURIComponent(
+  renderToStaticMarkup(<CircleFillIcon aria-hidden width={8} height={8} />)
+)}")`
+
 export const DatePickerStatusColors = {
-  FULL: { backgroundColor: '#FFCDD2' },
-  MANY: { backgroundColor: '#CCE1FF' },
-  FEW: { backgroundColor: '#FFE0B2' },
-  BLOCKED: { backgroundColor: 'var(--ds-color-neutral-surface-tinted)' },
+  FULL: {
+    backgroundColor: '#FFCDD2',
+    backgroundPosition: 'top 6px left 6px',
+    backgroundRepeat: 'no-repeat',
+    backgroundImage: fullStatusBackgroundImage,
+  },
+  MANY: {
+    backgroundColor: '#FFE0B2',
+    backgroundPosition: 'top 6px left 6px',
+    backgroundRepeat: 'no-repeat',
+  },
+  FEW: {
+    backgroundColor: '#CCE1FF',
+    backgroundPosition: 'top 6px left 6px',
+    backgroundRepeat: 'no-repeat',
+    backgroundImage: fewStatusBackgroundImage,
+  },
+  BLOCKED: {
+    backgroundColor: 'var(--ds-color-neutral-surface-tinted)',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
+  },
   NONE: { backgroundColor: 'var(--ds-color-accent-background-default)' },
 }
 
