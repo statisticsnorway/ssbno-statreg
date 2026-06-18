@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import './ListBlockedDates.css'
-import { Button, Heading, Link, Paragraph, Table } from '@digdir/designsystemet-react'
+import { Button, Heading, Link, Paragraph, Table } from '@statisticsnorway/design-react'
 import { ArrowLeftIcon, PlusCircleIcon, TrashIcon } from '@navikt/aksel-icons'
 import { Link as ReactRouterLink } from 'react-router'
 import { type BlockedReleaseDate } from '@ssbno-statreg/shared'

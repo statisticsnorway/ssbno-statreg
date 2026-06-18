@@ -10,7 +10,7 @@ import {
   Chip,
   Paragraph,
   Popover,
-} from '@digdir/designsystemet-react'
+} from '@statisticsnorway/design-react'
 import { ArrowLeftIcon, ArrowRightIcon, CalendarIcon, QuestionmarkCircleIcon } from '@navikt/aksel-icons'
 import { DatePicker, DatePickerColorLegend, DatePickerStatusColors } from '../components/DatePicker'
 import { PaginatedReleasesTable } from '../components/ReleasesTable'

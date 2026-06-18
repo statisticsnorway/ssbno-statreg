@@ -2,7 +2,7 @@ import './PageLayout.css'
 import ssbLogo from '../assets/SSB_logo_black.svg'
 
 import { Outlet, Link as ReactRouterLink } from 'react-router'
-import { Link, Button, Avatar } from '@digdir/designsystemet-react'
+import { Link, Button, Avatar } from '@statisticsnorway/design-react'
 import { useAuth } from '../context/AuthContext'
 
 const Header = () => {

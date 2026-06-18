@@ -6,7 +6,7 @@
     "module": "esnext",
     "types": [
       "vite/client",
-      "@digdir/designsystemet-react/react-types",
+      "@statisticsnorway/design-react/react-types",
       "@digdir/designsystemet-css/theme"
     ],
     "skipLibCheck": true,

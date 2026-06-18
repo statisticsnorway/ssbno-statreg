@@ -1,4 +1,4 @@
-import { Table } from '@digdir/designsystemet-react'
+import { Table } from '@statisticsnorway/design-react'
 
 import { type StatisticListing } from '@ssbno-statreg/shared'
 import { ApprovalStatusBadge } from '../components/ApprovalStatus'

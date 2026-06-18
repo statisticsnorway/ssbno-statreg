@@ -10,7 +10,7 @@ import {
   Field,
   Heading,
   Label,
-} from '@digdir/designsystemet-react'
+} from '@statisticsnorway/design-react'
 import { Link as ReactRouterLink, useSearchParams } from 'react-router'
 import { PlusCircleIcon } from '@navikt/aksel-icons'
 import { useAuth } from '../context/AuthContext'

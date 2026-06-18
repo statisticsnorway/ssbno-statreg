@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams, Link as ReactRouterLink } from 'react-router'
-import { Heading, Paragraph, List, Link, Button, Divider, Details, Card, Table } from '@digdir/designsystemet-react'
+import { Heading, Paragraph, List, Link, Button, Divider, Details, Card, Table } from '@statisticsnorway/design-react'
 import { PencilWritingIcon, PersonPencilIcon } from '@navikt/aksel-icons'
 import { StatisticStatusTag } from '../components/StatisticStatusTag'
 import { VariantCard } from '../components/VariantCard'

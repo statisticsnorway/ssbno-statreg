@@ -1,5 +1,5 @@
 import { Link as ReactRouterLink } from 'react-router'
-import { Paragraph, Button, Heading, Dialog } from '@digdir/designsystemet-react'
+import { Paragraph, Button, Heading, Dialog } from '@statisticsnorway/design-react'
 import { type ReleaseDetails } from '@ssbno-statreg/shared'
 
 type ReleaseFormModalProps = {
