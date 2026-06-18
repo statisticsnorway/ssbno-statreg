@@ -5,7 +5,7 @@ import { ApprovalStatusBadge } from '../components/ApprovalStatus'
 import { Pagination } from './Pagination'
 import '../views/ListReleases.css'
 import { Link } from 'react-router'
-import { formatContacts } from '../lib/utils'
+import { formatContacts, getSortDirection, toggleSort } from '../lib/utils'
 import type { Dispatch, SetStateAction } from 'react'
 
 const TABLE_HEADER_CELLS = [
@@ -51,33 +51,9 @@ export function StatisticsTable({
 }: Readonly<{
   statistics: StatisticListing[]
   openInNewTab?: boolean
-  sortBy: string
+  sortBy?: string
   setSortBy?: Dispatch<SetStateAction<string>>
 }>) {
-  function toggleSort(field: string) {
-    // We would like to loop through sorting like "" -> "shortname" -> "-shortname" -> ""
-    if (sortBy !== field && sortBy !== `-${field}`) {
-      // case 1: if field was not sorted by already, sort ascending
-      setSortBy?.(field)
-    } else {
-      const isDescending = sortBy.startsWith('-')
-
-      if (isDescending) {
-        // case 2: if field was sorted in descending order, change to none
-        setSortBy?.('')
-      } else {
-        // case 3: if field was sorted in ascending order, change to descending
-        setSortBy?.(`-${field}`)
-      }
-    }
-  }
-
-  function getSortDirection(field: string) {
-    if (sortBy === field) return 'ascending'
-    if (sortBy === `-${field}`) return 'descending'
-    return 'none'
-  }
-
   return (
     <Table>
       <Table.Head>
@@ -85,8 +61,8 @@ export function StatisticsTable({
           {TABLE_HEADER_CELLS.map(({ label, field, sortable }) => (
             <Table.HeaderCell
               key={field}
-              onClick={sortable ? () => toggleSort(field) : undefined}
-              sort={sortable ? getSortDirection(field) : undefined}
+              onClick={sortable && setSortBy ? () => setSortBy(toggleSort(field, sortBy || '')) : undefined}
+              sort={sortable ? getSortDirection(field, sortBy || '') : undefined}
             >
               {label}
             </Table.HeaderCell>

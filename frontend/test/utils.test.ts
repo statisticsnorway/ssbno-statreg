@@ -9,6 +9,8 @@ import {
   formatVariant,
   formatContacts,
   getPublishTimeFilterForDate,
+  toggleSort,
+  getSortDirection,
 } from '../src/lib/utils'
 
 const timeZone = 'Europe/Oslo'
@@ -225,5 +227,23 @@ describe('utils', () => {
 
       expect(input.getTime()).toBe(originalTime)
     })
+  })
+
+  test('toggle sorting', () => {
+    const changedDirection = toggleSort('shortname', 'shortname')
+    expect(changedDirection).toBe('-shortname')
+  })
+
+  test('test changing direction', () => {
+    const changedDirection = getSortDirection('shortname', '-shortname')
+    expect(changedDirection).toBe('descending')
+  })
+  test('test reverse changing direction', () => {
+    const changedDirection = getSortDirection('-shortname', 'shortname')
+    expect(changedDirection).toBe('none')
+  })
+  test('test same changing direction', () => {
+    const changedDirection = getSortDirection('shortname', 'shortname')
+    expect(changedDirection).toBe('ascending')
   })
 })

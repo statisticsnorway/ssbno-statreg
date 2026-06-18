@@ -49,7 +49,7 @@ function ListReleases() {
 
   const [selectedShortnames, setSelectedShortnames] = useState<SuggestionItem[]>([])
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
-  const [sortBy, setSortBy] = useState<string[]>(['-publish_time'])
+  const [sortBy, setSortBy] = useState<string>('-publish_time')
 
   const { auth } = useAuth()
   const isUltraWideDesktop = useMediaQuery('(min-width: 1920px)')
@@ -59,7 +59,7 @@ function ListReleases() {
       start: number,
       count: number,
       selectedShortnames: SuggestionItem[],
-      sortBy: string[],
+      sortBy: string,
       selectedDate?: Date
     ) {
       const filter = {
@@ -68,7 +68,7 @@ function ListReleases() {
         }),
         ...getPublishTimeFilterForDate(selectedDate),
       }
-      const sort = sortBy.join(',')
+      const sort = sortBy
       const { data, error } = await client.GET('/releases', {
         params: { query: { start, count, ...filter, sort } },
       })

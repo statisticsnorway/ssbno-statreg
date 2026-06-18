@@ -425,13 +425,13 @@ function DateReleasesTable({
   calendarDates,
 }: Readonly<{ selectedDate?: Date; calendarDates?: CalenderDate }>) {
   const [releases, setReleases] = useState<ReleaseListing[]>([])
-  const [sortBy, setSortBy] = useState<string[]>(['-publish_time'])
+  const [sortBy, setSortBy] = useState<string>('-publish_time')
 
   useEffect(() => {
     async function fetchReleases() {
       const { data, error } = await client.GET('/releases', {
         params: {
-          query: { start: 0, count: 100, sort: sortBy.join(','), ...getPublishTimeFilterForDate(selectedDate) },
+          query: { start: 0, count: 100, sort: sortBy, ...getPublishTimeFilterForDate(selectedDate) },
         },
       })
       if (error) {
@@ -467,12 +467,12 @@ function VariantReleasesTable({ shortname, variantId }: { shortname: string; var
   const [start, setStart] = useState(0)
   const [releases, setReleases] = useState<ReleaseListing[]>([])
   const [total, setTotal] = useState(0)
-  const [sortBy, setSortBy] = useState<string[]>(['-publish_time'])
+  const [sortBy, setSortBy] = useState<string>('-publish_time')
 
   useEffect(() => {
     async function fetchVariantReleases() {
       const { data, error } = await client.GET('/statistics/{shortname}/variants/{id}/releases', {
-        params: { path: { shortname, id: variantId }, query: { start, count, sort: sortBy.join(',') } },
+        params: { path: { shortname, id: variantId }, query: { start, count, sort: sortBy } },
       })
       if (error) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
