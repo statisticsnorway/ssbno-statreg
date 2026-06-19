@@ -38,7 +38,7 @@ export default function ListStatistics() {
     start: number,
     count: number,
     shortnameQuery: string | null,
-    contactQuery: string | null
+    contactQuery: string | null,
     sort: string
   ) => {
     const filter = {
