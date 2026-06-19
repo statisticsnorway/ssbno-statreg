@@ -93,7 +93,7 @@ export function DatePicker({ showColorCodingExplanation, calendarDatesEmit, ...p
   return (
     <div className='datepicker-container'>
       <AkselDatePicker.Standalone
-        key={`${selectedDate}-month-${displayedMonth}`}
+        key={selectedDate ? getDateOnlyAsString(selectedDate as Date) : getDateOnlyAsString(displayedMonth)}
         className='datepicker-wrapper'
         // @ts-expect-error: Allow custom "modifiers" prop for color coding
         modifiers={{ full, many, few, blocked }}
