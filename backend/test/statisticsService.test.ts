@@ -1010,7 +1010,7 @@ const mockedStatisticsResult = {
       },
       name: 'Energiregnskap og energibalanse',
       name_en: 'Energy account and energy balance',
-      contacts: [{ username: 'abc', email: 'alice@ssb.no' }],
+      contacts: [{ username: 'abc', email: 'alice@ssb.no', name: 'Navn Navnesen' }],
     },
     {
       shortname: 'befolk',
@@ -1022,7 +1022,7 @@ const mockedStatisticsResult = {
       },
       name: 'Befolkning og demografi',
       name_en: 'Population and demography',
-      contacts: [{ username: 'bcd', email: 'bob@ssb.no' }],
+      contacts: [{ username: 'bcd', email: 'bob@ssb.no', name: 'Navn Navnesen' }],
     },
   ],
   total: 2,

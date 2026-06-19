@@ -136,6 +136,7 @@ export async function getStatistics(
         contacts: statistic.responsiblePersons.map((person) => ({
           email: person.email,
           username: person.username ?? '',
+          name: 'Navn Navnesen',
           // TODO fetch name from cache when MIM-2729 is done
         })),
       }
