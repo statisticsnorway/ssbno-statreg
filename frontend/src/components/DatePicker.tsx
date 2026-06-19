@@ -18,12 +18,13 @@ type DatePickerProps = React.ComponentProps<typeof AkselDatePicker.Standalone> &
   calendarDatesEmit?: (data: CalenderDate) => void
 }
 
-const fewStatusBackgroundImage = `url("data:image/svg+xml,${encodeURIComponent(
+const fewStatusBackgroundImage = `url('data:image/svg+xml,${encodeURIComponent(
   renderToStaticMarkup(<CircleIcon aria-hidden width={8} height={8} />)
-)}")`
-const fullStatusBackgroundImage = `url("data:image/svg+xml,${encodeURIComponent(
+)}')`
+const manyStatusBackgroundImage = `url('data:image/svg+xml,${encodeURIComponent('<svg fill="#202733" width="8" height="8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 285.919 285.919" xml:space="preserve" transform="rotate(270)" stroke="#202733"><path d="M142.959,0C64.131,0,0,64.132,0,142.96c0,78.828,64.131,142.959,142.959,142.959c78.828,0,142.96-64.131,142.96-142.959 C285.919,64.132,221.787,0,142.959,0z M142.959,260.919V142.96V25c65.043,0,117.96,52.917,117.96,117.96 C260.919,208.003,208.002,260.919,142.959,260.919z"></path></svg>')}')`
+const fullStatusBackgroundImage = `url('data:image/svg+xml,${encodeURIComponent(
   renderToStaticMarkup(<CircleFillIcon aria-hidden width={8} height={8} />)
-)}")`
+)}')`
 
 export const DatePickerStatusColors = {
   FULL: {
@@ -36,6 +37,7 @@ export const DatePickerStatusColors = {
     backgroundColor: '#FFE0B2',
     backgroundPosition: 'top 6px left 6px',
     backgroundRepeat: 'no-repeat',
+    backgroundImage: manyStatusBackgroundImage,
   },
   FEW: {
     backgroundColor: '#CCE1FF',
