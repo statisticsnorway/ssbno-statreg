@@ -23,6 +23,7 @@ export default function ListStatistics() {
   const [count, setCount] = useState(20)
   const [start, setStart] = useState(0)
   const [total, setTotal] = useState(0)
+  const [sortBy, setSortBy] = useState('')
   const [statistics, setStatistics] = useState<StatisticListing[]>([])
   const [shortnames, setShortnames] = useState<ShortnameListing[]>([])
   const [contacts, setContacts] = useState<Contact[]>([])
@@ -30,14 +31,15 @@ export default function ListStatistics() {
   const { auth } = useAuth()
 
   useEffect(() => {
-    fetchStatistics(start, count, shortnameQuery, contactQuery)
-  }, [start, count, shortnameQuery, contactQuery])
+    fetchStatistics(start, count, shortnameQuery, contactQuery, sortBy)
+  }, [start, count, shortnameQuery, contactQuery, sortBy])
 
   const fetchStatistics = async (
     start: number,
     count: number,
     shortnameQuery: string | null,
     contactQuery: string | null
+    sort: string
   ) => {
     const filter = {
       ...(shortnameQuery && {
@@ -48,7 +50,7 @@ export default function ListStatistics() {
       }),
     }
     const { data, error } = await client.GET('/statistics', {
-      params: { query: { start, count, ...filter } },
+      params: { query: { start, count, sort, ...filter } },
     })
     if (error) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -183,6 +185,8 @@ export default function ListStatistics() {
           start={start}
           count={count}
           total={total}
+          sortBy={sortBy}
+          setSortBy={setSortBy}
           statistics={statistics}
           setCurrentPage={updateCurrentPage}
         />
