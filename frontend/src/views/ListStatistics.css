@@ -26,7 +26,7 @@
       }
 
       .category-label {
-        color: var(--ds-color-text-subtle);
+        color: var(--ds-color-neutral-text-subtle);
       }
     }
   }
