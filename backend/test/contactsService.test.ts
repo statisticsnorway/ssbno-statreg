@@ -8,7 +8,7 @@ describe('contactsService ', async () => {
   beforeEach(() => {
     prismaMock = {
       responsiblePerson: {
-        findMany: vi.fn(() => Promise.resolve([{ username: 'abc', email: 'alice@ssb.no', name: 'Navn Navnesen' }])),
+        findMany: vi.fn(() => Promise.resolve([{ username: 'abc', name: 'Navn Navnesen' }])),
       },
     }
   })
@@ -17,7 +17,7 @@ describe('contactsService ', async () => {
     test('returns mocked data', async () => {
       const result = await getContacts(prismaMock)
 
-      expect(result).toStrictEqual([{ username: 'abc', email: 'alice@ssb.no', name: 'Navn Navnesen' }])
+      expect(result).toStrictEqual([{ username: 'abc', name: 'Navn Navnesen' }])
     })
   })
 })
