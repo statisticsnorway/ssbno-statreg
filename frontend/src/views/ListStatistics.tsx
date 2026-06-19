@@ -22,23 +22,24 @@ export default function ListStatistics() {
   const [count, setCount] = useState(20)
   const [start, setStart] = useState(0)
   const [total, setTotal] = useState(0)
+  const [sortBy, setSortBy] = useState('')
   const [statistics, setStatistics] = useState<StatisticListing[]>([])
   const [shortnames, setShortnames] = useState<ShortnameListing[]>([])
   const [selectedShortnames, setSelectedShortnames] = useState<SuggestionItem[]>([])
   const { auth } = useAuth()
 
   useEffect(() => {
-    fetchStatistics(start, count, selectedShortnames)
-  }, [start, count, selectedShortnames])
+    fetchStatistics(start, count, selectedShortnames, sortBy)
+  }, [start, count, selectedShortnames, sortBy])
 
-  const fetchStatistics = async (start: number, count: number, selectedShortnames: SuggestionItem[]) => {
+  const fetchStatistics = async (start: number, count: number, selectedShortnames: SuggestionItem[], sort: string) => {
     const filter = {
       ...(selectedShortnames.length && {
         shortname: selectedShortnames.map((item) => item.value).join(','),
       }),
     }
     const { data, error } = await client.GET('/statistics', {
-      params: { query: { start, count, ...filter } },
+      params: { query: { start, count, sort, ...filter } },
     })
     if (error) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -140,6 +141,8 @@ export default function ListStatistics() {
           start={start}
           count={count}
           total={total}
+          sortBy={sortBy}
+          setSortBy={setSortBy}
           statistics={statistics}
           setCurrentPage={updateCurrentPage}
         />
