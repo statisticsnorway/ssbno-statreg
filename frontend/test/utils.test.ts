@@ -234,6 +234,16 @@ describe('utils', () => {
     expect(changedDirection).toBe('-shortname')
   })
 
+  test('reverse toggle sorting', () => {
+    const fromReverse = toggleSort('shortname', '-shortname')
+    expect(fromReverse).toBe('')
+  })
+
+  test('new sort field', () => {
+    const differentSort = toggleSort('user', '-shortname')
+    expect(differentSort).toBe('user')
+  })
+
   test('test changing direction', () => {
     const changedDirection = getSortDirection('shortname', '-shortname')
     expect(changedDirection).toBe('descending')
