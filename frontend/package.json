@@ -14,9 +14,9 @@
   "dependencies": {
     "@digdir/designsystemet-css": "1.16.1",
     "@digdir/designsystemet-react": "1.16.1",
-    "@navikt/aksel-icons": "8.13.0",
-    "@navikt/ds-css": "8.13.0",
-    "@navikt/ds-react": "8.13.0",
+    "@navikt/aksel-icons": "8.13.1",
+    "@navikt/ds-css": "8.13.1",
+    "@navikt/ds-react": "8.13.1",
     "@ssbno-statreg/shared": "*",
     "openapi-fetch": "0.17.0",
     "react": "19.2.7",
