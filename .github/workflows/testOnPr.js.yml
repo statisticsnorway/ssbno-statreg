@@ -13,7 +13,7 @@ jobs:
         node-version: [24.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v6
@@ -39,6 +39,6 @@ jobs:
   integration-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Run integration tests
         run: docker compose -f docker-compose-test.yaml up --abort-on-container-exit --exit-code-from tests
