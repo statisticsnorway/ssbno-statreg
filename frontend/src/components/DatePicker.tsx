@@ -62,9 +62,14 @@ export function DatePickerColorLegend({ statusColors }: Readonly<{ statusColors:
             className='datepicker-explanation-colors'
             style={{
               ...(key === 'NONE' ? { border: '1px solid var(--ds-color-text-default)' } : {}),
+              ...(key === 'BLOCKED'
+                ? { fontSize: '12px', textAlign: 'center', textDecoration: 'line-through', alignContent: 'center' }
+                : {}),
               ...statusColors[key as keyof typeof DatePickerStatusColors],
             }}
-          />
+          >
+            {key === 'BLOCKED' ? '00' : ''}
+          </div>
           <Paragraph data-size='xs'>{value}</Paragraph>
         </div>
       ))}
