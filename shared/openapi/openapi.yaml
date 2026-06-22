@@ -81,6 +81,10 @@ components:
   schemas:
     Blocked_release_date:
       type: object
+      required:
+        - date
+        - automatically_blocked
+        - blocked_comment
       example: { date: '2026-12-24', automatically_blocked: false, blocked_comment: 'Christmas eve' }
       properties:
         date: { type: string, format: date }
@@ -110,6 +114,9 @@ components:
 
     Contact:
       type: object
+      required:
+        - name
+        - username
       properties:
         name: { type: string, readOnly: true }
         username: { type: string, readOnly: true }
@@ -118,6 +125,9 @@ components:
 
     Frequency:
       type: object
+      required:
+        - name
+        - code
       properties:
         name: { type: string }
         code: { type: string }
@@ -126,12 +136,15 @@ components:
       description: 'Text field to specify variant beyond frequency and revision'
       type: object
       properties:
-        name: { type: string, nullable: true }
-        name_en: { type: string, nullable: true }
+        name: { type: [string, null] }
+        name_en: { type: [string, null] }
 
     Region_level:
       description: 'Valid region levels are (name in parethesis): L (Land), LD (Landsdel), F (Fylke), K (Kommune), BD (Bydel og krets)'
       type: object
+      required:
+        - code
+        - name
       properties:
         code: { type: string }
         name: { type: string }
@@ -139,60 +152,64 @@ components:
     Shortname_listing:
       description: 'Shortnames with its corresponding statistic name'
       type: object
+      required:
+        - shortname
+        - statistic_name
       properties:
         shortname: { type: string }
         statistic_name: { type: string }
 
-    Release:
+    Release_create:
       type: object
+      properties:
+        publish_time: { type: string, format: date-time }
+        period_to: { type: string, format: date }
+        period_from: { type: string, format: date }
+        release_date_precision: { type: string }
+
+    Release_update:
+      allOf:
+        - $ref: '#/components/schemas/Release_create'
+        - type: object
+          properties:
+            comment: { type: string }
+
+    Release_get:
+      type: object
+      required:
+        - id
+        - publish_time
+        - period_to
+        - period_from
+        - approval_status
+        - statistic
       properties:
         id: { type: integer, readOnly: true }
         publish_time: { type: string, format: date-time }
         period_to: { type: string, format: date }
         period_from: { type: string, format: date }
-
-    Release_create:
-      allOf:
-        - $ref: '#/components/schemas/Release'
-        - type: object
+        approval_status: { type: [string, null] }
+        statistic:
+          type: object
           properties:
-            release_date_precision: { type: string }
-
-    Release_update:
-      allOf:
-        - $ref: '#/components/schemas/Release'
-        - type: object
-          properties:
-            comment: { type: string }
-            release_date_precision: { type: string }
-
-    Release_get:
-      allOf:
-        - $ref: '#/components/schemas/Release'
-        - type: object
-          properties:
-            approval_status: { type: [string, 'null'] }
-            statistic:
-              type: object
-              properties:
-                shortname: { type: string, readOnly: true }
-                name: { type: string, readOnly: true }
-                name_en: { type: string, readOnly: true }
+            shortname: { type: string, readOnly: true }
+            name: { type: string, readOnly: true }
+            name_en: { type: string, readOnly: true }
+          required:
+            - shortname
+            - name
 
     Release_details:
       allOf:
         - $ref: '#/components/schemas/Release_get'
         - type: object
+          required:
+            - has_versions
+            - variant
+            - cancelled
+            - release_date_precision
           properties:
             has_versions: { type: boolean }
-            variant:
-              type: object
-              properties:
-                id: { type: integer, readOnly: true }
-                frequency:
-                  $ref: '#/components/schemas/Frequency'
-                revision:
-                  $ref: '#/components/schemas/Revision'
             cancelled: { type: boolean }
             release_date_precision: { type: string }
 
@@ -200,6 +217,9 @@ components:
       allOf:
         - $ref: '#/components/schemas/Release_get'
         - type: object
+          required:
+            - frequency
+            - revision
           properties:
             frequency:
               $ref: '#/components/schemas/Frequency'
@@ -209,11 +229,55 @@ components:
     Revision:
       description: 'Valid revision codes are:	I (Ingen), B (Beregnede), E (Endelige), F (Foreløpige), R (Reviderte), IG (Integrert)'
       type: object
+      required:
+        - code
       properties:
         code: { type: string }
 
-    Statistic:
+    Division:
       type: object
+      properties:
+        code: { type: [string, null] }
+        name: { type: string, readOnly: true }
+
+    Statistic_create:
+      type: object
+      properties:
+        name: { type: string }
+        name_en: { type: string }
+        main_language: { type: string, description: "Main language will be either 'nn' or 'nb' for statistics" }
+        status:
+          type: object
+          properties:
+            code: { type: string }
+          required:
+            - code
+        division: { type: [string, null] }
+        first_released_at: { type: [string, null], format: date }
+        yearly_reporting: { type: boolean }
+        statistic_region_levels:
+          type: array
+          items: { $ref: '#/components/schemas/Region_level' }
+        previous_topic_codes: { type: [string, null] }
+        comment: { type: string }
+
+    Statistic_update:
+      allOf:
+        - $ref: '#/components/schemas/Statistic_create'
+        - type: object
+          properties:
+            relation: { type: [string, null] }
+
+    Statistic_listing:
+      type: object
+      required:
+        - shortname
+        - main_language
+        - status
+        - name
+        - name_en
+        - division
+        - contacts
       properties:
         shortname: { type: string, readOnly: true }
         main_language: { type: string, description: "Main language will be either 'nn' or 'nb' for statistics" }
@@ -221,95 +285,86 @@ components:
           type: object
           properties:
             code: { type: string }
+          required:
+            - code
         name: { type: string }
         name_en: { type: string }
         approval_status: { type: string, description: " Is one of 'GODKJENT', 'AVVIST' or 'FORSLAG'" }
-
-    Statistic_create:
-      allOf:
-        - $ref: '#/components/schemas/Statistic'
-      type: object
-      properties:
-        division: { type: string, nullable: true }
-        first_released_at: { type: string, format: date, nullable: true }
-        yearly_reporting: { type: boolean }
-        statistic_region_levels:
+        division:
+          $ref: '#/components/schemas/Division'
+        contacts:
           type: array
-          items: { $ref: '#/components/schemas/Region_level' }
-        previous_topic_codes: { type: string, nullable: true }
-        comment: { type: string }
-
-    Statistic_update:
-      allOf:
-        - $ref: '#/components/schemas/Statistic_create'
-      type: object
-      properties:
-        relation: { type: string, nullable: true }
+          items:
+            $ref: '#/components/schemas/Contact'
 
     Statistic_details:
       allOf:
-        - $ref: '#/components/schemas/Statistic'
-      type: object
-      properties:
-        version: { type: integer }
-        division:
-          type: object
+        - $ref: '#/components/schemas/Statistic_listing'
+        - type: object
+          required:
+            - version
+            - yearly_reporting
+            - updated_at
+            - comment
+            - created_at
+            - variants
+            - statistic_region_levels
           properties:
-            code: { type: string, nullable: true }
-            name: { type: string, readOnly: true }
-        first_released_at: { type: string, format: date, nullable: true }
-        yearly_reporting: { type: boolean }
-        previous_topic_codes: { type: string, nullable: true }
-        relation:
-          type: object
-          properties:
-            shortname: { type: string }
-            name: { type: string, readOnly: true }
-            name_en: { type: string, readOnly: true }
-        updated_at: { type: string, format: date-time, readOnly: true }
-        comment: { type: string }
-        created_at: { type: string, format: date-time, readOnly: true }
-        variants:
-          type: array
-          items: { $ref: '#/components/schemas/Variant' }
-        contacts:
-          type: array
-          items:
-            $ref: '#/components/schemas/Contact'
-        statistic_region_levels:
-          type: array
-          items:
-            $ref: '#/components/schemas/Region_level'
+            version: { type: integer }
+            first_released_at: { type: [string, null], format: date }
+            yearly_reporting: { type: boolean }
+            previous_topic_codes: { type: [string, null] }
+            relation:
+              type:
+                - object
+                - null
+              properties:
+                shortname: { type: string }
+                name: { type: string, readOnly: true }
+                name_en: { type: string, readOnly: true }
+              required:
+                - shortname
+                - name
+            updated_at: { type: string, format: date-time, readOnly: true }
+            comment: { type: string }
+            created_at: { type: string, format: date-time, readOnly: true }
+            variants:
+              type: array
+              items: { $ref: '#/components/schemas/Variant' }
+            statistic_region_levels:
+              type: array
+              items:
+                $ref: '#/components/schemas/Region_level'
 
-    Statistic_listing:
-      allOf:
-        - $ref: '#/components/schemas/Statistic'
-      type: object
-      properties:
-        division:
-          type: object
-          properties:
-            code: { type: string, nullable: true }
-            name: { type: string, readOnly: true }
-        contacts:
-          type: array
-          items:
-            $ref: '#/components/schemas/Contact'
-
-    Variant:
+    Variant_listing:
       type: object
       properties:
         id: { type: integer, readOnly: true }
-        version: { type: integer }
-        updated_at: { type: string, format: date-time, readOnly: true }
-        level_of_detail:
-          $ref: '#/components/schemas/Level_of_detail'
-        created_at: { type: string, format: date-time, readOnly: true }
-        cancelled: { type: boolean }
         frequency:
           $ref: '#/components/schemas/Frequency'
         revision:
           $ref: '#/components/schemas/Revision'
+      required:
+        - id
+        - frequency
+        - revision
+
+    Variant:
+      properties:
+        allOf:
+          - $ref: '#/components/schemas/Variant_simple'
+          - type: object
+            required:
+              - updated_at
+              - level_of_detail
+              - created_at
+              - cancelled
+            version: { type: integer }
+            updated_at: { type: string, format: date-time, readOnly: true }
+            level_of_detail:
+              $ref: '#/components/schemas/Level_of_detail'
+            created_at: { type: string, format: date-time, readOnly: true }
+            cancelled: { type: boolean }
 
 paths:
   /contacts:
@@ -704,24 +759,23 @@ paths:
                 type: array
                 items: { $ref: '#/components/schemas/Blocked_release_date' }
   /auth/authenticate:
-      get:
-        summary: Check authentication status and information for current user. Used for controlling front-end behaviour, not security.
-        tags: [authentication]
-        responses: 
-          '200': 
-            description: Object with admin-status, user info
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    isAdmin:
-                      type: boolean
-                      example: true
-                    email: 
-                      type: string
-                      example: alice@example.com
-                    fullName:
-                      type: string
-                      example: Alice Examplesdottir
-
+    get:
+      summary: Check authentication status and information for current user. Used for controlling front-end behaviour, not security.
+      tags: [authentication]
+      responses:
+        '200':
+          description: Object with admin-status, user info
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isAdmin:
+                    type: boolean
+                    example: true
+                  email:
+                    type: string
+                    example: alice@example.com
+                  fullName:
+                    type: string
+                    example: Alice Examplesdottir

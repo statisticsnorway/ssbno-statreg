@@ -6,7 +6,6 @@ import {
   ApprovalStatus,
 } from '@ssbno-statreg/shared'
 import {
-  dateToISOString,
   sanitize,
   getDateOnlyAsString,
   parseDateISO,
@@ -82,7 +81,7 @@ export async function getReleases(
       const { statistic, frequency } = release.variant ?? {}
       return {
         id: release.id,
-        publish_time: dateToISOString(release.publish_time),
+        publish_time: release.publish_time.toISOString(),
         approval_status: release.desk_appoval_status,
         period_to: getDateOnlyAsString(release.period_to),
         period_from: getDateOnlyAsString(release.period_from),
@@ -365,7 +364,7 @@ export function mapToReleaseDetails(
 
   return {
     id: prismaRelease.id,
-    publish_time: dateToISOString(prismaRelease.publish_time),
+    publish_time: prismaRelease.publish_time.toISOString(),
     has_versions: prismaRelease.version > 1,
     approval_status: prismaRelease.desk_appoval_status,
     variant: {

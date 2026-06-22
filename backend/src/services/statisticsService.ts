@@ -171,12 +171,12 @@ export function parseStatisticVariants(
 
   return variants.map((variant) => ({
     id: variant.id,
-    updated_at: dateToISOString(variant.last_updated),
+    updated_at: variant.last_updated.toISOString(),
     level_of_detail: {
       name: variant.level_of_detail ?? '',
       name_en: variant.level_of_detail_en ?? '',
     },
-    created_at: dateToISOString(variant.date_created),
+    created_at: variant.date_created.toISOString(),
     cancelled: variant.cancelled,
     frequency: {
       name: variant.frequency.name,
@@ -193,11 +193,11 @@ export async function mapStatisticDetails(statistic: StatisticPrismaResult): Pro
   const division_code = statistic.division_code
   const relation = statistic.related_statistic?.shortname
     ? {
-        shortname: statistic.related_statistic?.shortname?.name,
-        name: statistic.related_statistic?.name,
+        shortname: statistic.related_statistic.shortname.name,
+        name: statistic.related_statistic.name,
         name_en: statistic.related_statistic?.name_en ?? '',
       }
-    : {}
+    : null
 
   return {
     version: statistic.version,
@@ -217,9 +217,9 @@ export async function mapStatisticDetails(statistic: StatisticPrismaResult): Pro
     relation,
     name: statistic.name,
     name_en: statistic.name_en ?? '',
-    updated_at: dateToISOString(statistic.last_updated),
+    updated_at: statistic.last_updated.toISOString(),
     comment: statistic.comment,
-    created_at: dateToISOString(statistic.date_created),
+    created_at: statistic.date_created.toISOString(),
     variants: parseStatisticVariants(statistic.variants),
     contacts: await fetchUsers(statistic.responsiblePersons).then((users) =>
       users?.map((user) => {

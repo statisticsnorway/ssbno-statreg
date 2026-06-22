@@ -8,7 +8,7 @@ import { type ReleaseDetails } from '@ssbno-statreg/shared'
 import { formatPublishTime, formatDate, formatVariant } from '../lib/utils'
 
 function ShowRelease() {
-  const [release, setRelease] = useState<ReleaseDetails>({})
+  const [release, setRelease] = useState<ReleaseDetails | null>(null)
   const { id } = useParams()
 
   useEffect(() => {
@@ -25,6 +25,8 @@ function ShowRelease() {
     }
     fetchRelease()
   }, [id])
+
+  if (!release) return null
 
   const approvalStatus = release.approval_status
   const statisticName = formatStatisticName(release.statistic)
