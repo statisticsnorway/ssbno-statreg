@@ -1,7 +1,7 @@
 import './ListStatistics.css'
 import { useEffect, useState } from 'react'
 import client from '../api'
-import type { ShortnameListing, StatisticListing } from '@ssbno-statreg/shared'
+import type { Contact, ShortnameListing, StatisticListing } from '@ssbno-statreg/shared'
 import { PaginatedStatisticsTable } from '../components/StatisticsTable'
 import {
   EXPERIMENTAL_Suggestion as Suggestion,
@@ -19,23 +19,34 @@ import { RowCountSelect } from '../components/RowCountSelect'
 export default function ListStatistics() {
   const [searchParams, setSearchParams] = useSearchParams()
   const shortnameQuery = searchParams.get('shortname')
+  const contactQuery = searchParams.get('contact')
   const [count, setCount] = useState(20)
   const [start, setStart] = useState(0)
   const [total, setTotal] = useState(0)
   const [sortBy, setSortBy] = useState('')
   const [statistics, setStatistics] = useState<StatisticListing[]>([])
   const [shortnames, setShortnames] = useState<ShortnameListing[]>([])
-  const [selectedShortnames, setSelectedShortnames] = useState<SuggestionItem[]>([])
+  const [contacts, setContacts] = useState<Contact[]>([])
+  const [selectedFilter, setSelectedFilter] = useState<SuggestionItem | null>(null)
   const { auth } = useAuth()
 
   useEffect(() => {
-    fetchStatistics(start, count, selectedShortnames, sortBy)
-  }, [start, count, selectedShortnames, sortBy])
+    fetchStatistics(start, count, shortnameQuery, contactQuery, sortBy)
+  }, [start, count, shortnameQuery, contactQuery, sortBy])
 
-  const fetchStatistics = async (start: number, count: number, selectedShortnames: SuggestionItem[], sort: string) => {
+  const fetchStatistics = async (
+    start: number,
+    count: number,
+    shortnameQuery: string | null,
+    contactQuery: string | null,
+    sort: string
+  ) => {
     const filter = {
-      ...(selectedShortnames.length && {
-        shortname: selectedShortnames.map((item) => item.value).join(','),
+      ...(shortnameQuery && {
+        shortname: shortnameQuery,
+      }),
+      ...(contactQuery && {
+        contact: contactQuery,
       }),
     }
     const { data, error } = await client.GET('/statistics', {
@@ -68,17 +79,38 @@ export default function ListStatistics() {
   }, [])
 
   useEffect(() => {
-    async function setSelectedShortnamesFromQuery() {
-      if (!shortnameQuery) return
-
-      const newSelectedShortnames = shortnameQuery.split(',').map((shortname) => ({
-        label: shortname,
-        value: shortname,
-      }))
-      setSelectedShortnames(newSelectedShortnames)
+    async function fetchContacts() {
+      const { data, error } = await client.GET('/contacts')
+      if (error) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const errorMessage = (error as any).error
+        console.log(errorMessage)
+        alert(errorMessage)
+      } else {
+        setContacts(data ?? [])
+      }
     }
-    setSelectedShortnamesFromQuery()
-  }, [shortnameQuery])
+    fetchContacts()
+  }, [])
+
+  useEffect(() => {
+    async function setSelectedFilterFromQuery() {
+      if (shortnameQuery) {
+        setSelectedFilter({
+          label: shortnameQuery,
+          value: `shortname:${shortnameQuery}`,
+        })
+      } else if (contactQuery) {
+        setSelectedFilter({
+          label: contactQuery,
+          value: `contact:${contactQuery}`,
+        })
+      } else {
+        setSelectedFilter(null)
+      }
+    }
+    setSelectedFilterFromQuery()
+  }, [shortnameQuery, contactQuery])
 
   function updateRowCount(newCount: number) {
     setCount(newCount)
@@ -89,23 +121,22 @@ export default function ListStatistics() {
     setStart((currentPage - 1) * count)
   }
 
-  function filterChanged(selected: SuggestionItem[]) {
-    setSelectedShortnames(selected)
-    const shortname = selected.map((item) => item.value).join(',')
-    setSearchParams(
-      (prev) => {
-        const next = new URLSearchParams(prev)
-        if (shortname) next.set('shortname', shortname)
-        else next.delete('shortname')
-        return next
-      },
-      { replace: true }
-    )
+  function filterChanged(selected: SuggestionItem | null) {
+    if (!selected) {
+      setSearchParams(new URLSearchParams())
+      return
+    }
+    const [category, value] = selected.value.split(':')
+    if (category === 'shortname') {
+      setSearchParams(new URLSearchParams({ shortname: value }))
+    } else if (category === 'contact') {
+      setSearchParams(new URLSearchParams({ contact: value }))
+    }
   }
 
   return (
     <div className='list-statistics-container'>
-      <div className='list-statistics-header'>
+      <div className='header-container'>
         <Heading level={1} data-size='sm'>
           Statistikkoversikt
         </Heading>
@@ -117,20 +148,33 @@ export default function ListStatistics() {
           </Button>
         )}
       </div>
-      <div className='list-statistics-filter-container'>
+      <div className='suggestion-container'>
         <Field>
-          <Label>Filtrer statistikk</Label>
-          <Suggestion multiple onSelectedChange={(selected) => filterChanged(selected)} selected={selectedShortnames}>
+          <Label>Filtrer på kortnavn eller kontakt</Label>
+          <Suggestion onSelectedChange={(selected) => filterChanged(selected)} selected={selectedFilter}>
             <Suggestion.Input />
-            <Suggestion.Clear />
-            <Suggestion.List>
+            <Suggestion.Clear onClick={() => filterChanged(null)} />
+            <Suggestion.List className='suggestion-list'>
               <Suggestion.Empty>Ingen treff</Suggestion.Empty>
-              {shortnames.map((shortname) => (
-                <Suggestion.Option key={shortname.shortname} label={shortname.shortname} value={shortname.shortname}>
-                  {shortname.shortname}
-                  <div>Kortnavn</div>
-                </Suggestion.Option>
-              ))}
+              {shortnames.map((shortname) => {
+                const value = `shortname:${shortname.shortname}`
+                return (
+                  <Suggestion.Option className='suggestion-item' key={value} label={shortname.shortname} value={value}>
+                    {shortname.shortname}
+                    <div className='category-label'>Kortnavn</div>
+                  </Suggestion.Option>
+                )
+              })}
+              {contacts.map((contact) => {
+                const value = `contact:${contact.username}`
+                return (
+                  <Suggestion.Option className='suggestion-item' key={value} label={contact.username} value={value}>
+                    {/* TODO: show "name (username)" when AD caching is done and /contacts endpoint updated MIM-2777 */}
+                    {contact.username}
+                    <div className='category-label'>Kontakt</div>
+                  </Suggestion.Option>
+                )
+              })}
             </Suggestion.List>
           </Suggestion>
         </Field>
