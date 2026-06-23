@@ -579,9 +579,9 @@ describe('statisticService', () => {
       expect(result).toStrictEqual(expectedResult)
     })
 
-    test('falls back to empty relation object when related statistic is missing', async () => {
+    test('falls back to relation=null when related statistic is missing', async () => {
       input.related_statistic = null
-      expectedResult.relation = {}
+      expectedResult.relation = null
 
       const result = await mapStatisticDetails(input)
 
