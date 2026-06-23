@@ -349,7 +349,7 @@ components:
         - frequency
         - revision
 
-    Variant:
+    Variant_details:
       properties:
         allOf:
           - $ref: '#/components/schemas/Variant_simple'
