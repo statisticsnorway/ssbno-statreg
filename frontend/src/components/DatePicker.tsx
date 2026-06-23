@@ -4,9 +4,11 @@ import '@navikt/ds-css/dist/global/tokens.css'
 import '@navikt/ds-css/dist/components.css'
 
 import { useState, useEffect } from 'react'
+import { renderToStaticMarkup } from 'react-dom/server'
 import { DatePicker as AkselDatePicker } from '@navikt/ds-react/DatePicker'
 import { type CalenderDate, DayStatus } from '@ssbno-statreg/shared'
 import { Paragraph } from '@digdir/designsystemet-react'
+import { CircleIcon, CircleFillIcon } from '@navikt/aksel-icons'
 
 import client from '../api'
 import { getDateOnlyAsString } from '../lib/utils'
@@ -16,11 +18,38 @@ type DatePickerProps = React.ComponentProps<typeof AkselDatePicker.Standalone> &
   calendarDatesEmit?: (data: CalenderDate) => void
 }
 
+const fewStatusBackgroundImage = `url('data:image/svg+xml,${encodeURIComponent(
+  renderToStaticMarkup(<CircleIcon aria-hidden width={8} height={8} />)
+)}')`
+const manyStatusBackgroundImage = `url('data:image/svg+xml,${encodeURIComponent('<svg fill="#202733" width="8" height="8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 285.919 285.919" xml:space="preserve" transform="rotate(270)" stroke="#202733"><path d="M142.959,0C64.131,0,0,64.132,0,142.96c0,78.828,64.131,142.959,142.959,142.959c78.828,0,142.96-64.131,142.96-142.959 C285.919,64.132,221.787,0,142.959,0z M142.959,260.919V142.96V25c65.043,0,117.96,52.917,117.96,117.96 C260.919,208.003,208.002,260.919,142.959,260.919z"></path></svg>')}')`
+const fullStatusBackgroundImage = `url('data:image/svg+xml,${encodeURIComponent(
+  renderToStaticMarkup(<CircleFillIcon aria-hidden width={8} height={8} />)
+)}')`
+
 export const DatePickerStatusColors = {
-  FULL: { backgroundColor: '#FFCDD2' },
-  MANY: { backgroundColor: '#CCE1FF' },
-  FEW: { backgroundColor: '#FFE0B2' },
-  BLOCKED: { backgroundColor: 'var(--ds-color-neutral-surface-tinted)' },
+  FULL: {
+    backgroundColor: '#FFCDD2',
+    backgroundPosition: 'top 6px left 6px',
+    backgroundRepeat: 'no-repeat',
+    backgroundImage: fullStatusBackgroundImage,
+  },
+  MANY: {
+    backgroundColor: '#FFE0B2',
+    backgroundPosition: 'top 6px left 6px',
+    backgroundRepeat: 'no-repeat',
+    backgroundImage: manyStatusBackgroundImage,
+  },
+  FEW: {
+    backgroundColor: '#CCE1FF',
+    backgroundPosition: 'top 6px left 6px',
+    backgroundRepeat: 'no-repeat',
+    backgroundImage: fewStatusBackgroundImage,
+  },
+  BLOCKED: {
+    backgroundColor: 'var(--ds-color-neutral-surface-tinted)',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
+  },
   NONE: { backgroundColor: 'var(--ds-color-accent-background-default)' },
 }
 
@@ -33,9 +62,14 @@ export function DatePickerColorLegend({ statusColors }: Readonly<{ statusColors:
             className='datepicker-explanation-colors'
             style={{
               ...(key === 'NONE' ? { border: '1px solid var(--ds-color-text-default)' } : {}),
+              ...(key === 'BLOCKED'
+                ? { fontSize: '12px', textAlign: 'center', textDecoration: 'line-through', alignContent: 'center' }
+                : {}),
               ...statusColors[key as keyof typeof DatePickerStatusColors],
             }}
-          />
+          >
+            {key === 'BLOCKED' ? '00' : ''}
+          </div>
           <Paragraph data-size='xs'>{value}</Paragraph>
         </div>
       ))}
