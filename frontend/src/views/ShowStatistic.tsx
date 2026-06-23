@@ -21,7 +21,7 @@ import { useAuth } from '../context/AuthContext'
 const TABLE_HEADER_CELLS = [{ label: 'Dato' }, { label: 'Variant' }, { label: 'Status' }]
 
 export default function ShowStatistic() {
-  const [statistic, setStatistic] = useState<StatisticDetails>({})
+  const [statistic, setStatistic] = useState<StatisticDetails | null>(null)
   const [releases, setReleases] = useState<ReleaseListing[]>([])
   const { shortname } = useParams()
   const { auth } = useAuth()
@@ -58,6 +58,8 @@ export default function ShowStatistic() {
     if (shortname) fetchReleases(shortname)
   }, [shortname])
 
+  if (!statistic) return null
+
   const statusCode = statistic.status?.code as keyof typeof StatisticStatus
   const englishName = statistic.name_en ?? '-'
   const division = formatDivision(statistic.division)
@@ -69,8 +71,6 @@ export default function ShowStatistic() {
   const variants = statistic.variants ?? []
   const cancelledVariants = formatCancelledVariants(variants)
   const activeVariants = variants.filter((v) => !v.cancelled)
-
-  if (!shortname) return null
 
   return (
     <>

@@ -1,4 +1,4 @@
-import { RevisionNames, type Contact, type Variant } from '@ssbno-statreg/shared'
+import { RevisionNames, type Contact, type VariantListing } from '@ssbno-statreg/shared'
 
 export function formatPublishTime(publishTime: string | undefined, timeZone?: string): string {
   if (!publishTime) return '-'
@@ -56,7 +56,7 @@ export function formatRevisionName(revision?: string): string {
   return RevisionNames[revision as keyof typeof RevisionNames]
 }
 
-export function formatVariant(variant?: Variant): string {
+export function formatVariant(variant?: VariantListing): string {
   const frequency = variant?.frequency?.name ?? '-'
   const revision = formatRevisionName(variant?.revision?.code).toLowerCase()
   return [frequency, revision].join(', ')

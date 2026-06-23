@@ -38,6 +38,7 @@ import {
   type ReleaseCreate,
   type ReleaseDetails,
   type CalenderDate,
+  type VariantListing,
 } from '@ssbno-statreg/shared'
 
 import client from '../api'
@@ -46,9 +47,8 @@ import './ReleaseForm.css'
 import { useAuth } from '../context/AuthContext'
 
 type Statistic = ReleaseByIdResponse['statistic'] & {
-  approval_status?: ReleaseByIdResponse['approval_status']
+  approval_status?: string
 }
-type Variant = ReleaseByIdResponse['variant']
 
 const releaseDatePrecisions = ['Dag', 'Måned', 'År'] as const
 
@@ -99,12 +99,12 @@ export default function ReleaseForm() {
   })
   const [errors, setErrors] = useState<ReleaseFormErrors>({})
   const [statistic, setStatistic] = useState<Statistic>()
-  const [variant, setVariant] = useState<Variant>()
+  const [variant, setVariant] = useState<VariantListing>()
   const publishTimePicker = useDatepicker('publishTime', setValues, setErrors)
   const periodFromPicker = useDatepicker('periodFrom', setValues, setErrors)
   const periodToPicker = useDatepicker('periodTo', setValues, setErrors)
   const [openReleaseModal, setOpenReleaseModal] = useState(false)
-  const [newOrUpdatedRelease, setNewOrUpdatedRelease] = useState<ReleaseDetails>({})
+  const [newOrUpdatedRelease, setNewOrUpdatedRelease] = useState<ReleaseDetails | null>(null)
   const [calendarDates, setCalendarDates] = useState<CalenderDate>({})
 
   const { auth } = useAuth()

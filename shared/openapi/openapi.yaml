@@ -210,6 +210,8 @@ components:
             - release_date_precision
           properties:
             has_versions: { type: boolean }
+            variant:
+              $ref: '#/components/schemas/Variant_listing'
             cancelled: { type: boolean }
             release_date_precision: { type: string }
 
@@ -349,16 +351,16 @@ components:
         - frequency
         - revision
 
-    Variant_details:
-      properties:
-        allOf:
-          - $ref: '#/components/schemas/Variant_simple'
-          - type: object
-            required:
-              - updated_at
-              - level_of_detail
-              - created_at
-              - cancelled
+    Variant:
+      allOf:
+        - $ref: '#/components/schemas/Variant_listing'
+        - type: object
+          required:
+            - updated_at
+            - level_of_detail
+            - created_at
+            - cancelled
+          properties:
             version: { type: integer }
             updated_at: { type: string, format: date-time, readOnly: true }
             level_of_detail:

@@ -879,11 +879,7 @@ export interface components {
     }
     Release_details: components['schemas']['Release_get'] & {
       has_versions: boolean
-      variant: {
-        readonly id: number
-        frequency: components['schemas']['Frequency']
-        revision: components['schemas']['Revision']
-      }
+      variant: components['schemas']['Variant_listing']
       cancelled: boolean
       release_date_precision: string
     }
@@ -898,18 +894,6 @@ export interface components {
     Division: {
       code?: string | null
       readonly name?: string
-    }
-    Statistic: {
-      readonly shortname: string
-      /** @description Main language will be either 'nn' or 'nb' for statistics */
-      main_language: string
-      status: {
-        code: string
-      }
-      name: string
-      name_en: string
-      /** @description Is one of 'GODKJENT', 'AVVIST' or 'FORSLAG' */
-      approval_status?: string
     }
     Statistic_create: {
       name?: string
@@ -930,9 +914,22 @@ export interface components {
     Statistic_update: components['schemas']['Statistic_create'] & {
       relation?: string | null
     }
-    Statistic_details: components['schemas']['Statistic'] & {
-      version: number
+    Statistic_listing: {
+      readonly shortname: string
+      /** @description Main language will be either 'nn' or 'nb' for statistics */
+      main_language: string
+      status: {
+        code: string
+      }
+      name: string
+      name_en: string
+      /** @description Is one of 'GODKJENT', 'AVVIST' or 'FORSLAG' */
+      approval_status?: string
       division: components['schemas']['Division']
+      contacts: components['schemas']['Contact'][]
+    }
+    Statistic_details: components['schemas']['Statistic_listing'] & {
+      version: number
       /** Format: date */
       first_released_at?: string | null
       yearly_reporting: boolean
@@ -948,15 +945,14 @@ export interface components {
       /** Format: date-time */
       readonly created_at: string
       variants: components['schemas']['Variant'][]
-      contacts: components['schemas']['Contact'][]
       statistic_region_levels: components['schemas']['Region_level'][]
     }
-    Statistic_listing: components['schemas']['Statistic'] & {
-      division: components['schemas']['Division']
-      contacts: components['schemas']['Contact'][]
-    }
-    Variant: {
+    Variant_listing: {
       readonly id: number
+      frequency: components['schemas']['Frequency']
+      revision: components['schemas']['Revision']
+    }
+    Variant: components['schemas']['Variant_listing'] & {
       version?: number
       /** Format: date-time */
       readonly updated_at: string
@@ -964,8 +960,6 @@ export interface components {
       /** Format: date-time */
       readonly created_at: string
       cancelled: boolean
-      frequency: components['schemas']['Frequency']
-      revision: components['schemas']['Revision']
     }
   }
   responses: {
