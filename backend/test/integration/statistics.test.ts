@@ -264,4 +264,16 @@ describe('statisticsController integration', () => {
     expect(statistics.statistics?.[0]?.shortname).toBe('helse')
     expect(statistics.statistics?.[1]?.shortname).toBe('energ')
   })
+
+  test('GET /statistics with contact filter and sort', async () => {
+    const response = await request(app).get('/statistikkregisteret/api/statistics').query('contact=abc&sort=shortname')
+
+    expect(response.status).toBe(200)
+
+    const statistics = response.body as StatisticListingResponse
+
+    expect(statistics.statistics?.length).toBe(2)
+    expect(statistics.statistics?.[0]?.shortname).toBe('energ')
+    expect(statistics.statistics?.[1]?.shortname).toBe('kpi')
+  })
 })
