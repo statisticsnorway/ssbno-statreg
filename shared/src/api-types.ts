@@ -197,7 +197,9 @@ export interface paths {
       parameters: {
         query?: never
         header?: never
-        path?: never
+        path: {
+          shortname: string
+        }
         cookie?: never
       }
       requestBody: {
@@ -237,7 +239,9 @@ export interface paths {
       parameters: {
         query?: never
         header?: never
-        path?: never
+        path: {
+          shortname: string
+        }
         cookie?: never
       }
       requestBody: {
@@ -392,7 +396,9 @@ export interface paths {
       parameters: {
         query?: never
         header?: never
-        path?: never
+        path: {
+          shortname: string
+        }
         cookie?: never
       }
       requestBody?: never
@@ -904,7 +910,6 @@ export interface components {
         code: string
       }
       division?: string | null
-      /** Format: date */
       first_released_at?: string | null
       yearly_reporting?: boolean
       statistic_region_levels?: components['schemas']['Region_level'][]
@@ -930,7 +935,6 @@ export interface components {
     }
     Statistic_details: components['schemas']['Statistic_listing'] & {
       version: number
-      /** Format: date */
       first_released_at?: string | null
       yearly_reporting: boolean
       previous_topic_codes?: string | null
