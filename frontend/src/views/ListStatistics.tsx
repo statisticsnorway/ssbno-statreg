@@ -44,7 +44,7 @@ export default function ListStatistics() {
     count: number,
     shortnameQuery: string | null,
     contactQuery: string | null,
-    sortQuery: string
+    sortQuery: string | null
   ) => {
     const filter = {
       ...(shortnameQuery && {
@@ -54,8 +54,15 @@ export default function ListStatistics() {
         contact: contactQuery,
       }),
     }
+
+    const sort = {
+      ...(sortQuery && {
+        sort: sortQuery,
+      }),
+    }
+
     const { data, error } = await client.GET('/statistics', {
-      params: { query: { start, count, sort: sortQuery, ...filter } },
+      params: { query: { start, count, ...sort, ...filter } },
     })
     if (error) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
