@@ -101,8 +101,9 @@ export default function ListStatistics() {
           value: `shortname:${shortnameQuery}`,
         })
       } else if (contactQuery) {
+        const selectedContact = contacts.find((contact) => contact.username === contactQuery)
         setSelectedFilter({
-          label: contactQuery,
+          label: selectedContact ? `${selectedContact.name} (${selectedContact.username})` : contactQuery,
           value: `contact:${contactQuery}`,
         })
       } else {
@@ -110,7 +111,7 @@ export default function ListStatistics() {
       }
     }
     setSelectedFilterFromQuery()
-  }, [shortnameQuery, contactQuery])
+  }, [shortnameQuery, contactQuery, contacts])
 
   function updateRowCount(newCount: number) {
     setCount(newCount)
