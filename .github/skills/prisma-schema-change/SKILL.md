@@ -19,11 +19,12 @@ argument-hint: "Describe schema change and target models"
 3. Apply migrations in normal flow:
    - `npm run db:deploy`
 4. If local setup requires documented recovery workflow, follow repo docs (`README.md` and `docs/database.md`) before continuing.
-5. Seed local DB when needed:
+5. Update `backend/prisma/seed.ts` if schema fields have changed, if new models are added or if additional examples are necessary. Beware that many integration tests depend on seed data. ALWAYS run integration tests after changing seed data.
+6. Seed local DB when needed:
    - `npm run seed`
-6. Run validation for backend-impacting changes:
+7. Run validation for backend-impacting changes:
    - `npm run test:backend`
-7. If the changes are successful and accepted by the user, a migration can be created like this. Remember to replace "${migration-name} with a unique name describing the migration. 
+8. If the changes are successful and accepted by the user, a migration can be created like this. Remember to replace "${migration-name} with a unique name describing the migration. 
    - `npx prisma migrate dev -n ${migration-name}`
 
 ## Guardrails
