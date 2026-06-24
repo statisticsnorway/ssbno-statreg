@@ -6,7 +6,6 @@ import { Pagination } from './Pagination'
 import '../views/ListReleases.css'
 import { Link } from 'react-router'
 import { formatContacts } from '../lib/utils'
-import type { Dispatch, SetStateAction } from 'react'
 
 const TABLE_HEADER_CELLS = [
   { label: 'Kortnavn', field: 'shortname', sortable: true },
@@ -47,27 +46,27 @@ export function StatisticsTable({
   statistics,
   openInNewTab,
   sortBy,
-  setSortBy,
+  onSortChange,
 }: Readonly<{
   statistics: StatisticListing[]
   openInNewTab?: boolean
   sortBy: string
-  setSortBy?: Dispatch<SetStateAction<string>>
+  onSortChange?: (sortBy: string) => void
 }>) {
   function toggleSort(field: string) {
     // We would like to loop through sorting like "" -> "shortname" -> "-shortname" -> ""
     if (sortBy !== field && sortBy !== `-${field}`) {
       // case 1: if field was not sorted by already, sort ascending
-      setSortBy?.(field)
+      onSortChange?.(field)
     } else {
       const isDescending = sortBy.startsWith('-')
 
       if (isDescending) {
         // case 2: if field was sorted in descending order, change to none
-        setSortBy?.('')
+        onSortChange?.('')
       } else {
         // case 3: if field was sorted in ascending order, change to descending
-        setSortBy?.(`-${field}`)
+        onSortChange?.(`-${field}`)
       }
     }
   }
@@ -107,7 +106,7 @@ type PaginatedStatisticsTableProps = {
   count: number
   total: number
   sortBy: string
-  setSortBy?: Dispatch<SetStateAction<string>>
+  onSortChange?: (sortBy: string) => void
   statistics: StatisticListing[]
   setCurrentPage: (selectedPage: number) => void
   openInNewTab?: boolean
@@ -118,14 +117,19 @@ export function PaginatedStatisticsTable({
   count,
   total,
   sortBy,
-  setSortBy,
+  onSortChange,
   statistics,
   setCurrentPage,
   openInNewTab,
 }: Readonly<PaginatedStatisticsTableProps>) {
   return (
     <div style={{ minWidth: '100%' }}>
-      <StatisticsTable statistics={statistics} openInNewTab={openInNewTab} sortBy={sortBy} setSortBy={setSortBy} />
+      <StatisticsTable
+        statistics={statistics}
+        openInNewTab={openInNewTab}
+        sortBy={sortBy}
+        onSortChange={onSortChange}
+      />
       <Pagination start={start} count={count} total={total} setCurrentPage={setCurrentPage} />
     </div>
   )
