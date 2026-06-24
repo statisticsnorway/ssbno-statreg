@@ -11,6 +11,11 @@ export type GraphUserResponse = {
   userPrincipalName?: string
 }
 
+export type GraphUsersResponse = {
+  value: GraphUserResponse[]
+  '@odata.nextLink'?: string
+}
+
 export type EntraUser = {
   username?: string | null
   displayName: string

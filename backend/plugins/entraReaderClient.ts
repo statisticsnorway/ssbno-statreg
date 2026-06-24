@@ -1,4 +1,4 @@
-import type { EntraUser, GraphUserResponse, TokenResponse } from '@/types/entra'
+import type { EntraUser, GraphUserResponse, GraphUsersResponse, TokenResponse } from '@/types/entra'
 import { URLSearchParams } from 'node:url'
 
 export const GRAPH_BASE_URL = 'https://graph.microsoft.com/v1.0'
@@ -75,6 +75,14 @@ export async function getAccessToken(): Promise<string> {
   }
 }
 
+function parseEntraUser(user: GraphUserResponse): EntraUser {
+  return {
+    displayName: user.displayName,
+    email: user.mail ?? user.userPrincipalName ?? null,
+    businessPhone: user.businessPhones?.[0] ?? null,
+  }
+}
+
 export async function fetchUserByEmail(userEmail: string, token: string): Promise<EntraUser | null> {
   if (!userEmail) {
     console.log(`Missing user email`)
@@ -94,9 +102,37 @@ export async function fetchUserByEmail(userEmail: string, token: string): Promis
 
   const user = (await response.json()) as GraphUserResponse
 
-  return {
-    displayName: user.displayName,
-    email: user.mail ?? user.userPrincipalName ?? null,
-    businessPhone: user.businessPhones?.[0] ?? null,
+  return parseEntraUser(user)
+}
+
+export async function fetchAllUsers(token: string): Promise<EntraUser[]> {
+  if (!token) {
+    throw new Error('Missing token')
   }
+
+  const users: EntraUser[] = []
+  let nextUrl: string | null =
+    `${GRAPH_BASE_URL}/users?$select=displayName,businessPhones,mail,userPrincipalName&$top=999`
+
+  while (nextUrl) {
+    const response = await fetch(nextUrl, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+
+    if (!response.ok) {
+      throw new Error(`Graph users request failed: ${response.status} ${await response.text()}`)
+    }
+
+    const body = (await response.json()) as GraphUsersResponse
+
+    for (const user of body.value) {
+      users.push(parseEntraUser(user))
+    }
+
+    nextUrl = body['@odata.nextLink'] ?? null
+  }
+
+  return users
 }

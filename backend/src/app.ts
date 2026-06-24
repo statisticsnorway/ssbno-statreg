@@ -9,6 +9,7 @@ import { promBundleMetrics } from '../plugins/promBundle'
 import controllerRouter from './api/core/controllerRouter'
 import { prisma } from './lib/prisma'
 import { initializeDepartments } from './services/klassService'
+import { initializeUsers } from './services/entraUserService'
 import * as dotenv from 'dotenv'
 dotenv.config()
 
@@ -65,6 +66,7 @@ export async function createApp() {
 
   await prisma.$connect()
   await initializeDepartments() //TODO handle error with caching solution MIM-2641
+  await initializeUsers() //TODO handle error with caching solution MIM-2641
 
   return app
 }
