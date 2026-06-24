@@ -6,8 +6,14 @@ import { Pagination } from './Pagination'
 import '../views/ListReleases.css'
 import { Link } from 'react-router'
 import { formatContacts } from '../lib/utils'
+import type { Dispatch, SetStateAction } from 'react'
 
-const TABLE_HEADER_CELLS = ['Kortnavn', 'Statistikknavn', 'Kontakt', 'Status']
+const TABLE_HEADER_CELLS = [
+  { label: 'Kortnavn', field: 'shortname', sortable: true },
+  { label: 'Statistikknavn', field: 'statistic.name' },
+  { label: 'Kontakt', field: 'statistic.contact' },
+  { label: 'Status', field: 'statistic.status' },
+]
 
 type StatisticRowProps = {
   statistic: StatisticListing
@@ -40,13 +46,50 @@ function StatisticRow({ statistic, openInNewTab }: Readonly<StatisticRowProps>) 
 export function StatisticsTable({
   statistics,
   openInNewTab,
-}: Readonly<{ statistics: StatisticListing[]; openInNewTab?: boolean }>) {
+  sortBy,
+  setSortBy,
+}: Readonly<{
+  statistics: StatisticListing[]
+  openInNewTab?: boolean
+  sortBy: string
+  setSortBy?: Dispatch<SetStateAction<string>>
+}>) {
+  function toggleSort(field: string) {
+    // We would like to loop through sorting like "" -> "shortname" -> "-shortname" -> ""
+    if (sortBy !== field && sortBy !== `-${field}`) {
+      // case 1: if field was not sorted by already, sort ascending
+      setSortBy?.(field)
+    } else {
+      const isDescending = sortBy.startsWith('-')
+
+      if (isDescending) {
+        // case 2: if field was sorted in descending order, change to none
+        setSortBy?.('')
+      } else {
+        // case 3: if field was sorted in ascending order, change to descending
+        setSortBy?.(`-${field}`)
+      }
+    }
+  }
+
+  function getSortDirection(field: string) {
+    if (sortBy === field) return 'ascending'
+    if (sortBy === `-${field}`) return 'descending'
+    return 'none'
+  }
+
   return (
     <Table>
       <Table.Head>
         <Table.Row>
-          {TABLE_HEADER_CELLS.map((header) => (
-            <Table.HeaderCell key={header}>{header}</Table.HeaderCell>
+          {TABLE_HEADER_CELLS.map(({ label, field, sortable }) => (
+            <Table.HeaderCell
+              key={field}
+              onClick={sortable ? () => toggleSort(field) : undefined}
+              sort={sortable ? getSortDirection(field) : undefined}
+            >
+              {label}
+            </Table.HeaderCell>
           ))}
         </Table.Row>
       </Table.Head>
@@ -63,6 +106,8 @@ type PaginatedStatisticsTableProps = {
   start: number
   count: number
   total: number
+  sortBy: string
+  setSortBy?: Dispatch<SetStateAction<string>>
   statistics: StatisticListing[]
   setCurrentPage: (selectedPage: number) => void
   openInNewTab?: boolean
@@ -72,13 +117,15 @@ export function PaginatedStatisticsTable({
   start,
   count,
   total,
+  sortBy,
+  setSortBy,
   statistics,
   setCurrentPage,
   openInNewTab,
 }: Readonly<PaginatedStatisticsTableProps>) {
   return (
     <div style={{ minWidth: '100%' }}>
-      <StatisticsTable statistics={statistics} openInNewTab={openInNewTab} />
+      <StatisticsTable statistics={statistics} openInNewTab={openInNewTab} sortBy={sortBy} setSortBy={setSortBy} />
       <Pagination start={start} count={count} total={total} setCurrentPage={setCurrentPage} />
     </div>
   )
