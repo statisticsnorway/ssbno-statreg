@@ -13,11 +13,13 @@ export async function initializeUsers(): Promise<void> {
   const cachedUsers = getUsersCache()
 
   if (cachedUsers) {
+    console.info(`initializeUsers: loaded ${cachedUsers.length} users from cache`)
     setUsers(cachedUsers)
     return
   }
 
-  setUsers(await fetchAllUsers())
+  const users = await fetchAllUsers()
+  console.info(`initializeUsers: loaded ${users.length} users from fetchAllUsers`)
 }
 
 export async function fetchAllUsers(): Promise<EntraUser[]> {
