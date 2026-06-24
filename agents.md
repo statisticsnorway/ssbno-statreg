@@ -77,7 +77,7 @@ Run the minimum required checks for the files you changed.
 | Any file | `npm run check` |
 | `backend/**` | `npm run test:backend` |
 | `frontend/**` | `npm run test:frontend` |
-| `shared/**` | `npm run test` and `npm run test:frontend` and `npm run test:backend` |
+| `shared/**` | `npm run test` |
 | `shared/openapi/openapi.yaml` | `npm run generate:api-types` and then relevant tests |
 | `backend/prisma/schema.prisma` | `npm run generate`, apply Prisma workflow from docs, then backend tests |
 | Cross-cutting refactors | `npm run test` and `npm run lint` |
