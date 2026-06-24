@@ -178,9 +178,7 @@ export default function ListStatistics() {
                 const value = `contact:${contact.username}`
                 return (
                   <Suggestion.Option className='suggestion-item' key={value} label={contact.username} value={value}>
-                    {/* TODO: show "name (username)" when AD caching is done and /contacts endpoint updated MIM-2777 */}
-                    {contact.username}
-                    <div className='category-label'>Kontakt</div>
+                    {contact.name} ({contact.username})<div className='category-label'>Kontakt</div>
                   </Suggestion.Option>
                 )
               })}
