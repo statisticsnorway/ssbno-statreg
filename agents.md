@@ -30,13 +30,16 @@ It manages statistics, variants, and publication releases, and serves as a sourc
 - Keep controllers thin; put business logic in services.
 - Reuse shared libraries instead of duplicating logic.
 - Keep API contract changes synchronized with OpenAPI and generated API types.
+- Does the standard libraries solve the problem? Use standard features first.
+- Does an already-installed dependency solve it? Use it.
+- Avoid adding third-party dependencies. Check with user first, and only add what is strictly needed.
 
 ## Commands
 
 Use these commands from repo root.
 
 ```bash
-# Start full stack (http://localhost:8080)
+# Start full stack (frontend + api: http://localhost:5173)
 npm run dev
 
 # Start local auth flow (Keycloak + app)

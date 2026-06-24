@@ -35,7 +35,7 @@ describe('entraUserService ', () => {
     })
 
     test('returns original users when token retrieval fails', async () => {
-      getAccessTokenMock.mockImplementationOnce(() => null)
+      getAccessTokenMock.mockImplementationOnce(() => Promise.resolve(''))
 
       const result = await fetchUsers([{ username: 'ola', email: 'ignored@test.com' }])
 
