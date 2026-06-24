@@ -177,8 +177,11 @@ describe('utils', () => {
 
   describe('formatContact', () => {
     test('returns initials', () => {
-      const contacts = [{ username: 'abc' }, { email: 'xyz@ssb.no' }]
-      expect(formatContacts(contacts)).toStrictEqual(['abc', 'xyz'])
+      const contacts = [
+        { username: 'abc', name: 'Ola Nordmann' },
+        { username: 'xyz', name: 'Kari Nordmann' },
+      ]
+      expect(formatContacts(contacts)).toStrictEqual(['Ola Nordmann (abc)', 'Kari Nordmann (xyz)'])
     })
 
     test('returns empty array when contacts is undefined', () => {
