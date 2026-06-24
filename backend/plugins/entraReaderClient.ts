@@ -5,7 +5,7 @@ export const GRAPH_BASE_URL = 'https://graph.microsoft.com/v1.0'
 
 let cachedToken: string | null = null
 let tokenExpiresAt = 0
-let tokenPromise: Promise<string> | null = null
+let tokenPromise: Promise<string | null> | null = null
 
 export function setCachedToken(token: string | null) {
   cachedToken = token
@@ -15,11 +15,11 @@ export function setTokenExpiresAt(time: number) {
   tokenExpiresAt = time
 }
 
-export function setTokenPromise(promise: Promise<string> | null) {
+export function setTokenPromise(promise: Promise<string | null> | null) {
   tokenPromise = promise
 }
 
-export async function getAccessToken(): Promise<string> {
+export async function getAccessToken(): Promise<string | null> {
   const tenantId = process.env.ENTRA_READER_AZURE_TENANT_ID
   const clientId = process.env.ENTRA_READER_AZURE_CLIENT_ID
   const clientSecret = process.env.ENTRA_READER_AZURE_CLIENT_SECRET

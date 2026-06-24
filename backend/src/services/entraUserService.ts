@@ -1,6 +1,7 @@
 import type { UserLookupItem, EntraUser, Users } from '@/types/entra'
 
 import * as entraClient from '@/../plugins/entraReaderClient'
+import { getUsersCache, setUsersCache } from '@/lib/cache'
 
 export let ALL_USERS: EntraUser[] = []
 
@@ -9,6 +10,13 @@ export function setUsers(users: EntraUser[]): void {
 }
 
 export async function initializeUsers(): Promise<void> {
+  const cachedUsers = getUsersCache()
+
+  if (cachedUsers) {
+    setUsers(cachedUsers)
+    return
+  }
+
   setUsers(await fetchAllUsers())
 }
 
@@ -21,10 +29,10 @@ export async function fetchAllUsers(): Promise<EntraUser[]> {
   }
 
   try {
-    return await entraClient.fetchAllUsers(token)
+    return setUsersCache(await entraClient.fetchAllUsers(token))
   } catch (error) {
     console.error(error)
-    return []
+    return getUsersCache() ?? []
   }
 }
 
