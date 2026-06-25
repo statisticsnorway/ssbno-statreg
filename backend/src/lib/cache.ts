@@ -6,7 +6,7 @@ const usersCache = new NodeCache({ stdTTL: 60 * 60 * 24, checkperiod: 60 })
 const ENTRA_USERS_CACHE_KEY = 'entra-users'
 
 export async function setUsersCache(): Promise<void> {
-  // Workaround for integration tests that run in Docker and don't have access to Azure Entra.
+  // Return mocked users for tests and development where application often restarts and/or is missing Azure Entra access
   if (process.env.MOCK_ENTRA_USERS === 'true') {
     console.info('setUsersCache: MOCK_ENTRA_USERS is set, using mock user data')
     usersCache.set(ENTRA_USERS_CACHE_KEY, [
