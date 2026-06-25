@@ -26,8 +26,13 @@ export async function setUsersCache(): Promise<void> {
     return
   }
 
-  const users = await entraClient.fetchAllUsers(token)
-  usersCache.set(ENTRA_USERS_CACHE_KEY, users)
+  try {
+    const users = await entraClient.fetchAllUsers(token)
+    usersCache.set(ENTRA_USERS_CACHE_KEY, users)
+  } catch (error) {
+    console.error(`Failed to set users cache: ${error}`)
+    return
+  }
 }
 
 export async function getUsersFromCache(): Promise<EntraUser[]> {
