@@ -1,50 +1,7 @@
-import type { UserLookupItem, EntraUser, Users } from '@/types/entra'
+import type { UserLookupItem, Users } from '@/types/entra'
 
 import * as entraClient from '@/../plugins/entraReaderClient'
-import { getUsersCache, setUsersCache } from '@/lib/cache'
 
-export async function initializeUsers(): Promise<void> {
-  // Workaround for integration tests that run in Docker and don't have access to Azure Entra.
-  if (process.env.MOCK_ENTRA_USERS === 'true') {
-    console.info('initializeUsers: MOCK_ENTRA_USERS is set, using mock user data')
-    setUsersCache([
-      {
-        displayName: 'Admin SSB',
-        email: 'admin.ssb@ssb.no',
-        businessPhone: null,
-      },
-    ])
-    return
-  }
-
-  const cachedUsers = getUsersCache()
-
-  if (cachedUsers) {
-    console.info(`initializeUsers: loaded ${cachedUsers.length} users from cache`)
-    return
-  }
-
-  const users = await fetchAllUsers()
-  console.info(`initializeUsers: loaded ${users.length} users from fetchAllUsers`)
-}
-
-export async function fetchAllUsers(): Promise<EntraUser[]> {
-  const token = await entraClient.getAccessToken()
-
-  if (!token) {
-    console.error('Failed getting access token for entra reader')
-    return []
-  }
-
-  try {
-    return setUsersCache(await entraClient.fetchAllUsers(token))
-  } catch (error) {
-    console.error(error)
-    return getUsersCache() ?? []
-  }
-}
-
-// TODO: MIM-2780: Check is this function is still needed
 export async function fetchUsers(users: Users[]) {
   if (!users?.length) return Promise.resolve([])
 

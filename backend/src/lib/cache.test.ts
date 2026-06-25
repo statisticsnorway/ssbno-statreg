@@ -1,66 +1,58 @@
-// users-cache.test.ts
-import { beforeEach, describe, expect, test } from 'vitest'
+import { vi, beforeEach, describe, expect, test } from 'vitest'
 
-import { setUsersCache, getUsersCache, clearUsersCache } from './cache'
+import { setUsersCache, getUsersFromCache, clearUsersCache } from './cache'
+
+const mockUsers = [
+  {
+    displayName: 'Ola Nordmann',
+    email: 'ola.nordmann@ssb.no',
+    businessPhone: null,
+  },
+  {
+    displayName: 'Infotjenesten',
+    email: 'infotjenesten@ssb.no',
+    businessPhone: '11223344',
+  },
+]
+
+const { fetchAllUsers, getAccessTokenMock } = vi.hoisted(() => ({
+  fetchAllUsers: vi.fn(async () => Promise.resolve(mockUsers)),
+  getAccessTokenMock: vi.fn(() => Promise.resolve('token')),
+}))
+
+vi.mock(import('../../plugins/entraReaderClient'), async (importOriginal) => {
+  const original = await importOriginal<typeof import('../../plugins/entraReaderClient')>()
+  return {
+    ...original,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    fetchAllUsers: fetchAllUsers as any,
+    getAccessToken: getAccessTokenMock,
+  }
+})
 
 describe('Users cache', () => {
-  const mockUsers = [
-    {
-      displayName: 'Ola Nordmann',
-      email: 'ola.nordmann@ssb.no',
-      businessPhone: null,
-    },
-    {
-      displayName: 'Infotjenesten',
-      email: 'infotjenesten@ssb.no',
-      businessPhone: '11223344',
-    },
-  ]
-
   beforeEach(() => {
     clearUsersCache()
+    fetchAllUsers.mockClear()
   })
 
-  test('return undefined when cache is empty', () => {
-    expect(getUsersCache()).toBeUndefined()
+  test('return empty array on first cache miss and populate cache', async () => {
+    await expect(getUsersFromCache()).resolves.toEqual([])
+    await expect(getUsersFromCache()).resolves.toEqual(mockUsers)
   })
 
-  test('store and return users', () => {
-    const result = setUsersCache(mockUsers)
-
-    expect(result).toBe(mockUsers)
-    expect(getUsersCache()).toEqual(mockUsers)
+  test('store and return users', async () => {
+    await expect(setUsersCache()).resolves.toBeUndefined()
+    await expect(getUsersFromCache()).resolves.toEqual(mockUsers)
   })
 
-  test('clear cached users', () => {
-    setUsersCache(mockUsers)
-
-    expect(getUsersCache()).toEqual(mockUsers)
+  test('clear cached users', async () => {
+    await setUsersCache()
+    await expect(getUsersFromCache()).resolves.toEqual(mockUsers)
 
     clearUsersCache()
 
-    expect(getUsersCache()).toBeUndefined()
-  })
-
-  test('overwrite previously cached users', () => {
-    const users1 = [
-      {
-        displayName: 'Ola Nordmann',
-        email: 'ola.nordmann@ssb.no',
-        businessPhone: null,
-      },
-    ]
-    const users2 = [
-      {
-        displayName: 'Infotjenesten',
-        email: 'infotjenesten@ssb.no',
-        businessPhone: '11223344',
-      },
-    ]
-
-    setUsersCache(users1)
-    setUsersCache(users2)
-
-    expect(getUsersCache()).toEqual(users2)
+    await expect(getUsersFromCache()).resolves.toEqual([])
+    await expect(getUsersFromCache()).resolves.toEqual(mockUsers)
   })
 })
