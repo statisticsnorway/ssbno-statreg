@@ -3,18 +3,11 @@ import type { UserLookupItem, EntraUser, Users } from '@/types/entra'
 import * as entraClient from '@/../plugins/entraReaderClient'
 import { getUsersCache, setUsersCache } from '@/lib/cache'
 
-export let ALL_USERS: EntraUser[] = []
-
-export function setUsers(users: EntraUser[]): void {
-  ALL_USERS = users
-}
-
 export async function initializeUsers(): Promise<void> {
   const cachedUsers = getUsersCache()
 
   if (cachedUsers) {
     console.info(`initializeUsers: loaded ${cachedUsers.length} users from cache`)
-    setUsers(cachedUsers)
     return
   }
 
@@ -38,6 +31,7 @@ export async function fetchAllUsers(): Promise<EntraUser[]> {
   }
 }
 
+// TODO: MIM-2780: Check is this function is still needed
 export async function fetchUsers(users: Users[]) {
   if (!users?.length) return Promise.resolve([])
 
