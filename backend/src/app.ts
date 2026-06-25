@@ -66,7 +66,7 @@ export async function createApp() {
 
   await prisma.$connect()
   await initializeDepartments() //TODO handle error with caching solution MIM-2641
-  await initializeUsers() //TODO handle error with caching solution MIM-2641
+  await initializeUsers()
 
   return app
 }
