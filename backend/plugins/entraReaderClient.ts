@@ -75,14 +75,6 @@ export async function getAccessToken(): Promise<string | null> {
   }
 }
 
-function parseEntraUser(user: GraphUserResponse): EntraUser {
-  return {
-    displayName: user.displayName,
-    email: user.mail ?? user.userPrincipalName ?? null,
-    businessPhone: user.businessPhones?.[0] ?? null,
-  }
-}
-
 // TODO: MIM-2778, MIM-2780: Check is this function is still needed
 export async function fetchUserByEmail(userEmail: string, token: string): Promise<EntraUser | null> {
   if (!userEmail) {
@@ -103,7 +95,11 @@ export async function fetchUserByEmail(userEmail: string, token: string): Promis
 
   const user = (await response.json()) as GraphUserResponse
 
-  return parseEntraUser(user)
+  return {
+    displayName: user.displayName,
+    email: user.mail ?? user.userPrincipalName ?? null,
+    businessPhone: user.businessPhones?.[0] ?? null,
+  }
 }
 
 export async function fetchAllUsers(token: string): Promise<EntraUser[]> {
@@ -129,7 +125,11 @@ export async function fetchAllUsers(token: string): Promise<EntraUser[]> {
     const body = (await response.json()) as GraphUsersResponse
 
     for (const user of body.value) {
-      users.push(parseEntraUser(user))
+      users.push({
+        displayName: user.displayName,
+        email: user.mail ?? user.userPrincipalName ?? null,
+        businessPhone: user.businessPhones?.[0] ?? null,
+      })
     }
 
     // Microsoft Graph may return a paged result even when requesting $top=999 in the url query.
