@@ -37,7 +37,7 @@ export async function getUsersFromCache(): Promise<EntraUser[]> {
   }
 
   await setUsersCache()
-  return cachedUsers ?? []
+  return (usersCache.get(ENTRA_USERS_CACHE_KEY) as EntraUser[] | undefined) ?? []
 }
 
 export function clearUsersCache(): void {
