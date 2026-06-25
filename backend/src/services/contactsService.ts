@@ -13,6 +13,6 @@ export async function getContacts(prisma: ContactPrisma): Promise<Contact[]> {
 
   return contacts.map((contact) => ({
     username: contact.username ?? '',
-    email: contact.email,
+    name: 'Navn Navnesen',
   }))
 }

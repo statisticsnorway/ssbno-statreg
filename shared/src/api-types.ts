@@ -826,10 +826,6 @@ export interface components {
     Contact: {
       readonly name?: string
       readonly username?: string
-      /** Format: mobile */
-      readonly mobile?: string
-      /** Format: email */
-      readonly email?: string
     }
     Frequency: {
       name?: string
