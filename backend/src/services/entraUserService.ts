@@ -4,6 +4,18 @@ import * as entraClient from '@/../plugins/entraReaderClient'
 import { getUsersCache, setUsersCache } from '@/lib/cache'
 
 export async function initializeUsers(): Promise<void> {
+  // Workaround for integration tests that run in Docker and don't have access to Azure Entra.
+  if (process.env.DOCKER_TEST) {
+    setUsersCache([
+      {
+        displayName: 'Admin SSB',
+        email: 'admin.ssb@ssb.no',
+        businessPhone: null,
+      },
+    ])
+    return
+  }
+
   const cachedUsers = getUsersCache()
 
   if (cachedUsers) {
