@@ -83,6 +83,7 @@ function parseEntraUser(user: GraphUserResponse): EntraUser {
   }
 }
 
+// TODO: MIM-2778, MIM-2780: Check is this function is still needed
 export async function fetchUserByEmail(userEmail: string, token: string): Promise<EntraUser | null> {
   if (!userEmail) {
     console.log(`Missing user email`)
@@ -131,6 +132,8 @@ export async function fetchAllUsers(token: string): Promise<EntraUser[]> {
       users.push(parseEntraUser(user))
     }
 
+    // Microsoft Graph may return a paged result even when requesting $top=999 in the url query.
+    // If Graph returns a paged response, follow @odata.nextLink to fetch the next batch of users.
     nextUrl = body['@odata.nextLink'] ?? null
   }
 
