@@ -6,6 +6,7 @@ import { getUsersCache, setUsersCache } from '@/lib/cache'
 export async function initializeUsers(): Promise<void> {
   // Workaround for integration tests that run in Docker and don't have access to Azure Entra.
   if (process.env.MOCK_ENTRA_USERS) {
+    console.info('initializeUsers: MOCK_ENTRA_USERS is set, using mock user data')
     setUsersCache([
       {
         displayName: 'Admin SSB',
