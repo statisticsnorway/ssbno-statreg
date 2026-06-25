@@ -29,7 +29,7 @@ function registerRoutesAndCollectMetadata(router: Router, publicPaths: RegExp[],
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const isPublicRoute = handlers.some((h) => (h as any).__skipAuth)
       if (isPublicRoute && typeof path === 'string') {
-        const pattern = '^/api' + path.replace(/:[^/]+/g, '[^/]+') + '$' // Convert Express-style route params (e.g. /statistics/:shortname) into a regex, that matches the same URL structure (e.g. /statistics/boliger) for public route checks
+        const pattern = '^/api' + path.replace(/:[^/]+/g, '[^/]+') + '/?$' // Convert Express-style route params (e.g. /statistics/:shortname) into a regex, that matches the same URL structure (e.g. /statistics/boliger) for public route checks
         publicPaths.push(new RegExp(pattern))
       }
 
