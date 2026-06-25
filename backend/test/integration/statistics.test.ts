@@ -11,7 +11,6 @@ import {
 } from './integrationUtils'
 
 vi.mock(import('@/services/entraUserService'), () => ({
-  initializeUsers: vi.fn().mockResolvedValue([]),
   fetchUsers: vi.fn((users: Array<{ username: string | null; email: string | null }>) =>
     Promise.resolve(
       users.map(() => ({
