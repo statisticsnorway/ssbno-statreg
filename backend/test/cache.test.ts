@@ -1,6 +1,6 @@
 import { vi, beforeEach, describe, expect, test } from 'vitest'
 
-import { setUsersCache, getUsersFromCache, clearUsersCache } from './cache'
+import { setUsersCache, getUsersFromCache, clearUsersCache } from '@/lib/cache'
 
 const mockUsers = [
   {
@@ -20,8 +20,8 @@ const { fetchAllUsers, getAccessTokenMock } = vi.hoisted(() => ({
   getAccessTokenMock: vi.fn(() => Promise.resolve('token')),
 }))
 
-vi.mock(import('../../plugins/entraReaderClient'), async (importOriginal) => {
-  const original = await importOriginal<typeof import('../../plugins/entraReaderClient')>()
+vi.mock(import('../plugins/entraReaderClient'), async (importOriginal) => {
+  const original = await importOriginal<typeof import('../plugins/entraReaderClient')>()
   return {
     ...original,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
