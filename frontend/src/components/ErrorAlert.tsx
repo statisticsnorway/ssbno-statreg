@@ -1,0 +1,28 @@
+import { Alert, Heading, Paragraph } from '@digdir/designsystemet-react'
+
+export function ErrorAlert(props: { message: string[] }) {
+  return (
+    <Alert data-color='danger' role='alert'>
+      <Heading
+        level={2}
+        data-size='xs'
+        style={{
+          marginBottom: 'var(--ds-size-2)',
+        }}
+      >
+        {'En feil har oppstått'}
+      </Heading>
+      <Paragraph>
+        Noe gikk galt. Vennligst prøv på nytt, eller kontakt produkteier (mmj@ssb.no) dersom problemet vedvarer.
+      </Paragraph>
+      {props.message.length > 0 && (
+        <Paragraph>
+          <br />
+          Teknisk feilmelding:
+          <br />
+          {props.message.join('. ')}
+        </Paragraph>
+      )}
+    </Alert>
+  )
+}
