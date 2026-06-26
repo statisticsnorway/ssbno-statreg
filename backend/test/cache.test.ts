@@ -6,11 +6,13 @@ const mockUsers = [
   {
     displayName: 'Ola Nordmann',
     email: 'ola.nordmann@ssb.no',
+    userPrincipalName: 'ola@ssb.no',
     businessPhone: null,
   },
   {
     displayName: 'Infotjenesten',
-    email: 'infotjenesten@ssb.no',
+    email: null,
+    userPrincipalName: 'infotjenesten@ssb.no',
     businessPhone: '11223344',
   },
 ]
@@ -19,6 +21,7 @@ const mockedEntraUsers = [
   {
     displayName: 'Admin SSB',
     email: 'admin.ssb@ssb.no',
+    userPrincipalName: 'admin@ssb.no',
     businessPhone: null,
   },
 ]

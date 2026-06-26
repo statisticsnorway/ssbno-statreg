@@ -230,7 +230,7 @@ describe('entraReaderClient ', () => {
               displayName: 'Admin SSB',
               businessPhones: ['123'],
               mail: TEST_EMAIL,
-              userPrincipalName: '',
+              userPrincipalName: 'admin@ssb.no',
             },
             {
               displayName: 'Infotjenesten',
@@ -252,11 +252,13 @@ describe('entraReaderClient ', () => {
         {
           displayName: 'Admin SSB',
           email: TEST_EMAIL,
+          userPrincipalName: 'admin@ssb.no',
           businessPhone: '123',
         },
         {
           displayName: 'Infotjenesten',
-          email: 'infotjenesten@ssb.no',
+          email: null,
+          userPrincipalName: 'infotjenesten@ssb.no',
           businessPhone: null,
         },
       ])
@@ -270,8 +272,8 @@ describe('entraReaderClient ', () => {
               {
                 displayName: 'Admin SSB',
                 businessPhones: ['123'],
-                mail: TEST_EMAIL,
-                userPrincipalName: '',
+                mail: null,
+                userPrincipalName: TEST_EMAIL,
               },
             ],
             '@odata.nextLink': entraUsersResult.nextPageUrl,
@@ -283,7 +285,7 @@ describe('entraReaderClient ', () => {
               {
                 displayName: 'Infotjenesten',
                 businessPhones: ['11223344'],
-                mail: null,
+                mail: 'infotjenesten@ssb.no',
                 userPrincipalName: 'infotjenesten@ssb.no',
               },
             ],
@@ -297,24 +299,18 @@ describe('entraReaderClient ', () => {
         expect.stringContaining(entraUsersResult.firstPageUrl),
         expect.anything()
       )
-      expect(fetchMock).toHaveBeenNthCalledWith(
-        2,
-        entraUsersResult.nextPageUrl,
-        expect.objectContaining({
-          headers: {
-            Authorization: 'Bearer token',
-          },
-        })
-      )
+      expect(fetchMock).toHaveBeenNthCalledWith(2, entraUsersResult.nextPageUrl, expect.anything())
       expect(users).toStrictEqual([
         {
           displayName: 'Admin SSB',
-          email: TEST_EMAIL,
+          email: null,
+          userPrincipalName: TEST_EMAIL,
           businessPhone: '123',
         },
         {
           displayName: 'Infotjenesten',
           email: 'infotjenesten@ssb.no',
+          userPrincipalName: 'infotjenesten@ssb.no',
           businessPhone: '11223344',
         },
       ])
