@@ -127,7 +127,8 @@ export async function fetchAllUsers(token: string): Promise<EntraUser[]> {
     for (const user of body.value) {
       users.push({
         displayName: user.displayName,
-        email: user.mail ?? user.userPrincipalName ?? null,
+        email: user.mail,
+        userPrincipalName: user.userPrincipalName,
         businessPhone: user.businessPhones?.[0] ?? null,
       })
     }
