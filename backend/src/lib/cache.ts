@@ -13,20 +13,21 @@ export async function setUsersCache(): Promise<void> {
       {
         displayName: 'Admin SSB',
         email: 'admin.ssb@ssb.no',
+        userPrincipalName: 'admin@ssb.no',
         businessPhone: null,
       },
     ])
     return
   }
 
-  const token = await entraClient.getAccessToken()
-
-  if (!token) {
-    console.error('Failed getting access token for entra reader')
-    return
-  }
-
   try {
+    const token = await entraClient.getAccessToken()
+
+    if (!token) {
+      console.error('Failed getting access token for entra reader')
+      return
+    }
+
     const users = await entraClient.fetchAllUsers(token)
     usersCache.set(ENTRA_USERS_CACHE_KEY, users)
   } catch (error) {
