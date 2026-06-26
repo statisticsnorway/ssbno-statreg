@@ -110,6 +110,26 @@ describe('Users cache', () => {
     expect(users).toEqual([])
   })
 
+  test('return empty array and log error when access token lookup throws', async () => {
+    getAccessTokenMock.mockRejectedValueOnce(new Error('entra unavailable'))
+
+    const users = await getUsersFromCache()
+
+    expect(getAccessTokenMock).toHaveBeenCalledTimes(1)
+    expect(fetchAllUsers).toHaveBeenCalledTimes(0)
+    expect(users).toEqual([])
+  })
+
+  test('return empty array and log error when fetching users throws', async () => {
+    fetchAllUsers.mockRejectedValueOnce(new Error('graph unavailable'))
+
+    const users = await getUsersFromCache()
+
+    expect(getAccessTokenMock).toHaveBeenCalledTimes(1)
+    expect(fetchAllUsers).toHaveBeenCalledTimes(1)
+    expect(users).toEqual([])
+  })
+
   test('use mock users when MOCK_ENTRA_USERS is true', async () => {
     process.env.MOCK_ENTRA_USERS = 'true'
 
