@@ -1,11 +1,11 @@
-import type { EntraUser, GraphUserResponse, TokenResponse } from '@/types/entra'
+import type { EntraUser, GraphUserResponse, GraphUsersResponse, TokenResponse } from '@/types/entra'
 import { URLSearchParams } from 'node:url'
 
 export const GRAPH_BASE_URL = 'https://graph.microsoft.com/v1.0'
 
 let cachedToken: string | null = null
 let tokenExpiresAt = 0
-let tokenPromise: Promise<string> | null = null
+let tokenPromise: Promise<string | null> | null = null
 
 export function setCachedToken(token: string | null) {
   cachedToken = token
@@ -15,11 +15,11 @@ export function setTokenExpiresAt(time: number) {
   tokenExpiresAt = time
 }
 
-export function setTokenPromise(promise: Promise<string> | null) {
+export function setTokenPromise(promise: Promise<string | null> | null) {
   tokenPromise = promise
 }
 
-export async function getAccessToken(): Promise<string> {
+export async function getAccessToken(): Promise<string | null> {
   const tenantId = process.env.ENTRA_READER_AZURE_TENANT_ID
   const clientId = process.env.ENTRA_READER_AZURE_CLIENT_ID
   const clientSecret = process.env.ENTRA_READER_AZURE_CLIENT_SECRET
@@ -75,6 +75,7 @@ export async function getAccessToken(): Promise<string> {
   }
 }
 
+// TODO: MIM-2778, MIM-2780: Check is this function is still needed
 export async function fetchUserByEmail(userEmail: string, token: string): Promise<EntraUser | null> {
   if (!userEmail) {
     console.log(`Missing user email`)
@@ -99,4 +100,43 @@ export async function fetchUserByEmail(userEmail: string, token: string): Promis
     email: user.mail ?? user.userPrincipalName ?? null,
     businessPhone: user.businessPhones?.[0] ?? null,
   }
+}
+
+export async function fetchAllUsers(token: string): Promise<EntraUser[]> {
+  if (!token) {
+    throw new Error('Missing token')
+  }
+
+  const users: EntraUser[] = []
+  let nextUrl: string | null =
+    `${GRAPH_BASE_URL}/users?$select=displayName,businessPhones,mail,userPrincipalName&$top=999`
+
+  while (nextUrl) {
+    const response = await fetch(nextUrl, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+
+    if (!response.ok) {
+      throw new Error(`Graph users request failed: ${response.status} ${await response.text()}`)
+    }
+
+    const body = (await response.json()) as GraphUsersResponse
+
+    for (const user of body.value) {
+      users.push({
+        displayName: user.displayName,
+        email: user.mail,
+        userPrincipalName: user.userPrincipalName,
+        businessPhone: user.businessPhones?.[0] ?? null,
+      })
+    }
+
+    // Microsoft Graph may return a paged result even when requesting $top=999 in the url query.
+    // If Graph returns a paged response, follow @odata.nextLink to fetch the next batch of users.
+    nextUrl = body['@odata.nextLink'] ?? null
+  }
+
+  return users
 }
