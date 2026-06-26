@@ -1,4 +1,4 @@
-import type { EntraUser, GraphUserResponse, GraphUsersResponse, TokenResponse } from '@/types/entra'
+import type { EntraUser, GraphUsersResponse, TokenResponse } from '@/types/entra'
 import { URLSearchParams } from 'node:url'
 
 export const GRAPH_BASE_URL = 'https://graph.microsoft.com/v1.0'
@@ -72,33 +72,6 @@ export async function getAccessToken(): Promise<string | null> {
     return await tokenPromise
   } finally {
     tokenPromise = null
-  }
-}
-
-// TODO: MIM-2778, MIM-2780: Check is this function is still needed
-export async function fetchUserByEmail(userEmail: string, token: string): Promise<EntraUser | null> {
-  if (!userEmail) {
-    console.log(`Missing user email`)
-    return null
-  }
-  if (!token) {
-    throw new Error(`Missing token`)
-  }
-  const response = await fetch(
-    `${GRAPH_BASE_URL}/users/${encodeURIComponent(userEmail)}?$select=displayName,businessPhones,mail,userPrincipalName`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  )
-
-  const user = (await response.json()) as GraphUserResponse
-
-  return {
-    displayName: user.displayName,
-    email: user.mail ?? user.userPrincipalName ?? null,
-    businessPhone: user.businessPhones?.[0] ?? null,
   }
 }
 

@@ -29,6 +29,7 @@ export async function setUsersCache(): Promise<void> {
     }
 
     const users = await entraClient.fetchAllUsers(token)
+    console.info(`setUsersFromCache: returning ${users.length} fetchAllUsers`)
     usersCache.set(ENTRA_USERS_CACHE_KEY, users)
   } catch (error) {
     console.error(`Failed to set users cache: ${error}`)
@@ -39,6 +40,7 @@ export async function setUsersCache(): Promise<void> {
 export async function getUsersFromCache(): Promise<EntraUser[]> {
   const cachedUsers = usersCache.get(ENTRA_USERS_CACHE_KEY) as EntraUser[] | undefined
   if (cachedUsers) {
+    console.info(`getUsersFromCache: returning ${cachedUsers.length} cached users`)
     return cachedUsers
   }
 

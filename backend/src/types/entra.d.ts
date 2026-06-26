@@ -4,11 +4,11 @@ export type TokenResponse = {
   expires_in: number
 }
 
-export type GraphUserResponse = {
+type GraphUserResponse = {
   displayName: string
   businessPhones?: string[]
   mail?: string
-  userPrincipalName?: string | undefined // MIM-2778: This field should not be optional
+  userPrincipalName: string | undefined
 }
 
 export type GraphUsersResponse = {
@@ -19,7 +19,7 @@ export type GraphUsersResponse = {
 export type EntraUser = {
   displayName: string
   email?: string  | null
-  userPrincipalName?: string | undefined // MIM-2778: This field should not be optional
+  userPrincipalName: string | undefined
   businessPhone: string | null
 }
 

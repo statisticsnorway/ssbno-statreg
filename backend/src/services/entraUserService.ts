@@ -1,47 +1,16 @@
-import type { UserLookupItem, Users } from '@/types/entra'
-
-import * as entraClient from '@/../plugins/entraReaderClient'
+import { getUsersFromCache } from '@/lib/cache'
+import type { Users } from '@/types/entra'
 
 export async function fetchUsers(users: Users[]) {
-  if (!users?.length) return Promise.resolve([])
-
-  const token = await entraClient.getAccessToken()
-
-  // Using initials to compose email on shortform, fallback on provided email for ie. infotjenesten@ssb.no
-  const userEmails = users.map((user) => {
-    return user.username ? `${user.username}@ssb.no` : user.email
-  })
-
-  if (!token) {
-    console.error(`Failed getting access token for entra reader getting user: ${userEmails.join(',')}`)
-    return Promise.resolve(users)
+  if (!users.length) {
+    return []
   }
 
-  const results = await Promise.all(
-    userEmails.map(async (email): Promise<UserLookupItem> => {
-      try {
-        const user = await entraClient.fetchUserByEmail(email, token)
+  const fetchedUsers = await getUsersFromCache()
+  const lookupEmails = new Set(users.map((user) => user.email.toLowerCase()))
 
-        if (user) {
-          return {
-            lookupEmail: email,
-            user,
-          }
-        }
-
-        return {
-          lookupEmail: email,
-          user: null,
-          error: 'User not found',
-        }
-      } catch {
-        return {
-          lookupEmail: email,
-          user: null,
-          error: 'Lookup failed',
-        }
-      }
-    })
-  )
-  return results
+  return fetchedUsers.filter((user) => {
+    const lookupEmail = user.email ?? user.userPrincipalName // TODO: email in ResponsiblePersons table will be replaced by userPrincipalName in the future so we won't need this workaround
+    return lookupEmail ? lookupEmails.has(lookupEmail.toLowerCase()) : false
+  })
 }

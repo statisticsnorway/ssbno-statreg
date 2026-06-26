@@ -1,51 +1,54 @@
-import { vi, test, describe, expect } from 'vitest'
+import { vi, test, describe, expect, beforeEach } from 'vitest'
 import { fetchUsers } from '@/services/entraUserService'
 
-const { fetchUserByEmailMock, getAccessTokenMock } = vi.hoisted(() => ({
-  fetchUserByEmailMock: vi.fn(async (email: string) => {
-    if (email === 'ola@ssb.no')
-      return { displayName: 'Ola Nordmann', email: 'ola.nordmann@ssb.no', businessPhone: '11223344' }
-    if (email === 'infotjenesten@ssb.no')
-      return { displayName: 'Infotjenesten', email: 'infotjenesten@ssb.no', businessPhone: '11223344' }
-    if (email === 'nonExisting@ssb.no') return null
-    if (email === 'failing call') throw new Error('Graph request failed: 500 something failed')
-    if (email === 'userWithoutEmailAndPhone@ssb.no')
-      return { displayName: 'Demo bruker', email: null, businessPhone: null }
-  }),
-  getAccessTokenMock: vi.fn(() => Promise.resolve('token')),
+const cachedUsers = [
+  {
+    displayName: 'Ola Nordmann',
+    email: 'ola.nordmann@ssb.no',
+    userPrincipalName: 'ola@ssb.no',
+    businessPhone: '11223344',
+  },
+  {
+    displayName: 'Infotjenesten',
+    email: null,
+    userPrincipalName: 'infotjenesten@ssb.no',
+    businessPhone: '11223344',
+  },
+  {
+    displayName: 'Demo bruker',
+    email: null,
+    userPrincipalName: undefined,
+    businessPhone: null,
+  },
+]
+
+const { getUsersFromCacheMock } = vi.hoisted(() => ({
+  getUsersFromCacheMock: vi.fn(async () => Promise.resolve(cachedUsers)),
 }))
 
-vi.mock(import('../plugins/entraReaderClient'), async (importOriginal) => {
-  const original = await importOriginal<typeof import('../plugins/entraReaderClient')>()
+vi.mock(import('@/lib/cache'), async (importOriginal) => {
+  const original = await importOriginal<typeof import('@/lib/cache')>()
   return {
     ...original,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    fetchUserByEmail: fetchUserByEmailMock as any,
-    getAccessToken: getAccessTokenMock,
+    getUsersFromCache: getUsersFromCacheMock,
   }
 })
 
 describe('entraUserService ', () => {
   describe('fetchUsers ', () => {
+    beforeEach(() => {
+      getUsersFromCacheMock.mockClear()
+      getUsersFromCacheMock.mockResolvedValue(cachedUsers)
+    })
+
     test('returns empty array when users array is empty', async () => {
       const result = await fetchUsers([])
 
       expect(result).toStrictEqual([])
-      expect(getAccessTokenMock).toHaveBeenCalledTimes(0)
+      expect(getUsersFromCacheMock).toHaveBeenCalledTimes(0)
     })
 
-    test('returns original users when token retrieval fails', async () => {
-      getAccessTokenMock.mockImplementationOnce(() => Promise.resolve(''))
-
-      const result = await fetchUsers([{ username: 'ola', email: 'ignored@test.com' }])
-
-      expect(result).toStrictEqual([{ username: 'ola', email: 'ignored@test.com' }])
-
-      expect(getAccessTokenMock).toHaveBeenCalledOnce()
-      expect(fetchUserByEmailMock).toHaveBeenCalledTimes(0)
-    })
-
-    test('returns entra users', async () => {
+    test('returns users matched by email and userPrincipalName', async () => {
       const usersInput = [
         { username: 'ola', email: 'ola.nordmann@ssb.no' },
         { username: null, email: 'infotjenesten@ssb.no' },
@@ -53,68 +56,55 @@ describe('entraUserService ', () => {
 
       const result = await fetchUsers(usersInput)
 
-      expect(result!.length).toBe(2)
+      expect(result).toHaveLength(2)
       expect(result).toStrictEqual([
         {
-          lookupEmail: 'ola@ssb.no',
-          user: { displayName: 'Ola Nordmann', email: 'ola.nordmann@ssb.no', businessPhone: '11223344' },
+          displayName: 'Ola Nordmann',
+          email: 'ola.nordmann@ssb.no',
+          userPrincipalName: 'ola@ssb.no',
+          businessPhone: '11223344',
         },
         {
-          lookupEmail: 'infotjenesten@ssb.no',
-          user: { displayName: 'Infotjenesten', email: 'infotjenesten@ssb.no', businessPhone: '11223344' },
+          displayName: 'Infotjenesten',
+          email: null,
+          userPrincipalName: 'infotjenesten@ssb.no',
+          businessPhone: '11223344',
         },
       ])
-      expect(result?.[1]).toStrictEqual(resultInfotjenesten)
+      expect(getUsersFromCacheMock).toHaveBeenCalledOnce()
     })
 
-    test('returns user without email & phone', async () => {
-      const result = await fetchUsers([{ username: null, email: 'userWithoutEmailAndPhone@ssb.no' }])
+    test('matches users case-insensitively', async () => {
+      const result = await fetchUsers([{ username: 'ola', email: 'OLA.NORDMANN@SSB.NO' }])
 
-      expect(result!.length).toBe(1)
       expect(result).toStrictEqual([
         {
-          lookupEmail: 'userWithoutEmailAndPhone@ssb.no',
-          user: { displayName: 'Demo bruker', email: null, businessPhone: null },
+          displayName: 'Ola Nordmann',
+          email: 'ola.nordmann@ssb.no',
+          userPrincipalName: 'ola@ssb.no',
+          businessPhone: '11223344',
         },
       ])
     })
 
-    test('handles 404 user', async () => {
+    test('returns empty array when no cached users match', async () => {
       const result = await fetchUsers([{ email: 'nonExisting@ssb.no', username: 'nonExisting' }])
 
-      expect(result).toStrictEqual([
-        {
-          lookupEmail: 'nonExisting@ssb.no',
-          user: null,
-          error: 'User not found',
-        },
-      ])
+      expect(result).toStrictEqual([])
     })
 
-    test('handles API failure without stopping execution', async () => {
-      fetchUserByEmailMock.mockImplementationOnce(() => Promise.reject('some error'))
-      const result = await fetchUsers([
-        { email: 'failing call', username: 'whatever' },
-        { username: 'ola', email: 'ola.nordmann@ssb.no' },
-      ])
+    test('returns empty array when cached users are empty', async () => {
+      getUsersFromCacheMock.mockResolvedValueOnce([])
 
-      expect(result).toStrictEqual([
-        {
-          lookupEmail: 'whatever@ssb.no',
-          user: null,
-          error: 'Lookup failed',
-        },
-        {
-          lookupEmail: 'ola@ssb.no',
-          user: { displayName: 'Ola Nordmann', email: 'ola.nordmann@ssb.no', businessPhone: '11223344' },
-        },
-      ])
+      const result = await fetchUsers([{ username: 'ola', email: 'ola.nordmann@ssb.no' }])
+
+      expect(result).toStrictEqual([])
+    })
+
+    test('propagates cache lookup failures', async () => {
+      getUsersFromCacheMock.mockRejectedValueOnce(new Error('cache unavailable'))
+
+      await expect(fetchUsers([{ username: 'ola', email: 'ola.nordmann@ssb.no' }])).rejects.toThrow('cache unavailable')
     })
   })
 })
-
-// --- Mock results ---
-const resultInfotjenesten = {
-  lookupEmail: 'infotjenesten@ssb.no',
-  user: { displayName: 'Infotjenesten', email: 'infotjenesten@ssb.no', businessPhone: '11223344' },
-}
