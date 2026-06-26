@@ -61,7 +61,7 @@ describe('controllerRouter', () => {
 
   test('bypasses requireAuth on public routes', async () => {
     const app = makeApp()
-    const res: MockResponse<any> = await invoke(app, 'GET', '/statistikkregisteret/api/public')
+    const res: MockResponse<any> = await invoke(app, 'GET', '/api/public')
 
     expect(res.statusCode).toBe(200)
     expect(requireAuthCalls).toHaveLength(0)
