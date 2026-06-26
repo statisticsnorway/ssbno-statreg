@@ -485,11 +485,11 @@ function VariantReleasesTable({
   shortname,
   variantId,
   apiErrorEmit,
-}: {
+}: Readonly<{
   shortname: string
   variantId: number
   apiErrorEmit?: (message: string) => void
-}) {
+}>) {
   const [count, setCount] = useState(10)
   const [start, setStart] = useState(0)
   const [releases, setReleases] = useState<ReleaseListing[]>([])
