@@ -1,6 +1,6 @@
 import { Alert, Heading, Paragraph } from '@digdir/designsystemet-react'
 
-export function ErrorAlert(props: { message: string[] }) {
+export function ErrorAlert(props: Readonly<{ message: string[] }>) {
   return (
     <Alert data-color='danger' role='alert'>
       <Heading
