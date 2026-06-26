@@ -12,6 +12,7 @@ import { CircleIcon, CircleFillIcon } from '@navikt/aksel-icons'
 
 import client from '../api'
 import { getDateOnlyAsString } from '../lib/utils'
+import { ErrorAlert } from './ErrorAlert'
 
 type DatePickerProps = React.ComponentProps<typeof AkselDatePicker.Standalone> & {
   showColorCodingExplanation?: boolean
@@ -79,6 +80,7 @@ export function DatePickerColorLegend({ statusColors }: Readonly<{ statusColors:
 
 export function DatePicker({ showColorCodingExplanation, calendarDatesEmit, ...props }: DatePickerProps) {
   const [calendarDates, setCalendarDates] = useState<CalenderDate>({})
+  const [apiError, setApiError] = useState<string[]>([])
   const displayedMonth = props.month
   const selectedDate = props.selected
 
@@ -96,7 +98,7 @@ export function DatePicker({ showColorCodingExplanation, calendarDatesEmit, ...p
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const errorMessage = (error as any).error
         console.log(errorMessage)
-        alert(errorMessage)
+        setApiError((prev) => [...prev, errorMessage])
       } else {
         setCalendarDates(data)
         calendarDatesEmit?.(data)
@@ -126,6 +128,7 @@ export function DatePicker({ showColorCodingExplanation, calendarDatesEmit, ...p
 
   return (
     <div className='datepicker-container'>
+      {apiError.length > 0 && <ErrorAlert message={apiError} />}
       <AkselDatePicker.Standalone
         key={selectedDate ? getDateOnlyAsString(selectedDate as Date) : getDateOnlyAsString(displayedMonth)}
         className='datepicker-wrapper'

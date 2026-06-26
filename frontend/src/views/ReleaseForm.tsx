@@ -44,6 +44,7 @@ import client from '../api'
 
 import './ReleaseForm.css'
 import { useAuth } from '../context/AuthContext'
+import { ErrorAlert } from '../components/ErrorAlert'
 
 type Statistic = ReleaseByIdResponse['statistic'] & {
   approval_status?: ReleaseByIdResponse['approval_status']
@@ -106,6 +107,7 @@ export default function ReleaseForm() {
   const [openReleaseModal, setOpenReleaseModal] = useState(false)
   const [newOrUpdatedRelease, setNewOrUpdatedRelease] = useState<ReleaseDetails>({})
   const [calendarDates, setCalendarDates] = useState<CalenderDate>({})
+  const [apiError, setApiError] = useState<string[]>([])
 
   const { auth } = useAuth()
 
@@ -200,7 +202,7 @@ export default function ReleaseForm() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const errorMessage = (error as any).error
       console.log(errorMessage)
-      alert(errorMessage)
+      setApiError((prev) => [...prev, errorMessage])
     } else {
       setOpenReleaseModal(true)
       setNewOrUpdatedRelease(data)
@@ -217,7 +219,7 @@ export default function ReleaseForm() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const errorMessage = (error as any).error
       console.log(errorMessage)
-      alert(errorMessage)
+      setApiError((prev) => [...prev, errorMessage])
     } else {
       setOpenReleaseModal(true)
       setNewOrUpdatedRelease(data)
@@ -246,6 +248,7 @@ export default function ReleaseForm() {
 
   return (
     <>
+      {apiError.length > 0 && <ErrorAlert message={apiError} />}
       <div>
         <Heading level={1} data-size='md'>
           {isEditing ? 'Rediger publiseringsdato' : 'Meld publiseringsdato'}
@@ -426,6 +429,7 @@ function DateReleasesTable({
 }: Readonly<{ selectedDate?: Date; calendarDates?: CalenderDate }>) {
   const [releases, setReleases] = useState<ReleaseListing[]>([])
   const [sortBy, setSortBy] = useState<string[]>(['-publish_time'])
+  const [apiError, setApiError] = useState<string[]>([])
 
   useEffect(() => {
     async function fetchReleases() {
@@ -438,7 +442,7 @@ function DateReleasesTable({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const errorMessage = (error as any).error
         console.log(errorMessage)
-        alert(errorMessage)
+        setApiError((prev) => [...prev, errorMessage])
       } else {
         setReleases(data?.releases ?? [])
       }
@@ -453,6 +457,7 @@ function DateReleasesTable({
 
   return (
     <>
+      {apiError.length > 0 && <ErrorAlert message={apiError} />}
       <div className='description-wrapper'>
         <span>Innmeldte datoer den {formatDate(selectedDate?.toISOString())}</span>
         <DayStatusTag status={selectedDateStatus || 'NONE'} />
@@ -468,6 +473,7 @@ function VariantReleasesTable({ shortname, variantId }: { shortname: string; var
   const [releases, setReleases] = useState<ReleaseListing[]>([])
   const [total, setTotal] = useState(0)
   const [sortBy, setSortBy] = useState<string[]>(['-publish_time'])
+  const [apiError, setApiError] = useState<string[]>([])
 
   useEffect(() => {
     async function fetchVariantReleases() {
@@ -478,7 +484,7 @@ function VariantReleasesTable({ shortname, variantId }: { shortname: string; var
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const errorMessage = (error as any).error
         console.log(errorMessage)
-        alert(errorMessage)
+        setApiError((prev) => [...prev, errorMessage])
       } else {
         setReleases(data?.releases ?? [])
         setTotal(data.total ?? 0)
@@ -498,6 +504,7 @@ function VariantReleasesTable({ shortname, variantId }: { shortname: string; var
 
   return (
     <>
+      {apiError.length > 0 && <ErrorAlert message={apiError} />}
       <div className='row-count-select-wrapper'>
         <RowCountSelect selectedRowCount={count} updateRowCount={updateRowCount} />
       </div>
