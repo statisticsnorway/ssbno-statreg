@@ -1,4 +1,5 @@
 import { static as staticExpress, Router, type RequestHandler } from 'express'
+import { asyncLocalStorage } from '@/lib/context'
 import statisticsController from '@/api/controllers/statisticsController'
 import releasesController from '../controllers/releasesController'
 import calendarController from '../controllers/calendarController'
@@ -28,7 +29,7 @@ function registerRoutesAndCollectMetadata(router: Router, publicPaths: RegExp[],
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const isPublicRoute = handlers.some((h) => (h as any).__skipAuth)
       if (isPublicRoute && typeof path === 'string') {
-        const pattern = '^/statistikkregisteret/api' + path.replace(/:[^/]+/g, '[^/]+') + '$' // Convert Express-style route params (e.g. /statistics/:shortname) into a regex, that matches the same URL structure (e.g. /statistics/boliger) for public route checks
+        const pattern = '^/api' + path.replace(/:[^/]+/g, '[^/]+') + '/?$' // Convert Express-style route params (e.g. /statistics/:shortname) into a regex, that matches the same URL structure (e.g. /statistics/boliger) for public route checks
         publicPaths.push(new RegExp(pattern))
       }
 
@@ -59,8 +60,9 @@ export default function controllerRouter(
   const outer = Router()
 
   outer.use((req, res, next) => {
-    if (publicPaths.some((r) => r.test(req.path))) return next()
-    return requireAuth(req, res, next)
+    if (publicPaths.some((r) => r.test(req.path))) {
+      return asyncLocalStorage.run({}, next)
+    } else return requireAuth(req, res, next)
   })
 
   // Ensure ALL controllers are placed under path /api
