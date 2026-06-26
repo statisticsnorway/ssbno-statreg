@@ -108,6 +108,9 @@ export default function ReleaseForm() {
   const [newOrUpdatedRelease, setNewOrUpdatedRelease] = useState<ReleaseDetails>({})
   const [calendarDates, setCalendarDates] = useState<CalenderDate>({})
   const [apiError, setApiError] = useState<string[]>([])
+  const [calendarApiError, setCalendarApiError] = useState<string>('')
+  const [variantReleasesApiError, setVariantReleasesApiError] = useState<string>('')
+  const [sameDateReleasesApiError, setSameDateReleasesApiError] = useState<string>('')
 
   const { auth } = useAuth()
 
@@ -246,9 +249,13 @@ export default function ReleaseForm() {
     }
   }
 
+  const errorsCombined = [...apiError, calendarApiError, sameDateReleasesApiError, variantReleasesApiError].filter(
+    Boolean
+  )
+
   return (
     <>
-      {apiError.length > 0 && <ErrorAlert message={apiError} />}
+      {errorsCombined.length > 0 && <ErrorAlert message={errorsCombined} />}
       <div>
         <Heading level={1} data-size='md'>
           {isEditing ? 'Rediger publiseringsdato' : 'Meld publiseringsdato'}
@@ -291,11 +298,11 @@ export default function ReleaseForm() {
             For kortere frister, kontakt mmj@ssb.no.
           </Field.Description>
           <Input id='publishTime' size={10} {...publishTimePicker.inputProps} aria-invalid={!!errors.publishTime} />
-          {/* TODO: Disable blocked days */}
           <DatePicker
             {...publishTimePicker.datepickerProps}
             showColorCodingExplanation
             calendarDatesEmit={setCalendarDates}
+            apiErrorEmit={setCalendarApiError}
           />
           {errors.publishTime && <ValidationMessage>{errors.publishTime}</ValidationMessage>}
         </Field>
@@ -396,11 +403,19 @@ export default function ReleaseForm() {
           </Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel className='p-0' value='selected-publish-date'>
-          <DateReleasesTable selectedDate={values.publishTime} calendarDates={calendarDates} />
+          <DateReleasesTable
+            selectedDate={values.publishTime}
+            calendarDates={calendarDates}
+            apiErrorEmit={setSameDateReleasesApiError}
+          />
         </Tabs.Panel>
         <Tabs.Panel className='p-0' value='variant-releases'>
           {statistic && variant && (
-            <VariantReleasesTable shortname={statistic.shortname as string} variantId={variant.id as number} />
+            <VariantReleasesTable
+              shortname={statistic.shortname as string}
+              variantId={variant.id as number}
+              apiErrorEmit={setVariantReleasesApiError}
+            />
           )}
         </Tabs.Panel>
       </Tabs>
@@ -426,10 +441,10 @@ function getCreatedReleaseModalDescription(createdRelease: ReleaseDetails) {
 function DateReleasesTable({
   selectedDate,
   calendarDates,
-}: Readonly<{ selectedDate?: Date; calendarDates?: CalenderDate }>) {
+  apiErrorEmit,
+}: Readonly<{ selectedDate?: Date; calendarDates?: CalenderDate; apiErrorEmit?: (message: string) => void }>) {
   const [releases, setReleases] = useState<ReleaseListing[]>([])
   const [sortBy, setSortBy] = useState<string[]>(['-publish_time'])
-  const [apiError, setApiError] = useState<string[]>([])
 
   useEffect(() => {
     async function fetchReleases() {
@@ -442,13 +457,13 @@ function DateReleasesTable({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const errorMessage = (error as any).error
         console.log(errorMessage)
-        setApiError((prev) => [...prev, errorMessage])
+        apiErrorEmit?.(`Date releases table error: ${errorMessage}`)
       } else {
         setReleases(data?.releases ?? [])
       }
     }
     fetchReleases()
-  }, [sortBy, selectedDate])
+  }, [sortBy, selectedDate, apiErrorEmit])
 
   const selectedDateStatus =
     selectedDate &&
@@ -457,7 +472,6 @@ function DateReleasesTable({
 
   return (
     <>
-      {apiError.length > 0 && <ErrorAlert message={apiError} />}
       <div className='description-wrapper'>
         <span>Innmeldte datoer den {formatDate(selectedDate?.toISOString())}</span>
         <DayStatusTag status={selectedDateStatus || 'NONE'} />
@@ -467,13 +481,20 @@ function DateReleasesTable({
   )
 }
 
-function VariantReleasesTable({ shortname, variantId }: { shortname: string; variantId: number }) {
+function VariantReleasesTable({
+  shortname,
+  variantId,
+  apiErrorEmit,
+}: {
+  shortname: string
+  variantId: number
+  apiErrorEmit?: (message: string) => void
+}) {
   const [count, setCount] = useState(10)
   const [start, setStart] = useState(0)
   const [releases, setReleases] = useState<ReleaseListing[]>([])
   const [total, setTotal] = useState(0)
   const [sortBy, setSortBy] = useState<string[]>(['-publish_time'])
-  const [apiError, setApiError] = useState<string[]>([])
 
   useEffect(() => {
     async function fetchVariantReleases() {
@@ -484,14 +505,14 @@ function VariantReleasesTable({ shortname, variantId }: { shortname: string; var
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const errorMessage = (error as any).error
         console.log(errorMessage)
-        setApiError((prev) => [...prev, errorMessage])
+        apiErrorEmit?.(`Variant releases table error: ${errorMessage}`)
       } else {
         setReleases(data?.releases ?? [])
         setTotal(data.total ?? 0)
       }
     }
     fetchVariantReleases()
-  }, [shortname, variantId, count, start, sortBy])
+  }, [shortname, variantId, count, start, sortBy, apiErrorEmit])
 
   function updateRowCount(newCount: number) {
     setCount(newCount)
@@ -504,7 +525,6 @@ function VariantReleasesTable({ shortname, variantId }: { shortname: string; var
 
   return (
     <>
-      {apiError.length > 0 && <ErrorAlert message={apiError} />}
       <div className='row-count-select-wrapper'>
         <RowCountSelect selectedRowCount={count} updateRowCount={updateRowCount} />
       </div>

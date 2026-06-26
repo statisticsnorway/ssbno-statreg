@@ -48,6 +48,7 @@ function ListReleases() {
   const [calendarMonth, setCalendarMonth] = useState(0)
   const [shortnames, setShortnames] = useState<ShortnameListing[]>([])
   const [apiError, setApiError] = useState<string[]>([])
+  const [calendarApiError, setCalendarApiError] = useState<string>('')
 
   const [selectedShortnames, setSelectedShortnames] = useState<SuggestionItem[]>([])
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
@@ -150,6 +151,7 @@ function ListReleases() {
               month={getFirstDayOfNthMonth(calendarMonth + offset)}
               selected={selectedDate}
               onSelect={onSelectDate}
+              apiErrorEmit={setCalendarApiError}
             />
           ))}
         </div>
@@ -160,9 +162,11 @@ function ListReleases() {
     )
   }
 
+  const errorsCombined = [...apiError, calendarApiError].filter(Boolean)
+
   return (
     <>
-      {apiError.length > 0 && <ErrorAlert message={apiError} />}
+      {errorsCombined.length > 0 && <ErrorAlert message={errorsCombined} />}
       <div className='list-releases-heading-container'>
         <Heading level={1} data-size='sm'>
           Publiseringsoversikt

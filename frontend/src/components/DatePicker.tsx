@@ -12,11 +12,11 @@ import { CircleIcon, CircleFillIcon } from '@navikt/aksel-icons'
 
 import client from '../api'
 import { getDateOnlyAsString } from '../lib/utils'
-import { ErrorAlert } from './ErrorAlert'
 
 type DatePickerProps = React.ComponentProps<typeof AkselDatePicker.Standalone> & {
   showColorCodingExplanation?: boolean
   calendarDatesEmit?: (data: CalenderDate) => void
+  apiErrorEmit?: (message: string) => void
 }
 
 const fewStatusBackgroundImage = `url('data:image/svg+xml,${encodeURIComponent(
@@ -78,9 +78,8 @@ export function DatePickerColorLegend({ statusColors }: Readonly<{ statusColors:
   )
 }
 
-export function DatePicker({ showColorCodingExplanation, calendarDatesEmit, ...props }: DatePickerProps) {
+export function DatePicker({ showColorCodingExplanation, calendarDatesEmit, apiErrorEmit, ...props }: DatePickerProps) {
   const [calendarDates, setCalendarDates] = useState<CalenderDate>({})
-  const [apiError, setApiError] = useState<string[]>([])
   const displayedMonth = props.month
   const selectedDate = props.selected
 
@@ -98,14 +97,14 @@ export function DatePicker({ showColorCodingExplanation, calendarDatesEmit, ...p
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const errorMessage = (error as any).error
         console.log(errorMessage)
-        setApiError((prev) => [...prev, errorMessage])
+        apiErrorEmit?.(`Calendar error: ${errorMessage}`)
       } else {
         setCalendarDates(data)
         calendarDatesEmit?.(data)
       }
     }
     fetchCalendarDates()
-  }, [displayedMonth, calendarDatesEmit])
+  }, [displayedMonth, calendarDatesEmit, apiErrorEmit])
 
   const full: Date[] = []
   const many: Date[] = []
@@ -128,7 +127,6 @@ export function DatePicker({ showColorCodingExplanation, calendarDatesEmit, ...p
 
   return (
     <div className='datepicker-container'>
-      {apiError.length > 0 && <ErrorAlert message={apiError} />}
       <AkselDatePicker.Standalone
         key={selectedDate ? getDateOnlyAsString(selectedDate as Date) : getDateOnlyAsString(displayedMonth)}
         className='datepicker-wrapper'
