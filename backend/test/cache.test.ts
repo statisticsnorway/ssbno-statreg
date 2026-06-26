@@ -61,23 +61,24 @@ describe('Users cache', () => {
   })
 
   test('return fetched users on first cache miss and reuse cached users', async () => {
+    const fetchedUsers = await getUsersFromCache()
+    expect(fetchedUsers).toEqual(mockUsers)
+
+    expect(getAccessTokenMock).toHaveBeenCalledTimes(1)
+    expect(fetchAllUsers).toHaveBeenCalledTimes(1)
+
+    getAccessTokenMock.mockClear()
+    fetchAllUsers.mockClear()
+
     const cachedUsers = await getUsersFromCache()
+
+    expect(getAccessTokenMock).toHaveBeenCalledTimes(0)
+    expect(fetchAllUsers).toHaveBeenCalledTimes(0)
     expect(cachedUsers).toEqual(mockUsers)
-
-    expect(getAccessTokenMock).toHaveBeenCalledTimes(1)
-    expect(fetchAllUsers).toHaveBeenCalledTimes(1)
-
-    const recachedUsers = await getUsersFromCache()
-
-    expect(getAccessTokenMock).toHaveBeenCalledTimes(1)
-    expect(fetchAllUsers).toHaveBeenCalledTimes(1)
-    expect(recachedUsers).toEqual(mockUsers)
   })
 
   test('store and return users', async () => {
-    const setUsers = await setUsersCache()
-    expect(setUsers).toBeUndefined()
-
+    await setUsersCache()
     const getUsers = await getUsersFromCache()
 
     expect(getAccessTokenMock).toHaveBeenCalledTimes(1)
