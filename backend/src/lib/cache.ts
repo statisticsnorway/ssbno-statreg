@@ -8,6 +8,7 @@ const ENTRA_USERS_CACHE_KEY = 'entra-users'
 export async function setUsersCache(): Promise<void> {
   // Return mocked users for tests and development where application often restarts and/or is missing Azure Entra access
   if (process.env.MOCK_ENTRA_USERS === 'true') {
+    console.info('setUsersCache: MOCK_ENTRA_USERS is set, using mock user data')
     usersCache.set(ENTRA_USERS_CACHE_KEY, [
       {
         displayName: 'Admin SSB',
