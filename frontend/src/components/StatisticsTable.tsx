@@ -6,7 +6,6 @@ import { Pagination } from './Pagination'
 import '../views/ListReleases.css'
 import { Link } from 'react-router'
 import { formatContacts, getSortDirection, toggleSort } from '../lib/utils'
-import type { Dispatch, SetStateAction } from 'react'
 
 const TABLE_HEADER_CELLS = [
   { label: 'Kortnavn', field: 'shortname', sortable: true },
@@ -47,12 +46,12 @@ export function StatisticsTable({
   statistics,
   openInNewTab,
   sortBy,
-  setSortBy,
+  onSortChange,
 }: Readonly<{
   statistics: StatisticListing[]
   openInNewTab?: boolean
   sortBy?: string
-  setSortBy?: Dispatch<SetStateAction<string>>
+  onSortChange?: (sortBy: string) => void
 }>) {
   return (
     <Table>
@@ -61,7 +60,7 @@ export function StatisticsTable({
           {TABLE_HEADER_CELLS.map(({ label, field, sortable }) => (
             <Table.HeaderCell
               key={field}
-              onClick={sortable && setSortBy ? () => setSortBy(toggleSort(field, sortBy || '')) : undefined}
+              onClick={sortable && onSortChange ? () => onSortChange(toggleSort(field, sortBy || '')) : undefined}
               sort={sortable ? getSortDirection(field, sortBy || '') : undefined}
             >
               {label}
@@ -83,7 +82,7 @@ type PaginatedStatisticsTableProps = {
   count: number
   total: number
   sortBy: string
-  setSortBy?: Dispatch<SetStateAction<string>>
+  setSortBy?: (sortBy: string) => void
   statistics: StatisticListing[]
   setCurrentPage: (selectedPage: number) => void
   openInNewTab?: boolean
@@ -101,7 +100,7 @@ export function PaginatedStatisticsTable({
 }: Readonly<PaginatedStatisticsTableProps>) {
   return (
     <div style={{ minWidth: '100%' }}>
-      <StatisticsTable statistics={statistics} openInNewTab={openInNewTab} sortBy={sortBy} setSortBy={setSortBy} />
+      <StatisticsTable statistics={statistics} openInNewTab={openInNewTab} sortBy={sortBy} onSortChange={setSortBy} />
       <Pagination start={start} count={count} total={total} setCurrentPage={setCurrentPage} />
     </div>
   )
