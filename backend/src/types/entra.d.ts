@@ -8,13 +8,18 @@ export type GraphUserResponse = {
   displayName: string
   businessPhones?: string[]
   mail?: string
-  userPrincipalName?: string
+  userPrincipalName?: string | undefined // MIM-2778: This field should not be optional
+}
+
+export type GraphUsersResponse = {
+  value: GraphUserResponse[]
+  '@odata.nextLink'?: string
 }
 
 export type EntraUser = {
-  username?: string | null
   displayName: string
-  email: string | null
+  email?: string  | null
+  userPrincipalName?: string | undefined // MIM-2778: This field should not be optional
   businessPhone: string | null
 }
 

@@ -6,7 +6,7 @@ services:
       POSTGRES_PASSWORD: test_pass
       POSTGRES_DB: statreg_db
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U test_user -d statreg_db" ]
+      test: ["CMD-SHELL", "pg_isready -U test_user -d statreg_db"]
       interval: 2s
       timeout: 2s
       retries: 30
@@ -21,6 +21,7 @@ services:
       NODE_ENV: test
       PGURL: postgresql://test_user:test_pass@db:5432/statreg_db?sslmode=disable
       AUTH_ENABLED: "false"
+      MOCK_ENTRA_USERS: "true"
     depends_on:
       db:
         condition: service_healthy

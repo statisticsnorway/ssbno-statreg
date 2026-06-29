@@ -15,31 +15,38 @@ import { Link as ReactRouterLink, useSearchParams } from 'react-router'
 import { PlusCircleIcon } from '@navikt/aksel-icons'
 import { useAuth } from '../context/AuthContext'
 import { RowCountSelect } from '../components/RowCountSelect'
+import { ErrorAlert } from '../components/ErrorAlert'
 
 export default function ListStatistics() {
   const [searchParams, setSearchParams] = useSearchParams()
   const shortnameQuery = searchParams.get('shortname')
   const contactQuery = searchParams.get('contact')
+  const sortQuery = searchParams.get('sort')
   const [count, setCount] = useState(20)
   const [start, setStart] = useState(0)
   const [total, setTotal] = useState(0)
-  const [sortBy, setSortBy] = useState('')
   const [statistics, setStatistics] = useState<StatisticListing[]>([])
   const [shortnames, setShortnames] = useState<ShortnameListing[]>([])
   const [contacts, setContacts] = useState<Contact[]>([])
-  const [selectedFilter, setSelectedFilter] = useState<SuggestionItem | null>(null)
+  const [apiError, setApiError] = useState<string[]>([])
   const { auth } = useAuth()
 
+  const selectedFilter = shortnameQuery
+    ? { label: shortnameQuery, value: `shortname:${shortnameQuery}` }
+    : contactQuery
+      ? { label: contactQuery, value: `contact:${contactQuery}` }
+      : null
+
   useEffect(() => {
-    fetchStatistics(start, count, shortnameQuery, contactQuery, sortBy)
-  }, [start, count, shortnameQuery, contactQuery, sortBy])
+    fetchStatistics(start, count, shortnameQuery, contactQuery, sortQuery)
+  }, [start, count, shortnameQuery, contactQuery, sortQuery])
 
   const fetchStatistics = async (
     start: number,
     count: number,
     shortnameQuery: string | null,
     contactQuery: string | null,
-    sort: string
+    sortQuery: string | null
   ) => {
     const filter = {
       ...(shortnameQuery && {
@@ -49,14 +56,21 @@ export default function ListStatistics() {
         contact: contactQuery,
       }),
     }
+
+    const sort = {
+      ...(sortQuery && {
+        sort: sortQuery,
+      }),
+    }
+
     const { data, error } = await client.GET('/statistics', {
-      params: { query: { start, count, sort, ...filter } },
+      params: { query: { start, count, ...sort, ...filter } },
     })
     if (error) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const errorMessage = (error as any).error
       console.log(errorMessage)
-      alert(errorMessage)
+      setApiError((prev) => [...prev, errorMessage])
     } else {
       setStatistics(data.statistics ?? [])
       setTotal(data.total ?? 0)
@@ -70,7 +84,7 @@ export default function ListStatistics() {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const errorMessage = (error as any).error
         console.log(errorMessage)
-        alert(errorMessage)
+        setApiError((prev) => [...prev, errorMessage])
       } else {
         setShortnames(data ?? [])
       }
@@ -85,32 +99,13 @@ export default function ListStatistics() {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const errorMessage = (error as any).error
         console.log(errorMessage)
-        alert(errorMessage)
+        setApiError((prev) => [...prev, errorMessage])
       } else {
         setContacts(data ?? [])
       }
     }
     fetchContacts()
   }, [])
-
-  useEffect(() => {
-    async function setSelectedFilterFromQuery() {
-      if (shortnameQuery) {
-        setSelectedFilter({
-          label: shortnameQuery,
-          value: `shortname:${shortnameQuery}`,
-        })
-      } else if (contactQuery) {
-        setSelectedFilter({
-          label: contactQuery,
-          value: `contact:${contactQuery}`,
-        })
-      } else {
-        setSelectedFilter(null)
-      }
-    }
-    setSelectedFilterFromQuery()
-  }, [shortnameQuery, contactQuery])
 
   function updateRowCount(newCount: number) {
     setCount(newCount)
@@ -121,21 +116,38 @@ export default function ListStatistics() {
     setStart((currentPage - 1) * count)
   }
 
-  function filterChanged(selected: SuggestionItem | null) {
-    if (!selected) {
-      setSearchParams(new URLSearchParams())
-      return
-    }
-    const [category, value] = selected.value.split(':')
-    if (category === 'shortname') {
-      setSearchParams(new URLSearchParams({ shortname: value }))
-    } else if (category === 'contact') {
-      setSearchParams(new URLSearchParams({ contact: value }))
-    }
+  function onFilterChange(selected: SuggestionItem | null) {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      next.delete('shortname')
+      next.delete('contact')
+
+      if (selected) {
+        const [category, value] = selected.value.split(':')
+        if (category === 'shortname' || category === 'contact') {
+          next.set(category, value)
+        }
+      }
+
+      return next
+    })
+  }
+
+  function onSortChange(newSortBy: string) {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      if (newSortBy) {
+        next.set('sort', newSortBy)
+      } else {
+        next.delete('sort')
+      }
+      return next
+    })
   }
 
   return (
     <div className='list-statistics-container'>
+      {apiError.length > 0 && <ErrorAlert message={apiError} />}
       <div className='header-container'>
         <Heading level={1} data-size='sm'>
           Statistikkoversikt
@@ -151,9 +163,9 @@ export default function ListStatistics() {
       <div className='suggestion-container'>
         <Field>
           <Label>Filtrer på kortnavn eller kontakt</Label>
-          <Suggestion onSelectedChange={(selected) => filterChanged(selected)} selected={selectedFilter}>
+          <Suggestion onSelectedChange={(selected) => onFilterChange(selected)} selected={selectedFilter}>
             <Suggestion.Input />
-            <Suggestion.Clear onClick={() => filterChanged(null)} />
+            <Suggestion.Clear onClick={() => onFilterChange(null)} />
             <Suggestion.List className='suggestion-list'>
               <Suggestion.Empty>Ingen treff</Suggestion.Empty>
               {shortnames.map((shortname) => {
@@ -169,9 +181,7 @@ export default function ListStatistics() {
                 const value = `contact:${contact.username}`
                 return (
                   <Suggestion.Option className='suggestion-item' key={value} label={contact.username} value={value}>
-                    {/* TODO: show "name (username)" when AD caching is done and /contacts endpoint updated MIM-2777 */}
-                    {contact.username}
-                    <div className='category-label'>Kontakt</div>
+                    {contact.name} ({contact.username})<div className='category-label'>Kontakt</div>
                   </Suggestion.Option>
                 )
               })}
@@ -185,8 +195,8 @@ export default function ListStatistics() {
           start={start}
           count={count}
           total={total}
-          sortBy={sortBy}
-          setSortBy={setSortBy}
+          sortBy={sortQuery ?? ''}
+          onSortChange={onSortChange}
           statistics={statistics}
           setCurrentPage={updateCurrentPage}
         />

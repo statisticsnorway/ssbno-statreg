@@ -19,5 +19,6 @@
     "noEmit": false,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src", "test", "plugins"]
+  "include": ["src", "test", "plugins"],
+  "exclude": ["src/scripts"]
 }

@@ -7,7 +7,7 @@ export function dateToISOString(date: Date | null): string | undefined {
 export function sanitize(input: string | undefined): string {
   if (typeof input !== 'string') return ''
 
-  return input.trim().replace(/[^a-zA-Z0-9æøåÆØÅ.,:;!?()/\-\s]/g, '')
+  return input.trim().replace(/[^a-zA-Z0-9æøåÆØÅ.,:;!?()/_\-\s]/g, '')
 }
 
 type DateString = string | string[] | undefined

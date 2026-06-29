@@ -113,8 +113,6 @@ components:
       properties:
         name: { type: string, readOnly: true }
         username: { type: string, readOnly: true }
-        mobile: { type: string, format: mobile, readOnly: true }
-        email: { type: string, format: email, readOnly: true }
 
     Frequency:
       type: object

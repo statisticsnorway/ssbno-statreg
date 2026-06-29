@@ -17,6 +17,7 @@ import './ShowStatistic.css'
 import { formatContacts, formatPublishTime, formatRevisionName, formatVariant } from '../lib/utils'
 import { ApprovalStatusBadge } from '../components/ApprovalStatus'
 import { useAuth } from '../context/AuthContext'
+import { ErrorAlert } from '../components/ErrorAlert'
 
 const TABLE_HEADER_CELLS = [{ label: 'Dato' }, { label: 'Variant' }, { label: 'Status' }]
 
@@ -25,6 +26,7 @@ export default function ShowStatistic() {
   const [releases, setReleases] = useState<ReleaseListing[]>([])
   const { shortname } = useParams()
   const { auth } = useAuth()
+  const [apiError, setApiError] = useState<string[]>([])
 
   useEffect(() => {
     async function fetchStatistic() {
@@ -35,7 +37,7 @@ export default function ShowStatistic() {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const errorMessage = (error as any).error
         console.log(errorMessage)
-        alert(errorMessage)
+        setApiError((prev) => [...prev, errorMessage])
       } else {
         setStatistic(data)
       }
@@ -49,7 +51,7 @@ export default function ShowStatistic() {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const errorMessage = (error as any).error
         console.log(errorMessage)
-        alert(errorMessage)
+        setApiError((prev) => [...prev, errorMessage])
       } else {
         setReleases(data.releases ?? [])
       }
@@ -74,6 +76,7 @@ export default function ShowStatistic() {
 
   return (
     <>
+      {apiError.length > 0 && <ErrorAlert message={apiError} />}
       <div>
         <Heading level={1}>{statistic.name}</Heading>
         <Paragraph variant='short'>{statistic.shortname}</Paragraph>

@@ -82,7 +82,7 @@ type PaginatedStatisticsTableProps = {
   count: number
   total: number
   sortBy: string
-  setSortBy?: (sortBy: string) => void
+  onSortChange?: (sortBy: string) => void
   statistics: StatisticListing[]
   setCurrentPage: (selectedPage: number) => void
   openInNewTab?: boolean
@@ -93,14 +93,19 @@ export function PaginatedStatisticsTable({
   count,
   total,
   sortBy,
-  setSortBy,
+  onSortChange,
   statistics,
   setCurrentPage,
   openInNewTab,
 }: Readonly<PaginatedStatisticsTableProps>) {
   return (
     <div style={{ minWidth: '100%' }}>
-      <StatisticsTable statistics={statistics} openInNewTab={openInNewTab} sortBy={sortBy} onSortChange={setSortBy} />
+      <StatisticsTable
+        statistics={statistics}
+        openInNewTab={openInNewTab}
+        sortBy={sortBy}
+        onSortChange={onSortChange}
+      />
       <Pagination start={start} count={count} total={total} setCurrentPage={setCurrentPage} />
     </div>
   )
