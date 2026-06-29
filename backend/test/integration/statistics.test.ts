@@ -9,18 +9,16 @@ import {
   readStatisticFromDb,
   type StatisticWithShortname,
 } from './integrationUtils'
+import { Users } from '@/types/entra'
 
 vi.mock(import('@/services/entraUserService'), () => ({
-  fetchUsers: vi.fn((users: Array<{ username: string | null; email: string | null }>) =>
+  fetchUsers: vi.fn((users: Users[]) =>
     Promise.resolve(
       users.map(() => ({
-        lookupEmail: 'bob@ssb.no',
-        user: {
-          displayName: 'Bob',
-          username: 'bob',
-          email: 'bob@ssb.no',
-          businessPhone: '11223344',
-        },
+        displayName: 'Bob',
+        userPrincipalName: 'bcd@ssb.no',
+        email: 'bob@ssb.no',
+        businessPhone: '11223344',
       }))
     )
   ),
