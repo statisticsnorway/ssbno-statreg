@@ -21,6 +21,7 @@ import './ListReleases.css'
 import type { ReleaseListing, ShortnameListing } from '@ssbno-statreg/shared'
 import { RowCountSelect } from '../components/RowCountSelect'
 import { useAuth } from '../context/AuthContext'
+import { ErrorAlert } from '../components/ErrorAlert'
 
 function useMediaQuery(mediaQuery: string): boolean {
   const getSnapshot = () => globalThis.matchMedia(mediaQuery).matches
@@ -46,6 +47,8 @@ function ListReleases() {
   const [total, setTotal] = useState(0)
   const [calendarMonth, setCalendarMonth] = useState(0)
   const [shortnames, setShortnames] = useState<ShortnameListing[]>([])
+  const [apiError, setApiError] = useState<string[]>([])
+  const [calendarApiError, setCalendarApiError] = useState<string>('')
 
   const [selectedShortnames, setSelectedShortnames] = useState<SuggestionItem[]>([])
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
@@ -76,7 +79,7 @@ function ListReleases() {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const errorMessage = (error as any).error
         console.log(errorMessage)
-        alert(errorMessage)
+        setApiError((prev) => [...prev, errorMessage])
       } else {
         setReleases(data.releases ?? [])
         setTotal(data.total ?? 0)
@@ -92,7 +95,7 @@ function ListReleases() {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const errorMessage = (error as any).error
         console.log(errorMessage)
-        alert(errorMessage)
+        setApiError((prev) => [...prev, errorMessage])
       } else {
         setShortnames(data ?? [])
       }
@@ -148,6 +151,7 @@ function ListReleases() {
               month={getFirstDayOfNthMonth(calendarMonth + offset)}
               selected={selectedDate}
               onSelect={onSelectDate}
+              apiErrorEmit={setCalendarApiError}
             />
           ))}
         </div>
@@ -158,8 +162,11 @@ function ListReleases() {
     )
   }
 
+  const errorsCombined = [...apiError, calendarApiError].filter(Boolean)
+
   return (
     <>
+      {errorsCombined.length > 0 && <ErrorAlert message={errorsCombined} />}
       <div className='list-releases-heading-container'>
         <Heading level={1} data-size='sm'>
           Publiseringsoversikt
