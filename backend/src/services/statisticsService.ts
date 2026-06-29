@@ -109,7 +109,7 @@ export async function getStatistics(
       name: true,
       name_en: true,
       shortname: { select: { name: true } },
-      responsiblePersons: { select: { username: true, email: true } },
+      responsiblePersons: { select: { username: true } },
       division_code: true,
     },
   })
@@ -121,7 +121,12 @@ export async function getStatistics(
       statistics.map(async (statistic) => {
         const main_language = statistic.language
         const divisionCode = statistic.division_code ?? ''
-        const contacts = await fetchUsers(statistic.responsiblePersons)
+        const contacts = await fetchUsers(statistic.responsiblePersons).then((users) => {
+          return users.map(({ displayName, userPrincipalName }) => ({
+            name: displayName,
+            userPrincipalName,
+          }))
+        })
 
         return {
           shortname: statistic.shortname.name,
@@ -155,7 +160,7 @@ const VariantSelect = {
 
 export const StatisticsDetailedIncludes = {
   shortname: { select: { name: true } },
-  responsiblePersons: { select: { email: true, username: true } },
+  responsiblePersons: { select: { username: true } },
   related_statistic: { select: { language: true, name: true, name_en: true, shortname: { select: { name: true } } } },
   statistic_region_levels: {
     select: { region_level: { select: { name: true, code: true } } },
@@ -220,7 +225,12 @@ export async function mapStatisticDetails(statistic: StatisticPrismaResult): Pro
     comment: statistic.comment,
     created_at: dateToISOString(statistic.date_created),
     variants: parseStatisticVariants(statistic.variants),
-    contacts: await fetchUsers(statistic.responsiblePersons),
+    contacts: await fetchUsers(statistic.responsiblePersons).then((users) => {
+      return users.map(({ displayName, userPrincipalName }) => ({
+        name: displayName,
+        userPrincipalName,
+      }))
+    }),
     statistic_region_levels: statistic.statistic_region_levels?.map(({ region_level }) => {
       return { name: region_level.name, code: region_level.code ?? '' }
     }),

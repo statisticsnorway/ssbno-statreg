@@ -23,13 +23,10 @@ const { fetchUsersMock, fetchDivisionMock } = vi.hoisted(() => ({
     if (!users?.length) return []
     return [
       {
-        lookupEmail: 'bob@ssb.no',
-        user: {
-          displayName: 'Bob',
-          username: 'bcd',
-          email: 'bob@ssb.no',
-          businessPhone: '11223344',
-        },
+        displayName: 'Bob',
+        userPrincipalName: 'bcd@ssb.no',
+        email: 'bob@ssb.no',
+        businessPhone: '11223344',
       },
     ]
   }),
@@ -551,17 +548,14 @@ describe('statisticService', () => {
 
     beforeEach(() => {
       input = structuredClone(mockStatisticsDetailedPrismaResult)
-      input.responsiblePersons = [{ username: 'bcd', email: 'bob_fallback@ssb.no' }]
+      input.responsiblePersons = [{ username: 'bcd' }]
 
       fetchUsersResult = [
         {
-          lookupEmail: 'bob_lookup@ssb.no',
-          user: {
-            displayName: 'Bob',
-            username: 'bcd',
-            email: 'bob@ssb.no',
-            businessPhone: '11223344',
-          },
+          displayName: 'Bob',
+          userPrincipalName: 'bcd@ssb.no',
+          email: 'bob@ssb.no',
+          businessPhone: '11223344',
         },
       ]
       fetchUsersMock.mockImplementation(async () => {
@@ -569,8 +563,7 @@ describe('statisticService', () => {
       })
 
       expectedResult = structuredClone(mockedStatisticDetailedResult)
-      // TODO bug: when fetchUsers "succeeds", username is always undefined
-      expectedResult.contacts = [{ username: undefined, name: 'Bob', email: 'bob@ssb.no' }]
+      expectedResult.contacts = [{ userPrincipalName: 'bcd@ssb.no', name: 'Bob' }]
     })
 
     test('returns valid statisticDetails when all conditionals succeed', async () => {
@@ -609,25 +602,6 @@ describe('statisticService', () => {
     test('falls back to empty english name when name_en is missing', async () => {
       input.name_en = null
       expectedResult.name_en = ''
-
-      const result = await mapStatisticDetails(input)
-
-      expect(result).toStrictEqual(expectedResult)
-    })
-
-    test('falls back to lookupEmail when fetched user email is missing', async () => {
-      fetchUsersResult[0].user.email = null
-      expectedResult.contacts[0].email = 'bob_lookup@ssb.no'
-
-      const result = await mapStatisticDetails(input)
-
-      expect(result).toStrictEqual(expectedResult)
-    })
-
-    test('falls back to responsible person data when fetchUsers returns Users[] instead of lookupUsers[]', async () => {
-      input.responsiblePersons = [{ username: 'bcd', email: 'bob_fallback@ssb.no' }]
-      fetchUsersMock.mockImplementationOnce((users: Users[]) => Promise.resolve(users as any))
-      expectedResult.contacts[0] = { name: undefined, email: 'bob_fallback@ssb.no', username: 'bcd' }
 
       const result = await mapStatisticDetails(input)
 
@@ -899,7 +873,6 @@ const mockStatisticsPrismaResult = [
     responsiblePersons: [
       {
         username: 'abc',
-        email: 'alice@ssb.no',
       },
     ],
   },
@@ -913,7 +886,6 @@ const mockStatisticsPrismaResult = [
     responsiblePersons: [
       {
         username: 'bcd',
-        email: 'bob@ssb.no',
       },
     ],
   },
@@ -947,7 +919,6 @@ const mockStatisticsDetailedPrismaResult = {
   responsiblePersons: [
     {
       username: 'bcd',
-      email: 'bob@ssb.no',
     },
   ],
   related_statistic: {
@@ -1010,7 +981,7 @@ const mockedStatisticsResult = {
       },
       name: 'Energiregnskap og energibalanse',
       name_en: 'Energy account and energy balance',
-      contacts: [{ username: 'abc', name: 'Navn Navnesen' }],
+      contacts: [{ userPrincipalName: 'bcd@ssb.no', name: 'Bob' }],
     },
     {
       shortname: 'befolk',
@@ -1022,7 +993,7 @@ const mockedStatisticsResult = {
       },
       name: 'Befolkning og demografi',
       name_en: 'Population and demography',
-      contacts: [{ username: 'bcd', name: 'Navn Navnesen' }],
+      contacts: [{ userPrincipalName: 'bcd@ssb.no', name: 'Bob' }],
     },
   ],
   total: 2,
@@ -1084,7 +1055,7 @@ const mockedStatisticDetailedResult = {
       },
     },
   ],
-  contacts: [{ username: undefined, name: 'Bob', email: 'bob@ssb.no' }],
+  contacts: [{ userPrincipalName: 'bcd@ssb.no', name: 'Bob' }],
   statistic_region_levels: [{ name: 'Bydel og krets', code: 'BD' }],
 }
 

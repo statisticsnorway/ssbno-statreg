@@ -48,15 +48,12 @@ describe('entraUserService ', () => {
       expect(getUsersFromCacheMock).toHaveBeenCalledTimes(0)
     })
 
-    test('returns users matched by email and userPrincipalName', async () => {
-      const usersInput = [
-        { username: 'ola', email: 'ola.nordmann@ssb.no' },
-        { username: null, email: 'infotjenesten@ssb.no' },
-      ]
+    test('returns users matched by userPrincipalName', async () => {
+      const usersInput = [{ username: 'ola' }]
 
       const result = await fetchUsers(usersInput)
 
-      expect(result).toHaveLength(2)
+      expect(result).toHaveLength(1)
       expect(result).toStrictEqual([
         {
           displayName: 'Ola Nordmann',
@@ -64,18 +61,12 @@ describe('entraUserService ', () => {
           userPrincipalName: 'ola@ssb.no',
           businessPhone: '11223344',
         },
-        {
-          displayName: 'Infotjenesten',
-          email: null,
-          userPrincipalName: 'infotjenesten@ssb.no',
-          businessPhone: '11223344',
-        },
       ])
       expect(getUsersFromCacheMock).toHaveBeenCalledOnce()
     })
 
     test('matches users case-insensitively', async () => {
-      const result = await fetchUsers([{ username: 'ola', email: 'OLA.NORDMANN@SSB.NO' }])
+      const result = await fetchUsers([{ username: 'ola' }])
 
       expect(result).toStrictEqual([
         {
@@ -88,7 +79,7 @@ describe('entraUserService ', () => {
     })
 
     test('returns empty array when no cached users match', async () => {
-      const result = await fetchUsers([{ email: 'nonExisting@ssb.no', username: 'nonExisting' }])
+      const result = await fetchUsers([{ username: 'nonExisting' }])
 
       expect(result).toStrictEqual([])
     })
@@ -96,7 +87,7 @@ describe('entraUserService ', () => {
     test('returns empty array when cached users are empty', async () => {
       getUsersFromCacheMock.mockResolvedValueOnce([])
 
-      const result = await fetchUsers([{ username: 'ola', email: 'ola.nordmann@ssb.no' }])
+      const result = await fetchUsers([{ username: 'ola' }])
 
       expect(result).toStrictEqual([])
     })
@@ -104,7 +95,7 @@ describe('entraUserService ', () => {
     test('propagates cache lookup failures', async () => {
       getUsersFromCacheMock.mockRejectedValueOnce(new Error('cache unavailable'))
 
-      await expect(fetchUsers([{ username: 'ola', email: 'ola.nordmann@ssb.no' }])).rejects.toThrow('cache unavailable')
+      await expect(fetchUsers([{ username: 'ola' }])).rejects.toThrow('cache unavailable')
     })
   })
 })

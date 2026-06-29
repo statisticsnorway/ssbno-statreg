@@ -31,5 +31,4 @@ export type UserLookupItem = {
 
 export type Users = { 
   username: string | null
-  email: string 
 }
