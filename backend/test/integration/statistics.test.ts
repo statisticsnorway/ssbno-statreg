@@ -13,7 +13,7 @@ import {
 vi.mock(import('@/lib/cache'), () => ({
   getAllUsersFromCache: vi.fn(() =>
     Promise.resolve({
-      'bob@ssb.no': {
+      'bcd@ssb.no': {
         displayName: 'Bob',
         userPrincipalName: 'bcd@ssb.no',
         email: 'bob@ssb.no',
