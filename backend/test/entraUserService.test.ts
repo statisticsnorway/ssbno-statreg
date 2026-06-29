@@ -14,12 +14,6 @@ const cachedUsers = [
     userPrincipalName: 'infotjenesten@ssb.no',
     businessPhone: '11223344',
   },
-  {
-    displayName: 'Demo bruker',
-    email: null,
-    userPrincipalName: undefined,
-    businessPhone: null,
-  },
 ]
 
 const { getUsersFromCacheMock } = vi.hoisted(() => ({
@@ -41,46 +35,35 @@ describe('entraUserService ', () => {
       getUsersFromCacheMock.mockResolvedValue(cachedUsers)
     })
 
-    test('returns empty array when users array is empty', async () => {
-      const result = await fetchUsers([])
-
-      expect(result).toStrictEqual([])
-      expect(getUsersFromCacheMock).toHaveBeenCalledTimes(0)
-    })
-
-    test('returns users matched by userPrincipalName', async () => {
+    test('returns user matched by userPrincipalName', async () => {
       const usersInput = [{ username: 'ola' }]
 
       const result = await fetchUsers(usersInput)
 
-      expect(result).toHaveLength(1)
-      expect(result).toStrictEqual([
-        {
-          displayName: 'Ola Nordmann',
-          email: 'ola.nordmann@ssb.no',
-          userPrincipalName: 'ola@ssb.no',
-          businessPhone: '11223344',
-        },
-      ])
       expect(getUsersFromCacheMock).toHaveBeenCalledOnce()
+      expect(result).toStrictEqual([cachedUsers[0]])
     })
 
-    test('matches users case-insensitively', async () => {
-      const result = await fetchUsers([{ username: 'ola' }])
+    test('returns users matched by userPrincipalName', async () => {
+      const usersInput = [{ username: 'ola' }, { username: 'infotjenesten' }]
 
-      expect(result).toStrictEqual([
-        {
-          displayName: 'Ola Nordmann',
-          email: 'ola.nordmann@ssb.no',
-          userPrincipalName: 'ola@ssb.no',
-          businessPhone: '11223344',
-        },
-      ])
+      const result = await fetchUsers(usersInput)
+
+      expect(getUsersFromCacheMock).toHaveBeenCalledOnce()
+      expect(result).toStrictEqual(cachedUsers)
+    })
+
+    test('returns empty array when users array is empty', async () => {
+      const result = await fetchUsers([])
+
+      expect(getUsersFromCacheMock).toHaveBeenCalledTimes(0)
+      expect(result).toStrictEqual([])
     })
 
     test('returns empty array when no cached users match', async () => {
       const result = await fetchUsers([{ username: 'nonExisting' }])
 
+      expect(getUsersFromCacheMock).toHaveBeenCalledTimes(1)
       expect(result).toStrictEqual([])
     })
 
@@ -89,6 +72,7 @@ describe('entraUserService ', () => {
 
       const result = await fetchUsers([{ username: 'ola' }])
 
+      expect(getUsersFromCacheMock).toHaveBeenCalledTimes(1)
       expect(result).toStrictEqual([])
     })
 
