@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { vi, describe, test, expect, beforeEach, afterEach, assert } from 'vitest'
 import {
+  fetchAllUsers,
   fetchUserByEmail,
   getAccessToken,
   setCachedToken,
@@ -27,6 +28,14 @@ function mockGraphSuccess(data: object) {
     ok: true,
     status: 200,
     json: async () => data,
+  })
+}
+
+function mockGraphFailure(status: number, message: string) {
+  return Promise.resolve({
+    ok: false,
+    status,
+    text: async () => message,
   })
 }
 
@@ -204,6 +213,122 @@ describe('entraReaderClient ', () => {
       })
     })
   })
+
+  describe('fetchAllUsers ', async () => {
+    test('throws error if missing token', async () => {
+      expect(fetchMock).toHaveBeenCalledTimes(0)
+      await expect(() => fetchAllUsers('')).rejects.toMatchObject({
+        message: 'Missing token',
+      })
+    })
+
+    test('returns all users from a single Graph response', async () => {
+      fetchMock.mockReturnValueOnce(
+        mockGraphSuccess({
+          value: [
+            {
+              displayName: 'Admin SSB',
+              businessPhones: ['123'],
+              mail: TEST_EMAIL,
+              userPrincipalName: 'admin@ssb.no',
+            },
+            {
+              displayName: 'Infotjenesten',
+              businessPhones: [],
+              mail: null,
+              userPrincipalName: 'infotjenesten@ssb.no',
+            },
+          ],
+        }) as any
+      )
+
+      const users = await fetchAllUsers('token')
+
+      expect(fetchMock).toHaveBeenCalledExactlyOnceWith(
+        expect.stringContaining(entraUsersResult.firstPageUrl),
+        expect.anything()
+      )
+      expect(users).toStrictEqual([
+        {
+          displayName: 'Admin SSB',
+          email: TEST_EMAIL,
+          userPrincipalName: 'admin@ssb.no',
+          businessPhone: '123',
+        },
+        {
+          displayName: 'Infotjenesten',
+          email: null,
+          userPrincipalName: 'infotjenesten@ssb.no',
+          businessPhone: null,
+        },
+      ])
+    })
+
+    test('follows @odata.nextLink and merges paged Graph responses', async () => {
+      fetchMock
+        .mockReturnValueOnce(
+          mockGraphSuccess({
+            value: [
+              {
+                displayName: 'Admin SSB',
+                businessPhones: ['123'],
+                mail: null,
+                userPrincipalName: TEST_EMAIL,
+              },
+            ],
+            '@odata.nextLink': entraUsersResult.nextPageUrl,
+          }) as any
+        )
+        .mockReturnValueOnce(
+          mockGraphSuccess({
+            value: [
+              {
+                displayName: 'Infotjenesten',
+                businessPhones: ['11223344'],
+                mail: 'infotjenesten@ssb.no',
+                userPrincipalName: 'infotjenesten@ssb.no',
+              },
+            ],
+          }) as any
+        )
+
+      const users = await fetchAllUsers('token')
+
+      expect(fetchMock).toHaveBeenNthCalledWith(
+        1,
+        expect.stringContaining(entraUsersResult.firstPageUrl),
+        expect.anything()
+      )
+      expect(fetchMock).toHaveBeenNthCalledWith(2, entraUsersResult.nextPageUrl, expect.anything())
+      expect(users).toStrictEqual([
+        {
+          displayName: 'Admin SSB',
+          email: null,
+          userPrincipalName: TEST_EMAIL,
+          businessPhone: '123',
+        },
+        {
+          displayName: 'Infotjenesten',
+          email: 'infotjenesten@ssb.no',
+          userPrincipalName: 'infotjenesten@ssb.no',
+          businessPhone: '11223344',
+        },
+      ])
+    })
+
+    test('throws error if Graph users request fails', async () => {
+      fetchMock.mockReturnValueOnce(mockGraphFailure(500, 'api error') as any)
+
+      await expect(() => fetchAllUsers('token')).rejects.toMatchObject({
+        message: 'Graph users request failed: 500 api error',
+      })
+
+      expect(fetchMock).toHaveBeenCalledExactlyOnceWith(
+        expect.stringContaining(entraUsersResult.firstPageUrl),
+        expect.anything()
+      )
+    })
+  })
 })
 
 ////////////// MOCK DATA ////////////////////////////////
@@ -215,4 +340,9 @@ const entraUserResult = {
     email: TEST_EMAIL,
     businessPhone: '123',
   },
+}
+
+const entraUsersResult = {
+  firstPageUrl: '/users?$select=displayName,businessPhones,mail,userPrincipalName&$top=999',
+  nextPageUrl: '/users?$skiptoken=next-page-token',
 }
