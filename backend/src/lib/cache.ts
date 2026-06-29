@@ -8,7 +8,6 @@ const ENTRA_USERS_CACHE_KEY = 'entra-users'
 export async function setUsersCache(): Promise<void> {
   // Return mocked users for tests and development where application often restarts and/or is missing Azure Entra access
   if (process.env.MOCK_ENTRA_USERS === 'true') {
-    console.info('setUsersCache: MOCK_ENTRA_USERS is set, using mock user data')
     usersCache.set(ENTRA_USERS_CACHE_KEY, [
       {
         displayName: 'Admin SSB',
@@ -29,7 +28,6 @@ export async function setUsersCache(): Promise<void> {
     }
 
     const users = await entraClient.fetchAllUsers(token)
-    console.info(`setUsersFromCache: returning ${users.length} fetchAllUsers`)
     usersCache.set(ENTRA_USERS_CACHE_KEY, users)
   } catch (error) {
     console.error(`Failed to set users cache: ${error}`)
@@ -40,7 +38,6 @@ export async function setUsersCache(): Promise<void> {
 export async function getUsersFromCache(): Promise<EntraUser[]> {
   const cachedUsers = usersCache.get(ENTRA_USERS_CACHE_KEY) as EntraUser[] | undefined
   if (cachedUsers) {
-    console.info(`getUsersFromCache: returning ${cachedUsers.length} cached users`)
     return cachedUsers
   }
 
