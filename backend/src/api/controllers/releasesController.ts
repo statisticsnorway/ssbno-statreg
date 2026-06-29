@@ -59,7 +59,7 @@ export default function releasesController(router: Router) {
 
       const start = req.query?.start ? Number(req.query.start) : undefined
       const count = req.query?.count ? Number(req.query.count) : undefined
-      const sort = req.query?.sort ? ensureStringArray(req.query.sort as string) : undefined
+      const sort = req.query?.sort as string
 
       const data = await getVariantReleases({ start, count, shortname, variantId, sort }, prisma)
       res.json(data)
