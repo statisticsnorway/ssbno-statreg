@@ -1,6 +1,6 @@
 import { vi, afterAll, beforeEach, describe, expect, test } from 'vitest'
 
-import { setUsersCache, getAllUsersFromCache, getUserFromCache, clearUsersCache } from '@/lib/cache'
+import { setUsersCache, getAllUsersFromCache, clearUsersCache } from '@/lib/cache'
 
 const mockUsers = [
   {
@@ -17,14 +17,29 @@ const mockUsers = [
   },
 ]
 
-const mockedEntraUsers = [
-  {
+const expectedCachedUsers = {
+  'ola@ssb.no': {
+    displayName: 'Ola Nordmann',
+    email: 'ola.nordmann@ssb.no',
+    userPrincipalName: 'ola@ssb.no',
+    businessPhone: null,
+  },
+  'infotjenesten@ssb.no': {
+    displayName: 'Infotjenesten',
+    email: null,
+    userPrincipalName: 'infotjenesten@ssb.no',
+    businessPhone: '11223344',
+  },
+}
+
+const mockedEntraUsers = {
+  'admin@ssb.no': {
     displayName: 'Admin SSB',
     email: 'admin.ssb@ssb.no',
     userPrincipalName: 'admin@ssb.no',
     businessPhone: null,
   },
-]
+}
 
 const originalMockEntraUsers = process.env.MOCK_ENTRA_USERS
 
@@ -62,7 +77,7 @@ describe('Users cache', () => {
 
   test('return fetched users on first cache miss and reuse cached users', async () => {
     const fetchedUsers = await getAllUsersFromCache()
-    expect(fetchedUsers).toEqual(mockUsers)
+    expect(fetchedUsers).toEqual(expectedCachedUsers)
 
     expect(getAccessTokenMock).toHaveBeenCalledTimes(1)
     expect(fetchAllUsers).toHaveBeenCalledTimes(1)
@@ -74,7 +89,7 @@ describe('Users cache', () => {
 
     expect(getAccessTokenMock).toHaveBeenCalledTimes(0)
     expect(fetchAllUsers).toHaveBeenCalledTimes(0)
-    expect(cachedUsers).toEqual(mockUsers)
+    expect(cachedUsers).toEqual(expectedCachedUsers)
   })
 
   test('store and return users', async () => {
@@ -83,13 +98,13 @@ describe('Users cache', () => {
 
     expect(getAccessTokenMock).toHaveBeenCalledTimes(1)
     expect(fetchAllUsers).toHaveBeenCalledTimes(1)
-    expect(getUsers).toEqual(mockUsers)
+    expect(getUsers).toEqual(expectedCachedUsers)
   })
 
   test('clear cached users', async () => {
     await setUsersCache()
     const cachedUsers = await getAllUsersFromCache()
-    expect(cachedUsers).toEqual(mockUsers)
+    expect(cachedUsers).toEqual(expectedCachedUsers)
 
     clearUsersCache()
 
@@ -97,7 +112,7 @@ describe('Users cache', () => {
 
     expect(getAccessTokenMock).toHaveBeenCalledTimes(2)
     expect(fetchAllUsers).toHaveBeenCalledTimes(2)
-    expect(reCachedUsers).toEqual(mockUsers)
+    expect(reCachedUsers).toEqual(expectedCachedUsers)
   })
 
   test('return empty array when no access token is available', async () => {
@@ -108,7 +123,7 @@ describe('Users cache', () => {
 
     expect(getAccessTokenMock).toHaveBeenCalledTimes(1)
     expect(fetchAllUsers).toHaveBeenCalledTimes(0)
-    expect(users).toEqual([])
+    expect(users).toEqual({})
   })
 
   test('return empty array and log error when access token lookup throws', async () => {
@@ -118,7 +133,7 @@ describe('Users cache', () => {
 
     expect(getAccessTokenMock).toHaveBeenCalledTimes(1)
     expect(fetchAllUsers).toHaveBeenCalledTimes(0)
-    expect(users).toEqual([])
+    expect(users).toEqual({})
   })
 
   test('return empty array and log error when fetching users throws', async () => {
@@ -128,7 +143,7 @@ describe('Users cache', () => {
 
     expect(getAccessTokenMock).toHaveBeenCalledTimes(1)
     expect(fetchAllUsers).toHaveBeenCalledTimes(1)
-    expect(users).toEqual([])
+    expect(users).toEqual({})
   })
 
   test('use mock users when MOCK_ENTRA_USERS is true', async () => {
@@ -139,13 +154,5 @@ describe('Users cache', () => {
     expect(getAccessTokenMock).toHaveBeenCalledTimes(0)
     expect(fetchAllUsers).toHaveBeenCalledTimes(0)
     expect(users).toEqual(mockedEntraUsers)
-  })
-
-  test('get user from cache by principal name', async () => {
-    const user = await getUserFromCache('infotjenesten@ssb.no')
-
-    expect(getAccessTokenMock).toHaveBeenCalledTimes(1)
-    expect(fetchAllUsers).toHaveBeenCalledTimes(1)
-    expect(user).toEqual(mockUsers[1])
   })
 })

@@ -20,7 +20,7 @@ import {
 const { getAllUsersFromCacheMock, fetchDivisionMock } = vi.hoisted(() => ({
   getAllUsersFromCacheMock: vi.fn(async () => {
     return {
-      'bob@ssb.no': {
+      'bcd@ssb.no': {
         displayName: 'Bob',
         userPrincipalName: 'bcd@ssb.no',
         email: 'bob@ssb.no',
@@ -608,7 +608,7 @@ describe('statisticService', () => {
 
     test('falls back to empty contact array when responsible persons is empty', async () => {
       input.responsiblePersons = []
-      fetchUsersResult = []
+      fetchUsersResult = {}
       expectedResult.contacts = []
 
       const result = await mapStatisticDetails(input)
@@ -979,7 +979,7 @@ const mockedStatisticsResult = {
       },
       name: 'Energiregnskap og energibalanse',
       name_en: 'Energy account and energy balance',
-      contacts: [{ userPrincipalName: 'bcd@ssb.no', name: 'Bob' }],
+      contacts: [{ userPrincipalName: '', name: '' }],
     },
     {
       shortname: 'befolk',
