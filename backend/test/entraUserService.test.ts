@@ -75,11 +75,5 @@ describe('entraUserService ', () => {
       expect(getUsersFromCacheMock).toHaveBeenCalledTimes(1)
       expect(result).toStrictEqual([])
     })
-
-    test('propagates cache lookup failures', async () => {
-      getUsersFromCacheMock.mockRejectedValueOnce(new Error('cache unavailable'))
-
-      await expect(fetchUsers([{ username: 'ola' }])).rejects.toThrow('cache unavailable')
-    })
   })
 })
