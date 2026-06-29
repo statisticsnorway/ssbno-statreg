@@ -5,9 +5,11 @@ import { ArrowLeftIcon, PlusCircleIcon, TrashIcon } from '@navikt/aksel-icons'
 import { Link as ReactRouterLink } from 'react-router'
 import { type BlockedReleaseDate } from '@ssbno-statreg/shared'
 import client from '../api'
+import { ErrorAlert } from '../components/ErrorAlert'
 
 export default function ListBlockedDates() {
   const [blockedDates, setBlockedDates] = useState<BlockedReleaseDate[]>([])
+  const [apiError, setApiError] = useState<string[]>([])
 
   useEffect(() => {
     async function fetchBlockedDates() {
@@ -16,7 +18,7 @@ export default function ListBlockedDates() {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const errorMessage = (error as any).error
         console.log(errorMessage)
-        alert(errorMessage)
+        setApiError((prev) => [...prev, errorMessage])
       } else {
         setBlockedDates(data ?? [])
       }
@@ -26,6 +28,7 @@ export default function ListBlockedDates() {
 
   return (
     <>
+      {apiError.length > 0 && <ErrorAlert message={apiError} />}
       <Link asChild>
         <ReactRouterLink to='/'>
           <ArrowLeftIcon /> Tilbake til publiseringsoversikten
