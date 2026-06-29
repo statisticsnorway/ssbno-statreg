@@ -23,12 +23,6 @@ export type EntraUser = {
   businessPhone: string | null
 }
 
-export type UserLookupItem = {
-  lookupEmail: string
-  user: EntraUser | null
-  error?: string | null
-}
-
 export type Users = { 
   username: string | null
 }
