@@ -6,9 +6,9 @@ export type TokenResponse = {
 
 type GraphUserResponse = {
   displayName: string
-  businessPhones?: string[]
-  mail: string
-  userPrincipalName: string | undefined
+  businessPhones: string | null
+  mail: string | null
+  userPrincipalName: string
 }
 
 export type GraphUsersResponse = {
@@ -19,7 +19,7 @@ export type GraphUsersResponse = {
 export type EntraUser = {
   displayName: string
   email: string  | null
-  userPrincipalName: string | undefined
+  userPrincipalName: string
   businessPhone: string | null
 }
 

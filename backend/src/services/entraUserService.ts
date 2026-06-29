@@ -11,7 +11,6 @@ export async function fetchUsers(users: Users[]) {
   const lookupUserPrincipalNames = new Set(users.map((user) => `${user.username}@ssb.no`))
 
   return fetchedUsers.filter((user) => {
-    const userPrincipalName = user.userPrincipalName
-    return userPrincipalName ? lookupUserPrincipalNames.has(userPrincipalName) : false
+    return lookupUserPrincipalNames.has(user.userPrincipalName)
   })
 }
