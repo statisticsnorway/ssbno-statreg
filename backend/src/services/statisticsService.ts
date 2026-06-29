@@ -9,9 +9,9 @@ import {
 import { dateToISOString, sanitize, parseDateOnly, ensureRequiredFieldsExists, isNumber, parseId } from '@/lib/utils'
 import type { Prisma } from '@/generated/prisma/client'
 import { getDivisionFromCode } from '@/services/klassService'
-import { fetchUsers } from '@/services/entraUserService'
 import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
 import { statisticsAsserts } from '@/lib/asserts'
+import { getAllUsersFromCache } from '@/lib/cache'
 
 export type StatisticPrisma = Pick<PrismaClient, 'statistic' | 'shortname'>
 
@@ -114,6 +114,7 @@ export async function getStatistics(
     },
   })
   const total = await prisma.statistic.count({ where })
+  const users = await getAllUsersFromCache()
 
   return {
     total,
@@ -121,11 +122,12 @@ export async function getStatistics(
       statistics.map(async (statistic) => {
         const main_language = statistic.language
         const divisionCode = statistic.division_code ?? ''
-        const contacts = await fetchUsers(statistic.responsiblePersons).then((users) => {
-          return users.map(({ displayName, userPrincipalName }) => ({
-            name: displayName,
-            userPrincipalName,
-          }))
+        const contacts = statistic.responsiblePersons.map(({ username }) => {
+          const user = users[username ? username + '@ssb.no' : '']
+          return {
+            name: user?.displayName ?? '',
+            userPrincipalName: user?.userPrincipalName ?? '',
+          }
         })
 
         return {
@@ -202,6 +204,7 @@ export async function mapStatisticDetails(statistic: StatisticPrismaResult): Pro
         name_en: statistic.related_statistic?.name_en ?? '',
       }
     : {}
+  const users = await getAllUsersFromCache()
 
   return {
     version: statistic.version,
@@ -225,11 +228,12 @@ export async function mapStatisticDetails(statistic: StatisticPrismaResult): Pro
     comment: statistic.comment,
     created_at: dateToISOString(statistic.date_created),
     variants: parseStatisticVariants(statistic.variants),
-    contacts: await fetchUsers(statistic.responsiblePersons).then((users) => {
-      return users.map(({ displayName, userPrincipalName }) => ({
-        name: displayName,
-        userPrincipalName,
-      }))
+    contacts: statistic.responsiblePersons.map(({ username }) => {
+      const user = users[username ? username + '@ssb.no' : '']
+      return {
+        name: user?.displayName ?? '',
+        userPrincipalName: user?.userPrincipalName ?? '',
+      }
     }),
     statistic_region_levels: statistic.statistic_region_levels?.map(({ region_level }) => {
       return { name: region_level.name, code: region_level.code ?? '' }

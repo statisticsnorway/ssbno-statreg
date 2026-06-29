@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { vi, describe, test, expect, beforeEach } from 'vitest'
 import { ApprovalStatus, StatisticStatus, type StatisticCreate, type StatisticUpdate } from '@ssbno-statreg/shared'
-import { Users } from '@/types/entra'
 import { statisticsAsserts } from '@/lib/asserts'
 import {
   getFilteredStatistics,
@@ -18,17 +17,16 @@ import {
   buildStatisticFilter,
 } from '@/services/statisticsService'
 
-const { fetchUsersMock, fetchDivisionMock } = vi.hoisted(() => ({
-  fetchUsersMock: vi.fn(async (users: Users[]) => {
-    if (!users?.length) return []
-    return [
-      {
+const { getAllUsersFromCacheMock, fetchDivisionMock } = vi.hoisted(() => ({
+  getAllUsersFromCacheMock: vi.fn(async () => {
+    return {
+      'bob@ssb.no': {
         displayName: 'Bob',
         userPrincipalName: 'bcd@ssb.no',
         email: 'bob@ssb.no',
         businessPhone: '11223344',
       },
-    ]
+    }
   }),
   fetchDivisionMock: vi.fn((code: number, language?: string) => {
     if (code === 104 && language === 'en') return { code: 104, name: 'Division A1' }
@@ -37,11 +35,11 @@ const { fetchUsersMock, fetchDivisionMock } = vi.hoisted(() => ({
   }),
 }))
 
-vi.mock(import('@/services/entraUserService'), async (importOriginal) => {
-  const original = await importOriginal<typeof import('@/services/entraUserService')>()
+vi.mock(import('@/lib/cache'), async (importOriginal) => {
+  const original = await importOriginal<typeof import('@/lib/cache')>()
   return {
     ...original,
-    fetchUsers: fetchUsersMock,
+    getAllUsersFromCache: getAllUsersFromCacheMock,
   }
 })
 
@@ -550,15 +548,15 @@ describe('statisticService', () => {
       input = structuredClone(mockStatisticsDetailedPrismaResult)
       input.responsiblePersons = [{ username: 'bcd' }]
 
-      fetchUsersResult = [
-        {
+      fetchUsersResult = {
+        'bcd@ssb.no': {
           displayName: 'Bob',
           userPrincipalName: 'bcd@ssb.no',
           email: 'bob@ssb.no',
           businessPhone: '11223344',
         },
-      ]
-      fetchUsersMock.mockImplementation(async () => {
+      }
+      getAllUsersFromCacheMock.mockImplementation(async () => {
         return fetchUsersResult
       })
 
