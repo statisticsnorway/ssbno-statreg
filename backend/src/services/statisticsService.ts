@@ -118,34 +118,32 @@ export async function getStatistics(
 
   return {
     total,
-    statistics: await Promise.all(
-      statistics.map(async (statistic) => {
-        const main_language = statistic.language
-        const divisionCode = statistic.division_code ?? ''
-        const contacts = statistic.responsiblePersons.map(({ username }) => {
-          const user = users[username ? username + '@ssb.no' : '']
-          return {
-            name: user?.displayName ?? '',
-            userPrincipalName: user?.userPrincipalName ?? '',
-          }
-        })
-
+    statistics: statistics.map((statistic) => {
+      const main_language = statistic.language
+      const divisionCode = statistic.division_code ?? ''
+      const contacts = statistic.responsiblePersons.map(({ username }) => {
+        const user = users[username ? username + '@ssb.no' : '']
         return {
-          shortname: statistic.shortname.name,
-          main_language,
-          status: {
-            code: statistic.status,
-          },
-          division: {
-            name: getDivisionFromCode(Number(divisionCode))?.name,
-            code: divisionCode,
-          },
-          name: statistic.name,
-          name_en: statistic.name_en ?? '',
-          contacts,
+          name: user?.displayName ?? '',
+          userPrincipalName: user?.userPrincipalName ?? '',
         }
       })
-    ),
+
+      return {
+        shortname: statistic.shortname.name,
+        main_language,
+        status: {
+          code: statistic.status,
+        },
+        division: {
+          name: getDivisionFromCode(Number(divisionCode))?.name,
+          code: divisionCode,
+        },
+        name: statistic.name,
+        name_en: statistic.name_en ?? '',
+        contacts,
+      }
+    }),
   }
 }
 
