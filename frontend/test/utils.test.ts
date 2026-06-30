@@ -180,8 +180,8 @@ describe('utils', () => {
   describe('formatContact', () => {
     test('returns initials', () => {
       const contacts = [
-        { username: 'abc', name: 'Ola Nordmann' },
-        { username: 'xyz', name: 'Kari Nordmann' },
+        { userPrincipalName: 'abc@ssb.no', name: 'Ola Nordmann' },
+        { userPrincipalName: 'xyz@ssb.no', name: 'Kari Nordmann' },
       ]
       expect(formatContacts(contacts)).toStrictEqual(['Ola Nordmann (abc)', 'Kari Nordmann (xyz)'])
     })
