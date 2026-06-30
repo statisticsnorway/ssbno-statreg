@@ -58,7 +58,7 @@ vi.mock(import('../plugins/entraReaderClient'), async (importOriginal) => {
   }
 })
 
-describe('Users cache', () => {
+describe('getAllUsersFromCache', () => {
   beforeEach(() => {
     clearUsersCache()
     fetchAllUsers.mockClear()
@@ -92,15 +92,6 @@ describe('Users cache', () => {
     expect(cachedUsers).toEqual(expectedCachedUsers)
   })
 
-  test('store and return users', async () => {
-    await setUsersCache()
-    const getUsers = await getAllUsersFromCache()
-
-    expect(getAccessTokenMock).toHaveBeenCalledTimes(1)
-    expect(fetchAllUsers).toHaveBeenCalledTimes(1)
-    expect(getUsers).toEqual(expectedCachedUsers)
-  })
-
   test('clear cached users', async () => {
     await setUsersCache()
     const cachedUsers = await getAllUsersFromCache()
@@ -116,8 +107,7 @@ describe('Users cache', () => {
   })
 
   test('return empty array when no access token is available', async () => {
-    // @ts-expect-error: Mocking the getAccessToken function to return undefined for testing purposes
-    getAccessTokenMock.mockResolvedValueOnce(undefined)
+    getAccessTokenMock.mockRejectedValueOnce(undefined)
 
     const users = await getAllUsersFromCache()
 

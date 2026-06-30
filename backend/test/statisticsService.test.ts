@@ -979,7 +979,7 @@ const mockedStatisticsResult = {
       },
       name: 'Energiregnskap og energibalanse',
       name_en: 'Energy account and energy balance',
-      contacts: [{ userPrincipalName: '', name: '' }],
+      contacts: [{ userPrincipalName: 'abc@ssb.no', name: '' }],
     },
     {
       shortname: 'befolk',
