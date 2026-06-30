@@ -546,7 +546,7 @@ describe('statisticService', () => {
 
     beforeEach(() => {
       input = structuredClone(mockStatisticsDetailedPrismaResult)
-      input.responsiblePersons = [{ username: 'bcd' }]
+      input.responsiblePersons = [{ principalName: 'bcd@ssb.no' }]
 
       fetchUsersResult = {
         'bcd@ssb.no': {
@@ -870,7 +870,7 @@ const mockStatisticsPrismaResult = [
     division_code: 104,
     responsiblePersons: [
       {
-        username: 'abc',
+        principalName: 'abc@ssb.no',
       },
     ],
   },
@@ -883,7 +883,7 @@ const mockStatisticsPrismaResult = [
     division_code: 105,
     responsiblePersons: [
       {
-        username: 'bcd',
+        principalName: 'bcd@ssb.no',
       },
     ],
   },
@@ -916,7 +916,7 @@ const mockStatisticsDetailedPrismaResult = {
   },
   responsiblePersons: [
     {
-      username: 'bcd',
+      principalName: 'bcd@ssb.no',
     },
   ],
   related_statistic: {

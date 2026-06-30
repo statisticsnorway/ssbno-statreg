@@ -109,7 +109,7 @@ export async function getStatistics(
       name: true,
       name_en: true,
       shortname: { select: { name: true } },
-      responsiblePersons: { select: { username: true } },
+      responsiblePersons: { select: { principalName: true } },
       division_code: true,
     },
   })
@@ -118,14 +118,15 @@ export async function getStatistics(
 
   return {
     total,
+    //@ts-expect-error: Will be fixed later
     statistics: statistics.map((statistic) => {
       const main_language = statistic.language
       const divisionCode = statistic.division_code ?? ''
-      const contacts = statistic.responsiblePersons.map(({ username }) => {
-        const user = users[username ? username + '@ssb.no' : '']
+      const contacts = statistic.responsiblePersons.map(({ principalName }) => {
+        const user = users[principalName as string]
         return {
           name: user?.displayName ?? '',
-          userPrincipalName: username + '@ssb.no',
+          userPrincipalName: principalName,
         }
       })
 
@@ -160,7 +161,7 @@ const VariantSelect = {
 
 export const StatisticsDetailedIncludes = {
   shortname: { select: { name: true } },
-  responsiblePersons: { select: { username: true } },
+  responsiblePersons: { select: { principalName: true } },
   related_statistic: { select: { language: true, name: true, name_en: true, shortname: { select: { name: true } } } },
   statistic_region_levels: {
     select: { region_level: { select: { name: true, code: true } } },
@@ -226,11 +227,12 @@ export async function mapStatisticDetails(statistic: StatisticPrismaResult): Pro
     comment: statistic.comment,
     created_at: dateToISOString(statistic.date_created),
     variants: parseStatisticVariants(statistic.variants),
-    contacts: statistic.responsiblePersons.map(({ username }) => {
-      const user = users[username ? username + '@ssb.no' : '']
+    //@ts-expect-error: Will be fixed later
+    contacts: statistic.responsiblePersons.map(({ principalName }) => {
+      const user = users[principalName as string]
       return {
         name: user?.displayName ?? '',
-        userPrincipalName: username + '@ssb.no',
+        userPrincipalName: principalName,
       }
     }),
     statistic_region_levels: statistic.statistic_region_levels?.map(({ region_level }) => {
