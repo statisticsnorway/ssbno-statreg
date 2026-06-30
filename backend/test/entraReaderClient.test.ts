@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { vi, describe, test, expect, beforeEach, afterEach, assert } from 'vitest'
+import { vi, describe, test, expect, beforeEach, afterEach } from 'vitest'
 import {
-  fetchUserByEmail,
+  fetchAllUsers,
   getAccessToken,
   setCachedToken,
   setTokenExpiresAt,
@@ -27,6 +27,14 @@ function mockGraphSuccess(data: object) {
     ok: true,
     status: 200,
     json: async () => data,
+  })
+}
+
+function mockGraphFailure(status: number, message: string) {
+  return Promise.resolve({
+    ok: false,
+    status,
+    text: async () => message,
   })
 }
 
@@ -107,112 +115,126 @@ describe('entraReaderClient ', () => {
     })
   })
 
-  describe('fetchUserByEmail ', async () => {
-    test('returns null if email is missing', async () => {
-      fetchMock.mockReturnValueOnce(null as any)
-      const user = await fetchUserByEmail('', 'token')
-      expect(fetchMock).toHaveBeenCalledTimes(0)
-      expect(user).toBeNull()
-    })
-
+  describe('fetchAllUsers ', async () => {
     test('throws error if missing token', async () => {
       expect(fetchMock).toHaveBeenCalledTimes(0)
-      await expect(() => fetchUserByEmail(TEST_EMAIL, '')).rejects.toMatchObject({
+      await expect(() => fetchAllUsers('')).rejects.toMatchObject({
         message: 'Missing token',
       })
     })
 
-    test('returns user from email', async () => {
+    test('returns all users from a single Graph response', async () => {
       fetchMock.mockReturnValueOnce(
         mockGraphSuccess({
+          value: [
+            {
+              displayName: 'Admin SSB',
+              businessPhones: ['123'],
+              mail: TEST_EMAIL,
+              userPrincipalName: 'admin@ssb.no',
+            },
+            {
+              displayName: 'Infotjenesten',
+              businessPhones: [],
+              mail: null,
+              userPrincipalName: 'infotjenesten@ssb.no',
+            },
+          ],
+        }) as any
+      )
+
+      const users = await fetchAllUsers('token')
+
+      expect(fetchMock).toHaveBeenCalledExactlyOnceWith(
+        expect.stringContaining(entraUsersResult.firstPageUrl),
+        expect.anything()
+      )
+      expect(users).toStrictEqual([
+        {
           displayName: 'Admin SSB',
-          businessPhones: ['123'],
           mail: TEST_EMAIL,
-          userPrincipalName: '',
-        }) as any
-      )
-      const user = await fetchUserByEmail(TEST_EMAIL, 'token')
-      expect(fetchMock).toHaveBeenCalledExactlyOnceWith(
-        expect.stringContaining(
-          `/${encodeURIComponent(TEST_EMAIL)}?$select=displayName,businessPhones,mail,userPrincipalName`
-        ),
+          userPrincipalName: 'admin@ssb.no',
+          businessPhones: ['123'],
+        },
+        {
+          displayName: 'Infotjenesten',
+          mail: null,
+          userPrincipalName: 'infotjenesten@ssb.no',
+          businessPhones: [],
+        },
+      ])
+    })
+
+    test('follows @odata.nextLink and merges paged Graph responses', async () => {
+      fetchMock
+        .mockReturnValueOnce(
+          mockGraphSuccess({
+            value: [
+              {
+                displayName: 'Admin SSB',
+                businessPhones: ['123'],
+                mail: null,
+                userPrincipalName: TEST_EMAIL,
+              },
+            ],
+            '@odata.nextLink': entraUsersResult.nextPageUrl,
+          }) as any
+        )
+        .mockReturnValueOnce(
+          mockGraphSuccess({
+            value: [
+              {
+                displayName: 'Infotjenesten',
+                businessPhones: ['11223344'],
+                mail: 'infotjenesten@ssb.no',
+                userPrincipalName: 'infotjenesten@ssb.no',
+              },
+            ],
+          }) as any
+        )
+
+      const users = await fetchAllUsers('token')
+
+      expect(fetchMock).toHaveBeenNthCalledWith(
+        1,
+        expect.stringContaining(entraUsersResult.firstPageUrl),
         expect.anything()
       )
-      expect(user).toStrictEqual(entraUserResult.user)
-    })
-
-    test('returns rejected Promise when Graph returns 404', async () => {
-      fetchMock.mockReturnValueOnce(mockFetchError(404, 'user not found'))
-      await expect(() => fetchUserByEmail('NonExistingUser', 'token')).rejects.toMatchObject({
-        status: 404,
-        text: 'user not found',
-      })
-      expect(fetchMock).toHaveBeenCalledExactlyOnceWith(
-        expect.stringContaining(
-          `/${encodeURIComponent('NonExistingUser')}?$select=displayName,businessPhones,mail,userPrincipalName`
-        ),
-        expect.anything()
-      )
-    })
-
-    test('throws error if fetch from api fails', async () => {
-      fetchMock.mockReturnValueOnce(mockFetchError(500, 'api error'))
-      await expect(() => fetchUserByEmail('admin', 'token')).rejects.toMatchObject({
-        status: 500,
-        text: 'api error',
-      })
-    })
-
-    test('returns correct user format if only displayname returned', async () => {
-      fetchMock.mockReturnValueOnce(
-        mockGraphSuccess({
+      expect(fetchMock).toHaveBeenNthCalledWith(2, entraUsersResult.nextPageUrl, expect.anything())
+      expect(users).toStrictEqual([
+        {
           displayName: 'Admin SSB',
-        }) as any
-      )
-      const user = await fetchUserByEmail(TEST_EMAIL, 'token')
-      expect(fetchMock).toHaveBeenCalledExactlyOnceWith(
-        expect.stringContaining(
-          `/${encodeURIComponent(TEST_EMAIL)}?$select=displayName,businessPhones,mail,userPrincipalName`
-        ),
-        expect.anything()
-      )
-      assert.deepEqual(user, {
-        displayName: 'Admin SSB',
-        email: null,
-        businessPhone: null,
-      })
+          mail: null,
+          userPrincipalName: TEST_EMAIL,
+          businessPhones: ['123'],
+        },
+        {
+          displayName: 'Infotjenesten',
+          mail: 'infotjenesten@ssb.no',
+          userPrincipalName: 'infotjenesten@ssb.no',
+          businessPhones: ['11223344'],
+        },
+      ])
     })
 
-    test('returns user email from userPrincipalName if email missing', async () => {
-      fetchMock.mockReturnValueOnce(
-        mockGraphSuccess({
-          displayName: 'Admin SSB',
-          userPrincipalName: 'admin.ssb@ssb.no',
-        }) as any
-      )
-      const user = await fetchUserByEmail(TEST_EMAIL, 'token')
+    test('throws error if Graph users request fails', async () => {
+      fetchMock.mockReturnValueOnce(mockGraphFailure(500, 'api error') as any)
+
+      await expect(() => fetchAllUsers('token')).rejects.toMatchObject({
+        message: 'Graph users request failed: 500 api error',
+      })
+
       expect(fetchMock).toHaveBeenCalledExactlyOnceWith(
-        expect.stringContaining(
-          `/${encodeURIComponent(TEST_EMAIL)}?$select=displayName,businessPhones,mail,userPrincipalName`
-        ),
+        expect.stringContaining(entraUsersResult.firstPageUrl),
         expect.anything()
       )
-      expect(user).toStrictEqual({
-        displayName: 'Admin SSB',
-        email: 'admin.ssb@ssb.no',
-        businessPhone: null,
-      })
     })
   })
 })
 
 ////////////// MOCK DATA ////////////////////////////////
 
-const entraUserResult = {
-  initials: 'admin',
-  user: {
-    displayName: 'Admin SSB',
-    email: TEST_EMAIL,
-    businessPhone: '123',
-  },
+const entraUsersResult = {
+  firstPageUrl: '/users?$select=displayName,businessPhones,mail,userPrincipalName&$top=999',
+  nextPageUrl: '/users?$skiptoken=next-page-token',
 }

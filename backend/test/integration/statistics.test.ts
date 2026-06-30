@@ -10,19 +10,16 @@ import {
   type StatisticWithShortname,
 } from './integrationUtils'
 
-vi.mock(import('@/services/entraUserService'), () => ({
-  fetchUsers: vi.fn((users: Array<{ username: string | null; email: string | null }>) =>
-    Promise.resolve(
-      users.map(() => ({
-        lookupEmail: 'bob@ssb.no',
-        user: {
-          displayName: 'Bob',
-          username: 'bob',
-          email: 'bob@ssb.no',
-          businessPhone: '11223344',
-        },
-      }))
-    )
+vi.mock(import('@/lib/cache'), () => ({
+  getAllUsersFromCache: vi.fn(() =>
+    Promise.resolve({
+      'bcd@ssb.no': {
+        displayName: 'Bob',
+        userPrincipalName: 'bcd@ssb.no',
+        mail: 'bob@ssb.no',
+        businessPhones: ['11223344'],
+      },
+    })
   ),
 }))
 

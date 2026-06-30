@@ -9,10 +9,9 @@ import {
 import { dateToISOString, sanitize, parseDateOnly, ensureRequiredFieldsExists, isNumber, parseId } from '@/lib/utils'
 import type { Prisma } from '@/generated/prisma/client'
 import { getDivisionFromCode } from '@/services/klassService'
-import { fetchUsers } from '@/services/entraUserService'
-import type { UserLookupItem, Users } from '@/types/entra'
 import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
 import { statisticsAsserts } from '@/lib/asserts'
+import { getAllUsersFromCache } from '@/lib/cache'
 
 export type StatisticPrisma = Pick<PrismaClient, 'statistic' | 'shortname'>
 
@@ -115,12 +114,21 @@ export async function getStatistics(
     },
   })
   const total = await prisma.statistic.count({ where })
+  const users = await getAllUsersFromCache()
 
   return {
     total,
     statistics: statistics.map((statistic) => {
       const main_language = statistic.language
       const divisionCode = statistic.division_code ?? ''
+      const contacts = statistic.responsiblePersons.map(({ username }) => {
+        const user = users[username ? username + '@ssb.no' : '']
+        return {
+          name: user?.displayName ?? '',
+          userPrincipalName: username + '@ssb.no',
+        }
+      })
+
       return {
         shortname: statistic.shortname.name,
         main_language,
@@ -133,11 +141,7 @@ export async function getStatistics(
         },
         name: statistic.name,
         name_en: statistic.name_en ?? '',
-        contacts: statistic.responsiblePersons.map((person) => ({
-          username: person.username ?? '',
-          name: 'Navn Navnesen',
-          // TODO fetch name from cache when MIM-2729 is done
-        })),
+        contacts,
       }
     }),
   }
@@ -156,7 +160,7 @@ const VariantSelect = {
 
 export const StatisticsDetailedIncludes = {
   shortname: { select: { name: true } },
-  responsiblePersons: { select: { email: true, username: true } },
+  responsiblePersons: { select: { username: true } },
   related_statistic: { select: { language: true, name: true, name_en: true, shortname: { select: { name: true } } } },
   statistic_region_levels: {
     select: { region_level: { select: { name: true, code: true } } },
@@ -198,6 +202,7 @@ export async function mapStatisticDetails(statistic: StatisticPrismaResult): Pro
         name_en: statistic.related_statistic?.name_en ?? '',
       }
     : {}
+  const users = await getAllUsersFromCache()
 
   return {
     version: statistic.version,
@@ -221,19 +226,13 @@ export async function mapStatisticDetails(statistic: StatisticPrismaResult): Pro
     comment: statistic.comment,
     created_at: dateToISOString(statistic.date_created),
     variants: parseStatisticVariants(statistic.variants),
-    contacts: await fetchUsers(statistic.responsiblePersons).then((users) =>
-      users?.map((user) => {
-        const lookupUser = (user as UserLookupItem).user
-        const responsiblePerson = user as Users
-
-        // TODO bug: when fetchUsers "succeeds", username is always undefined
-        return {
-          name: lookupUser?.displayName,
-          email: lookupUser?.email ?? (user as UserLookupItem).lookupEmail ?? responsiblePerson.email,
-          username: responsiblePerson.username as string | undefined,
-        }
-      })
-    ),
+    contacts: statistic.responsiblePersons.map(({ username }) => {
+      const user = users[username ? username + '@ssb.no' : '']
+      return {
+        name: user?.displayName ?? '',
+        userPrincipalName: username + '@ssb.no',
+      }
+    }),
     statistic_region_levels: statistic.statistic_region_levels?.map(({ region_level }) => {
       return { name: region_level.name, code: region_level.code ?? '' }
     }),

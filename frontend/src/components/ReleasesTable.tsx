@@ -3,7 +3,7 @@ import { Table } from '@digdir/designsystemet-react'
 
 import { type ReleaseListing } from '@ssbno-statreg/shared'
 import { ApprovalStatusBadge } from '../components/ApprovalStatus'
-import { formatPublishTime, formatDate } from '../lib/utils'
+import { formatPublishTime, formatDate, toggleSort, getSortDirection } from '../lib/utils'
 import { Pagination, type PaginationProps } from './Pagination'
 import '../views/ListReleases.css'
 import { Link } from 'react-router'
@@ -20,8 +20,8 @@ type ReleaseRowProps = {
 
 type ReleaseTableProps = {
   releases: ReleaseListing[]
-  sortBy?: string[]
-  setSortBy?: Dispatch<SetStateAction<string[]>>
+  sortBy?: string
+  setSortBy?: Dispatch<SetStateAction<string>>
   openInNewTab?: boolean
 }
 
@@ -74,38 +74,6 @@ function ReleaseRow({ release, openInNewTab }: Readonly<ReleaseRowProps>) {
 }
 
 export function ReleasesTable({ releases, sortBy, setSortBy, openInNewTab }: Readonly<ReleaseTableProps>) {
-  function toggleSort(field: string) {
-    const existingIndex = sortBy?.findIndex((s) => s.replace('-', '') === field) ?? -1
-    const newSort = [...(sortBy ?? [])]
-
-    // Example sortBy cycle = ['approval_status'] -> ['approval_status', 'publish_time'] -> ['approval_status', '-publish_time'] -> ['approval_status']
-    if (existingIndex === -1) {
-      // case 1: if field was not sorted by already, add to the end:
-      newSort.push(field)
-    } else {
-      const isDescending = newSort[existingIndex].startsWith('-')
-
-      if (isDescending) {
-        // case 2: if field was sorted in descending order, change to ascending
-        newSort.splice(existingIndex, 1)
-      } else {
-        // case 3: if field was sorted in ascending order, change to descending
-        newSort[existingIndex] = `-${field}`
-      }
-    }
-
-    setSortBy?.(newSort?.length ? newSort : [])
-  }
-
-  function getSortDirection(field: string) {
-    if (sortBy?.length === 0) return 'none'
-
-    const entry = sortBy?.find((s) => s.replace('-', '') === field)
-
-    if (!entry) return undefined
-    return entry.startsWith('-') ? 'descending' : 'ascending'
-  }
-
   return (
     <Table>
       <Table.Head>
@@ -113,8 +81,8 @@ export function ReleasesTable({ releases, sortBy, setSortBy, openInNewTab }: Rea
           {TABLE_HEADER_CELLS.map(({ label, field, sortable }) => (
             <Table.HeaderCell
               key={label}
-              onClick={sortable ? () => toggleSort(field) : undefined}
-              sort={sortable ? getSortDirection(field) : undefined}
+              onClick={sortable && setSortBy ? () => setSortBy(toggleSort(field, sortBy || '')) : undefined}
+              sort={sortable ? getSortDirection(field, sortBy || '') : undefined}
             >
               {label}
             </Table.HeaderCell>

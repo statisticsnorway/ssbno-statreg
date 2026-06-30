@@ -9,6 +9,8 @@ import {
   formatVariant,
   formatContacts,
   getPublishTimeFilterForDate,
+  toggleSort,
+  getSortDirection,
 } from '../src/lib/utils'
 
 const timeZone = 'Europe/Oslo'
@@ -178,8 +180,8 @@ describe('utils', () => {
   describe('formatContact', () => {
     test('returns initials', () => {
       const contacts = [
-        { username: 'abc', name: 'Ola Nordmann' },
-        { username: 'xyz', name: 'Kari Nordmann' },
+        { userPrincipalName: 'abc@ssb.no', name: 'Ola Nordmann' },
+        { userPrincipalName: 'xyz@ssb.no', name: 'Kari Nordmann' },
       ]
       expect(formatContacts(contacts)).toStrictEqual(['Ola Nordmann (abc)', 'Kari Nordmann (xyz)'])
     })
@@ -228,5 +230,33 @@ describe('utils', () => {
 
       expect(input.getTime()).toBe(originalTime)
     })
+  })
+
+  test('toggle sorting', () => {
+    const changedDirection = toggleSort('shortname', 'shortname')
+    expect(changedDirection).toBe('-shortname')
+  })
+
+  test('reverse toggle sorting', () => {
+    const fromReverse = toggleSort('shortname', '-shortname')
+    expect(fromReverse).toBe('')
+  })
+
+  test('new sort field', () => {
+    const differentSort = toggleSort('user', '-shortname')
+    expect(differentSort).toBe('user')
+  })
+
+  test('test changing direction', () => {
+    const changedDirection = getSortDirection('shortname', '-shortname')
+    expect(changedDirection).toBe('descending')
+  })
+  test('test reverse changing direction', () => {
+    const changedDirection = getSortDirection('-shortname', 'shortname')
+    expect(changedDirection).toBe('none')
+  })
+  test('test same changing direction', () => {
+    const changedDirection = getSortDirection('shortname', 'shortname')
+    expect(changedDirection).toBe('ascending')
   })
 })

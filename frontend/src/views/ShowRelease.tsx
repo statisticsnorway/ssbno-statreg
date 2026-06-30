@@ -6,9 +6,11 @@ import { ApprovalStatusTag } from '../components/ApprovalStatus'
 import client from '../api'
 import { type ReleaseDetails } from '@ssbno-statreg/shared'
 import { formatPublishTime, formatDate, formatVariant } from '../lib/utils'
+import { ErrorAlert } from '../components/ErrorAlert'
 
 function ShowRelease() {
   const [release, setRelease] = useState<ReleaseDetails>({})
+  const [apiError, setApiError] = useState<string[]>([])
   const { id } = useParams()
 
   useEffect(() => {
@@ -18,7 +20,7 @@ function ShowRelease() {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const errorMessage = (error as any).error
         console.log(errorMessage)
-        alert(errorMessage)
+        setApiError((prev) => [...prev, errorMessage])
       } else {
         setRelease(data)
       }
@@ -34,6 +36,7 @@ function ShowRelease() {
 
   return (
     <>
+      {apiError.length > 0 && <ErrorAlert message={apiError} />}
       <div>
         <Heading data-size='md' level={1}>
           Publiseringsdato

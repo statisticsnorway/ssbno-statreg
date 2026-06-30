@@ -15,6 +15,7 @@ import { Link as ReactRouterLink, useSearchParams } from 'react-router'
 import { PlusCircleIcon } from '@navikt/aksel-icons'
 import { useAuth } from '../context/AuthContext'
 import { RowCountSelect } from '../components/RowCountSelect'
+import { ErrorAlert } from '../components/ErrorAlert'
 
 export default function ListStatistics() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -27,6 +28,7 @@ export default function ListStatistics() {
   const [statistics, setStatistics] = useState<StatisticListing[]>([])
   const [shortnames, setShortnames] = useState<ShortnameListing[]>([])
   const [contacts, setContacts] = useState<Contact[]>([])
+  const [apiError, setApiError] = useState<string[]>([])
   const { auth } = useAuth()
 
   const selectedFilter = shortnameQuery
@@ -68,7 +70,7 @@ export default function ListStatistics() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const errorMessage = (error as any).error
       console.log(errorMessage)
-      alert(errorMessage)
+      setApiError((prev) => [...prev, errorMessage])
     } else {
       setStatistics(data.statistics ?? [])
       setTotal(data.total ?? 0)
@@ -82,7 +84,7 @@ export default function ListStatistics() {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const errorMessage = (error as any).error
         console.log(errorMessage)
-        alert(errorMessage)
+        setApiError((prev) => [...prev, errorMessage])
       } else {
         setShortnames(data ?? [])
       }
@@ -97,7 +99,7 @@ export default function ListStatistics() {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const errorMessage = (error as any).error
         console.log(errorMessage)
-        alert(errorMessage)
+        setApiError((prev) => [...prev, errorMessage])
       } else {
         setContacts(data ?? [])
       }
@@ -145,6 +147,7 @@ export default function ListStatistics() {
 
   return (
     <div className='list-statistics-container'>
+      {apiError.length > 0 && <ErrorAlert message={apiError} />}
       <div className='header-container'>
         <Heading level={1} data-size='sm'>
           Statistikkoversikt
@@ -175,10 +178,15 @@ export default function ListStatistics() {
                 )
               })}
               {contacts.map((contact) => {
-                const value = `contact:${contact.username}`
+                const value = `contact:${contact.userPrincipalName}`
                 return (
-                  <Suggestion.Option className='suggestion-item' key={value} label={contact.username} value={value}>
-                    {contact.name} ({contact.username})<div className='category-label'>Kontakt</div>
+                  <Suggestion.Option
+                    className='suggestion-item'
+                    key={value}
+                    label={contact.userPrincipalName}
+                    value={value}
+                  >
+                    {contact.name} ({contact.userPrincipalName})<div className='category-label'>Kontakt</div>
                   </Suggestion.Option>
                 )
               })}
