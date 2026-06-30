@@ -102,3 +102,98 @@ export function parseSortInput(
     })
     .filter((v) => v !== null)
 }
+
+export function parseHumanReadableMeasuringPeriod(frequencyCode: string, period_from: Date, period_to: Date): string {
+  // TODO: Fiks formattering
+  // TODO: Håndter feil i input, f.eks. at period_from er etter period_to, eller at datoene ikke stemmer med frekvenskode, skal de løses her eller i en egen funksjon som validerer input? (f.eks. at 01.01.2021-31.12.2021 er gyldig for frekvenskode Y)
+  const code = frequencyCode.toUpperCase()
+
+  const isSameDay =
+    period_from.getUTCFullYear() === period_to.getUTCFullYear() &&
+    period_from.getUTCMonth() === period_to.getUTCMonth() &&
+    period_from.getUTCDate() === period_to.getUTCDate()
+
+  const formatMonthYear = (date: Date): string => {
+    const monthYear = new Intl.DateTimeFormat('nb-NO', {
+      month: 'long',
+      year: 'numeric',
+      timeZone: 'UTC',
+    }).format(date)
+    return monthYear.charAt(0).toUpperCase() + monthYear.slice(1)
+  }
+
+  const formatDayMonthYear = (date: Date): string => {
+    return new Intl.DateTimeFormat('nb-NO', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      timeZone: 'UTC',
+    }).format(date)
+  }
+
+  const getIsoWeek = (date: Date): number => {
+    const utcDate = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()))
+    const day = utcDate.getUTCDay() || 7
+    utcDate.setUTCDate(utcDate.getUTCDate() + 4 - day)
+    const yearStart = new Date(Date.UTC(utcDate.getUTCFullYear(), 0, 1))
+    return Math.ceil(((utcDate.getTime() - yearStart.getTime()) / 86400000 + 1) / 7)
+  }
+
+  if (code === 'W' || code === 'U') {
+    return `Uke ${getIsoWeek(period_to)} ${period_to.getUTCFullYear()}`
+  }
+
+  if (code === 'M') {
+    if (isSameDay) {
+      return formatDayMonthYear(period_to)
+    }
+    return formatMonthYear(period_to)
+  }
+
+  if (code === 'T') {
+    const term = Math.floor(period_to.getUTCMonth() / 2) + 1
+    return `${term}. termin ${period_to.getUTCFullYear()}`
+  }
+
+  if (code === 'K') {
+    if (isSameDay) {
+      return formatDayMonthYear(period_to)
+    }
+    const quarter = Math.floor(period_to.getUTCMonth() / 3) + 1
+    return `${quarter}. kvartal ${period_to.getUTCFullYear()}`
+  }
+
+  if (code === 'H') {
+    const half = Math.floor(period_to.getUTCMonth() / 6) + 1
+    return `${half}. halvår ${period_to.getUTCFullYear()}`
+  }
+
+  if (code === 'Y' || code === 'A') {
+    if (isSameDay && period_from.getDate() === 1 && period_from.getMonth() === 0) {
+      return `Per ${formatDayMonthYear(period_to)}`
+    }
+    if (isSameDay) {
+      return formatDayMonthYear(period_to)
+    }
+    if (period_from.getUTCFullYear() === period_to.getUTCFullYear()) {
+      return `${period_to.getUTCFullYear()}`
+    }
+
+    return `${period_from.getUTCFullYear()}/${period_to.getUTCFullYear()}`
+  }
+
+  if (
+    code === '2Y' ||
+    code === '3Y' ||
+    code === '4Y' ||
+    code === '5Y' ||
+    code === '2A' ||
+    code === '3A' ||
+    code === '4A' ||
+    code === '5A'
+  ) {
+    return `${period_from.getUTCFullYear()}-${period_to.getUTCFullYear()}`
+  }
+
+  return `${formatDayMonthYear(period_from)}-${formatDayMonthYear(period_to)}`
+}
