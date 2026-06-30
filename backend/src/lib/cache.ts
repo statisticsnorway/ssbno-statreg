@@ -6,7 +6,7 @@ const usersCache = new NodeCache({ stdTTL: 60 * 60 * 24, checkperiod: 60 })
 const ENTRA_USERS_CACHE_KEY = 'entra-users'
 type EntraUsersRecord = Record<string, EntraUser> // key is userPrincipalName
 
-function toUsersRecord(users: EntraUser[]): EntraUsersRecord {
+function indexUsersByPrincipalName(users: EntraUser[]): EntraUsersRecord {
   return users.reduce<EntraUsersRecord>((record, user) => {
     record[user.userPrincipalName] = user
     return record
@@ -16,10 +16,9 @@ function toUsersRecord(users: EntraUser[]): EntraUsersRecord {
 export async function setUsersCache(): Promise<void> {
   // Return mocked users for tests and development where application often restarts and/or is missing Azure Entra access
   if (process.env.MOCK_ENTRA_USERS === 'true') {
-    console.info('setUsersCache: MOCK_ENTRA_USERS is set, using mock user data')
     usersCache.set(
       ENTRA_USERS_CACHE_KEY,
-      toUsersRecord([
+      indexUsersByPrincipalName([
         {
           displayName: 'Admin SSB',
           mail: 'admin.ssb@ssb.no',
@@ -40,7 +39,7 @@ export async function setUsersCache(): Promise<void> {
     }
 
     const users = await entraClient.fetchAllUsers(token)
-    usersCache.set(ENTRA_USERS_CACHE_KEY, toUsersRecord(users))
+    usersCache.set(ENTRA_USERS_CACHE_KEY, indexUsersByPrincipalName(users))
   } catch (error) {
     console.error(`Failed to set users cache: ${error}`)
     return
