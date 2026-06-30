@@ -178,10 +178,15 @@ export default function ListStatistics() {
                 )
               })}
               {contacts.map((contact) => {
-                const value = `contact:${contact.username}`
+                const value = `contact:${contact.userPrincipalName}`
                 return (
-                  <Suggestion.Option className='suggestion-item' key={value} label={contact.username} value={value}>
-                    {contact.name} ({contact.username})<div className='category-label'>Kontakt</div>
+                  <Suggestion.Option
+                    className='suggestion-item'
+                    key={value}
+                    label={contact.userPrincipalName}
+                    value={value}
+                  >
+                    {contact.name} ({contact.userPrincipalName})<div className='category-label'>Kontakt</div>
                   </Suggestion.Option>
                 )
               })}
