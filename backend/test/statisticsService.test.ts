@@ -23,8 +23,8 @@ const { getAllUsersFromCacheMock, fetchDivisionMock } = vi.hoisted(() => ({
       'bcd@ssb.no': {
         displayName: 'Bob',
         userPrincipalName: 'bcd@ssb.no',
-        email: 'bob@ssb.no',
-        businessPhone: '11223344',
+        mail: 'bob@ssb.no',
+        businessPhones: ['11223344'],
       },
     }
   }),
@@ -552,8 +552,8 @@ describe('statisticService', () => {
         'bcd@ssb.no': {
           displayName: 'Bob',
           userPrincipalName: 'bcd@ssb.no',
-          email: 'bob@ssb.no',
-          businessPhone: '11223344',
+          mail: 'bob@ssb.no',
+          businessPhones: ['11223344'],
         },
       }
       getAllUsersFromCacheMock.mockImplementation(async () => {

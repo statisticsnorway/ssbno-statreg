@@ -4,23 +4,16 @@ export type TokenResponse = {
   expires_in: number
 }
 
-type GraphUserResponse = {
-  displayName: string
-  businessPhones: string | null
-  mail: string | null
-  userPrincipalName: string
-}
-
 export type GraphUsersResponse = {
-  value: GraphUserResponse[]
+  value: EntraUser[]
   '@odata.nextLink'?: string
 }
 
 export type EntraUser = {
   displayName: string
-  email: string  | null
+  mail: string  | null
   userPrincipalName: string
-  businessPhone: string | null
+  businessPhones: string[] | null
 }
 
 export type Users = { 

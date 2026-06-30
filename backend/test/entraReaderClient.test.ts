@@ -152,15 +152,15 @@ describe('entraReaderClient ', () => {
       expect(users).toStrictEqual([
         {
           displayName: 'Admin SSB',
-          email: TEST_EMAIL,
+          mail: TEST_EMAIL,
           userPrincipalName: 'admin@ssb.no',
-          businessPhone: '123',
+          businessPhones: ['123'],
         },
         {
           displayName: 'Infotjenesten',
-          email: null,
+          mail: null,
           userPrincipalName: 'infotjenesten@ssb.no',
-          businessPhone: null,
+          businessPhones: [],
         },
       ])
     })
@@ -204,15 +204,15 @@ describe('entraReaderClient ', () => {
       expect(users).toStrictEqual([
         {
           displayName: 'Admin SSB',
-          email: null,
+          mail: null,
           userPrincipalName: TEST_EMAIL,
-          businessPhone: '123',
+          businessPhones: ['123'],
         },
         {
           displayName: 'Infotjenesten',
-          email: 'infotjenesten@ssb.no',
+          mail: 'infotjenesten@ssb.no',
           userPrincipalName: 'infotjenesten@ssb.no',
-          businessPhone: '11223344',
+          businessPhones: ['11223344'],
         },
       ])
     })

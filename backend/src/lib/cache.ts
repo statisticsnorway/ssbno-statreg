@@ -22,9 +22,9 @@ export async function setUsersCache(): Promise<void> {
       toUsersRecord([
         {
           displayName: 'Admin SSB',
-          email: 'admin.ssb@ssb.no',
+          mail: 'admin.ssb@ssb.no',
           userPrincipalName: 'admin@ssb.no',
-          businessPhone: null,
+          businessPhones: null,
         },
       ])
     )

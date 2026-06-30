@@ -98,12 +98,7 @@ export async function fetchAllUsers(token: string): Promise<EntraUser[]> {
     const body = (await response.json()) as GraphUsersResponse
 
     for (const user of body.value) {
-      users.push({
-        displayName: user.displayName,
-        email: user.mail,
-        userPrincipalName: user.userPrincipalName,
-        businessPhone: user.businessPhones?.[0] ?? null,
-      })
+      users.push(user)
     }
 
     // Microsoft Graph may return a paged result even when requesting $top=999 in the url query.

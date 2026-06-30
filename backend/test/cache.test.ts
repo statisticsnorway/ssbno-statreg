@@ -5,39 +5,39 @@ import { setUsersCache, getAllUsersFromCache, clearUsersCache } from '@/lib/cach
 const mockUsers = [
   {
     displayName: 'Ola Nordmann',
-    email: 'ola.nordmann@ssb.no',
+    mail: 'ola.nordmann@ssb.no',
     userPrincipalName: 'ola@ssb.no',
-    businessPhone: null,
+    businessPhones: null,
   },
   {
     displayName: 'Infotjenesten',
-    email: null,
+    mail: null,
     userPrincipalName: 'infotjenesten@ssb.no',
-    businessPhone: '11223344',
+    businessPhones: ['11223344'],
   },
 ]
 
 const expectedCachedUsers = {
   'ola@ssb.no': {
     displayName: 'Ola Nordmann',
-    email: 'ola.nordmann@ssb.no',
+    mail: 'ola.nordmann@ssb.no',
     userPrincipalName: 'ola@ssb.no',
-    businessPhone: null,
+    businessPhones: null,
   },
   'infotjenesten@ssb.no': {
     displayName: 'Infotjenesten',
-    email: null,
+    mail: null,
     userPrincipalName: 'infotjenesten@ssb.no',
-    businessPhone: '11223344',
+    businessPhones: ['11223344'],
   },
 }
 
 const mockedEntraUsers = {
   'admin@ssb.no': {
     displayName: 'Admin SSB',
-    email: 'admin.ssb@ssb.no',
+    mail: 'admin.ssb@ssb.no',
     userPrincipalName: 'admin@ssb.no',
-    businessPhone: null,
+    businessPhones: null,
   },
 }
 

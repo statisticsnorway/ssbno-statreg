@@ -16,8 +16,8 @@ vi.mock(import('@/lib/cache'), () => ({
       'bcd@ssb.no': {
         displayName: 'Bob',
         userPrincipalName: 'bcd@ssb.no',
-        email: 'bob@ssb.no',
-        businessPhone: '11223344',
+        mail: 'bob@ssb.no',
+        businessPhones: ['11223344'],
       },
     })
   ),
