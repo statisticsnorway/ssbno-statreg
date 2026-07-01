@@ -111,9 +111,10 @@ export function parseHumanReadableMeasuringPeriod(frequencyCode: string, period_
     utcDate.setUTCDate(utcDate.getUTCDate() + 4 - day)
     const year = utcDate.getUTCFullYear()
     const yearStart = new Date(Date.UTC(year, 0, 1))
+    const msPerDay = 24 * 60 * 60 * 1000
 
     return {
-      week: Math.ceil(((utcDate.getTime() - yearStart.getTime()) / 86400000 + 1) / 7),
+      week: Math.ceil(((utcDate.getTime() - yearStart.getTime()) / msPerDay + 1) / 7),
       year,
     }
   }
