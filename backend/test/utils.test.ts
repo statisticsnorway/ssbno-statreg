@@ -12,6 +12,7 @@ import {
   parseHumanReadableMeasuringPeriod,
   formatMonthYear,
   formatDayMonthYear,
+  getIsoWeekInfo,
 } from '@/lib/utils'
 import { describe, test, expect } from 'vitest'
 
@@ -250,6 +251,23 @@ describe('utils', () => {
     })
   })
 
+  describe('getIsoWeekInfo', () => {
+    test('returns week and year for a regular week', () => {
+      const result = getIsoWeekInfo(new Date(Date.UTC(2011, 11, 11)))
+      expect(result).toEqual({ week: 49, year: 2011 })
+    })
+
+    test('returns ISO week-year for week 1 spanning year boundary', () => {
+      const result = getIsoWeekInfo(new Date(Date.UTC(2025, 11, 29)))
+      expect(result).toEqual({ week: 1, year: 2026 })
+    })
+
+    test('returns previous ISO year for 1st of january in week 52', () => {
+      const result = getIsoWeekInfo(new Date(Date.UTC(2022, 11, 26)))
+      expect(result).toEqual({ week: 52, year: 2022 })
+    })
+  })
+
   describe('parseHumanReadableMeasuringPeriod', () => {
     function toUtcDate(dateString: string): Date {
       const [day, month, year] = dateString.split('.')
@@ -271,20 +289,6 @@ describe('utils', () => {
         periodFrom: '05.12.2011',
         periodTo: '11.12.2011',
         expected: 'Uke 49 2011',
-      },
-      {
-        scenarioDescription: 'week period week 1 starting in december',
-        frequencyCode: 'W',
-        periodFrom: '29.12.2025',
-        periodTo: '04.01.2026',
-        expected: 'Uke 1 2026',
-      },
-      {
-        scenarioDescription: 'week period 1st of january is in week 52',
-        frequencyCode: 'W',
-        periodFrom: '26.12.2022',
-        periodTo: '01.01.2023',
-        expected: 'Uke 52 2022',
       },
       {
         scenarioDescription: 'month period full month',

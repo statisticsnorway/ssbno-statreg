@@ -97,6 +97,23 @@ export const formatDayMonthYear = (date: Date): string => {
   }).format(date)
 }
 
+export const getIsoWeekInfo = (date: Date): { week: number; year: number } => {
+  const utcDate = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()))
+  const day = utcDate.getUTCDay() || 7
+
+  // Shift to Thursday so the ISO week-year can be determined. Each week's year is the Gregorian year in which the Thursday falls.
+  utcDate.setUTCDate(utcDate.getUTCDate() + 4 - day)
+
+  const year = utcDate.getUTCFullYear()
+  const yearStart = new Date(Date.UTC(year, 0, 1))
+  const msPerDay = 24 * 60 * 60 * 1000
+
+  return {
+    week: Math.ceil(((utcDate.getTime() - yearStart.getTime()) / msPerDay + 1) / 7),
+    year,
+  }
+}
+
 export function parseHumanReadableMeasuringPeriod(frequencyCode: string, period_from: Date, period_to: Date): string {
   const code = frequencyCode.toUpperCase()
 
@@ -104,23 +121,6 @@ export function parseHumanReadableMeasuringPeriod(frequencyCode: string, period_
     period_from.getUTCFullYear() === period_to.getUTCFullYear() &&
     period_from.getUTCMonth() === period_to.getUTCMonth() &&
     period_from.getUTCDate() === period_to.getUTCDate()
-
-  const getIsoWeekInfo = (date: Date): { week: number; year: number } => {
-    const utcDate = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()))
-    const day = utcDate.getUTCDay() || 7
-
-    // Shift to Thursday so the ISO week-year can be determined. Each week's year is the Gregorian year in which the Thursday falls.
-    utcDate.setUTCDate(utcDate.getUTCDate() + 4 - day)
-
-    const year = utcDate.getUTCFullYear()
-    const yearStart = new Date(Date.UTC(year, 0, 1))
-    const msPerDay = 24 * 60 * 60 * 1000
-
-    return {
-      week: Math.ceil(((utcDate.getTime() - yearStart.getTime()) / msPerDay + 1) / 7),
-      year,
-    }
-  }
 
   if (code === 'W' || code === 'U') {
     const { week, year } = getIsoWeekInfo(period_to)
