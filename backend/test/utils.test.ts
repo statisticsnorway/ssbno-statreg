@@ -9,6 +9,7 @@ import {
   ensureRequiredFieldsExists,
   isNumber,
   getDateOnlyAsString,
+  validatePeriodWeeks,
   parseHumanReadableMeasuringPeriod,
   formatMonthYear,
   formatDayMonthYear,
@@ -225,6 +226,36 @@ describe('utils', () => {
     test('returns iso date if given local date with offset', () => {
       const dateString = getDateOnlyAsString(new Date('2026-05-05T00:00+01:00'))
       expect(dateString).toBe('2026-05-04')
+    })
+  })
+
+  describe('validatePeriodWeeks', () => {
+    test('returns true for a full ISO week from monday to sunday', () => {
+      const periodFrom = new Date(Date.UTC(2026, 0, 5))
+      const periodTo = new Date(Date.UTC(2026, 0, 11))
+
+      expect(validatePeriodWeeks(periodFrom, periodTo)).toBe(true)
+    })
+
+    test('returns false when period does not start on monday', () => {
+      const periodFrom = new Date(Date.UTC(2026, 0, 6))
+      const periodTo = new Date(Date.UTC(2026, 0, 12))
+
+      expect(validatePeriodWeeks(periodFrom, periodTo)).toBe(false)
+    })
+
+    test('returns false when period does not end on sunday', () => {
+      const periodFrom = new Date(Date.UTC(2026, 0, 5))
+      const periodTo = new Date(Date.UTC(2026, 0, 10))
+
+      expect(validatePeriodWeeks(periodFrom, periodTo)).toBe(false)
+    })
+
+    test('returns false when period end is not exactly six days after period start', () => {
+      const periodFrom = new Date(Date.UTC(2026, 0, 5))
+      const periodTo = new Date(Date.UTC(2026, 0, 18))
+
+      expect(validatePeriodWeeks(periodFrom, periodTo)).toBe(false)
     })
   })
 
