@@ -118,15 +118,15 @@ export async function getStatistics(
 
   return {
     total,
-    //@ts-expect-error: TODO: Will be fixed later
     statistics: statistics.map((statistic) => {
       const main_language = statistic.language
       const divisionCode = statistic.division_code ?? ''
       const contacts = statistic.responsiblePersons.map(({ principalName }) => {
+        // TODO: Remove type casting for principalName once principalName is no longer set as optional in the Prisma schema
         const user = users[principalName as string]
         return {
           name: user?.displayName ?? '',
-          userPrincipalName: principalName,
+          userPrincipalName: principalName as string,
         }
       })
 
@@ -227,12 +227,12 @@ export async function mapStatisticDetails(statistic: StatisticPrismaResult): Pro
     comment: statistic.comment,
     created_at: dateToISOString(statistic.date_created),
     variants: parseStatisticVariants(statistic.variants),
-    //@ts-expect-error: TODO: Will be fixed later
     contacts: statistic.responsiblePersons.map(({ principalName }) => {
+      // TODO: Remove type casting for principalName once principalName is no longer set as optional in the Prisma schema
       const user = users[principalName as string]
       return {
         name: user?.displayName ?? '',
-        userPrincipalName: principalName,
+        userPrincipalName: principalName as string,
       }
     }),
     statistic_region_levels: statistic.statistic_region_levels?.map(({ region_level }) => {
