@@ -97,8 +97,8 @@ export function validatePeriodDaysWithinSameYear(
   else if (period === 'Q') numberOfPeriodsInAYear = 4
   else if (period === 'H') numberOfPeriodsInAYear = 2
   else return false
-  const periodNumber = Math.floor(period_to.getUTCMonth() / numberOfPeriodsInAYear) + 1
   const monthsInPeriod = 12 / numberOfPeriodsInAYear
+  const periodNumber = Math.floor(period_to.getUTCMonth() / monthsInPeriod) + 1
   const fromMonth = (periodNumber - 1) * monthsInPeriod
   const toMonth = periodNumber * monthsInPeriod - 1
   const lastDayOfToMonth = new Date(Date.UTC(period_to.getUTCFullYear(), toMonth + 1, 0)).getUTCDate()
@@ -186,13 +186,13 @@ export const getIsoWeekInfo = (date: Date): { week: number; year: number } => {
 
 export function parseHumanReadableMeasuringPeriod(frequencyCode: string, period_from: Date, period_to: Date): string {
   const code = frequencyCode.toUpperCase()
-  const MULTI_YEAR_FREQUENCY_CODES = new Set(['2Y', '3Y', '4Y', '5Y', '2A', '3A', '4A', '5A'])
+  const MULTI_YEAR_FREQUENCY_CODES = new Set(['2Y', '3Y', '4Y', '5Y'])
   const isSameDay =
     period_from.getUTCFullYear() === period_to.getUTCFullYear() &&
     period_from.getUTCMonth() === period_to.getUTCMonth() &&
     period_from.getUTCDate() === period_to.getUTCDate()
 
-  if (code === 'W' || code === 'U') {
+  if ((code === 'W' || code === 'U') && validatePeriodWeeks(period_from, period_to)) {
     const { week, year } = getIsoWeekInfo(period_to)
     return `Uke ${week} ${year}`
   }
@@ -201,10 +201,12 @@ export function parseHumanReadableMeasuringPeriod(frequencyCode: string, period_
     if (isSameDay) {
       return formatDayMonthYear(period_to)
     }
-    return formatMonthYear(period_to)
+    if (validatePeriodDaysWithinSameYear(period_from, period_to, 'M')) {
+      return formatMonthYear(period_to)
+    }
   }
 
-  if (code === 'T') {
+  if (code === 'T' && validatePeriodDaysWithinSameYear(period_from, period_to, 'T')) {
     const term = Math.floor(period_to.getUTCMonth() / 2) + 1
     return `${term}. termin ${period_to.getUTCFullYear()}`
   }
@@ -213,11 +215,13 @@ export function parseHumanReadableMeasuringPeriod(frequencyCode: string, period_
     if (isSameDay) {
       return formatDayMonthYear(period_to)
     }
-    const quarter = Math.floor(period_to.getUTCMonth() / 3) + 1
-    return `${quarter}. kvartal ${period_to.getUTCFullYear()}`
+    if (validatePeriodDaysWithinSameYear(period_from, period_to, 'Q')) {
+      const quarter = Math.floor(period_to.getUTCMonth() / 3) + 1
+      return `${quarter}. kvartal ${period_to.getUTCFullYear()}`
+    }
   }
 
-  if (code === 'H') {
+  if (code === 'H' && validatePeriodDaysWithinSameYear(period_from, period_to, 'H')) {
     const half = Math.floor(period_to.getUTCMonth() / 6) + 1
     return `${half}. halvår ${period_to.getUTCFullYear()}`
   }
@@ -226,7 +230,10 @@ export function parseHumanReadableMeasuringPeriod(frequencyCode: string, period_
     return formatYear(isSameDay, period_from, period_to)
   }
 
-  if (MULTI_YEAR_FREQUENCY_CODES.has(code)) {
+  if (
+    MULTI_YEAR_FREQUENCY_CODES.has(code) &&
+    validatePeriodDaysSpanningSeveralYears(period_from, period_to, code as '2Y' | '3Y' | '4Y' | '5Y')
+  ) {
     return `${period_from.getUTCFullYear()}-${period_to.getUTCFullYear()}`
   }
 
