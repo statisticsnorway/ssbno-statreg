@@ -561,7 +561,7 @@ describe('statisticService', () => {
       })
 
       expectedResult = structuredClone(mockedStatisticDetailedResult)
-      expectedResult.contacts = [{ userPrincipalName: 'bcd@ssb.no', name: 'Bob' }]
+      expectedResult.contacts = [{ principalName: 'bcd@ssb.no', name: 'Bob' }]
     })
 
     test('returns valid statisticDetails when all conditionals succeed', async () => {
@@ -979,7 +979,7 @@ const mockedStatisticsResult = {
       },
       name: 'Energiregnskap og energibalanse',
       name_en: 'Energy account and energy balance',
-      contacts: [{ userPrincipalName: 'abc@ssb.no', name: '' }],
+      contacts: [{ principalName: 'abc@ssb.no', name: '' }],
     },
     {
       shortname: 'befolk',
@@ -991,7 +991,7 @@ const mockedStatisticsResult = {
       },
       name: 'Befolkning og demografi',
       name_en: 'Population and demography',
-      contacts: [{ userPrincipalName: 'bcd@ssb.no', name: 'Bob' }],
+      contacts: [{ principalName: 'bcd@ssb.no', name: 'Bob' }],
     },
   ],
   total: 2,
@@ -1053,7 +1053,7 @@ const mockedStatisticDetailedResult = {
       },
     },
   ],
-  contacts: [{ userPrincipalName: 'bcd@ssb.no', name: 'Bob' }],
+  contacts: [{ principalName: 'bcd@ssb.no', name: 'Bob' }],
   statistic_region_levels: [{ name: 'Bydel og krets', code: 'BD' }],
 }
 

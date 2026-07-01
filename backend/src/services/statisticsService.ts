@@ -126,7 +126,7 @@ export async function getStatistics(
         const user = users[principalName as string]
         return {
           name: user?.displayName ?? '',
-          userPrincipalName: principalName as string,
+          principalName: principalName as string,
         }
       })
 
@@ -232,7 +232,7 @@ export async function mapStatisticDetails(statistic: StatisticPrismaResult): Pro
       const user = users[principalName as string]
       return {
         name: user?.displayName ?? '',
-        userPrincipalName: principalName as string,
+        principalName: principalName as string,
       }
     }),
     statistic_region_levels: statistic.statistic_region_levels?.map(({ region_level }) => {
