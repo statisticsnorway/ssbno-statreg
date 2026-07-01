@@ -65,7 +65,7 @@ export function formatVariant(variant?: Variant): string {
 export function formatContacts(contacts?: Contact[]): string[] {
   if (!contacts) return []
   return contacts.map((contact) => {
-    const username = contact.userPrincipalName?.split('@')[0]
+    const username = contact.principalName?.split('@')[0]
     return [contact.name ?? '', username ? `(${username})` : ''].filter(Boolean).join(' ')
   })
 }

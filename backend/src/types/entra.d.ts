@@ -15,7 +15,3 @@ export type EntraUser = {
   userPrincipalName: string
   businessPhones: string[] | null
 }
-
-export type Users = { 
-  username: string | null
-}
