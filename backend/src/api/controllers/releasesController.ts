@@ -6,7 +6,7 @@ import {
   createRelease,
   updateRelease,
 } from '@/services/releasesService'
-import { skipAuth } from 'plugins/authMiddleware'
+import { skipAuth } from '@/../plugins/authMiddleware'
 import { handleErrors } from '@/lib/prismaErrors'
 import { prisma } from '@/lib/prisma'
 import { ensureString, ensureStringArray } from '@/lib/utils'

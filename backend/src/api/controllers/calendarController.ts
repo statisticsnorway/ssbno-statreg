@@ -6,7 +6,7 @@ import {
   getDateStatusForRange,
 } from '@/services/calendarService'
 import { Router } from 'express'
-import { requireAdminAuthorization, skipAuth } from 'plugins/authMiddleware'
+import { requireAdminAuthorization, skipAuth } from '@/../plugins/authMiddleware'
 
 export default function calendarController(router: Router) {
   router.get('/calendar/blocked-release-days', skipAuth, async (_req, res) => {
