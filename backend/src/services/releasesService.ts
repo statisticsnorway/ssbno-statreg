@@ -85,6 +85,7 @@ export async function getReleases(
         approval_status: release.desk_appoval_status,
         period_to: getDateOnlyAsString(release.period_to),
         period_from: getDateOnlyAsString(release.period_from),
+        measuring_period_title: '',
         statistic: {
           shortname: statistic.shortname.name,
           name: statistic.name,

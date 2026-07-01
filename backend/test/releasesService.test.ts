@@ -680,6 +680,7 @@ const mockedReleasesResult = [
     approval_status: 'APPROVED',
     period_to: '2024-09-01',
     period_from: '2024-08-01',
+    measuring_period_title: '',
     frequency: {
       name: 'Måned',
       code: 'M',
@@ -697,6 +698,7 @@ const mockedReleasesResult = [
     approval_status: 'DRAFT',
     period_to: '2024-12-31',
     period_from: '2024-01-01',
+    measuring_period_title: '',
     frequency: {
       name: 'År',
       code: 'Y',
@@ -714,6 +716,7 @@ const mockedReleasesResult = [
     approval_status: 'FORSLAG',
     period_to: '2026-02-21',
     period_from: '2026-02-15',
+    measuring_period_title: '',
     frequency: {
       name: 'Halvår',
       code: 'H',
