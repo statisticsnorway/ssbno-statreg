@@ -60,7 +60,23 @@ vi.mock(import('../plugins/entraReaderClient'), async (importOriginal) => {
 
 describe('indexUsersByPrincipalName', () => {
   test('indexes users by userPrincipalName', () => {
-    expect(indexUsersByPrincipalName(mockUsers)).toEqual(expectedCachedUsers)
+    expect(
+      indexUsersByPrincipalName([
+        {
+          displayName: 'Ola Nordmann',
+          mail: 'ola.nordmann@ssb.no',
+          userPrincipalName: 'ola@ssb.no',
+          businessPhones: null,
+        },
+      ])
+    ).toEqual({
+      'ola@ssb.no': {
+        displayName: 'Ola Nordmann',
+        mail: 'ola.nordmann@ssb.no',
+        userPrincipalName: 'ola@ssb.no',
+        businessPhones: null,
+      },
+    })
   })
 
   test('returns empty record for empty user list', () => {
