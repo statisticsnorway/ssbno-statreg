@@ -310,6 +310,20 @@ describe('utils', () => {
         expected: 'Uke 49 2011',
       },
       {
+        scenaioDescription: 'week period week 1 starting in december',
+        frequencyCode: 'W',
+        periodFrom: '29.12.2025',
+        periodTo: '04.01.2026',
+        expected: 'Uke 1 2026',
+      },
+      {
+        scenaioDescription: 'week period 1st of january is in week 52',
+        frequencyCode: 'W',
+        periodFrom: '26.12.2022',
+        periodTo: '01.01.2023',
+        expected: 'Uke 52 2022',
+      },
+      {
         scenaioDescription: 'month period full month',
         frequencyCode: 'M',
         periodFrom: '01.12.2011',
