@@ -59,12 +59,12 @@ vi.mock(import('../plugins/entraReaderClient'), async (importOriginal) => {
 })
 
 describe('indexUsersByPrincipalName', () => {
-  test('returns empty record for empty user list', () => {
-    expect(indexUsersByPrincipalName([])).toEqual({})
-  })
-
   test('indexes users by userPrincipalName', () => {
     expect(indexUsersByPrincipalName(mockUsers)).toEqual(expectedCachedUsers)
+  })
+
+  test('returns empty record for empty user list', () => {
+    expect(indexUsersByPrincipalName([])).toEqual({})
   })
 })
 
