@@ -97,6 +97,20 @@ export const formatDayMonthYear = (date: Date): string => {
   }).format(date)
 }
 
+export function formatYear(isSameDay: boolean, period_from: Date, period_to: Date): string {
+  if (isSameDay && period_from.getDate() === 1 && period_from.getMonth() === 0) {
+    return `Per ${formatDayMonthYear(period_to)}`
+  }
+  if (isSameDay) {
+    return formatDayMonthYear(period_to)
+  }
+  if (period_from.getUTCFullYear() === period_to.getUTCFullYear()) {
+    return `${period_to.getUTCFullYear()}`
+  }
+
+  return `${period_from.getUTCFullYear()}/${period_to.getUTCFullYear()}`
+}
+
 export const getIsoWeekInfo = (date: Date): { week: number; year: number } => {
   const utcDate = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()))
   const day = utcDate.getUTCDay() || 7
@@ -116,7 +130,7 @@ export const getIsoWeekInfo = (date: Date): { week: number; year: number } => {
 
 export function parseHumanReadableMeasuringPeriod(frequencyCode: string, period_from: Date, period_to: Date): string {
   const code = frequencyCode.toUpperCase()
-
+  const MULTI_YEAR_FREQUENCY_CODES = new Set(['2Y', '3Y', '4Y', '5Y', '2A', '3A', '4A', '5A'])
   const isSameDay =
     period_from.getUTCFullYear() === period_to.getUTCFullYear() &&
     period_from.getUTCMonth() === period_to.getUTCMonth() &&
@@ -153,29 +167,10 @@ export function parseHumanReadableMeasuringPeriod(frequencyCode: string, period_
   }
 
   if (code === 'Y' || code === 'A') {
-    if (isSameDay && period_from.getDate() === 1 && period_from.getMonth() === 0) {
-      return `Per ${formatDayMonthYear(period_to)}`
-    }
-    if (isSameDay) {
-      return formatDayMonthYear(period_to)
-    }
-    if (period_from.getUTCFullYear() === period_to.getUTCFullYear()) {
-      return `${period_to.getUTCFullYear()}`
-    }
-
-    return `${period_from.getUTCFullYear()}/${period_to.getUTCFullYear()}`
+    return formatYear(isSameDay, period_from, period_to)
   }
 
-  if (
-    code === '2Y' ||
-    code === '3Y' ||
-    code === '4Y' ||
-    code === '5Y' ||
-    code === '2A' ||
-    code === '3A' ||
-    code === '4A' ||
-    code === '5A'
-  ) {
+  if (MULTI_YEAR_FREQUENCY_CODES.has(code)) {
     return `${period_from.getUTCFullYear()}-${period_to.getUTCFullYear()}`
   }
 

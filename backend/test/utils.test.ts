@@ -12,6 +12,7 @@ import {
   parseHumanReadableMeasuringPeriod,
   formatMonthYear,
   formatDayMonthYear,
+  formatYear,
   getIsoWeekInfo,
 } from '@/lib/utils'
 import { describe, test, expect } from 'vitest'
@@ -268,6 +269,36 @@ describe('utils', () => {
     })
   })
 
+  describe('formatYear', () => {
+    test('returns "Per" for yearly counting point on 1st of january', () => {
+      const periodFrom = new Date(Date.UTC(2011, 0, 1))
+      const periodTo = new Date(Date.UTC(2011, 0, 1))
+
+      expect(formatYear(true, periodFrom, periodTo)).toBe('Per 1. januar 2011')
+    })
+
+    test('returns day-month-year for same-day non-january measuring point', () => {
+      const periodFrom = new Date(Date.UTC(2011, 9, 1))
+      const periodTo = new Date(Date.UTC(2011, 9, 1))
+
+      expect(formatYear(true, periodFrom, periodTo)).toBe('1. oktober 2011')
+    })
+
+    test('returns single year when period is from 1st of January to 31st of December', () => {
+      const periodFrom = new Date(Date.UTC(2011, 0, 1))
+      const periodTo = new Date(Date.UTC(2011, 11, 31))
+
+      expect(formatYear(false, periodFrom, periodTo)).toBe('2011')
+    })
+
+    test('returns year range when period spans multiple years', () => {
+      const periodFrom = new Date(Date.UTC(2010, 8, 1))
+      const periodTo = new Date(Date.UTC(2011, 2, 31))
+
+      expect(formatYear(false, periodFrom, periodTo)).toBe('2010/2011')
+    })
+  })
+
   describe('parseHumanReadableMeasuringPeriod', () => {
     function toUtcDate(dateString: string): Date {
       const [day, month, year] = dateString.split('.')
@@ -366,27 +397,6 @@ describe('utils', () => {
         periodFrom: '01.01.2011',
         periodTo: '31.12.2011',
         expected: '2011',
-      },
-      {
-        scenarioDescription: 'ie. school or hunting year over two years',
-        frequencyCode: 'Y',
-        periodFrom: '01.09.2010',
-        periodTo: '31.03.2011',
-        expected: '2010/2011',
-      },
-      {
-        scenarioDescription: 'year counting point',
-        frequencyCode: 'Y',
-        periodFrom: '01.01.2011',
-        periodTo: '01.01.2011',
-        expected: 'Per 1. januar 2011',
-      },
-      {
-        scenarioDescription: 'multi-year period',
-        frequencyCode: 'Y',
-        periodFrom: '01.01.2011',
-        periodTo: '31.12.2014',
-        expected: '2011/2014',
       },
       {
         scenarioDescription: 'every 2nd year',
