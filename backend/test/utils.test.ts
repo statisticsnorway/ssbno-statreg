@@ -9,10 +9,11 @@ import {
   ensureRequiredFieldsExists,
   isNumber,
   getDateOnlyAsString,
-  parseSortInput,
   parseHumanReadableMeasuringPeriod,
   formatMonthYear,
   formatDayMonthYear,
+  formatYear,
+  getIsoWeekInfo,
 } from '@/lib/utils'
 import { describe, test, expect } from 'vitest'
 
@@ -227,68 +228,6 @@ describe('utils', () => {
     })
   })
 
-  describe('parseSortInput', () => {
-    test("return ascending sort when no '-' prefix", () => {
-      const result = parseSortInput(['publish_time'], ['publish_time'])
-      expect(result).toEqual([
-        {
-          publish_time: 'asc',
-        },
-      ])
-    })
-
-    test("return descending sort when '-' prefix is used", () => {
-      const result = parseSortInput(['-publish_time', 'approval_status'], ['approval_status'])
-      expect(result).toEqual([
-        {
-          approval_status: 'asc',
-        },
-      ])
-    })
-
-    test('handle multiple valid fields', () => {
-      const result = parseSortInput(['publish_time', '-approval_status'], ['publish_time', 'approval_status'])
-      expect(result).toEqual([{ publish_time: 'asc' }, { approval_status: 'desc' }])
-    })
-
-    test('ignore fields not in allowedFiel ds', () => {
-      const result = parseSortInput(['publish_time', 'invalid'], ['publish_time'])
-      expect(result).toEqual([{ publish_time: 'asc' }])
-    })
-
-    test('handle mix of valid and invalid with correct order preserved', () => {
-      const result = parseSortInput(
-        ['invalid', '-publish_time', 'approval_status'],
-        ['publish_time', 'approval_status']
-      )
-      expect(result).toEqual([{ publish_time: 'desc' }, { approval_status: 'asc' }])
-    })
-
-    test('handle undefined allowedFields safely', () => {
-      const result = parseSortInput(['publish_time'])
-      expect(result).toEqual([])
-    })
-
-    test('filter out all invalid fields', () => {
-      const result = parseSortInput(['invalid', '-field'], ['publish_time'])
-      expect(result).toEqual([])
-    })
-
-    test('return empty array if sortQuery is undefined', () => {
-      const result = parseSortInput(undefined, ['publish_time'])
-      expect(result).toEqual([])
-    })
-
-    test('return empty array if sortQuery is empty', () => {
-      const result = parseSortInput([], ['publish_time'])
-      expect(result).toEqual([])
-    })
-
-    test('return empty array if allowedFields is empty', () => {
-      const result = parseSortInput(['publish_time'], [])
-      expect(result).toEqual([])
-    })
-  })
   describe('formatMonthYear', () => {
     test('returns capitalized month and year in Norwegian', () => {
       const result = formatMonthYear(new Date(Date.UTC(2026, 0, 15)))
@@ -313,6 +252,53 @@ describe('utils', () => {
     })
   })
 
+  describe('getIsoWeekInfo', () => {
+    test('returns week and year for a regular week', () => {
+      const result = getIsoWeekInfo(new Date(Date.UTC(2011, 11, 11)))
+      expect(result).toEqual({ week: 49, year: 2011 })
+    })
+
+    test('returns ISO week-year for week 1 spanning year boundary', () => {
+      const result = getIsoWeekInfo(new Date(Date.UTC(2025, 11, 29)))
+      expect(result).toEqual({ week: 1, year: 2026 })
+    })
+
+    test('returns previous ISO year for 1st of january in week 52', () => {
+      const result = getIsoWeekInfo(new Date(Date.UTC(2022, 11, 26)))
+      expect(result).toEqual({ week: 52, year: 2022 })
+    })
+  })
+
+  describe('formatYear', () => {
+    test('returns "Per" for yearly counting point on 1st of january', () => {
+      const periodFrom = new Date(Date.UTC(2011, 0, 1))
+      const periodTo = new Date(Date.UTC(2011, 0, 1))
+
+      expect(formatYear(true, periodFrom, periodTo)).toBe('Per 1. januar 2011')
+    })
+
+    test('returns day-month-year for same-day non-january measuring point', () => {
+      const periodFrom = new Date(Date.UTC(2011, 9, 1))
+      const periodTo = new Date(Date.UTC(2011, 9, 1))
+
+      expect(formatYear(true, periodFrom, periodTo)).toBe('1. oktober 2011')
+    })
+
+    test('returns single year when period is from 1st of January to 31st of December', () => {
+      const periodFrom = new Date(Date.UTC(2011, 0, 1))
+      const periodTo = new Date(Date.UTC(2011, 11, 31))
+
+      expect(formatYear(false, periodFrom, periodTo)).toBe('2011')
+    })
+
+    test('returns year range when period spans multiple years', () => {
+      const periodFrom = new Date(Date.UTC(2010, 8, 1))
+      const periodTo = new Date(Date.UTC(2011, 2, 31))
+
+      expect(formatYear(false, periodFrom, periodTo)).toBe('2010/2011')
+    })
+  })
+
   describe('parseHumanReadableMeasuringPeriod', () => {
     function toUtcDate(dateString: string): Date {
       const [day, month, year] = dateString.split('.')
@@ -320,7 +306,7 @@ describe('utils', () => {
     }
 
     type MeasuringPeriodScenario = {
-      scenaioDescription: string
+      scenarioDescription: string
       frequencyCode: string
       periodFrom: string
       periodTo: string
@@ -329,154 +315,119 @@ describe('utils', () => {
 
     const scenarios: MeasuringPeriodScenario[] = [
       {
-        scenaioDescription: 'week period monday to sunday',
+        scenarioDescription: 'week period monday to sunday',
         frequencyCode: 'W',
         periodFrom: '05.12.2011',
         periodTo: '11.12.2011',
         expected: 'Uke 49 2011',
       },
       {
-        scenaioDescription: 'week period week 1 starting in december',
-        frequencyCode: 'W',
-        periodFrom: '29.12.2025',
-        periodTo: '04.01.2026',
-        expected: 'Uke 1 2026',
-      },
-      {
-        scenaioDescription: 'week period 1st of january is in week 52',
-        frequencyCode: 'W',
-        periodFrom: '26.12.2022',
-        periodTo: '01.01.2023',
-        expected: 'Uke 52 2022',
-      },
-      {
-        scenaioDescription: 'month period full month',
+        scenarioDescription: 'month period full month',
         frequencyCode: 'M',
         periodFrom: '01.12.2011',
         periodTo: '31.12.2011',
         expected: 'Desember 2011',
       },
       {
-        scenaioDescription: 'month measuring point',
+        scenarioDescription: 'month measuring point',
         frequencyCode: 'M',
         periodFrom: '15.12.2011',
         periodTo: '15.12.2011',
         expected: '15. desember 2011',
       },
       {
-        scenaioDescription: 'term period over two months',
+        scenarioDescription: 'term period over two months',
         frequencyCode: 'T',
         periodFrom: '01.11.2011',
         periodTo: '31.12.2011',
         expected: '6. termin 2011',
       },
       {
-        scenaioDescription: '1st quarter period',
+        scenarioDescription: '1st quarter period',
         frequencyCode: 'K',
         periodFrom: '01.01.2011',
         periodTo: '31.03.2011',
         expected: '1. kvartal 2011',
       },
       {
-        scenaioDescription: '2nd quarter period',
+        scenarioDescription: '2nd quarter period',
         frequencyCode: 'K',
         periodFrom: '01.04.2011',
         periodTo: '30.06.2011',
         expected: '2. kvartal 2011',
       },
       {
-        scenaioDescription: '3rd quarter period',
+        scenarioDescription: '3rd quarter period',
         frequencyCode: 'K',
         periodFrom: '01.07.2011',
         periodTo: '30.09.2011',
         expected: '3. kvartal 2011',
       },
       {
-        scenaioDescription: '4th quarter period',
+        scenarioDescription: '4th quarter period',
         frequencyCode: 'K',
         periodFrom: '01.10.2011',
         periodTo: '31.12.2011',
         expected: '4. kvartal 2011',
       },
       {
-        scenaioDescription: 'quarter measuring point',
+        scenarioDescription: 'quarter measuring point',
         frequencyCode: 'K',
         periodFrom: '01.04.2011',
         periodTo: '01.04.2011',
         expected: '1. april 2011',
       },
       {
-        scenaioDescription: 'half-year first half',
+        scenarioDescription: 'half-year first half',
         frequencyCode: 'H',
         periodFrom: '01.01.2011',
         periodTo: '30.06.2011',
         expected: '1. halvår 2011',
       },
       {
-        scenaioDescription: 'half-year second half',
+        scenarioDescription: 'half-year second half',
         frequencyCode: 'H',
         periodFrom: '01.07.2011',
         periodTo: '31.12.2011',
         expected: '2. halvår 2011',
       },
       {
-        scenaioDescription: 'calendar year',
+        scenarioDescription: 'calendar year',
         frequencyCode: 'Y',
         periodFrom: '01.01.2011',
         periodTo: '31.12.2011',
         expected: '2011',
       },
       {
-        scenaioDescription: 'ie. school or hunting year over two years',
-        frequencyCode: 'Y',
-        periodFrom: '01.09.2010',
-        periodTo: '31.03.2011',
-        expected: '2010/2011',
-      },
-      {
-        scenaioDescription: 'year counting point',
-        frequencyCode: 'Y',
-        periodFrom: '01.01.2011',
-        periodTo: '01.01.2011',
-        expected: 'Per 1. januar 2011',
-      },
-      {
-        scenaioDescription: 'multi-year period',
-        frequencyCode: 'Y',
-        periodFrom: '01.01.2011',
-        periodTo: '31.12.2014',
-        expected: '2011/2014',
-      },
-      {
-        scenaioDescription: 'every 2nd year',
+        scenarioDescription: 'every 2nd year',
         frequencyCode: '2Y',
         periodFrom: '01.01.2010',
         periodTo: '31.12.2011',
         expected: '2010-2011',
       },
       {
-        scenaioDescription: 'every 3rd year',
+        scenarioDescription: 'every 3rd year',
         frequencyCode: '3Y',
         periodFrom: '01.01.2010',
         periodTo: '31.12.2012',
         expected: '2010-2012',
       },
       {
-        scenaioDescription: 'every 4th year',
+        scenarioDescription: 'every 4th year',
         frequencyCode: '4Y',
         periodFrom: '01.01.2010',
         periodTo: '31.12.2013',
         expected: '2010-2013',
       },
       {
-        scenaioDescription: 'every 5th year',
+        scenarioDescription: 'every 5th year',
         frequencyCode: '5Y',
         periodFrom: '01.01.2010',
         periodTo: '31.12.2014',
         expected: '2010-2014',
       },
       {
-        scenaioDescription: 'year measuring point with month label',
+        scenarioDescription: 'year measuring point with month label',
         frequencyCode: 'Y',
         periodFrom: '01.10.2011',
         periodTo: '01.10.2011',
@@ -485,7 +436,7 @@ describe('utils', () => {
     ]
 
     test.each(scenarios)(
-      'returns correct for: $scenaioDescription',
+      'returns correct for: $scenarioDescription',
       ({ frequencyCode, periodFrom, periodTo, expected }: MeasuringPeriodScenario) => {
         expect(parseHumanReadableMeasuringPeriod(frequencyCode, toUtcDate(periodFrom), toUtcDate(periodTo))).toBe(
           expected

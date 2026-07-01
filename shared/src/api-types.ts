@@ -825,7 +825,7 @@ export interface components {
     }
     Contact: {
       readonly name?: string
-      readonly username?: string
+      readonly principalName?: string
     }
     Frequency: {
       name?: string

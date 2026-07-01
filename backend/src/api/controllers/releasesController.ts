@@ -6,7 +6,7 @@ import {
   createRelease,
   updateRelease,
 } from '@/services/releasesService'
-import { skipAuth } from 'plugins/authMiddleware'
+import { skipAuth } from '@/../plugins/authMiddleware'
 import { handleErrors } from '@/lib/prismaErrors'
 import { prisma } from '@/lib/prisma'
 import { ensureString, ensureStringArray } from '@/lib/utils'
@@ -29,7 +29,7 @@ export default function releasesController(router: Router) {
       const count = req.query?.count ? Number(req.query.count) : undefined
       const publishTimeAfter = req.query?.publish_time_after?.toString()
       const publishTimeBefore = req.query?.publish_time_before?.toString()
-      const sort = req.query?.sort ? ensureStringArray(req.query.sort as string) : undefined
+      const sort = typeof req.query?.sort == 'string' ? req?.query?.sort : undefined
       const filterByShortnames = ensureStringArray(req.query.shortname as string)
 
       const data = await getFilteredReleases(
@@ -59,7 +59,7 @@ export default function releasesController(router: Router) {
 
       const start = req.query?.start ? Number(req.query.start) : undefined
       const count = req.query?.count ? Number(req.query.count) : undefined
-      const sort = req.query?.sort ? ensureStringArray(req.query.sort as string) : undefined
+      const sort = typeof req.query?.sort == 'string' ? req?.query?.sort : undefined
 
       const data = await getVariantReleases({ start, count, shortname, variantId, sort }, prisma)
       res.json(data)

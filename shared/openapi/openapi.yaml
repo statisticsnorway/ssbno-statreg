@@ -112,7 +112,7 @@ components:
       type: object
       properties:
         name: { type: string, readOnly: true }
-        username: { type: string, readOnly: true }
+        principalName: { type: string, readOnly: true }
 
     Frequency:
       type: object
