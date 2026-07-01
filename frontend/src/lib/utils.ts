@@ -65,7 +65,8 @@ export function formatVariant(variant?: Variant): string {
 export function formatContacts(contacts?: Contact[]): string[] {
   if (!contacts) return []
   return contacts.map((contact) => {
-    return [contact.name ?? '', contact.username ? `(${contact.username})` : ''].filter(Boolean).join(' ')
+    const username = contact.principalName?.split('@')[0]
+    return [contact.name ?? '', username ? `(${username})` : ''].filter(Boolean).join(' ')
   })
 }
 
@@ -81,4 +82,28 @@ export function getPublishTimeFilterForDate(selectedDate: Date | undefined) {
     publish_time_after: fromTime.toISOString(),
     publish_time_before: toTime.toISOString(),
   }
+}
+
+export function toggleSort(sortField: string, oldSort: string): string {
+  // We would like to loop through sorting like "" -> "shortname" -> "-shortname" -> ""
+  if (oldSort !== sortField && oldSort !== `-${sortField}`) {
+    // case 1: if field was not sorted by already, sort ascending
+    return sortField
+  } else {
+    const isDescending = oldSort.startsWith('-')
+
+    if (isDescending) {
+      // case 2: if field was sorted in descending order, change to none
+      return ''
+    } else {
+      // case 3: if field was sorted in ascending order, change to descending
+      return `-${sortField}`
+    }
+  }
+}
+
+export function getSortDirection(field: string, oldSort: string) {
+  if (oldSort === field) return 'ascending'
+  if (oldSort === `-${field}`) return 'descending'
+  return 'none'
 }

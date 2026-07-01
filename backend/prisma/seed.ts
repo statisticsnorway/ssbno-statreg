@@ -103,6 +103,7 @@ async function main() {
     create: {
       email: 'alice@ssb.no',
       username: 'abc',
+      principalName: 'abc@ssb.no',
     },
   })
 
@@ -114,6 +115,7 @@ async function main() {
     create: {
       email: 'bob@ssb.no',
       username: 'bcd',
+      principalName: 'bcd@ssb.no',
     },
   })
 
@@ -125,6 +127,7 @@ async function main() {
     create: {
       email: 'carol@ssb.no',
       username: 'cde',
+      principalName: 'cde@ssb.no',
     },
   })
 

@@ -4,32 +4,14 @@ export type TokenResponse = {
   expires_in: number
 }
 
-export type GraphUserResponse = {
-  displayName: string
-  businessPhones?: string[]
-  mail?: string
-  userPrincipalName?: string | undefined // MIM-2778: This field should not be optional
-}
-
 export type GraphUsersResponse = {
-  value: GraphUserResponse[]
+  value: EntraUser[]
   '@odata.nextLink'?: string
 }
 
 export type EntraUser = {
   displayName: string
-  email?: string  | null
-  userPrincipalName?: string | undefined // MIM-2778: This field should not be optional
-  businessPhone: string | null
-}
-
-export type UserLookupItem = {
-  lookupEmail: string
-  user: EntraUser | null
-  error?: string | null
-}
-
-export type Users = { 
-  username: string | null
-  email: string 
+  mail: string  | null
+  userPrincipalName: string
+  businessPhones: string[] | null
 }

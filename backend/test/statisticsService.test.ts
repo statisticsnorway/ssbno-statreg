@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { vi, describe, test, expect, beforeEach } from 'vitest'
 import { ApprovalStatus, StatisticStatus, type StatisticCreate, type StatisticUpdate } from '@ssbno-statreg/shared'
-import { Users } from '@/types/entra'
 import { statisticsAsserts } from '@/lib/asserts'
 import {
   getFilteredStatistics,
@@ -18,20 +17,16 @@ import {
   buildStatisticFilter,
 } from '@/services/statisticsService'
 
-const { fetchUsersMock, fetchDivisionMock } = vi.hoisted(() => ({
-  fetchUsersMock: vi.fn(async (users: Users[]) => {
-    if (!users?.length) return []
-    return [
-      {
-        lookupEmail: 'bob@ssb.no',
-        user: {
-          displayName: 'Bob',
-          username: 'bcd',
-          email: 'bob@ssb.no',
-          businessPhone: '11223344',
-        },
+const { getAllUsersFromCacheMock, fetchDivisionMock } = vi.hoisted(() => ({
+  getAllUsersFromCacheMock: vi.fn(async () => {
+    return {
+      'bcd@ssb.no': {
+        displayName: 'Bob',
+        userPrincipalName: 'bcd@ssb.no',
+        mail: 'bob@ssb.no',
+        businessPhones: ['11223344'],
       },
-    ]
+    }
   }),
   fetchDivisionMock: vi.fn((code: number, language?: string) => {
     if (code === 104 && language === 'en') return { code: 104, name: 'Division A1' }
@@ -40,11 +35,11 @@ const { fetchUsersMock, fetchDivisionMock } = vi.hoisted(() => ({
   }),
 }))
 
-vi.mock(import('@/services/entraUserService'), async (importOriginal) => {
-  const original = await importOriginal<typeof import('@/services/entraUserService')>()
+vi.mock(import('@/lib/cache'), async (importOriginal) => {
+  const original = await importOriginal<typeof import('@/lib/cache')>()
   return {
     ...original,
-    fetchUsers: fetchUsersMock,
+    getAllUsersFromCache: getAllUsersFromCacheMock,
   }
 })
 
@@ -551,26 +546,22 @@ describe('statisticService', () => {
 
     beforeEach(() => {
       input = structuredClone(mockStatisticsDetailedPrismaResult)
-      input.responsiblePersons = [{ username: 'bcd', email: 'bob_fallback@ssb.no' }]
+      input.responsiblePersons = [{ principalName: 'bcd@ssb.no' }]
 
-      fetchUsersResult = [
-        {
-          lookupEmail: 'bob_lookup@ssb.no',
-          user: {
-            displayName: 'Bob',
-            username: 'bcd',
-            email: 'bob@ssb.no',
-            businessPhone: '11223344',
-          },
+      fetchUsersResult = {
+        'bcd@ssb.no': {
+          displayName: 'Bob',
+          userPrincipalName: 'bcd@ssb.no',
+          mail: 'bob@ssb.no',
+          businessPhones: ['11223344'],
         },
-      ]
-      fetchUsersMock.mockImplementation(async () => {
+      }
+      getAllUsersFromCacheMock.mockImplementation(async () => {
         return fetchUsersResult
       })
 
       expectedResult = structuredClone(mockedStatisticDetailedResult)
-      // TODO bug: when fetchUsers "succeeds", username is always undefined
-      expectedResult.contacts = [{ username: undefined, name: 'Bob', email: 'bob@ssb.no' }]
+      expectedResult.contacts = [{ principalName: 'bcd@ssb.no', name: 'Bob' }]
     })
 
     test('returns valid statisticDetails when all conditionals succeed', async () => {
@@ -615,28 +606,9 @@ describe('statisticService', () => {
       expect(result).toStrictEqual(expectedResult)
     })
 
-    test('falls back to lookupEmail when fetched user email is missing', async () => {
-      fetchUsersResult[0].user.email = null
-      expectedResult.contacts[0].email = 'bob_lookup@ssb.no'
-
-      const result = await mapStatisticDetails(input)
-
-      expect(result).toStrictEqual(expectedResult)
-    })
-
-    test('falls back to responsible person data when fetchUsers returns Users[] instead of lookupUsers[]', async () => {
-      input.responsiblePersons = [{ username: 'bcd', email: 'bob_fallback@ssb.no' }]
-      fetchUsersMock.mockImplementationOnce((users: Users[]) => Promise.resolve(users as any))
-      expectedResult.contacts[0] = { name: undefined, email: 'bob_fallback@ssb.no', username: 'bcd' }
-
-      const result = await mapStatisticDetails(input)
-
-      expect(result).toStrictEqual(expectedResult)
-    })
-
     test('falls back to empty contact array when responsible persons is empty', async () => {
       input.responsiblePersons = []
-      fetchUsersResult = []
+      fetchUsersResult = {}
       expectedResult.contacts = []
 
       const result = await mapStatisticDetails(input)
@@ -898,8 +870,7 @@ const mockStatisticsPrismaResult = [
     division_code: 104,
     responsiblePersons: [
       {
-        username: 'abc',
-        email: 'alice@ssb.no',
+        principalName: 'abc@ssb.no',
       },
     ],
   },
@@ -912,8 +883,7 @@ const mockStatisticsPrismaResult = [
     division_code: 105,
     responsiblePersons: [
       {
-        username: 'bcd',
-        email: 'bob@ssb.no',
+        principalName: 'bcd@ssb.no',
       },
     ],
   },
@@ -946,8 +916,7 @@ const mockStatisticsDetailedPrismaResult = {
   },
   responsiblePersons: [
     {
-      username: 'bcd',
-      email: 'bob@ssb.no',
+      principalName: 'bcd@ssb.no',
     },
   ],
   related_statistic: {
@@ -1010,7 +979,7 @@ const mockedStatisticsResult = {
       },
       name: 'Energiregnskap og energibalanse',
       name_en: 'Energy account and energy balance',
-      contacts: [{ username: 'abc', name: 'Navn Navnesen' }],
+      contacts: [{ principalName: 'abc@ssb.no', name: '' }],
     },
     {
       shortname: 'befolk',
@@ -1022,7 +991,7 @@ const mockedStatisticsResult = {
       },
       name: 'Befolkning og demografi',
       name_en: 'Population and demography',
-      contacts: [{ username: 'bcd', name: 'Navn Navnesen' }],
+      contacts: [{ principalName: 'bcd@ssb.no', name: 'Bob' }],
     },
   ],
   total: 2,
@@ -1084,7 +1053,7 @@ const mockedStatisticDetailedResult = {
       },
     },
   ],
-  contacts: [{ username: undefined, name: 'Bob', email: 'bob@ssb.no' }],
+  contacts: [{ principalName: 'bcd@ssb.no', name: 'Bob' }],
   statistic_region_levels: [{ name: 'Bydel og krets', code: 'BD' }],
 }
 

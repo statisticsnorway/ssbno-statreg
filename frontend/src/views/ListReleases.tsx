@@ -21,6 +21,7 @@ import './ListReleases.css'
 import type { ReleaseListing, ShortnameListing } from '@ssbno-statreg/shared'
 import { RowCountSelect } from '../components/RowCountSelect'
 import { useAuth } from '../context/AuthContext'
+import { ErrorAlert } from '../components/ErrorAlert'
 
 function useMediaQuery(mediaQuery: string): boolean {
   const getSnapshot = () => globalThis.matchMedia(mediaQuery).matches
@@ -46,10 +47,12 @@ function ListReleases() {
   const [total, setTotal] = useState(0)
   const [calendarMonth, setCalendarMonth] = useState(0)
   const [shortnames, setShortnames] = useState<ShortnameListing[]>([])
+  const [apiError, setApiError] = useState<string[]>([])
+  const [calendarApiError, setCalendarApiError] = useState<string>('')
 
   const [selectedShortnames, setSelectedShortnames] = useState<SuggestionItem[]>([])
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
-  const [sortBy, setSortBy] = useState<string[]>(['-publish_time'])
+  const [sortBy, setSortBy] = useState<string>('-publish_time')
 
   const { auth } = useAuth()
   const isUltraWideDesktop = useMediaQuery('(min-width: 1920px)')
@@ -59,7 +62,7 @@ function ListReleases() {
       start: number,
       count: number,
       selectedShortnames: SuggestionItem[],
-      sortBy: string[],
+      sortBy: string,
       selectedDate?: Date
     ) {
       const filter = {
@@ -68,7 +71,7 @@ function ListReleases() {
         }),
         ...getPublishTimeFilterForDate(selectedDate),
       }
-      const sort = sortBy.join(',')
+      const sort = sortBy
       const { data, error } = await client.GET('/releases', {
         params: { query: { start, count, ...filter, sort } },
       })
@@ -76,7 +79,7 @@ function ListReleases() {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const errorMessage = (error as any).error
         console.log(errorMessage)
-        alert(errorMessage)
+        setApiError((prev) => [...prev, errorMessage])
       } else {
         setReleases(data.releases ?? [])
         setTotal(data.total ?? 0)
@@ -92,7 +95,7 @@ function ListReleases() {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const errorMessage = (error as any).error
         console.log(errorMessage)
-        alert(errorMessage)
+        setApiError((prev) => [...prev, errorMessage])
       } else {
         setShortnames(data ?? [])
       }
@@ -148,6 +151,7 @@ function ListReleases() {
               month={getFirstDayOfNthMonth(calendarMonth + offset)}
               selected={selectedDate}
               onSelect={onSelectDate}
+              apiErrorEmit={setCalendarApiError}
             />
           ))}
         </div>
@@ -158,8 +162,11 @@ function ListReleases() {
     )
   }
 
+  const errorsCombined = [...apiError, calendarApiError].filter(Boolean)
+
   return (
     <>
+      {errorsCombined.length > 0 && <ErrorAlert message={errorsCombined} />}
       <div className='list-releases-heading-container'>
         <Heading level={1} data-size='sm'>
           Publiseringsoversikt

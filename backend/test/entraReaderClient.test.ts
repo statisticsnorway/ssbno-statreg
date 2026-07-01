@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { vi, describe, test, expect, beforeEach, afterEach, assert } from 'vitest'
+import { vi, describe, test, expect, beforeEach, afterEach } from 'vitest'
 import {
   fetchAllUsers,
-  fetchUserByEmail,
   getAccessToken,
   setCachedToken,
   setTokenExpiresAt,
@@ -116,104 +115,6 @@ describe('entraReaderClient ', () => {
     })
   })
 
-  describe('fetchUserByEmail ', async () => {
-    test('returns null if email is missing', async () => {
-      fetchMock.mockReturnValueOnce(null as any)
-      const user = await fetchUserByEmail('', 'token')
-      expect(fetchMock).toHaveBeenCalledTimes(0)
-      expect(user).toBeNull()
-    })
-
-    test('throws error if missing token', async () => {
-      expect(fetchMock).toHaveBeenCalledTimes(0)
-      await expect(() => fetchUserByEmail(TEST_EMAIL, '')).rejects.toMatchObject({
-        message: 'Missing token',
-      })
-    })
-
-    test('returns user from email', async () => {
-      fetchMock.mockReturnValueOnce(
-        mockGraphSuccess({
-          displayName: 'Admin SSB',
-          businessPhones: ['123'],
-          mail: TEST_EMAIL,
-          userPrincipalName: '',
-        }) as any
-      )
-      const user = await fetchUserByEmail(TEST_EMAIL, 'token')
-      expect(fetchMock).toHaveBeenCalledExactlyOnceWith(
-        expect.stringContaining(
-          `/${encodeURIComponent(TEST_EMAIL)}?$select=displayName,businessPhones,mail,userPrincipalName`
-        ),
-        expect.anything()
-      )
-      expect(user).toStrictEqual(entraUserResult.user)
-    })
-
-    test('returns rejected Promise when Graph returns 404', async () => {
-      fetchMock.mockReturnValueOnce(mockFetchError(404, 'user not found'))
-      await expect(() => fetchUserByEmail('NonExistingUser', 'token')).rejects.toMatchObject({
-        status: 404,
-        text: 'user not found',
-      })
-      expect(fetchMock).toHaveBeenCalledExactlyOnceWith(
-        expect.stringContaining(
-          `/${encodeURIComponent('NonExistingUser')}?$select=displayName,businessPhones,mail,userPrincipalName`
-        ),
-        expect.anything()
-      )
-    })
-
-    test('throws error if fetch from api fails', async () => {
-      fetchMock.mockReturnValueOnce(mockFetchError(500, 'api error'))
-      await expect(() => fetchUserByEmail('admin', 'token')).rejects.toMatchObject({
-        status: 500,
-        text: 'api error',
-      })
-    })
-
-    test('returns correct user format if only displayname returned', async () => {
-      fetchMock.mockReturnValueOnce(
-        mockGraphSuccess({
-          displayName: 'Admin SSB',
-        }) as any
-      )
-      const user = await fetchUserByEmail(TEST_EMAIL, 'token')
-      expect(fetchMock).toHaveBeenCalledExactlyOnceWith(
-        expect.stringContaining(
-          `/${encodeURIComponent(TEST_EMAIL)}?$select=displayName,businessPhones,mail,userPrincipalName`
-        ),
-        expect.anything()
-      )
-      assert.deepEqual(user, {
-        displayName: 'Admin SSB',
-        email: null,
-        businessPhone: null,
-      })
-    })
-
-    test('returns user email from userPrincipalName if email missing', async () => {
-      fetchMock.mockReturnValueOnce(
-        mockGraphSuccess({
-          displayName: 'Admin SSB',
-          userPrincipalName: 'admin.ssb@ssb.no',
-        }) as any
-      )
-      const user = await fetchUserByEmail(TEST_EMAIL, 'token')
-      expect(fetchMock).toHaveBeenCalledExactlyOnceWith(
-        expect.stringContaining(
-          `/${encodeURIComponent(TEST_EMAIL)}?$select=displayName,businessPhones,mail,userPrincipalName`
-        ),
-        expect.anything()
-      )
-      expect(user).toStrictEqual({
-        displayName: 'Admin SSB',
-        email: 'admin.ssb@ssb.no',
-        businessPhone: null,
-      })
-    })
-  })
-
   describe('fetchAllUsers ', async () => {
     test('throws error if missing token', async () => {
       expect(fetchMock).toHaveBeenCalledTimes(0)
@@ -251,15 +152,15 @@ describe('entraReaderClient ', () => {
       expect(users).toStrictEqual([
         {
           displayName: 'Admin SSB',
-          email: TEST_EMAIL,
+          mail: TEST_EMAIL,
           userPrincipalName: 'admin@ssb.no',
-          businessPhone: '123',
+          businessPhones: ['123'],
         },
         {
           displayName: 'Infotjenesten',
-          email: null,
+          mail: null,
           userPrincipalName: 'infotjenesten@ssb.no',
-          businessPhone: null,
+          businessPhones: [],
         },
       ])
     })
@@ -303,15 +204,15 @@ describe('entraReaderClient ', () => {
       expect(users).toStrictEqual([
         {
           displayName: 'Admin SSB',
-          email: null,
+          mail: null,
           userPrincipalName: TEST_EMAIL,
-          businessPhone: '123',
+          businessPhones: ['123'],
         },
         {
           displayName: 'Infotjenesten',
-          email: 'infotjenesten@ssb.no',
+          mail: 'infotjenesten@ssb.no',
           userPrincipalName: 'infotjenesten@ssb.no',
-          businessPhone: '11223344',
+          businessPhones: ['11223344'],
         },
       ])
     })
@@ -332,15 +233,6 @@ describe('entraReaderClient ', () => {
 })
 
 ////////////// MOCK DATA ////////////////////////////////
-
-const entraUserResult = {
-  initials: 'admin',
-  user: {
-    displayName: 'Admin SSB',
-    email: TEST_EMAIL,
-    businessPhone: '123',
-  },
-}
 
 const entraUsersResult = {
   firstPageUrl: '/users?$select=displayName,businessPhones,mail,userPrincipalName&$top=999',

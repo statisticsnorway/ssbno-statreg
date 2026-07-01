@@ -16,6 +16,7 @@ import { getDateOnlyAsString } from '../lib/utils'
 type DatePickerProps = React.ComponentProps<typeof AkselDatePicker.Standalone> & {
   showColorCodingExplanation?: boolean
   calendarDatesEmit?: (data: CalenderDate) => void
+  apiErrorEmit?: (message: string) => void
 }
 
 const fewStatusBackgroundImage = `url('data:image/svg+xml,${encodeURIComponent(
@@ -77,7 +78,7 @@ export function DatePickerColorLegend({ statusColors }: Readonly<{ statusColors:
   )
 }
 
-export function DatePicker({ showColorCodingExplanation, calendarDatesEmit, ...props }: DatePickerProps) {
+export function DatePicker({ showColorCodingExplanation, calendarDatesEmit, apiErrorEmit, ...props }: DatePickerProps) {
   const [calendarDates, setCalendarDates] = useState<CalenderDate>({})
   const displayedMonth = props.month
   const selectedDate = props.selected
@@ -96,14 +97,14 @@ export function DatePicker({ showColorCodingExplanation, calendarDatesEmit, ...p
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const errorMessage = (error as any).error
         console.log(errorMessage)
-        alert(errorMessage)
+        apiErrorEmit?.(`Calendar error: ${errorMessage}`)
       } else {
         setCalendarDates(data)
         calendarDatesEmit?.(data)
       }
     }
     fetchCalendarDates()
-  }, [displayedMonth, calendarDatesEmit])
+  }, [displayedMonth, calendarDatesEmit, apiErrorEmit])
 
   const full: Date[] = []
   const many: Date[] = []
