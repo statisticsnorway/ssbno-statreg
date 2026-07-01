@@ -6,7 +6,7 @@ const usersCache = new NodeCache({ stdTTL: 60 * 60 * 24, checkperiod: 60 })
 const ENTRA_USERS_CACHE_KEY = 'entra-users'
 type EntraUsersRecord = Record<string, EntraUser> // key is userPrincipalName
 
-function indexUsersByPrincipalName(users: EntraUser[]): EntraUsersRecord {
+export function indexUsersByPrincipalName(users: EntraUser[]): EntraUsersRecord {
   return users.reduce<EntraUsersRecord>((record, user) => {
     record[user.userPrincipalName] = user
     return record

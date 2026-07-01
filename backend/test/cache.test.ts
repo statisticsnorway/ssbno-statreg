@@ -1,6 +1,6 @@
 import { vi, afterAll, beforeEach, describe, expect, test } from 'vitest'
 
-import { setUsersCache, getAllUsersFromCache, clearUsersCache } from '@/lib/cache'
+import { setUsersCache, getAllUsersFromCache, clearUsersCache, indexUsersByPrincipalName } from '@/lib/cache'
 
 const mockUsers = [
   {
@@ -56,6 +56,16 @@ vi.mock(import('../plugins/entraReaderClient'), async (importOriginal) => {
     fetchAllUsers: fetchAllUsers as any,
     getAccessToken: getAccessTokenMock,
   }
+})
+
+describe('indexUsersByPrincipalName', () => {
+  test('returns empty record for empty user list', () => {
+    expect(indexUsersByPrincipalName([])).toEqual({})
+  })
+
+  test('indexes users by userPrincipalName', () => {
+    expect(indexUsersByPrincipalName(mockUsers)).toEqual(expectedCachedUsers)
+  })
 })
 
 describe('getAllUsersFromCache', () => {
