@@ -103,7 +103,7 @@ export function parseSortInput(
     .filter((v) => v !== null)
 }
 
-// Eks. "Januear 2026"
+// Eks. "Januar 2026"
 export const formatMonthYear = (date: Date): string => {
   const monthYear = new Intl.DateTimeFormat('nb-NO', {
     month: 'long',
