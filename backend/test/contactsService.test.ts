@@ -39,8 +39,8 @@ describe('contactsService', () => {
 
       expect(getAllUsersFromCacheMock).toHaveBeenCalledTimes(1)
       expect(result).toStrictEqual([
-        { principalName: 'bcd@ssb.no', name: 'Bob' },
-        { principalName: 'admin@ssb.no', name: 'Admin SSB' },
+        { principalName: 'bcd', name: 'Bob' },
+        { principalName: 'admin', name: 'Admin SSB' },
       ])
     })
 

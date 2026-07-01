@@ -6,6 +6,6 @@ export async function getContacts(): Promise<Contact[]> {
 
   return Object.values(users).map(({ displayName, userPrincipalName }) => ({
     name: displayName,
-    principalName: userPrincipalName,
+    principalName: userPrincipalName.split('@')[0],
   }))
 }
