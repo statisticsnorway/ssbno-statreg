@@ -123,6 +123,62 @@ export const formatDayMonthYear = (date: Date): string => {
   }).format(date)
 }
 
+export function validatePeriodWeeks(period_from: Date, period_to: Date): boolean {
+  const startDay = period_from.getUTCDay() === 0 ? 7 : period_from.getUTCDay()
+  const endDay = period_to.getUTCDay() === 0 ? 7 : period_to.getUTCDay()
+  const calculatedWeekEndDate = new Date(period_from)
+  calculatedWeekEndDate.setUTCDate(calculatedWeekEndDate.getUTCDate() + 6)
+
+  return startDay === 1 && endDay === 7 && period_to.getTime() === calculatedWeekEndDate.getTime()
+}
+
+export function validatePeriodDaysWithinSameYear(
+  period_from: Date,
+  period_to: Date,
+  period: 'M' | 'T' | 'Q' | 'H'
+): boolean {
+  let numberOfPeriodsInAYear: number
+  if (period === 'M') numberOfPeriodsInAYear = 12
+  else if (period === 'T') numberOfPeriodsInAYear = 6
+  else if (period === 'Q') numberOfPeriodsInAYear = 4
+  else if (period === 'H') numberOfPeriodsInAYear = 2
+  else return false
+  const periodNumber = Math.floor(period_to.getUTCMonth() / numberOfPeriodsInAYear) + 1
+  const monthsInPeriod = 12 / numberOfPeriodsInAYear
+  const fromMonth = (periodNumber - 1) * monthsInPeriod
+  const toMonth = periodNumber * monthsInPeriod - 1
+  const lastDayOfToMonth = new Date(Date.UTC(period_to.getUTCFullYear(), toMonth + 1, 0)).getUTCDate()
+
+  return (
+    period_from.getUTCDate() === 1 &&
+    period_from.getUTCMonth() === fromMonth &&
+    period_to.getUTCMonth() === toMonth &&
+    period_to.getUTCDate() === lastDayOfToMonth &&
+    period_from.getUTCFullYear() === period_to.getUTCFullYear()
+  )
+}
+
+export function validatePeriodDaysSpanningSeveralYears(
+  period_from: Date,
+  period_to: Date,
+  period: '2Y' | '3Y' | '4Y' | '5Y'
+): boolean {
+  let numberOfYears: number
+  if (period === '2Y') numberOfYears = 2
+  else if (period === '3Y') numberOfYears = 3
+  else if (period === '4Y') numberOfYears = 4
+  else if (period === '5Y') numberOfYears = 5
+  else return false
+
+  return (
+    period_from.getUTCDate() === 1 &&
+    period_from.getUTCMonth() === 0 &&
+    period_to.getUTCDate() === 31 &&
+    period_to.getUTCMonth() === 11 &&
+    period_from.getUTCFullYear() + numberOfYears - 1 === period_to.getUTCFullYear()
+  )
+}
+
 export function parseHumanReadableMeasuringPeriod(frequencyCode: string, period_from: Date, period_to: Date): string {
   const code = frequencyCode.toUpperCase()
 
@@ -174,6 +230,19 @@ export function parseHumanReadableMeasuringPeriod(frequencyCode: string, period_
     return `${half}. halvår ${period_to.getUTCFullYear()}`
   }
 
+  if (
+    code === '2Y' ||
+    code === '3Y' ||
+    code === '4Y' ||
+    code === '5Y' ||
+    code === '2A' ||
+    code === '3A' ||
+    code === '4A' ||
+    code === '5A'
+  ) {
+    return `${period_from.getUTCFullYear()}-${period_to.getUTCFullYear()}`
+  }
+
   if (code === 'Y' || code === 'A') {
     if (isSameDay && period_from.getDate() === 1 && period_from.getMonth() === 0) {
       return `Per ${formatDayMonthYear(period_to)}`
@@ -186,19 +255,6 @@ export function parseHumanReadableMeasuringPeriod(frequencyCode: string, period_
     }
 
     return `${period_from.getUTCFullYear()}/${period_to.getUTCFullYear()}`
-  }
-
-  if (
-    code === '2Y' ||
-    code === '3Y' ||
-    code === '4Y' ||
-    code === '5Y' ||
-    code === '2A' ||
-    code === '3A' ||
-    code === '4A' ||
-    code === '5A'
-  ) {
-    return `${period_from.getUTCFullYear()}-${period_to.getUTCFullYear()}`
   }
 
   return `${formatDayMonthYear(period_from)}-${formatDayMonthYear(period_to)}`
