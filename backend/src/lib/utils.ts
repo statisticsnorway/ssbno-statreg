@@ -103,6 +103,26 @@ export function parseSortInput(
     .filter((v) => v !== null)
 }
 
+// Eks. "Januear 2026"
+export const formatMonthYear = (date: Date): string => {
+  const monthYear = new Intl.DateTimeFormat('nb-NO', {
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(date)
+  return monthYear.charAt(0).toUpperCase() + monthYear.slice(1)
+}
+
+// Eks. "1. januar 2026"
+export const formatDayMonthYear = (date: Date): string => {
+  return new Intl.DateTimeFormat('nb-NO', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(date)
+}
+
 export function parseHumanReadableMeasuringPeriod(frequencyCode: string, period_from: Date, period_to: Date): string {
   const code = frequencyCode.toUpperCase()
 
@@ -110,24 +130,6 @@ export function parseHumanReadableMeasuringPeriod(frequencyCode: string, period_
     period_from.getUTCFullYear() === period_to.getUTCFullYear() &&
     period_from.getUTCMonth() === period_to.getUTCMonth() &&
     period_from.getUTCDate() === period_to.getUTCDate()
-
-  const formatMonthYear = (date: Date): string => {
-    const monthYear = new Intl.DateTimeFormat('nb-NO', {
-      month: 'long',
-      year: 'numeric',
-      timeZone: 'UTC',
-    }).format(date)
-    return monthYear.charAt(0).toUpperCase() + monthYear.slice(1)
-  }
-
-  const formatDayMonthYear = (date: Date): string => {
-    return new Intl.DateTimeFormat('nb-NO', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-      timeZone: 'UTC',
-    }).format(date)
-  }
 
   const getIsoWeekInfo = (date: Date): { week: number; year: number } => {
     const utcDate = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()))

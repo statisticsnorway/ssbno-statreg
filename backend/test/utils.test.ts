@@ -11,6 +11,8 @@ import {
   getDateOnlyAsString,
   parseSortInput,
   parseHumanReadableMeasuringPeriod,
+  formatMonthYear,
+  formatDayMonthYear,
 } from '@/lib/utils'
 import { describe, test, expect } from 'vitest'
 
@@ -287,6 +289,30 @@ describe('utils', () => {
       expect(result).toEqual([])
     })
   })
+  describe('formatMonthYear', () => {
+    test('returns capitalized month and year in Norwegian', () => {
+      const result = formatMonthYear(new Date(Date.UTC(2026, 0, 15)))
+      expect(result).toBe('Januar 2026')
+    })
+
+    test('returns correct month for mid-year date', () => {
+      const result = formatMonthYear(new Date(Date.UTC(2023, 5, 30)))
+      expect(result).toBe('Juni 2023')
+    })
+  })
+
+  describe('formatDayMonthYear', () => {
+    test('returns day, month and year in Norwegian', () => {
+      const result = formatDayMonthYear(new Date(Date.UTC(2026, 0, 1)))
+      expect(result).toBe('1. januar 2026')
+    })
+
+    test('returns correct format for end of year', () => {
+      const result = formatDayMonthYear(new Date(Date.UTC(2024, 11, 25)))
+      expect(result).toBe('25. desember 2024')
+    })
+  })
+
   describe('parseHumanReadableMeasuringPeriod', () => {
     function toUtcDate(dateString: string): Date {
       const [day, month, year] = dateString.split('.')
