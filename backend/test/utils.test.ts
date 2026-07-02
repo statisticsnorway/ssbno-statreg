@@ -9,6 +9,9 @@ import {
   ensureRequiredFieldsExists,
   isNumber,
   getDateOnlyAsString,
+  validatePeriodWeeks,
+  validatePeriodDaysWithinSameYear,
+  validatePeriodDaysSpanningSeveralYears,
   parseHumanReadableMeasuringPeriod,
   formatMonthYear,
   formatDayMonthYear,
@@ -228,6 +231,110 @@ describe('utils', () => {
     })
   })
 
+  describe('validatePeriodWeeks', () => {
+    test('returns true for a full ISO week from monday to sunday', () => {
+      const periodFrom = new Date(Date.UTC(2026, 0, 5))
+      const periodTo = new Date(Date.UTC(2026, 0, 11))
+
+      expect(validatePeriodWeeks(periodFrom, periodTo)).toBe(true)
+    })
+
+    test('returns false when period does not start on monday', () => {
+      const periodFrom = new Date(Date.UTC(2026, 0, 6))
+      const periodTo = new Date(Date.UTC(2026, 0, 12))
+
+      expect(validatePeriodWeeks(periodFrom, periodTo)).toBe(false)
+    })
+
+    test('returns false when period does not end on sunday', () => {
+      const periodFrom = new Date(Date.UTC(2026, 0, 5))
+      const periodTo = new Date(Date.UTC(2026, 0, 10))
+
+      expect(validatePeriodWeeks(periodFrom, periodTo)).toBe(false)
+    })
+
+    test('returns false when period end is not exactly six days after period start', () => {
+      const periodFrom = new Date(Date.UTC(2026, 0, 5))
+      const periodTo = new Date(Date.UTC(2026, 0, 18))
+
+      expect(validatePeriodWeeks(periodFrom, periodTo)).toBe(false)
+    })
+  })
+
+  describe('validatePeriodDaysWithinSameYear', () => {
+    test('returns true for a full month period', () => {
+      const periodFrom = new Date(Date.UTC(2026, 4, 1))
+      const periodTo = new Date(Date.UTC(2026, 4, 31))
+
+      expect(validatePeriodDaysWithinSameYear(periodFrom, periodTo, 'M')).toBe(true)
+    })
+
+    test('returns true for a full two-month term period', () => {
+      const periodFrom = new Date(Date.UTC(2026, 2, 1))
+      const periodTo = new Date(Date.UTC(2026, 3, 30))
+
+      expect(validatePeriodDaysWithinSameYear(periodFrom, periodTo, 'T')).toBe(true)
+    })
+
+    test('returns true for a full quarter period', () => {
+      const periodFrom = new Date(Date.UTC(2026, 9, 1))
+      const periodTo = new Date(Date.UTC(2026, 11, 31))
+
+      expect(validatePeriodDaysWithinSameYear(periodFrom, periodTo, 'Q')).toBe(true)
+    })
+
+    test('returns true for a full half-year period', () => {
+      const periodFrom = new Date(Date.UTC(2026, 6, 1))
+      const periodTo = new Date(Date.UTC(2026, 11, 31))
+
+      expect(validatePeriodDaysWithinSameYear(periodFrom, periodTo, 'H')).toBe(true)
+    })
+
+    test('returns false when period does not start on first day of expected month', () => {
+      const periodFrom = new Date(Date.UTC(2026, 0, 2))
+      const periodTo = new Date(Date.UTC(2026, 0, 31))
+
+      expect(validatePeriodDaysWithinSameYear(periodFrom, periodTo, 'M')).toBe(false)
+    })
+
+    test('returns false when period spans across years', () => {
+      const periodFrom = new Date(Date.UTC(2025, 11, 1))
+      const periodTo = new Date(Date.UTC(2026, 0, 31))
+
+      expect(validatePeriodDaysWithinSameYear(periodFrom, periodTo, 'T')).toBe(false)
+    })
+  })
+
+  describe('validatePeriodDaysSpanningSeveralYears', () => {
+    test('returns true for a valid 2-year period', () => {
+      const periodFrom = new Date(Date.UTC(2020, 0, 1))
+      const periodTo = new Date(Date.UTC(2021, 11, 31))
+
+      expect(validatePeriodDaysSpanningSeveralYears(periodFrom, periodTo, '2Y')).toBe(true)
+    })
+
+    test('returns true for a valid 5-year period', () => {
+      const periodFrom = new Date(Date.UTC(2018, 0, 1))
+      const periodTo = new Date(Date.UTC(2022, 11, 31))
+
+      expect(validatePeriodDaysSpanningSeveralYears(periodFrom, periodTo, '5Y')).toBe(true)
+    })
+
+    test('returns false when period does not start on first of january', () => {
+      const periodFrom = new Date(Date.UTC(2020, 0, 2))
+      const periodTo = new Date(Date.UTC(2021, 11, 31))
+
+      expect(validatePeriodDaysSpanningSeveralYears(periodFrom, periodTo, '2Y')).toBe(false)
+    })
+
+    test('returns false when period does not end on 31st of december', () => {
+      const periodFrom = new Date(Date.UTC(2020, 0, 1))
+      const periodTo = new Date(Date.UTC(2021, 11, 30))
+
+      expect(validatePeriodDaysSpanningSeveralYears(periodFrom, periodTo, '2Y')).toBe(false)
+    })
+  })
+
   describe('formatMonthYear', () => {
     test('returns capitalized month and year in Norwegian', () => {
       const result = formatMonthYear(new Date(Date.UTC(2026, 0, 15)))
@@ -322,11 +429,32 @@ describe('utils', () => {
         expected: 'Uke 49 2011',
       },
       {
+        scenarioDescription: 'wrong week period tuesday to monday',
+        frequencyCode: 'W',
+        periodFrom: '06.12.2011',
+        periodTo: '12.12.2011',
+        expected: '6. desember 2011-12. desember 2011',
+      },
+      {
+        scenarioDescription: 'wrong week period monday to friday',
+        frequencyCode: 'W',
+        periodFrom: '05.12.2011',
+        periodTo: '09.12.2011',
+        expected: '5. desember 2011-9. desember 2011',
+      },
+      {
         scenarioDescription: 'month period full month',
         frequencyCode: 'M',
         periodFrom: '01.12.2011',
         periodTo: '31.12.2011',
         expected: 'Desember 2011',
+      },
+      {
+        scenarioDescription: 'month period not full month',
+        frequencyCode: 'M',
+        periodFrom: '01.12.2011',
+        periodTo: '30.12.2011',
+        expected: '1. desember 2011-30. desember 2011',
       },
       {
         scenarioDescription: 'month measuring point',
@@ -343,11 +471,25 @@ describe('utils', () => {
         expected: '6. termin 2011',
       },
       {
+        scenarioDescription: 'term period not over two months',
+        frequencyCode: 'T',
+        periodFrom: '01.11.2011',
+        periodTo: '30.11.2011',
+        expected: '1. november 2011-30. november 2011',
+      },
+      {
         scenarioDescription: '1st quarter period',
         frequencyCode: 'K',
         periodFrom: '01.01.2011',
         periodTo: '31.03.2011',
         expected: '1. kvartal 2011',
+      },
+      {
+        scenarioDescription: 'quarter period not spanning full quarter',
+        frequencyCode: 'K',
+        periodFrom: '01.01.2011',
+        periodTo: '28.02.2011',
+        expected: '1. januar 2011-28. februar 2011',
       },
       {
         scenarioDescription: '2nd quarter period',
@@ -385,6 +527,13 @@ describe('utils', () => {
         expected: '1. halvår 2011',
       },
       {
+        scenarioDescription: 'half-year not starting on 1st of january',
+        frequencyCode: 'H',
+        periodFrom: '01.02.2011',
+        periodTo: '30.07.2011',
+        expected: '1. februar 2011-30. juli 2011',
+      },
+      {
         scenarioDescription: 'half-year second half',
         frequencyCode: 'H',
         periodFrom: '01.07.2011',
@@ -399,11 +548,32 @@ describe('utils', () => {
         expected: '2011',
       },
       {
+        scenarioDescription: 'Two dates within the same calendar year',
+        frequencyCode: 'Y',
+        periodFrom: '01.03.2011',
+        periodTo: '31.10.2011',
+        expected: '2011',
+      },
+      {
+        scenarioDescription: 'calendar year school year/hunting year',
+        frequencyCode: 'Y',
+        periodFrom: '01.09.2010',
+        periodTo: '31.03.2011',
+        expected: '2010/2011',
+      },
+      {
         scenarioDescription: 'every 2nd year',
         frequencyCode: '2Y',
         periodFrom: '01.01.2010',
         periodTo: '31.12.2011',
         expected: '2010-2011',
+      },
+      {
+        scenarioDescription: 'every 2nd year with period not starting on 1st of january',
+        frequencyCode: '2Y',
+        periodFrom: '01.02.2010',
+        periodTo: '31.01.2012',
+        expected: '1. februar 2010-31. januar 2012',
       },
       {
         scenarioDescription: 'every 3rd year',
