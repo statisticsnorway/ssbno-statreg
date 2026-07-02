@@ -626,8 +626,8 @@ const mockedReleasesPrismaResult = [
     version: 1,
     publish_time: new Date('2026-02-25T08:00:00Z'),
     desk_appoval_status: 'FORSLAG',
-    period_to: new Date('2026-01-01T00:00:00Z'),
-    period_from: new Date('2026-06-30T00:00:00Z'),
+    period_to: new Date('2026-06-30T00:00:00Z'),
+    period_from: new Date('2026-01-01T00:00:00Z'),
     variant: {
       frequency: {
         name: 'Halvår',
@@ -714,8 +714,8 @@ const mockedReleasesResult = [
     id: 103,
     publish_time: '2026-02-25T08:00:00.000Z',
     approval_status: 'FORSLAG',
-    period_to: '2026-01-01',
-    period_from: '2026-06-30',
+    period_to: '2026-06-30',
+    period_from: '2026-01-01',
     measuring_period_title: '1. halvår 2026',
     frequency: {
       name: 'Halvår',
