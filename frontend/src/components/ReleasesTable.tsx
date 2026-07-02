@@ -1,4 +1,3 @@
-import { type SetStateAction, type Dispatch } from 'react'
 import { Table } from '@digdir/designsystemet-react'
 
 import { type ReleaseListing } from '@ssbno-statreg/shared'
@@ -21,7 +20,7 @@ type ReleaseRowProps = {
 type ReleaseTableProps = {
   releases: ReleaseListing[]
   sortBy?: string
-  setSortBy?: Dispatch<SetStateAction<string>>
+  setSortBy?: (sortBy: string) => void
   openInNewTab?: boolean
 }
 
