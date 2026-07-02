@@ -122,11 +122,10 @@ export async function getStatistics(
       const main_language = statistic.language
       const divisionCode = statistic.division_code ?? ''
       const contacts = statistic.responsiblePersons.map(({ principalName }) => {
-        // TODO: Remove type casting for principalName once principalName is no longer set as optional in the Prisma schema
-        const user = users[principalName as string]
+        const user = users[principalName]
         return {
           name: user?.displayName ?? '',
-          principalName: principalName as string,
+          principalName: principalName,
         }
       })
 
@@ -228,11 +227,10 @@ export async function mapStatisticDetails(statistic: StatisticPrismaResult): Pro
     created_at: dateToISOString(statistic.date_created),
     variants: parseStatisticVariants(statistic.variants),
     contacts: statistic.responsiblePersons.map(({ principalName }) => {
-      // TODO: Remove type casting for principalName once principalName is no longer set as optional in the Prisma schema
-      const user = users[principalName as string]
+      const user = users[principalName]
       return {
         name: user?.displayName ?? '',
-        principalName: principalName as string,
+        principalName: principalName,
       }
     }),
     statistic_region_levels: statistic.statistic_region_levels?.map(({ region_level }) => {
