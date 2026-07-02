@@ -5,72 +5,74 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  schemas = ["statreg"]
+  schemas  = ["statreg"]
 }
 
 model Frequency {
-  @@schema("statreg")
-  id      Int    @id @default(autoincrement())
-  version Int    @default(1)   
+  id      Int       @id @default(autoincrement())
+  version Int       @default(1)
   name    String
-  name_en String    
+  name_en String
   code    String    @unique
   variant Variant[]
+
+  @@schema("statreg")
 }
 
 model Calender_date {
-  @@schema("statreg")
   id      Int      @id @default(autoincrement())
   version Int      @default(1)
   comment String
-  day     DateTime @db.Timestamp(6) @unique
+  day     DateTime @unique @db.Timestamp(6)
+
+  @@schema("statreg")
 }
 
 model Contact_DoNotUse {
-  @@schema("statreg")
-  id                 Int      @id @default(autoincrement())
-  version            Int      @default(1)
-  initials           String?  
-  mobile             String?  
-  name               String   
-  last_updated       DateTime @db.Timestamp(6)
-  phone              String?  
+  id                 Int                  @id @default(autoincrement())
+  version            Int                  @default(1)
+  initials           String?
+  mobile             String?
+  name               String
+  last_updated       DateTime             @db.Timestamp(6)
+  phone              String?
   email              String
-  date_created       DateTime @db.Timestamp(6)
+  date_created       DateTime             @db.Timestamp(6)
   inactiv            Boolean?
   name_en            String?
   statistic_contacts Statistic_contacts[]
+
+  @@schema("statreg")
 }
 
 model ResponsiblePerson {
+  id            Int         @id @default(autoincrement())
+  principalName String      @unique
+  statistics    Statistic[]
+
   @@schema("statreg")
-  id  Int               @id @default(autoincrement())
-  username String?      @unique
-  principalName String?  @unique
-  email String          @unique
-  statistics Statistic[]
 }
 
 model Shortname {
+  id           Int        @id @default(autoincrement())
+  version      Int        @default(1)
+  name         String     @unique
+  last_updated DateTime   @db.Timestamp(6)
+  date_created DateTime   @db.Timestamp(6)
+  statistic    Statistic?
+
   @@schema("statreg")
-  id           Int         @id @default(autoincrement())
-  version      Int         @default(1)
-  name         String      @unique
-  last_updated DateTime    @db.Timestamp(6)
-  date_created DateTime    @db.Timestamp(6)
-  statistic   Statistic?
 }
 
 model Release {
-  @@schema("statreg")
   id                     Int      @id @default(autoincrement())
   version                Int      @default(1)
   publish_time           DateTime @db.Timestamp(6)
   has_versions           Boolean
   last_updated           DateTime @db.Timestamp(6)
-  comment                String 
+  comment                String
   period_to              DateTime @db.Timestamp(6)
-  desk_appoval_status    String? 
+  desk_appoval_status    String?
   variant_id             Int
   period_from            DateTime @db.Timestamp(6)
   cancelled              Boolean  @default(false)
@@ -78,83 +80,87 @@ model Release {
   release_date_precision String
   import_flag            Boolean?
   variant                Variant  @relation(fields: [variant_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@schema("statreg")
 }
 
 model Region_level {
-  @@schema("statreg")
-  id                      Int     @id @default(autoincrement())
-  version                 Int     @default(1)
+  id                      Int                      @id @default(autoincrement())
+  version                 Int                      @default(1)
   name                    String
-  code                    String? @unique
+  code                    String?                  @unique
   statistic_region_levels Statistic_region_level[]
+
+  @@schema("statreg")
 }
 
 model Division_DoNotUse {
-  @@schema("statreg")
   id         Int         @id @default(autoincrement())
   version    Int         @default(1)
   code       String      @unique
   name_en    String
   name       String
   statistics Statistic[]
+
+  @@schema("statreg")
 }
 
 model Statistic {
+  id                           Int                      @id @default(autoincrement())
+  version                      Int                      @default(1)
+  shortname_id                 Int                      @unique
+  dir_appoval_status           String?
+  search_phrases               String?
+  priority                     Int
+  desk_appoval_status          String?
+  language                     String
+  search_phrases_en            String?
+  division_code                String?
+  division_id                  Int?
+  first_release                DateTime?                @db.Timestamp(6)
+  yearly_reporting             Boolean
+  status                       String
+  related_statistic_id         Int?
+  name                         String
+  last_updated                 DateTime                 @db.Timestamp(6)
+  comment                      String
+  name_en                      String?
+  date_created                 DateTime                 @db.Timestamp(6)
+  legacy_topic_codes           String?
+  responsiblePersons           ResponsiblePerson[]
+  related_statistic            Statistic?               @relation("STATISTICToSTATISTIC", fields: [related_statistic_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  incoming_statistic_relations Statistic[]              @relation("STATISTICToSTATISTIC")
+  division                     Division_DoNotUse?       @relation(fields: [division_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  shortname                    Shortname                @relation(fields: [shortname_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  contacts                     Statistic_contacts[]
+  statistic_region_levels      Statistic_region_level[]
+  variants                     Variant[]
+
   @@schema("statreg")
-  id                      Int                      @id @default(autoincrement())
-  version                 Int                      @default(1)
-  shortname_id            Int                      @unique
-  dir_appoval_status      String?
-  search_phrases          String?
-  priority                Int
-  desk_appoval_status     String?
-  language                String
-  search_phrases_en       String?
-  division_code           String?
-  division_id             Int?
-  first_release           DateTime?                @db.Timestamp(6)
-  yearly_reporting        Boolean
-  status                  String
-  related_statistic_id    Int?
-  name                    String
-  last_updated            DateTime                 @db.Timestamp(6)
-  comment                 String
-  name_en                 String?
-  date_created            DateTime                 @db.Timestamp(6)
-  legacy_topic_codes      String?
-  responsiblePersons      ResponsiblePerson[]
-  related_statistic               Statistic?               @relation("STATISTICToSTATISTIC", fields: [related_statistic_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  incoming_statistic_relations        Statistic[]              @relation("STATISTICToSTATISTIC")
-  division                Division_DoNotUse?                 @relation(fields: [division_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  shortname               Shortname                @relation(fields: [shortname_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  contacts                Statistic_contacts[]
-  statistic_region_levels Statistic_region_level[]
-  variants                Variant[]
 }
 
 model Statistic_contacts {
-  @@schema("statreg")
   statistic_id Int
   contact_id   Int
   contacts_idx Int?
-  contact      Contact_DoNotUse   @relation(fields: [contact_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  statistic    Statistic @relation(fields: [statistic_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  contact      Contact_DoNotUse @relation(fields: [contact_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  statistic    Statistic        @relation(fields: [statistic_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([statistic_id, contact_id])
+  @@schema("statreg")
 }
 
 model Statistic_region_level {
-  @@schema("statreg")
   region_level_id Int
   statistic_id    Int
   region_level    Region_level @relation(fields: [region_level_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   statistic       Statistic    @relation(fields: [statistic_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([statistic_id, region_level_id])
+  @@schema("statreg")
 }
 
 model Variant {
-  @@schema("statreg")
   id                 Int       @id @default(autoincrement())
   version            Int       @default(1)
   last_updated       DateTime  @db.Timestamp(6)
@@ -168,20 +174,23 @@ model Variant {
   releases           Release[]
   frequency          Frequency @relation(fields: [freq_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   statistic          Statistic @relation(fields: [statistic_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@schema("statreg")
 }
 
 model AuditLog {
+  id                       Int      @id @default(autoincrement())
+  last_updated             DateTime
+  property_name            String?
+  old_value                String?
+  new_value                String?
+  actor                    String
+  uri                      String?
+  persisted_object_version Int?
+  date_created             DateTime
+  class_name               String
+  event_name               String
+  persisted_object_id      Int
+
   @@schema("statreg")
-  id                        Int       @id @default(autoincrement())
-  last_updated              DateTime
-  property_name             String?
-  old_value                 String?
-  new_value                 String?
-  actor                     String
-  uri                       String?
-  persisted_object_version  Int?
-  date_created              DateTime
-  class_name                String
-  event_name                String
-  persisted_object_id       Int
 }

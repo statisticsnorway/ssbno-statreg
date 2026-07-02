@@ -34,10 +34,10 @@ export default function statisticsController(router: Router) {
       const count = req.query?.count ? Number(req.query.count) : undefined
       const sort = ensureString(req.query.sort as string) || undefined
       const filterByShortnames = ensureStringArray(req.query.shortname as string)
-      const filterByContactInitials = ensureStringArray(req.query.contact as string)
+      const filterByContactPrincipalName = ensureStringArray(req.query.contact as string)
 
       const data = await getFilteredStatistics(
-        { start, count, filterByShortnames, filterByContactInitials, sort },
+        { start, count, filterByShortnames, filterByContactPrincipalName, sort },
         prisma
       )
       res.json(data)
