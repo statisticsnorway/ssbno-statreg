@@ -37,7 +37,7 @@ function createRouteMetadata(): RouteMetadata {
   }
 }
 
-function isSkipAuthHandler(handler: unknown): boolean {
+function isSkipAuthHandler(handler: unknown): handler is { __skipAuth?: boolean } {
   return Boolean((handler as { __skipAuth?: boolean }).__skipAuth)
 }
 
@@ -61,6 +61,12 @@ function createPublicRouteRule(method: RouteMethod, routePath: string): PublicRo
   }
 }
 
+// Wrap Express route registration so we can collect metadata while controllers
+// are mounted:
+// - knownPaths: exact API paths used to return 405 for unsupported methods
+// - publicRoutes: method/path rules for routes marked with skipAuth
+// We remove skipAuth from the actual handler chain because auth is enforced
+// centrally in createAuthGate.
 function createTrackedRouter(metadata: RouteMetadata): Router {
   const router = Router()
 
@@ -85,6 +91,9 @@ function isPublicRequest(req: { method: string; path: string }, publicRoutes: Pu
   return publicRoutes.some((route) => route.method === req.method && route.pathPattern.test(req.path))
 }
 
+// Global auth middleware that decides per request:
+// - public route: bypass requireAuth but still initialize request context
+// - protected route: delegate to requireAuth (Keycloak or configured strategy)
 function createAuthGate(requireAuth: RequestHandler, publicRoutes: PublicRouteRule[]): RequestHandler {
   return (req, res, next) => {
     const isPublic = isPublicRequest(req, publicRoutes)
@@ -97,9 +106,19 @@ function createAuthGate(requireAuth: RequestHandler, publicRoutes: PublicRouteRu
   }
 }
 
+// Return 405 only when the path exists but the HTTP method is not one of the
+// registered API methods. Unknown paths should continue so static/fallback
+// handlers can resolve them.
 function createMethodGuard(knownPaths: Set<string>): RequestHandler {
+  const knownPathPatterns = Array.from(knownPaths, (knownPath) => {
+    const pattern = `^${knownPath.replace(/:[^/]+/g, '[^/]+')}/?$`
+    return new RegExp(pattern)
+  })
+
   return (req, res, next) => {
-    if (!ALLOWED_METHODS.has(req.method) && knownPaths.has(req.path)) {
+    const isKnownPath = knownPathPatterns.some((pattern) => pattern.test(req.path))
+
+    if (!ALLOWED_METHODS.has(req.method) && isKnownPath) {
       return res.status(405).json({ error: 'Method Not Allowed' })
     }
 
@@ -122,9 +141,9 @@ export default function controllerRouter(
 
   router.use(createAuthGate(requireAuth, metadata.publicRoutes))
   router.use(API_PREFIX, apiRouter)
-  router.use(staticExpress(path.resolve(__dirname)))
+  router.use(staticExpress(path.resolve(__dirname))) // Resolves assets and favicon
   router.get('/*splat', (_req, res) => {
-    res.sendFile(path.resolve(__dirname, 'index.html'))
+    res.sendFile(path.resolve(__dirname, 'index.html')) // Delivers packaged React payload from Express
   })
   router.use(createMethodGuard(metadata.knownPaths))
 
