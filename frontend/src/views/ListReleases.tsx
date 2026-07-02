@@ -130,9 +130,22 @@ function ListReleases() {
     setSelectedShortnames([])
   }
 
-  function filterChanged(selected: SuggestionItem[]) {
-    setSelectedShortnames(selected)
-    setSelectedDate(undefined)
+  function onFilterChange(selected: SuggestionItem | SuggestionItem[] | null) {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      next.delete('shortname')
+
+      if (selected) {
+        const selectedItems = Array.isArray(selected) ? selected : [selected]
+        const shortnameValue = selectedItems.map((item) => item.value).join(',')
+
+        if (shortnameValue) {
+          next.set('shortname', shortnameValue)
+        }
+      }
+
+      return next
+    })
   }
 
   function onSortChange(newSortBy: string) {
@@ -229,9 +242,9 @@ function ListReleases() {
               {formatDate(selectedDate.toISOString())}
             </Chip.Removable>
           )}
-          <Suggestion multiple onSelectedChange={(selected) => filterChanged(selected)} selected={selectedShortnames}>
+          <Suggestion multiple onSelectedChange={(selected) => onFilterChange(selected)} selected={selectedShortnames}>
             <Suggestion.Input />
-            <Suggestion.Clear />
+            <Suggestion.Clear onClick={() => onFilterChange(null)} />
             <Suggestion.List>
               <Suggestion.Empty>Ingen treff</Suggestion.Empty>
               {shortnames.map((shortname) => (
