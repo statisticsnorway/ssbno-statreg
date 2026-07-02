@@ -22,13 +22,13 @@ export async function getFilteredStatistics(
     start = 0,
     count = 10,
     filterByShortnames,
-    filterByContactInitials,
+    filterByContactPrincipalName,
     sort,
   }: {
     start?: number
     count?: number
     filterByShortnames?: string[]
-    filterByContactInitials?: string[]
+    filterByContactPrincipalName?: string[]
     sort?: string
   },
   prisma: StatisticPrisma
@@ -38,7 +38,7 @@ export async function getFilteredStatistics(
     : undefined
 
   const where = await buildStatisticFilter(
-    { filterByShortnames: safeFilterByShortnames, filterByContactInitials },
+    { filterByShortnames: safeFilterByShortnames, filterByContactPrincipalName },
     prisma
   )
 
@@ -58,8 +58,8 @@ function parseStatisticSortQuery(sort?: string): Prisma.StatisticOrderByWithRela
 export async function buildStatisticFilter(
   {
     filterByShortnames,
-    filterByContactInitials,
-  }: { filterByShortnames?: string[]; filterByContactInitials?: string[] },
+    filterByContactPrincipalName,
+  }: { filterByShortnames?: string[]; filterByContactPrincipalName?: string[] },
   prisma: StatisticPrisma
 ) {
   if (filterByShortnames?.length) {
@@ -74,10 +74,10 @@ export async function buildStatisticFilter(
         },
       })),
     }),
-    ...(filterByContactInitials?.length && {
+    ...(filterByContactPrincipalName?.length && {
       responsiblePersons: {
         some: {
-          username: { in: filterByContactInitials },
+          principalName: { in: filterByContactPrincipalName },
         },
       },
     }),
