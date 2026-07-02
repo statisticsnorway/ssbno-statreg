@@ -13,7 +13,7 @@ import {
   parseDateOnly,
   parseId,
   ensureRequiredFieldsExists,
-  parseSortInput,
+  parseHumanReadableMeasuringPeriod,
 } from '@/lib/utils'
 import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
 import type { Prisma } from '@/generated/prisma/client'
@@ -31,17 +31,17 @@ export async function getReleases(
     start?: number
     count?: number
     where?: Prisma.ReleaseWhereInput
-    sort?: string[]
+    sort?: string
   },
   prisma: ReleasePrisma
 ): Promise<ReleaseListingResponse> {
-  const orderBy = parseSortInput(sort, ['publish_time'])
+  const orderBy = parseReleasesSortQuery(sort)
 
   const releases = await prisma.release.findMany({
     skip: start,
     take: count,
     where,
-    orderBy: orderBy?.length ? orderBy : { publish_time: 'desc' },
+    orderBy: orderBy ?? { publish_time: 'desc' },
     select: {
       id: true,
       version: true,
@@ -86,6 +86,11 @@ export async function getReleases(
         approval_status: release.desk_appoval_status,
         period_to: getDateOnlyAsString(release.period_to),
         period_from: getDateOnlyAsString(release.period_from),
+        measuring_period_title: parseHumanReadableMeasuringPeriod(
+          frequency.code,
+          release.period_from,
+          release.period_to
+        ),
         statistic: {
           shortname: statistic.shortname.name,
           name: statistic.name,
@@ -99,6 +104,16 @@ export async function getReleases(
       }
     }),
   }
+}
+
+function parseReleasesSortQuery(sort?: string): Prisma.ReleaseOrderByWithRelationInput | undefined {
+  if (sort === 'publish_time') {
+    return { publish_time: 'asc' }
+  }
+  if (sort === '-publish_time') {
+    return { publish_time: 'desc' }
+  }
+  return undefined
 }
 
 export async function getFilteredReleases(
@@ -115,7 +130,7 @@ export async function getFilteredReleases(
     filterByShortnames?: string[]
     publishTimeAfter?: string
     publishTimeBefore?: string
-    sort?: string[]
+    sort?: string
   },
   prisma: ReleasePrisma
 ): Promise<ReleaseListingResponse> {
@@ -146,7 +161,7 @@ export async function getVariantReleases(
     count?: number
     shortname: string
     variantId: number
-    sort?: string[]
+    sort?: string
   },
   prisma: ReleasePrisma
 ): Promise<ReleaseListingResponse> {

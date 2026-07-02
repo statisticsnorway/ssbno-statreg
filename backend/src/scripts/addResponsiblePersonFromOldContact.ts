@@ -21,25 +21,19 @@ async function main() {
     const contact = row.contact
     const statistic = row.statistic
 
-    let email = contact.email
+    const principalName = contact.initials ? contact.initials + '@ssb.no' : contact.email
 
-    if (!email) {
-      if (contact.initials) {
-        email = `${contact.initials}@ssb.no`
-        console.log('email derived from username: ' + contact.initials)
-      } else {
-        console.log(`Contact ${contact.id} has neither email or initials - cannot create ResponsiblePerson. Skipped.`)
-        continue
-      }
+    if (!principalName) {
+      console.log(`Contact ${contact.id} has neither email or initials - cannot create ResponsiblePerson. Skipped.`)
+      continue
     }
 
     // Upsert responsible person by unique email
     const responsible = await prisma.responsiblePerson.upsert({
-      where: { email: email },
+      where: { principalName },
       update: {},
       create: {
-        email: email,
-        username: contact.initials ?? null,
+        principalName,
       },
     })
 

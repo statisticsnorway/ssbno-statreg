@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { describe, test, expect, beforeEach, vi } from 'vitest'
+import { describe, test, expect, beforeEach } from 'vitest'
 import express, { Router, type RequestHandler } from 'express'
 import controllerRouter from '@/api/core/controllerRouter'
 import { invoke, makeSkipAuthMarker } from './helpers'
@@ -13,27 +13,9 @@ describe('controllerRouter', () => {
     const skip = makeSkipAuthMarker()
 
     router.get('/public', skip, (_req, res) => res.json({ ok: 'public' }))
+    router.get('/mixed', skip, (_req, res) => res.json({ ok: 'mixed-public' }))
+    router.post('/mixed', (_req, res) => res.json({ ok: 'mixed-protected' }))
     router.get('/protected', (_req, res) => res.json({ ok: 'protected' }))
-
-    vi.mock('@/api/controllers/statisticsController', () => ({
-      default: () => {},
-    }))
-
-    vi.mock('@/api/controllers/releasesController', () => ({
-      default: () => {},
-    }))
-
-    vi.mock('@/api/controllers/calendarController', () => ({
-      default: () => {},
-    }))
-
-    vi.mock('@/api/controllers/shortnamesController', () => ({
-      default: () => {},
-    }))
-
-    vi.mock('@/api/controllers/contactsController', () => ({
-      default: () => {},
-    }))
   }
 
   const makeApp = () =>
@@ -65,6 +47,24 @@ describe('controllerRouter', () => {
 
     expect(res.statusCode).toBe(200)
     expect(requireAuthCalls).toHaveLength(0)
+  })
+
+  test('bypasses requireAuth on public routes with trailing slash', async () => {
+    const app = makeApp()
+    const res: MockResponse<any> = await invoke(app, 'GET', '/api/public/')
+
+    expect(res.statusCode).toBe(200)
+    expect(requireAuthCalls).toHaveLength(0)
+  })
+
+  test('does not bypass requireAuth for protected methods on same path', async () => {
+    const app = makeApp()
+    const res: MockResponse<any> = await invoke(app, 'POST', '/api/mixed')
+
+    expect(res.statusCode).toBe(200)
+    expect(res._getJSONData().ok).toBe('mixed-protected')
+    expect(requireAuthCalls).toHaveLength(1)
+    expect(requireAuthCalls[0]).toBe('POST /api/mixed')
   })
 
   test('returns 405 for disallowed methods (e.g., PATCH)', async () => {

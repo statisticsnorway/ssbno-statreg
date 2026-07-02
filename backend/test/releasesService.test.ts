@@ -72,19 +72,19 @@ describe('releasesService ', async () => {
     test('sorts by field when sort is provided', async () => {
       setPrismaResult(mockedReleasesPrismaResult)
 
-      const result = await getReleases({ sort: ['publish_time'] }, prismaMock)
+      const result = await getReleases({ sort: 'publish_time' }, prismaMock)
 
       expect(result).toStrictEqual({ releases: mockedReleasesResult, total: 3 })
 
       expect(prismaMock.release.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({ orderBy: [{ publish_time: 'asc' }] })
+        expect.objectContaining({ orderBy: { publish_time: 'asc' } })
       )
     })
 
     test('uses default sort when invalid field is passed', async () => {
       setPrismaResult(mockedReleasesPrismaResult)
 
-      const result = await getReleases({ sort: ['invalid_field'] }, prismaMock)
+      const result = await getReleases({ sort: 'invalid_field' }, prismaMock)
 
       expect(result).toStrictEqual({ releases: mockedReleasesResult, total: 3 })
 
@@ -580,7 +580,7 @@ const mockedReleasesPrismaResult = [
     version: 3,
     publish_time: new Date('2024-10-15T08:00:00Z'),
     desk_appoval_status: 'APPROVED',
-    period_to: new Date('2024-09-01T00:00:00Z'),
+    period_to: new Date('2024-08-31T00:00:00Z'),
     period_from: new Date('2024-08-01T00:00:00Z'),
     variant: {
       frequency: {
@@ -626,8 +626,8 @@ const mockedReleasesPrismaResult = [
     version: 1,
     publish_time: new Date('2026-02-25T08:00:00Z'),
     desk_appoval_status: 'FORSLAG',
-    period_to: new Date('2026-02-21T00:00:00Z'),
-    period_from: new Date('2026-02-15T00:00:00Z'),
+    period_to: new Date('2026-01-01T00:00:00Z'),
+    period_from: new Date('2026-06-30T00:00:00Z'),
     variant: {
       frequency: {
         name: 'Halvår',
@@ -651,7 +651,7 @@ const mockedSingleReleasePrismaResult = {
   version: 3,
   publish_time: new Date('2024-10-15T08:00:00Z'),
   desk_appoval_status: 'APPROVED',
-  period_to: new Date('2024-09-01T00:00:00Z'),
+  period_to: new Date('2024-08-31T00:00:00Z'),
   period_from: new Date('2024-08-01T00:00:00Z'),
   cancelled: false,
   release_date_precision: 'dag',
@@ -678,8 +678,9 @@ const mockedReleasesResult = [
     id: 101,
     publish_time: '2024-10-15T08:00:00.000Z',
     approval_status: 'APPROVED',
-    period_to: '2024-09-01',
+    period_to: '2024-08-31',
     period_from: '2024-08-01',
+    measuring_period_title: 'August 2024',
     frequency: {
       name: 'Måned',
       code: 'M',
@@ -697,6 +698,7 @@ const mockedReleasesResult = [
     approval_status: 'DRAFT',
     period_to: '2024-12-31',
     period_from: '2024-01-01',
+    measuring_period_title: '2024',
     frequency: {
       name: 'År',
       code: 'Y',
@@ -712,8 +714,9 @@ const mockedReleasesResult = [
     id: 103,
     publish_time: '2026-02-25T08:00:00.000Z',
     approval_status: 'FORSLAG',
-    period_to: '2026-02-21',
-    period_from: '2026-02-15',
+    period_to: '2026-01-01',
+    period_from: '2026-06-30',
+    measuring_period_title: '1. halvår 2026',
     frequency: {
       name: 'Halvår',
       code: 'H',
@@ -748,7 +751,7 @@ const mockedSingleReleaseResult = {
     name_en: 'Consumer Price Index',
   },
   period_from: '2024-08-01',
-  period_to: '2024-09-01',
+  period_to: '2024-08-31',
   release_date_precision: 'dag',
   cancelled: false,
 }

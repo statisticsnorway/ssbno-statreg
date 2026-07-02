@@ -1,5 +1,3 @@
-import type { Prisma } from '@/generated/prisma/client'
-
 export function dateToISOString(date: Date | null): string | undefined {
   if (!date) return
 
@@ -79,26 +77,102 @@ export function getDateOnlyAsString(date: Date): string {
   return date.toISOString().slice(0, 10)
 }
 
-export function parseSortInput(
-  sortQuery?: string[],
-  allowedFields?: string[]
-): Prisma.ReleaseOrderByWithRelationInput[] {
-  const allowedSortingFields = new Set(allowedFields ?? [])
+// Eks. "Januar 2026"
+export const formatMonthYear = (date: Date): string => {
+  const monthYear = new Intl.DateTimeFormat('nb-NO', {
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(date)
+  return monthYear.charAt(0).toUpperCase() + monthYear.slice(1)
+}
 
-  if (!sortQuery) return []
+// Eks. "1. januar 2026"
+export const formatDayMonthYear = (date: Date): string => {
+  return new Intl.DateTimeFormat('nb-NO', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(date)
+}
 
-  return sortQuery
-    .map((field) => {
-      const isDesc = field.startsWith('-')
-      const key = isDesc ? field.slice(1) : field
+export function formatYear(isSameDay: boolean, period_from: Date, period_to: Date): string {
+  if (isSameDay && period_from.getDate() === 1 && period_from.getMonth() === 0) {
+    return `Per ${formatDayMonthYear(period_to)}`
+  }
+  if (isSameDay) {
+    return formatDayMonthYear(period_to)
+  }
+  if (period_from.getUTCFullYear() === period_to.getUTCFullYear()) {
+    return `${period_to.getUTCFullYear()}`
+  }
 
-      if (!allowedSortingFields.has(key)) {
-        return null
-      }
+  return `${period_from.getUTCFullYear()}/${period_to.getUTCFullYear()}`
+}
 
-      return {
-        [key]: isDesc ? 'desc' : 'asc',
-      }
-    })
-    .filter((v) => v !== null)
+export const getIsoWeekInfo = (date: Date): { week: number; year: number } => {
+  const utcDate = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()))
+  const day = utcDate.getUTCDay() || 7
+
+  // Shift to Thursday so the ISO week-year can be determined. Each week's year is the Gregorian year in which the Thursday falls.
+  utcDate.setUTCDate(utcDate.getUTCDate() + 4 - day)
+
+  const year = utcDate.getUTCFullYear()
+  const yearStart = new Date(Date.UTC(year, 0, 1))
+  const msPerDay = 24 * 60 * 60 * 1000
+
+  return {
+    week: Math.ceil(((utcDate.getTime() - yearStart.getTime()) / msPerDay + 1) / 7),
+    year,
+  }
+}
+
+export function parseHumanReadableMeasuringPeriod(frequencyCode: string, period_from: Date, period_to: Date): string {
+  const code = frequencyCode.toUpperCase()
+  const MULTI_YEAR_FREQUENCY_CODES = new Set(['2Y', '3Y', '4Y', '5Y', '2A', '3A', '4A', '5A'])
+  const isSameDay =
+    period_from.getUTCFullYear() === period_to.getUTCFullYear() &&
+    period_from.getUTCMonth() === period_to.getUTCMonth() &&
+    period_from.getUTCDate() === period_to.getUTCDate()
+
+  if (code === 'W' || code === 'U') {
+    const { week, year } = getIsoWeekInfo(period_to)
+    return `Uke ${week} ${year}`
+  }
+
+  if (code === 'M') {
+    if (isSameDay) {
+      return formatDayMonthYear(period_to)
+    }
+    return formatMonthYear(period_to)
+  }
+
+  if (code === 'T') {
+    const term = Math.floor(period_to.getUTCMonth() / 2) + 1
+    return `${term}. termin ${period_to.getUTCFullYear()}`
+  }
+
+  if (code === 'K') {
+    if (isSameDay) {
+      return formatDayMonthYear(period_to)
+    }
+    const quarter = Math.floor(period_to.getUTCMonth() / 3) + 1
+    return `${quarter}. kvartal ${period_to.getUTCFullYear()}`
+  }
+
+  if (code === 'H') {
+    const half = Math.floor(period_to.getUTCMonth() / 6) + 1
+    return `${half}. halvår ${period_to.getUTCFullYear()}`
+  }
+
+  if (code === 'Y' || code === 'A') {
+    return formatYear(isSameDay, period_from, period_to)
+  }
+
+  if (MULTI_YEAR_FREQUENCY_CODES.has(code)) {
+    return `${period_from.getUTCFullYear()}-${period_to.getUTCFullYear()}`
+  }
+
+  return `${formatDayMonthYear(period_from)}-${formatDayMonthYear(period_to)}`
 }

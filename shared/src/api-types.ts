@@ -825,7 +825,7 @@ export interface components {
     }
     Contact: {
       readonly name?: string
-      readonly username?: string
+      readonly principalName?: string
     }
     Frequency: {
       name?: string
@@ -869,6 +869,7 @@ export interface components {
         readonly name?: string
         readonly name_en?: string
       }
+      readonly measuring_period_title?: string
     }
     Release_details: components['schemas']['Release_get'] & {
       has_versions?: boolean

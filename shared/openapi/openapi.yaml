@@ -112,7 +112,7 @@ components:
       type: object
       properties:
         name: { type: string, readOnly: true }
-        username: { type: string, readOnly: true }
+        principalName: { type: string, readOnly: true }
 
     Frequency:
       type: object
@@ -176,6 +176,7 @@ components:
                 shortname: { type: string, readOnly: true }
                 name: { type: string, readOnly: true }
                 name_en: { type: string, readOnly: true }
+            measuring_period_title: { type: string, readOnly: true }
 
     Release_details:
       allOf:
