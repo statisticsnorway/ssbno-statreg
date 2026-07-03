@@ -166,12 +166,10 @@ function ListReleases() {
       next.delete('publish_time_after')
       next.delete('publish_time_before')
 
-      if (selectedItems.length) {
-        const shortnameValue = selectedItems.map((item) => item.value).join(',')
+      const shortnameValue = selectedItems.map((item) => item.value).join(',')
 
-        if (shortnameValue) {
-          next.set('shortname', shortnameValue)
-        }
+      if (shortnameValue) {
+        next.set('shortname', shortnameValue)
       }
 
       return next
