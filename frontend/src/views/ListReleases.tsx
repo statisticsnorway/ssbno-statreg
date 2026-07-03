@@ -39,7 +39,7 @@ function useMediaQuery(mediaQuery: string): boolean {
 }
 
 function ListReleases() {
-  const [searchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   const shortnamesQuery = searchParams.get('shortname')
   const [rowCount, setRowCount] = useState(10)
   const [start, setStart] = useState(0)
@@ -52,7 +52,7 @@ function ListReleases() {
 
   const [selectedShortnames, setSelectedShortnames] = useState<SuggestionItem[]>([])
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
-  const [sortBy, setSortBy] = useState<string>('-publish_time')
+  const sortQuery = searchParams.get('sort')
 
   const { auth } = useAuth()
   const isUltraWideDesktop = useMediaQuery('(min-width: 1920px)')
@@ -85,8 +85,8 @@ function ListReleases() {
         setTotal(data.total ?? 0)
       }
     }
-    fetchReleases(start, rowCount, selectedShortnames, sortBy, selectedDate)
-  }, [start, rowCount, selectedShortnames, sortBy, selectedDate])
+    fetchReleases(start, rowCount, selectedShortnames, sortQuery ?? '', selectedDate)
+  }, [start, rowCount, selectedShortnames, sortQuery, selectedDate])
 
   useEffect(() => {
     async function fetchShortnames() {
@@ -133,6 +133,18 @@ function ListReleases() {
   function filterChanged(selected: SuggestionItem[]) {
     setSelectedShortnames(selected)
     setSelectedDate(undefined)
+  }
+
+  function onSortChange(newSortBy: string) {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      if (newSortBy) {
+        next.set('sort', newSortBy)
+      } else {
+        next.delete('sort')
+      }
+      return next
+    })
   }
 
   function renderCalendarList() {
@@ -238,8 +250,8 @@ function ListReleases() {
         total={total}
         releases={releases}
         setCurrentPage={setCurrentPage}
-        sortBy={sortBy}
-        setSortBy={setSortBy}
+        sortBy={sortQuery ?? undefined}
+        setSortBy={onSortChange}
       />
     </>
   )

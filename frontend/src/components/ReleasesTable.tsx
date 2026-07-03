@@ -1,4 +1,3 @@
-import { type SetStateAction, type Dispatch } from 'react'
 import { Table } from '@digdir/designsystemet-react'
 
 import { type ReleaseListing } from '@ssbno-statreg/shared'
@@ -21,7 +20,7 @@ type ReleaseRowProps = {
 type ReleaseTableProps = {
   releases: ReleaseListing[]
   sortBy?: string
-  setSortBy?: Dispatch<SetStateAction<string>>
+  setSortBy?: (sortBy: string) => void
   openInNewTab?: boolean
 }
 
@@ -31,7 +30,7 @@ const TABLE_HEADER_CELLS = [
   { label: 'Kortnavn', field: 'statistic.shortname' },
   { label: 'Statistikknavn', field: 'statistic.name' },
   { label: 'Variant', field: 'frequency.name' },
-  { label: 'Måleperiodetittel' },
+  { label: 'Måleperiodetittel', field: 'measuring_period_title' },
   { label: 'Målperiode fra', field: 'period_from' },
   { label: 'Måleperiode til', field: 'period_to' },
   { label: 'Publiseringsdato', sortable: true, field: 'publish_time' },
@@ -62,7 +61,7 @@ function ReleaseRow({ release, openInNewTab }: Readonly<ReleaseRowProps>) {
       </Table.Cell>
       <TruncatedTableCell value={release.statistic?.name} />
       <Table.Cell>{release.frequency?.name ?? ''}</Table.Cell>
-      <Table.Cell>TBA</Table.Cell>
+      <Table.Cell>{release.measuring_period_title ?? ''}</Table.Cell>
       <Table.Cell>{formatDate(release.period_from)}</Table.Cell>
       <Table.Cell>{formatDate(release.period_to)}</Table.Cell>
       <Table.Cell>{formatPublishTime(release.publish_time)}</Table.Cell>

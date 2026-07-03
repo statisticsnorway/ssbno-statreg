@@ -174,20 +174,20 @@ describe('statisticService', () => {
         {
           testCase: 'one contact initial',
           input: {
-            filterByContactInitials: ['abc'],
+            filterByContactPrincipalName: ['abc@ssb.no'],
           },
         },
         {
           testCase: 'several contact initials',
           input: {
-            filterByContactInitials: ['abc', 'bcd'],
+            filterByContactPrincipalName: ['abc@ssb.no', 'bcd@ssb.no'],
           },
         },
         {
           testCase: 'shortnames and contact initials',
           input: {
             filterByShortnames: ['KPI', 'energ'],
-            filterByContactInitials: ['abc'],
+            filterByContactPrincipalName: ['abc@ssb.no'],
           },
         },
         {
@@ -268,12 +268,12 @@ describe('statisticService', () => {
         {
           testCase: 'one contact initial',
           input: {
-            filterByContactInitials: ['abc'],
+            filterByContactPrincipalName: ['abc@ssb.no'],
           },
           expectedWhere: {
             responsiblePersons: {
               some: {
-                username: { in: ['abc'] },
+                principalName: { in: ['abc@ssb.no'] },
               },
             },
           },
@@ -281,12 +281,12 @@ describe('statisticService', () => {
         {
           testCase: 'several contact initials',
           input: {
-            filterByContactInitials: ['abc', 'bcd'],
+            filterByContactPrincipalName: ['abc@ssb.no', 'bcd@ssb.no'],
           },
           expectedWhere: {
             responsiblePersons: {
               some: {
-                username: { in: ['abc', 'bcd'] },
+                principalName: { in: ['abc@ssb.no', 'bcd@ssb.no'] },
               },
             },
           },
@@ -295,7 +295,7 @@ describe('statisticService', () => {
           testCase: 'shortnames and contact initials',
           input: {
             filterByShortnames: ['KPI', 'energ'],
-            filterByContactInitials: ['abc'],
+            filterByContactPrincipalName: ['abc@ssb.no'],
           },
           expectedWhere: {
             OR: [
@@ -312,7 +312,7 @@ describe('statisticService', () => {
             ],
             responsiblePersons: {
               some: {
-                username: { in: ['abc'] },
+                principalName: { in: ['abc@ssb.no'] },
               },
             },
           },

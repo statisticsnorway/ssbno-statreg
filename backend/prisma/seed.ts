@@ -98,11 +98,9 @@ async function main() {
   console.log('Created shortnames from seed: \n' + shortname1 + shortname2 + shortname3 + shortname4 + shortname5)
 
   const responsiblePerson1 = await prisma.responsiblePerson.upsert({
-    where: { email: 'alice@ssb.no' },
+    where: { principalName: 'alice@ssb.no' },
     update: {},
     create: {
-      email: 'alice@ssb.no',
-      username: 'abc',
       principalName: 'abc@ssb.no',
     },
   })
@@ -110,11 +108,9 @@ async function main() {
   console.log('Created responsiblePerson1: \n' + JSON.stringify(responsiblePerson1, null, 2))
 
   const responsiblePerson2 = await prisma.responsiblePerson.upsert({
-    where: { email: 'bob@ssb.no' },
+    where: { principalName: 'bob@ssb.no' },
     update: {},
     create: {
-      email: 'bob@ssb.no',
-      username: 'bcd',
       principalName: 'bcd@ssb.no',
     },
   })
@@ -122,11 +118,9 @@ async function main() {
   console.log('Created responsiblePerson2: \n' + JSON.stringify(responsiblePerson2, null, 2))
 
   const responsiblePerson3 = await prisma.responsiblePerson.upsert({
-    where: { email: 'carol@ssb.no' },
+    where: { principalName: 'carol@ssb.no' },
     update: {},
     create: {
-      email: 'carol@ssb.no',
-      username: 'cde',
       principalName: 'cde@ssb.no',
     },
   })
@@ -145,7 +139,7 @@ async function main() {
       },
       responsiblePersons: {
         connect: {
-          email: responsiblePerson1.email,
+          principalName: responsiblePerson1.principalName,
         },
       },
       dir_appoval_status: 'GODKJENT',
@@ -185,7 +179,7 @@ async function main() {
       },
       responsiblePersons: {
         connect: {
-          email: responsiblePerson2.email,
+          principalName: responsiblePerson2.principalName,
         },
       },
       dir_appoval_status: 'GODKJENT',
@@ -222,7 +216,7 @@ async function main() {
       },
       responsiblePersons: {
         connect: {
-          email: responsiblePerson1.email,
+          principalName: responsiblePerson1.principalName,
         },
       },
       dir_appoval_status: 'GODKJENT',
@@ -256,7 +250,7 @@ async function main() {
       },
       responsiblePersons: {
         connect: {
-          email: responsiblePerson3.email,
+          principalName: responsiblePerson3.principalName,
         },
       },
       dir_appoval_status: 'GODKJENT',
@@ -294,7 +288,7 @@ async function main() {
       },
       responsiblePersons: {
         connect: {
-          email: responsiblePerson2.email,
+          principalName: responsiblePerson2.principalName,
         },
       },
       dir_appoval_status: 'GODKJENT',

@@ -263,7 +263,9 @@ describe('statisticsController integration', () => {
   })
 
   test('GET /statistics with contact filter and sort', async () => {
-    const response = await request(app).get('/statistikkregisteret/api/statistics').query('contact=abc&sort=shortname')
+    const response = await request(app)
+      .get('/statistikkregisteret/api/statistics')
+      .query('contact=abc@ssb.no&sort=shortname')
 
     expect(response.status).toBe(200)
 

@@ -235,6 +235,7 @@ describe('entraReaderClient ', () => {
 ////////////// MOCK DATA ////////////////////////////////
 
 const entraUsersResult = {
-  firstPageUrl: '/users?$select=displayName,businessPhones,mail,userPrincipalName&$top=999',
+  firstPageUrl:
+    '/users?$filter=accountEnabled eq true&$select=displayName,businessPhones,mail,userPrincipalName&$top=999',
   nextPageUrl: '/users?$skiptoken=next-page-token',
 }
