@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useSyncExternalStore } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 import { useSearchParams, Link as ReactRouterLink } from 'react-router'
 import {
   Heading,
@@ -41,7 +41,6 @@ function useMediaQuery(mediaQuery: string): boolean {
 function ListReleases() {
   const [searchParams, setSearchParams] = useSearchParams()
   const shortnamesQuery = searchParams.get('shortname')
-  const publishTimeAfterQuery = searchParams.get('publish_time_after')
   const [rowCount, setRowCount] = useState(10)
   const [start, setStart] = useState(0)
   const [releases, setReleases] = useState<ReleaseListing[]>([])
@@ -53,11 +52,7 @@ function ListReleases() {
 
   const [selectedShortnames, setSelectedShortnames] = useState<SuggestionItem[]>([])
   const sortQuery = searchParams.get('sort')
-  const selectedDate = useMemo(
-    () => (publishTimeAfterQuery ? new Date(publishTimeAfterQuery) : undefined),
-    [publishTimeAfterQuery]
-  )
-  const hasValidSelectedDate = selectedDate && !Number.isNaN(selectedDate.getTime())
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
 
   const { auth } = useAuth()
   const isUltraWideDesktop = useMediaQuery('(min-width: 1920px)')
@@ -90,8 +85,8 @@ function ListReleases() {
         setTotal(data.total ?? 0)
       }
     }
-    fetchReleases(start, rowCount, selectedShortnames, sortQuery ?? '', hasValidSelectedDate ? selectedDate : undefined)
-  }, [start, rowCount, selectedShortnames, sortQuery, hasValidSelectedDate, selectedDate])
+    fetchReleases(start, rowCount, selectedShortnames, sortQuery ?? '', selectedDate)
+  }, [start, rowCount, selectedShortnames, sortQuery, selectedDate])
 
   useEffect(() => {
     async function fetchShortnames() {
@@ -134,27 +129,7 @@ function ListReleases() {
   }
 
   function onSelectDate(date?: Date) {
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev)
-      next.delete('shortname')
-
-      if (!date) {
-        next.delete('publish_time_after')
-        next.delete('publish_time_before')
-        return next
-      }
-
-      const publishTimeFilter = getPublishTimeFilterForDate(date)
-      const publishTimeAfter = publishTimeFilter.publish_time_after
-      const publishTimeBefore = publishTimeFilter.publish_time_before
-
-      if (publishTimeAfter && publishTimeBefore) {
-        next.set('publish_time_after', publishTimeAfter)
-        next.set('publish_time_before', publishTimeBefore)
-      }
-
-      return next
-    })
+    setSelectedDate(date ?? undefined)
     setSelectedShortnames([])
   }
 
@@ -165,8 +140,6 @@ function ListReleases() {
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev)
       next.delete('shortname')
-      next.delete('publish_time_after')
-      next.delete('publish_time_before')
 
       if (selectedItems.length > 0) {
         const shortnameValue = selectedItems.map((item) => item.value).join(',')
