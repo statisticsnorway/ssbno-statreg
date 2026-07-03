@@ -157,7 +157,7 @@ function ListReleases() {
 
   function onFilterChange(selected: SuggestionItem | SuggestionItem[] | null) {
     if (!selected) return
-    const selectedItems = !Array.isArray(selected) ? [selected] : selected
+    const selectedItems = Array.isArray(selected) ? selected : [selected]
 
     setSelectedShortnames(selectedItems)
     setSearchParams((prev) => {
