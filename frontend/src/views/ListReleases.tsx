@@ -136,7 +136,7 @@ function ListReleases() {
         next.delete('publish_time_after')
         next.delete('publish_time_before')
 
-        if (shortnames.length > 0) {
+        if (shortnames.length) {
           next.set('shortname', shortnames.join(','))
         }
       }
@@ -181,10 +181,11 @@ function ListReleases() {
   }
 
   function onFilterChange(selected: SuggestionItem | SuggestionItem[] | null) {
-    const items = !selected ? [] : Array.isArray(selected) ? selected : [selected]
+    if (!selected) return
+    const selectedShortnames = Array.isArray(selected) ? selected : [selected]
 
     updateFilters({
-      shortnames: items.map((item) => item.value),
+      shortnames: selectedShortnames.map((item) => item.value),
     })
   }
 
