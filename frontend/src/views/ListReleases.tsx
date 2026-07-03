@@ -1,4 +1,4 @@
-import { useEffect, useState, useSyncExternalStore } from 'react'
+import { useEffect, useMemo, useState, useSyncExternalStore } from 'react'
 import { useSearchParams, Link as ReactRouterLink } from 'react-router'
 import {
   Heading,
@@ -41,6 +41,7 @@ function useMediaQuery(mediaQuery: string): boolean {
 function ListReleases() {
   const [searchParams, setSearchParams] = useSearchParams()
   const shortnamesQuery = searchParams.get('shortname')
+  const publishTimeAfterQuery = searchParams.get('publish_time_after')
   const [rowCount, setRowCount] = useState(10)
   const [start, setStart] = useState(0)
   const [releases, setReleases] = useState<ReleaseListing[]>([])
@@ -52,8 +53,10 @@ function ListReleases() {
 
   const [selectedShortnames, setSelectedShortnames] = useState<SuggestionItem[]>([])
   const sortQuery = searchParams.get('sort')
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
-
+  const selectedDate = useMemo(
+    () => (publishTimeAfterQuery ? new Date(publishTimeAfterQuery) : undefined),
+    [publishTimeAfterQuery]
+  )
   const { auth } = useAuth()
   const isUltraWideDesktop = useMediaQuery('(min-width: 1920px)')
 
@@ -129,19 +132,41 @@ function ListReleases() {
   }
 
   function onSelectDate(date?: Date) {
-    setSelectedDate(date ?? undefined)
-    setSelectedShortnames([])
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      next.delete('shortname')
+
+      if (!date) {
+        next.delete('publish_time_after')
+        next.delete('publish_time_before')
+        return next
+      }
+
+      const publishTimeFilter = getPublishTimeFilterForDate(date)
+      const publishTimeAfter = publishTimeFilter.publish_time_after
+      const publishTimeBefore = publishTimeFilter.publish_time_before
+
+      if (publishTimeAfter && publishTimeBefore) {
+        next.set('publish_time_after', publishTimeAfter)
+        next.set('publish_time_before', publishTimeBefore)
+      }
+
+      return next
+    })
   }
 
   function onFilterChange(selected: SuggestionItem | SuggestionItem[] | null) {
-    const selectedItems = !selected ? [] : Array.isArray(selected) ? selected : [selected]
+    if (!selected) return
+    const selectedItems = !Array.isArray(selected) ? [selected] : selected
 
     setSelectedShortnames(selectedItems)
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev)
       next.delete('shortname')
+      next.delete('publish_time_after')
+      next.delete('publish_time_before')
 
-      if (selectedItems.length > 0) {
+      if (selectedItems.length) {
         const shortnameValue = selectedItems.map((item) => item.value).join(',')
 
         if (shortnameValue) {
