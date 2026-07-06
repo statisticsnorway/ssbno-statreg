@@ -22,7 +22,7 @@
     "test:integration": "vitest run --project integration"
   },
   "dependencies": {
-    "@cacheable/node-cache": "^3.0.1",
+    "@cacheable/node-cache": "^3.1.1",
     "@prisma/adapter-pg": "7.8.0",
     "@prisma/client": "7.8.0",
     "@ssbno-statreg/shared": "*",
@@ -33,7 +33,7 @@
     "jose": "6.2.3",
     "lightship": "9.0.4",
     "swagger-ui-express": "5.0.1",
-    "tsx": "4.22.4",
+    "tsx": "4.23.0",
     "yaml": "2.9.0"
   },
   "devDependencies": {
