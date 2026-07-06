@@ -36,7 +36,7 @@ function App() {
           <Route path='opprett' element={<CreateBlockedDate />} />
         </Route>
 
-        <Route path='mine-saker' element={<MyPage />} />
+        <Route path='oppgaver' element={<MyPage />} />
       </Route>
     </Routes>
   )

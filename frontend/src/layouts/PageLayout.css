@@ -25,6 +25,13 @@
       align-items: center;
       column-gap: var(--ds-size-5);
     }
+
+    .header-user-info {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      column-gap: var(--ds-size-3);
+    }
   }
 }
 
