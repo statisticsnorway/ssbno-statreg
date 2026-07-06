@@ -67,6 +67,15 @@ describe('release data is persisted when ', () => {
   })
 })
 
+describe('release listing can be filtered by approval status', () => {
+  test('returns only releases with GODKJENT approval status', async () => {
+    const response = await request(app).get('/statistikkregisteret/api/releases?approval_status=GODKJENT')
+    expect(response.status).toBe(200)
+    expect(response.body.total).toBeGreaterThan(0)
+    expect(response.body.releases.every((release: any) => release.approval_status === 'GODKJENT')).toBe(true)
+  })
+})
+
 function addMonthsToDate(date: string, months: number): string {
   const d = new Date(date)
   d.setMonth(d.getMonth() + months)

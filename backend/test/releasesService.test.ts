@@ -289,11 +289,21 @@ describe('releasesService ', async () => {
           },
         },
         {
-          testCase: 'shortnames, publishtime after and publish time before',
+          testCase: 'approval status',
+          input: {
+            filterByApprovalStatus: 'FORSLAG',
+          },
+          expectedWhere: {
+            desk_appoval_status: 'FORSLAG',
+          },
+        },
+        {
+          testCase: 'shortnames, publishtime after, publish time before and approval status',
           input: {
             filterByShortnames: ['KPI', 'energ'],
             filterByBeforePublishDate: new Date('2027-01-01T00:00Z'),
             filterByAfterPublishDate: new Date('2026-12-24T23:59Z'),
+            filterByApprovalStatus: 'GODKJENT',
           },
           expectedWhere: {
             OR: [
@@ -320,6 +330,7 @@ describe('releasesService ', async () => {
               gte: new Date('2026-12-24T23:59:00.000Z'),
               lte: new Date('2027-01-01T00:00:00.000Z'),
             },
+            desk_appoval_status: 'GODKJENT',
           },
         },
       ])('$testCase', async ({ input, expectedWhere }) => {

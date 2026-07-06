@@ -31,9 +31,10 @@ export default function releasesController(router: Router) {
       const publishTimeBefore = req.query?.publish_time_before?.toString()
       const sort = typeof req.query?.sort == 'string' ? req?.query?.sort : undefined
       const filterByShortnames = ensureStringArray(req.query.shortname as string)
+      const approvalStatus = ensureString(req.query.approval_status as string)
 
       const data = await getFilteredReleases(
-        { start, count, filterByShortnames, publishTimeAfter, publishTimeBefore, sort },
+        { start, count, filterByShortnames, publishTimeAfter, publishTimeBefore, sort, approvalStatus },
         prisma
       )
       res.json(data)
