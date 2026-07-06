@@ -1,3 +1,4 @@
+import { Heading } from '@digdir/designsystemet-react'
 import { useAuth } from '../context/AuthContext'
 import ErrorPage, { ErrorType } from './ErrorPage'
 
@@ -6,5 +7,11 @@ export default function MyPage() {
 
   if (!auth?.isAdmin) return <ErrorPage type={ErrorType.NOTAUTH} />
 
-  return <h1>MyPage will be served here!</h1>
+  return (
+    <div>
+      <Heading level={2} data-size='sm'>
+        Oppgaver
+      </Heading>
+    </div>
+  )
 }
