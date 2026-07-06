@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest'
 import { createApp } from '@/app'
 import request from 'supertest'
+import { ReleaseListing } from '@ssbno-statreg/shared'
 
 const app = await createApp()
 
@@ -72,7 +73,7 @@ describe('release listing can be filtered by approval status', () => {
     const response = await request(app).get('/statistikkregisteret/api/releases?approval_status=GODKJENT')
     expect(response.status).toBe(200)
     expect(response.body.total).toBeGreaterThan(0)
-    expect(response.body.releases.every((release: any) => release.approval_status === 'GODKJENT')).toBe(true)
+    expect(response.body.releases.every((release: ReleaseListing) => release.approval_status === 'GODKJENT')).toBe(true)
   })
 })
 
