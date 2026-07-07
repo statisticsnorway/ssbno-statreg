@@ -606,7 +606,7 @@ paths:
                           description: Id of the release that was processed
                           type: integer
                         status:
-                          description: HTTP status code for the release
+                          description: HTTP status code for the approval request of a release
                           type: integer
                       required:
                         - id
