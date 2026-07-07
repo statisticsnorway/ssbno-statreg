@@ -17,6 +17,7 @@ import {
   formatDayMonthYear,
   formatYear,
   getIsoWeekInfo,
+  ensureIntegerArray,
 } from '@/lib/utils'
 import { describe, test, expect } from 'vitest'
 
@@ -160,6 +161,29 @@ describe('utils', () => {
       // @ts-expect-error testing non-string input
       const result = ensureStringArray([123])
       expect(result).toEqual([])
+    })
+  })
+
+  describe('ensureIntegerArray', () => {
+    test('returns array of numbers when passed an array of integers', () => {
+      const result = ensureIntegerArray([1, 2, 3])
+      expect(result).toEqual([1, 2, 3])
+    })
+
+    test('returns array of numbers when passed an array of numeric strings', () => {
+      const result = ensureIntegerArray(['1', '2', '3'])
+      expect(result).toEqual([1, 2, 3])
+    })
+
+    test('returns empty array when passed an empty array', () => {
+      const result = ensureIntegerArray([])
+      expect(result).toEqual([])
+    })
+
+    test('throws error when value is not an array', () => {
+      expect(() => ensureIntegerArray('not an array', 'ids')).toThrow({
+        statregError: "Invalid format for field 'ids'. Expected an array of integers.",
+      })
     })
   })
 

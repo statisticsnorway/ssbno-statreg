@@ -52,6 +52,14 @@ export function parseId(id: string | number, fieldName?: string): number {
   return Number(id)
 }
 
+export function ensureIntegerArray(value: unknown, fieldName = ''): number[] {
+  if (!Array.isArray(value) || value.some((item) => !isNumber(item))) {
+    throw { statregError: `Invalid format for field '${fieldName}'. Expected an array of integers.` }
+  }
+
+  return value.map(Number)
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function ensureRequiredFieldsExists<T extends Record<string, any>>(
   body: T | undefined,
