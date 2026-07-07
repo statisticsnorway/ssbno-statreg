@@ -19,7 +19,7 @@ import { PaginatedReleasesTable } from '../components/ReleasesTable'
 import { ErrorAlert } from '../components/ErrorAlert'
 import ErrorPage, { ErrorType } from './ErrorPage'
 
-import type { ReleaseListing, ShortnameListing } from '@ssbno-statreg/shared'
+import { ApprovalStatus, type ReleaseListing, type ShortnameListing } from '@ssbno-statreg/shared'
 
 export default function Tasks() {
   const [searchParams] = useSearchParams()
@@ -27,6 +27,7 @@ export default function Tasks() {
   const [rowCount, setRowCount] = useState(10)
   const [start, setStart] = useState(0)
   const [releases, setReleases] = useState<ReleaseListing[]>([])
+  const [pendingReleases, setPendingReleases] = useState<ReleaseListing[]>([])
   const [total, setTotal] = useState(0)
   const [shortnames, setShortnames] = useState<ShortnameListing[]>([])
   const [apiError, setApiError] = useState<string[]>([])
@@ -36,6 +37,27 @@ export default function Tasks() {
 
   const { auth } = useAuth()
   const isAdmin = auth?.isAdmin
+
+  useEffect(() => {
+    if (!isAdmin) return
+    async function fetchPendingReleases(start: number, count: number, sortBy: string) {
+      const sort = sortBy
+      const { data, error } = await client.GET('/releases', {
+        params: { query: { start, count, approval_status: ApprovalStatus['PENDING'], sort } },
+      })
+
+      if (error) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const errorMessage = (error as any).error
+        console.log(errorMessage)
+        setApiError((prev) => [...prev, errorMessage])
+      } else {
+        setPendingReleases(data.releases ?? [])
+        setTotal(data.total ?? 0)
+      }
+    }
+    fetchPendingReleases(start, rowCount, sortBy)
+  }, [isAdmin, start, rowCount, sortBy])
 
   useEffect(() => {
     if (!isAdmin) return
@@ -105,6 +127,8 @@ export default function Tasks() {
   function filterChanged(selected: SuggestionItem[]) {
     setSelectedShortnames(selected)
   }
+
+  console.log(pendingReleases)
 
   if (!isAdmin) return <ErrorPage type={ErrorType.NOTAUTH} />
 
