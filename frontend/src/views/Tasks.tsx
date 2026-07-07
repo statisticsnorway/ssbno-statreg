@@ -11,6 +11,8 @@ import {
 
 import client from '../api'
 
+import './ListReleases.css'
+
 import { useAuth } from '../context/AuthContext'
 import { RowCountSelect } from '../components/RowCountSelect'
 import { PaginatedReleasesTable } from '../components/ReleasesTable'
@@ -153,14 +155,7 @@ export default function Tasks() {
       <Heading level={3} data-size='xs'>
         Publiseringsoversikt
       </Heading>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          marginBottom: 'var(--ds-size-8)',
-          width: '100%',
-        }}
-      >
+      <div className='list-releases-filter-container'>
         <Field>
           <Label>Søk og filtrer</Label>
           <Suggestion multiple onSelectedChange={(selected) => onFilterChange(selected)} selected={selectedShortnames}>
