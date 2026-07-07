@@ -485,7 +485,7 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  '/releases/approve': {
+  '/releases/bulk-approve': {
     parameters: {
       query?: never
       header?: never

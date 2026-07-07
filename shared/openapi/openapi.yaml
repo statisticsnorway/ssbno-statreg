@@ -569,7 +569,7 @@ paths:
                     type: array
                     items: { $ref: '#/components/schemas/Release_listing' }
 
-  /releases/approve:
+  /releases/bulk-approve:
     post:
       summary: Bulk approve releases
       tags: [releases]
