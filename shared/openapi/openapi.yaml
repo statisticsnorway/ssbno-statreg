@@ -560,6 +560,29 @@ paths:
                   releases:
                     type: array
                     items: { $ref: '#/components/schemas/Release_listing' }
+
+  /releases/approve:
+    patch:
+      summary: Bulk approve releases
+      tags: [releases]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  type: array
+                  description: Release ids to approve
+                  items:
+                    type: integer
+              required:
+                - ids
+      responses:
+        '204':
+          description: Releases approved successfully
+
   /releases/{id}:
     get:
       summary: Get release by id
@@ -703,24 +726,23 @@ paths:
                 type: array
                 items: { $ref: '#/components/schemas/Blocked_release_date' }
   /auth/authenticate:
-      get:
-        summary: Check authentication status and information for current user. Used for controlling front-end behaviour, not security.
-        tags: [authentication]
-        responses: 
-          '200': 
-            description: Object with admin-status, user info
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    isAdmin:
-                      type: boolean
-                      example: true
-                    email: 
-                      type: string
-                      example: alice@example.com
-                    fullName:
-                      type: string
-                      example: Alice Examplesdottir
-
+    get:
+      summary: Check authentication status and information for current user. Used for controlling front-end behaviour, not security.
+      tags: [authentication]
+      responses:
+        '200':
+          description: Object with admin-status, user info
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isAdmin:
+                    type: boolean
+                    example: true
+                  email:
+                    type: string
+                    example: alice@example.com
+                  fullName:
+                    type: string
+                    example: Alice Examplesdottir
