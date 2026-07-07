@@ -253,14 +253,7 @@ function ListReleases() {
         </div>
         {renderCalendarList()}
       </div>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          marginBottom: 'var(--ds-size-8)',
-          width: '100%',
-        }}
-      >
+      <div className='list-releases-filter-container'>
         <Field>
           <Label>Filtrer publiseringer</Label>
           {selectedDate && (

@@ -10,7 +10,7 @@ import CreateStatistic from './views/CreateStatistic'
 import EditStatistic from './views/EditStatistic'
 import ListBlockedDates from './views/ListBlockedDates'
 import CreateBlockedDate from './views/CreateBlockedDate'
-import MyPage from './views/MyPage'
+import Tasks from './views/Tasks'
 
 function App() {
   return (
@@ -36,7 +36,7 @@ function App() {
           <Route path='opprett' element={<CreateBlockedDate />} />
         </Route>
 
-        <Route path='mine-saker' element={<MyPage />} />
+        <Route path='oppgaver' element={<Tasks />} />
       </Route>
     </Routes>
   )

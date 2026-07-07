@@ -9,6 +9,10 @@ const Header = () => {
   const { auth } = useAuth()
   const firstNameLetter = auth?.fullName?.charAt(0)
 
+  function renderAvatar() {
+    return <Avatar aria-label={auth?.fullName ?? ''} initials={firstNameLetter} />
+  }
+
   return (
     <div id='header'>
       <div className='header-content' data-color='brand1' data-size='sm'>
@@ -16,12 +20,17 @@ const Header = () => {
         <div className='header-links'>
           <Link href='/statistikkregisteret/'>Publisering</Link>
           <Link href='/statistikkregisteret/statistikk'>Statistikker</Link>
-          {auth?.isAdmin && (
+          {auth?.isAdmin ? (
             <Button variant='tertiary' asChild>
-              <ReactRouterLink to='/mine-saker' reloadDocument>
-                Mine saker <Avatar aria-label={auth?.fullName ?? ''} initials={firstNameLetter} />
+              <ReactRouterLink to='/oppgaver' reloadDocument>
+                Oppgaver {renderAvatar()}
               </ReactRouterLink>
             </Button>
+          ) : (
+            <div className='header-user-info'>
+              {auth?.email?.split('@')[0] ?? ''}
+              {renderAvatar()}
+            </div>
           )}
         </div>
       </div>
