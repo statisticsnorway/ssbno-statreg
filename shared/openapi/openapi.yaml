@@ -603,7 +603,7 @@ paths:
                       type: object
                       properties:
                         id:
-                          description: Id of the release that was processed
+                          description: The identifier of the release to approve.
                           type: integer
                         status:
                           description: HTTP status code for the approval request of a release
