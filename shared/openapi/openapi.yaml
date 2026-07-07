@@ -587,6 +587,8 @@ paths:
                     type: integer
               required:
                 - ids
+            example:
+              ids: [1, 2, 3]
       responses:
         '207':
           description: List of status codes for each processed release.

@@ -504,6 +504,15 @@ export interface paths {
       }
       requestBody: {
         content: {
+          /**
+           * @example {
+           *       "ids": [
+           *         1,
+           *         2,
+           *         3
+           *       ]
+           *     }
+           */
           'application/json': {
             /** @description Release ids to approve */
             ids: number[]
