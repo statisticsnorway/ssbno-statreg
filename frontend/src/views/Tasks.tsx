@@ -6,6 +6,8 @@ import {
   Field,
   Label,
   Checkbox,
+  Badge,
+  Tabs,
   Table,
   EXPERIMENTAL_Suggestion as Suggestion,
   type SuggestionItem,
@@ -24,14 +26,12 @@ import ErrorPage, { ErrorType } from './ErrorPage'
 
 import { ApprovalStatus, type ReleaseListing, type ShortnameListing } from '@ssbno-statreg/shared'
 
-type ReleaseRowProps = {
+type PendingReleaseRowProps = {
   pendingRelease: ReleaseListing
 }
 
-type ReleaseTableProps = {
+type PendingReleaseTableProps = {
   pendingReleases: ReleaseListing[]
-  sortBy?: string
-  setSortBy?: (sortBy: string) => void
 }
 
 const TABLE_HEADER_CELLS = [
@@ -44,7 +44,7 @@ const TABLE_HEADER_CELLS = [
   { label: 'Publiseringsdato', sortable: true, field: 'publish_time' },
 ]
 
-function ReleaseRow({ pendingRelease }: Readonly<ReleaseRowProps>) {
+function ReleaseRow({ pendingRelease }: Readonly<PendingReleaseRowProps>) {
   const statisticsShortname = pendingRelease.statistic?.shortname ?? ''
   return (
     <Table.Row key={`${pendingRelease.publish_time}-${pendingRelease.id}`} className='selectable-row'>
@@ -61,7 +61,7 @@ function ReleaseRow({ pendingRelease }: Readonly<ReleaseRowProps>) {
   )
 }
 
-function PendingReleasesTable({ pendingReleases }: Readonly<ReleaseTableProps>) {
+function PendingReleasesTable({ pendingReleases }: Readonly<PendingReleaseTableProps>) {
   return (
     <Table>
       <Table.Head>
@@ -196,7 +196,16 @@ export default function Tasks() {
         Oppgaver
       </Heading>
 
-      <PendingReleasesTable pendingReleases={pendingReleases} />
+      <Tabs defaultValue='pending-releases' style={{ width: '100%' }}>
+        <Tabs.List>
+          <Tabs.Tab value='pending-releases'>
+            Publiseringsdatoer <Badge data-color='danger' count={pendingReleases?.length ?? 0} />
+          </Tabs.Tab>
+        </Tabs.List>
+        <Tabs.Panel value='pending-releases' style={{ paddingLeft: '0', paddingRight: '0' }}>
+          <PendingReleasesTable pendingReleases={pendingReleases} />
+        </Tabs.Panel>
+      </Tabs>
       <Divider />
 
       <Heading level={3} data-size='xs'>
