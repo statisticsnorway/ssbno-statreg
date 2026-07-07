@@ -514,7 +514,7 @@ export interface paths {
            *     }
            */
           'application/json': {
-            /** @description Release ids to approve */
+            /** @description The identifiers of the releases to approve. */
             ids: number[]
           }
         }
@@ -546,9 +546,9 @@ export interface paths {
              */
             'application/json': {
               releases: {
-                /** @description Id of the release that was processed */
+                /** @description The identifier of the release to approve. */
                 id: number
-                /** @description HTTP status code for the release */
+                /** @description HTTP status code for the approval request of a release. */
                 status: number
               }[]
             }

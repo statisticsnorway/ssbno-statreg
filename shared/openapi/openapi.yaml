@@ -582,7 +582,7 @@ paths:
               properties:
                 ids:
                   type: array
-                  description: Release ids to approve
+                  description: The identifiers of the releases to approve.
                   items:
                     type: integer
               required:
@@ -606,7 +606,7 @@ paths:
                           description: The identifier of the release to approve.
                           type: integer
                         status:
-                          description: HTTP status code for the approval request of a release
+                          description: HTTP status code for the approval request of a release.
                           type: integer
                       required:
                         - id
