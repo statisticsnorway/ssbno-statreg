@@ -33,8 +33,7 @@ export default function Tasks() {
   const [apiError, setApiError] = useState<string[]>([])
 
   const { auth } = useAuth()
-
-  if (!auth?.isAdmin) return <ErrorPage type={ErrorType.NOTAUTH} />
+  const isAdmin = auth?.isAdmin
 
   const selectedShortnames = useMemo<SuggestionItem[]>(() => {
     if (!shortnamesQuery) return []
@@ -59,6 +58,7 @@ export default function Tasks() {
 
   useEffect(() => {
     async function fetchReleases() {
+      if (!isAdmin) return
       const { data, error } = await client.GET('/releases', {
         params: {
           query: releaseQuery,
@@ -76,10 +76,11 @@ export default function Tasks() {
       }
     }
     fetchReleases()
-  }, [releaseQuery])
+  }, [isAdmin, releaseQuery])
 
   useEffect(() => {
     async function fetchShortnames() {
+      if (!isAdmin) return
       const { data, error } = await client.GET('/shortnames')
       if (error) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -91,7 +92,7 @@ export default function Tasks() {
       }
     }
     fetchShortnames()
-  }, [])
+  }, [isAdmin])
 
   function updateRowCount(newCount: number) {
     setRowCount(newCount)
@@ -140,6 +141,8 @@ export default function Tasks() {
       shortnames: selectedShortnames.map((item) => item.value),
     })
   }
+
+  if (!isAdmin) return <ErrorPage type={ErrorType.NOTAUTH} />
 
   return (
     <>
