@@ -61,6 +61,13 @@ components:
       example: 'ferie,reise'
       schema:
         type: string
+    Approval_status_filter:
+      in: query
+      name: approval_status
+      description: Filter by approval status. Valid values are "GODKJENT", "FORSLAG" and "AVVIST".
+      example: 'FORSLAG'
+      schema:
+        type: string
     Contact_filter:
       in: query
       name: contact
@@ -533,6 +540,7 @@ paths:
         - $ref: '#/components/parameters/Pagination_count'
         - $ref: '#/components/parameters/Sort'
         - $ref: '#/components/parameters/Shortname_filter'
+        - $ref: '#/components/parameters/Approval_status_filter'
         - in: query
           name: publish_time_after
           description: Filter releases with publish_time after the specified time given in ISO format.

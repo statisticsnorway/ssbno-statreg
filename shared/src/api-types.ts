@@ -442,6 +442,11 @@ export interface paths {
            */
           shortname?: components['parameters']['Shortname_filter']
           /**
+           * @description Filter by approval status. Valid values are "GODKJENT", "FORSLAG" and "AVVIST".
+           * @example FORSLAG
+           */
+          approval_status?: components['parameters']['Approval_status_filter']
+          /**
            * @description Filter releases with publish_time after the specified time given in ISO format.
            * @example 2026-05-06T06:00:00Z
            */
@@ -983,6 +988,11 @@ export interface components {
      * @example ferie,reise
      */
     Shortname_filter: string
+    /**
+     * @description Filter by approval status. Valid values are "GODKJENT", "FORSLAG" and "AVVIST".
+     * @example FORSLAG
+     */
+    Approval_status_filter: string
     /**
      * @description Filter by contact initial(s) separated by comma.
      * @example abc,xyz

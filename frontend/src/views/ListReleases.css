@@ -43,3 +43,10 @@
     }
   }
 }
+
+.list-releases-filter-container {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--ds-size-8);
+  width: 100%;
+}

@@ -124,6 +124,7 @@ export async function getFilteredReleases(
     publishTimeAfter,
     publishTimeBefore,
     sort,
+    approvalStatus,
   }: {
     start?: number
     count?: number
@@ -131,6 +132,7 @@ export async function getFilteredReleases(
     publishTimeAfter?: string
     publishTimeBefore?: string
     sort?: string
+    approvalStatus?: string
   },
   prisma: ReleasePrisma
 ): Promise<ReleaseListingResponse> {
@@ -140,9 +142,15 @@ export async function getFilteredReleases(
 
   const filterByAfterPublishDate = publishTimeAfter ? parseDateISO(publishTimeAfter) : undefined
   const filterByBeforePublishDate = publishTimeBefore ? parseDateISO(publishTimeBefore) : undefined
+  const filterByApprovalStatus = approvalStatus ? sanitize(approvalStatus) : undefined
 
   const where = await buildReleaseFilter(
-    { filterByShortnames: safeFilterByShortnames, filterByAfterPublishDate, filterByBeforePublishDate },
+    {
+      filterByShortnames: safeFilterByShortnames,
+      filterByAfterPublishDate,
+      filterByBeforePublishDate,
+      filterByApprovalStatus,
+    },
     prisma
   )
 
@@ -230,7 +238,13 @@ export async function buildReleaseFilter(
     filterByShortnames,
     filterByAfterPublishDate,
     filterByBeforePublishDate,
-  }: { filterByShortnames?: string[]; filterByAfterPublishDate?: Date; filterByBeforePublishDate?: Date },
+    filterByApprovalStatus,
+  }: {
+    filterByShortnames?: string[]
+    filterByAfterPublishDate?: Date
+    filterByBeforePublishDate?: Date
+    filterByApprovalStatus?: string
+  },
   prisma: ReleasePrisma
 ) {
   if (filterByShortnames?.length) {
@@ -259,6 +273,9 @@ export async function buildReleaseFilter(
           gte: filterByAfterPublishDate,
         }),
       },
+    }),
+    ...(filterByApprovalStatus && {
+      desk_appoval_status: filterByApprovalStatus,
     }),
   }
 }

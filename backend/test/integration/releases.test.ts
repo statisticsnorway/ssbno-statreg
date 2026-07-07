@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest'
 import { createApp } from '@/app'
 import request from 'supertest'
+import { ReleaseListing } from '@ssbno-statreg/shared'
 
 const app = await createApp()
 
@@ -64,6 +65,15 @@ describe('release data is persisted when ', () => {
     // test persistence
     expect(fetched.body.id, picked.id)
     assertEqualReleaseData(fetched.body, updateBody)
+  })
+})
+
+describe('release listing can be filtered by approval status', () => {
+  test('returns only releases with GODKJENT approval status', async () => {
+    const response = await request(app).get('/statistikkregisteret/api/releases?approval_status=GODKJENT')
+    expect(response.status).toBe(200)
+    expect(response.body.total).toBeGreaterThan(0)
+    expect(response.body.releases.every((release: ReleaseListing) => release.approval_status === 'GODKJENT')).toBe(true)
   })
 })
 
