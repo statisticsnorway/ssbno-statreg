@@ -17,9 +17,10 @@ import client from '../api'
 
 import './ListReleases.css'
 
-import { formatPublishTime, formatDate } from '../lib/utils'
+import { formatPublishTime, formatDate, toggleSort, getSortDirection } from '../lib/utils'
 import { useAuth } from '../context/AuthContext'
 import { RowCountSelect } from '../components/RowCountSelect'
+import { Pagination } from '../components/Pagination'
 import { PaginatedReleasesTable, TruncatedTableCell } from '../components/ReleasesTable'
 import { ErrorAlert } from '../components/ErrorAlert'
 import ErrorPage, { ErrorType } from './ErrorPage'
@@ -32,6 +33,8 @@ type PendingReleaseRowProps = {
 
 type PendingReleaseTableProps = {
   pendingReleases: ReleaseListing[]
+  sortBy?: string
+  setSortBy?: (sortBy: string) => void
 }
 
 const TABLE_HEADER_CELLS = [
@@ -61,13 +64,19 @@ function ReleaseRow({ pendingRelease }: Readonly<PendingReleaseRowProps>) {
   )
 }
 
-function PendingReleasesTable({ pendingReleases }: Readonly<PendingReleaseTableProps>) {
+function PendingReleasesTable({ pendingReleases, sortBy, setSortBy }: Readonly<PendingReleaseTableProps>) {
   return (
     <Table>
       <Table.Head>
         <Table.Row>
-          {TABLE_HEADER_CELLS.map(({ label }) => (
-            <Table.HeaderCell key={label}>{label}</Table.HeaderCell>
+          {TABLE_HEADER_CELLS.map(({ label, field, sortable }) => (
+            <Table.HeaderCell
+              key={label}
+              onClick={sortable && setSortBy ? () => setSortBy(toggleSort(field, sortBy || '')) : undefined}
+              sort={sortable ? getSortDirection(field, sortBy || '') : undefined}
+            >
+              {label}
+            </Table.HeaderCell>
           ))}
         </Table.Row>
       </Table.Head>
@@ -86,13 +95,17 @@ export default function Tasks() {
   const [rowCount, setRowCount] = useState(10)
   const [start, setStart] = useState(0)
   const [releases, setReleases] = useState<ReleaseListing[]>([])
-  const [pendingReleases, setPendingReleases] = useState<ReleaseListing[]>([])
   const [total, setTotal] = useState(0)
   const [shortnames, setShortnames] = useState<ShortnameListing[]>([])
-  const [apiError, setApiError] = useState<string[]>([])
-
-  const [selectedShortnames, setSelectedShortnames] = useState<SuggestionItem[]>([])
   const [sortBy, setSortBy] = useState<string>('-publish_time')
+  const [apiError, setApiError] = useState<string[]>([])
+  const [selectedShortnames, setSelectedShortnames] = useState<SuggestionItem[]>([])
+
+  const [pendingRowCount, setPendingRowCount] = useState(10)
+  const [pendingStart, setPendingStart] = useState(0)
+  const [pendingReleases, setPendingReleases] = useState<ReleaseListing[]>([])
+  const [pendingTotal, setPendingTotal] = useState(0)
+  const [pendingSortBy, setPendingSortBy] = useState<string>('-publish_time')
 
   const { auth } = useAuth()
   const isAdmin = auth?.isAdmin
@@ -112,11 +125,11 @@ export default function Tasks() {
         setApiError((prev) => [...prev, errorMessage])
       } else {
         setPendingReleases(data.releases ?? [])
-        setTotal(data.total ?? 0)
+        setPendingTotal(data.total ?? 0)
       }
     }
-    fetchPendingReleases(start, rowCount, sortBy)
-  }, [isAdmin, start, rowCount, sortBy])
+    fetchPendingReleases(pendingStart, pendingRowCount, pendingSortBy)
+  }, [isAdmin, pendingStart, pendingRowCount, pendingSortBy])
 
   useEffect(() => {
     if (!isAdmin) return
@@ -187,23 +200,55 @@ export default function Tasks() {
     setSelectedShortnames(selected)
   }
 
+  function updatePendingRowCount(newCount: number) {
+    setPendingRowCount(newCount)
+    setPendingStart(0)
+  }
+
+  function setCurrentPendingPage(currentPage: number) {
+    setPendingStart((currentPage - 1) * pendingRowCount)
+  }
+
   if (!isAdmin) return <ErrorPage type={ErrorType.NOTAUTH} />
 
+  // TODO: Move inline-styles
   return (
     <>
       {apiError.length > 0 && <ErrorAlert message={apiError} />}
-      <Heading level={2} data-size='sm'>
+      <Heading level={2} data-size='md'>
         Oppgaver
       </Heading>
 
       <Tabs defaultValue='pending-releases' style={{ width: '100%' }}>
         <Tabs.List>
           <Tabs.Tab value='pending-releases'>
-            Publiseringsdatoer <Badge data-color='danger' count={pendingReleases?.length ?? 0} />
+            Publiseringsdatoer <Badge data-color='danger' count={pendingTotal} />
           </Tabs.Tab>
         </Tabs.List>
-        <Tabs.Panel value='pending-releases' style={{ paddingLeft: '0', paddingRight: '0' }}>
-          <PendingReleasesTable pendingReleases={pendingReleases} />
+        <Tabs.Panel
+          value='pending-releases'
+          style={{
+            paddingLeft: '0',
+            paddingRight: '0',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              marginTop: 'var(--ds-size-8)',
+              marginBottom: 'var(--ds-size-8)',
+            }}
+          >
+            <RowCountSelect selectedRowCount={pendingRowCount} updateRowCount={updatePendingRowCount} />
+          </div>
+          <PendingReleasesTable pendingReleases={pendingReleases} sortBy={pendingSortBy} setSortBy={setPendingSortBy} />
+          <Pagination
+            start={pendingStart}
+            count={pendingRowCount}
+            total={pendingTotal}
+            setCurrentPage={setCurrentPendingPage}
+          />
         </Tabs.Panel>
       </Tabs>
       <Divider />
