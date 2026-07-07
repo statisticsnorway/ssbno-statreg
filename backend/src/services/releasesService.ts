@@ -3,6 +3,7 @@ import {
   type ReleaseCreate,
   type ReleaseUpdate,
   type ReleaseListingResponse,
+  type ReleasesBulkApproveResponse,
   ApprovalStatus,
 } from '@ssbno-statreg/shared'
 import {
@@ -323,6 +324,27 @@ export async function updateRelease(
   })
 
   return mapToReleaseDetails(release)
+}
+
+export async function approveReleases(prisma: ReleasePrisma, ids: number[]): Promise<ReleasesBulkApproveResponse> {
+  const releases = []
+
+  for (const id of ids) {
+    try {
+      await prisma.release.update({
+        where: { id },
+        data: {
+          desk_appoval_status: ApprovalStatus.ACCEPTED,
+          last_updated: new Date(),
+        },
+      })
+      releases.push({ id, status: 200 })
+    } catch {
+      releases.push({ id, status: 500 })
+    }
+  }
+
+  return { releases }
 }
 
 type ValidatedReleaseInput = {
