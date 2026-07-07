@@ -61,6 +61,13 @@ components:
       example: 'ferie,reise'
       schema:
         type: string
+    Approval_status_filter:
+      in: query
+      name: approval_status
+      description: Filter by approval status. Valid values are "GODKJENT", "FORSLAG" and "AVVIST".
+      example: 'FORSLAG'
+      schema:
+        type: string
     Contact_filter:
       in: query
       name: contact
@@ -533,6 +540,7 @@ paths:
         - $ref: '#/components/parameters/Pagination_count'
         - $ref: '#/components/parameters/Sort'
         - $ref: '#/components/parameters/Shortname_filter'
+        - $ref: '#/components/parameters/Approval_status_filter'
         - in: query
           name: publish_time_after
           description: Filter releases with publish_time after the specified time given in ISO format.
@@ -703,24 +711,23 @@ paths:
                 type: array
                 items: { $ref: '#/components/schemas/Blocked_release_date' }
   /auth/authenticate:
-      get:
-        summary: Check authentication status and information for current user. Used for controlling front-end behaviour, not security.
-        tags: [authentication]
-        responses: 
-          '200': 
-            description: Object with admin-status, user info
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    isAdmin:
-                      type: boolean
-                      example: true
-                    email: 
-                      type: string
-                      example: alice@example.com
-                    fullName:
-                      type: string
-                      example: Alice Examplesdottir
-
+    get:
+      summary: Check authentication status and information for current user. Used for controlling front-end behaviour, not security.
+      tags: [authentication]
+      responses:
+        '200':
+          description: Object with admin-status, user info
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isAdmin:
+                    type: boolean
+                    example: true
+                  email:
+                    type: string
+                    example: alice@example.com
+                  fullName:
+                    type: string
+                    example: Alice Examplesdottir
