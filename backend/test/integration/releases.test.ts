@@ -77,6 +77,45 @@ describe('release listing can be filtered by approval status', () => {
   })
 })
 
+describe('/releases/bulk-approve', () => {
+  test('can approve two newly created releases', async () => {
+    // POST two identical releases and check that both have approval status FORSLAG
+    const created1 = await request(app)
+      .post(`/statistikkregisteret/api/statistics/${shortname}/variants/${variantId}/releases`)
+      .set(headers)
+      .send(body)
+    expect(created1.status).toBe(200)
+    expect(created1.body.approval_status).toBe('FORSLAG')
+
+    const created2 = await request(app)
+      .post(`/statistikkregisteret/api/statistics/${shortname}/variants/${variantId}/releases`)
+      .set(headers)
+      .send(body)
+    expect(created2.status).toBe(200)
+    expect(created2.body.approval_status).toBe('FORSLAG')
+
+    // POST bulk approve the two releases
+    const approveResponse = await request(app)
+      .post('/statistikkregisteret/api/releases/bulk-approve')
+      .set(headers)
+      .send({ ids: [created1.body.id, created2.body.id] })
+    expect(approveResponse.status).toBe(207)
+    expect(approveResponse.body.releases).toStrictEqual([
+      { id: created1.body.id, status: 200 },
+      { id: created2.body.id, status: 200 },
+    ])
+
+    // GET verify that new status is persisted
+    const fetched1 = await request(app).get(`/statistikkregisteret/api/releases/${created1.body.id}`)
+    expect(fetched1.status).toBe(200)
+    expect(fetched1.body.approval_status).toBe('GODKJENT')
+
+    const fetched2 = await request(app).get(`/statistikkregisteret/api/releases/${created2.body.id}`)
+    expect(fetched2.status).toBe(200)
+    expect(fetched2.body.approval_status).toBe('GODKJENT')
+  })
+})
+
 function addMonthsToDate(date: string, months: number): string {
   const d = new Date(date)
   d.setMonth(d.getMonth() + months)
