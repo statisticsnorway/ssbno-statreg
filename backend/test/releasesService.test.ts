@@ -298,7 +298,7 @@ describe('releasesService ', async () => {
           },
         },
         {
-          testCase: 'shortnames, publishtime after, publish time before and approval status',
+          testCase: 'shortnames, publish time after, publish time before and approval status',
           input: {
             filterByShortnames: ['KPI', 'energ'],
             filterByBeforePublishDate: new Date('2027-01-01T00:00Z'),
