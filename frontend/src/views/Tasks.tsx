@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import {
   Heading,
@@ -22,9 +22,8 @@ import ErrorPage, { ErrorType } from './ErrorPage'
 import type { ReleaseListing, ShortnameListing } from '@ssbno-statreg/shared'
 
 export default function Tasks() {
-  const [searchParams, setSearchParams] = useSearchParams()
+  const [searchParams] = useSearchParams()
   const shortnamesQuery = searchParams.get('shortname')
-  const sortQuery = searchParams.get('sort')
   const [rowCount, setRowCount] = useState(10)
   const [start, setStart] = useState(0)
   const [releases, setReleases] = useState<ReleaseListing[]>([])
@@ -32,37 +31,24 @@ export default function Tasks() {
   const [shortnames, setShortnames] = useState<ShortnameListing[]>([])
   const [apiError, setApiError] = useState<string[]>([])
 
+  const [selectedShortnames, setSelectedShortnames] = useState<SuggestionItem[]>([])
+  const [sortBy, setSortBy] = useState<string>('-publish_time')
+
   const { auth } = useAuth()
   const isAdmin = auth?.isAdmin
 
-  const selectedShortnames = useMemo<SuggestionItem[]>(() => {
-    if (!shortnamesQuery) return []
-
-    return shortnamesQuery.split(',').map((shortname) => ({
-      label: shortname,
-      value: shortname,
-    }))
-  }, [shortnamesQuery])
-
-  const releaseQuery = useMemo(
-    () => ({
-      start,
-      count: rowCount,
-      ...(selectedShortnames.length && {
-        shortname: selectedShortnames.map((shortname) => shortname.value).join(','),
-      }),
-      sort: sortQuery ?? '',
-    }),
-    [start, rowCount, selectedShortnames, sortQuery]
-  )
-
   useEffect(() => {
-    async function fetchReleases() {
-      if (!isAdmin) return
+    if (!isAdmin) return
+    async function fetchReleases(start: number, count: number, selectedShortnames: SuggestionItem[], sortBy: string) {
+      const filter = {
+        ...(selectedShortnames.length && {
+          shortname: selectedShortnames.map((item) => item.value).join(','),
+        }),
+      }
+
+      const sort = sortBy
       const { data, error } = await client.GET('/releases', {
-        params: {
-          query: releaseQuery,
-        },
+        params: { query: { start, count, ...filter, sort } },
       })
 
       if (error) {
@@ -75,12 +61,12 @@ export default function Tasks() {
         setTotal(data.total ?? 0)
       }
     }
-    fetchReleases()
-  }, [isAdmin, releaseQuery])
+    fetchReleases(start, rowCount, selectedShortnames, sortBy)
+  }, [isAdmin, start, rowCount, selectedShortnames, sortBy])
 
   useEffect(() => {
+    if (!isAdmin) return
     async function fetchShortnames() {
-      if (!isAdmin) return
       const { data, error } = await client.GET('/shortnames')
       if (error) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -94,6 +80,19 @@ export default function Tasks() {
     fetchShortnames()
   }, [isAdmin])
 
+  useEffect(() => {
+    async function setSelectedShortnamesFromQuery() {
+      if (!isAdmin || !shortnamesQuery) return
+
+      const newSelectedShortnames = shortnamesQuery.split(',').map((shortname) => ({
+        label: shortname,
+        value: shortname,
+      }))
+      setSelectedShortnames(newSelectedShortnames)
+    }
+    setSelectedShortnamesFromQuery()
+  }, [isAdmin, shortnamesQuery])
+
   function updateRowCount(newCount: number) {
     setRowCount(newCount)
     setStart(0)
@@ -103,43 +102,8 @@ export default function Tasks() {
     setStart((currentPage - 1) * rowCount)
   }
 
-  function updateFilters({ shortnames }: { shortnames?: string[] }) {
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev)
-
-      if (shortnames) {
-        next.delete('shortname')
-        next.delete('publish_time_after')
-        next.delete('publish_time_before')
-
-        if (shortnames.length) {
-          next.set('shortname', shortnames.join(','))
-        }
-      }
-
-      return next
-    })
-  }
-
-  function onSortChange(newSortBy: string) {
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev)
-      if (newSortBy) {
-        next.set('sort', newSortBy)
-      } else {
-        next.delete('sort')
-      }
-      return next
-    })
-  }
-
-  function onFilterChange(selected: SuggestionItem | SuggestionItem[] | null) {
-    if (!selected) return
-    const selectedShortnames = Array.isArray(selected) ? selected : [selected]
-
-    updateFilters({
-      shortnames: selectedShortnames.map((item) => item.value),
-    })
+  function filterChanged(selected: SuggestionItem[]) {
+    setSelectedShortnames(selected)
   }
 
   if (!isAdmin) return <ErrorPage type={ErrorType.NOTAUTH} />
@@ -161,9 +125,9 @@ export default function Tasks() {
       <div className='list-releases-filter-container'>
         <Field>
           <Label>Søk og filtrer</Label>
-          <Suggestion multiple onSelectedChange={(selected) => onFilterChange(selected)} selected={selectedShortnames}>
+          <Suggestion multiple onSelectedChange={(selected) => filterChanged(selected)} selected={selectedShortnames}>
             <Suggestion.Input />
-            <Suggestion.Clear onClick={() => onFilterChange(null)} />
+            <Suggestion.Clear />
             <Suggestion.List>
               <Suggestion.Empty>Ingen treff</Suggestion.Empty>
               {shortnames.map((shortname) => (
@@ -182,8 +146,8 @@ export default function Tasks() {
         total={total}
         releases={releases}
         setCurrentPage={setCurrentPage}
-        sortBy={sortQuery ?? undefined}
-        setSortBy={onSortChange}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
       />
     </>
   )
