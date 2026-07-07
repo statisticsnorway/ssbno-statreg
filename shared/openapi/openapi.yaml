@@ -570,7 +570,7 @@ paths:
                     items: { $ref: '#/components/schemas/Release_listing' }
 
   /releases/approve:
-    patch:
+    post:
       summary: Bulk approve releases
       tags: [releases]
       requestBody:
@@ -589,28 +589,36 @@ paths:
                 - ids
       responses:
         '207':
-          description: Multi-status response with per-item approval result. Each item status is one of SUCCESS, NOT_FOUND or ERROR.
+          description: List of status codes for each processed release.
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  items:
+                  releases:
                     type: array
                     items:
                       type: object
                       properties:
                         id:
-                          description: Release id that was processed
+                          description: Id of the release that was processed
                           type: integer
                         status:
-                          description: Result status for this release. Can be SUCCESS, NOT_FOUND or ERROR.
-                          type: string
+                          description: HTTP status code for the release
+                          type: integer
                       required:
                         - id
                         - status
                 required:
-                  - items
+                  - releases
+              example:
+                releases:
+                  - id: 1
+                    status: 200
+                  - id: 2
+                    status: 404
+                  - id: 3
+                    status: 500
 
   /releases/{id}:
     get:

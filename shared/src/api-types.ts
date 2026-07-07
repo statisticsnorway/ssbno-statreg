@@ -485,6 +485,74 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/releases/approve': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Bulk approve releases */
+    post: {
+      parameters: {
+        query?: never
+        header?: never
+        path?: never
+        cookie?: never
+      }
+      requestBody: {
+        content: {
+          'application/json': {
+            /** @description Release ids to approve */
+            ids: number[]
+          }
+        }
+      }
+      responses: {
+        /** @description List of status codes for each processed release. */
+        207: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            /**
+             * @example {
+             *       "releases": [
+             *         {
+             *           "id": 1,
+             *           "status": 200
+             *         },
+             *         {
+             *           "id": 2,
+             *           "status": 404
+             *         },
+             *         {
+             *           "id": 3,
+             *           "status": 500
+             *         }
+             *       ]
+             *     }
+             */
+            'application/json': {
+              releases: {
+                /** @description Id of the release that was processed */
+                id: number
+                /** @description HTTP status code for the release */
+                status: number
+              }[]
+            }
+          }
+        }
+      }
+    }
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/releases/{id}': {
     parameters: {
       query?: never
