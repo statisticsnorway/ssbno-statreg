@@ -568,6 +568,60 @@ paths:
                   releases:
                     type: array
                     items: { $ref: '#/components/schemas/Release_listing' }
+
+  /releases/bulk-approve:
+    post:
+      summary: Bulk approve releases
+      tags: [releases]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  type: array
+                  description: The identifiers of the releases to approve.
+                  items:
+                    type: integer
+              required:
+                - ids
+            example:
+              ids: [1, 2, 3]
+      responses:
+        '207':
+          description: List of status codes for each processed release.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  releases:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          description: The identifier of the release to approve.
+                          type: integer
+                        status:
+                          description: HTTP status code for the approval request of a release.
+                          type: integer
+                      required:
+                        - id
+                        - status
+                required:
+                  - releases
+              example:
+                releases:
+                  - id: 1
+                    status: 200
+                  - id: 2
+                    status: 404
+                  - id: 3
+                    status: 500
+
   /releases/{id}:
     get:
       summary: Get release by id
