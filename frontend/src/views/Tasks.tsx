@@ -5,6 +5,8 @@ import {
   Divider,
   Field,
   Label,
+  Checkbox,
+  Table,
   EXPERIMENTAL_Suggestion as Suggestion,
   type SuggestionItem,
 } from '@digdir/designsystemet-react'
@@ -13,13 +15,70 @@ import client from '../api'
 
 import './ListReleases.css'
 
+import { formatPublishTime, formatDate } from '../lib/utils'
 import { useAuth } from '../context/AuthContext'
 import { RowCountSelect } from '../components/RowCountSelect'
-import { PaginatedReleasesTable } from '../components/ReleasesTable'
+import { PaginatedReleasesTable, TruncatedTableCell } from '../components/ReleasesTable'
 import { ErrorAlert } from '../components/ErrorAlert'
 import ErrorPage, { ErrorType } from './ErrorPage'
 
 import { ApprovalStatus, type ReleaseListing, type ShortnameListing } from '@ssbno-statreg/shared'
+
+type ReleaseRowProps = {
+  pendingRelease: ReleaseListing
+}
+
+type ReleaseTableProps = {
+  pendingReleases: ReleaseListing[]
+  sortBy?: string
+  setSortBy?: (sortBy: string) => void
+}
+
+const TABLE_HEADER_CELLS = [
+  { label: 'Velg', field: 'choose_release' },
+  { label: 'Kortnavn', field: 'statistic.shortname' },
+  { label: 'Statistikknavn', field: 'statistic.name' },
+  { label: 'Variant', field: 'frequency.name' },
+  { label: 'Målperiode fra', field: 'period_from' },
+  { label: 'Måleperiode til', field: 'period_to' },
+  { label: 'Publiseringsdato', sortable: true, field: 'publish_time' },
+]
+
+function ReleaseRow({ pendingRelease }: Readonly<ReleaseRowProps>) {
+  const statisticsShortname = pendingRelease.statistic?.shortname ?? ''
+  return (
+    <Table.Row key={`${pendingRelease.publish_time}-${pendingRelease.id}`} className='selectable-row'>
+      <Table.Cell>
+        <Checkbox label='' description='' value={pendingRelease.id} />
+      </Table.Cell>
+      <Table.Cell>{statisticsShortname}</Table.Cell>
+      <TruncatedTableCell value={pendingRelease.statistic?.name} />
+      <Table.Cell>{pendingRelease.frequency?.name ?? ''}</Table.Cell>
+      <Table.Cell>{formatDate(pendingRelease.period_from)}</Table.Cell>
+      <Table.Cell>{formatDate(pendingRelease.period_to)}</Table.Cell>
+      <Table.Cell>{formatPublishTime(pendingRelease.publish_time)}</Table.Cell>
+    </Table.Row>
+  )
+}
+
+function PendingReleasesTable({ pendingReleases }: Readonly<ReleaseTableProps>) {
+  return (
+    <Table>
+      <Table.Head>
+        <Table.Row>
+          {TABLE_HEADER_CELLS.map(({ label }) => (
+            <Table.HeaderCell key={label}>{label}</Table.HeaderCell>
+          ))}
+        </Table.Row>
+      </Table.Head>
+      <Table.Body>
+        {pendingReleases?.map((release) => (
+          <ReleaseRow key={`${release.publish_time}-${release.id}`} pendingRelease={release} />
+        ))}
+      </Table.Body>
+    </Table>
+  )
+}
 
 export default function Tasks() {
   const [searchParams] = useSearchParams()
@@ -128,8 +187,6 @@ export default function Tasks() {
     setSelectedShortnames(selected)
   }
 
-  console.log(pendingReleases)
-
   if (!isAdmin) return <ErrorPage type={ErrorType.NOTAUTH} />
 
   return (
@@ -139,8 +196,7 @@ export default function Tasks() {
         Oppgaver
       </Heading>
 
-      {/* TODO: MIM-2873: Add task list table */}
-
+      <PendingReleasesTable pendingReleases={pendingReleases} />
       <Divider />
 
       <Heading level={3} data-size='xs'>
