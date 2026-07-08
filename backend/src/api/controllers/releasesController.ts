@@ -5,11 +5,12 @@ import {
   getReleaseById,
   createRelease,
   updateRelease,
+  approveReleases,
 } from '@/services/releasesService'
-import { skipAuth } from '@/../plugins/authMiddleware'
+import { requireAdminAuthorization, skipAuth } from '@/../plugins/authMiddleware'
 import { handleErrors } from '@/lib/prismaErrors'
 import { prisma } from '@/lib/prisma'
-import { ensureString, ensureStringArray } from '@/lib/utils'
+import { isNumber, ensureString, ensureStringArray, ensureRequiredFieldsExists } from '@/lib/utils'
 
 export default function releasesController(router: Router) {
   router.get('/releases/:id', skipAuth, async (req, res) => {
@@ -38,6 +39,21 @@ export default function releasesController(router: Router) {
         prisma
       )
       res.json(data)
+    } catch (error) {
+      return handleErrors(error, res)
+    }
+  })
+
+  router.post('/releases/bulk-approve', requireAdminAuthorization(), async (req, res) => {
+    try {
+      const body = ensureRequiredFieldsExists(req.body, ['ids'])
+      const input = body.ids
+      if (!Array.isArray(input) || input.some((item) => !isNumber(item))) {
+        throw { statregError: `Invalid format for field 'ids'. Expected an array of integers.` }
+      }
+      const ids = input.map(Number)
+      const result = await approveReleases(prisma, ids)
+      res.status(207).json(result)
     } catch (error) {
       return handleErrors(error, res)
     }

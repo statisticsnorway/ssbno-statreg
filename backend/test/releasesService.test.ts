@@ -8,6 +8,7 @@ import {
   getReleaseById,
   updateRelease,
   createRelease,
+  approveReleases,
   buildReleaseFilter,
   buildVariantReleaseFilter,
   ReleaseDetailsIncludes,
@@ -488,6 +489,41 @@ describe('releasesService ', async () => {
       })
 
       expect(prismaMock.release.update).toHaveBeenCalledTimes(0)
+    })
+  })
+
+  describe('approveReleases ', () => {
+    test('approves all releases and returns their statuses', async () => {
+      const result = await approveReleases(prismaMock, [1, 2, 3])
+
+      expect(result).toStrictEqual({
+        releases: [
+          { id: 1, status: 200 },
+          { id: 2, status: 200 },
+          { id: 3, status: 200 },
+        ],
+      })
+      expect(prismaMock.release.update).toHaveBeenCalledTimes(3)
+    })
+
+    test('returns 500 status for releases that fail to update', async () => {
+      prismaMock.release.update = vi.fn((args: any) => {
+        if (args.where.id === 2) {
+          return Promise.reject(new Error('Update failed'))
+        }
+        return Promise.resolve({ id: args.where.id })
+      })
+
+      const result = await approveReleases(prismaMock, [1, 2, 3])
+
+      expect(result).toStrictEqual({
+        releases: [
+          { id: 1, status: 200 },
+          { id: 2, status: 500 },
+          { id: 3, status: 200 },
+        ],
+      })
+      expect(prismaMock.release.update).toHaveBeenCalledTimes(3)
     })
   })
 
