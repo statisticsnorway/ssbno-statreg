@@ -18,3 +18,44 @@ export async function getShortnames(prisma: ShortnamePrisma): Promise<ShortnameL
 
   return result
 }
+
+export async function createShortname(prisma: ShortnamePrisma, body: unknown): Promise<void> {
+  if (body === null || typeof body !== 'object' || !('shortname' in body)) {
+    throw { statregError: "Missing required field 'shortname'." }
+  }
+
+  const shortname = parseShortname(body.shortname)
+
+  const existing = await prisma.shortname.findUnique({
+    where: { name: shortname },
+    select: { id: true },
+  })
+
+  if (existing) {
+    throw { statregError: `Shortname '${shortname}' already exists` }
+  }
+
+  const now = new Date()
+  await prisma.shortname.create({
+    data: {
+      name: shortname,
+      date_created: now,
+      last_updated: now,
+    },
+  })
+}
+
+export function parseShortname(value: unknown): string {
+  if (typeof value !== 'string') {
+    throw { statregError: "Field 'shortname' must be a string." }
+  }
+
+  if (!/^[a-z-]{1,14}$/.test(value)) {
+    throw {
+      statregError:
+        "Field 'shortname' must only contain lowercase letters (a-z) and hyphens (-), and be at most 14 characters.",
+    }
+  }
+
+  return value
+}

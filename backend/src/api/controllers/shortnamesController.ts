@@ -1,7 +1,7 @@
 import { handleErrors } from '@/lib/prismaErrors'
-import { getShortnames } from '@/services/shortnamesService'
+import { getShortnames, createShortname } from '@/services/shortnamesService'
 import { Router } from 'express'
-import { skipAuth } from '@/../plugins/authMiddleware'
+import { requireAdminAuthorization, skipAuth } from '@/../plugins/authMiddleware'
 import { prisma } from '@/lib/prisma'
 
 export default function shortnamesController(router: Router) {
@@ -9,6 +9,15 @@ export default function shortnamesController(router: Router) {
     try {
       const result = await getShortnames(prisma)
       res.json(result)
+    } catch (error) {
+      handleErrors(error, res)
+    }
+  })
+
+  router.post('/shortnames', requireAdminAuthorization(), async (req, res) => {
+    try {
+      await createShortname(prisma, req.body)
+      res.status(201).send()
     } catch (error) {
       handleErrors(error, res)
     }
