@@ -69,7 +69,32 @@ export interface paths {
       }
     }
     put?: never
-    post?: never
+    /** Create a new shortname */
+    post: {
+      parameters: {
+        query?: never
+        header?: never
+        path?: never
+        cookie?: never
+      }
+      requestBody: {
+        content: {
+          'application/json': {
+            /** @description Only small letters (a-z) and hyphens (-) are allowed. Maximum 14 characters. */
+            shortname: string
+          }
+        }
+      }
+      responses: {
+        /** @description The shortname was created */
+        201: {
+          headers: {
+            [name: string]: unknown
+          }
+          content?: never
+        }
+      }
+    }
     delete?: never
     options?: never
     head?: never
