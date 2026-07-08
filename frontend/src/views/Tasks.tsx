@@ -104,6 +104,12 @@ function PendingReleasesTable({
 }
 
 export default function Tasks() {
+  const [pendingRowCount, setPendingRowCount] = useState(10)
+  const [pendingStart, setPendingStart] = useState(0)
+  const [pendingReleases, setPendingReleases] = useState<ReleaseListing[]>([])
+  const [pendingTotal, setPendingTotal] = useState(0)
+  const [pendingSortBy, setPendingSortBy] = useState<string>('-publish_time')
+
   const [searchParams] = useSearchParams()
   const shortnamesQuery = searchParams.get('shortname')
   const [rowCount, setRowCount] = useState(10)
@@ -112,14 +118,8 @@ export default function Tasks() {
   const [total, setTotal] = useState(0)
   const [shortnames, setShortnames] = useState<ShortnameListing[]>([])
   const [sortBy, setSortBy] = useState<string>('-publish_time')
-  const [apiError, setApiError] = useState<string[]>([]) // TODO: Seperate errors for releases and pending releases
+  const [apiError, setApiError] = useState<string[]>([])
   const [selectedShortnames, setSelectedShortnames] = useState<SuggestionItem[]>([])
-
-  const [pendingRowCount, setPendingRowCount] = useState(10)
-  const [pendingStart, setPendingStart] = useState(0)
-  const [pendingReleases, setPendingReleases] = useState<ReleaseListing[]>([])
-  const [pendingTotal, setPendingTotal] = useState(0)
-  const [pendingSortBy, setPendingSortBy] = useState<string>('-publish_time')
 
   const { auth } = useAuth()
   const isAdmin = auth?.isAdmin
@@ -132,15 +132,6 @@ export default function Tasks() {
     name: 'pending-releases-table',
     value: [],
   })
-
-  // TODO: Finish implementation
-  useEffect(() => {
-    const visiblePendingReleaseIds = pendingReleases.flatMap((release) => (release.id ? [release.id.toString()] : []))
-
-    setSelectedPendingReleaseIds((currentValue) =>
-      currentValue.filter((selectedReleaseId) => visiblePendingReleaseIds.includes(selectedReleaseId))
-    )
-  }, [pendingReleases, setSelectedPendingReleaseIds])
 
   useEffect(() => {
     if (!isAdmin) return
@@ -219,6 +210,30 @@ export default function Tasks() {
     setSelectedShortnamesFromQuery()
   }, [isAdmin, shortnamesQuery])
 
+  async function batchApproveReleases() {
+    const { error } = await client.POST('/releases/bulk-approve', {
+      body: { ids: selectedPendingReleaseIds.map((id) => Number(id)) },
+    })
+
+    if (error) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const errorMessage = (error as any).error
+      console.log(errorMessage)
+      setApiError((prev) => [...prev, errorMessage])
+    } else {
+      setSelectedPendingReleaseIds([])
+      setPendingStart(0)
+    }
+  }
+
+  function handleOnSubmit(e: React.SubmitEvent<HTMLFormElement>) {
+    e.preventDefault()
+
+    if (!selectedPendingReleaseIds.length) return
+
+    batchApproveReleases()
+  }
+
   function updateRowCount(newCount: number) {
     setRowCount(newCount)
     setStart(0)
@@ -263,37 +278,41 @@ export default function Tasks() {
             paddingRight: '0',
           }}
         >
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'flex-end',
-              marginTop: 'var(--ds-size-8)',
-              marginBottom: 'var(--ds-size-8)',
-            }}
-          >
-            <RowCountSelect selectedRowCount={pendingRowCount} updateRowCount={updatePendingRowCount} />
-          </div>
-          <PendingReleasesTable
-            pendingReleases={pendingReleases}
-            getCheckboxProps={getCheckboxProps}
-            sortBy={pendingSortBy}
-            setSortBy={setPendingSortBy}
-          />
-          {selectedPendingReleaseIds.length > 0 && (
-            <div style={{ display: 'flex', marginTop: 'var(--ds-size-6)' }}>
-              <Button variant='primary'>Godkjenn ({selectedPendingReleaseIds.length} valgte)</Button>
-              <Button variant='tertiary' onClick={() => setSelectedPendingReleaseIds([])}>
-                <EraserIcon />
-                Nullstill valg
-              </Button>
+          <form onSubmit={handleOnSubmit}>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                marginTop: 'var(--ds-size-8)',
+                marginBottom: 'var(--ds-size-8)',
+              }}
+            >
+              <RowCountSelect selectedRowCount={pendingRowCount} updateRowCount={updatePendingRowCount} />
             </div>
-          )}
-          <Pagination
-            start={pendingStart}
-            count={pendingRowCount}
-            total={pendingTotal}
-            setCurrentPage={setCurrentPendingPage}
-          />
+            <PendingReleasesTable
+              pendingReleases={pendingReleases}
+              getCheckboxProps={getCheckboxProps}
+              sortBy={pendingSortBy}
+              setSortBy={setPendingSortBy}
+            />
+            {selectedPendingReleaseIds.length > 0 && (
+              <div style={{ display: 'flex', marginTop: 'var(--ds-size-6)' }}>
+                <Button variant='primary' type='submit'>
+                  Godkjenn ({selectedPendingReleaseIds.length} valgte)
+                </Button>
+                <Button variant='tertiary' onClick={() => setSelectedPendingReleaseIds([])}>
+                  <EraserIcon />
+                  Nullstill valg
+                </Button>
+              </div>
+            )}
+            <Pagination
+              start={pendingStart}
+              count={pendingRowCount}
+              total={pendingTotal}
+              setCurrentPage={setCurrentPendingPage}
+            />
+          </form>
         </Tabs.Panel>
       </Tabs>
       <Divider />
