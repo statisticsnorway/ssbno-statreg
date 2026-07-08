@@ -11,7 +11,10 @@ import {
   Table,
   EXPERIMENTAL_Suggestion as Suggestion,
   type SuggestionItem,
+  useCheckboxGroup,
+  Button,
 } from '@digdir/designsystemet-react'
+import { EraserIcon } from '@navikt/aksel-icons'
 
 import client from '../api'
 
@@ -29,10 +32,12 @@ import { ApprovalStatus, type ReleaseListing, type ShortnameListing } from '@ssb
 
 type PendingReleaseRowProps = {
   pendingRelease: ReleaseListing
+  getCheckboxProps: ReturnType<typeof useCheckboxGroup>['getCheckboxProps']
 }
 
 type PendingReleaseTableProps = {
   pendingReleases: ReleaseListing[]
+  getCheckboxProps: ReturnType<typeof useCheckboxGroup>['getCheckboxProps']
   sortBy?: string
   setSortBy?: (sortBy: string) => void
 }
@@ -47,12 +52,12 @@ const TABLE_HEADER_CELLS = [
   { label: 'Publiseringsdato', sortable: true, field: 'publish_time' },
 ]
 
-function ReleaseRow({ pendingRelease }: Readonly<PendingReleaseRowProps>) {
+function PendingReleaseRow({ pendingRelease, getCheckboxProps }: Readonly<PendingReleaseRowProps>) {
   const statisticsShortname = pendingRelease.statistic?.shortname ?? ''
   return (
     <Table.Row key={`${pendingRelease.publish_time}-${pendingRelease.id}`} className='selectable-row'>
       <Table.Cell>
-        <Checkbox label='' description='' value={pendingRelease.id} />
+        <Checkbox aria-label='choose_releases' {...getCheckboxProps(pendingRelease.id?.toString())} />
       </Table.Cell>
       <Table.Cell>{statisticsShortname}</Table.Cell>
       <TruncatedTableCell value={pendingRelease.statistic?.name} />
@@ -64,7 +69,12 @@ function ReleaseRow({ pendingRelease }: Readonly<PendingReleaseRowProps>) {
   )
 }
 
-function PendingReleasesTable({ pendingReleases, sortBy, setSortBy }: Readonly<PendingReleaseTableProps>) {
+function PendingReleasesTable({
+  pendingReleases,
+  getCheckboxProps,
+  sortBy,
+  setSortBy,
+}: Readonly<PendingReleaseTableProps>) {
   return (
     <Table>
       <Table.Head>
@@ -82,7 +92,11 @@ function PendingReleasesTable({ pendingReleases, sortBy, setSortBy }: Readonly<P
       </Table.Head>
       <Table.Body>
         {pendingReleases?.map((release) => (
-          <ReleaseRow key={`${release.publish_time}-${release.id}`} pendingRelease={release} />
+          <PendingReleaseRow
+            key={`${release.publish_time}-${release.id}`}
+            pendingRelease={release}
+            getCheckboxProps={getCheckboxProps}
+          />
         ))}
       </Table.Body>
     </Table>
@@ -98,7 +112,7 @@ export default function Tasks() {
   const [total, setTotal] = useState(0)
   const [shortnames, setShortnames] = useState<ShortnameListing[]>([])
   const [sortBy, setSortBy] = useState<string>('-publish_time')
-  const [apiError, setApiError] = useState<string[]>([])
+  const [apiError, setApiError] = useState<string[]>([]) // TODO: Seperate errors for releases and pending releases
   const [selectedShortnames, setSelectedShortnames] = useState<SuggestionItem[]>([])
 
   const [pendingRowCount, setPendingRowCount] = useState(10)
@@ -109,6 +123,24 @@ export default function Tasks() {
 
   const { auth } = useAuth()
   const isAdmin = auth?.isAdmin
+
+  const {
+    value: selectedPendingReleaseIds,
+    setValue: setSelectedPendingReleaseIds,
+    getCheckboxProps,
+  } = useCheckboxGroup({
+    name: 'pending-releases-table',
+    value: [],
+  })
+
+  // TODO: Finish implementation
+  useEffect(() => {
+    const visiblePendingReleaseIds = pendingReleases.flatMap((release) => (release.id ? [release.id.toString()] : []))
+
+    setSelectedPendingReleaseIds((currentValue) =>
+      currentValue.filter((selectedReleaseId) => visiblePendingReleaseIds.includes(selectedReleaseId))
+    )
+  }, [pendingReleases, setSelectedPendingReleaseIds])
 
   useEffect(() => {
     if (!isAdmin) return
@@ -211,7 +243,6 @@ export default function Tasks() {
 
   if (!isAdmin) return <ErrorPage type={ErrorType.NOTAUTH} />
 
-  // TODO: Move inline-styles
   return (
     <>
       {apiError.length > 0 && <ErrorAlert message={apiError} />}
@@ -242,7 +273,21 @@ export default function Tasks() {
           >
             <RowCountSelect selectedRowCount={pendingRowCount} updateRowCount={updatePendingRowCount} />
           </div>
-          <PendingReleasesTable pendingReleases={pendingReleases} sortBy={pendingSortBy} setSortBy={setPendingSortBy} />
+          <PendingReleasesTable
+            pendingReleases={pendingReleases}
+            getCheckboxProps={getCheckboxProps}
+            sortBy={pendingSortBy}
+            setSortBy={setPendingSortBy}
+          />
+          {selectedPendingReleaseIds.length > 0 && (
+            <div style={{ display: 'flex', marginTop: 'var(--ds-size-6)' }}>
+              <Button variant='primary'>Godkjenn ({selectedPendingReleaseIds.length} valgte)</Button>
+              <Button variant='tertiary' onClick={() => setSelectedPendingReleaseIds([])}>
+                <EraserIcon />
+                Nullstill valg
+              </Button>
+            </div>
+          )}
           <Pagination
             start={pendingStart}
             count={pendingRowCount}
