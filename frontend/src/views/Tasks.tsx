@@ -13,6 +13,7 @@ import {
   type SuggestionItem,
   useCheckboxGroup,
   Button,
+  Alert,
 } from '@digdir/designsystemet-react'
 import { EraserIcon } from '@navikt/aksel-icons'
 
@@ -109,6 +110,7 @@ export default function Tasks() {
   const [pendingReleases, setPendingReleases] = useState<ReleaseListing[]>([])
   const [pendingTotal, setPendingTotal] = useState(0)
   const [pendingSortBy, setPendingSortBy] = useState<string>('-publish_time')
+  const [approvedReleasesCount, setApprovedReleasesCount] = useState(0)
 
   const [searchParams] = useSearchParams()
   const shortnamesQuery = searchParams.get('shortname')
@@ -133,26 +135,25 @@ export default function Tasks() {
     value: [],
   })
 
-  async function fetchPendingReleases(start: number, count: number, sortBy: string) {
-    const { data, error } = await client.GET('/releases', {
-      params: { query: { start, count, approval_status: ApprovalStatus.PENDING, sort: sortBy } },
-    })
-
-    if (error) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const errorMessage = (error as any).error
-      setApiError((prev) => [...prev, errorMessage])
-      return
-    }
-
-    setPendingReleases(data.releases ?? [])
-    setPendingTotal(data.total ?? 0)
-  }
-
   useEffect(() => {
     if (!isAdmin) return
+    async function fetchPendingReleases(start: number, count: number, sortBy: string) {
+      const { data, error } = await client.GET('/releases', {
+        params: { query: { start, count, approval_status: ApprovalStatus.PENDING, sort: sortBy } },
+      })
+
+      if (error) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const errorMessage = (error as any).error
+        setApiError((prev) => [...prev, errorMessage])
+        return
+      }
+
+      setPendingReleases(data.releases ?? [])
+      setPendingTotal(data.total ?? 0)
+    }
     fetchPendingReleases(pendingStart, pendingRowCount, pendingSortBy)
-  }, [isAdmin, pendingStart, pendingRowCount, pendingSortBy])
+  }, [isAdmin, pendingStart, pendingRowCount, pendingSortBy, approvedReleasesCount])
 
   useEffect(() => {
     if (!isAdmin) return
@@ -211,7 +212,7 @@ export default function Tasks() {
   }, [isAdmin, shortnamesQuery])
 
   async function batchApproveReleases() {
-    const { error } = await client.POST('/releases/bulk-approve', {
+    const { data, error } = await client.POST('/releases/bulk-approve', {
       body: { ids: selectedPendingReleaseIds.map((id) => Number(id)) },
     })
 
@@ -221,9 +222,9 @@ export default function Tasks() {
       console.log(errorMessage)
       setApiError((prev) => [...prev, errorMessage])
     } else {
+      setApprovedReleasesCount(data.releases?.filter(({ status }) => status === 200)?.length ?? 0)
       setSelectedPendingReleaseIds([])
       setPendingStart(0)
-      await fetchPendingReleases(0, pendingRowCount, pendingSortBy)
     }
   }
 
@@ -283,11 +284,17 @@ export default function Tasks() {
             <div
               style={{
                 display: 'flex',
-                justifyContent: 'flex-end',
+                justifyContent: 'space-between',
+                alignItems: 'center',
                 marginTop: 'var(--ds-size-8)',
                 marginBottom: 'var(--ds-size-8)',
               }}
             >
+              {approvedReleasesCount !== 0 && (
+                <Alert data-color='success'>
+                  <b>{`${approvedReleasesCount} ${approvedReleasesCount === 1 ? `publisering` : 'publiseringer'} har blitt godkjent`}</b>
+                </Alert>
+              )}
               <RowCountSelect selectedRowCount={pendingRowCount} updateRowCount={updatePendingRowCount} />
             </div>
             <PendingReleasesTable
