@@ -133,24 +133,24 @@ export default function Tasks() {
     value: [],
   })
 
+  async function fetchPendingReleases(start: number, count: number, sortBy: string) {
+    const { data, error } = await client.GET('/releases', {
+      params: { query: { start, count, approval_status: ApprovalStatus.PENDING, sort: sortBy } },
+    })
+
+    if (error) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const errorMessage = (error as any).error
+      setApiError((prev) => [...prev, errorMessage])
+      return
+    }
+
+    setPendingReleases(data.releases ?? [])
+    setPendingTotal(data.total ?? 0)
+  }
+
   useEffect(() => {
     if (!isAdmin) return
-    async function fetchPendingReleases(start: number, count: number, sortBy: string) {
-      const sort = sortBy
-      const { data, error } = await client.GET('/releases', {
-        params: { query: { start, count, approval_status: ApprovalStatus['PENDING'], sort } },
-      })
-
-      if (error) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const errorMessage = (error as any).error
-        console.log(errorMessage)
-        setApiError((prev) => [...prev, errorMessage])
-      } else {
-        setPendingReleases(data.releases ?? [])
-        setPendingTotal(data.total ?? 0)
-      }
-    }
     fetchPendingReleases(pendingStart, pendingRowCount, pendingSortBy)
   }, [isAdmin, pendingStart, pendingRowCount, pendingSortBy])
 
@@ -223,6 +223,7 @@ export default function Tasks() {
     } else {
       setSelectedPendingReleaseIds([])
       setPendingStart(0)
+      await fetchPendingReleases(0, pendingRowCount, pendingSortBy)
     }
   }
 
