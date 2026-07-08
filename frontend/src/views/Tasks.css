@@ -1,0 +1,20 @@
+.pending-releases-tab {
+  width: 100%;
+
+  .pending-releases-tab-panel {
+    padding-left: 0;
+    padding-right: 0;
+  
+    .row-count-select-wrapper {
+      display: flex;
+      margin-top: var(--ds-size-8);
+      margin-bottom: var(--ds-size-8);
+    }
+
+    .pending-releases-buttons-wrapper {
+      display: flex;
+      margin-top: var(--ds-size-6);
+    }
+  }
+
+}

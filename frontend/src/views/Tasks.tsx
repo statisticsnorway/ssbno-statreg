@@ -19,7 +19,7 @@ import { EraserIcon } from '@navikt/aksel-icons'
 
 import client from '../api'
 
-import './ListReleases.css'
+import './Tasks.css'
 
 import { formatPublishTime, formatDate, toggleSort, getSortDirection } from '../lib/utils'
 import { useAuth } from '../context/AuthContext'
@@ -267,30 +267,19 @@ export default function Tasks() {
         Oppgaver
       </Heading>
 
-      <Tabs defaultValue='pending-releases' style={{ width: '100%' }}>
+      <Tabs defaultValue='pending-releases' className='pending-releases-tab'>
         <Tabs.List>
           <Tabs.Tab value='pending-releases'>
             Publiseringsdatoer <Badge data-color='danger' count={pendingTotal} />
           </Tabs.Tab>
         </Tabs.List>
-        <Tabs.Panel
-          value='pending-releases'
-          style={{
-            paddingLeft: '0',
-            paddingRight: '0',
-          }}
-        >
+        <Tabs.Panel value='pending-releases' className='pending-releases-tab-panel'>
           <form onSubmit={handleOnSubmit}>
             <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginTop: 'var(--ds-size-8)',
-                marginBottom: 'var(--ds-size-8)',
-              }}
+              className='row-count-select-wrapper'
+              style={{ justifyContent: approvedReleasesCount > 0 ? 'space-between' : 'flex-end' }}
             >
-              {approvedReleasesCount !== 0 && (
+              {approvedReleasesCount > 0 && (
                 <Alert data-color='success'>
                   <b>{`${approvedReleasesCount} ${approvedReleasesCount === 1 ? `publisering` : 'publiseringer'} har blitt godkjent`}</b>
                 </Alert>
@@ -304,7 +293,7 @@ export default function Tasks() {
               setSortBy={setPendingSortBy}
             />
             {selectedPendingReleaseIds.length > 0 && (
-              <div style={{ display: 'flex', marginTop: 'var(--ds-size-6)' }}>
+              <div className='pending-releases-buttons-wrapper'>
                 <Button variant='primary' type='submit'>
                   Godkjenn ({selectedPendingReleaseIds.length} valgte)
                 </Button>
