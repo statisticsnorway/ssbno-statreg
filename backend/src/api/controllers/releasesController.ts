@@ -34,7 +34,6 @@ export default function releasesController(router: Router) {
       const filterByShortnames = ensureStringArray(req.query.shortname as string)
       const approvalStatus = ensureString(req.query.approval_status as string)
 
-      console.log(count)
       const data = await getFilteredReleases(
         { start, count, filterByShortnames, publishTimeAfter, publishTimeBefore, sort, approvalStatus },
         prisma
