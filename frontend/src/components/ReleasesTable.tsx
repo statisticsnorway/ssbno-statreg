@@ -37,7 +37,7 @@ const TABLE_HEADER_CELLS = [
   { label: 'Status', field: 'approval_status' },
 ]
 
-function TruncatedTableCell({ value, maxWidth = '340px' }: TruncatedTableCellProps) {
+export function TruncatedTableCell({ value, maxWidth = '340px' }: TruncatedTableCellProps) {
   return (
     <Table.Cell style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth }} title={value}>
       {value}
