@@ -156,6 +156,16 @@ export default function Tasks() {
   }, [isAdmin, pendingStart, pendingRowCount, pendingSortBy, approvedReleasesCount])
 
   useEffect(() => {
+    if (approvedReleasesCount === 0) return
+
+    const timer = setTimeout(() => {
+      setApprovedReleasesCount(0)
+    }, 5250)
+
+    return () => clearTimeout(timer)
+  }, [approvedReleasesCount])
+
+  useEffect(() => {
     if (!isAdmin) return
     async function fetchReleases(start: number, count: number, selectedShortnames: SuggestionItem[], sortBy: string) {
       const filter = {
@@ -282,7 +292,10 @@ export default function Tasks() {
               style={{ justifyContent: approvedReleasesCount > 0 ? 'space-between' : 'flex-end' }}
             >
               {approvedReleasesCount > 0 && (
-                <Alert data-color='success'>{`${publishedReleasesAmountText} har blitt godkjent`}</Alert>
+                <Alert
+                  data-color='success'
+                  className='approval-alert'
+                >{`${publishedReleasesAmountText} har blitt godkjent`}</Alert>
               )}
               <RowCountSelect selectedRowCount={pendingRowCount} updateRowCount={updatePendingRowCount} />
             </div>
