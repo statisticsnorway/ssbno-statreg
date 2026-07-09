@@ -1,5 +1,5 @@
 import type { ExtendedPrismaClient } from '@/lib/prisma'
-import { type ShortnameListing } from '@ssbno-statreg/shared'
+import { type Shortname, type ShortnameListing } from '@ssbno-statreg/shared'
 
 export type ShortnamePrisma = Pick<ExtendedPrismaClient, 'shortname' | 'statistic'>
 
@@ -19,7 +19,7 @@ export async function getShortnames(prisma: ShortnamePrisma): Promise<ShortnameL
   return result
 }
 
-export async function createShortname(prisma: ShortnamePrisma, body: unknown): Promise<void> {
+export async function createShortname(prisma: ShortnamePrisma, body: unknown): Promise<Shortname> {
   if (!body || typeof body !== 'object' || !('shortname' in body)) {
     throw { statregError: "Missing required field 'shortname'." }
   }
@@ -36,13 +36,15 @@ export async function createShortname(prisma: ShortnamePrisma, body: unknown): P
   }
 
   const now = new Date()
-  await prisma.shortname.create({
+  const created = await prisma.shortname.create({
     data: {
       name: shortname,
       date_created: now,
       last_updated: now,
     },
   })
+
+  return { id: created.id, shortname: created.name }
 }
 
 export function parseShortname(value: unknown): string {

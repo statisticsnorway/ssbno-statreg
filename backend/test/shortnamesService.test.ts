@@ -53,7 +53,7 @@ describe('shortnamesService ', async () => {
       prismaMock = {
         shortname: {
           findUnique: vi.fn(() => Promise.resolve(null)),
-          create: vi.fn(() => Promise.resolve({})),
+          create: vi.fn(() => Promise.resolve({ id: 42, name: 'new-name' })),
         },
       }
     })
@@ -73,11 +73,12 @@ describe('shortnamesService ', async () => {
     })
 
     test('creates a shortname when the body is valid', async () => {
-      await createShortname(prismaMock, { shortname: 'new-name' })
+      const result = await createShortname(prismaMock, { shortname: 'new-name' })
 
       expect(prismaMock.shortname.create).toHaveBeenCalledWith({
         data: expect.objectContaining({ name: 'new-name' }),
       })
+      expect(result).toStrictEqual({ id: 42, shortname: 'new-name' })
     })
   })
 })

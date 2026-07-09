@@ -1,5 +1,5 @@
 import { afterAll, describe, expect, test, vi } from 'vitest'
-import { StatisticDetails, StatisticListingResponse } from '@ssbno-statreg/shared'
+import { ShortnameListing, StatisticCreate, StatisticDetails, StatisticListingResponse } from '@ssbno-statreg/shared'
 import { prisma } from '@/lib/prisma'
 import { createApp } from '@/app'
 import request from 'supertest'
@@ -9,7 +9,6 @@ import {
   readStatisticFromDb,
   type StatisticWithShortname,
 } from './integrationUtils'
-
 vi.mock(import('@/lib/cache'), () => ({
   getAllUsersFromCache: vi.fn(() =>
     Promise.resolve({
@@ -274,5 +273,44 @@ describe('statisticsController integration', () => {
     expect(statistics.statistics?.length).toBe(2)
     expect(statistics.statistics?.[0]?.shortname).toBe('energ')
     expect(statistics.statistics?.[1]?.shortname).toBe('kpi')
+  })
+
+  test('POST /shortnames creates a shortname that can be used to create and fetch a statistic', async () => {
+    // POST shortname
+    const shortnameResponse = await request(app)
+      .post('/statistikkregisteret/api/shortnames')
+      .set('content-type', 'application/json')
+      .send({ shortname: 'nytt-kortnavn' })
+
+    expect(shortnameResponse.status).toBe(201)
+    expect(shortnameResponse.body).toMatchObject({
+      id: expect.any(Number),
+      shortname: 'nytt-kortnavn',
+    })
+
+    // POST statistic for created shortname
+    const createPayload: StatisticCreate = {
+      division: '101',
+      name: 'Ny statistikk',
+      name_en: 'New statistic',
+      first_released_at: '2027-01-01',
+      main_language: 'nb',
+    }
+    const createResponse = await request(app)
+      .post('/statistikkregisteret/api/statistics/nytt-kortnavn')
+      .set('content-type', 'application/json')
+      .send(createPayload)
+
+    expect(createResponse.status).toBe(200)
+
+    // GET statistic to test persistence
+    const fetchResponse = await request(app).get('/statistikkregisteret/api/statistics/nytt-kortnavn')
+    expect(fetchResponse.status).toBe(200)
+    expect(fetchResponse.body.shortname).toBe('nytt-kortnavn')
+
+    // GET shortnames to verify created shortname is listed
+    const shortnamesListResponse = await request(app).get('/statistikkregisteret/api/shortnames')
+    expect(shortnamesListResponse.status).toBe(200)
+    expect(shortnamesListResponse.body.some((item: ShortnameListing) => item.shortname === 'nytt-kortnavn')).toBe(true)
   })
 })

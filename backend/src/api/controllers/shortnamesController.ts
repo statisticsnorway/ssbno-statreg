@@ -16,8 +16,8 @@ export default function shortnamesController(router: Router) {
 
   router.post('/shortnames', requireAdminAuthorization(), async (req, res) => {
     try {
-      await createShortname(prisma, req.body)
-      res.status(201).send()
+      const result = await createShortname(prisma, req.body)
+      res.status(201).json(result)
     } catch (error) {
       handleErrors(error, res)
     }
