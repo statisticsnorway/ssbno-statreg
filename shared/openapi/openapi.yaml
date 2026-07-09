@@ -141,6 +141,16 @@ components:
         code: { type: string }
         name: { type: string }
 
+    Shortname:
+      description: 'A shortname with its identifier'
+      type: object
+      required:
+        - id
+        - shortname
+      properties:
+        id: { type: integer, readOnly: true }
+        shortname: { type: string }
+
     Shortname_listing:
       description: 'Shortnames with its corresponding statistic name'
       type: object
@@ -345,6 +355,28 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Shortname_listing'
+    post:
+      summary: Create a new shortname
+      tags: [shortnames]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                shortname:
+                  type: string
+                  description: 'Only small letters (a-z) and hyphens (-) are allowed. Maximum 14 characters.'
+                  maxLength: 14
+              required:
+                - shortname
+      responses:
+        '201':
+          description: The shortname that was created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Shortname' }
   /statistics:
     get:
       summary: List of all statistics
