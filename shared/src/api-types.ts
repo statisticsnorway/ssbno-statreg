@@ -86,12 +86,14 @@ export interface paths {
         }
       }
       responses: {
-        /** @description The shortname was created */
+        /** @description The shortname that was created */
         201: {
           headers: {
             [name: string]: unknown
           }
-          content?: never
+          content: {
+            'application/json': components['schemas']['Shortname']
+          }
         }
       }
     }
@@ -949,6 +951,11 @@ export interface components {
     Region_level: {
       code?: string
       name?: string
+    }
+    /** @description A shortname with its identifier */
+    Shortname: {
+      readonly id: number
+      shortname: string
     }
     /** @description Shortnames with its corresponding statistic name */
     Shortname_listing: {

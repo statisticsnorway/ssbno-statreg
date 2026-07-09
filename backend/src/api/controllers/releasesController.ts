@@ -11,6 +11,7 @@ import { requireAdminAuthorization, skipAuth } from '@/../plugins/authMiddleware
 import { handleErrors } from '@/lib/prismaErrors'
 import { prisma } from '@/lib/prisma'
 import { isNumber, ensureString, ensureStringArray, ensureRequiredFieldsExists } from '@/lib/utils'
+import { log } from 'node:console'
 
 export default function releasesController(router: Router) {
   router.get('/releases/:id', skipAuth, async (req, res) => {
@@ -34,6 +35,7 @@ export default function releasesController(router: Router) {
       const filterByShortnames = ensureStringArray(req.query.shortname as string)
       const approvalStatus = ensureString(req.query.approval_status as string)
 
+      console.log(count)
       const data = await getFilteredReleases(
         { start, count, filterByShortnames, publishTimeAfter, publishTimeBefore, sort, approvalStatus },
         prisma
