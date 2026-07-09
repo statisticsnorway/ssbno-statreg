@@ -608,6 +608,8 @@ paths:
                         status:
                           description: HTTP status code for the approval request of a release.
                           type: integer
+                        message:
+                          description: Error message if the approval request failed.
                       required:
                         - id
                         - status

@@ -5,7 +5,7 @@ import {
   getReleaseById,
   createRelease,
   updateRelease,
-  approveReleases,
+  bulkApproveReleases,
 } from '@/services/releasesService'
 import { requireAdminAuthorization, skipAuth } from '@/../plugins/authMiddleware'
 import { handleErrors } from '@/lib/prismaErrors'
@@ -52,7 +52,7 @@ export default function releasesController(router: Router) {
         throw { statregError: `Invalid format for field 'ids'. Expected an array of integers.` }
       }
       const ids = input.map(Number)
-      const result = await approveReleases(prisma, ids)
+      const result = await bulkApproveReleases(prisma, ids)
       res.status(207).json(result)
     } catch (error) {
       return handleErrors(error, res)
