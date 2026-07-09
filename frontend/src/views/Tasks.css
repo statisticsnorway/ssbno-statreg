@@ -6,7 +6,7 @@
     padding-left: 0;
     padding-right: 0;
   
-    .approved-relases-alert-wrapper {
+    .approved-releases-alert-wrapper {
       display: flex;
     }
 
@@ -19,7 +19,7 @@
 
 .approved-releases-alert {
   animation: approval-alert-fade 250ms ease-out 5s forwards;
-  margin-bottom: var(--ds-size-8);
+  margin-bottom: var(--ds-size-9);
 }
 
 @keyframes approved-releases-alert-fade {

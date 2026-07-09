@@ -318,7 +318,7 @@ export default function Tasks() {
         </Tabs.List>
         <Tabs.Panel value='pending-releases' className='pending-releases-tab-panel'>
           <form onSubmit={handleOnSubmit}>
-            <div className='approved-relases-alert-wrapper'>
+            <div className='approved-releases-alert-wrapper'>
               {approvedReleasesCount > 0 && (
                 <Alert
                   data-color='success'
