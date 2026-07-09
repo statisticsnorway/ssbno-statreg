@@ -15,7 +15,7 @@ async function fetchAuthState(): Promise<AuthResponse | undefined> {
   const result = await client.GET('/auth/authenticate')
 
   if (result.error) {
-    return
+    console.log(result)
   }
 
   return result.data

@@ -95,7 +95,7 @@ components:
     Error:
       type: object
       required:
-        - message
+        - error
       properties:
         error:
           type: string
@@ -878,5 +878,3 @@ paths:
                   fullName:
                     type: string
                     example: Alice Examplesdottir
-        default:
-          $ref: '#/components/responses/Error'

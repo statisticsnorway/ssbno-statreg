@@ -909,7 +909,6 @@ export interface paths {
             }
           }
         }
-        default: components['responses']['Error']
       }
     }
     put?: never
