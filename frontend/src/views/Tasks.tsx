@@ -213,7 +213,7 @@ export default function Tasks() {
 
   async function batchApproveReleases() {
     const { data, error } = await client.POST('/releases/bulk-approve', {
-      body: { ids: selectedPendingReleaseIds.map((id) => Number(id)) },
+      body: { ids: selectedPendingReleaseIds.map(Number) },
     })
 
     if (error) {
@@ -260,6 +260,8 @@ export default function Tasks() {
 
   if (!isAdmin) return <ErrorPage type={ErrorType.NOTAUTH} />
 
+  const publishedReleasesAmountText =
+    approvedReleasesCount === 1 ? `${approvedReleasesCount} publisering` : `${approvedReleasesCount} publiseringer`
   return (
     <>
       {apiError.length > 0 && <ErrorAlert message={apiError} />}
@@ -281,7 +283,7 @@ export default function Tasks() {
             >
               {approvedReleasesCount > 0 && (
                 <Alert data-color='success'>
-                  <b>{`${approvedReleasesCount} ${approvedReleasesCount === 1 ? `publisering` : 'publiseringer'} har blitt godkjent`}</b>
+                  <b>{`${publishedReleasesAmountText} har blitt godkjent`}</b>
                 </Alert>
               )}
               <RowCountSelect selectedRowCount={pendingRowCount} updateRowCount={updatePendingRowCount} />
