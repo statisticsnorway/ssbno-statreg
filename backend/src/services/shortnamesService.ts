@@ -20,7 +20,7 @@ export async function getShortnames(prisma: ShortnamePrisma): Promise<ShortnameL
 }
 
 export async function createShortname(prisma: ShortnamePrisma, body: unknown): Promise<void> {
-  if (body === null || typeof body !== 'object' || !('shortname' in body)) {
+  if (!body || typeof body !== 'object' || !('shortname' in body)) {
     throw { statregError: "Missing required field 'shortname'." }
   }
 
