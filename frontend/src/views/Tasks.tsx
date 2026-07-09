@@ -24,7 +24,6 @@ import './Tasks.css'
 import { formatPublishTime, formatDate, toggleSort, getSortDirection } from '../lib/utils'
 import { useAuth } from '../context/AuthContext'
 import { RowCountSelect } from '../components/RowCountSelect'
-import { Pagination } from '../components/Pagination'
 import { PaginatedReleasesTable, TruncatedTableCell } from '../components/ReleasesTable'
 import { ErrorAlert } from '../components/ErrorAlert'
 import ErrorPage, { ErrorType } from './ErrorPage'
@@ -105,8 +104,6 @@ function PendingReleasesTable({
 }
 
 export default function Tasks() {
-  const [pendingRowCount, setPendingRowCount] = useState(10)
-  const [pendingStart, setPendingStart] = useState(0)
   const [pendingReleases, setPendingReleases] = useState<ReleaseListing[]>([])
   const [pendingTotal, setPendingTotal] = useState(0)
   const [pendingSortBy, setPendingSortBy] = useState<string>('-publish_time')
@@ -137,9 +134,9 @@ export default function Tasks() {
 
   useEffect(() => {
     if (!isAdmin) return
-    async function fetchPendingReleases(start: number, count: number, sortBy: string) {
+    async function fetchPendingReleases(sortBy: string) {
       const { data, error } = await client.GET('/releases', {
-        params: { query: { start, count, approval_status: ApprovalStatus.PENDING, sort: sortBy } },
+        params: { query: { start: 0, count: 999, approval_status: ApprovalStatus.PENDING, sort: sortBy } },
       })
 
       if (error) {
@@ -152,8 +149,8 @@ export default function Tasks() {
       setPendingReleases(data.releases ?? [])
       setPendingTotal(data.total ?? 0)
     }
-    fetchPendingReleases(pendingStart, pendingRowCount, pendingSortBy)
-  }, [isAdmin, pendingStart, pendingRowCount, pendingSortBy, approvedReleasesCount])
+    fetchPendingReleases(pendingSortBy)
+  }, [isAdmin, pendingSortBy, approvedReleasesCount])
 
   useEffect(() => {
     if (approvedReleasesCount === 0) return
@@ -190,7 +187,7 @@ export default function Tasks() {
       }
     }
     fetchReleases(start, rowCount, selectedShortnames, sortBy)
-  }, [isAdmin, start, rowCount, selectedShortnames, sortBy])
+  }, [isAdmin, start, rowCount, selectedShortnames, sortBy, approvedReleasesCount])
 
   useEffect(() => {
     if (!isAdmin) return
@@ -234,7 +231,6 @@ export default function Tasks() {
     } else {
       setApprovedReleasesCount(data.releases?.filter(({ status }) => status === 200)?.length ?? 0)
       setSelectedPendingReleaseIds([])
-      setPendingStart(0)
     }
   }
 
@@ -259,15 +255,6 @@ export default function Tasks() {
     setSelectedShortnames(selected)
   }
 
-  function updatePendingRowCount(newCount: number) {
-    setPendingRowCount(newCount)
-    setPendingStart(0)
-  }
-
-  function setCurrentPendingPage(currentPage: number) {
-    setPendingStart((currentPage - 1) * pendingRowCount)
-  }
-
   if (!isAdmin) return <ErrorPage type={ErrorType.NOTAUTH} />
 
   const publishedReleasesAmountText =
@@ -287,17 +274,13 @@ export default function Tasks() {
         </Tabs.List>
         <Tabs.Panel value='pending-releases' className='pending-releases-tab-panel'>
           <form onSubmit={handleOnSubmit}>
-            <div
-              className='row-count-select-wrapper'
-              style={{ justifyContent: approvedReleasesCount > 0 ? 'space-between' : 'flex-end' }}
-            >
+            <div className='approved-relases-alert-wrapper'>
               {approvedReleasesCount > 0 && (
                 <Alert
                   data-color='success'
                   className='approved-releases-alert'
                 >{`${publishedReleasesAmountText} har blitt godkjent`}</Alert>
               )}
-              <RowCountSelect selectedRowCount={pendingRowCount} updateRowCount={updatePendingRowCount} />
             </div>
             <PendingReleasesTable
               pendingReleases={pendingReleases}
@@ -316,12 +299,6 @@ export default function Tasks() {
                 </Button>
               </div>
             )}
-            <Pagination
-              start={pendingStart}
-              count={pendingRowCount}
-              total={pendingTotal}
-              setCurrentPage={setCurrentPendingPage}
-            />
           </form>
         </Tabs.Panel>
       </Tabs>

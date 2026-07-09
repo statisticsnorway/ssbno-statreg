@@ -2,13 +2,12 @@
   width: 100%;
 
   .pending-releases-tab-panel {
+    margin-top: var(--ds-size-8);
     padding-left: 0;
     padding-right: 0;
   
-    .row-count-select-wrapper {
+    .approved-relases-alert-wrapper {
       display: flex;
-      margin-top: var(--ds-size-8);
-      margin-bottom: var(--ds-size-8);
     }
 
     .pending-releases-buttons-wrapper {
@@ -20,6 +19,7 @@
 
 .approved-releases-alert {
   animation: approval-alert-fade 250ms ease-out 5s forwards;
+  margin-bottom: var(--ds-size-8);
 }
 
 @keyframes approved-releases-alert-fade {
