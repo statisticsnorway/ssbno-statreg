@@ -18,11 +18,11 @@
   }
 }
 
-.approval-alert {
+.approved-releases-alert {
   animation: approval-alert-fade 250ms ease-out 5s forwards;
 }
 
-@keyframes approval-alert-fade {
+@keyframes approved-releases-alert-fade {
   from {
     opacity: 1;
   }

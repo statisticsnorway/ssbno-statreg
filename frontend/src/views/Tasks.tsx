@@ -294,7 +294,7 @@ export default function Tasks() {
               {approvedReleasesCount > 0 && (
                 <Alert
                   data-color='success'
-                  className='approval-alert'
+                  className='approved-releases-alert'
                 >{`${publishedReleasesAmountText} har blitt godkjent`}</Alert>
               )}
               <RowCountSelect selectedRowCount={pendingRowCount} updateRowCount={updatePendingRowCount} />
