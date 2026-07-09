@@ -144,19 +144,17 @@ function ListReleasesTable({ isAdmin, setApiError, approvedReleasesCount }: List
       }
 
       const sort = sortBy
-      const { data, error } = await client.GET('/releases', {
+      const result = await client.GET('/releases', {
         params: { query: { start, count, ...filter, sort } },
       })
 
-      if (error) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const errorMessage = (error as any).error
-        console.log(errorMessage)
-        setApiError((prev) => [...prev, errorMessage])
-      } else {
-        setReleases(data.releases ?? [])
-        setTotal(data.total ?? 0)
+      if (result.error) {
+        setApiError((prev) => [...prev, result.error.error])
+        return
       }
+
+      setReleases(result.data.releases ?? [])
+      setTotal(result.data.total ?? 0)
     }
     fetchReleases(start, rowCount, selectedShortnames, sortBy)
   }, [isAdmin, start, rowCount, selectedShortnames, sortBy, setApiError, approvedReleasesCount])
@@ -164,15 +162,14 @@ function ListReleasesTable({ isAdmin, setApiError, approvedReleasesCount }: List
   useEffect(() => {
     if (!isAdmin) return
     async function fetchShortnames() {
-      const { data, error } = await client.GET('/shortnames')
-      if (error) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const errorMessage = (error as any).error
-        console.log(errorMessage)
-        setApiError((prev) => [...prev, errorMessage])
-      } else {
-        setShortnames(data ?? [])
+      const result = await client.GET('/shortnames')
+
+      if (result.error) {
+        setApiError((prev) => [...prev, result.error.error])
+        return
       }
+
+      setShortnames(result.data ?? [])
     }
     fetchShortnames()
   }, [isAdmin, setApiError])
@@ -248,19 +245,17 @@ export default function Tasks() {
   useEffect(() => {
     if (!isAdmin) return
     async function fetchPendingReleases(sortBy: string) {
-      const { data, error } = await client.GET('/releases', {
+      const result = await client.GET('/releases', {
         params: { query: { start: 0, count: 999, approval_status: ApprovalStatus.PENDING, sort: sortBy } },
       })
 
-      if (error) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const errorMessage = (error as any).error
-        setApiError((prev) => [...prev, errorMessage])
+      if (result.error) {
+        setApiError((prev) => [...prev, result.error.error])
         return
       }
 
-      setPendingReleases(data.releases ?? [])
-      setPendingTotal(data.total ?? 0)
+      setPendingReleases(result.data.releases ?? [])
+      setPendingTotal(result.data.total ?? 0)
     }
     fetchPendingReleases(pendingSortBy)
   }, [isAdmin, pendingSortBy, approvedReleasesCount])
@@ -276,19 +271,17 @@ export default function Tasks() {
   }, [approvedReleasesCount])
 
   async function batchApproveReleases() {
-    const { data, error } = await client.POST('/releases/bulk-approve', {
+    const result = await client.POST('/releases/bulk-approve', {
       body: { ids: selectedPendingReleaseIds.map(Number) },
     })
 
-    if (error) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const errorMessage = (error as any).error
-      console.log(errorMessage)
-      setApiError((prev) => [...prev, errorMessage])
-    } else {
-      setApprovedReleasesCount(data.releases?.filter(({ status }) => status === 200)?.length ?? 0)
-      setSelectedPendingReleaseIds([])
+    if (result.error) {
+      setApiError((prev) => [...prev, result.error.error])
+      return
     }
+
+    setApprovedReleasesCount(result.data.releases?.filter(({ status }) => status === 200)?.length ?? 0)
+    setSelectedPendingReleaseIds([])
   }
 
   function handleOnSubmit(e: React.SubmitEvent<HTMLFormElement>) {

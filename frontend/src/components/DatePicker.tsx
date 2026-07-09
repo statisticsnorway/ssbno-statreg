@@ -88,20 +88,19 @@ export function DatePicker({ showColorCodingExplanation, calendarDatesEmit, apiE
       if (!displayedMonth) return
       const from = new Date(displayedMonth.getFullYear(), displayedMonth.getMonth(), 1)
       const to = new Date(displayedMonth.getFullYear(), displayedMonth.getMonth() + 1, 0)
-      const { data, error } = await client.GET('/calendar', {
+      const result = await client.GET('/calendar', {
         params: {
           query: { fromDate: getDateOnlyAsString(from), toDate: getDateOnlyAsString(to) },
         },
       })
-      if (error) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const errorMessage = (error as any).error
-        console.log(errorMessage)
-        apiErrorEmit?.(`Calendar error: ${errorMessage}`)
-      } else {
-        setCalendarDates(data)
-        calendarDatesEmit?.(data)
+
+      if (result.error) {
+        apiErrorEmit?.(`Calendar error: ${result.error.error}`)
+        return
       }
+
+      setCalendarDates(result.data)
+      calendarDatesEmit?.(result.data)
     }
     fetchCalendarDates()
   }, [displayedMonth, calendarDatesEmit, apiErrorEmit])

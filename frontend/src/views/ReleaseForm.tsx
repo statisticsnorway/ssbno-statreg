@@ -196,37 +196,33 @@ export default function ReleaseForm() {
   }
 
   async function updateRelease(body: ReleaseUpdate) {
-    const { data, error } = await client.PUT('/releases/{id}', {
+    const result = await client.PUT('/releases/{id}', {
       params: { path: { id: releaseId?.toString() ?? '' } },
       body: body,
     })
 
-    if (error) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const errorMessage = (error as any).error
-      console.log(errorMessage)
-      setApiError((prev) => [...prev, errorMessage])
-    } else {
-      setOpenReleaseModal(true)
-      setNewOrUpdatedRelease(data)
+    if (result.error) {
+      setApiError((prev) => [...prev, result.error.error])
+      return
     }
+
+    setOpenReleaseModal(true)
+    setNewOrUpdatedRelease(result.data)
   }
 
   async function createRelease(body: ReleaseCreate) {
-    const { data, error } = await client.POST('/statistics/{shortname}/variants/{id}/releases', {
+    const result = await client.POST('/statistics/{shortname}/variants/{id}/releases', {
       params: { path: { shortname: shortname as string, id: Number(variantId) } },
       body,
     })
 
-    if (error) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const errorMessage = (error as any).error
-      console.log(errorMessage)
-      setApiError((prev) => [...prev, errorMessage])
-    } else {
-      setOpenReleaseModal(true)
-      setNewOrUpdatedRelease(data)
+    if (result.error) {
+      setApiError((prev) => [...prev, result.error.error])
+      return
     }
+
+    setOpenReleaseModal(true)
+    setNewOrUpdatedRelease(result.data)
   }
 
   function handleOnSubmit(e: React.SubmitEvent<HTMLFormElement>) {
@@ -448,19 +444,18 @@ function DateReleasesTable({
 
   useEffect(() => {
     async function fetchReleases() {
-      const { data, error } = await client.GET('/releases', {
+      const result = await client.GET('/releases', {
         params: {
           query: { start: 0, count: 100, sort: sortBy, ...getPublishTimeFilterForDate(selectedDate) },
         },
       })
-      if (error) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const errorMessage = (error as any).error
-        console.log(errorMessage)
-        apiErrorEmit?.(`Date releases table error: ${errorMessage}`)
-      } else {
-        setReleases(data?.releases ?? [])
+
+      if (result.error) {
+        apiErrorEmit?.(`Date releases table error: ${result.error.error}`)
+        return
       }
+
+      setReleases(result.data.releases ?? [])
     }
     fetchReleases()
   }, [sortBy, selectedDate, apiErrorEmit])
@@ -498,18 +493,17 @@ function VariantReleasesTable({
 
   useEffect(() => {
     async function fetchVariantReleases() {
-      const { data, error } = await client.GET('/statistics/{shortname}/variants/{id}/releases', {
+      const result = await client.GET('/statistics/{shortname}/variants/{id}/releases', {
         params: { path: { shortname, id: variantId }, query: { start, count, sort: sortBy } },
       })
-      if (error) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const errorMessage = (error as any).error
-        console.log(errorMessage)
-        apiErrorEmit?.(`Variant releases table error: ${errorMessage}`)
-      } else {
-        setReleases(data?.releases ?? [])
-        setTotal(data.total ?? 0)
+
+      if (result.error) {
+        apiErrorEmit?.(`Variant releases table error: ${result.error.error}`)
+        return
       }
+
+      setReleases(result.data.releases ?? [])
+      setTotal(result.data.total ?? 0)
     }
     fetchVariantReleases()
   }, [shortname, variantId, count, start, sortBy, apiErrorEmit])

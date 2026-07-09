@@ -63,46 +63,43 @@ export default function ListStatistics() {
       }),
     }
 
-    const { data, error } = await client.GET('/statistics', {
+    const result = await client.GET('/statistics', {
       params: { query: { start, count, ...sort, ...filter } },
     })
-    if (error) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const errorMessage = (error as any).error
-      console.log(errorMessage)
-      setApiError((prev) => [...prev, errorMessage])
-    } else {
-      setStatistics(data.statistics ?? [])
-      setTotal(data.total ?? 0)
+
+    if (result.error) {
+      setApiError((prev) => [...prev, result.error.error])
+      return
     }
+
+    setStatistics(result.data.statistics ?? [])
+    setTotal(result.data.total ?? 0)
   }
 
   useEffect(() => {
     async function fetchShortnames() {
-      const { data, error } = await client.GET('/shortnames')
-      if (error) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const errorMessage = (error as any).error
-        console.log(errorMessage)
-        setApiError((prev) => [...prev, errorMessage])
-      } else {
-        setShortnames(data ?? [])
+      const result = await client.GET('/shortnames')
+
+      if (result.error) {
+        setApiError((prev) => [...prev, result.error.error])
+        return
       }
+
+      setShortnames(result.data ?? [])
     }
     fetchShortnames()
   }, [])
 
   useEffect(() => {
     async function fetchContacts() {
-      const { data, error } = await client.GET('/contacts')
-      if (error) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const errorMessage = (error as any).error
-        console.log(errorMessage)
-        setApiError((prev) => [...prev, errorMessage])
-      } else {
-        setContacts(data ?? [])
+      const result = await client.GET('/contacts')
+
+      if (result.error) {
+        setApiError((prev) => [...prev, result.error.error])
+        return
       }
+
+      setContacts(result.data ?? [])
     }
     fetchContacts()
   }, [])

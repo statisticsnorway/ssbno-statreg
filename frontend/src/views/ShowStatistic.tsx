@@ -30,31 +30,29 @@ export default function ShowStatistic() {
 
   useEffect(() => {
     async function fetchStatistic() {
-      const { data, error } = await client.GET('/statistics/{shortname}', {
+      const result = await client.GET('/statistics/{shortname}', {
         params: { path: { shortname: shortname as string } },
       })
-      if (error) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const errorMessage = (error as any).error
-        console.log(errorMessage)
-        setApiError((prev) => [...prev, errorMessage])
-      } else {
-        setStatistic(data)
+
+      if (result.error) {
+        setApiError((prev) => [...prev, result.error.error])
+        return
       }
+
+      setStatistic(result.data)
     }
 
     async function fetchReleases(shortname: string) {
-      const { data, error } = await client.GET('/releases', {
+      const result = await client.GET('/releases', {
         params: { query: { shortname, count: 100, publish_time_after: new Date().toISOString() } },
       })
-      if (error) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const errorMessage = (error as any).error
-        console.log(errorMessage)
-        setApiError((prev) => [...prev, errorMessage])
-      } else {
-        setReleases(data.releases ?? [])
+
+      if (result.error) {
+        setApiError((prev) => [...prev, result.error.error])
+        return
       }
+
+      setReleases(result.data.releases ?? [])
     }
     fetchStatistic()
     if (shortname) fetchReleases(shortname)

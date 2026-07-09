@@ -84,36 +84,33 @@ function ListReleases() {
 
   useEffect(() => {
     async function fetchReleases() {
-      const { data, error } = await client.GET('/releases', {
+      const result = await client.GET('/releases', {
         params: {
           query: releaseQuery,
         },
       })
 
-      if (error) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const errorMessage = (error as any).error
-        console.log(errorMessage)
-        setApiError((prev) => [...prev, errorMessage])
-      } else {
-        setReleases(data.releases ?? [])
-        setTotal(data.total ?? 0)
+      if (result.error) {
+        setApiError((prev) => [...prev, result.error.error])
+        return
       }
+
+      setReleases(result.data.releases ?? [])
+      setTotal(result.data.total ?? 0)
     }
     fetchReleases()
   }, [releaseQuery])
 
   useEffect(() => {
     async function fetchShortnames() {
-      const { data, error } = await client.GET('/shortnames')
-      if (error) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const errorMessage = (error as any).error
-        console.log(errorMessage)
-        setApiError((prev) => [...prev, errorMessage])
-      } else {
-        setShortnames(data ?? [])
+      const result = await client.GET('/shortnames')
+
+      if (result.error) {
+        setApiError((prev) => [...prev, result.error.error])
+        return
       }
+
+      setShortnames(result.data ?? [])
     }
     fetchShortnames()
   }, [])
