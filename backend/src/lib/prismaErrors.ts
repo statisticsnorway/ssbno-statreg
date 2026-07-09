@@ -3,7 +3,7 @@ import type { Response } from 'express'
 
 // Please refer to https://www.prisma.io/docs/orm/reference/error-reference#error-codes for error codes in Prisma
 
-function checkForKnownPrismaErrors(err: Error): string {
+export function checkForKnownPrismaErrors(err: Error): string {
   if (err instanceof Prisma.PrismaClientKnownRequestError) {
     if (err.code === 'P2002') {
       return 'Prisma unique constraint error: ' + getLastLineFromErrorMessage(err.message)

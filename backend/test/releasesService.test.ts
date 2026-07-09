@@ -8,13 +8,14 @@ import {
   getReleaseById,
   updateRelease,
   createRelease,
-  approveReleases,
+  bulkApproveReleases,
   buildReleaseFilter,
   buildVariantReleaseFilter,
   ReleaseDetailsIncludes,
   mapToReleaseDetails,
 } from '@/services/releasesService'
 import { ApprovalStatus } from '@ssbno-statreg/shared'
+import { Prisma } from '@/generated/prisma/client'
 
 let prismaMock: any
 let releasesResult: object | null
@@ -494,7 +495,7 @@ describe('releasesService ', async () => {
 
   describe('approveReleases ', () => {
     test('approves all releases and returns their statuses', async () => {
-      const result = await approveReleases(prismaMock, [1, 2, 3])
+      const result = await bulkApproveReleases(prismaMock, [1, 2, 3])
 
       expect(result).toStrictEqual({
         releases: [
@@ -506,19 +507,29 @@ describe('releasesService ', async () => {
       expect(prismaMock.release.update).toHaveBeenCalledTimes(3)
     })
 
-    test('returns 500 status for releases that fail to update', async () => {
+    test('returns 400, 500 and 200 statuses for mixed results', async () => {
       prismaMock.release.update = vi.fn((args: any) => {
-        if (args.where.id === 2) {
-          return Promise.reject(new Error('Update failed'))
+        if (args.where.id === 1) {
+          return Promise.reject(
+            new Prisma.PrismaClientKnownRequestError('Unique constraint failed', {
+              code: 'P2002',
+              clientVersion: '1.0.0',
+            })
+          )
         }
+
+        if (args.where.id === 2) {
+          return Promise.reject(new Error())
+        }
+
         return Promise.resolve({ id: args.where.id })
       })
 
-      const result = await approveReleases(prismaMock, [1, 2, 3])
+      const result = await bulkApproveReleases(prismaMock, [1, 2, 3])
 
-      expect(result).toStrictEqual({
+      expect(result).toMatchObject({
         releases: [
-          { id: 1, status: 200 },
+          { id: 1, status: 400 },
           { id: 2, status: 500 },
           { id: 3, status: 200 },
         ],
