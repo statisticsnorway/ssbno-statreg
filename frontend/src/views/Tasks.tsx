@@ -282,9 +282,7 @@ export default function Tasks() {
               style={{ justifyContent: approvedReleasesCount > 0 ? 'space-between' : 'flex-end' }}
             >
               {approvedReleasesCount > 0 && (
-                <Alert data-color='success'>
-                  <b>{`${publishedReleasesAmountText} har blitt godkjent`}</b>
-                </Alert>
+                <Alert data-color='success'>{`${publishedReleasesAmountText} har blitt godkjent`}</Alert>
               )}
               <RowCountSelect selectedRowCount={pendingRowCount} updateRowCount={updatePendingRowCount} />
             </div>
