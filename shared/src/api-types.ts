@@ -575,6 +575,8 @@ export interface paths {
                 id: number
                 /** @description HTTP status code for the approval request of a release. */
                 status: number
+                /** @description Error message if the approval request failed. */
+                message?: unknown
               }[]
             }
           }

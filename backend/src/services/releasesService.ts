@@ -3,6 +3,7 @@ import {
   type ReleaseCreate,
   type ReleaseUpdate,
   type ReleaseListingResponse,
+  type ReleasesBulkApproveResponse,
   ApprovalStatus,
 } from '@ssbno-statreg/shared'
 import {
@@ -18,6 +19,7 @@ import {
 import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
 import type { Prisma } from '@/generated/prisma/client'
 import { releaseAsserts } from '@/lib/asserts'
+import { checkForKnownPrismaErrors } from '@/lib/prismaErrors'
 
 export type ReleasePrisma = Pick<PrismaClient, 'release' | 'statistic' | 'variant' | 'shortname'>
 
@@ -323,6 +325,39 @@ export async function updateRelease(
   })
 
   return mapToReleaseDetails(release)
+}
+
+type ReleaseApproveResponse = ReleasesBulkApproveResponse['releases'][number]
+
+async function approveRelease(prisma: ReleasePrisma, id: number): Promise<ReleaseApproveResponse> {
+  try {
+    await prisma.release.update({
+      where: { id },
+      data: {
+        desk_appoval_status: ApprovalStatus.ACCEPTED,
+        last_updated: new Date(),
+      },
+    })
+    return { id, status: 200 }
+  } catch (error) {
+    if (error instanceof Error) {
+      const knownErrorMessage = checkForKnownPrismaErrors(error)
+      if (knownErrorMessage) {
+        return { id, status: 400, message: knownErrorMessage }
+      }
+    }
+    return { id, status: 500 }
+  }
+}
+
+export async function bulkApproveReleases(prisma: ReleasePrisma, ids: number[]): Promise<ReleasesBulkApproveResponse> {
+  const releases = []
+
+  for (const id of ids) {
+    releases.push(await approveRelease(prisma, id))
+  }
+
+  return { releases }
 }
 
 type ValidatedReleaseInput = {
