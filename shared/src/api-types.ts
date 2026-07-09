@@ -69,7 +69,34 @@ export interface paths {
       }
     }
     put?: never
-    post?: never
+    /** Create a new shortname */
+    post: {
+      parameters: {
+        query?: never
+        header?: never
+        path?: never
+        cookie?: never
+      }
+      requestBody: {
+        content: {
+          'application/json': {
+            /** @description Only small letters (a-z) and hyphens (-) are allowed. Maximum 14 characters. */
+            shortname: string
+          }
+        }
+      }
+      responses: {
+        /** @description The shortname that was created */
+        201: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            'application/json': components['schemas']['Shortname']
+          }
+        }
+      }
+    }
     delete?: never
     options?: never
     head?: never
@@ -924,6 +951,11 @@ export interface components {
     Region_level: {
       code?: string
       name?: string
+    }
+    /** @description A shortname with its identifier */
+    Shortname: {
+      readonly id: number
+      shortname: string
     }
     /** @description Shortnames with its corresponding statistic name */
     Shortname_listing: {
