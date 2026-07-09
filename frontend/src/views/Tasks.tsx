@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type Dispatch, type SetStateAction } from 'react'
 import { useSearchParams } from 'react-router'
 import {
   Heading,
@@ -40,6 +40,13 @@ type PendingReleaseTableProps = {
   getCheckboxProps: ReturnType<typeof useCheckboxGroup>['getCheckboxProps']
   sortBy?: string
   setSortBy?: (sortBy: string) => void
+}
+
+type ListReleasesTableProps = {
+  isAdmin: boolean
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  setApiError: Dispatch<SetStateAction<any[]>>
+  approvedReleasesCount: number
 }
 
 const TABLE_HEADER_CELLS = [
@@ -103,12 +110,7 @@ function PendingReleasesTable({
   )
 }
 
-export default function Tasks() {
-  const [pendingReleases, setPendingReleases] = useState<ReleaseListing[]>([])
-  const [pendingTotal, setPendingTotal] = useState(0)
-  const [pendingSortBy, setPendingSortBy] = useState<string>('-publish_time')
-  const [approvedReleasesCount, setApprovedReleasesCount] = useState(0)
-
+function ListReleasesTable({ isAdmin, setApiError, approvedReleasesCount }: ListReleasesTableProps) {
   const [searchParams] = useSearchParams()
   const shortnamesQuery = searchParams.get('shortname')
   const [rowCount, setRowCount] = useState(10)
@@ -117,8 +119,119 @@ export default function Tasks() {
   const [total, setTotal] = useState(0)
   const [shortnames, setShortnames] = useState<ShortnameListing[]>([])
   const [sortBy, setSortBy] = useState<string>('-publish_time')
-  const [apiError, setApiError] = useState<string[]>([])
   const [selectedShortnames, setSelectedShortnames] = useState<SuggestionItem[]>([])
+
+  function updateRowCount(newCount: number) {
+    setRowCount(newCount)
+    setStart(0)
+  }
+
+  function setCurrentPage(currentPage: number) {
+    setStart((currentPage - 1) * rowCount)
+  }
+
+  function filterChanged(selected: SuggestionItem[]) {
+    setSelectedShortnames(selected)
+  }
+
+  useEffect(() => {
+    if (!isAdmin) return
+    async function fetchReleases(start: number, count: number, selectedShortnames: SuggestionItem[], sortBy: string) {
+      const filter = {
+        ...(selectedShortnames.length && {
+          shortname: selectedShortnames.map((item) => item.value).join(','),
+        }),
+      }
+
+      const sort = sortBy
+      const { data, error } = await client.GET('/releases', {
+        params: { query: { start, count, ...filter, sort } },
+      })
+
+      if (error) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const errorMessage = (error as any).error
+        console.log(errorMessage)
+        setApiError((prev) => [...prev, errorMessage])
+      } else {
+        setReleases(data.releases ?? [])
+        setTotal(data.total ?? 0)
+      }
+    }
+    fetchReleases(start, rowCount, selectedShortnames, sortBy)
+  }, [isAdmin, start, rowCount, selectedShortnames, sortBy, setApiError, approvedReleasesCount])
+
+  useEffect(() => {
+    if (!isAdmin) return
+    async function fetchShortnames() {
+      const { data, error } = await client.GET('/shortnames')
+      if (error) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const errorMessage = (error as any).error
+        console.log(errorMessage)
+        setApiError((prev) => [...prev, errorMessage])
+      } else {
+        setShortnames(data ?? [])
+      }
+    }
+    fetchShortnames()
+  }, [isAdmin, setApiError])
+
+  useEffect(() => {
+    async function setSelectedShortnamesFromQuery() {
+      if (!isAdmin || !shortnamesQuery) return
+
+      const newSelectedShortnames = shortnamesQuery.split(',').map((shortname) => ({
+        label: shortname,
+        value: shortname,
+      }))
+      setSelectedShortnames(newSelectedShortnames)
+    }
+    setSelectedShortnamesFromQuery()
+  }, [isAdmin, shortnamesQuery])
+
+  return (
+    <>
+      <Heading level={3} data-size='xs'>
+        Publiseringsoversikt
+      </Heading>
+      <div className='list-releases-filter-container'>
+        <Field>
+          <Label>Søk og filtrer</Label>
+          <Suggestion multiple onSelectedChange={(selected) => filterChanged(selected)} selected={selectedShortnames}>
+            <Suggestion.Input />
+            <Suggestion.Clear />
+            <Suggestion.List>
+              <Suggestion.Empty>Ingen treff</Suggestion.Empty>
+              {shortnames.map((shortname) => (
+                <Suggestion.Option key={shortname.shortname} label={shortname.shortname} value={shortname.shortname}>
+                  {shortname.shortname}, {shortname.statistic_name}
+                </Suggestion.Option>
+              ))}
+            </Suggestion.List>
+          </Suggestion>
+        </Field>
+        <RowCountSelect selectedRowCount={rowCount} updateRowCount={updateRowCount} />
+      </div>
+      <PaginatedReleasesTable
+        start={start}
+        count={rowCount}
+        total={total}
+        releases={releases}
+        setCurrentPage={setCurrentPage}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
+      />
+    </>
+  )
+}
+
+export default function Tasks() {
+  const [pendingReleases, setPendingReleases] = useState<ReleaseListing[]>([])
+  const [pendingTotal, setPendingTotal] = useState(0)
+  const [pendingSortBy, setPendingSortBy] = useState<string>('-publish_time')
+  const [approvedReleasesCount, setApprovedReleasesCount] = useState(0)
+  const [apiError, setApiError] = useState<string[]>([])
 
   const { auth } = useAuth()
   const isAdmin = auth?.isAdmin
@@ -162,62 +275,6 @@ export default function Tasks() {
     return () => clearTimeout(timer)
   }, [approvedReleasesCount])
 
-  useEffect(() => {
-    if (!isAdmin) return
-    async function fetchReleases(start: number, count: number, selectedShortnames: SuggestionItem[], sortBy: string) {
-      const filter = {
-        ...(selectedShortnames.length && {
-          shortname: selectedShortnames.map((item) => item.value).join(','),
-        }),
-      }
-
-      const sort = sortBy
-      const { data, error } = await client.GET('/releases', {
-        params: { query: { start, count, ...filter, sort } },
-      })
-
-      if (error) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const errorMessage = (error as any).error
-        console.log(errorMessage)
-        setApiError((prev) => [...prev, errorMessage])
-      } else {
-        setReleases(data.releases ?? [])
-        setTotal(data.total ?? 0)
-      }
-    }
-    fetchReleases(start, rowCount, selectedShortnames, sortBy)
-  }, [isAdmin, start, rowCount, selectedShortnames, sortBy, approvedReleasesCount])
-
-  useEffect(() => {
-    if (!isAdmin) return
-    async function fetchShortnames() {
-      const { data, error } = await client.GET('/shortnames')
-      if (error) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const errorMessage = (error as any).error
-        console.log(errorMessage)
-        setApiError((prev) => [...prev, errorMessage])
-      } else {
-        setShortnames(data ?? [])
-      }
-    }
-    fetchShortnames()
-  }, [isAdmin])
-
-  useEffect(() => {
-    async function setSelectedShortnamesFromQuery() {
-      if (!isAdmin || !shortnamesQuery) return
-
-      const newSelectedShortnames = shortnamesQuery.split(',').map((shortname) => ({
-        label: shortname,
-        value: shortname,
-      }))
-      setSelectedShortnames(newSelectedShortnames)
-    }
-    setSelectedShortnamesFromQuery()
-  }, [isAdmin, shortnamesQuery])
-
   async function batchApproveReleases() {
     const { data, error } = await client.POST('/releases/bulk-approve', {
       body: { ids: selectedPendingReleaseIds.map(Number) },
@@ -240,19 +297,6 @@ export default function Tasks() {
     if (!selectedPendingReleaseIds.length) return
 
     batchApproveReleases()
-  }
-
-  function updateRowCount(newCount: number) {
-    setRowCount(newCount)
-    setStart(0)
-  }
-
-  function setCurrentPage(currentPage: number) {
-    setStart((currentPage - 1) * rowCount)
-  }
-
-  function filterChanged(selected: SuggestionItem[]) {
-    setSelectedShortnames(selected)
   }
 
   if (!isAdmin) return <ErrorPage type={ErrorType.NOTAUTH} />
@@ -303,37 +347,7 @@ export default function Tasks() {
         </Tabs.Panel>
       </Tabs>
       <Divider />
-
-      <Heading level={3} data-size='xs'>
-        Publiseringsoversikt
-      </Heading>
-      <div className='list-releases-filter-container'>
-        <Field>
-          <Label>Søk og filtrer</Label>
-          <Suggestion multiple onSelectedChange={(selected) => filterChanged(selected)} selected={selectedShortnames}>
-            <Suggestion.Input />
-            <Suggestion.Clear />
-            <Suggestion.List>
-              <Suggestion.Empty>Ingen treff</Suggestion.Empty>
-              {shortnames.map((shortname) => (
-                <Suggestion.Option key={shortname.shortname} label={shortname.shortname} value={shortname.shortname}>
-                  {shortname.shortname}, {shortname.statistic_name}
-                </Suggestion.Option>
-              ))}
-            </Suggestion.List>
-          </Suggestion>
-        </Field>
-        <RowCountSelect selectedRowCount={rowCount} updateRowCount={updateRowCount} />
-      </div>
-      <PaginatedReleasesTable
-        start={start}
-        count={rowCount}
-        total={total}
-        releases={releases}
-        setCurrentPage={setCurrentPage}
-        sortBy={sortBy}
-        setSortBy={setSortBy}
-      />
+      <ListReleasesTable isAdmin={isAdmin} setApiError={setApiError} approvedReleasesCount={approvedReleasesCount} />
     </>
   )
 }
