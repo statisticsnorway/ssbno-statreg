@@ -92,7 +92,6 @@ export function CreateShortnameModal({
     e.preventDefault()
 
     if (!validateShortname()) return
-
     createShortname()
   }
 
