@@ -1,6 +1,38 @@
+import { useState } from 'react'
 import { Button, Heading, Dialog, Field, Input, ValidationMessage, Paragraph } from '@digdir/designsystemet-react'
 
-export function CreateShortnameModal({ openCreateShortnameModal, setOpenCreateReleaseModal }) {
+type CreateShortnameModalProps = {
+  openCreateShortnameModal: boolean
+  setOpenCreateReleaseModal: (open: boolean) => void
+}
+
+export function CreateShortnameModal({
+  openCreateShortnameModal,
+  setOpenCreateReleaseModal,
+}: CreateShortnameModalProps) {
+  const [validationError, setValidationError] = useState('')
+  const [shortname, setShortname] = useState('')
+
+  function validateShortname() {
+    if (!shortname) {
+      setValidationError('Fyll ut et kortnavn')
+      return
+    }
+
+    const validShortnameCharacters = shortname.match(/[^a-z-]/g)
+    if (validShortnameCharacters) {
+      const invalidChars = [...new Set(validShortnameCharacters)]
+      setValidationError(`Kortnavnet inneholder ugyldige tegn: ${invalidChars.join(', ')}`)
+      return
+    }
+
+    setValidationError('')
+  }
+
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setShortname(e.target.value)
+  }
+
   return (
     <Dialog
       id='create-shortname-modal'
@@ -16,11 +48,12 @@ export function CreateShortnameModal({ openCreateShortnameModal, setOpenCreateRe
             Du må registrere et kortnavn før du kan fylle ut resten av informasjonen om statistikken. Kortnavnet kan
             ikke endres etter at statistikken har blitt opprettet. Maks 14 tegn, kun små bokstaver og bindestrek er lov.
           </Field.Description>
-          <Input />
+          <Input aria-invalid={!!validationError} onChange={handleChange} onBlur={validateShortname} />
           <Paragraph data-limit='14' data-field='counter' />
-          <ValidationMessage>Fyll ut et kortnavn</ValidationMessage>
+          {validationError && <ValidationMessage>{validationError}</ValidationMessage>}
+
+          {/* TODO: Check with fetch shortname? */}
           <ValidationMessage>Dette kortnavnet er ikke ledig</ValidationMessage>
-          <ValidationMessage>Kortnavnet inneholder ikke gyldige tegn</ValidationMessage>
           <ValidationMessage data-color='success'>Kortnavn er ledig</ValidationMessage>
         </Field>
         <div style={{ display: 'flex' }}>
