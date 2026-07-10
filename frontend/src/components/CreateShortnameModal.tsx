@@ -51,7 +51,7 @@ export function CreateShortnameModal({
       return false
     }
 
-    const validShortnameCharacters = shortnameInput.match(/[^a-z-]/g)
+    const validShortnameCharacters = shortnameInput.match(/[^a-z_]/g)
     if (validShortnameCharacters) {
       const invalidChars = [...new Set(validShortnameCharacters)]
       setValidationError(`Kortnavnet inneholder ugyldige tegn: ${invalidChars.join(', ')}`)
@@ -111,7 +111,7 @@ export function CreateShortnameModal({
           <Field>
             <Field.Description>
               Du må registrere et kortnavn før du kan fylle ut resten av informasjonen om statistikken. Kortnavnet kan
-              ikke endres etter at statistikken har blitt opprettet. Maks 14 tegn, kun små bokstaver og bindestrek er
+              ikke endres etter at statistikken har blitt opprettet. Maks 14 tegn, kun små bokstaver og understrek er
               lov.
             </Field.Description>
             <Input aria-invalid={!!validationError} onChange={handleInputChange} onBlur={validateShortname} />

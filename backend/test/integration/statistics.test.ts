@@ -280,12 +280,12 @@ describe('statisticsController integration', () => {
     const shortnameResponse = await request(app)
       .post('/statistikkregisteret/api/shortnames')
       .set('content-type', 'application/json')
-      .send({ shortname: 'nytt-kortnavn' })
+      .send({ shortname: 'nytt_kortnavn' })
 
     expect(shortnameResponse.status).toBe(201)
     expect(shortnameResponse.body).toMatchObject({
       id: expect.any(Number),
-      shortname: 'nytt-kortnavn',
+      shortname: 'nytt_kortnavn',
     })
 
     // POST statistic for created shortname
@@ -297,20 +297,20 @@ describe('statisticsController integration', () => {
       main_language: 'nb',
     }
     const createResponse = await request(app)
-      .post('/statistikkregisteret/api/statistics/nytt-kortnavn')
+      .post('/statistikkregisteret/api/statistics/nytt_kortnavn')
       .set('content-type', 'application/json')
       .send(createPayload)
 
     expect(createResponse.status).toBe(200)
 
     // GET statistic to test persistence
-    const fetchResponse = await request(app).get('/statistikkregisteret/api/statistics/nytt-kortnavn')
+    const fetchResponse = await request(app).get('/statistikkregisteret/api/statistics/nytt_kortnavn')
     expect(fetchResponse.status).toBe(200)
-    expect(fetchResponse.body.shortname).toBe('nytt-kortnavn')
+    expect(fetchResponse.body.shortname).toBe('nytt_kortnavn')
 
     // GET shortnames to verify created shortname is listed
     const shortnamesListResponse = await request(app).get('/statistikkregisteret/api/shortnames')
     expect(shortnamesListResponse.status).toBe(200)
-    expect(shortnamesListResponse.body.some((item: ShortnameListing) => item.shortname === 'nytt-kortnavn')).toBe(true)
+    expect(shortnamesListResponse.body.some((item: ShortnameListing) => item.shortname === 'nytt_kortnavn')).toBe(true)
   })
 })

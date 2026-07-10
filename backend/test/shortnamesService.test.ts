@@ -24,27 +24,27 @@ describe('shortnamesService ', async () => {
   describe('parseShortname', () => {
     const expectedError = {
       statregError:
-        "Field 'shortname' must only contain lowercase letters (a-z) and hyphens (-), and be at most 14 characters.",
+        "Field 'shortname' must only contain lowercase letters (a-z) and underscore (_), and be at most 14 characters.",
     }
 
     test('throws when shortname is not a string', () => {
       expect(() => parseShortname(123)).toThrow({ statregError: "Field 'shortname' must be a string." })
     })
     test('throws when shortname contains uppercase letters', () => {
-      expect(() => parseShortname('Invalid-Name')).toThrow(expectedError)
+      expect(() => parseShortname('Invalid_Name')).toThrow(expectedError)
     })
 
     test('throws when shortname is longer than 14 characters', () => {
-      expect(() => parseShortname('this-name-is-too-long')).toThrow(expectedError)
+      expect(() => parseShortname('this_name_is_too_long')).toThrow(expectedError)
     })
 
     test('throws when shortname contains invalid characters', () => {
-      expect(() => parseShortname('invalid_name')).toThrow(expectedError)
+      expect(() => parseShortname('invalid-name')).toThrow(expectedError)
     })
     test('returns the shortname when it is valid', () => {
-      const result = parseShortname('valid-name')
+      const result = parseShortname('valid_name')
 
-      expect(result).toBe('valid-name')
+      expect(result).toBe('valid_name')
     })
   })
 
@@ -53,7 +53,7 @@ describe('shortnamesService ', async () => {
       prismaMock = {
         shortname: {
           findUnique: vi.fn(() => Promise.resolve(null)),
-          create: vi.fn(() => Promise.resolve({ id: 42, name: 'new-name' })),
+          create: vi.fn(() => Promise.resolve({ id: 42, name: 'new_name' })),
         },
       }
     })
@@ -73,12 +73,12 @@ describe('shortnamesService ', async () => {
     })
 
     test('creates a shortname when the body is valid', async () => {
-      const result = await createShortname(prismaMock, { shortname: 'new-name' })
+      const result = await createShortname(prismaMock, { shortname: 'new_name' })
 
       expect(prismaMock.shortname.create).toHaveBeenCalledWith({
-        data: expect.objectContaining({ name: 'new-name' }),
+        data: expect.objectContaining({ name: 'new_name' }),
       })
-      expect(result).toStrictEqual({ id: 42, shortname: 'new-name' })
+      expect(result).toStrictEqual({ id: 42, shortname: 'new_name' })
     })
   })
 })
