@@ -27,11 +27,13 @@ export default function CreateStatistic() {
           </Paragraph>
         </Alert>
       )}
-      <CreateShortnameModal
-        openCreateShortnameModal={openCreateShortnameModal}
-        setOpenCreateReleaseModal={setOpenCreateReleaseModal}
-        setCreatedShortname={setCreatedShortname}
-      />
+      {openCreateShortnameModal && (
+        <CreateShortnameModal
+          openCreateShortnameModal={openCreateShortnameModal}
+          setOpenCreateReleaseModal={setOpenCreateReleaseModal}
+          setCreatedShortname={setCreatedShortname}
+        />
+      )}
     </>
   )
 }
