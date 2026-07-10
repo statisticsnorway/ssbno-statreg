@@ -38,7 +38,7 @@ function useMediaQuery(mediaQuery: string): boolean {
   return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
 }
 
-function ListReleases() {
+export default function ListReleases() {
   const [searchParams, setSearchParams] = useSearchParams()
   const shortnamesQuery = searchParams.get('shortname')
   const publishTimeAfterQuery = searchParams.get('publish_time_after')
@@ -291,5 +291,3 @@ function ListReleases() {
     </>
   )
 }
-
-export default ListReleases
