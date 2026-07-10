@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router'
 import { Button, Heading, Dialog, Field, Input, ValidationMessage, Paragraph } from '@digdir/designsystemet-react'
 
 import client from '../api'
@@ -25,6 +26,7 @@ export function CreateShortnameModal({
   const [validationError, setValidationError] = useState('')
   const [shortnameInput, setShortnameInput] = useState('')
 
+  const navigate = useNavigate()
   const isAdmin = auth?.isAdmin ?? false
 
   useEffect(() => {
@@ -94,12 +96,13 @@ export function CreateShortnameModal({
     createShortname()
   }
 
+  function handleCloseModal() {
+    setOpenCreateReleaseModal(false)
+    navigate(-1) // Navigate back to the previous page
+  }
+
   return (
-    <Dialog
-      id='create-shortname-modal'
-      open={openCreateShortnameModal}
-      onClose={() => setOpenCreateReleaseModal(false)}
-    >
+    <Dialog id='create-shortname-modal' open={openCreateShortnameModal} onClose={handleCloseModal}>
       <Dialog.Block>
         <Heading data-size='xs'>Opprett kortnavn for statistikken</Heading>
       </Dialog.Block>
@@ -124,7 +127,7 @@ export function CreateShortnameModal({
             <Button variant='primary' type='submit'>
               Opprett kortnavn
             </Button>
-            <Button variant='tertiary' onClick={() => setOpenCreateReleaseModal(false)}>
+            <Button variant='tertiary' onClick={handleCloseModal}>
               Avbryt
             </Button>
           </div>
