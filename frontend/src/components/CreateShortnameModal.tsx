@@ -17,7 +17,7 @@ export function CreateShortnameModal({
   openCreateShortnameModal,
   setOpenCreateReleaseModal,
   setCreatedShortname,
-}: CreateShortnameModalProps) {
+}: Readonly<CreateShortnameModalProps>) {
   const { auth } = useAuth()
 
   const [shortnames, setShortnames] = useState<ShortnameListing['shortname'][]>([])

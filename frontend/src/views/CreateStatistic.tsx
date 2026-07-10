@@ -7,7 +7,7 @@ import ErrorPage, { ErrorType } from './ErrorPage'
 import { CreateShortnameModal } from '../components/CreateShortnameModal'
 
 export default function CreateStatistic() {
-  const [openCreateShortnameModal, setOpenCreateReleaseModal] = useState(true)
+  const [openCreateShortnameModal, setOpenCreateShortnameModal] = useState(true)
   const [createdShortname, setCreatedShortname] = useState<Shortname | null>(null)
 
   const { auth } = useAuth()
@@ -30,7 +30,7 @@ export default function CreateStatistic() {
       {openCreateShortnameModal && (
         <CreateShortnameModal
           openCreateShortnameModal={openCreateShortnameModal}
-          setOpenCreateReleaseModal={setOpenCreateReleaseModal}
+          setOpenCreateReleaseModal={setOpenCreateShortnameModal}
           setCreatedShortname={setCreatedShortname}
         />
       )}
