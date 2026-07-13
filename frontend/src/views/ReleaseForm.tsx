@@ -73,6 +73,125 @@ function parseDateFromString(dateString: string | undefined): Date | undefined {
   return dateString ? new Date(dateString) : undefined
 }
 
+function getReleaseModalTitle(isEditing: boolean) {
+  return isEditing ? 'Endringer må godkjennes' : 'Publiseringsdato er registrert'
+}
+
+function getReleaseModalDescription(isEditing: boolean, createdRelease: ReleaseDetails) {
+  return isEditing
+    ? 'Endringer på meldt dato må godkjennes på nytt.'
+    : getCreatedReleaseModalDescription(createdRelease)
+}
+
+function getCreatedReleaseModalDescription(createdRelease: ReleaseDetails) {
+  const createdReleaseVariant = formatVariant(createdRelease?.variant).toLowerCase()
+  return `Datoen ${formatDate(createdRelease?.publish_time)} er nå sendt inn for ${createdReleaseVariant}.`
+}
+
+function DateReleasesTable({
+  selectedDate,
+  calendarDates,
+  apiErrorEmit,
+}: Readonly<{ selectedDate?: Date; calendarDates?: CalenderDate; apiErrorEmit?: (message: string) => void }>) {
+  const [releases, setReleases] = useState<ReleaseListing[]>([])
+  const [sortBy, setSortBy] = useState<string>('-publish_time')
+
+  useEffect(() => {
+    async function fetchReleases() {
+      const { data, error } = await client.GET('/releases', {
+        params: {
+          query: { start: 0, count: 100, sort: sortBy, ...getPublishTimeFilterForDate(selectedDate) },
+        },
+      })
+      if (error) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const errorMessage = (error as any).error
+        console.log(errorMessage)
+        apiErrorEmit?.(`Date releases table error: ${errorMessage}`)
+      } else {
+        setReleases(data?.releases ?? [])
+      }
+    }
+    fetchReleases()
+  }, [sortBy, selectedDate, apiErrorEmit])
+
+  const selectedDateStatus =
+    selectedDate &&
+    calendarDates &&
+    (calendarDates?.[getDateOnlyAsString(selectedDate)]?.status as keyof typeof DayStatus)
+
+  return (
+    <>
+      <div className='description-wrapper'>
+        <span>Innmeldte datoer den {formatDate(selectedDate?.toISOString())}</span>
+        <DayStatusTag status={selectedDateStatus || 'NONE'} />
+      </div>
+      <ReleasesTable releases={releases} sortBy={sortBy} setSortBy={setSortBy} openInNewTab />
+    </>
+  )
+}
+
+function VariantReleasesTable({
+  shortname,
+  variantId,
+  apiErrorEmit,
+}: Readonly<{
+  shortname: string
+  variantId: number
+  apiErrorEmit?: (message: string) => void
+}>) {
+  const [count, setCount] = useState(10)
+  const [start, setStart] = useState(0)
+  const [releases, setReleases] = useState<ReleaseListing[]>([])
+  const [total, setTotal] = useState(0)
+  const [sortBy, setSortBy] = useState<string>('-publish_time')
+
+  useEffect(() => {
+    async function fetchVariantReleases() {
+      const { data, error } = await client.GET('/statistics/{shortname}/variants/{id}/releases', {
+        params: { path: { shortname, id: variantId }, query: { start, count, sort: sortBy } },
+      })
+      if (error) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const errorMessage = (error as any).error
+        console.log(errorMessage)
+        apiErrorEmit?.(`Variant releases table error: ${errorMessage}`)
+      } else {
+        setReleases(data?.releases ?? [])
+        setTotal(data.total ?? 0)
+      }
+    }
+    fetchVariantReleases()
+  }, [shortname, variantId, count, start, sortBy, apiErrorEmit])
+
+  function updateRowCount(newCount: number) {
+    setCount(newCount)
+    setStart(0)
+  }
+
+  function setCurrentPage(currentPage: number) {
+    setStart((currentPage - 1) * count)
+  }
+
+  return (
+    <>
+      <div className='row-count-select-wrapper'>
+        <RowCountSelect selectedRowCount={count} updateRowCount={updateRowCount} />
+      </div>
+      <PaginatedReleasesTable
+        start={start}
+        count={count}
+        total={total}
+        releases={releases}
+        setCurrentPage={setCurrentPage}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
+        openInNewTab
+      />
+    </>
+  )
+}
+
 function useDatepicker(
   key: keyof ReleaseFormTypes,
   setValues: React.Dispatch<React.SetStateAction<ReleaseFormTypes>>,
@@ -419,125 +538,6 @@ export default function ReleaseForm() {
           )}
         </Tabs.Panel>
       </Tabs>
-    </>
-  )
-}
-
-function getReleaseModalTitle(isEditing: boolean) {
-  return isEditing ? 'Endringer må godkjennes' : 'Publiseringsdato er registrert'
-}
-
-function getReleaseModalDescription(isEditing: boolean, createdRelease: ReleaseDetails) {
-  return isEditing
-    ? 'Endringer på meldt dato må godkjennes på nytt.'
-    : getCreatedReleaseModalDescription(createdRelease)
-}
-
-function getCreatedReleaseModalDescription(createdRelease: ReleaseDetails) {
-  const createdReleaseVariant = formatVariant(createdRelease?.variant).toLowerCase()
-  return `Datoen ${formatDate(createdRelease?.publish_time)} er nå sendt inn for ${createdReleaseVariant}.`
-}
-
-function DateReleasesTable({
-  selectedDate,
-  calendarDates,
-  apiErrorEmit,
-}: Readonly<{ selectedDate?: Date; calendarDates?: CalenderDate; apiErrorEmit?: (message: string) => void }>) {
-  const [releases, setReleases] = useState<ReleaseListing[]>([])
-  const [sortBy, setSortBy] = useState<string>('-publish_time')
-
-  useEffect(() => {
-    async function fetchReleases() {
-      const { data, error } = await client.GET('/releases', {
-        params: {
-          query: { start: 0, count: 100, sort: sortBy, ...getPublishTimeFilterForDate(selectedDate) },
-        },
-      })
-      if (error) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const errorMessage = (error as any).error
-        console.log(errorMessage)
-        apiErrorEmit?.(`Date releases table error: ${errorMessage}`)
-      } else {
-        setReleases(data?.releases ?? [])
-      }
-    }
-    fetchReleases()
-  }, [sortBy, selectedDate, apiErrorEmit])
-
-  const selectedDateStatus =
-    selectedDate &&
-    calendarDates &&
-    (calendarDates?.[getDateOnlyAsString(selectedDate)]?.status as keyof typeof DayStatus)
-
-  return (
-    <>
-      <div className='description-wrapper'>
-        <span>Innmeldte datoer den {formatDate(selectedDate?.toISOString())}</span>
-        <DayStatusTag status={selectedDateStatus || 'NONE'} />
-      </div>
-      <ReleasesTable releases={releases} sortBy={sortBy} setSortBy={setSortBy} openInNewTab />
-    </>
-  )
-}
-
-function VariantReleasesTable({
-  shortname,
-  variantId,
-  apiErrorEmit,
-}: Readonly<{
-  shortname: string
-  variantId: number
-  apiErrorEmit?: (message: string) => void
-}>) {
-  const [count, setCount] = useState(10)
-  const [start, setStart] = useState(0)
-  const [releases, setReleases] = useState<ReleaseListing[]>([])
-  const [total, setTotal] = useState(0)
-  const [sortBy, setSortBy] = useState<string>('-publish_time')
-
-  useEffect(() => {
-    async function fetchVariantReleases() {
-      const { data, error } = await client.GET('/statistics/{shortname}/variants/{id}/releases', {
-        params: { path: { shortname, id: variantId }, query: { start, count, sort: sortBy } },
-      })
-      if (error) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const errorMessage = (error as any).error
-        console.log(errorMessage)
-        apiErrorEmit?.(`Variant releases table error: ${errorMessage}`)
-      } else {
-        setReleases(data?.releases ?? [])
-        setTotal(data.total ?? 0)
-      }
-    }
-    fetchVariantReleases()
-  }, [shortname, variantId, count, start, sortBy, apiErrorEmit])
-
-  function updateRowCount(newCount: number) {
-    setCount(newCount)
-    setStart(0)
-  }
-
-  function setCurrentPage(currentPage: number) {
-    setStart((currentPage - 1) * count)
-  }
-
-  return (
-    <>
-      <div className='row-count-select-wrapper'>
-        <RowCountSelect selectedRowCount={count} updateRowCount={updateRowCount} />
-      </div>
-      <PaginatedReleasesTable
-        start={start}
-        count={count}
-        total={total}
-        releases={releases}
-        setCurrentPage={setCurrentPage}
-        sortBy={sortBy}
-        setSortBy={setSortBy}
-        openInNewTab
-      />
     </>
   )
 }

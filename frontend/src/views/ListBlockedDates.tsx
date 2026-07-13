@@ -7,6 +7,56 @@ import { type BlockedReleaseDate } from '@ssbno-statreg/shared'
 import client from '../api'
 import { ErrorAlert } from '../components/ErrorAlert'
 
+type BlockedDateRowProps = {
+  readonly day: BlockedReleaseDate
+}
+
+type BlockedDatesTableProps = {
+  readonly days: readonly BlockedReleaseDate[]
+}
+
+function BlockedDateRow({ day }: BlockedDateRowProps) {
+  return (
+    <Table.Row>
+      <Table.Cell>{day.date}</Table.Cell>
+      <Table.Cell>{day.blocked_comment}</Table.Cell>
+      <Table.Cell className='delete-column'>
+        {!day.automatically_blocked && (
+          <Button
+            variant='tertiary'
+            data-color='danger'
+            aria-label={`Slett sperret dato: ${day.date}`}
+            onClick={() => alert('Kommer senere')}
+          >
+            <TrashIcon />
+          </Button>
+        )}
+      </Table.Cell>
+    </Table.Row>
+  )
+}
+
+function BlockedDatesTable({ days }: BlockedDatesTableProps) {
+  return (
+    <Table className='blocked-days-table'>
+      <Table.Head>
+        <Table.Row>
+          <Table.HeaderCell key='dato'>Dato</Table.HeaderCell>
+          <Table.HeaderCell key='kommentar'>Kommentar</Table.HeaderCell>
+          <Table.HeaderCell key='slett' className='delete-column'>
+            Slett
+          </Table.HeaderCell>
+        </Table.Row>
+      </Table.Head>
+      <Table.Body>
+        {days.map((day) => (
+          <BlockedDateRow key={day.date} day={day} />
+        ))}
+      </Table.Body>
+    </Table>
+  )
+}
+
 export default function ListBlockedDates() {
   const [blockedDates, setBlockedDates] = useState<BlockedReleaseDate[]>([])
   const [apiError, setApiError] = useState<string[]>([])
@@ -50,55 +100,5 @@ export default function ListBlockedDates() {
         <PlusCircleIcon aria-hidden /> Legg til ny sperret dato
       </Button>
     </>
-  )
-}
-
-type BlockedDatesTableProps = {
-  readonly days: readonly BlockedReleaseDate[]
-}
-
-function BlockedDatesTable({ days }: BlockedDatesTableProps) {
-  return (
-    <Table className='blocked-days-table'>
-      <Table.Head>
-        <Table.Row>
-          <Table.HeaderCell key='dato'>Dato</Table.HeaderCell>
-          <Table.HeaderCell key='kommentar'>Kommentar</Table.HeaderCell>
-          <Table.HeaderCell key='slett' className='delete-column'>
-            Slett
-          </Table.HeaderCell>
-        </Table.Row>
-      </Table.Head>
-      <Table.Body>
-        {days.map((day) => (
-          <BlockedDateRow key={day.date} day={day} />
-        ))}
-      </Table.Body>
-    </Table>
-  )
-}
-
-type BlockedDateRowProps = {
-  readonly day: BlockedReleaseDate
-}
-
-function BlockedDateRow({ day }: BlockedDateRowProps) {
-  return (
-    <Table.Row>
-      <Table.Cell>{day.date}</Table.Cell>
-      <Table.Cell>{day.blocked_comment}</Table.Cell>
-      <Table.Cell className='delete-column'>
-        {!day.automatically_blocked && (
-          <Button
-            variant='tertiary'
-            data-color='danger'
-            aria-label={`Slett sperret dato: ${day.date}`}
-            onClick={() => alert('Kommer senere')}
-          >
-            <TrashIcon />
-          </Button>
-        )}
-      </Table.Cell>
-    </Table.Row>
   )
 }

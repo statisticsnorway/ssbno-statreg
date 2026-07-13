@@ -19,7 +19,79 @@ import { ApprovalStatusBadge } from '../components/ApprovalStatus'
 import { useAuth } from '../context/AuthContext'
 import { ErrorAlert } from '../components/ErrorAlert'
 
+type ReleaseRowProps = {
+  release: ReleaseListing
+}
+
 const TABLE_HEADER_CELLS = [{ label: 'Dato' }, { label: 'Variant' }, { label: 'Status' }]
+
+function formatMainLanguage(language?: string): string {
+  if (!language) return '-'
+  if (language === 'nb') return 'Bokmål'
+  if (language === 'nn') return 'Nynorsk'
+  return language
+}
+
+function formatDivision(division: StatisticDetails['division']): string {
+  if (!division?.name) return '-'
+  if (!division.code) return division.name
+  return `${division.name} (${division.code})`
+}
+
+function formatStartYear(dateString: string | null | undefined): string {
+  if (!dateString) return '-'
+  return new Date(dateString).getFullYear().toString()
+}
+
+function formatCancelledVariants(variants: Variant[]): string[] {
+  if (!variants) return []
+  return variants.filter((variant: Variant) => variant.cancelled).map(formatVariantDetails)
+}
+
+function formatVariantDetails(variant: Variant): string {
+  const detail = variant.level_of_detail?.name ?? '-'
+  return `${detail}, ${formatVariant(variant)}`
+}
+
+function SimpleReleasesTable({ releases }: { releases: ReleaseListing[] }) {
+  return (
+    <Table>
+      <Table.Head>
+        <Table.Row>
+          {TABLE_HEADER_CELLS.map(({ label }) => (
+            <Table.HeaderCell key={label}>{label}</Table.HeaderCell>
+          ))}
+        </Table.Row>
+      </Table.Head>
+      <Table.Body>
+        {releases?.map((release) => (
+          <SimpleReleaseRow key={`${release.publish_time}-${release.id}`} release={release} />
+        ))}
+      </Table.Body>
+    </Table>
+  )
+}
+
+function SimpleReleaseRow({ release }: ReleaseRowProps) {
+  const navigate = useNavigate()
+  return (
+    <Table.Row
+      key={`${release.publish_time}-${release.id}`}
+      onClick={() => {
+        navigate(`/publisering/${release.id}`, {})
+      }}
+      className='selectable-row'
+    >
+      <Table.Cell>{formatPublishTime(release.publish_time)}</Table.Cell>
+      <Table.Cell>
+        {release.frequency?.name ?? ''}, {formatRevisionName(release.revision?.code).toLocaleLowerCase()}
+      </Table.Cell>
+      <Table.Cell className='status-column'>
+        <ApprovalStatusBadge status={release.approval_status} />
+      </Table.Cell>
+    </Table.Row>
+  )
+}
 
 export default function ShowStatistic() {
   const [statistic, setStatistic] = useState<StatisticDetails>({})
@@ -202,77 +274,5 @@ export default function ShowStatistic() {
         </div>
       )}
     </>
-  )
-}
-
-function formatMainLanguage(language?: string): string {
-  if (!language) return '-'
-  if (language === 'nb') return 'Bokmål'
-  if (language === 'nn') return 'Nynorsk'
-  return language
-}
-
-function formatDivision(division: StatisticDetails['division']): string {
-  if (!division?.name) return '-'
-  if (!division.code) return division.name
-  return `${division.name} (${division.code})`
-}
-
-function formatStartYear(dateString: string | null | undefined): string {
-  if (!dateString) return '-'
-  return new Date(dateString).getFullYear().toString()
-}
-
-function formatCancelledVariants(variants: Variant[]): string[] {
-  if (!variants) return []
-  return variants.filter((variant: Variant) => variant.cancelled).map(formatVariantDetails)
-}
-
-function formatVariantDetails(variant: Variant): string {
-  const detail = variant.level_of_detail?.name ?? '-'
-  return `${detail}, ${formatVariant(variant)}`
-}
-
-function SimpleReleasesTable({ releases }: { releases: ReleaseListing[] }) {
-  return (
-    <Table>
-      <Table.Head>
-        <Table.Row>
-          {TABLE_HEADER_CELLS.map(({ label }) => (
-            <Table.HeaderCell key={label}>{label}</Table.HeaderCell>
-          ))}
-        </Table.Row>
-      </Table.Head>
-      <Table.Body>
-        {releases?.map((release) => (
-          <SimpleReleaseRow key={`${release.publish_time}-${release.id}`} release={release} />
-        ))}
-      </Table.Body>
-    </Table>
-  )
-}
-
-type ReleaseRowProps = {
-  release: ReleaseListing
-}
-
-function SimpleReleaseRow({ release }: ReleaseRowProps) {
-  const navigate = useNavigate()
-  return (
-    <Table.Row
-      key={`${release.publish_time}-${release.id}`}
-      onClick={() => {
-        navigate(`/publisering/${release.id}`, {})
-      }}
-      className='selectable-row'
-    >
-      <Table.Cell>{formatPublishTime(release.publish_time)}</Table.Cell>
-      <Table.Cell>
-        {release.frequency?.name ?? ''}, {formatRevisionName(release.revision?.code).toLocaleLowerCase()}
-      </Table.Cell>
-      <Table.Cell className='status-column'>
-        <ApprovalStatusBadge status={release.approval_status} />
-      </Table.Cell>
-    </Table.Row>
   )
 }
