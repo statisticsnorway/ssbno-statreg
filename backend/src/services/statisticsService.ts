@@ -1,4 +1,5 @@
 import {
+  type Contact,
   type StatisticDetails,
   type StatisticUpdate,
   type StatisticCreate,
@@ -13,7 +14,7 @@ import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
 import { statisticsAsserts } from '@/lib/asserts'
 import { getAllUsersFromCache } from '@/lib/cache'
 
-export type StatisticPrisma = Pick<PrismaClient, 'statistic' | 'shortname'>
+export type StatisticPrisma = Pick<PrismaClient, 'statistic' | 'shortname' | 'responsiblePerson'>
 
 // Statistic listing
 
@@ -336,6 +337,56 @@ export async function updateStatistic(
   })
 
   return await mapStatisticDetails(updatedStatistic)
+}
+
+export async function updateContacts(
+  shortname: string,
+  newPrincipalNames: string[],
+  prisma: StatisticPrisma
+): Promise<Contact[]> {
+  const safeShortname = sanitize(shortname)
+
+  const existingStatistic = await prisma.statistic.findFirst({
+    where: { shortname: { name: safeShortname } },
+    select: { id: true },
+  })
+  if (!existingStatistic) {
+    return Promise.reject({ status: 404, statregError: `Shortname ${safeShortname} not found` })
+  }
+
+  const users = await getAllUsersFromCache()
+  const uniquePrincipalNames = [...new Set(newPrincipalNames)]
+  const unknownPrincipalNames = uniquePrincipalNames.filter((principalName) => !users[principalName])
+  if (unknownPrincipalNames.length > 0) {
+    return Promise.reject({
+      status: 400,
+      statregError: `Unknown principal names: ${unknownPrincipalNames.join(', ')}`,
+    })
+  }
+
+  await Promise.all(
+    uniquePrincipalNames.map((principalName) =>
+      prisma.responsiblePerson.upsert({
+        where: { principalName },
+        create: { principalName },
+        update: {},
+      })
+    )
+  )
+
+  await prisma.statistic.update({
+    where: { id: existingStatistic.id },
+    data: {
+      responsiblePersons: {
+        set: uniquePrincipalNames.map((principalName) => ({ principalName })),
+      },
+    },
+  })
+
+  return uniquePrincipalNames.map((principalName) => ({
+    name: users[principalName]?.displayName ?? '',
+    principalName,
+  }))
 }
 
 export async function createStatistic(
