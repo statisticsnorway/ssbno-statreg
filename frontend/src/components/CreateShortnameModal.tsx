@@ -34,13 +34,10 @@ export function CreateShortnameModal({
     async function fetchShortnames() {
       const { data, error } = await client.GET('/shortnames')
       if (error) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const errorMessage = (error as any).error
-        console.log(errorMessage)
-        setApiError((prev) => [...prev, errorMessage])
-      } else {
-        setShortnames(data.map(({ shortname }) => shortname ?? '') ?? [])
+        setApiError((prev) => [...prev, error.error])
+        return
       }
+      setShortnames(data.map(({ shortname }) => shortname ?? '') ?? [])
     }
     fetchShortnames()
   }, [isAdmin])
