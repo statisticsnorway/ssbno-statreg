@@ -367,7 +367,7 @@ paths:
               properties:
                 shortname:
                   type: string
-                  description: 'Only small letters (a-z) and hyphens (-) are allowed. Maximum 14 characters.'
+                  description: 'Only small letters (a-z) and underscore (_) are allowed. Maximum 14 characters.'
                   maxLength: 14
               required:
                 - shortname

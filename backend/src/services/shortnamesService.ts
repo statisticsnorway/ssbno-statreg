@@ -52,10 +52,10 @@ export function parseShortname(value: unknown): string {
     throw { statregError: "Field 'shortname' must be a string." }
   }
 
-  if (!/^[a-z-]{1,14}$/.test(value)) {
+  if (!/^[a-z_]{1,14}$/.test(value)) {
     throw {
       statregError:
-        "Field 'shortname' must only contain lowercase letters (a-z) and hyphens (-), and be at most 14 characters.",
+        "Field 'shortname' must only contain lowercase letters (a-z) and underscore (_), and be at most 14 characters.",
     }
   }
 
