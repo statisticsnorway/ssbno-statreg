@@ -562,6 +562,40 @@ paths:
             application/json:
               schema: {}
 
+  /statistics/{shortname}/contacts:
+    post:
+      summary: Set contacts for a statistic
+      description: Replaces the entire contact list for the statistic with the supplied principal names.
+      tags: [statistics]
+      parameters:
+        - name: shortname
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                principalNames:
+                  type: array
+                  description: List of principal names to set as contacts for the statistic.
+                  items:
+                    type: string
+              required:
+                - principalNames
+      responses:
+        '200':
+          description: The updated list of contacts for the statistic.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Contact' }
+
   /releases:
     get:
       summary: List all releases. Filter and sorting can be specified using query params
