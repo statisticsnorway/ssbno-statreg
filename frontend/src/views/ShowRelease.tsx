@@ -8,7 +8,16 @@ import { type ReleaseDetails } from '@ssbno-statreg/shared'
 import { formatPublishTime, formatDate, formatVariant } from '../lib/utils'
 import { ErrorAlert } from '../components/ErrorAlert'
 
-function ShowRelease() {
+function formatStatisticName(statistic: ReleaseDetails['statistic']): string {
+  if (!statistic || !statistic.name || !statistic.shortname) return '-'
+  return `${statistic.name} (${statistic.shortname})`
+}
+
+function formatPeriod(from?: string, to?: string): string {
+  return `${formatDate(from)} – ${formatDate(to)}`
+}
+
+export default function ShowRelease() {
   const [release, setRelease] = useState<ReleaseDetails>({})
   const [apiError, setApiError] = useState<string[]>([])
   const { id } = useParams()
@@ -73,14 +82,3 @@ function ShowRelease() {
     </>
   )
 }
-
-function formatStatisticName(statistic: ReleaseDetails['statistic']): string {
-  if (!statistic || !statistic.name || !statistic.shortname) return '-'
-  return `${statistic.name} (${statistic.shortname})`
-}
-
-function formatPeriod(from?: string, to?: string): string {
-  return `${formatDate(from)} – ${formatDate(to)}`
-}
-
-export default ShowRelease
