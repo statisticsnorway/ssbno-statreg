@@ -1026,8 +1026,12 @@ export interface components {
       statistic_region_levels?: components['schemas']['Region_level'][]
       previous_topic_codes?: string | null
       comment?: string
-      variants?: components['schemas']['Variant'][]
-      contacts?: components['schemas']['Contact'][]
+      variants?: {
+        id?: number
+      }[]
+      contacts?: {
+        principalName?: string
+      }[]
     } & components['schemas']['Statistic']
     Statistic_create_coming: components['schemas']['Statistic_create_base'] & {
       status?: {

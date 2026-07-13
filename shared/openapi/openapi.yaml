@@ -83,7 +83,8 @@ components:
         application/json:
           schema:
             type: array
-            items: { $ref: '#/components/schemas/Blocked_release_date' }
+            items: 
+              $ref: '#/components/schemas/Blocked_release_date'
 
   schemas:
     Blocked_release_date:
@@ -251,16 +252,22 @@ components:
         yearly_reporting: { type: boolean }
         statistic_region_levels:
           type: array
-          items: { $ref: '#/components/schemas/Region_level' }
+          items:
+            $ref: '#/components/schemas/Region_level'
         previous_topic_codes: { type: string, nullable: true }
         comment: { type: string }
         variants:
           type: array
-          items: { $ref: '#/components/schemas/Variant' }
+          items:
+            type: object
+            properties:
+              id: { type: integer }
         contacts:
           type: array
           items:
-            $ref: '#/components/schemas/Contact'
+            type: object
+            properties:
+              principalName: { type: string }
 
     Statistic_create_coming:
       allOf:
@@ -325,7 +332,8 @@ components:
         created_at: { type: string, format: date-time, readOnly: true }
         variants:
           type: array
-          items: { $ref: '#/components/schemas/Variant' }
+          items: 
+            $ref: '#/components/schemas/Variant'
         contacts:
           type: array
           items:
@@ -378,7 +386,8 @@ paths:
             application/json:
               schema:
                 type: array
-                items: { $ref: '#/components/schemas/Contact' }
+                items: 
+                  $ref: '#/components/schemas/Contact'
   /shortnames:
     get:
       summary: List of all existing shortnames
@@ -438,7 +447,8 @@ paths:
                     type: integer
                   statistics:
                     type: array
-                    items: { $ref: '#/components/schemas/Statistic_listing' }
+                    items: 
+                      $ref: '#/components/schemas/Statistic_listing'
 
   /statistics/{shortname}:
     get:
@@ -563,7 +573,8 @@ paths:
                     type: integer
                   releases:
                     type: array
-                    items: { $ref: '#/components/schemas/Release_listing' }
+                    items:
+                      $ref: '#/components/schemas/Release_listing'
     post:
       summary: Create a new release
       tags: [statistics]
@@ -637,7 +648,8 @@ paths:
                     type: integer
                   releases:
                     type: array
-                    items: { $ref: '#/components/schemas/Release_listing' }
+                    items: 
+                      $ref: '#/components/schemas/Release_listing'
 
   /releases/bulk-approve:
     post:
