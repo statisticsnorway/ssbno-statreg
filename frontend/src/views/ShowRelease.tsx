@@ -24,14 +24,14 @@ export default function ShowRelease() {
 
   useEffect(() => {
     async function fetchRelease() {
-      const result = await client.GET('/releases/{id}', { params: { path: { id: id as string } } })
+      const { data, error } = await client.GET('/releases/{id}', { params: { path: { id: id as string } } })
 
-      if (result.error) {
-        setApiError((prev) => [...prev, result.error.error])
+      if (error) {
+        setApiError((prev) => [...prev, error.error])
         return
       }
 
-      setRelease(result.data)
+      setRelease(data)
     }
     fetchRelease()
   }, [id])

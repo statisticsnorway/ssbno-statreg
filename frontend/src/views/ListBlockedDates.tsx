@@ -63,14 +63,14 @@ export default function ListBlockedDates() {
 
   useEffect(() => {
     async function fetchBlockedDates() {
-      const result = await client.GET('/calendar/blocked-release-days')
+      const { data, error } = await client.GET('/calendar/blocked-release-days')
 
-      if (result.error) {
-        setApiError((prev) => [...prev, result.error.error])
+      if (error) {
+        setApiError((prev) => [...prev, error.error])
         return
       }
 
-      setBlockedDates(result.data ?? [])
+      setBlockedDates(data ?? [])
     }
     fetchBlockedDates()
   }, [])

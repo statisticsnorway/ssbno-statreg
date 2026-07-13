@@ -144,17 +144,17 @@ function ListReleasesTable({ isAdmin, setApiError, approvedReleasesCount }: List
       }
 
       const sort = sortBy
-      const result = await client.GET('/releases', {
+      const { data, error } = await client.GET('/releases', {
         params: { query: { start, count, ...filter, sort } },
       })
 
-      if (result.error) {
-        setApiError((prev) => [...prev, result.error.error])
+      if (error) {
+        setApiError((prev) => [...prev, error.error])
         return
       }
 
-      setReleases(result.data.releases ?? [])
-      setTotal(result.data.total ?? 0)
+      setReleases(data.releases ?? [])
+      setTotal(data.total ?? 0)
     }
     fetchReleases(start, rowCount, selectedShortnames, sortBy)
   }, [isAdmin, start, rowCount, selectedShortnames, sortBy, setApiError, approvedReleasesCount])
@@ -162,14 +162,14 @@ function ListReleasesTable({ isAdmin, setApiError, approvedReleasesCount }: List
   useEffect(() => {
     if (!isAdmin) return
     async function fetchShortnames() {
-      const result = await client.GET('/shortnames')
+      const { data, error } = await client.GET('/shortnames')
 
-      if (result.error) {
-        setApiError((prev) => [...prev, result.error.error])
+      if (error) {
+        setApiError((prev) => [...prev, error.error])
         return
       }
 
-      setShortnames(result.data ?? [])
+      setShortnames(data ?? [])
     }
     fetchShortnames()
   }, [isAdmin, setApiError])
@@ -245,17 +245,17 @@ export default function Tasks() {
   useEffect(() => {
     if (!isAdmin) return
     async function fetchPendingReleases(sortBy: string) {
-      const result = await client.GET('/releases', {
+      const { data, error } = await client.GET('/releases', {
         params: { query: { start: 0, count: 999, approval_status: ApprovalStatus.PENDING, sort: sortBy } },
       })
 
-      if (result.error) {
-        setApiError((prev) => [...prev, result.error.error])
+      if (error) {
+        setApiError((prev) => [...prev, error.error])
         return
       }
 
-      setPendingReleases(result.data.releases ?? [])
-      setPendingTotal(result.data.total ?? 0)
+      setPendingReleases(data.releases ?? [])
+      setPendingTotal(data.total ?? 0)
     }
     fetchPendingReleases(pendingSortBy)
   }, [isAdmin, pendingSortBy, approvedReleasesCount])
@@ -271,16 +271,16 @@ export default function Tasks() {
   }, [approvedReleasesCount])
 
   async function batchApproveReleases() {
-    const result = await client.POST('/releases/bulk-approve', {
+    const { data, error } = await client.POST('/releases/bulk-approve', {
       body: { ids: selectedPendingReleaseIds.map(Number) },
     })
 
-    if (result.error) {
-      setApiError((prev) => [...prev, result.error.error])
+    if (error) {
+      setApiError((prev) => [...prev, error.error])
       return
     }
 
-    setApprovedReleasesCount(result.data.releases?.filter(({ status }) => status === 200)?.length ?? 0)
+    setApprovedReleasesCount(data.releases?.filter(({ status }) => status === 200)?.length ?? 0)
     setSelectedPendingReleaseIds([])
   }
 

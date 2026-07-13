@@ -63,43 +63,43 @@ export default function ListStatistics() {
       }),
     }
 
-    const result = await client.GET('/statistics', {
+    const { data, error } = await client.GET('/statistics', {
       params: { query: { start, count, ...sort, ...filter } },
     })
 
-    if (result.error) {
-      setApiError((prev) => [...prev, result.error.error])
+    if (error) {
+      setApiError((prev) => [...prev, error.error])
       return
     }
 
-    setStatistics(result.data.statistics ?? [])
-    setTotal(result.data.total ?? 0)
+    setStatistics(data.statistics ?? [])
+    setTotal(data.total ?? 0)
   }
 
   useEffect(() => {
     async function fetchShortnames() {
-      const result = await client.GET('/shortnames')
+      const { data, error } = await client.GET('/shortnames')
 
-      if (result.error) {
-        setApiError((prev) => [...prev, result.error.error])
+      if (error) {
+        setApiError((prev) => [...prev, error.error])
         return
       }
 
-      setShortnames(result.data ?? [])
+      setShortnames(data ?? [])
     }
     fetchShortnames()
   }, [])
 
   useEffect(() => {
     async function fetchContacts() {
-      const result = await client.GET('/contacts')
+      const { data, error } = await client.GET('/contacts')
 
-      if (result.error) {
-        setApiError((prev) => [...prev, result.error.error])
+      if (error) {
+        setApiError((prev) => [...prev, error.error])
         return
       }
 
-      setContacts(result.data ?? [])
+      setContacts(data ?? [])
     }
     fetchContacts()
   }, [])

@@ -104,13 +104,10 @@ function DateReleasesTable({
         },
       })
       if (error) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const errorMessage = (error as any).error
-        console.log(errorMessage)
-        apiErrorEmit?.(`Date releases table error: ${errorMessage}`)
-      } else {
-        setReleases(data?.releases ?? [])
+        apiErrorEmit?.(`Date releases table error: ${error.error}`)
+        return
       }
+      setReleases(data.releases ?? [])
     }
     fetchReleases()
   }, [sortBy, selectedDate, apiErrorEmit])

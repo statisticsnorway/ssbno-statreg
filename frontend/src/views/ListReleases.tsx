@@ -84,33 +84,33 @@ export default function ListReleases() {
 
   useEffect(() => {
     async function fetchReleases() {
-      const result = await client.GET('/releases', {
+      const { data, error } = await client.GET('/releases', {
         params: {
           query: releaseQuery,
         },
       })
 
-      if (result.error) {
-        setApiError((prev) => [...prev, result.error.error])
+      if (error) {
+        setApiError((prev) => [...prev, error.error])
         return
       }
 
-      setReleases(result.data.releases ?? [])
-      setTotal(result.data.total ?? 0)
+      setReleases(data.releases ?? [])
+      setTotal(data.total ?? 0)
     }
     fetchReleases()
   }, [releaseQuery])
 
   useEffect(() => {
     async function fetchShortnames() {
-      const result = await client.GET('/shortnames')
+      const { data, error } = await client.GET('/shortnames')
 
-      if (result.error) {
-        setApiError((prev) => [...prev, result.error.error])
+      if (error) {
+        setApiError((prev) => [...prev, error.error])
         return
       }
 
-      setShortnames(result.data ?? [])
+      setShortnames(data ?? [])
     }
     fetchShortnames()
   }, [])

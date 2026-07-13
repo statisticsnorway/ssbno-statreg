@@ -102,29 +102,29 @@ export default function ShowStatistic() {
 
   useEffect(() => {
     async function fetchStatistic() {
-      const result = await client.GET('/statistics/{shortname}', {
+      const { data, error } = await client.GET('/statistics/{shortname}', {
         params: { path: { shortname: shortname as string } },
       })
 
-      if (result.error) {
-        setApiError((prev) => [...prev, result.error.error])
+      if (error) {
+        setApiError((prev) => [...prev, error.error])
         return
       }
 
-      setStatistic(result.data)
+      setStatistic(data)
     }
 
     async function fetchReleases(shortname: string) {
-      const result = await client.GET('/releases', {
+      const { data, error } = await client.GET('/releases', {
         params: { query: { shortname, count: 100, publish_time_after: new Date().toISOString() } },
       })
 
-      if (result.error) {
-        setApiError((prev) => [...prev, result.error.error])
+      if (error) {
+        setApiError((prev) => [...prev, error.error])
         return
       }
 
-      setReleases(result.data.releases ?? [])
+      setReleases(data.releases ?? [])
     }
     fetchStatistic()
     if (shortname) fetchReleases(shortname)
