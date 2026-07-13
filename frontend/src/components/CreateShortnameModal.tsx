@@ -51,10 +51,15 @@ export function CreateShortnameModal({
       return false
     }
 
-    const validShortnameCharacters = shortnameInput.match(/[^a-z_]/g)
-    if (validShortnameCharacters) {
-      const invalidChars = [...new Set(validShortnameCharacters)]
+    const invalidShortnameCharacters = shortnameInput.match(/[^a-z_]/g)
+    if (invalidShortnameCharacters) {
+      const invalidChars = [...new Set(invalidShortnameCharacters)]
       setValidationError(`Kortnavnet inneholder ugyldige tegn: ${invalidChars.join(', ')}`)
+      return false
+    }
+
+    if (shortnameInput.length > 14) {
+      setValidationError('Kortnavnet kan ikke være lengre enn 14 tegn')
       return false
     }
 
