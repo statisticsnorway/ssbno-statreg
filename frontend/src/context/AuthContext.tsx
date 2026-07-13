@@ -14,8 +14,8 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 async function fetchAuthState(): Promise<AuthResponse | undefined> {
   const result = await client.GET('/auth/authenticate')
 
-  if (result.error) {
-    console.log(result)
+  if (!result.data) {
+    console.log(result.response)
   }
 
   return result.data
