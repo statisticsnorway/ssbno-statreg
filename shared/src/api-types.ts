@@ -82,7 +82,7 @@ export interface paths {
       requestBody: {
         content: {
           'application/json': {
-            /** @description Only small letters (a-z) and hyphens (-) are allowed. Maximum 14 characters. */
+            /** @description Only small letters (a-z) and underscore (_) are allowed. Maximum 14 characters. */
             shortname: string
           }
         }
