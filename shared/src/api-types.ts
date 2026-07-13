@@ -1010,6 +1010,7 @@ export interface components {
       /** @description Main language will be either 'nn' or 'nb' for statistics */
       main_language?: string
       status?: {
+        /** @description Is one of 'K', 'A', 'IA', 'UT', 'SA' or 'SP' */
         code?: string
       }
       name?: string
@@ -1017,7 +1018,7 @@ export interface components {
       /** @description Is one of 'GODKJENT', 'AVVIST' or 'FORSLAG' */
       approval_status?: string
     }
-    Statistic_create: {
+    Statistic_create_base: {
       division?: string | null
       /** Format: date */
       first_released_at?: string | null
@@ -1025,10 +1026,25 @@ export interface components {
       statistic_region_levels?: components['schemas']['Region_level'][]
       previous_topic_codes?: string | null
       comment?: string
+      variants?: components['schemas']['Variant'][]
+      contacts?: components['schemas']['Contact'][]
     } & components['schemas']['Statistic']
+    Statistic_create_coming: components['schemas']['Statistic_create_base'] & {
+      status?: {
+        code: string
+      }
+    }
+    Statistic_create_active: components['schemas']['Statistic_create_base'] & {
+      status: {
+        code: string
+      }
+    }
+    Statistic_create:
+      | components['schemas']['Statistic_create_coming']
+      | components['schemas']['Statistic_create_active']
     Statistic_update: {
       relation?: string | null
-    } & components['schemas']['Statistic_create']
+    } & components['schemas']['Statistic_create_base']
     Statistic_details: {
       version?: number
       division?: {

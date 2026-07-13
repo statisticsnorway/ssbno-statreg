@@ -236,12 +236,12 @@ components:
         status:
           type: object
           properties:
-            code: { type: string }
+            code: { type: string, description: "Is one of 'K', 'A', 'IA', 'UT', 'SA' or 'SP'" }
         name: { type: string }
         name_en: { type: string }
         approval_status: { type: string, description: " Is one of 'GODKJENT', 'AVVIST' or 'FORSLAG'" }
 
-    Statistic_create:
+    Statistic_create_base:
       allOf:
         - $ref: '#/components/schemas/Statistic'
       type: object
@@ -254,10 +254,48 @@ components:
           items: { $ref: '#/components/schemas/Region_level' }
         previous_topic_codes: { type: string, nullable: true }
         comment: { type: string }
+        variants:
+          type: array
+          items: { $ref: '#/components/schemas/Variant' }
+        contacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Contact'
+
+    Statistic_create_coming:
+      allOf:
+        - $ref: '#/components/schemas/Statistic_create_base'
+        - type: object
+          required: [division, name, shortname]
+          properties:
+            status:
+              type: object
+              required: [code]
+              properties:
+                code:
+                  type: string
+
+    Statistic_create_active:
+      allOf:
+        - $ref: '#/components/schemas/Statistic_create_base'
+        - type: object
+          required: [division, name, name_en, main_language, contacts, variants, shortname, status]
+          properties:
+            status:
+              type: object
+              required: [code]
+              properties:
+                code:
+                  type: string
+
+    Statistic_create:
+      oneOf:
+        - $ref: '#/components/schemas/Statistic_create_coming'
+        - $ref: '#/components/schemas/Statistic_create_active'
 
     Statistic_update:
       allOf:
-        - $ref: '#/components/schemas/Statistic_create'
+        - $ref: '#/components/schemas/Statistic_create_base'
       type: object
       properties:
         relation: { type: string, nullable: true }
