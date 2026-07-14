@@ -13,3 +13,11 @@ export const requiredStatisticFieldsByStatus: Record<CreatableStatisticStatus, C
   K: ['shortname', 'name', 'division'],
   A: ['shortname', 'name', 'name_en', 'variants', 'contacts', 'division', 'main_language'],
 }
+
+export function getRequiredStatisticFields(status: CreatableStatisticStatus): CreateStatisticField[] {
+  return requiredStatisticFieldsByStatus[status]
+}
+
+export function isCreateStatisticFieldRequired(status: CreatableStatisticStatus, field: CreateStatisticField): boolean {
+  return requiredStatisticFieldsByStatus[status].includes(field)
+}
