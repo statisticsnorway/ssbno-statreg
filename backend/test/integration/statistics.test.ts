@@ -1,5 +1,11 @@
 import { afterAll, describe, expect, test, vi } from 'vitest'
-import { ShortnameListing, StatisticCreate, StatisticDetails, StatisticListingResponse } from '@ssbno-statreg/shared'
+import {
+  Contact,
+  ShortnameListing,
+  StatisticCreate,
+  StatisticDetails,
+  StatisticListingResponse,
+} from '@ssbno-statreg/shared'
 import { prisma } from '@/lib/prisma'
 import { createApp } from '@/app'
 import request from 'supertest'
@@ -12,6 +18,12 @@ import {
 vi.mock(import('@/lib/cache'), () => ({
   getAllUsersFromCache: vi.fn(() =>
     Promise.resolve({
+      'abc@ssb.no': {
+        displayName: 'Alice',
+        userPrincipalName: 'abc@ssb.no',
+        mail: 'alice@ssb.no',
+        businessPhones: null,
+      },
       'bcd@ssb.no': {
         displayName: 'Bob',
         userPrincipalName: 'bcd@ssb.no',
@@ -312,5 +324,31 @@ describe('statisticsController integration', () => {
     const shortnamesListResponse = await request(app).get('/statistikkregisteret/api/shortnames')
     expect(shortnamesListResponse.status).toBe(200)
     expect(shortnamesListResponse.body.some((item: ShortnameListing) => item.shortname === 'nytt_kortnavn')).toBe(true)
+  })
+
+  test('PUT /statistics/nytt_kortnavn/contacts sets new contacts for the statistic', async () => {
+    // PUT statistics/nytt_kortnavn/contacts
+    const contactsPayload = {
+      principalNames: ['abc@ssb.no', 'bcd@ssb.no'],
+    }
+    const contactsResponse = await request(app)
+      .put('/statistikkregisteret/api/statistics/nytt_kortnavn/contacts')
+      .set('content-type', 'application/json')
+      .send(contactsPayload)
+
+    const expectedContacts: Contact[] = [
+      { name: 'Alice', principalName: 'abc@ssb.no' },
+      { name: 'Bob', principalName: 'bcd@ssb.no' },
+    ]
+
+    expect(contactsResponse.status).toBe(200)
+    expect(contactsResponse.body).toHaveLength(2)
+    expect(contactsResponse.body).toEqual(expect.arrayContaining(expectedContacts))
+
+    // GET statistic to test persistence of new contacts
+    const fetchResponse = await request(app).get('/statistikkregisteret/api/statistics/nytt_kortnavn')
+    expect(fetchResponse.status).toBe(200)
+    expect(fetchResponse.body.contacts).toHaveLength(2)
+    expect(fetchResponse.body.contacts).toEqual(expect.arrayContaining(expectedContacts))
   })
 })
