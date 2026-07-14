@@ -95,7 +95,7 @@ export function DatePicker({ showColorCodingExplanation, calendarDatesEmit, apiE
       })
 
       if (error) {
-        apiErrorEmit?.(`Calendar error: ${error.error}`)
+        apiErrorEmit?.(`Calendar error: ${error.message}`)
         return
       }
 

@@ -68,7 +68,7 @@ export default function ListStatistics() {
     })
 
     if (error) {
-      setApiError((prev) => [...prev, error.error])
+      setApiError((prev) => [...prev, error.message])
       return
     }
 
@@ -81,7 +81,7 @@ export default function ListStatistics() {
       const { data, error } = await client.GET('/shortnames')
 
       if (error) {
-        setApiError((prev) => [...prev, error.error])
+        setApiError((prev) => [...prev, error.message])
         return
       }
 
@@ -95,7 +95,7 @@ export default function ListStatistics() {
       const { data, error } = await client.GET('/contacts')
 
       if (error) {
-        setApiError((prev) => [...prev, error.error])
+        setApiError((prev) => [...prev, error.message])
         return
       }
 

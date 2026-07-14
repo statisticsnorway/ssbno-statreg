@@ -925,7 +925,7 @@ export interface components {
   schemas: {
     Error: {
       /** @description Error message */
-      error: string
+      message: string
     }
     /**
      * @example {

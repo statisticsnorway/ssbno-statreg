@@ -34,7 +34,7 @@ export function CreateShortnameModal({
     async function fetchShortnames() {
       const { data, error } = await client.GET('/shortnames')
       if (error) {
-        setApiError((prev) => [...prev, error.error])
+        setApiError((prev) => [...prev, error.message])
         return
       }
       setShortnames(data.map(({ shortname }) => shortname ?? '') ?? [])

@@ -66,7 +66,7 @@ export default function ListBlockedDates() {
       const { data, error } = await client.GET('/calendar/blocked-release-days')
 
       if (error) {
-        setApiError((prev) => [...prev, error.error])
+        setApiError((prev) => [...prev, error.message])
         return
       }
 

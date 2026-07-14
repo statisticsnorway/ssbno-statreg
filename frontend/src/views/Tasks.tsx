@@ -149,7 +149,7 @@ function ListReleasesTable({ isAdmin, setApiError, approvedReleasesCount }: List
       })
 
       if (error) {
-        setApiError((prev) => [...prev, error.error])
+        setApiError((prev) => [...prev, error.message])
         return
       }
 
@@ -165,7 +165,7 @@ function ListReleasesTable({ isAdmin, setApiError, approvedReleasesCount }: List
       const { data, error } = await client.GET('/shortnames')
 
       if (error) {
-        setApiError((prev) => [...prev, error.error])
+        setApiError((prev) => [...prev, error.message])
         return
       }
 
@@ -250,7 +250,7 @@ export default function Tasks() {
       })
 
       if (error) {
-        setApiError((prev) => [...prev, error.error])
+        setApiError((prev) => [...prev, error.message])
         return
       }
 
@@ -276,7 +276,7 @@ export default function Tasks() {
     })
 
     if (error) {
-      setApiError((prev) => [...prev, error.error])
+      setApiError((prev) => [...prev, error.message])
       return
     }
 

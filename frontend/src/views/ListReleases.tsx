@@ -91,7 +91,7 @@ export default function ListReleases() {
       })
 
       if (error) {
-        setApiError((prev) => [...prev, error.error])
+        setApiError((prev) => [...prev, error.message])
         return
       }
 
@@ -106,7 +106,7 @@ export default function ListReleases() {
       const { data, error } = await client.GET('/shortnames')
 
       if (error) {
-        setApiError((prev) => [...prev, error.error])
+        setApiError((prev) => [...prev, error.message])
         return
       }
 

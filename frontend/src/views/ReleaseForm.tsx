@@ -104,7 +104,7 @@ function DateReleasesTable({
         },
       })
       if (error) {
-        apiErrorEmit?.(`Date releases table error: ${error.error}`)
+        apiErrorEmit?.(`Date releases table error: ${error.message}`)
         return
       }
       setReleases(data.releases ?? [])

@@ -27,7 +27,7 @@ export default function ShowRelease() {
       const { data, error } = await client.GET('/releases/{id}', { params: { path: { id: id as string } } })
 
       if (error) {
-        setApiError((prev) => [...prev, error.error])
+        setApiError((prev) => [...prev, error.message])
         return
       }
 
