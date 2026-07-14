@@ -1,0 +1,21 @@
+.create-statistic-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-size-9);
+  width: 100%;
+
+  .ds-divider {
+    margin-top: var(--ds-size-9);
+    margin-bottom: var(--ds-size-4);
+  }
+
+  .create-statistic-form-status-label {
+    display: flex;
+    align-items: center;
+  }
+
+  .create-statistic-form-buttons {
+    display: flex;
+    gap: var(--ds-size-4)
+  }
+}
