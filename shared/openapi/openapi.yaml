@@ -237,7 +237,7 @@ components:
         status:
           type: object
           properties:
-            code: { type: string, description: "Is one of 'K', 'A', 'IA', 'UT', 'SA' or 'SP'" }
+            code: { type: string, description: "Is one of K (Kommende), A (Aktiv), IA (Ikke-aktiv), UT (Opphørt), SA (Sammenslått) or SP (Splittet)" }
         name: { type: string }
         name_en: { type: string }
         approval_status: { type: string, description: " Is one of 'GODKJENT', 'AVVIST' or 'FORSLAG'" }
@@ -269,7 +269,7 @@ components:
             properties:
               principalName: { type: string }
 
-    Statistic_create_coming:
+    Statistic_create_upcoming:
       allOf:
         - $ref: '#/components/schemas/Statistic_create_base'
         - type: object
@@ -280,6 +280,7 @@ components:
               required: [code]
               properties:
                 code:
+                  description: 'Must be "K" for creation of upcoming statistics'
                   type: string
 
     Statistic_create_active:
@@ -293,11 +294,12 @@ components:
               required: [code]
               properties:
                 code:
+                  description: 'Must be "A" for creation of active statistics'
                   type: string
 
     Statistic_create:
       oneOf:
-        - $ref: '#/components/schemas/Statistic_create_coming'
+        - $ref: '#/components/schemas/Statistic_create_upcoming'
         - $ref: '#/components/schemas/Statistic_create_active'
 
     Statistic_update:

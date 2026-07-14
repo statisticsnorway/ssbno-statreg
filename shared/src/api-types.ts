@@ -1010,7 +1010,7 @@ export interface components {
       /** @description Main language will be either 'nn' or 'nb' for statistics */
       main_language?: string
       status?: {
-        /** @description Is one of 'K', 'A', 'IA', 'UT', 'SA' or 'SP' */
+        /** @description Is one of K (Kommende), A (Aktiv), IA (Ikke-aktiv), UT (Opphørt), SA (Sammenslått) or SP (Splittet) */
         code?: string
       }
       name?: string
@@ -1033,18 +1033,20 @@ export interface components {
         principalName?: string
       }[]
     } & components['schemas']['Statistic']
-    Statistic_create_coming: components['schemas']['Statistic_create_base'] & {
+    Statistic_create_upcoming: components['schemas']['Statistic_create_base'] & {
       status?: {
+        /** @description Must be "K" for creation of upcoming statistics */
         code: string
       }
     }
     Statistic_create_active: components['schemas']['Statistic_create_base'] & {
       status: {
+        /** @description Must be "A" for creation of active statistics */
         code: string
       }
     }
     Statistic_create:
-      | components['schemas']['Statistic_create_coming']
+      | components['schemas']['Statistic_create_upcoming']
       | components['schemas']['Statistic_create_active']
     Statistic_update: {
       relation?: string | null
