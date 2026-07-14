@@ -30,6 +30,7 @@ export interface paths {
             'application/json': components['schemas']['Contact'][]
           }
         }
+        default: components['responses']['Error']
       }
     }
     put?: never
@@ -66,6 +67,7 @@ export interface paths {
             'application/json': components['schemas']['Shortname_listing'][]
           }
         }
+        default: components['responses']['Error']
       }
     }
     put?: never
@@ -95,6 +97,7 @@ export interface paths {
             'application/json': components['schemas']['Shortname']
           }
         }
+        default: components['responses']['Error']
       }
     }
     delete?: never
@@ -152,6 +155,7 @@ export interface paths {
             }
           }
         }
+        default: components['responses']['Error']
       }
     }
     put?: never
@@ -190,6 +194,7 @@ export interface paths {
             'application/json': components['schemas']['Statistic_details']
           }
         }
+        default: components['responses']['Error']
       }
     }
     /** Update a statistic */
@@ -217,6 +222,7 @@ export interface paths {
             'application/json': components['schemas']['Statistic_details']
           }
         }
+        default: components['responses']['Error']
       }
     }
     /** Create a new statistic */
@@ -242,6 +248,7 @@ export interface paths {
             'application/json': components['schemas']['Statistic_details']
           }
         }
+        default: components['responses']['Error']
       }
     }
     delete?: never
@@ -282,6 +289,7 @@ export interface paths {
             'application/json': components['schemas']['Variant']
           }
         }
+        default: components['responses']['Error']
       }
     }
     delete?: never
@@ -324,6 +332,7 @@ export interface paths {
             'application/json': components['schemas']['Variant']
           }
         }
+        default: components['responses']['Error']
       }
     }
     post?: never
@@ -370,6 +379,7 @@ export interface paths {
             }
           }
         }
+        default: components['responses']['Error']
       }
     }
     put?: never
@@ -399,6 +409,7 @@ export interface paths {
             'application/json': components['schemas']['Release_details']
           }
         }
+        default: components['responses']['Error']
       }
     }
     delete?: never
@@ -433,6 +444,7 @@ export interface paths {
             'application/json': unknown
           }
         }
+        default: components['responses']['Error']
       }
     }
     put?: never
@@ -502,6 +514,7 @@ export interface paths {
             }
           }
         }
+        default: components['responses']['Error']
       }
     }
     put?: never
@@ -583,6 +596,7 @@ export interface paths {
             }
           }
         }
+        default: components['responses']['Error']
       }
     }
     delete?: never
@@ -619,6 +633,7 @@ export interface paths {
             'application/json': components['schemas']['Release_details']
           }
         }
+        default: components['responses']['Error']
       }
     }
     /** Update a release */
@@ -646,6 +661,7 @@ export interface paths {
             'application/json': components['schemas']['Release_details']
           }
         }
+        default: components['responses']['Error']
       }
     }
     post?: never
@@ -683,6 +699,7 @@ export interface paths {
             'application/json': unknown
           }
         }
+        default: components['responses']['Error']
       }
     }
     put?: never
@@ -719,6 +736,7 @@ export interface paths {
             'application/json': components['schemas']['Frequency'][]
           }
         }
+        default: components['responses']['Error']
       }
     }
     put?: never
@@ -758,6 +776,7 @@ export interface paths {
             'application/json': components['schemas']['Calender_date']
           }
         }
+        default: components['responses']['Error']
       }
     }
     put?: never
@@ -786,6 +805,7 @@ export interface paths {
       requestBody?: never
       responses: {
         200: components['responses']['FutureBlockedReleaseDays']
+        default: components['responses']['Error']
       }
     }
     put?: never
@@ -824,6 +844,7 @@ export interface paths {
       }
       responses: {
         200: components['responses']['FutureBlockedReleaseDays']
+        default: components['responses']['Error']
       }
     }
     /** Delete a manually blocked day */
@@ -847,6 +868,7 @@ export interface paths {
             'application/json': components['schemas']['Blocked_release_date'][]
           }
         }
+        default: components['responses']['Error']
       }
     }
     options?: never
@@ -901,6 +923,10 @@ export interface paths {
 export type webhooks = Record<string, never>
 export interface components {
   schemas: {
+    Error: {
+      /** @description Error message */
+      message: string
+    }
     /**
      * @example {
      *       "date": "2026-12-24",
@@ -1094,6 +1120,15 @@ export interface components {
     }
   }
   responses: {
+    /** @description Error response */
+    Error: {
+      headers: {
+        [name: string]: unknown
+      }
+      content: {
+        'application/json': components['schemas']['Error']
+      }
+    }
     /** @description List of future blocked release days. Includes all manually blocked days, but only automatically blocked days for the next three calendar years. Sorted from earliest to latest date. */
     FutureBlockedReleaseDays: {
       headers: {

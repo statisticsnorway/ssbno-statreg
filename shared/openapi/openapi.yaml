@@ -77,6 +77,12 @@ components:
         type: string
 
   responses:
+    Error:
+      description: Error response
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+
     FutureBlockedReleaseDays:
       description: List of future blocked release days. Includes all manually blocked days, but only automatically blocked days for the next three calendar years. Sorted from earliest to latest date.
       content:
@@ -87,6 +93,15 @@ components:
               $ref: '#/components/schemas/Blocked_release_date'
 
   schemas:
+    Error:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: Error message
+
     Blocked_release_date:
       type: object
       example: { date: '2026-12-24', automatically_blocked: false, blocked_comment: 'Christmas eve' }
@@ -388,6 +403,8 @@ paths:
                 type: array
                 items: 
                   $ref: '#/components/schemas/Contact'
+        default:
+          $ref: '#/components/responses/Error'
   /shortnames:
     get:
       summary: List of all existing shortnames
@@ -402,6 +419,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Shortname_listing'
+        default:
+          $ref: '#/components/responses/Error'
     post:
       summary: Create a new shortname
       tags: [shortnames]
@@ -424,6 +443,8 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Shortname' }
+        default:
+          $ref: '#/components/responses/Error'
   /statistics:
     get:
       summary: List of all statistics
@@ -449,6 +470,8 @@ paths:
                     type: array
                     items: 
                       $ref: '#/components/schemas/Statistic_listing'
+        default:
+          $ref: '#/components/responses/Error'
 
   /statistics/{shortname}:
     get:
@@ -467,6 +490,8 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Statistic_details' }
+        default:
+          $ref: '#/components/responses/Error'
     post:
       summary: Create a new statistic
       tags: [statistics]
@@ -481,6 +506,8 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Statistic_details' }
+        default:
+          $ref: '#/components/responses/Error'
     put:
       summary: Update a statistic
       tags: [statistics]
@@ -501,6 +528,8 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Statistic_details' }
+        default:
+          $ref: '#/components/responses/Error'
 
   /statistics/{shortname}/variants:
     post:
@@ -517,6 +546,8 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Variant' }
+        default:
+          $ref: '#/components/responses/Error'
   /statistics/{shortname}/variants/{id}:
     put:
       summary: Update a variant
@@ -543,6 +574,8 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Variant' }
+        default:
+          $ref: '#/components/responses/Error'
   /statistics/{shortname}/variants/{id}/releases:
     get:
       summary: List all releases for one variant
@@ -575,6 +608,8 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Release_listing'
+        default:
+          $ref: '#/components/responses/Error'
     post:
       summary: Create a new release
       tags: [statistics]
@@ -600,6 +635,8 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Release_details' }
+        default:
+          $ref: '#/components/responses/Error'
   /statistics/{shortname}/versions:
     get:
       summary: List all versions with changes and comment. Response object TBD
@@ -610,6 +647,8 @@ paths:
           content:
             application/json:
               schema: {}
+        default:
+          $ref: '#/components/responses/Error'
 
   /releases:
     get:
@@ -650,6 +689,8 @@ paths:
                     type: array
                     items: 
                       $ref: '#/components/schemas/Release_listing'
+        default:
+          $ref: '#/components/responses/Error'
 
   /releases/bulk-approve:
     post:
@@ -705,6 +746,8 @@ paths:
                     status: 404
                   - id: 3
                     status: 500
+        default:
+          $ref: '#/components/responses/Error'
 
   /releases/{id}:
     get:
@@ -723,6 +766,8 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Release_details' }
+        default:
+          $ref: '#/components/responses/Error'
     put:
       summary: Update a release
       tags: [releases]
@@ -743,6 +788,8 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Release_details' }
+        default:
+          $ref: '#/components/responses/Error'
   /releases/{id}/versions:
     get:
       summary: List all versions on a release with change and comment. Response object TBD
@@ -759,6 +806,8 @@ paths:
           content:
             application/json:
               schema: {}
+        default:
+          $ref: '#/components/responses/Error'
 
   /frequencies:
     get:
@@ -772,6 +821,8 @@ paths:
               schema:
                 type: array
                 items: { $ref: '#/components/schemas/Frequency' }
+        default:
+          $ref: '#/components/responses/Error'
 
   /calendar:
     get:
@@ -799,6 +850,8 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Calender_date' }
+        default:
+          $ref: '#/components/responses/Error'
 
   /calendar/blocked-release-days:
     get:
@@ -807,6 +860,8 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/FutureBlockedReleaseDays'
+        default:
+          $ref: '#/components/responses/Error'
   /calendar/blocked-release-days/{date}:
     post:
       summary: Manually block a day
@@ -830,6 +885,8 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/FutureBlockedReleaseDays'
+        default:
+          $ref: '#/components/responses/Error'
     delete:
       summary: Delete a manually blocked day
       tags: [calendar]
@@ -848,6 +905,8 @@ paths:
               schema:
                 type: array
                 items: { $ref: '#/components/schemas/Blocked_release_date' }
+        default:
+          $ref: '#/components/responses/Error'
   /auth/authenticate:
     get:
       summary: Check authentication status and information for current user. Used for controlling front-end behaviour, not security.

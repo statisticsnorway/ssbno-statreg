@@ -91,14 +91,12 @@ export default function ListReleases() {
       })
 
       if (error) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const errorMessage = (error as any).error
-        console.log(errorMessage)
-        setApiError((prev) => [...prev, errorMessage])
-      } else {
-        setReleases(data.releases ?? [])
-        setTotal(data.total ?? 0)
+        setApiError((prev) => [...prev, error.message])
+        return
       }
+
+      setReleases(data.releases ?? [])
+      setTotal(data.total ?? 0)
     }
     fetchReleases()
   }, [releaseQuery])
@@ -106,14 +104,13 @@ export default function ListReleases() {
   useEffect(() => {
     async function fetchShortnames() {
       const { data, error } = await client.GET('/shortnames')
+
       if (error) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const errorMessage = (error as any).error
-        console.log(errorMessage)
-        setApiError((prev) => [...prev, errorMessage])
-      } else {
-        setShortnames(data ?? [])
+        setApiError((prev) => [...prev, error.message])
+        return
       }
+
+      setShortnames(data ?? [])
     }
     fetchShortnames()
   }, [])
