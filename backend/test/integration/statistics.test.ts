@@ -116,16 +116,13 @@ describe('statisticsController integration', () => {
     }
   })
 
-  test('POST /statistics/:shortname creates a new statistic in the database', async () => {
+  test('POST /statistics/:shortname creates a new upcoming statistic in the database', async () => {
     const createdShortnameName = await createTestShortname()
 
     const createPayload = {
       division: '101',
       name: 'Integration Test Created Statistic',
-      name_en: 'Integration Test Created Statistic EN',
       first_released_at: '2024-01-01',
-      main_language: 'nb',
-      comment: 'Created by integration test',
     }
 
     const response = await request(app)
@@ -140,9 +137,9 @@ describe('statisticsController integration', () => {
     expect(toStatisticResponseShape(statistic)).toStrictEqual({
       shortname: createdShortnameName,
       name: createPayload.name,
-      name_en: createPayload.name_en,
-      main_language: createPayload.main_language,
-      comment: createPayload.comment,
+      name_en: undefined,
+      main_language: 'nb',
+      comment: '',
       division_code: createPayload.division,
       yearly_reporting: false,
       status_code: 'K',
@@ -158,9 +155,9 @@ describe('statisticsController integration', () => {
     expect(toStatisticDbShape(createdStatistic)).toStrictEqual({
       shortname: createdShortnameName,
       name: createPayload.name,
-      name_en: createPayload.name_en,
-      language: createPayload.main_language,
-      comment: createPayload.comment,
+      name_en: undefined,
+      language: 'nb',
+      comment: '',
       division_code: createPayload.division,
       yearly_reporting: false,
       status: 'K',
