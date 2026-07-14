@@ -31,7 +31,7 @@ export function handleErrors(error: any, res: Response) {
 
   const knownErrorMessage = checkForKnownPrismaErrors(error)
   if (knownErrorMessage) {
-    return res.status(400).json(knownErrorMessage)
+    return res.status(400).json({ error: knownErrorMessage })
   }
 
   console.error(error)

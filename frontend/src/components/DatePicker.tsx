@@ -93,15 +93,14 @@ export function DatePicker({ showColorCodingExplanation, calendarDatesEmit, apiE
           query: { fromDate: getDateOnlyAsString(from), toDate: getDateOnlyAsString(to) },
         },
       })
+
       if (error) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const errorMessage = (error as any).error
-        console.log(errorMessage)
-        apiErrorEmit?.(`Calendar error: ${errorMessage}`)
-      } else {
-        setCalendarDates(data)
-        calendarDatesEmit?.(data)
+        apiErrorEmit?.(`Calendar error: ${error.message}`)
+        return
       }
+
+      setCalendarDates(data)
+      calendarDatesEmit?.(data)
     }
     fetchCalendarDates()
   }, [displayedMonth, calendarDatesEmit, apiErrorEmit])

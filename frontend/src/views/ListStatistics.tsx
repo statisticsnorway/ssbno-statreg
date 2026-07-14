@@ -66,28 +66,26 @@ export default function ListStatistics() {
     const { data, error } = await client.GET('/statistics', {
       params: { query: { start, count, ...sort, ...filter } },
     })
+
     if (error) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const errorMessage = (error as any).error
-      console.log(errorMessage)
-      setApiError((prev) => [...prev, errorMessage])
-    } else {
-      setStatistics(data.statistics ?? [])
-      setTotal(data.total ?? 0)
+      setApiError((prev) => [...prev, error.message])
+      return
     }
+
+    setStatistics(data.statistics ?? [])
+    setTotal(data.total ?? 0)
   }
 
   useEffect(() => {
     async function fetchShortnames() {
       const { data, error } = await client.GET('/shortnames')
+
       if (error) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const errorMessage = (error as any).error
-        console.log(errorMessage)
-        setApiError((prev) => [...prev, errorMessage])
-      } else {
-        setShortnames(data ?? [])
+        setApiError((prev) => [...prev, error.message])
+        return
       }
+
+      setShortnames(data ?? [])
     }
     fetchShortnames()
   }, [])
@@ -95,14 +93,13 @@ export default function ListStatistics() {
   useEffect(() => {
     async function fetchContacts() {
       const { data, error } = await client.GET('/contacts')
+
       if (error) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const errorMessage = (error as any).error
-        console.log(errorMessage)
-        setApiError((prev) => [...prev, errorMessage])
-      } else {
-        setContacts(data ?? [])
+        setApiError((prev) => [...prev, error.message])
+        return
       }
+
+      setContacts(data ?? [])
     }
     fetchContacts()
   }, [])

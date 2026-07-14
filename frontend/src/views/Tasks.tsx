@@ -149,14 +149,12 @@ function ListReleasesTable({ isAdmin, setApiError, approvedReleasesCount }: List
       })
 
       if (error) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const errorMessage = (error as any).error
-        console.log(errorMessage)
-        setApiError((prev) => [...prev, errorMessage])
-      } else {
-        setReleases(data.releases ?? [])
-        setTotal(data.total ?? 0)
+        setApiError((prev) => [...prev, error.message])
+        return
       }
+
+      setReleases(data.releases ?? [])
+      setTotal(data.total ?? 0)
     }
     fetchReleases(start, rowCount, selectedShortnames, sortBy)
   }, [isAdmin, start, rowCount, selectedShortnames, sortBy, setApiError, approvedReleasesCount])
@@ -165,14 +163,13 @@ function ListReleasesTable({ isAdmin, setApiError, approvedReleasesCount }: List
     if (!isAdmin) return
     async function fetchShortnames() {
       const { data, error } = await client.GET('/shortnames')
+
       if (error) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const errorMessage = (error as any).error
-        console.log(errorMessage)
-        setApiError((prev) => [...prev, errorMessage])
-      } else {
-        setShortnames(data ?? [])
+        setApiError((prev) => [...prev, error.message])
+        return
       }
+
+      setShortnames(data ?? [])
     }
     fetchShortnames()
   }, [isAdmin, setApiError])
@@ -253,9 +250,7 @@ export default function Tasks() {
       })
 
       if (error) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const errorMessage = (error as any).error
-        setApiError((prev) => [...prev, errorMessage])
+        setApiError((prev) => [...prev, error.message])
         return
       }
 
@@ -281,14 +276,12 @@ export default function Tasks() {
     })
 
     if (error) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const errorMessage = (error as any).error
-      console.log(errorMessage)
-      setApiError((prev) => [...prev, errorMessage])
-    } else {
-      setApprovedReleasesCount(data.releases?.filter(({ status }) => status === 200)?.length ?? 0)
-      setSelectedPendingReleaseIds([])
+      setApiError((prev) => [...prev, error.message])
+      return
     }
+
+    setApprovedReleasesCount(data.releases?.filter(({ status }) => status === 200)?.length ?? 0)
+    setSelectedPendingReleaseIds([])
   }
 
   function handleOnSubmit(e: React.SubmitEvent<HTMLFormElement>) {
