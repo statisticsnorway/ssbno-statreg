@@ -392,8 +392,18 @@ export async function createStatistic(
       ...(variants?.length
         ? {
             variant: {
-              connect: variants.map((variantId) => ({
-                id: variantId,
+              create: variants.map((variant) => ({
+                date_created: now,
+                last_updated: now,
+                cancelled: !!variant.cancelled,
+                revision: variant.revision?.code ?? 'I',
+                frequency: {
+                  connect: {
+                    code: variant.frequency?.code,
+                  },
+                },
+                ...(variant.level_of_detail?.name ? { level_of_detail: variant.level_of_detail.name } : {}),
+                ...(variant.level_of_detail?.name_en ? { level_of_detail_en: variant.level_of_detail.name_en } : {}),
               })),
             },
           }
@@ -439,10 +449,11 @@ type ValidatedStatisticInput = {
 function parseCreateStatisticStatus(body?: CreateStatisticRequest): CreatableStatisticStatus {
   const statusCode = body?.status?.code
 
-  if (!statusCode) return 'K'
-  if (statusCode === 'K' || statusCode === 'A') return statusCode
-
-  throw { statregError: "Field 'status' must be one of these: K, A." }
+  if (statusCode === 'K' || statusCode === 'A') {
+    return statusCode
+  } else {
+    throw { statregError: "Field 'status' must be one of these: K, A." }
+  }
 }
 
 function getRequiredCreateBodyFields(status: CreatableStatisticStatus): (keyof CreateStatisticRequest)[] {
@@ -484,15 +495,20 @@ function parseGetVariants(
     throw { statregError: "Field 'variants' must contain at least one variant." }
   }
 
-  const variantIds = [...new Set(variants.map((variant: Variant) => variant.id ?? ''))].filter(
-    (variantId): variantId is number => Boolean(variantId)
+  const frequency = [...new Set(variants.map((variant: Variant) => variant.frequency))].filter(
+    (variantFrequencyCode): variantFrequencyCode is Variant['frequency'] => Boolean(variantFrequencyCode)
   )
 
-  if (!variants.length) {
-    throw { statregError: "Field 'variants' must contain id value of type number." }
+  if (!frequency.length) {
+    throw { statregError: "Field 'variants' must contain 'frequency'." }
   }
 
-  return variantIds
+  return variants.map((variant) => ({
+    cancelled: !!variant.cancelled,
+    frequency: variant.frequency,
+    revision: variant.revision ?? { code: 'I' },
+    level_of_detail: variant.level_of_detail,
+  }))
 }
 
 function parseCreateStatisticInput(

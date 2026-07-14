@@ -259,9 +259,7 @@ components:
         variants:
           type: array
           items:
-            type: object
-            properties:
-              id: { type: integer }
+            $ref: '#/components/schemas/Variant'
         contacts:
           type: array
           items:

@@ -1026,9 +1026,7 @@ export interface components {
       statistic_region_levels?: components['schemas']['Region_level'][]
       previous_topic_codes?: string | null
       comment?: string
-      variants?: {
-        id?: number
-      }[]
+      variants?: components['schemas']['Variant'][]
       contacts?: {
         principalName?: string
       }[]

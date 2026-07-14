@@ -441,6 +441,7 @@ describe('statisticService', () => {
         id: 1,
         version: 1,
         desk_appoval_status: ApprovalStatus.PENDING,
+        status: 'K',
       })
 
       await createStatistic(
@@ -452,6 +453,7 @@ describe('statisticService', () => {
           division: '104',
           first_released_at: '2024-04-01',
           main_language: 'nb',
+          status: { code: 'K' },
         },
         now
       )
@@ -482,15 +484,14 @@ describe('statisticService', () => {
 
     test('reject with error message if body is missing', async () => {
       await expect(() => createStatistic(prismaMock, 'kpi', undefined, now)).rejects.toMatchObject({
-        statregError: 'Missing required field(s): name, division',
+        statregError: "Field 'status' must be one of these: K, A.",
       })
       expect(prismaMock.statistic.create).toHaveBeenCalledTimes(0)
     })
 
     test('rejects with error message any of the required fields are missing', async () => {
-      // TODO: Add more fields to this test when validation logic are in place
-      await expect(() => createStatistic(prismaMock, 'kpi', {}, now)).rejects.toMatchObject({
-        statregError: 'Missing required field(s): name, division',
+      await expect(() => createStatistic(prismaMock, 'kpi', { status: { code: 'A' } }, now)).rejects.toMatchObject({
+        statregError: 'Missing required field(s): name, name_en, variants, contacts, division, main_language',
       })
       expect(prismaMock.statistic.create).toHaveBeenCalledTimes(0)
     })
@@ -513,7 +514,7 @@ describe('statisticService', () => {
           division: '104',
           main_language: 'nn',
           contacts: [{ principalName: 'bcd@ssb.no' }],
-          variants: [{ id: 1 }],
+          variants: [{ frequency: { code: 'M' }, revision: { code: 'I' } }],
         },
         now
       )
@@ -540,9 +541,17 @@ describe('statisticService', () => {
             ],
           },
           variant: {
-            connect: [
+            create: [
               {
-                id: 1,
+                date_created: now,
+                last_updated: now,
+                cancelled: false,
+                revision: 'I',
+                frequency: {
+                  connect: {
+                    code: 'M',
+                  },
+                },
               },
             ],
           },
