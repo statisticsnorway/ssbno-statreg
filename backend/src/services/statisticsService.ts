@@ -467,8 +467,8 @@ export function parseCreateStatisticInput(
 }
 
 export function parseUpdateStatisticInput(
-  body: StatisticCreate | StatisticUpdate | undefined,
-  requiredFields: (keyof StatisticCreate)[] | (keyof StatisticUpdate)[]
+  body: StatisticUpdate | undefined,
+  requiredFields: (keyof StatisticUpdate)[]
 ): ValidatedStatisticInput {
   const {
     division,
@@ -482,7 +482,7 @@ export function parseUpdateStatisticInput(
     main_language,
     comment,
     relation,
-  } = ensureRequiredFieldsExists(body as StatisticUpdate, requiredFields as (keyof StatisticUpdate)[])
+  } = ensureRequiredFieldsExists(body, requiredFields)
 
   const safeName = sanitize(name)
   const safeNameEn = sanitize(name_en)
