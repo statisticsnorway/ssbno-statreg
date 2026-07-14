@@ -355,17 +355,12 @@ export async function updateContacts(
   }
 
   const users = await getAllUsersFromCache()
+
   const uniquePrincipalNames = [...new Set(newPrincipalNames)]
-  const unknownPrincipalNames = uniquePrincipalNames.filter((principalName) => !users[principalName])
-  if (unknownPrincipalNames.length > 0) {
-    return Promise.reject({
-      status: 400,
-      statregError: `Unknown principal names: ${unknownPrincipalNames.join(', ')}`,
-    })
-  }
+  const knownPrincipalNames = uniquePrincipalNames.filter((principalName) => users[principalName])
 
   const newContacts = await Promise.all(
-    uniquePrincipalNames.map((principalName) =>
+    knownPrincipalNames.map((principalName) =>
       prisma.responsiblePerson.upsert({
         where: { principalName },
         create: { principalName },
@@ -373,19 +368,20 @@ export async function updateContacts(
       })
     )
   )
-  //https://docs.prisma.io/docs/orm/reference/prisma-client-reference?utm_source=chatgpt.com#set
-  await prisma.statistic.update({
+  const updatedStatistic = await prisma.statistic.update({
+    // https://docs.prisma.io/docs/orm/reference/prisma-client-reference#set
     where: { id: existingStatistic.id },
     data: {
       responsiblePersons: {
         set: newContacts.map((contact) => ({ id: contact.id })),
       },
     },
+    select: { responsiblePersons: { select: { principalName: true } } },
   })
 
-  return uniquePrincipalNames.map((principalName) => ({
-    name: users[principalName]?.displayName ?? '',
-    principalName,
+  return updatedStatistic.responsiblePersons.map((person) => ({
+    name: users[person.principalName]?.displayName ?? '',
+    principalName: person.principalName,
   }))
 }
 
