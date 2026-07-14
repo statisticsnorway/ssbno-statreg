@@ -25,14 +25,13 @@ export default function ShowRelease() {
   useEffect(() => {
     async function fetchRelease() {
       const { data, error } = await client.GET('/releases/{id}', { params: { path: { id: id as string } } })
+
       if (error) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const errorMessage = (error as any).error
-        console.log(errorMessage)
-        setApiError((prev) => [...prev, errorMessage])
-      } else {
-        setRelease(data)
+        setApiError((prev) => [...prev, error.message])
+        return
       }
+
+      setRelease(data)
     }
     fetchRelease()
   }, [id])

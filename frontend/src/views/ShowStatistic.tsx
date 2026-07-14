@@ -105,28 +105,26 @@ export default function ShowStatistic() {
       const { data, error } = await client.GET('/statistics/{shortname}', {
         params: { path: { shortname: shortname as string } },
       })
+
       if (error) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const errorMessage = (error as any).error
-        console.log(errorMessage)
-        setApiError((prev) => [...prev, errorMessage])
-      } else {
-        setStatistic(data)
+        setApiError((prev) => [...prev, error.message])
+        return
       }
+
+      setStatistic(data)
     }
 
     async function fetchReleases(shortname: string) {
       const { data, error } = await client.GET('/releases', {
         params: { query: { shortname, count: 100, publish_time_after: new Date().toISOString() } },
       })
+
       if (error) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const errorMessage = (error as any).error
-        console.log(errorMessage)
-        setApiError((prev) => [...prev, errorMessage])
-      } else {
-        setReleases(data.releases ?? [])
+        setApiError((prev) => [...prev, error.message])
+        return
       }
+
+      setReleases(data.releases ?? [])
     }
     fetchStatistic()
     if (shortname) fetchReleases(shortname)
