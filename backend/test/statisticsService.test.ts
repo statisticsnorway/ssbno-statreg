@@ -482,7 +482,7 @@ describe('statisticService', () => {
 
     test('reject with error message if body is missing', async () => {
       await expect(() => createStatistic(prismaMock, 'kpi', undefined, now)).rejects.toMatchObject({
-        statregError: 'Missing required field(s): division, name, name_en, first_released_at',
+        statregError: 'Missing required field(s): name, division',
       })
       expect(prismaMock.statistic.create).toHaveBeenCalledTimes(0)
     })
@@ -490,9 +490,70 @@ describe('statisticService', () => {
     test('rejects with error message any of the required fields are missing', async () => {
       // TODO: Add more fields to this test when validation logic are in place
       await expect(() => createStatistic(prismaMock, 'kpi', {}, now)).rejects.toMatchObject({
-        statregError: 'Missing required field(s): division, name, name_en, first_released_at',
+        statregError: 'Missing required field(s): name, division',
       })
       expect(prismaMock.statistic.create).toHaveBeenCalledTimes(0)
+    })
+
+    test('creates an active statistic with required contacts and variants', async () => {
+      setStatisticsResult({
+        ...mockedStatisticCreatedPrismaResult,
+        id: 1,
+        version: 1,
+        desk_appoval_status: ApprovalStatus.PENDING,
+      })
+
+      await createStatistic(
+        prismaMock,
+        'kpi',
+        {
+          status: { code: 'A' },
+          name: 'Konsumprisindeksen',
+          name_en: 'Consumer price index',
+          division: '104',
+          main_language: 'nn',
+          contacts: [{ principalName: 'bcd@ssb.no' }],
+          variants: [{ id: 1 }],
+        },
+        now
+      )
+
+      expect(prismaMock.statistic.create).toHaveBeenCalledExactlyOnceWith({
+        data: {
+          name: 'Konsumprisindeksen',
+          name_en: 'Consumer price index',
+          priority: 1,
+          yearly_reporting: false,
+          status: 'A',
+          division_code: '104',
+          comment: expect.any(String),
+          language: 'nn',
+          date_created: now,
+          last_updated: now,
+          desk_appoval_status: ApprovalStatus.ACCEPTED,
+          responsiblePersons: {
+            connectOrCreate: [
+              {
+                where: { principalName: 'bcd@ssb.no' },
+                create: { principalName: 'bcd@ssb.no' },
+              },
+            ],
+          },
+          variant: {
+            connect: [
+              {
+                id: 1,
+              },
+            ],
+          },
+          shortname: {
+            connect: {
+              name: 'kpi',
+            },
+          },
+        },
+        include: StatisticsDetailedIncludes,
+      })
     })
   })
 

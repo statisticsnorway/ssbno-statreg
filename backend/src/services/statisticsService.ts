@@ -1,10 +1,15 @@
 import {
+  type CreatableStatisticStatus,
+  type CreateStatisticField,
   type StatisticDetails,
   type StatisticUpdate,
   type StatisticCreate,
+  type Contact,
+  type Variant,
   ApprovalStatus,
   StatisticStatus,
   StatisticListingResponse,
+  requiredStatisticFieldsByStatus,
 } from '@ssbno-statreg/shared'
 import { dateToISOString, sanitize, parseDateOnly, ensureRequiredFieldsExists, isNumber, parseId } from '@/lib/utils'
 import type { Prisma } from '@/generated/prisma/client'
@@ -14,6 +19,13 @@ import { statisticsAsserts } from '@/lib/asserts'
 import { getAllUsersFromCache } from '@/lib/cache'
 
 export type StatisticPrisma = Pick<PrismaClient, 'statistic' | 'shortname'>
+
+type CreateStatisticRequest = StatisticCreate & {
+  contacts?: Contact[]
+  variants?: Variant[]
+}
+
+type StatisticStatusCode = keyof typeof StatisticStatus
 
 // Statistic listing
 
@@ -133,7 +145,7 @@ export async function getStatistics(
         shortname: statistic.shortname.name,
         main_language,
         status: {
-          code: statistic.status,
+          code: parseStatusCode(statistic.status),
         },
         division: {
           name: getDivisionFromCode(Number(divisionCode))?.name,
@@ -216,7 +228,7 @@ export async function mapStatisticDetails(statistic: StatisticPrismaResult): Pro
     first_released_at: dateToISOString(statistic.first_release),
     yearly_reporting: statistic.yearly_reporting,
     status: {
-      code: statistic.status,
+      code: parseStatusCode(statistic.status),
     },
     previous_topic_codes: statistic.legacy_topic_codes,
     relation,
@@ -341,7 +353,7 @@ export async function updateStatistic(
 export async function createStatistic(
   prisma: StatisticPrisma,
   shortname: string,
-  body?: StatisticCreate,
+  body?: CreateStatisticRequest,
   now = new Date()
 ): Promise<StatisticDetails> {
   const safeShortname = sanitize(shortname)
@@ -349,26 +361,43 @@ export async function createStatistic(
   await statisticsAsserts.assertShortnameExists(safeShortname, prisma)
   await statisticsAsserts.assertShortnameExistsAndIsAvailable(safeShortname, prisma)
 
-  const requiredFields: (keyof StatisticCreate)[] = ['division', 'name', 'name_en', 'first_released_at']
-  const { division, name, name_en, first_released_at, main_language, comment } = parseStatisticInput(
-    body,
-    requiredFields
-  )
+  const createStatisticStatus = parseCreateStatisticStatus(body)
+  const { division, name, name_en, first_released_at, main_language, comment, contacts, variants } =
+    parseCreateStatisticInput(body, createStatisticStatus)
 
   const result = await prisma.statistic.create({
     data: {
       name,
-      name_en,
+      ...(name_en ? { name_en } : {}),
       priority: 1,
       yearly_reporting: false,
-      status: 'K',
+      status: createStatisticStatus,
       desk_appoval_status: ApprovalStatus.ACCEPTED,
       language: main_language,
       date_created: now,
       last_updated: now,
-      first_release: first_released_at,
+      ...(first_released_at ? { first_release: first_released_at } : {}),
       comment: comment || `Create statistic with shortname: ${shortname}`,
       division_code: division,
+      ...(contacts?.length
+        ? {
+            responsiblePersons: {
+              connectOrCreate: contacts.map((principalName) => ({
+                where: { principalName },
+                create: { principalName },
+              })),
+            },
+          }
+        : {}),
+      ...(variants?.length
+        ? {
+            variant: {
+              connect: variants.map((variantId) => ({
+                id: variantId,
+              })),
+            },
+          }
+        : {}),
       shortname: {
         connect: {
           name: safeShortname,
@@ -378,6 +407,17 @@ export async function createStatistic(
     include: StatisticsDetailedIncludes,
   })
   return await mapStatisticDetails(result)
+}
+
+type ValidatedCreateStatisticInput = {
+  division: string
+  name: string
+  name_en?: string
+  first_released_at?: Date
+  main_language: string
+  comment: string
+  contacts?: string[]
+  variants?: CreateStatisticRequest['variants']
 }
 
 type ValidatedStatisticInput = {
@@ -394,6 +434,102 @@ type ValidatedStatisticInput = {
   main_language: string
   comment: string
   relation?: number | null
+}
+
+function parseCreateStatisticStatus(body?: CreateStatisticRequest): CreatableStatisticStatus {
+  const statusCode = body?.status?.code
+
+  if (!statusCode) return 'K'
+  if (statusCode === 'K' || statusCode === 'A') return statusCode
+
+  throw { statregError: "Field 'status' must be one of these: K, A." }
+}
+
+function getRequiredCreateBodyFields(status: CreatableStatisticStatus): (keyof CreateStatisticRequest)[] {
+  const requiredFields = requiredStatisticFieldsByStatus[status].filter(
+    (field: CreateStatisticField) => field !== 'shortname'
+  )
+
+  return requiredFields as (keyof CreateStatisticRequest)[]
+}
+
+function parseCreateContacts(
+  contacts: CreateStatisticRequest['contacts'],
+  status: CreatableStatisticStatus
+): string[] | undefined {
+  if (status !== 'A') return undefined
+
+  if (!contacts?.length) {
+    throw { statregError: "Field 'contacts' must contain at least one contact." }
+  }
+
+  const principalNames = [...new Set(contacts.map((contact: Contact) => contact.principalName ?? ''))].filter(
+    (principalName): principalName is string => Boolean(principalName)
+  )
+
+  if (!principalNames.length) {
+    throw { statregError: "Field 'contacts' must contain principalName value of type string." }
+  }
+
+  return principalNames
+}
+
+function parseGetVariants(
+  variants: CreateStatisticRequest['variants'],
+  status: CreatableStatisticStatus
+): CreateStatisticRequest['variants'] | undefined {
+  if (status !== 'A') return undefined
+
+  if (!variants?.length) {
+    throw { statregError: "Field 'variants' must contain at least one variant." }
+  }
+
+  const variantIds = [...new Set(variants.map((variant: Variant) => variant.id ?? ''))].filter(
+    (variantId): variantId is number => Boolean(variantId)
+  )
+
+  if (!variants.length) {
+    throw { statregError: "Field 'variants' must contain id value of type number." }
+  }
+
+  return variantIds
+}
+
+function parseCreateStatisticInput(
+  body: CreateStatisticRequest | undefined,
+  status: CreatableStatisticStatus
+): ValidatedCreateStatisticInput {
+  const requiredFields = getRequiredCreateBodyFields(status)
+  const { division, name, name_en, first_released_at, main_language, comment, contacts, variants } =
+    ensureRequiredFieldsExists(body ?? {}, requiredFields)
+
+  const safeName = sanitize(name)
+  const safeNameEn = sanitize(name_en)
+  const safeComment = sanitize(comment)
+  const language = main_language ?? 'nb'
+
+  if (!safeName) {
+    throw { statregError: "Field 'name' must be a non-empty string." }
+  }
+
+  if (status === 'A' && !safeNameEn) {
+    throw { statregError: "Field 'name_en' must be a non-empty string." }
+  }
+
+  if (language !== 'nb' && language !== 'nn') {
+    throw { statregError: "Field 'main_language' must be either 'nb' or 'nn'." }
+  }
+
+  return {
+    division: parseDivision(division),
+    name: safeName,
+    ...(safeNameEn ? { name_en: safeNameEn } : {}),
+    ...(first_released_at ? { first_released_at: parseDateOnly(first_released_at, 'first_released_at') } : {}),
+    main_language: language,
+    comment: safeComment,
+    ...(contacts ? { contacts: parseCreateContacts(contacts, status) } : {}),
+    ...(variants ? { variants: parseGetVariants(variants, status) } : {}),
+  }
 }
 
 export function parseStatisticInput(
@@ -471,11 +607,11 @@ export function parseDivision(division?: string | null) {
   return division.toString()
 }
 
-export function parseStatusCode(statusCode?: string): string {
+export function parseStatusCode(statusCode?: string): StatisticStatusCode {
   if (!statusCode || !Object.keys(StatisticStatus).includes(statusCode)) {
     throw { statregError: `Field 'status' must be one of these: ${Object.keys(StatisticStatus).join(', ')}.` }
   }
-  return statusCode
+  return statusCode as StatisticStatusCode
 }
 
 export function parseRelation(relationId?: string | null): number | null {
