@@ -364,7 +364,7 @@ export async function updateContacts(
     })
   }
 
-  await Promise.all(
+  const newContacts = await Promise.all(
     uniquePrincipalNames.map((principalName) =>
       prisma.responsiblePerson.upsert({
         where: { principalName },
@@ -373,12 +373,12 @@ export async function updateContacts(
       })
     )
   )
-
+  //https://docs.prisma.io/docs/orm/reference/prisma-client-reference?utm_source=chatgpt.com#set
   await prisma.statistic.update({
     where: { id: existingStatistic.id },
     data: {
       responsiblePersons: {
-        set: uniquePrincipalNames.map((principalName) => ({ principalName })),
+        set: newContacts.map((contact) => ({ id: contact.id })),
       },
     },
   })
