@@ -351,7 +351,7 @@ export async function updateContacts(
     select: { id: true },
   })
   if (!existingStatistic) {
-    return Promise.reject({ status: 404, statregError: `Shortname ${safeShortname} not found` })
+    return Promise.reject({ status: 404, statregError: `Shortname '${safeShortname}' not found` })
   }
 
   const users = await getAllUsersFromCache()
