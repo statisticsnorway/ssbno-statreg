@@ -120,6 +120,7 @@ describe('statisticsController integration', () => {
     const createdShortnameName = await createTestShortname()
 
     const createPayload = {
+      status: { code: 'K' },
       division: '101',
       name: 'Integration Test Created Statistic',
       first_released_at: '2024-01-01',
@@ -137,9 +138,9 @@ describe('statisticsController integration', () => {
     expect(toStatisticResponseShape(statistic)).toStrictEqual({
       shortname: createdShortnameName,
       name: createPayload.name,
-      name_en: undefined,
+      name_en: '',
       main_language: 'nb',
-      comment: '',
+      comment: `Create statistic with shortname: ${createdShortnameName}`,
       division_code: createPayload.division,
       yearly_reporting: false,
       status_code: 'K',
@@ -155,9 +156,9 @@ describe('statisticsController integration', () => {
     expect(toStatisticDbShape(createdStatistic)).toStrictEqual({
       shortname: createdShortnameName,
       name: createPayload.name,
-      name_en: undefined,
+      name_en: null,
       language: 'nb',
-      comment: '',
+      comment: `Create statistic with shortname: ${createdShortnameName}`,
       division_code: createPayload.division,
       yearly_reporting: false,
       status: 'K',
@@ -171,6 +172,7 @@ describe('statisticsController integration', () => {
     const createdShortnameName = await createTestShortname()
 
     const createPayload = {
+      status: { code: 'K' },
       division: '101',
       name: 'Integration Test Statistic To Update',
       name_en: 'Integration Test Statistic To Update EN',
@@ -287,6 +289,7 @@ describe('statisticsController integration', () => {
 
     // POST statistic for created shortname
     const createPayload: StatisticCreate = {
+      status: { code: 'K' },
       division: '101',
       name: 'Ny statistikk',
       name_en: 'New statistic',
