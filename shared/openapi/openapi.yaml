@@ -563,7 +563,7 @@ paths:
               schema: {}
 
   /statistics/{shortname}/contacts:
-    post:
+    put:
       summary: Set contacts for a statistic
       description: Replaces the entire contact list for the statistic with the supplied principal names.
       tags: [statistics]

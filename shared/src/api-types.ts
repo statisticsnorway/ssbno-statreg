@@ -451,12 +451,11 @@ export interface paths {
       cookie?: never
     }
     get?: never
-    put?: never
     /**
      * Set contacts for a statistic
      * @description Replaces the entire contact list for the statistic with the supplied principal names.
      */
-    post: {
+    put: {
       parameters: {
         query?: never
         header?: never
@@ -485,6 +484,7 @@ export interface paths {
         }
       }
     }
+    post?: never
     delete?: never
     options?: never
     head?: never
