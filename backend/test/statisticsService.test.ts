@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { vi, describe, test, expect, beforeEach } from 'vitest'
-import { ApprovalStatus, StatisticStatus, type StatisticCreate, type StatisticUpdate } from '@ssbno-statreg/shared'
+import { ApprovalStatus, StatisticStatus, type StatisticUpdate } from '@ssbno-statreg/shared'
 import { statisticsAsserts } from '@/lib/asserts'
 import {
   getFilteredStatistics,
   getStatisticByShortname,
   parseStatisticVariants,
   mapStatisticDetails,
-  parseStatisticInput,
+  parseCreateStatisticInput,
+  parseUpdateStatisticInput,
   updateStatistic,
   createStatistic,
   StatisticsDetailedIncludes,
@@ -495,75 +496,6 @@ describe('statisticService', () => {
       })
       expect(prismaMock.statistic.create).toHaveBeenCalledTimes(0)
     })
-
-    test('creates an active statistic with required contacts and variants', async () => {
-      setStatisticsResult({
-        ...mockedStatisticCreatedPrismaResult,
-        id: 1,
-        version: 1,
-        desk_appoval_status: ApprovalStatus.PENDING,
-      })
-
-      await createStatistic(
-        prismaMock,
-        'kpi',
-        {
-          status: { code: 'A' },
-          name: 'Konsumprisindeksen',
-          name_en: 'Consumer price index',
-          division: '104',
-          main_language: 'nn',
-          contacts: [{ principalName: 'bcd@ssb.no' }],
-          variants: [{ frequency: { code: 'M' }, revision: { code: 'I' } }],
-        },
-        now
-      )
-
-      expect(prismaMock.statistic.create).toHaveBeenCalledExactlyOnceWith({
-        data: {
-          name: 'Konsumprisindeksen',
-          name_en: 'Consumer price index',
-          priority: 1,
-          yearly_reporting: false,
-          status: 'A',
-          division_code: '104',
-          comment: expect.any(String),
-          language: 'nn',
-          date_created: now,
-          last_updated: now,
-          desk_appoval_status: ApprovalStatus.ACCEPTED,
-          responsiblePersons: {
-            connectOrCreate: [
-              {
-                where: { principalName: 'bcd@ssb.no' },
-                create: { principalName: 'bcd@ssb.no' },
-              },
-            ],
-          },
-          variant: {
-            create: [
-              {
-                date_created: now,
-                last_updated: now,
-                cancelled: false,
-                revision: 'I',
-                frequency: {
-                  connect: {
-                    code: 'M',
-                  },
-                },
-              },
-            ],
-          },
-          shortname: {
-            connect: {
-              name: 'kpi',
-            },
-          },
-        },
-        include: StatisticsDetailedIncludes,
-      })
-    })
   })
 
   describe('parseStatisticVariants ', async () => {
@@ -696,82 +628,76 @@ describe('statisticService', () => {
     })
   })
 
-  describe('validateAndParseStatisticInput ', async () => {
-    describe('create', async () => {
-      let input: any
-      let expectedResult: any
-      const requiredCreateFields = ['division', 'name', 'name_en', 'first_released_at'] as (keyof StatisticCreate)[]
+  describe('parseCreateStatisticInput ', async () => {
+    let input: any
+    let expectedResult: any
 
-      beforeEach(() => {
-        input = {
-          division: '104',
-          name: 'Helse og helsetjenester',
-          name_en: 'Health and health services',
-          first_released_at: '2024-04-01',
-          main_language: 'nn',
-          comment: 'Kommentar om statistikken',
-        }
+    beforeEach(() => {
+      input = {
+        status: { code: 'K' },
+        division: '104',
+        name: 'Helse og helsetjenester',
+        first_released_at: '2024-04-01',
+      }
 
-        expectedResult = {
-          division: '104',
-          name: 'Helse og helsetjenester',
-          name_en: 'Health and health services',
-          first_released_at: new Date('2024-04-01T00:00:00.000Z'),
-          main_language: 'nn',
-          comment: 'Kommentar om statistikken',
-        }
-      })
+      expectedResult = {
+        division: '104',
+        name: 'Helse og helsetjenester',
+        main_language: 'nb',
+        comment: '',
+        first_released_at: new Date('2024-04-01T00:00:00.000Z'),
+      }
+    })
 
-      test('returns validated statistic input when all conditionals succeed', () => {
-        const result = parseStatisticInput(input, requiredCreateFields)
+    test('returns validated statistic input when all conditionals succeed', () => {
+      const result = parseCreateStatisticInput(input, 'K')
 
-        expect(result).toStrictEqual(expectedResult)
-      })
+      expect(result).toStrictEqual(expectedResult)
+    })
 
-      test('throws error when name is an empty string', () => {
-        input.name = ''
+    test('throws error when name is an empty string', () => {
+      input.name = ''
 
-        expect(() => parseStatisticInput(input, requiredCreateFields)).toThrow({
-          statregError: "Field 'name' must be a non-empty string.",
-        })
-      })
-
-      test('throws error when division is not a number', () => {
-        input.division = 'division-a'
-
-        expect(() => parseStatisticInput(input, requiredCreateFields)).toThrow({
-          statregError: "Field 'division' must be a number.",
-        })
-      })
-
-      test('throws error when division lookup does not find a match', () => {
-        input.division = '106'
-
-        expect(() => parseStatisticInput(input, requiredCreateFields)).toThrow({
-          statregError: "Field 'division' does not correspond to an existing division.",
-        })
-      })
-
-      test("throws error main_language is neither 'nb' or 'nn'", () => {
-        input.main_language = 'en'
-        expectedResult.main_language = 'nb'
-
-        expect(() => parseStatisticInput(input, requiredCreateFields)).toThrow({
-          statregError: "Field 'main_language' must be either 'nb' or 'nn'.",
-        })
-      })
-
-      test('falls back to empty string when comment is missing', () => {
-        input.comment = undefined
-        expectedResult.comment = ''
-
-        const result = parseStatisticInput(input, requiredCreateFields)
-
-        expect(result).toStrictEqual(expectedResult)
+      expect(() => parseCreateStatisticInput(input, 'K')).toThrow({
+        statregError: "Field 'name' must be a non-empty string.",
       })
     })
 
-    describe('update', async () => {
+    test('throws error when division is not a number', () => {
+      input.division = 'division-a'
+
+      expect(() => parseCreateStatisticInput(input, 'K')).toThrow({
+        statregError: "Field 'division' must be a number.",
+      })
+    })
+
+    test('throws error when division lookup does not find a match', () => {
+      input.division = '106'
+
+      expect(() => parseCreateStatisticInput(input, 'K')).toThrow({
+        statregError: "Field 'division' does not correspond to an existing division.",
+      })
+    })
+
+    test("throws error main_language is neither 'nb' or 'nn'", () => {
+      input.main_language = 'en'
+      expectedResult.main_language = 'nb'
+
+      expect(() => parseCreateStatisticInput(input, 'K')).toThrow({
+        statregError: "Field 'main_language' must be either 'nb' or 'nn'.",
+      })
+    })
+
+    test('falls back to empty string when comment is missing', () => {
+      input.comment = undefined
+      expectedResult.comment = ''
+
+      const result = parseCreateStatisticInput(input, 'K')
+
+      expect(result).toStrictEqual(expectedResult)
+    })
+
+    describe('parseUpdateStatisticInput', async () => {
       let input: any
       let expectedResult: any
       const requiredUpdateFields = [
@@ -819,7 +745,7 @@ describe('statisticService', () => {
       })
 
       test('returns validated statistic input when all conditionals succeed', () => {
-        const result = parseStatisticInput(input, requiredUpdateFields, 'update')
+        const result = parseUpdateStatisticInput(input, requiredUpdateFields)
 
         expect(result).toStrictEqual(expectedResult)
       })
@@ -827,7 +753,7 @@ describe('statisticService', () => {
       test('throws error when comment is an empty string', () => {
         input.comment = ''
 
-        expect(() => parseStatisticInput(input, requiredUpdateFields, 'update')).toThrow({
+        expect(() => parseUpdateStatisticInput(input, requiredUpdateFields)).toThrow({
           statregError: "Field 'comment' must be a non-empty string.",
         })
       })
@@ -835,7 +761,7 @@ describe('statisticService', () => {
       test('throws error when yearly_reporting is not a valid boolean', () => {
         input.yearly_reporting = 'not-a-boolean'
 
-        expect(() => parseStatisticInput(input, requiredUpdateFields, 'update')).toThrow({
+        expect(() => parseUpdateStatisticInput(input, requiredUpdateFields)).toThrow({
           statregError: "Field 'yearly_reporting' must be a boolean.",
         })
       })
@@ -843,7 +769,7 @@ describe('statisticService', () => {
       test('throws error when relation id is an invalid format', () => {
         input.relation = 'abc'
 
-        expect(() => parseStatisticInput(input, requiredUpdateFields, 'update')).toThrow({
+        expect(() => parseUpdateStatisticInput(input, requiredUpdateFields)).toThrow({
           statregError: 'Invalid relation id format',
         })
       })
@@ -851,7 +777,7 @@ describe('statisticService', () => {
       test('throws error when status is not valid value', () => {
         input.status = 'ABC'
 
-        expect(() => parseStatisticInput(input, requiredUpdateFields, 'update')).toThrow({
+        expect(() => parseUpdateStatisticInput(input, requiredUpdateFields)).toThrow({
           statregError: "Field 'status' must be one of these: K, A, IA, UT, SA, SP.",
         })
       })

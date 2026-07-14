@@ -9,7 +9,7 @@ import {
   ApprovalStatus,
   StatisticStatus,
   StatisticListingResponse,
-  requiredStatisticFieldsByStatus,
+  getRequiredStatisticFields,
 } from '@ssbno-statreg/shared'
 import { dateToISOString, sanitize, parseDateOnly, ensureRequiredFieldsExists, isNumber, parseId } from '@/lib/utils'
 import type { Prisma } from '@/generated/prisma/client'
@@ -26,6 +26,33 @@ type CreateStatisticRequest = StatisticCreate & {
 }
 
 type StatisticStatusCode = keyof typeof StatisticStatus
+
+type ValidatedCreateStatisticInput = {
+  division: string
+  name: string
+  name_en?: string
+  first_released_at?: Date
+  main_language: string
+  comment: string
+  contacts?: string[]
+  variants?: CreateStatisticRequest['variants']
+}
+
+type ValidatedStatisticInput = {
+  division: string | null | undefined
+  statistic_region_levels?: {
+    code?: string | undefined
+  }[]
+  status?: string
+  name: string
+  name_en: string
+  previous_topic_codes?: string
+  yearly_reporting?: boolean
+  first_released_at: Date
+  main_language: string
+  comment: string
+  relation?: number | null
+}
 
 // Statistic listing
 
@@ -302,7 +329,7 @@ export async function updateStatistic(
     first_released_at,
     main_language,
     comment,
-  } = parseStatisticInput(body, requiredFields, 'update')
+  } = parseUpdateStatisticInput(body, requiredFields)
 
   const regionLevelsToRemove = existingStatistic.statistic_region_levels.filter(
     (existingRegLvl) =>
@@ -362,8 +389,10 @@ export async function createStatistic(
   await statisticsAsserts.assertShortnameExistsAndIsAvailable(safeShortname, prisma)
 
   const createStatisticStatus = parseCreateStatisticStatus(body)
-  const { division, name, name_en, first_released_at, main_language, comment, contacts, variants } =
-    parseCreateStatisticInput(body, createStatisticStatus)
+  const { division, name, name_en, first_released_at, main_language, comment } = parseCreateStatisticInput(
+    body,
+    createStatisticStatus
+  )
 
   const result = await prisma.statistic.create({
     data: {
@@ -379,35 +408,6 @@ export async function createStatistic(
       ...(first_released_at ? { first_release: first_released_at } : {}),
       comment: comment || `Create statistic with shortname: ${shortname}`,
       division_code: division,
-      ...(contacts?.length
-        ? {
-            responsiblePersons: {
-              connectOrCreate: contacts.map((principalName) => ({
-                where: { principalName },
-                create: { principalName },
-              })),
-            },
-          }
-        : {}),
-      ...(variants?.length
-        ? {
-            variant: {
-              create: variants.map((variant) => ({
-                date_created: now,
-                last_updated: now,
-                cancelled: !!variant.cancelled,
-                revision: variant.revision?.code ?? 'I',
-                frequency: {
-                  connect: {
-                    code: variant.frequency?.code,
-                  },
-                },
-                ...(variant.level_of_detail?.name ? { level_of_detail: variant.level_of_detail.name } : {}),
-                ...(variant.level_of_detail?.name_en ? { level_of_detail_en: variant.level_of_detail.name_en } : {}),
-              })),
-            },
-          }
-        : {}),
       shortname: {
         connect: {
           name: safeShortname,
@@ -419,34 +419,8 @@ export async function createStatistic(
   return await mapStatisticDetails(result)
 }
 
-type ValidatedCreateStatisticInput = {
-  division: string
-  name: string
-  name_en?: string
-  first_released_at?: Date
-  main_language: string
-  comment: string
-  contacts?: string[]
-  variants?: CreateStatisticRequest['variants']
-}
-
-type ValidatedStatisticInput = {
-  division: string | null | undefined
-  statistic_region_levels?: {
-    code?: string | undefined
-  }[]
-  status?: string
-  name: string
-  name_en: string
-  previous_topic_codes?: string
-  yearly_reporting?: boolean
-  first_released_at: Date
-  main_language: string
-  comment: string
-  relation?: number | null
-}
-
-function parseCreateStatisticStatus(body?: CreateStatisticRequest): CreatableStatisticStatus {
+// TODO: MIM-2674: Add tests
+export function parseCreateStatisticStatus(body?: CreateStatisticRequest): CreatableStatisticStatus {
   const statusCode = body?.status?.code
 
   if (statusCode === 'K' || statusCode === 'A') {
@@ -456,68 +430,24 @@ function parseCreateStatisticStatus(body?: CreateStatisticRequest): CreatableSta
   }
 }
 
-function getRequiredCreateBodyFields(status: CreatableStatisticStatus): (keyof CreateStatisticRequest)[] {
-  const requiredFields = requiredStatisticFieldsByStatus[status].filter(
+// TODO: MIM-2674: Add tests
+export function getRequiredCreateBodyFields(status: CreatableStatisticStatus): (keyof CreateStatisticRequest)[] {
+  const requiredFields = getRequiredStatisticFields(status).filter(
     (field: CreateStatisticField) => field !== 'shortname'
   )
 
   return requiredFields as (keyof CreateStatisticRequest)[]
 }
 
-function parseCreateContacts(
-  contacts: CreateStatisticRequest['contacts'],
-  status: CreatableStatisticStatus
-): string[] | undefined {
-  if (status !== 'A') return undefined
-
-  if (!contacts?.length) {
-    throw { statregError: "Field 'contacts' must contain at least one contact." }
-  }
-
-  const principalNames = [...new Set(contacts.map((contact: Contact) => contact.principalName ?? ''))].filter(
-    (principalName): principalName is string => Boolean(principalName)
-  )
-
-  if (!principalNames.length) {
-    throw { statregError: "Field 'contacts' must contain principalName value of type string." }
-  }
-
-  return principalNames
-}
-
-function parseGetVariants(
-  variants: CreateStatisticRequest['variants'],
-  status: CreatableStatisticStatus
-): CreateStatisticRequest['variants'] | undefined {
-  if (status !== 'A') return undefined
-
-  if (!variants?.length) {
-    throw { statregError: "Field 'variants' must contain at least one variant." }
-  }
-
-  const frequency = [...new Set(variants.map((variant: Variant) => variant.frequency))].filter(
-    (variantFrequencyCode): variantFrequencyCode is Variant['frequency'] => Boolean(variantFrequencyCode)
-  )
-
-  if (!frequency.length) {
-    throw { statregError: "Field 'variants' must contain 'frequency'." }
-  }
-
-  return variants.map((variant) => ({
-    cancelled: !!variant.cancelled,
-    frequency: variant.frequency,
-    revision: variant.revision ?? { code: 'I' },
-    level_of_detail: variant.level_of_detail,
-  }))
-}
-
-function parseCreateStatisticInput(
+export function parseCreateStatisticInput(
   body: CreateStatisticRequest | undefined,
   status: CreatableStatisticStatus
 ): ValidatedCreateStatisticInput {
   const requiredFields = getRequiredCreateBodyFields(status)
-  const { division, name, name_en, first_released_at, main_language, comment, contacts, variants } =
-    ensureRequiredFieldsExists(body ?? {}, requiredFields)
+  const { division, name, name_en, first_released_at, main_language, comment } = ensureRequiredFieldsExists(
+    body ?? {},
+    requiredFields
+  )
 
   const safeName = sanitize(name)
   const safeNameEn = sanitize(name_en)
@@ -543,15 +473,12 @@ function parseCreateStatisticInput(
     ...(first_released_at ? { first_released_at: parseDateOnly(first_released_at, 'first_released_at') } : {}),
     main_language: language,
     comment: safeComment,
-    ...(contacts ? { contacts: parseCreateContacts(contacts, status) } : {}),
-    ...(variants ? { variants: parseGetVariants(variants, status) } : {}),
   }
 }
 
-export function parseStatisticInput(
+export function parseUpdateStatisticInput(
   body: StatisticCreate | StatisticUpdate | undefined,
-  requiredFields: (keyof StatisticCreate)[] | (keyof StatisticUpdate)[],
-  type: 'create' | 'update' = 'create'
+  requiredFields: (keyof StatisticCreate)[] | (keyof StatisticUpdate)[]
 ): ValidatedStatisticInput {
   const {
     division,
@@ -588,27 +515,23 @@ export function parseStatisticInput(
     comment: safeComment,
   }
 
-  if (type === 'update') {
-    if (typeof yearly_reporting !== 'boolean') {
-      throw { statregError: "Field 'yearly_reporting' must be a boolean." }
-    }
-
-    if (!safeComment) {
-      throw { statregError: "Field 'comment' must be a non-empty string." }
-    }
-
-    return {
-      ...validatedInput,
-      statistic_region_levels,
-      status: parseStatusCode(status?.code),
-      previous_topic_codes: sanitize(previous_topic_codes!),
-      yearly_reporting: Boolean(yearly_reporting),
-      relation: parseRelation(relation),
-      comment: safeComment,
-    }
+  if (typeof yearly_reporting !== 'boolean') {
+    throw { statregError: "Field 'yearly_reporting' must be a boolean." }
   }
 
-  return validatedInput
+  if (!safeComment) {
+    throw { statregError: "Field 'comment' must be a non-empty string." }
+  }
+
+  return {
+    ...validatedInput,
+    statistic_region_levels,
+    status: parseStatusCode(status?.code),
+    previous_topic_codes: sanitize(previous_topic_codes!),
+    yearly_reporting: Boolean(yearly_reporting),
+    relation: parseRelation(relation),
+    comment: safeComment,
+  }
 }
 
 export function parseDivision(division?: string | null) {
