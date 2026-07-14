@@ -271,7 +271,7 @@ components:
       allOf:
         - $ref: '#/components/schemas/Statistic_create_base'
         - type: object
-          required: [division, name, shortname]
+          required: [division, name]
           properties:
             status:
               type: object
@@ -285,7 +285,7 @@ components:
       allOf:
         - $ref: '#/components/schemas/Statistic_create_base'
         - type: object
-          required: [division, name, name_en, main_language, contacts, variants, shortname, status]
+          required: [division, name, name_en, main_language, contacts, variants, status]
           properties:
             status:
               type: object

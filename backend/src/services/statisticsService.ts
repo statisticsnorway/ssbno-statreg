@@ -1,6 +1,5 @@
 import {
   type CreatableStatisticStatus,
-  type CreateStatisticField,
   type StatisticDetails,
   type StatisticUpdate,
   type StatisticCreate,
@@ -430,20 +429,11 @@ export function parseCreateStatisticStatus(body?: CreateStatisticRequest): Creat
   }
 }
 
-// TODO: MIM-2674: Add tests
-export function getRequiredCreateBodyFields(status: CreatableStatisticStatus): (keyof CreateStatisticRequest)[] {
-  const requiredFields = getRequiredStatisticFields(status).filter(
-    (field: CreateStatisticField) => field !== 'shortname'
-  )
-
-  return requiredFields as (keyof CreateStatisticRequest)[]
-}
-
 export function parseCreateStatisticInput(
   body: CreateStatisticRequest | undefined,
   status: CreatableStatisticStatus
 ): ValidatedCreateStatisticInput {
-  const requiredFields = getRequiredCreateBodyFields(status)
+  const requiredFields = getRequiredStatisticFields(status)
   const { division, name, name_en, first_released_at, main_language, comment } = ensureRequiredFieldsExists(
     body ?? {},
     requiredFields
