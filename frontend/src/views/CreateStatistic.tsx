@@ -31,7 +31,7 @@ export default function CreateStatistic() {
   if (!auth?.isAdmin) return <ErrorPage type={ErrorType.NOTAUTH} />
 
   return (
-    <>
+    <div className='create-statistic-container'>
       {createdShortname && (
         <Alert data-color='success'>
           <Heading level={2} data-size='xs'>
@@ -43,6 +43,7 @@ export default function CreateStatistic() {
           </Paragraph>
         </Alert>
       )}
+
       {openCreateShortnameModal && (
         <CreateShortnameModal
           openCreateShortnameModal={openCreateShortnameModal}
@@ -50,9 +51,11 @@ export default function CreateStatistic() {
           setCreatedShortname={setCreatedShortname}
         />
       )}
-      <Heading level={1} data-size='md'>
+
+      <Heading level={1} data-size='md' className='create-statistic-heading'>
         Opprett statistikk
       </Heading>
+
       <form className='create-statistic-form'>
         <Field>
           <div className='create-statistic-form-status-label'>
@@ -135,6 +138,6 @@ export default function CreateStatistic() {
           <Button variant='tertiary'>Avbryt</Button>
         </div>
       </form>
-    </>
+    </div>
   )
 }
