@@ -1,11 +1,13 @@
 import {
   type Contact,
+  type CreatableStatisticStatus,
   type StatisticDetails,
   type StatisticUpdate,
   type StatisticCreate,
   ApprovalStatus,
   StatisticStatus,
   StatisticListingResponse,
+  getRequiredStatisticFields,
 } from '@ssbno-statreg/shared'
 import { dateToISOString, sanitize, parseDateOnly, ensureRequiredFieldsExists, isNumber, parseId } from '@/lib/utils'
 import type { Prisma } from '@/generated/prisma/client'
@@ -15,6 +17,35 @@ import { statisticsAsserts } from '@/lib/asserts'
 import { getAllUsersFromCache } from '@/lib/cache'
 
 export type StatisticPrisma = Pick<PrismaClient, 'statistic' | 'shortname' | 'responsiblePerson'>
+
+type StatisticStatusCode = keyof typeof StatisticStatus
+
+type ValidatedCreateStatisticInput = {
+  division: string
+  name: string
+  name_en?: string
+  first_released_at?: Date
+  main_language: string
+  comment: string
+  contacts?: StatisticCreate['contacts']
+  variants?: StatisticCreate['variants']
+}
+
+type ValidatedStatisticInput = {
+  division: string | null | undefined
+  statistic_region_levels?: {
+    code?: string | undefined
+  }[]
+  status?: string
+  name: string
+  name_en: string
+  previous_topic_codes?: string
+  yearly_reporting?: boolean
+  first_released_at: Date
+  main_language: string
+  comment: string
+  relation?: number | null
+}
 
 // Statistic listing
 
@@ -134,7 +165,7 @@ export async function getStatistics(
         shortname: statistic.shortname.name,
         main_language,
         status: {
-          code: statistic.status,
+          code: parseStatusCode(statistic.status),
         },
         division: {
           name: getDivisionFromCode(Number(divisionCode))?.name,
@@ -217,7 +248,7 @@ export async function mapStatisticDetails(statistic: StatisticPrismaResult): Pro
     first_released_at: dateToISOString(statistic.first_release),
     yearly_reporting: statistic.yearly_reporting,
     status: {
-      code: statistic.status,
+      code: parseStatusCode(statistic.status),
     },
     previous_topic_codes: statistic.legacy_topic_codes,
     relation,
@@ -291,7 +322,7 @@ export async function updateStatistic(
     first_released_at,
     main_language,
     comment,
-  } = parseStatisticInput(body, requiredFields, 'update')
+  } = parseUpdateStatisticInput(body, requiredFields)
 
   const regionLevelsToRemove = existingStatistic.statistic_region_levels.filter(
     (existingRegLvl) =>
@@ -396,24 +427,24 @@ export async function createStatistic(
   await statisticsAsserts.assertShortnameExists(safeShortname, prisma)
   await statisticsAsserts.assertShortnameExistsAndIsAvailable(safeShortname, prisma)
 
-  const requiredFields: (keyof StatisticCreate)[] = ['division', 'name', 'name_en', 'first_released_at']
-  const { division, name, name_en, first_released_at, main_language, comment } = parseStatisticInput(
+  const createStatisticStatus = parseCreateStatisticStatus(body)
+  const { division, name, name_en, first_released_at, main_language, comment } = parseCreateStatisticInput(
     body,
-    requiredFields
+    createStatisticStatus
   )
 
   const result = await prisma.statistic.create({
     data: {
       name,
-      name_en,
+      ...(name_en ? { name_en } : {}),
       priority: 1,
       yearly_reporting: false,
-      status: 'K',
+      status: createStatisticStatus,
       desk_appoval_status: ApprovalStatus.ACCEPTED,
       language: main_language,
       date_created: now,
       last_updated: now,
-      first_release: first_released_at,
+      ...(first_released_at ? { first_release: first_released_at } : {}),
       comment: comment || `Create statistic with shortname: ${shortname}`,
       division_code: division,
       shortname: {
@@ -427,26 +458,57 @@ export async function createStatistic(
   return await mapStatisticDetails(result)
 }
 
-type ValidatedStatisticInput = {
-  division: string | null | undefined
-  statistic_region_levels?: {
-    code?: string | undefined
-  }[]
-  status?: string
-  name: string
-  name_en: string
-  previous_topic_codes?: string
-  yearly_reporting?: boolean
-  first_released_at: Date
-  main_language: string
-  comment: string
-  relation?: number | null
+// TODO: MIM-2674: Add tests
+export function parseCreateStatisticStatus(body?: StatisticCreate): CreatableStatisticStatus {
+  const statusCode = body?.status?.code
+
+  if (statusCode === 'K' || statusCode === 'A') {
+    return statusCode
+  } else {
+    throw { statregError: "Field 'status' must be one of these: K, A." }
+  }
 }
 
-export function parseStatisticInput(
-  body: StatisticCreate | StatisticUpdate | undefined,
-  requiredFields: (keyof StatisticCreate)[] | (keyof StatisticUpdate)[],
-  type: 'create' | 'update' = 'create'
+export function parseCreateStatisticInput(
+  body: StatisticCreate | undefined,
+  status: CreatableStatisticStatus
+): ValidatedCreateStatisticInput {
+  const requiredFields = getRequiredStatisticFields(status)
+  const { division, name, name_en, first_released_at, main_language, comment } = ensureRequiredFieldsExists(
+    body ?? {},
+    requiredFields
+  )
+
+  const safeName = sanitize(name)
+  const safeNameEn = sanitize(name_en)
+  const safeComment = sanitize(comment)
+  const language = main_language ?? 'nb'
+
+  if (!safeName) {
+    throw { statregError: "Field 'name' must be a non-empty string." }
+  }
+
+  if (status === 'A' && !safeNameEn) {
+    throw { statregError: "Field 'name_en' must be a non-empty string." }
+  }
+
+  if (language !== 'nb' && language !== 'nn') {
+    throw { statregError: "Field 'main_language' must be either 'nb' or 'nn'." }
+  }
+
+  return {
+    division: parseDivision(division),
+    name: safeName,
+    ...(safeNameEn ? { name_en: safeNameEn } : {}),
+    ...(first_released_at ? { first_released_at: parseDateOnly(first_released_at, 'first_released_at') } : {}),
+    main_language: language,
+    comment: safeComment,
+  }
+}
+
+export function parseUpdateStatisticInput(
+  body: StatisticUpdate | undefined,
+  requiredFields: (keyof StatisticUpdate)[]
 ): ValidatedStatisticInput {
   const {
     division,
@@ -460,7 +522,7 @@ export function parseStatisticInput(
     main_language,
     comment,
     relation,
-  } = ensureRequiredFieldsExists(body as StatisticUpdate, requiredFields as (keyof StatisticUpdate)[])
+  } = ensureRequiredFieldsExists(body, requiredFields)
 
   const safeName = sanitize(name)
   const safeNameEn = sanitize(name_en)
@@ -483,27 +545,23 @@ export function parseStatisticInput(
     comment: safeComment,
   }
 
-  if (type === 'update') {
-    if (typeof yearly_reporting !== 'boolean') {
-      throw { statregError: "Field 'yearly_reporting' must be a boolean." }
-    }
-
-    if (!safeComment) {
-      throw { statregError: "Field 'comment' must be a non-empty string." }
-    }
-
-    return {
-      ...validatedInput,
-      statistic_region_levels,
-      status: parseStatusCode(status?.code),
-      previous_topic_codes: sanitize(previous_topic_codes!),
-      yearly_reporting: Boolean(yearly_reporting),
-      relation: parseRelation(relation),
-      comment: safeComment,
-    }
+  if (typeof yearly_reporting !== 'boolean') {
+    throw { statregError: "Field 'yearly_reporting' must be a boolean." }
   }
 
-  return validatedInput
+  if (!safeComment) {
+    throw { statregError: "Field 'comment' must be a non-empty string." }
+  }
+
+  return {
+    ...validatedInput,
+    statistic_region_levels,
+    status: parseStatusCode(status?.code),
+    previous_topic_codes: sanitize(previous_topic_codes!),
+    yearly_reporting: Boolean(yearly_reporting),
+    relation: parseRelation(relation),
+    comment: safeComment,
+  }
 }
 
 export function parseDivision(division?: string | null) {
@@ -518,11 +576,11 @@ export function parseDivision(division?: string | null) {
   return division.toString()
 }
 
-export function parseStatusCode(statusCode?: string): string {
+export function parseStatusCode(statusCode?: string): StatisticStatusCode {
   if (!statusCode || !Object.keys(StatisticStatus).includes(statusCode)) {
     throw { statregError: `Field 'status' must be one of these: ${Object.keys(StatisticStatus).join(', ')}.` }
   }
-  return statusCode
+  return statusCode as StatisticStatusCode
 }
 
 export function parseRelation(relationId?: string | null): number | null {

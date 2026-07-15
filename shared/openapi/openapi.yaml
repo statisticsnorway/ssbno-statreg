@@ -89,7 +89,8 @@ components:
         application/json:
           schema:
             type: array
-            items: { $ref: '#/components/schemas/Blocked_release_date' }
+            items: 
+              $ref: '#/components/schemas/Blocked_release_date'
 
   schemas:
     Error:
@@ -251,12 +252,12 @@ components:
         status:
           type: object
           properties:
-            code: { type: string }
+            code: { type: string, description: "Is one of K (Kommende), A (Aktiv), IA (Ikke-aktiv), UT (Opphørt), SA (Sammenslått) or SP (Splittet)" }
         name: { type: string }
         name_en: { type: string }
         approval_status: { type: string, description: " Is one of 'GODKJENT', 'AVVIST' or 'FORSLAG'" }
 
-    Statistic_create:
+    Statistic_create_base:
       allOf:
         - $ref: '#/components/schemas/Statistic'
       type: object
@@ -266,13 +267,57 @@ components:
         yearly_reporting: { type: boolean }
         statistic_region_levels:
           type: array
-          items: { $ref: '#/components/schemas/Region_level' }
+          items:
+            $ref: '#/components/schemas/Region_level'
         previous_topic_codes: { type: string, nullable: true }
         comment: { type: string }
+        variants:
+          type: array
+          items:
+            $ref: '#/components/schemas/Variant'
+        contacts:
+          type: array
+          items:
+            type: object
+            properties:
+              principalName: { type: string }
+
+    Statistic_create_upcoming:
+      allOf:
+        - $ref: '#/components/schemas/Statistic_create_base'
+        - type: object
+          required: [division, name]
+          properties:
+            status:
+              type: object
+              required: [code]
+              properties:
+                code:
+                  description: 'Must be "K" for creation of upcoming statistics'
+                  type: string
+
+    Statistic_create_active:
+      allOf:
+        - $ref: '#/components/schemas/Statistic_create_base'
+        - type: object
+          required: [division, name, name_en, main_language, contacts, variants, status]
+          properties:
+            status:
+              type: object
+              required: [code]
+              properties:
+                code:
+                  description: 'Must be "A" for creation of active statistics'
+                  type: string
+
+    Statistic_create:
+      oneOf:
+        - $ref: '#/components/schemas/Statistic_create_upcoming'
+        - $ref: '#/components/schemas/Statistic_create_active'
 
     Statistic_update:
       allOf:
-        - $ref: '#/components/schemas/Statistic_create'
+        - $ref: '#/components/schemas/Statistic_create_base'
       type: object
       properties:
         relation: { type: string, nullable: true }
@@ -302,7 +347,8 @@ components:
         created_at: { type: string, format: date-time, readOnly: true }
         variants:
           type: array
-          items: { $ref: '#/components/schemas/Variant' }
+          items: 
+            $ref: '#/components/schemas/Variant'
         contacts:
           type: array
           items:
@@ -355,7 +401,8 @@ paths:
             application/json:
               schema:
                 type: array
-                items: { $ref: '#/components/schemas/Contact' }
+                items: 
+                  $ref: '#/components/schemas/Contact'
         default:
           $ref: '#/components/responses/Error'
   /shortnames:
@@ -421,7 +468,8 @@ paths:
                     type: integer
                   statistics:
                     type: array
-                    items: { $ref: '#/components/schemas/Statistic_listing' }
+                    items: 
+                      $ref: '#/components/schemas/Statistic_listing'
         default:
           $ref: '#/components/responses/Error'
 
@@ -558,7 +606,8 @@ paths:
                     type: integer
                   releases:
                     type: array
-                    items: { $ref: '#/components/schemas/Release_listing' }
+                    items:
+                      $ref: '#/components/schemas/Release_listing'
         default:
           $ref: '#/components/responses/Error'
     post:
@@ -672,7 +721,8 @@ paths:
                     type: integer
                   releases:
                     type: array
-                    items: { $ref: '#/components/schemas/Release_listing' }
+                    items: 
+                      $ref: '#/components/schemas/Release_listing'
         default:
           $ref: '#/components/responses/Error'
 
