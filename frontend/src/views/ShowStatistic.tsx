@@ -7,6 +7,7 @@ import { VariantCard } from '../components/VariantCard'
 import client from '../api'
 import {
   StatisticStatus,
+  type Contact,
   type RegionLevel,
   type ReleaseListing,
   type StatisticDetails,
@@ -18,6 +19,7 @@ import { formatContacts, formatPublishTime, formatRevisionName, formatVariant } 
 import { ApprovalStatusBadge } from '../components/ApprovalStatus'
 import { useAuth } from '../context/AuthContext'
 import { ErrorAlert } from '../components/ErrorAlert'
+import { ContactSelection } from '../components/ContactSelection'
 
 type ReleaseRowProps = {
   release: ReleaseListing
@@ -96,6 +98,8 @@ function SimpleReleaseRow({ release }: ReleaseRowProps) {
 export default function ShowStatistic() {
   const [statistic, setStatistic] = useState<StatisticDetails>({})
   const [releases, setReleases] = useState<ReleaseListing[]>([])
+  const [allContacts, setAllContacts] = useState<Contact[]>([])
+  const [selectedContacts, setSelectedContacts] = useState<Contact[]>([])
   const { shortname } = useParams()
   const { auth } = useAuth()
   const [apiError, setApiError] = useState<string[]>([])
@@ -129,6 +133,24 @@ export default function ShowStatistic() {
     fetchStatistic()
     if (shortname) fetchReleases(shortname)
   }, [shortname])
+
+  useEffect(() => {
+    async function fetchContacts() {
+      const { data, error } = await client.GET('/contacts')
+
+      if (error) {
+        setApiError((prev) => [...prev, error.message])
+        return
+      }
+
+      setAllContacts(data ?? [])
+    }
+    fetchContacts()
+  }, [])
+
+  useEffect(() => {
+    setSelectedContacts(statistic.contacts ?? [])
+  }, [statistic.contacts])
 
   const statusCode = statistic.status?.code as keyof typeof StatisticStatus
   const englishName = statistic.name_en ?? '-'
@@ -225,6 +247,12 @@ export default function ShowStatistic() {
             <PersonPencilIcon /> Rediger kontakt
           </Button>
         )}
+        <ContactSelection
+          contacts={allContacts}
+          label='Velg kontakter'
+          selected={selectedContacts}
+          onChange={setSelectedContacts}
+        />
       </div>
 
       <div>
