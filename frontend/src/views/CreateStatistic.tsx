@@ -126,7 +126,7 @@ export default function CreateStatistic() {
         />
       )}
 
-      {!openCreateShortnameModal && (
+      {createdShortname && (
         <div className='create-statistic-container'>
           {createdShortname && (
             <Alert data-color='success'>
@@ -181,7 +181,7 @@ export default function CreateStatistic() {
             <Field>
               <Label>Kortnavn</Label>
               <Field.Description>Kortnavnet kan ikke endres etter statistikken har blitt opprettet.</Field.Description>
-              <Input readOnly value={createdShortname?.shortname} />
+              <Input readOnly value={createdShortname.shortname} />
             </Field>
             <Field>
               <Label>{getFieldLabel('Norsk statistikknavn', 'name')}</Label>
