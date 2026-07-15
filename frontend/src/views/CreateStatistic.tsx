@@ -128,22 +128,19 @@ export default function CreateStatistic() {
 
       {createdShortname && (
         <div className='create-statistic-container'>
-          {createdShortname && (
-            <Alert data-color='success'>
-              <Heading level={2} data-size='xs'>
-                Kortnavnet er nå registrert i systemet
-              </Heading>
-              <Paragraph>
-                Fyll ut resten av informasjonen. Alle obligatoriske felter må fylles ut før du kan opprette den endelige
-                statistikken.
-              </Paragraph>
-            </Alert>
-          )}
-
+          <Alert data-color='success'>
+            <Heading level={2} data-size='xs'>
+              Kortnavnet er nå registrert i systemet
+            </Heading>
+            <Paragraph>
+              Fyll ut resten av informasjonen. Alle obligatoriske felter må fylles ut før du kan opprette den endelige
+              statistikken.
+            </Paragraph>
+          </Alert>
+          )
           <Heading level={1} data-size='md' className='create-statistic-heading'>
             Opprett statistikk
           </Heading>
-
           <form className='create-statistic-form' onSubmit={handleSubmit}>
             <Field>
               <div className='create-statistic-form-status-label'>
