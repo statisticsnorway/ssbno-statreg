@@ -23,6 +23,10 @@ import type { Shortname } from '@ssbno-statreg/shared'
 import ErrorPage, { ErrorType } from './ErrorPage'
 import { CreateShortnameModal } from '../components/CreateShortnameModal'
 
+function formatFirstReleasedAt(year: string): string {
+  return `${year}-12-31`
+}
+
 export default function CreateStatistic() {
   const [openCreateShortnameModal, setOpenCreateShortnameModal] = useState(true)
   const [createdShortname, setCreatedShortname] = useState<Shortname | null>(null)
@@ -32,7 +36,7 @@ export default function CreateStatistic() {
     value: [],
   })
 
-  const [values, setValues] = useState({
+  const defaultValues = {
     status: 'K',
     name: '',
     name_en: '',
@@ -40,7 +44,9 @@ export default function CreateStatistic() {
     main_language: '',
     first_released_at: '',
     comment: '',
-  })
+  }
+
+  const [values, setValues] = useState(defaultValues)
 
   const regionLevelCheckboxes = [
     {
@@ -67,10 +73,12 @@ export default function CreateStatistic() {
 
   const { auth } = useAuth()
 
+  // TODO: Validate form onBlur and onSubmit
+
   function handleSubmit(e: React.ChangeEvent<HTMLFormElement>) {
     e.preventDefault()
 
-    console.log(values)
+    console.log({ ...values, first_released_at: formatFirstReleasedAt(values.first_released_at) })
   }
 
   if (!auth?.isAdmin) return <ErrorPage type={ErrorType.NOTAUTH} />
@@ -200,7 +208,10 @@ export default function CreateStatistic() {
             </Field>
             <div className='create-statistic-form-buttons'>
               <Button type='submit'>Opprett</Button>
-              <Button variant='tertiary'>Avbryt</Button>
+              {/* TODO: Double check the flow/behavior for "Avbryt" button. Set to form clear for now */}
+              <Button variant='tertiary' onClick={() => setValues(defaultValues)}>
+                Avbryt
+              </Button>
             </div>
           </form>
         </div>
