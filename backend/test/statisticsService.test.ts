@@ -7,6 +7,7 @@ import {
   getStatisticByShortname,
   parseStatisticVariants,
   mapStatisticDetails,
+  parseCreateStatisticStatus,
   parseCreateStatisticInput,
   parseUpdateStatisticInput,
   updateStatistic,
@@ -731,6 +732,22 @@ describe('statisticService', () => {
       expect(result).toStrictEqual(expectedResult)
     })
 
+    test('returns validated statistic input for approved status when english name is provided', () => {
+      input.status = { code: 'A' }
+      input.name_en = 'Health and health services'
+      input.main_language = 'nn'
+      input.variants = []
+      input.contacts = []
+
+      const result = parseCreateStatisticInput(input, 'A')
+
+      expect(result).toStrictEqual({
+        ...expectedResult,
+        name_en: 'Health and health services',
+        main_language: 'nn',
+      })
+    })
+
     test('throws error when name is an empty string', () => {
       input.name = ''
 
@@ -771,6 +788,40 @@ describe('statisticService', () => {
       const result = parseCreateStatisticInput(input, 'K')
 
       expect(result).toStrictEqual(expectedResult)
+    })
+
+    test('throws error when approved status has empty english name', () => {
+      input.status = { code: 'A' }
+      input.main_language = 'nb'
+      input.name_en = ''
+      input.variants = []
+      input.contacts = []
+
+      expect(() => parseCreateStatisticInput(input, 'A')).toThrow({
+        statregError: "Field 'name_en' must be a non-empty string.",
+      })
+    })
+
+    describe('parseCreateStatisticStatus', () => {
+      test('returns K when status code is K', () => {
+        expect(parseCreateStatisticStatus({ status: { code: 'K' } } as any)).toBe('K')
+      })
+
+      test('returns A when status code is A', () => {
+        expect(parseCreateStatisticStatus({ status: { code: 'A' } } as any)).toBe('A')
+      })
+
+      test('throws when status code is missing', () => {
+        expect(() => parseCreateStatisticStatus(undefined)).toThrow({
+          statregError: "Field 'status' must be one of these: K, A.",
+        })
+      })
+
+      test('throws when status code is not creatable', () => {
+        expect(() => parseCreateStatisticStatus({ status: { code: 'IA' } } as any)).toThrow({
+          statregError: "Field 'status' must be one of these: K, A.",
+        })
+      })
     })
 
     describe('parseUpdateStatisticInput', async () => {
