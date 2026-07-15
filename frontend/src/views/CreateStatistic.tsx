@@ -99,24 +99,19 @@ export default function CreateStatistic() {
         </span>
       )
     }
-
     return label
   }
 
-  function validateField(): boolean {
+  function validFields(): boolean {
     return true
-  }
-
-  function formatFirstReleasedAt(year: string): string {
-    return `${year}-12-31`
   }
 
   function handleSubmit(e: React.ChangeEvent<HTMLFormElement>) {
     e.preventDefault()
 
-    if (!validateField()) return
+    if (!validFields()) return
 
-    console.log({ ...values, first_released_at: formatFirstReleasedAt(values.first_released_at) })
+    console.log({ ...values, first_released_at: `${values.first_released_at}-12-31` })
   }
 
   if (!auth?.isAdmin) return <ErrorPage type={ErrorType.NOTAUTH} />
