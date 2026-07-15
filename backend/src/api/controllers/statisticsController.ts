@@ -56,7 +56,7 @@ export default function statisticsController(router: Router) {
     }
   })
 
-  router.put('/statistics/:shortname/contacts', requireAdminAuthorization(), async (req, res) => {
+  router.put('/statistics/:shortname/contacts', async (req, res) => {
     try {
       const input = req.body.principalNames
       if (!Array.isArray(input) || !input.every((item) => typeof item === 'string')) {
