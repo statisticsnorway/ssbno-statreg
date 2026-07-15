@@ -14,17 +14,29 @@ import {
   Input,
   Button,
   useCheckboxGroup,
+  Tag,
 } from '@digdir/designsystemet-react'
 import { QuestionmarkCircleIcon } from '@navikt/aksel-icons'
 
 import './CreateStatistic.css'
 
-import type { Shortname } from '@ssbno-statreg/shared'
+import {
+  isCreateStatisticFieldRequired,
+  type CreateStatisticField,
+  type CreatableStatisticStatus,
+  type Shortname,
+} from '@ssbno-statreg/shared'
 import ErrorPage, { ErrorType } from './ErrorPage'
 import { CreateShortnameModal } from '../components/CreateShortnameModal'
 
-function formatFirstReleasedAt(year: string): string {
-  return `${year}-12-31`
+type StatisticFormValues = {
+  status: CreatableStatisticStatus
+  name: string
+  name_en: string
+  division: string
+  main_language: string
+  first_released_at: string
+  comment: string
 }
 
 export default function CreateStatistic() {
@@ -36,7 +48,7 @@ export default function CreateStatistic() {
     value: [],
   })
 
-  const defaultValues = {
+  const defaultValues: StatisticFormValues = {
     status: 'K',
     name: '',
     name_en: '',
@@ -73,10 +85,36 @@ export default function CreateStatistic() {
 
   const { auth } = useAuth()
 
-  // TODO: Validate form onBlur and onSubmit
+  const status = values.status
+
+  function isRequired(field: CreateStatisticField) {
+    return isCreateStatisticFieldRequired(status, field)
+  }
+
+  function getFieldLabel(label: string, field: CreateStatisticField) {
+    if (isRequired(field)) {
+      return (
+        <span>
+          {label} <Tag data-color='warning'>Må fylles ut</Tag>
+        </span>
+      )
+    }
+
+    return label
+  }
+
+  function validateField(): boolean {
+    return true
+  }
+
+  function formatFirstReleasedAt(year: string): string {
+    return `${year}-12-31`
+  }
 
   function handleSubmit(e: React.ChangeEvent<HTMLFormElement>) {
     e.preventDefault()
+
+    if (!validateField()) return
 
     console.log({ ...values, first_released_at: formatFirstReleasedAt(values.first_released_at) })
   }
@@ -136,7 +174,10 @@ export default function CreateStatistic() {
                 Statistikker som er nyopprettet får status «Kommende». For å sette den til «Aktiv» må du i tillegg fylle
                 ut: Engelsk navn, varianter og målform.
               </Field.Description>
-              <Select defaultValue='K' onChange={(e) => setValues({ ...values, status: e.target.value })}>
+              <Select
+                value={values.status}
+                onChange={(e) => setValues({ ...values, status: e.target.value as CreatableStatisticStatus })}
+              >
                 <Select.Option value='K'>Kommende</Select.Option>
               </Select>
             </Field>
@@ -148,28 +189,22 @@ export default function CreateStatistic() {
               <Input readOnly value={createdShortname?.shortname} />
             </Field>
             <Field>
-              <Label>Norsk statistikknavn</Label>
-              <Input
-                value={values.name}
-                onChange={(e) => {
-                  setValues((values) => ({ ...values, name: e.target.value }))
-                }}
-              />
+              <Label>{getFieldLabel('Norsk statistikknavn', 'name')}</Label>
+              <Input value={values.name} onChange={(e) => setValues({ ...values, name: e.target.value })} />
             </Field>
             <Field>
-              <Label>Engelsk statistikknavn</Label>
+              <Label>{getFieldLabel('Engelsk statistikknavn', 'name_en')}</Label>
               <Input
+                required={isRequired('name_en')}
                 value={values.name_en}
-                onChange={(e) => {
-                  setValues((values) => ({ ...values, name_en: e.target.value }))
-                }}
+                onChange={(e) => setValues({ ...values, name_en: e.target.value })}
               />
             </Field>
             <Divider />
             <Heading level={2}>Detaljer</Heading>
             <Field>
-              <Label>Seksjon</Label>
-              <Select defaultValue='' onChange={(e) => setValues({ ...values, division: e.target.value })}>
+              <Label>{getFieldLabel('Seksjon', 'division')}</Label>
+              <Select value={values.division} onChange={(e) => setValues({ ...values, division: e.target.value })}>
                 <Select.Option value='' disabled />
                 <Select.Option value='123'>Seksjon for ...</Select.Option>
               </Select>
@@ -185,8 +220,11 @@ export default function CreateStatistic() {
               ))}
             </Fieldset>
             <Field>
-              <Label>Målform</Label>
-              <Select defaultValue='' onChange={(e) => setValues({ ...values, main_language: e.target.value })}>
+              <Label>{getFieldLabel('Målform', 'main_language')}</Label>
+              <Select
+                value={values.main_language}
+                onChange={(e) => setValues({ ...values, main_language: e.target.value })}
+              >
                 <Select.Option value='' disabled />
                 <Select.Option value='nb'>Bokmål</Select.Option>
                 <Select.Option value='nn'>Nynorsk</Select.Option>
@@ -209,7 +247,13 @@ export default function CreateStatistic() {
             <div className='create-statistic-form-buttons'>
               <Button type='submit'>Opprett</Button>
               {/* TODO: Double check the flow/behavior for "Avbryt" button. Set to form clear for now */}
-              <Button variant='tertiary' onClick={() => setValues(defaultValues)}>
+              <Button
+                type='button'
+                variant='tertiary'
+                onClick={() => {
+                  setValues(defaultValues)
+                }}
+              >
                 Avbryt
               </Button>
             </div>
