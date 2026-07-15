@@ -13,6 +13,7 @@ import {
   Select,
   Input,
   Button,
+  useCheckboxGroup,
 } from '@digdir/designsystemet-react'
 import { QuestionmarkCircleIcon } from '@navikt/aksel-icons'
 
@@ -26,7 +27,51 @@ export default function CreateStatistic() {
   const [openCreateShortnameModal, setOpenCreateShortnameModal] = useState(true)
   const [createdShortname, setCreatedShortname] = useState<Shortname | null>(null)
 
+  const { getCheckboxProps } = useCheckboxGroup({
+    name: 'region-level-checkbox',
+    value: [],
+  })
+
+  const [values, setValues] = useState({
+    status: 'K',
+    name: '',
+    name_en: '',
+    division: '',
+    main_language: '',
+    first_released_at: '',
+    comment: '',
+  })
+
+  const regionLevelCheckboxes = [
+    {
+      name: 'Bydel og krets',
+      code: 'BD',
+    },
+    {
+      name: 'Kommune',
+      code: 'K',
+    },
+    {
+      name: 'Fylke',
+      code: 'F',
+    },
+    {
+      name: 'Landsdel',
+      code: 'LD',
+    },
+    {
+      name: 'Land',
+      code: 'L',
+    },
+  ]
+
   const { auth } = useAuth()
+
+  function handleSubmit(e: React.ChangeEvent<HTMLFormElement>) {
+    e.preventDefault()
+
+    console.log(values)
+  }
 
   if (!auth?.isAdmin) return <ErrorPage type={ErrorType.NOTAUTH} />
 
@@ -57,7 +102,7 @@ export default function CreateStatistic() {
           Opprett statistikk
         </Heading>
 
-        <form className='create-statistic-form'>
+        <form className='create-statistic-form' onSubmit={handleSubmit}>
           <Field>
             <div className='create-statistic-form-status-label'>
               <Label data-size='lg'>Status</Label>
@@ -82,7 +127,7 @@ export default function CreateStatistic() {
               Statistikker som er nyopprettet får status «Kommende». For å sette den til «Aktiv» må du i tillegg fylle
               ut: Engelsk navn, varianter og målform.
             </Field.Description>
-            <Select defaultValue='K'>
+            <Select defaultValue='K' onChange={(e) => setValues({ ...values, status: e.target.value })}>
               <Select.Option value='K'>Kommende</Select.Option>
             </Select>
           </Field>
@@ -95,31 +140,45 @@ export default function CreateStatistic() {
           </Field>
           <Field>
             <Label>Norsk statistikknavn</Label>
-            <Input />
+            <Input
+              value={values.name}
+              onChange={(e) => {
+                setValues((values) => ({ ...values, name: e.target.value }))
+              }}
+            />
           </Field>
           <Field>
             <Label>Engelsk statistikknavn</Label>
-            <Input />
+            <Input
+              value={values.name_en}
+              onChange={(e) => {
+                setValues((values) => ({ ...values, name_en: e.target.value }))
+              }}
+            />
           </Field>
           <Divider />
           <Heading level={2}>Detaljer</Heading>
           <Field>
             <Label>Seksjon</Label>
-            <Select defaultValue=''>
+            <Select defaultValue='' onChange={(e) => setValues({ ...values, division: e.target.value })}>
+              <Select.Option value='' disabled />
               <Select.Option value='123'>Seksjon for ...</Select.Option>
             </Select>
           </Field>
           <Fieldset>
             <Fieldset.Legend>Regionale nivåer</Fieldset.Legend>
-            <Checkbox label='Bydel og krets' />
-            <Checkbox label='Kommune' />
-            <Checkbox label='Fylke' />
-            <Checkbox label='Landsdel' />
-            <Checkbox label='Land' />
+            {regionLevelCheckboxes.map((regionLevel) => (
+              <Checkbox
+                key={`region-level-checkbox-${regionLevel.code}`}
+                label={regionLevel.name}
+                {...getCheckboxProps(regionLevel.code)}
+              />
+            ))}
           </Fieldset>
           <Field>
             <Label>Målform</Label>
-            <Select defaultValue=''>
+            <Select defaultValue='' onChange={(e) => setValues({ ...values, main_language: e.target.value })}>
+              <Select.Option value='' disabled />
               <Select.Option value='nb'>Bokmål</Select.Option>
               <Select.Option value='nn'>Nynorsk</Select.Option>
             </Select>
@@ -127,13 +186,16 @@ export default function CreateStatistic() {
           <Field>
             <Label>Statistikkens startår</Label>
             <Field.Description>F.eks 1876</Field.Description>
-            <Input />
+            <Input
+              value={values.first_released_at}
+              onChange={(e) => setValues({ ...values, first_released_at: e.target.value })}
+            />
           </Field>
           <Divider />
           <Field>
             <Label>Kommentar (Valgfritt)</Label>
             <Field.Description>Annen relevant informasjon.</Field.Description>
-            <Input />
+            <Input value={values.comment} onChange={(e) => setValues({ ...values, comment: e.target.value })} />
           </Field>
           <div className='create-statistic-form-buttons'>
             <Button type='submit'>Opprett</Button>
