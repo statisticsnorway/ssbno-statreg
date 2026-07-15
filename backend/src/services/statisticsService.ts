@@ -1,4 +1,5 @@
 import {
+  type Contact,
   type CreatableStatisticStatus,
   type StatisticDetails,
   type StatisticUpdate,
@@ -15,7 +16,7 @@ import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
 import { statisticsAsserts } from '@/lib/asserts'
 import { getAllUsersFromCache } from '@/lib/cache'
 
-export type StatisticPrisma = Pick<PrismaClient, 'statistic' | 'shortname'>
+export type StatisticPrisma = Pick<PrismaClient, 'statistic' | 'shortname' | 'responsiblePerson'>
 
 type StatisticStatusCode = keyof typeof StatisticStatus
 
@@ -367,6 +368,52 @@ export async function updateStatistic(
   })
 
   return await mapStatisticDetails(updatedStatistic)
+}
+
+export async function updateContacts(
+  shortname: string,
+  newPrincipalNames: string[],
+  prisma: StatisticPrisma
+): Promise<Contact[]> {
+  const safeShortname = sanitize(shortname)
+
+  const existingStatistic = await prisma.statistic.findFirst({
+    where: { shortname: { name: safeShortname } },
+    select: { id: true },
+  })
+  if (!existingStatistic) {
+    return Promise.reject({ status: 404, statregError: `Shortname '${safeShortname}' not found` })
+  }
+
+  const users = await getAllUsersFromCache()
+
+  const uniquePrincipalNames = [...new Set(newPrincipalNames)]
+  const knownPrincipalNames = uniquePrincipalNames.filter((principalName) => users[principalName])
+
+  const newContacts = await Promise.all(
+    knownPrincipalNames.map((principalName) =>
+      prisma.responsiblePerson.upsert({
+        where: { principalName },
+        create: { principalName },
+        update: {},
+      })
+    )
+  )
+  const updatedStatistic = await prisma.statistic.update({
+    // https://docs.prisma.io/docs/orm/reference/prisma-client-reference#set
+    where: { id: existingStatistic.id },
+    data: {
+      responsiblePersons: {
+        set: newContacts.map((contact) => ({ id: contact.id })),
+      },
+    },
+    select: { responsiblePersons: { select: { principalName: true } } },
+  })
+
+  return updatedStatistic.responsiblePersons.map((person) => ({
+    name: users[person.principalName]?.displayName ?? '',
+    principalName: person.principalName,
+  }))
 }
 
 export async function createStatistic(
