@@ -1,4 +1,5 @@
-export * from './enums.js'
+export * from './enums'
+export * from './create-statistics'
 import type { components, paths } from './api-types'
 
 export type BlockedReleaseDate = components['schemas']['Blocked_release_date']
