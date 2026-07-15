@@ -3,8 +3,6 @@ import {
   type StatisticDetails,
   type StatisticUpdate,
   type StatisticCreate,
-  type Contact,
-  type Variant,
   ApprovalStatus,
   StatisticStatus,
   StatisticListingResponse,
@@ -19,11 +17,6 @@ import { getAllUsersFromCache } from '@/lib/cache'
 
 export type StatisticPrisma = Pick<PrismaClient, 'statistic' | 'shortname'>
 
-type CreateStatisticRequest = StatisticCreate & {
-  contacts?: Contact[]
-  variants?: Variant[]
-}
-
 type StatisticStatusCode = keyof typeof StatisticStatus
 
 type ValidatedCreateStatisticInput = {
@@ -33,8 +26,8 @@ type ValidatedCreateStatisticInput = {
   first_released_at?: Date
   main_language: string
   comment: string
-  contacts?: string[]
-  variants?: CreateStatisticRequest['variants']
+  contacts?: StatisticCreate['contacts']
+  variants?: StatisticCreate['variants']
 }
 
 type ValidatedStatisticInput = {
@@ -379,7 +372,7 @@ export async function updateStatistic(
 export async function createStatistic(
   prisma: StatisticPrisma,
   shortname: string,
-  body?: CreateStatisticRequest,
+  body?: StatisticCreate,
   now = new Date()
 ): Promise<StatisticDetails> {
   const safeShortname = sanitize(shortname)
@@ -419,7 +412,7 @@ export async function createStatistic(
 }
 
 // TODO: MIM-2674: Add tests
-export function parseCreateStatisticStatus(body?: CreateStatisticRequest): CreatableStatisticStatus {
+export function parseCreateStatisticStatus(body?: StatisticCreate): CreatableStatisticStatus {
   const statusCode = body?.status?.code
 
   if (statusCode === 'K' || statusCode === 'A') {
@@ -430,7 +423,7 @@ export function parseCreateStatisticStatus(body?: CreateStatisticRequest): Creat
 }
 
 export function parseCreateStatisticInput(
-  body: CreateStatisticRequest | undefined,
+  body: StatisticCreate | undefined,
   status: CreatableStatisticStatus
 ): ValidatedCreateStatisticInput {
   const requiredFields = getRequiredStatisticFields(status)
