@@ -455,6 +455,54 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/statistics/{shortname}/contacts': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /**
+     * Set contacts for a statistic
+     * @description Replaces the entire contact list for the statistic with the supplied principal names.
+     */
+    put: {
+      parameters: {
+        query?: never
+        header?: never
+        path: {
+          shortname: string
+        }
+        cookie?: never
+      }
+      requestBody: {
+        content: {
+          'application/json': {
+            /** @description List of principal names to set as contacts for the statistic. */
+            principalNames: string[]
+          }
+        }
+      }
+      responses: {
+        /** @description The updated list of contacts for the statistic. */
+        200: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            'application/json': components['schemas']['Contact'][]
+          }
+        }
+      }
+    }
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/releases': {
     parameters: {
       query?: never

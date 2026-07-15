@@ -10,6 +10,7 @@ import {
   parseCreateStatisticInput,
   parseUpdateStatisticInput,
   updateStatistic,
+  updateContacts,
   createStatistic,
   StatisticsDetailedIncludes,
   parseDivision,
@@ -83,6 +84,9 @@ describe('statisticService', () => {
       },
       shortname: {
         findUnique: vi.fn(() => Promise.resolve({ name: 'kpi', id: 1 })),
+      },
+      responsiblePerson: {
+        upsert: vi.fn(),
       },
     }
     statisticsAsserts.assertFilteredShortnamesExist = vi.fn(async () => true) as any
@@ -426,6 +430,78 @@ describe('statisticService', () => {
         status: 404,
         statregError: 'Shortname test not found',
       })
+      expect(prismaMock.statistic.update).toHaveBeenCalledTimes(0)
+    })
+  })
+
+  describe('updateContacts ', async () => {
+    beforeEach(() => {
+      prismaMock.statistic.findFirst.mockResolvedValue({ id: 1 })
+
+      getAllUsersFromCacheMock.mockImplementation(async () => ({
+        'abc@ssb.no': {
+          displayName: 'Alice',
+          userPrincipalName: 'abc@ssb.no',
+          mail: 'alice@ssb.no',
+          businessPhones: [],
+        },
+        'bcd@ssb.no': {
+          displayName: 'Bob',
+          userPrincipalName: 'bcd@ssb.no',
+          mail: 'bob@ssb.no',
+          businessPhones: ['11223344'],
+        },
+      }))
+
+      prismaMock.responsiblePerson.upsert.mockResolvedValueOnce({ id: 2 }).mockResolvedValueOnce({ id: 3 })
+
+      prismaMock.statistic.update.mockResolvedValue({
+        responsiblePersons: [{ principalName: 'abc@ssb.no' }, { principalName: 'bcd@ssb.no' }],
+      })
+    })
+
+    test('returns updated contacts when valid shortname and principal names are provided', async () => {
+      const result = await updateContacts('helse', ['abc@ssb.no', 'bcd@ssb.no'], prismaMock)
+
+      expect(prismaMock.statistic.findFirst).toHaveBeenCalledExactlyOnceWith({
+        where: { shortname: { name: 'helse' } },
+        select: { id: true },
+      })
+      expect(prismaMock.responsiblePerson.upsert).toHaveBeenCalledTimes(2)
+      expect(prismaMock.responsiblePerson.upsert).toHaveBeenNthCalledWith(1, {
+        where: { principalName: 'abc@ssb.no' },
+        create: { principalName: 'abc@ssb.no' },
+        update: {},
+      })
+      expect(prismaMock.responsiblePerson.upsert).toHaveBeenNthCalledWith(2, {
+        where: { principalName: 'bcd@ssb.no' },
+        create: { principalName: 'bcd@ssb.no' },
+        update: {},
+      })
+      expect(prismaMock.statistic.update).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({
+          where: { id: 1 },
+          data: {
+            responsiblePersons: {
+              set: [{ id: 2 }, { id: 3 }],
+            },
+          },
+        })
+      )
+      expect(result).toStrictEqual([
+        { name: 'Alice', principalName: 'abc@ssb.no' },
+        { name: 'Bob', principalName: 'bcd@ssb.no' },
+      ])
+    })
+
+    test('throws error when shortname is not found', async () => {
+      prismaMock.statistic.findFirst.mockResolvedValue(null)
+
+      await expect(() => updateContacts('helse', ['abc@ssb.no'], prismaMock)).rejects.toMatchObject({
+        status: 404,
+        statregError: "Shortname 'helse' not found",
+      })
+      expect(prismaMock.responsiblePerson.upsert).toHaveBeenCalledTimes(0)
       expect(prismaMock.statistic.update).toHaveBeenCalledTimes(0)
     })
   })
