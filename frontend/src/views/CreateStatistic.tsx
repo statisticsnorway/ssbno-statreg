@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router'
 import { useAuth } from '../context/AuthContext'
 import { useState } from 'react'
 import {
@@ -94,21 +95,10 @@ export default function CreateStatistic() {
   ]
 
   const { auth } = useAuth()
+  const navigate = useNavigate()
 
   function isRequired(field: CreateStatisticField) {
     return isCreateStatisticFieldRequired(values.status, field)
-  }
-
-  function getFieldLabel(label: string, field: CreateStatisticField) {
-    if (isRequired(field)) {
-      return (
-        <span>
-          {label} <Tag data-color='warning'>Må fylles ut</Tag>
-        </span>
-      )
-    }
-
-    return label
   }
 
   function validateField(field: CreateStatisticField, nextValues: StatisticFormValues): string {
@@ -158,7 +148,7 @@ export default function CreateStatistic() {
       body: {
         ...values,
         status: { code: values.status },
-        first_released_at: `${values.first_released_at}-12-31`,
+        first_released_at: values.first_released_at ? `${values.first_released_at}-12-31` : '',
         approval_status: ApprovalStatus['ACCEPTED'],
       },
     })
@@ -169,7 +159,7 @@ export default function CreateStatistic() {
       return
     }
 
-    console.log(data) // TODO: Double check what flow after creation of statistic
+    navigate(`/statistikk/${data.shortname}`)
   }
 
   function handleSubmit(e: React.ChangeEvent<HTMLFormElement>) {
@@ -185,6 +175,18 @@ export default function CreateStatistic() {
   }
 
   if (!auth?.isAdmin) return <ErrorPage type={ErrorType.NOTAUTH} />
+
+  function getFieldLabel(label: string, field: CreateStatisticField) {
+    if (isRequired(field)) {
+      return (
+        <span>
+          {label} <Tag data-color='warning'>Må fylles ut</Tag>
+        </span>
+      )
+    }
+
+    return label
+  }
 
   return (
     <>
@@ -277,7 +279,7 @@ export default function CreateStatistic() {
                 onBlur={() => handleOnBlur('division')}
               >
                 <Select.Option value='' disabled />
-                <Select.Option value='123'>Seksjon for ...</Select.Option>
+                <Select.Option value='723'>Seksjon for formidlingsplattform</Select.Option>
               </Select>
               {errors.division && <ValidationMessage>{errors.division}</ValidationMessage>}
             </Field>
