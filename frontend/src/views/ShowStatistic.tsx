@@ -100,6 +100,7 @@ export default function ShowStatistic() {
   const [releases, setReleases] = useState<ReleaseListing[]>([])
   const [allContacts, setAllContacts] = useState<Contact[]>([])
   const [selectedContacts, setSelectedContacts] = useState<Contact[]>([])
+  const [isEditingContacts, setIsEditingContacts] = useState(false)
   const { shortname } = useParams()
   const { auth } = useAuth()
   const [apiError, setApiError] = useState<string[]>([])
@@ -234,25 +235,29 @@ export default function ShowStatistic() {
 
       <div className='show-statistic-contacts-container'>
         <Heading data-size='xs'>Kontaktpersoner</Heading>
-        <Paragraph>Kontaktpersoner kan endres uten godkjenning</Paragraph>
+        <Paragraph style={{ color: 'var(--ds-color-neutral-text-subtle)', marginBottom: 'var(--ds-size-4)' }}>
+          Navn vises under overskriften 'Kontakt' på statistikksiden på ssb.no
+        </Paragraph>
         {contacts.map((contact) => (
-          <Paragraph key={contact}>{contact}</Paragraph>
+          <Paragraph key={contact}>
+            <Link href='#' onClick={() => alert('Kontaktside ikke implementert')}>
+              {contact}
+            </Link>
+          </Paragraph>
         ))}
         {!auth?.isAdmin && (
-          <Button
-            variant='tertiary'
-            className='edit-contact-button'
-            onClick={() => alert('Rediger kontakter er ikke implementert ennå.')}
-          >
-            <PersonPencilIcon /> Rediger kontakt
+          <Button variant='tertiary' className='edit-contact-button' onClick={() => setIsEditingContacts(true)}>
+            <PersonPencilIcon /> Rediger kontakter
           </Button>
         )}
-        <ContactSelection
-          contacts={allContacts}
-          label='Velg kontakter'
-          selected={selectedContacts}
-          onChange={setSelectedContacts}
-        />
+        {isEditingContacts && (
+          <ContactSelection
+            contacts={allContacts}
+            label='Velg kontakter'
+            selected={selectedContacts}
+            onChange={setSelectedContacts}
+          />
+        )}
       </div>
 
       <div>
