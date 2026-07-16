@@ -14,19 +14,25 @@ import {
   Input,
   Button,
   useCheckboxGroup,
+  ValidationMessage,
   Tag,
+  ErrorSummary,
 } from '@digdir/designsystemet-react'
 import { QuestionmarkCircleIcon } from '@navikt/aksel-icons'
+
+import client from '../api'
 
 import './CreateStatistic.css'
 
 import {
+  getRequiredStatisticFields,
   isCreateStatisticFieldRequired,
   type CreateStatisticField,
   type CreatableStatisticStatus,
-  type Shortname,
+  ApprovalStatus,
 } from '@ssbno-statreg/shared'
 import ErrorPage, { ErrorType } from './ErrorPage'
+import { ErrorAlert } from '../components/ErrorAlert'
 import { CreateShortnameModal } from '../components/CreateShortnameModal'
 
 type StatisticFormValues = {
@@ -39,9 +45,11 @@ type StatisticFormValues = {
   comment: string
 }
 
+type StatisticFormErrors = Partial<Record<CreateStatisticField, string>>
+
 export default function CreateStatistic() {
   const [openCreateShortnameModal, setOpenCreateShortnameModal] = useState(true)
-  const [createdShortname, setCreatedShortname] = useState<Shortname | null>(null)
+  const [createdShortname, setCreatedShortname] = useState<string>('')
 
   const { getCheckboxProps } = useCheckboxGroup({
     name: 'region-level-checkbox',
@@ -59,8 +67,10 @@ export default function CreateStatistic() {
   }
 
   const [values, setValues] = useState(defaultValues)
+  const [errors, setErrors] = useState<StatisticFormErrors>({})
+  const [apiError, setApiError] = useState<string[]>([])
 
-  const regionLevelCheckboxes = [
+  const regionLevelCheckboxData = [
     {
       name: 'Bydel og krets',
       code: 'BD',
@@ -86,6 +96,7 @@ export default function CreateStatistic() {
   const { auth } = useAuth()
 
   const status = values.status
+  const requiredFieldsForImplementedStatuses = getRequiredStatisticFields('K')
 
   function isRequired(field: CreateStatisticField) {
     return isCreateStatisticFieldRequired(status, field)
@@ -99,19 +110,99 @@ export default function CreateStatistic() {
         </span>
       )
     }
+
     return label
   }
 
-  function validFields(): boolean {
-    return true
+  function validateField(field: CreateStatisticField, nextValues: StatisticFormValues): string {
+    if (nextValues.status !== 'K' || !requiredFieldsForImplementedStatuses.includes(field)) {
+      return ''
+    }
+
+    if (field === 'name' && !nextValues.name) return 'Fyll inn norsk statistikknavn'
+    if (field === 'division' && !nextValues.division) return 'Velg ansvarlig seksjon for statistikken'
+
+    return ''
+  }
+
+  function updateFieldError(
+    field: CreateStatisticField,
+    nextValues: StatisticFormValues,
+    nextErrors: StatisticFormErrors
+  ) {
+    const error = validateField(field, nextValues)
+
+    if (error) nextErrors[field] = error
+    else delete nextErrors[field]
+  }
+
+  function handleValueChange<K extends keyof StatisticFormValues>(field: K, value: StatisticFormValues[K]) {
+    setValues((currentValues) => {
+      const nextValues = { ...currentValues, [field]: value }
+
+      setErrors((currentErrors) => {
+        const nextErrors = { ...currentErrors }
+
+        if (field === 'status') {
+          for (const dependentField of requiredFieldsForImplementedStatuses) {
+            updateFieldError(dependentField, nextValues, nextErrors)
+          }
+
+          return nextErrors
+        }
+
+        if (field === 'name' || field === 'division') {
+          updateFieldError(field, nextValues, nextErrors)
+        }
+
+        return nextErrors
+      })
+
+      return nextValues
+    })
+  }
+
+  function validateForm(nextValues: StatisticFormValues): StatisticFormErrors {
+    const nextErrors: StatisticFormErrors = {}
+
+    for (const field of requiredFieldsForImplementedStatuses) {
+      const error = validateField(field, nextValues)
+      if (error) nextErrors[field] = error
+    }
+
+    return nextErrors
+  }
+
+  async function createStatistic() {
+    const { data, error } = await client.POST(`/statistics/{shortname}`, {
+      params: { path: { shortname: createdShortname } },
+      body: {
+        ...values,
+        status: { code: values.status },
+        first_released_at: `${values.first_released_at}-12-31`,
+        approval_status: ApprovalStatus['ACCEPTED'],
+      },
+    })
+
+    if (error) {
+      console.error('Error creating statistic:', error)
+      setApiError((prev) => [...prev, error.message])
+      return
+    }
+
+    console.log(data) // TODO: Double check what flow after creation of statistic
   }
 
   function handleSubmit(e: React.ChangeEvent<HTMLFormElement>) {
     e.preventDefault()
 
-    if (!validFields()) return
+    const nextErrors = validateForm(values)
+    setApiError([])
+    setErrors(nextErrors)
 
-    console.log({ ...values, first_released_at: `${values.first_released_at}-12-31` })
+    if (Object.keys(nextErrors).length > 0) return
+
+    createStatistic()
   }
 
   if (!auth?.isAdmin) return <ErrorPage type={ErrorType.NOTAUTH} />
@@ -128,6 +219,7 @@ export default function CreateStatistic() {
 
       {createdShortname && (
         <div className='create-statistic-container'>
+          {apiError.length > 0 && <ErrorAlert message={apiError} />}
           <Alert data-color='success'>
             <Heading level={2} data-size='xs'>
               Kortnavnet er nå registrert i systemet
@@ -137,7 +229,6 @@ export default function CreateStatistic() {
               statistikken.
             </Paragraph>
           </Alert>
-          )
           <Heading level={1} data-size='md' className='create-statistic-heading'>
             Opprett statistikk
           </Heading>
@@ -168,7 +259,7 @@ export default function CreateStatistic() {
               </Field.Description>
               <Select
                 value={values.status}
-                onChange={(e) => setValues({ ...values, status: e.target.value as CreatableStatisticStatus })}
+                onChange={(e) => handleValueChange('status', e.target.value as CreatableStatisticStatus)}
               >
                 <Select.Option value='K'>Kommende</Select.Option>
               </Select>
@@ -178,32 +269,39 @@ export default function CreateStatistic() {
             <Field>
               <Label>Kortnavn</Label>
               <Field.Description>Kortnavnet kan ikke endres etter statistikken har blitt opprettet.</Field.Description>
-              <Input readOnly value={createdShortname.shortname} />
+              <Input readOnly value={createdShortname} />
             </Field>
             <Field>
               <Label>{getFieldLabel('Norsk statistikknavn', 'name')}</Label>
-              <Input value={values.name} onChange={(e) => setValues({ ...values, name: e.target.value })} />
+              <Input
+                aria-invalid={!!errors.name}
+                value={values.name}
+                onChange={(e) => handleValueChange('name', e.target.value)}
+              />
+              {errors.name && <ValidationMessage>{errors.name}</ValidationMessage>}
             </Field>
             <Field>
               <Label>{getFieldLabel('Engelsk statistikknavn', 'name_en')}</Label>
-              <Input
-                required={isRequired('name_en')}
-                value={values.name_en}
-                onChange={(e) => setValues({ ...values, name_en: e.target.value })}
-              />
+              <Input value={values.name_en} onChange={(e) => handleValueChange('name_en', e.target.value)} />
+              {errors.name_en && <ValidationMessage>{errors.name_en}</ValidationMessage>}
             </Field>
             <Divider />
             <Heading level={2}>Detaljer</Heading>
             <Field>
               <Label>{getFieldLabel('Seksjon', 'division')}</Label>
-              <Select value={values.division} onChange={(e) => setValues({ ...values, division: e.target.value })}>
+              <Select
+                aria-invalid={!!errors.division}
+                value={values.division}
+                onChange={(e) => handleValueChange('division', e.target.value)}
+              >
                 <Select.Option value='' disabled />
                 <Select.Option value='123'>Seksjon for ...</Select.Option>
               </Select>
+              {errors.division && <ValidationMessage>{errors.division}</ValidationMessage>}
             </Field>
             <Fieldset>
               <Fieldset.Legend>Regionale nivåer</Fieldset.Legend>
-              {regionLevelCheckboxes.map((regionLevel) => (
+              {regionLevelCheckboxData.map((regionLevel) => (
                 <Checkbox
                   key={`region-level-checkbox-${regionLevel.code}`}
                   label={regionLevel.name}
@@ -214,27 +312,31 @@ export default function CreateStatistic() {
             <Field>
               <Label>{getFieldLabel('Målform', 'main_language')}</Label>
               <Select
+                defaultValue='nb'
+                aria-invalid={!!errors.main_language}
                 value={values.main_language}
-                onChange={(e) => setValues({ ...values, main_language: e.target.value })}
+                onChange={(e) => handleValueChange('main_language', e.target.value)}
               >
-                <Select.Option value='' disabled />
                 <Select.Option value='nb'>Bokmål</Select.Option>
                 <Select.Option value='nn'>Nynorsk</Select.Option>
               </Select>
+              {errors.main_language && <ValidationMessage>{errors.main_language}</ValidationMessage>}
             </Field>
             <Field>
               <Label>Statistikkens startår</Label>
               <Field.Description>F.eks 1876</Field.Description>
               <Input
+                type='number'
+                size={4}
                 value={values.first_released_at}
-                onChange={(e) => setValues({ ...values, first_released_at: e.target.value })}
+                onChange={(e) => handleValueChange('first_released_at', e.target.value)}
               />
             </Field>
             <Divider />
             <Field>
               <Label>Kommentar (Valgfritt)</Label>
               <Field.Description>Annen relevant informasjon.</Field.Description>
-              <Input value={values.comment} onChange={(e) => setValues({ ...values, comment: e.target.value })} />
+              <Input value={values.comment} onChange={(e) => handleValueChange('comment', e.target.value)} />
             </Field>
             <div className='create-statistic-form-buttons'>
               <Button type='submit'>Opprett</Button>
@@ -244,11 +346,28 @@ export default function CreateStatistic() {
                 variant='tertiary'
                 onClick={() => {
                   setValues(defaultValues)
+                  setErrors({})
                 }}
               >
                 Avbryt
               </Button>
             </div>
+            {Object.values(errors).some(Boolean) && (
+              <ErrorSummary>
+                <ErrorSummary.Heading>For å gå videre må du rette opp følgende feil:</ErrorSummary.Heading>
+                <ErrorSummary.List>
+                  {Object.entries(errors).map(([key, message]) => {
+                    if (message) {
+                      return (
+                        <ErrorSummary.Item key={message}>
+                          <ErrorSummary.Link href={`#${key}`}>{message}</ErrorSummary.Link>
+                        </ErrorSummary.Item>
+                      )
+                    }
+                  })}
+                </ErrorSummary.List>
+              </ErrorSummary>
+            )}
           </form>
         </div>
       )}
