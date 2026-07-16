@@ -62,8 +62,7 @@ export function formatVariant(variant?: Variant): string {
   return [frequency, revision].join(', ')
 }
 
-export function formatContact(contact?: Contact): string {
-  if (!contact) return '-'
+export function formatContact(contact: Contact): string {
   const username = contact.principalName?.split('@')[0]
   return [contact.name ?? '', username ? `(${username})` : ''].filter(Boolean).join(' ')
 }
