@@ -1,5 +1,6 @@
 import { Department } from '@/types/department'
 import { KlassClassification } from '@/types/klassClassification'
+import { Division } from '@ssbno-statreg/shared'
 import process from 'node:process'
 
 export let DEPARTMENTS_NB: Department[] = []
@@ -21,6 +22,24 @@ export function getDivisionFromCode(code: string, language?: string) {
 export async function initializeDepartments() {
   setDepartmentsNb(await getDepartmentsFromKlass())
   setDepartmentsEn(await getDepartmentsFromKlass('en'))
+}
+
+export async function getDivisionsFromKlass(language = 'nb'): Promise<Division[]> {
+  const divisions: Division[] = []
+  const dataBaseUrl = process.env.KLASS_BASE_URL || 'https://data.ssb.no'
+
+  const response = await fetch(`${dataBaseUrl}/api/klass/v1/versions/3009.json?language=${language}`)
+  const data = (await response.json()) as KlassClassification
+
+  data.classificationItems
+    .filter((it) => it.level == '2') // Only divisions, not departments
+    .forEach((it) => {
+      divisions.push({
+        code: it.code,
+        name: it.name,
+      })
+    })
+  return divisions
 }
 
 export async function getDepartmentsFromKlass(language = 'nb'): Promise<Department[]> {
