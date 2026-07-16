@@ -149,14 +149,11 @@ function VariantReleasesTable({
         params: { path: { shortname, id: variantId }, query: { start, count, sort: sortBy } },
       })
       if (error) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const errorMessage = (error as any).error
-        console.log(errorMessage)
-        apiErrorEmit?.(`Variant releases table error: ${errorMessage}`)
-      } else {
-        setReleases(data?.releases ?? [])
-        setTotal(data.total ?? 0)
+        apiErrorEmit?.(`Variant releases table error: ${error.message}`)
+        return
       }
+      setReleases(data.releases ?? [])
+      setTotal(data.total ?? 0)
     }
     fetchVariantReleases()
   }, [shortname, variantId, count, start, sortBy, apiErrorEmit])
@@ -318,14 +315,11 @@ export default function ReleaseForm() {
     })
 
     if (error) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const errorMessage = (error as any).error
-      console.log(errorMessage)
-      setApiError((prev) => [...prev, errorMessage])
-    } else {
-      setOpenReleaseModal(true)
-      setNewOrUpdatedRelease(data)
+      setApiError((prev) => [...prev, error.message])
+      return
     }
+    setOpenReleaseModal(true)
+    setNewOrUpdatedRelease(data)
   }
 
   async function createRelease(body: ReleaseCreate) {
@@ -335,14 +329,11 @@ export default function ReleaseForm() {
     })
 
     if (error) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const errorMessage = (error as any).error
-      console.log(errorMessage)
-      setApiError((prev) => [...prev, errorMessage])
-    } else {
-      setOpenReleaseModal(true)
-      setNewOrUpdatedRelease(data)
+      setApiError((prev) => [...prev, error.message])
+      return
     }
+    setOpenReleaseModal(true)
+    setNewOrUpdatedRelease(data)
   }
 
   function handleOnSubmit(e: React.SubmitEvent<HTMLFormElement>) {
