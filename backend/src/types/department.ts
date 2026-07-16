@@ -5,7 +5,7 @@ export interface Division {
 }
 
 export interface Department {
-  code: number
+  code: string
   divisions: Division[]
   name: string
   notes?: string

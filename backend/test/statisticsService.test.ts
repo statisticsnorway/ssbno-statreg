@@ -30,10 +30,10 @@ const { getAllUsersFromCacheMock, fetchDivisionMock } = vi.hoisted(() => ({
       },
     }
   }),
-  fetchDivisionMock: vi.fn((code: number, language?: string) => {
-    if (code === 104 && language === 'en') return { code: 104, name: 'Division A1' }
-    if (code === 104) return { code: 104, name: 'Seksjon A1' }
-    if (code === 105) return { code: 105, name: 'Seksjon B1' }
+  fetchDivisionMock: vi.fn((code: string, language?: string) => {
+    if (code === '104' && language === 'en') return { code: '104', name: 'Division A1' }
+    if (code === '104') return { code: '104', name: 'Seksjon A1' }
+    if (code === '105') return { code: '105', name: 'Seksjon B1' }
   }),
 }))
 
@@ -939,7 +939,7 @@ const mockStatisticsPrismaResult = [
     name: 'Energiregnskap og energibalanse',
     name_en: 'Energy account and energy balance',
     shortname: { name: 'energ' },
-    division_code: 104,
+    division_code: '104',
     responsiblePersons: [
       {
         principalName: 'abc@ssb.no',
@@ -952,7 +952,7 @@ const mockStatisticsPrismaResult = [
     name: 'Befolkning og demografi',
     name_en: 'Population and demography',
     shortname: { name: 'befolk' },
-    division_code: 105,
+    division_code: '105',
     responsiblePersons: [
       {
         principalName: 'bcd@ssb.no',
@@ -1047,7 +1047,7 @@ const mockedStatisticsResult = {
       status: { code: 'SA' },
       division: {
         name: 'Seksjon A1',
-        code: 104,
+        code: '104',
       },
       name: 'Energiregnskap og energibalanse',
       name_en: 'Energy account and energy balance',
@@ -1058,7 +1058,7 @@ const mockedStatisticsResult = {
       main_language: 'nb',
       status: { code: 'SA' },
       division: {
-        code: 105,
+        code: '105',
         name: 'Seksjon B1',
       },
       name: 'Befolkning og demografi',
