@@ -683,6 +683,8 @@ paths:
               schema:
                 type: array
                 items: { $ref: '#/components/schemas/Contact' }
+        default:
+          $ref: '#/components/responses/Error'
 
   /releases:
     get:

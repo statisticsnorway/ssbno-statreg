@@ -494,6 +494,7 @@ export interface paths {
             'application/json': components['schemas']['Contact'][]
           }
         }
+        default: components['responses']['Error']
       }
     }
     post?: never

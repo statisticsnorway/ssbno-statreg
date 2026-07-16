@@ -1,20 +1,14 @@
 import './ContactSelection.css'
-import {
-  EXPERIMENTAL_Suggestion as Suggestion,
-  type SuggestionItem,
-  Field,
-  Label,
-} from '@digdir/designsystemet-react'
+import { EXPERIMENTAL_Suggestion as Suggestion, type SuggestionItem, Field } from '@digdir/designsystemet-react'
 import type { Contact } from '@ssbno-statreg/shared'
 
 export type ContactSelectionProps = {
   contacts: Contact[]
-  label?: string
   selected: Contact[]
   onChange: (selected: Contact[]) => void
 }
 
-export function ContactSelection({ contacts, label, selected, onChange }: ContactSelectionProps) {
+export function ContactSelection({ contacts, selected, onChange }: ContactSelectionProps) {
   const selectedItems: SuggestionItem[] = selected.map((contact) => ({
     label: contact.name || contact.principalName || '',
     value: contact.principalName || '',
@@ -30,7 +24,6 @@ export function ContactSelection({ contacts, label, selected, onChange }: Contac
 
   return (
     <Field>
-      {label && <Label>{label}</Label>}
       <Suggestion
         className='contact-selection'
         multiple

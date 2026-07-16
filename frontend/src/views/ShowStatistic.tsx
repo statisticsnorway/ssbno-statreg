@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams, Link as ReactRouterLink } from 'react-router'
 import { Heading, Paragraph, List, Link, Button, Divider, Details, Card, Table } from '@digdir/designsystemet-react'
-import { PencilWritingIcon, PersonPencilIcon } from '@navikt/aksel-icons'
+import { PencilWritingIcon } from '@navikt/aksel-icons'
 import { StatisticStatusTag } from '../components/StatisticStatusTag'
 import { VariantCard } from '../components/VariantCard'
 import client from '../api'
@@ -117,6 +117,7 @@ export default function ShowStatistic() {
       }
 
       setStatistic(data)
+      setSelectedContacts(data.contacts ?? [])
     }
 
     async function fetchReleases(shortname: string) {
@@ -149,9 +150,22 @@ export default function ShowStatistic() {
     fetchContacts()
   }, [])
 
-  useEffect(() => {
-    setSelectedContacts(statistic.contacts ?? [])
-  }, [statistic.contacts])
+  async function saveContacts() {
+    if (!shortname) return
+
+    const { data, error } = await client.PUT('/statistics/{shortname}/contacts', {
+      params: { path: { shortname } },
+      body: { principalNames: selectedContacts.map((contact) => contact.principalName).filter(Boolean) as string[] },
+    })
+
+    if (error) {
+      setApiError((prev) => [...prev, error.message])
+      return
+    }
+
+    setStatistic((prev) => ({ ...prev, contacts: data }))
+    setIsEditingContacts(false)
+  }
 
   const statusCode = statistic.status?.code as keyof typeof StatisticStatus
   const englishName = statistic.name_en ?? '-'
@@ -234,30 +248,41 @@ export default function ShowStatistic() {
       </div>
 
       <div className='show-statistic-contacts-container'>
-        <Heading data-size='xs'>Kontaktpersoner</Heading>
-        <Paragraph style={{ color: 'var(--ds-color-neutral-text-subtle)', marginBottom: 'var(--ds-size-4)' }}>
-          Navn vises under overskriften 'Kontakt' på statistikksiden på ssb.no
-        </Paragraph>
-        {contacts.map((contact) => (
-          <Paragraph key={contact}>
-            <Link href='#' onClick={() => alert('Kontaktside ikke implementert')}>
-              {contact}
-            </Link>
-          </Paragraph>
-        ))}
-        {!auth?.isAdmin && (
-          <Button variant='tertiary' className='edit-contact-button' onClick={() => setIsEditingContacts(true)}>
-            <PersonPencilIcon /> Rediger kontakter
-          </Button>
-        )}
-        {isEditingContacts && (
-          <ContactSelection
-            contacts={allContacts}
-            label='Velg kontakter'
-            selected={selectedContacts}
-            onChange={setSelectedContacts}
-          />
-        )}
+        <div className='show-statistic-contacts-heading'>
+          <Heading data-size='xs'>Kontaktpersoner</Heading>
+          {!auth?.isAdmin && !isEditingContacts && (
+            <Button
+              variant='tertiary'
+              data-size='sm'
+              aria-label='Rediger kontakter'
+              onClick={() => setIsEditingContacts(true)}
+            >
+              <PencilWritingIcon aria-hidden />
+            </Button>
+          )}
+        </div>
+        <Paragraph>Navn vises under overskriften 'Kontakt' på statistikksiden på ssb.no</Paragraph>
+        <div className='show-statistic-contacts-content'>
+          {!isEditingContacts &&
+            contacts.map((contact) => (
+              <Paragraph key={contact}>
+                <Link href='#' onClick={() => alert('Kontaktside ikke implementert')}>
+                  {contact}
+                </Link>
+              </Paragraph>
+            ))}
+          {isEditingContacts && (
+            <>
+              <ContactSelection contacts={allContacts} selected={selectedContacts} onChange={setSelectedContacts} />
+              <div className='show-statistic-contacts-button-wrapper'>
+                <Button onClick={saveContacts}>Lagre</Button>
+                <Button variant='tertiary' onClick={() => setIsEditingContacts(false)}>
+                  Avbryt
+                </Button>
+              </div>
+            </>
+          )}
+        </div>
       </div>
 
       <div>
