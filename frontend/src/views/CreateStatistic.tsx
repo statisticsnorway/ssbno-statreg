@@ -61,7 +61,7 @@ export default function CreateStatistic() {
     name: '',
     name_en: '',
     division: '',
-    main_language: '',
+    main_language: 'nb',
     first_released_at: '',
     comment: '',
   }
@@ -95,11 +95,8 @@ export default function CreateStatistic() {
 
   const { auth } = useAuth()
 
-  const status = values.status
-  const requiredFieldsForImplementedStatuses = getRequiredStatisticFields('K')
-
   function isRequired(field: CreateStatisticField) {
-    return isCreateStatisticFieldRequired(status, field)
+    return isCreateStatisticFieldRequired(values.status, field)
   }
 
   function getFieldLabel(label: string, field: CreateStatisticField) {
@@ -115,7 +112,7 @@ export default function CreateStatistic() {
   }
 
   function validateField(field: CreateStatisticField, nextValues: StatisticFormValues): string {
-    if (nextValues.status !== 'K' || !requiredFieldsForImplementedStatuses.includes(field)) {
+    if (!isRequired(field)) {
       return ''
     }
 
@@ -125,47 +122,29 @@ export default function CreateStatistic() {
     return ''
   }
 
-  function updateFieldError(
-    field: CreateStatisticField,
-    nextValues: StatisticFormValues,
-    nextErrors: StatisticFormErrors
-  ) {
-    const error = validateField(field, nextValues)
-
-    if (error) nextErrors[field] = error
-    else delete nextErrors[field]
+  function handleValueChange<K extends keyof StatisticFormValues>(field: K, value: StatisticFormValues[K]) {
+    setValues((currentValues) => ({
+      ...currentValues,
+      [field]: value,
+    }))
   }
 
-  function handleValueChange<K extends keyof StatisticFormValues>(field: K, value: StatisticFormValues[K]) {
-    setValues((currentValues) => {
-      const nextValues = { ...currentValues, [field]: value }
+  function handleOnBlur(field: CreateStatisticField) {
+    setErrors((currentErrors) => {
+      const nextErrors = { ...currentErrors }
+      const error = validateField(field, values)
 
-      setErrors((currentErrors) => {
-        const nextErrors = { ...currentErrors }
+      if (error) nextErrors[field] = error
+      else delete nextErrors[field]
 
-        if (field === 'status') {
-          for (const dependentField of requiredFieldsForImplementedStatuses) {
-            updateFieldError(dependentField, nextValues, nextErrors)
-          }
-
-          return nextErrors
-        }
-
-        if (field === 'name' || field === 'division') {
-          updateFieldError(field, nextValues, nextErrors)
-        }
-
-        return nextErrors
-      })
-
-      return nextValues
+      return nextErrors
     })
   }
 
   function validateForm(nextValues: StatisticFormValues): StatisticFormErrors {
     const nextErrors: StatisticFormErrors = {}
 
-    for (const field of requiredFieldsForImplementedStatuses) {
+    for (const field of getRequiredStatisticFields(values.status)) {
       const error = validateField(field, nextValues)
       if (error) nextErrors[field] = error
     }
@@ -197,8 +176,8 @@ export default function CreateStatistic() {
     e.preventDefault()
 
     const nextErrors = validateForm(values)
-    setApiError([])
     setErrors(nextErrors)
+    setApiError([])
 
     if (Object.keys(nextErrors).length > 0) return
 
@@ -258,6 +237,7 @@ export default function CreateStatistic() {
                 ut: Engelsk navn, varianter og målform.
               </Field.Description>
               <Select
+                width='auto'
                 value={values.status}
                 onChange={(e) => handleValueChange('status', e.target.value as CreatableStatisticStatus)}
               >
@@ -277,22 +257,24 @@ export default function CreateStatistic() {
                 aria-invalid={!!errors.name}
                 value={values.name}
                 onChange={(e) => handleValueChange('name', e.target.value)}
+                onBlur={() => handleOnBlur('name')}
               />
               {errors.name && <ValidationMessage>{errors.name}</ValidationMessage>}
             </Field>
             <Field>
               <Label>{getFieldLabel('Engelsk statistikknavn', 'name_en')}</Label>
               <Input value={values.name_en} onChange={(e) => handleValueChange('name_en', e.target.value)} />
-              {errors.name_en && <ValidationMessage>{errors.name_en}</ValidationMessage>}
             </Field>
             <Divider />
             <Heading level={2}>Detaljer</Heading>
             <Field>
               <Label>{getFieldLabel('Seksjon', 'division')}</Label>
               <Select
+                width='auto'
                 aria-invalid={!!errors.division}
                 value={values.division}
                 onChange={(e) => handleValueChange('division', e.target.value)}
+                onBlur={() => handleOnBlur('division')}
               >
                 <Select.Option value='' disabled />
                 <Select.Option value='123'>Seksjon for ...</Select.Option>
@@ -312,21 +294,19 @@ export default function CreateStatistic() {
             <Field>
               <Label>{getFieldLabel('Målform', 'main_language')}</Label>
               <Select
-                defaultValue='nb'
-                aria-invalid={!!errors.main_language}
+                width='auto'
                 value={values.main_language}
                 onChange={(e) => handleValueChange('main_language', e.target.value)}
               >
                 <Select.Option value='nb'>Bokmål</Select.Option>
                 <Select.Option value='nn'>Nynorsk</Select.Option>
               </Select>
-              {errors.main_language && <ValidationMessage>{errors.main_language}</ValidationMessage>}
             </Field>
             <Field>
               <Label>Statistikkens startår</Label>
               <Field.Description>F.eks 1876</Field.Description>
               <Input
-                type='number'
+                maxLength={4}
                 size={4}
                 value={values.first_released_at}
                 onChange={(e) => handleValueChange('first_released_at', e.target.value)}
