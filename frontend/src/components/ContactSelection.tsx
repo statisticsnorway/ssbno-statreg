@@ -39,14 +39,14 @@ export function ContactSelection({ contacts, label, selected, onChange }: Contac
       >
         <Suggestion.Input />
         <Suggestion.Clear aria-label='Tøm valgte kontakter' />
-        <Suggestion.List>
+        <Suggestion.List className='contact-selection-list'>
           <Suggestion.Empty>Ingen treff</Suggestion.Empty>
           {contacts.map((contact) => {
             const value = contact.principalName || ''
             const contactLabel = contact.name || value
 
             return (
-              <Suggestion.Option key={value} label={contactLabel} value={value}>
+              <Suggestion.Option className='contact-selection-item' key={value} label={contactLabel} value={value}>
                 {contact.name} ({contact.principalName})
               </Suggestion.Option>
             )
