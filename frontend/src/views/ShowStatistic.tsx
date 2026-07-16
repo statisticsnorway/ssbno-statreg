@@ -15,7 +15,7 @@ import {
 } from '@ssbno-statreg/shared'
 
 import './ShowStatistic.css'
-import { formatContacts, formatPublishTime, formatRevisionName, formatVariant } from '../lib/utils'
+import { formatContact, formatPublishTime, formatRevisionName, formatVariant } from '../lib/utils'
 import { ApprovalStatusBadge } from '../components/ApprovalStatus'
 import { useAuth } from '../context/AuthContext'
 import { ErrorAlert } from '../components/ErrorAlert'
@@ -99,7 +99,7 @@ export default function ShowStatistic() {
   const [statistic, setStatistic] = useState<StatisticDetails>({})
   const [releases, setReleases] = useState<ReleaseListing[]>([])
   const [allContacts, setAllContacts] = useState<Contact[]>([])
-  const [selectedContacts, setSelectedContacts] = useState<Contact[]>([])
+  const [selectedContacts, setSelectedContacts] = useState<string[]>([])
   const [isEditingContacts, setIsEditingContacts] = useState(false)
   const { shortname } = useParams()
   const { auth } = useAuth()
@@ -117,7 +117,7 @@ export default function ShowStatistic() {
       }
 
       setStatistic(data)
-      setSelectedContacts(data.contacts ?? [])
+      setSelectedContacts(data.contacts?.map((c) => c.principalName) ?? [])
     }
 
     async function fetchReleases(shortname: string) {
@@ -155,7 +155,7 @@ export default function ShowStatistic() {
 
     const { data, error } = await client.PUT('/statistics/{shortname}/contacts', {
       params: { path: { shortname } },
-      body: { principalNames: selectedContacts.map((contact) => contact.principalName).filter(Boolean) as string[] },
+      body: { principalNames: selectedContacts },
     })
 
     if (error) {
@@ -173,7 +173,6 @@ export default function ShowStatistic() {
   const regionLevels = statistic.statistic_region_levels ?? []
   const mainLanguage = formatMainLanguage(statistic.main_language)
   const startYear = formatStartYear(statistic.first_released_at)
-  const contacts = formatContacts(statistic.contacts)
   const mockContinuedBy = ['putegjeld', 'k2', 'k3']
   const variants = statistic.variants ?? []
   const cancelledVariants = formatCancelledVariants(variants)
@@ -264,16 +263,16 @@ export default function ShowStatistic() {
         <Paragraph>Navn vises under overskriften 'Kontakt' på statistikksiden på ssb.no</Paragraph>
         <div className='show-statistic-contacts-content'>
           {!isEditingContacts &&
-            contacts.map((contact) => (
-              <Paragraph key={contact}>
+            statistic.contacts?.map((contact) => (
+              <Paragraph key={contact.principalName}>
                 <Link href='#' onClick={() => alert('Kontaktside ikke implementert')}>
-                  {contact}
+                  {formatContact(contact)}
                 </Link>
               </Paragraph>
             ))}
           {isEditingContacts && (
             <>
-              <ContactSelection contacts={allContacts} selected={selectedContacts} onChange={setSelectedContacts} />
+              <ContactSelection contacts={allContacts} selected={selectedContacts} setSelected={setSelectedContacts} />
               <div className='show-statistic-contacts-button-wrapper'>
                 <Button onClick={saveContacts}>Lagre</Button>
                 <Button variant='tertiary' onClick={() => setIsEditingContacts(false)}>
