@@ -80,14 +80,11 @@ export function CreateShortnameModal({
       },
     })
     if (error) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const errorMessage = (error as any).error
-      console.log(errorMessage)
-      setApiError((prev) => [...prev, errorMessage])
-    } else {
-      setCreatedShortname(data.shortname)
-      setOpenCreateReleaseModal(false)
+      setApiError((prev) => [...prev, error.message])
+      return
     }
+    setCreatedShortname(data.shortname)
+    setOpenCreateReleaseModal(false)
   }
 
   function handleOnSubmit(e: React.ChangeEvent<HTMLFormElement>) {
