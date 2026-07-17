@@ -41,8 +41,9 @@ type StatisticFormValues = {
 }
 
 type StatisticFormErrors = Partial<Record<keyof StatisticFormValues, string>>
+
 export default function CreateStatistic() {
-  const [openCreateShortnameModal, setOpenCreateShortnameModal] = useState(true)
+  const [openCreateShortnameModal, setOpenCreateShortnameModal] = useState<boolean>(true)
   const [createdShortname, setCreatedShortname] = useState<string>('')
 
   const { getCheckboxProps } = useCheckboxGroup({
@@ -60,7 +61,7 @@ export default function CreateStatistic() {
     comment: '',
   }
 
-  const [values, setValues] = useState(defaultValues)
+  const [values, setValues] = useState<StatisticFormValues>(defaultValues)
   const [errors, setErrors] = useState<StatisticFormErrors>({})
   const [apiError, setApiError] = useState<string[]>([])
 
@@ -108,13 +109,6 @@ export default function CreateStatistic() {
     }
 
     return ''
-  }
-
-  function handleValueChange(field: keyof StatisticFormValues, value: StatisticFormValues[keyof StatisticFormValues]) {
-    setValues((currentValues) => ({
-      ...currentValues,
-      [field]: value,
-    }))
   }
 
   function handleOnBlur(field: keyof StatisticFormValues) {
@@ -234,7 +228,9 @@ export default function CreateStatistic() {
               <Select
                 width='auto'
                 value={values.status}
-                onChange={(e) => handleValueChange('status', e.target.value as CreatableStatisticStatus)}
+                onChange={(e) =>
+                  setValues((prevValues) => ({ ...prevValues, status: e.target.value as CreatableStatisticStatus }))
+                }
               >
                 <Select.Option value='K'>Kommende</Select.Option>
               </Select>
@@ -251,14 +247,17 @@ export default function CreateStatistic() {
               <Input
                 aria-invalid={!!errors.name}
                 value={values.name}
-                onChange={(e) => handleValueChange('name', e.target.value)}
+                onChange={(e) => setValues((prevValues) => ({ ...prevValues, name: e.target.value }))}
                 onBlur={() => handleOnBlur('name')}
               />
               {errors.name && <ValidationMessage>{errors.name}</ValidationMessage>}
             </Field>
             <Field>
               <Label>{getFieldLabel('Engelsk statistikknavn', 'name_en')}</Label>
-              <Input value={values.name_en} onChange={(e) => handleValueChange('name_en', e.target.value)} />
+              <Input
+                value={values.name_en}
+                onChange={(e) => setValues((prevValues) => ({ ...prevValues, name_en: e.target.value }))}
+              />
             </Field>
             <Divider />
             <Heading level={2}>Detaljer</Heading>
@@ -268,7 +267,7 @@ export default function CreateStatistic() {
                 width='auto'
                 aria-invalid={!!errors.division}
                 value={values.division}
-                onChange={(e) => handleValueChange('division', e.target.value)}
+                onChange={(e) => setValues((prevValues) => ({ ...prevValues, division: e.target.value }))}
                 onBlur={() => handleOnBlur('division')}
               >
                 <Select.Option value='' disabled />
@@ -291,7 +290,7 @@ export default function CreateStatistic() {
               <Select
                 width='auto'
                 value={values.main_language}
-                onChange={(e) => handleValueChange('main_language', e.target.value)}
+                onChange={(e) => setValues((prevValues) => ({ ...prevValues, main_language: e.target.value }))}
               >
                 <Select.Option value='nb'>Bokmål</Select.Option>
                 <Select.Option value='nn'>Nynorsk</Select.Option>
@@ -305,7 +304,7 @@ export default function CreateStatistic() {
                 size={4}
                 aria-invalid={!!errors.first_released_at}
                 value={values.first_released_at}
-                onChange={(e) => handleValueChange('first_released_at', e.target.value)}
+                onChange={(e) => setValues((prevValues) => ({ ...prevValues, first_released_at: e.target.value }))}
                 onBlur={() => handleOnBlur('first_released_at')}
               />
               {errors.first_released_at && <ValidationMessage>{errors.first_released_at}</ValidationMessage>}
@@ -314,11 +313,14 @@ export default function CreateStatistic() {
             <Field>
               <Label>Kommentar (Valgfritt)</Label>
               <Field.Description>Annen relevant informasjon.</Field.Description>
-              <Input value={values.comment} onChange={(e) => handleValueChange('comment', e.target.value)} />
+              <Input
+                value={values.comment}
+                onChange={(e) => setValues((prevValues) => ({ ...prevValues, comment: e.target.value }))}
+              />
             </Field>
             <div className='create-statistic-form-buttons'>
               <Button type='submit'>Opprett</Button>
-              {/* TODO: Double check the flow/behavior for "Avbryt" button. Set to form clear for now */}
+              {/* TODO: Double check the flow/behavior for "Avbryt" button with designer. Set to form clear for now */}
               <Button
                 type='button'
                 variant='tertiary'
