@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router'
 import { useAuth } from '../context/AuthContext'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Alert,
   Heading,
@@ -25,7 +25,12 @@ import client from '../api'
 
 import './CreateStatistic.css'
 
-import { isCreateStatisticFieldRequired, type CreatableStatisticStatus, ApprovalStatus } from '@ssbno-statreg/shared'
+import {
+  isCreateStatisticFieldRequired,
+  type CreatableStatisticStatus,
+  ApprovalStatus,
+  type Division,
+} from '@ssbno-statreg/shared'
 import ErrorPage, { ErrorType } from './ErrorPage'
 import { ErrorAlert } from '../components/ErrorAlert'
 import { CreateShortnameModal } from '../components/CreateShortnameModal'
@@ -62,6 +67,7 @@ export default function CreateStatistic() {
   }
 
   const [values, setValues] = useState<StatisticFormValues>(defaultValues)
+  const [divisions, setDivisions] = useState<Division[]>([])
   const [errors, setErrors] = useState<StatisticFormErrors>({})
   const [apiError, setApiError] = useState<string[]>([])
 
@@ -90,6 +96,22 @@ export default function CreateStatistic() {
 
   const { auth } = useAuth()
   const navigate = useNavigate()
+
+  useEffect(() => {
+    if (!createdShortname || !auth?.isAdmin) return
+
+    async function fetchDivisions() {
+      const { data, error } = await client.GET('/divisions')
+
+      if (error) {
+        setApiError((prev) => [...prev, error.message])
+        return
+      }
+
+      setDivisions((Object.values(data) as Division[]) ?? [])
+    }
+    fetchDivisions()
+  }, [createdShortname, auth?.isAdmin])
 
   function isRequired(field: keyof StatisticFormValues) {
     return isCreateStatisticFieldRequired(values.status, field)
@@ -269,14 +291,17 @@ export default function CreateStatistic() {
             <Field>
               <Label>{getFieldLabel('Seksjon', 'division')}</Label>
               <Select
-                width='auto'
                 aria-invalid={!!errors.division}
                 value={values.division}
                 onChange={(e) => setValues((prevValues) => ({ ...prevValues, division: e.target.value }))}
                 onBlur={() => handleOnBlur('division')}
               >
                 <Select.Option value='' disabled />
-                <Select.Option value='723'>Seksjon for formidlingsplattform</Select.Option>
+                {divisions.map(({ code, name }) => (
+                  <Select.Option key={`division-${code}`} value={code}>
+                    {name} ({code})
+                  </Select.Option>
+                ))}
               </Select>
               {errors.division && <ValidationMessage>{errors.division}</ValidationMessage>}
             </Field>

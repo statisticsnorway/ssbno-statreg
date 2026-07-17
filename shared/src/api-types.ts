@@ -132,6 +132,7 @@ export interface paths {
             'application/json': components['schemas']['Division']
           }
         }
+        default: components['responses']['Error']
       }
     }
     put?: never
