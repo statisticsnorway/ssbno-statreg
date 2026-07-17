@@ -26,19 +26,23 @@ export async function initializeDepartments() {
 
 export async function getDivisionsFromKlass(language = 'nb'): Promise<Division[]> {
   const divisions: Division[] = []
-  const dataBaseUrl = process.env.KLASS_BASE_URL || 'https://data.ssb.no'
+  try {
+    const dataBaseUrl = process.env.KLASS_BASE_URL || 'https://data.ssb.no'
 
-  const response = await fetch(`${dataBaseUrl}/api/klass/v1/versions/3009.json?language=${language}`)
-  const data = (await response.json()) as KlassClassification
+    const response = await fetch(`${dataBaseUrl}/api/klass/v1/versions/3009.json?language=${language}`)
+    const data = (await response.json()) as KlassClassification
 
-  data.classificationItems
-    .filter((it) => it.level == '2') // Only divisions, not departments
-    .forEach((it) => {
-      divisions.push({
-        code: it.code,
-        name: it.name,
+    data.classificationItems
+      .filter((it) => it.level == '2') // Only divisions, not departments
+      .forEach((it) => {
+        divisions.push({
+          code: it.code,
+          name: it.name,
+        })
       })
-    })
+  } catch (error) {
+    console.error(error)
+  }
   return divisions
 }
 
