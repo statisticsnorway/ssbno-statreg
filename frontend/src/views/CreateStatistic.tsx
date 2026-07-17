@@ -25,13 +25,7 @@ import client from '../api'
 
 import './CreateStatistic.css'
 
-import {
-  getRequiredStatisticFields,
-  isCreateStatisticFieldRequired,
-  type CreateStatisticField,
-  type CreatableStatisticStatus,
-  ApprovalStatus,
-} from '@ssbno-statreg/shared'
+import { isCreateStatisticFieldRequired, type CreatableStatisticStatus, ApprovalStatus } from '@ssbno-statreg/shared'
 import ErrorPage, { ErrorType } from './ErrorPage'
 import { ErrorAlert } from '../components/ErrorAlert'
 import { CreateShortnameModal } from '../components/CreateShortnameModal'
@@ -46,8 +40,7 @@ type StatisticFormValues = {
   comment: string
 }
 
-type StatisticFormErrors = Partial<Record<CreateStatisticField, string>>
-
+type StatisticFormErrors = Partial<Record<keyof StatisticFormValues, string>>
 export default function CreateStatistic() {
   const [openCreateShortnameModal, setOpenCreateShortnameModal] = useState(true)
   const [createdShortname, setCreatedShortname] = useState<string>('')
@@ -97,29 +90,34 @@ export default function CreateStatistic() {
   const { auth } = useAuth()
   const navigate = useNavigate()
 
-  function isRequired(field: CreateStatisticField) {
+  function isRequired(field: keyof StatisticFormValues) {
     return isCreateStatisticFieldRequired(values.status, field)
   }
 
-  function validateField(field: CreateStatisticField, nextValues: StatisticFormValues): string {
-    if (!isRequired(field)) {
+  function validateField(field: keyof StatisticFormValues, nextValues: StatisticFormValues): string {
+    if (!isRequired(field) && !nextValues[field]) {
       return ''
     }
 
     if (field === 'name' && !nextValues.name) return 'Fyll inn norsk statistikknavn'
     if (field === 'division' && !nextValues.division) return 'Velg ansvarlig seksjon for statistikken'
 
+    // Optional fields
+    if (field === 'first_released_at' && !/^\d{4}$/.test(nextValues.first_released_at)) {
+      return 'Statistikkens startår må være et gyldig år med fire siffer'
+    }
+
     return ''
   }
 
-  function handleValueChange<K extends keyof StatisticFormValues>(field: K, value: StatisticFormValues[K]) {
+  function handleValueChange(field: keyof StatisticFormValues, value: StatisticFormValues[keyof StatisticFormValues]) {
     setValues((currentValues) => ({
       ...currentValues,
       [field]: value,
     }))
   }
 
-  function handleOnBlur(field: CreateStatisticField) {
+  function handleOnBlur(field: keyof StatisticFormValues) {
     setErrors((currentErrors) => {
       const nextErrors = { ...currentErrors }
       const error = validateField(field, values)
@@ -129,17 +127,6 @@ export default function CreateStatistic() {
 
       return nextErrors
     })
-  }
-
-  function validateForm(nextValues: StatisticFormValues): StatisticFormErrors {
-    const nextErrors: StatisticFormErrors = {}
-
-    for (const field of getRequiredStatisticFields(values.status)) {
-      const error = validateField(field, nextValues)
-      if (error) nextErrors[field] = error
-    }
-
-    return nextErrors
   }
 
   async function createStatistic() {
@@ -165,18 +152,24 @@ export default function CreateStatistic() {
   function handleSubmit(e: React.ChangeEvent<HTMLFormElement>) {
     e.preventDefault()
 
-    const nextErrors = validateForm(values)
+    const nextErrors: StatisticFormErrors = {}
+
+    for (const field of Object.keys(values) as (keyof StatisticFormValues)[]) {
+      const error = validateField(field, values)
+      if (error) nextErrors[field] = error
+    }
+
     setErrors(nextErrors)
     setApiError([])
 
-    if (Object.keys(nextErrors).length > 0) return
+    if (Object.keys(nextErrors).length) return
 
     createStatistic()
   }
 
   if (!auth?.isAdmin) return <ErrorPage type={ErrorType.NOTAUTH} />
 
-  function getFieldLabel(label: string, field: CreateStatisticField) {
+  function getFieldLabel(label: string, field: keyof StatisticFormValues) {
     if (isRequired(field)) {
       return (
         <span>
@@ -310,9 +303,12 @@ export default function CreateStatistic() {
               <Input
                 maxLength={4}
                 size={4}
+                aria-invalid={!!errors.first_released_at}
                 value={values.first_released_at}
                 onChange={(e) => handleValueChange('first_released_at', e.target.value)}
+                onBlur={() => handleOnBlur('first_released_at')}
               />
+              {errors.first_released_at && <ValidationMessage>{errors.first_released_at}</ValidationMessage>}
             </Field>
             <Divider />
             <Field>
