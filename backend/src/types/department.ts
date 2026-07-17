@@ -1,11 +1,7 @@
-export interface Division {
-  code: number
-  name: string
-  notes?: string
-}
+import { Division } from '@ssbno-statreg/shared'
 
 export interface Department {
-  code: number
+  code: string
   divisions: Division[]
   name: string
   notes?: string

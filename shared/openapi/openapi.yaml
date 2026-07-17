@@ -136,7 +136,12 @@ components:
       properties:
         name: { type: string, readOnly: true }
         principalName: { type: string, readOnly: true }
-
+    Division:
+      type: object
+      properties:
+        code: { type: string, nullable: false }
+        name: { type: string, nullable: false, readOnly: true }
+        note: { type: string, nullable: true }
     Frequency:
       type: object
       properties:
@@ -331,10 +336,7 @@ components:
       properties:
         version: { type: integer }
         division:
-          type: object
-          properties:
-            code: { type: string, nullable: true }
-            name: { type: string, readOnly: true }
+          $ref: '#/components/schemas/Division'
         first_released_at: { type: string, format: date, nullable: true }
         yearly_reporting: { type: boolean }
         previous_topic_codes: { type: string, nullable: true }
@@ -366,10 +368,7 @@ components:
       type: object
       properties:
         division:
-          type: object
-          properties:
-            code: { type: string, nullable: true }
-            name: { type: string, readOnly: true }
+          $ref: '#/components/schemas/Division'
         contacts:
           type: array
           items:
@@ -447,6 +446,17 @@ paths:
               schema: { $ref: '#/components/schemas/Shortname' }
         default:
           $ref: '#/components/responses/Error'
+  /divisions:
+    get:
+      summary: List of all divisions in our organization.
+      security: []
+      responses:
+        '200':
+          description: List of divisions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Division'
   /statistics:
     get:
       summary: List of all statistics

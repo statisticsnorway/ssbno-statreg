@@ -3,6 +3,7 @@ import {
   setDepartmentsNb,
   setDepartmentsEn,
   getDepartmentsFromKlass,
+  getDivisionsFromKlass,
   getDivisionFromCode,
 } from '@/services/klassService'
 import process from 'node:process'
@@ -93,6 +94,62 @@ describe('klassService ', async () => {
     })
   })
 
+  describe('getDivisionsFromKlass', async () => {
+    test('returns only level 2 items as divisions', async () => {
+      setClassificationItems(mockClassificationItems)
+
+      const divisions = await getDivisionsFromKlass()
+
+      expect(fetchMock).toHaveBeenCalledExactlyOnceWith(
+        'https://data.ssb.no/api/klass/v1/versions/3009.json?language=nb'
+      )
+      expect(divisions).toStrictEqual([
+        { code: '110', name: 'Seksjon A1' },
+        { code: '120', name: 'Seksjon A2' },
+        { code: '210', name: 'Seksjon B1' },
+      ])
+    })
+
+    test('fetches correct url when language "en" is passed', async () => {
+      setClassificationItems(mockClassificationItems)
+
+      await getDivisionsFromKlass('en')
+
+      expect(fetchMock).toHaveBeenCalledExactlyOnceWith(
+        'https://data.ssb.no/api/klass/v1/versions/3009.json?language=en'
+      )
+    })
+
+    test('uses KLASS_BASE_URL env var when present', async () => {
+      process.env.KLASS_BASE_URL = 'https://example.test'
+      setClassificationItems(mockClassificationItems)
+
+      await getDivisionsFromKlass()
+
+      expect(fetchMock).toHaveBeenCalledExactlyOnceWith(
+        'https://example.test/api/klass/v1/versions/3009.json?language=nb'
+      )
+    })
+
+    test('returns empty array when no level 2 items exist', async () => {
+      setClassificationItems({ classificationItems: [{ level: '1', code: '100', name: 'Avdeling A' }] })
+
+      const divisions = await getDivisionsFromKlass()
+
+      expect(divisions).toStrictEqual([])
+    })
+
+    test('catches and logs on fetch errors', async () => {
+      fetchMock.mockImplementationOnce(async () => {
+        throw new Error('network error')
+      })
+
+      const divisions = await getDivisionsFromKlass()
+
+      expect(divisions).toStrictEqual([])
+    })
+  })
+
   describe('getDivisionFromCode', async () => {
     beforeEach(() => {
       setDepartmentsNb(mockDepartments)
@@ -100,20 +157,20 @@ describe('klassService ', async () => {
     })
 
     test('returns the correct division for "nb" when found', async () => {
-      const division = getDivisionFromCode(210)
+      const division = getDivisionFromCode('210')
 
-      expect(division).toStrictEqual({ code: 210, name: 'Seksjon B1' })
+      expect(division).toStrictEqual({ code: '210', name: 'Seksjon B1' })
     })
 
     test('returns the correct division for "en" when found', async () => {
-      const division = getDivisionFromCode(110, 'en')
+      const division = getDivisionFromCode('110', 'en')
 
-      expect(division).toStrictEqual({ code: 110, name: 'Division A1' })
+      expect(division).toStrictEqual({ code: '110', name: 'Division A1' })
     })
 
     test('returns undefined when the division code does not exist', async () => {
-      const divisionNb = getDivisionFromCode(999)
-      const divisionEn = getDivisionFromCode(999, 'en')
+      const divisionNb = getDivisionFromCode('999')
+      const divisionEn = getDivisionFromCode('999', 'en')
 
       expect(divisionNb).toBeUndefined()
       expect(divisionEn).toBeUndefined()
@@ -123,8 +180,8 @@ describe('klassService ', async () => {
       setDepartmentsNb([])
       setDepartmentsEn([])
 
-      const divisionNb = getDivisionFromCode(999)
-      const divisionEn = getDivisionFromCode(999, 'en')
+      const divisionNb = getDivisionFromCode('999')
+      const divisionEn = getDivisionFromCode('999', 'en')
 
       expect(divisionNb).toBeUndefined()
       expect(divisionEn).toBeUndefined()
@@ -152,32 +209,32 @@ const mockInvalidClassificationItems = {
 
 const mockDepartments = [
   {
-    code: 100,
+    code: '100',
     name: 'Avdeling A',
     divisions: [
-      { code: 110, name: 'Seksjon A1' },
-      { code: 120, name: 'Seksjon A2' },
+      { code: '110', name: 'Seksjon A1' },
+      { code: '120', name: 'Seksjon A2' },
     ],
   },
   {
-    code: 200,
+    code: '200',
     name: 'Avdeling B',
-    divisions: [{ code: 210, name: 'Seksjon B1' }],
+    divisions: [{ code: '210', name: 'Seksjon B1' }],
   },
 ]
 
 const mockDepartmentsEn = [
   {
-    code: 100,
+    code: '100',
     name: 'Department A',
     divisions: [
-      { code: 110, name: 'Division A1' },
-      { code: 120, name: 'Division A2' },
+      { code: '110', name: 'Division A1' },
+      { code: '120', name: 'Division A2' },
     ],
   },
   {
-    code: 200,
+    code: '200',
     name: 'Department B',
-    divisions: [{ code: 210, name: 'Division B1' }],
+    divisions: [{ code: '210', name: 'Division B1' }],
   },
 ]
