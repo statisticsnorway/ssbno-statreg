@@ -27,7 +27,7 @@ type ValidatedCreateStatisticInput = {
   first_released_at?: Date
   main_language: string
   statistic_region_levels?: {
-    code?: string | undefined
+    code?: string
   }[]
   comment: string
   contacts?: StatisticCreate['contacts']
@@ -37,7 +37,7 @@ type ValidatedCreateStatisticInput = {
 type ValidatedStatisticInput = {
   division: string | null | undefined
   statistic_region_levels?: {
-    code?: string | undefined
+    code?: string
   }[]
   status?: string
   name: string
