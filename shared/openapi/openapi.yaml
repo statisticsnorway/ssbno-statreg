@@ -457,6 +457,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Division'
+        default:
+          $ref: '#/components/responses/Error'
   /statistics:
     get:
       summary: List of all statistics
