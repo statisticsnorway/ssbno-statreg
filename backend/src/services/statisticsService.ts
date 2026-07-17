@@ -26,6 +26,9 @@ type ValidatedCreateStatisticInput = {
   name_en?: string
   first_released_at?: Date
   main_language: string
+  statistic_region_levels?: {
+    code?: string | undefined
+  }[]
   comment: string
   contacts?: StatisticCreate['contacts']
   variants?: StatisticCreate['variants']
@@ -428,10 +431,15 @@ export async function createStatistic(
   await statisticsAsserts.assertShortnameExistsAndIsAvailable(safeShortname, prisma)
 
   const createStatisticStatus = parseCreateStatisticStatus(body)
-  const { division, name, name_en, first_released_at, main_language, comment } = parseCreateStatisticInput(
-    body,
-    createStatisticStatus
-  )
+  const {
+    division,
+    name,
+    name_en,
+    first_released_at,
+    main_language,
+    statistic_region_levels = [],
+    comment,
+  } = parseCreateStatisticInput(body, createStatisticStatus)
 
   const result = await prisma.statistic.create({
     data: {
@@ -447,6 +455,11 @@ export async function createStatistic(
       ...(first_released_at ? { first_release: first_released_at } : {}),
       comment: comment || `Create statistic with shortname: ${shortname}`,
       division_code: division,
+      statistic_region_levels: {
+        create: statistic_region_levels.map(({ code }) => ({
+          region_level: { connect: { code } },
+        })),
+      },
       shortname: {
         connect: {
           name: safeShortname,
@@ -474,10 +487,8 @@ export function parseCreateStatisticInput(
   status: CreatableStatisticStatus
 ): ValidatedCreateStatisticInput {
   const requiredFields = getRequiredStatisticFields(status)
-  const { division, name, name_en, first_released_at, main_language, comment } = ensureRequiredFieldsExists(
-    body ?? {},
-    requiredFields
-  )
+  const { division, name, name_en, first_released_at, main_language, statistic_region_levels, comment } =
+    ensureRequiredFieldsExists(body ?? {}, requiredFields)
 
   const safeName = sanitize(name)
   const safeNameEn = sanitize(name_en)
@@ -501,6 +512,7 @@ export function parseCreateStatisticInput(
     name: safeName,
     ...(safeNameEn ? { name_en: safeNameEn } : {}),
     ...(first_released_at ? { first_released_at: parseDateOnly(first_released_at, 'first_released_at') } : {}),
+    statistic_region_levels,
     main_language: language,
     comment: safeComment,
   }
