@@ -1,6 +1,5 @@
 import { getDivisionsCache } from '@/lib/cache'
 import { handleErrors } from '@/lib/prismaErrors'
-
 import { Router } from 'express'
 
 export default function divisionsController(router: Router) {

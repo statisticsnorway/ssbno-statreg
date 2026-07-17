@@ -3,6 +3,7 @@ import {
   setDepartmentsNb,
   setDepartmentsEn,
   getDepartmentsFromKlass,
+  getDivisionsFromKlass,
   getDivisionFromCode,
 } from '@/services/klassService'
 import process from 'node:process'
@@ -90,6 +91,62 @@ describe('klassService ', async () => {
       })
       const departments = await getDepartmentsFromKlass()
       expect(departments).toStrictEqual([])
+    })
+  })
+
+  describe('getDivisionsFromKlass', async () => {
+    test('returns only level 2 items as divisions', async () => {
+      setClassificationItems(mockClassificationItems)
+
+      const divisions = await getDivisionsFromKlass()
+
+      expect(fetchMock).toHaveBeenCalledExactlyOnceWith(
+        'https://data.ssb.no/api/klass/v1/versions/3009.json?language=nb'
+      )
+      expect(divisions).toStrictEqual([
+        { code: '110', name: 'Seksjon A1' },
+        { code: '120', name: 'Seksjon A2' },
+        { code: '210', name: 'Seksjon B1' },
+      ])
+    })
+
+    test('fetches correct url when language "en" is passed', async () => {
+      setClassificationItems(mockClassificationItems)
+
+      await getDivisionsFromKlass('en')
+
+      expect(fetchMock).toHaveBeenCalledExactlyOnceWith(
+        'https://data.ssb.no/api/klass/v1/versions/3009.json?language=en'
+      )
+    })
+
+    test('uses KLASS_BASE_URL env var when present', async () => {
+      process.env.KLASS_BASE_URL = 'https://example.test'
+      setClassificationItems(mockClassificationItems)
+
+      await getDivisionsFromKlass()
+
+      expect(fetchMock).toHaveBeenCalledExactlyOnceWith(
+        'https://example.test/api/klass/v1/versions/3009.json?language=nb'
+      )
+    })
+
+    test('returns empty array when no level 2 items exist', async () => {
+      setClassificationItems({ classificationItems: [{ level: '1', code: '100', name: 'Avdeling A' }] })
+
+      const divisions = await getDivisionsFromKlass()
+
+      expect(divisions).toStrictEqual([])
+    })
+
+    test('catches and logs on fetch errors', async () => {
+      fetchMock.mockImplementationOnce(async () => {
+        throw new Error('network error')
+      })
+
+      const divisions = await getDivisionsFromKlass()
+
+      expect(divisions).toStrictEqual([])
     })
   })
 
