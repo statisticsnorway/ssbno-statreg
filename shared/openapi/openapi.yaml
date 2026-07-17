@@ -268,7 +268,9 @@ components:
         statistic_region_levels:
           type: array
           items:
-            $ref: '#/components/schemas/Region_level'
+            type: object
+            properties:
+              code: { type: string }
         previous_topic_codes: { type: string, nullable: true }
         comment: { type: string }
         variants:

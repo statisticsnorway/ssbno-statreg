@@ -1099,7 +1099,9 @@ export interface components {
       /** Format: date */
       first_released_at?: string | null
       yearly_reporting?: boolean
-      statistic_region_levels?: components['schemas']['Region_level'][]
+      statistic_region_levels?: {
+        code?: string
+      }[]
       previous_topic_codes?: string | null
       comment?: string
       variants?: components['schemas']['Variant'][]

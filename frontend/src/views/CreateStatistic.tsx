@@ -130,15 +130,7 @@ export default function CreateStatistic() {
         ...values,
         status: { code: values.status },
         first_released_at: values.first_released_at ? `${values.first_released_at}-12-31` : '',
-        statistic_region_levels: regionLevelValues.length
-          ? regionLevelValues.map((code: string) => {
-              const level = regionLevelCheckboxData.find((item) => item.code === code)
-              return {
-                code,
-                name: level?.name ?? '',
-              }
-            })
-          : [],
+        statistic_region_levels: regionLevelValues.length ? regionLevelValues.map((code: string) => code) : [],
         approval_status: ApprovalStatus['ACCEPTED'],
       },
     })
