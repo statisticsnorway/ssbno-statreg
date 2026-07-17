@@ -20,7 +20,7 @@ async function setDivisionsCache(): Promise<void> {
   try {
     cacheDay.set(DIVISIONS_CACHE_KEY, await getDivisionsFromKlass())
   } catch (error) {
-    console.log(`Failed to cache divisions from Klas, error: ${error}`)
+    console.log(`Failed to cache divisions from Klass, error: ${error}`)
     return
   }
 }
