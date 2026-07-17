@@ -168,7 +168,7 @@ export async function getStatistics(
           code: parseStatusCode(statistic.status),
         },
         division: {
-          name: getDivisionFromCode(Number(divisionCode))?.name,
+          name: getDivisionFromCode(divisionCode)?.name,
           code: divisionCode,
         },
         name: statistic.name,
@@ -226,7 +226,7 @@ export function parseStatisticVariants(
 
 export async function mapStatisticDetails(statistic: StatisticPrismaResult): Promise<StatisticDetails> {
   const main_language = statistic.language
-  const division_code = statistic.division_code
+  const division_code = statistic.division_code ?? ''
   const relation = statistic.related_statistic?.shortname
     ? {
         shortname: statistic.related_statistic?.shortname?.name,
@@ -243,7 +243,7 @@ export async function mapStatisticDetails(statistic: StatisticPrismaResult): Pro
     main_language,
     division: {
       code: division_code,
-      name: getDivisionFromCode(Number(division_code))?.name,
+      name: getDivisionFromCode(division_code)?.name,
     },
     first_released_at: dateToISOString(statistic.first_release),
     yearly_reporting: statistic.yearly_reporting,
@@ -569,7 +569,7 @@ export function parseDivision(division?: string | null) {
     throw { statregError: "Field 'division' must be a number." }
   }
 
-  if (!getDivisionFromCode(Number(division))) {
+  if (!getDivisionFromCode(division)) {
     throw { statregError: "Field 'division' does not correspond to an existing division." }
   }
 
