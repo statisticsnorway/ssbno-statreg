@@ -487,8 +487,15 @@ export function parseCreateStatisticInput(
   status: CreatableStatisticStatus
 ): ValidatedCreateStatisticInput {
   const requiredFields = getRequiredStatisticFields(status)
-  const { division, name, name_en, first_released_at, main_language, statistic_region_levels, comment } =
-    ensureRequiredFieldsExists(body ?? {}, requiredFields)
+  const {
+    division,
+    name,
+    name_en,
+    first_released_at,
+    main_language,
+    statistic_region_levels = [],
+    comment,
+  } = ensureRequiredFieldsExists(body ?? {}, requiredFields)
 
   const safeName = sanitize(name)
   const safeNameEn = sanitize(name_en)
