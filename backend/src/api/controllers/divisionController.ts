@@ -1,6 +1,6 @@
 import { getDivisionsCache } from '@/lib/cache'
 import { handleErrors } from '@/lib/prismaErrors'
-import { Router } from 'express'
+import { type Router } from 'express'
 
 export default function divisionsController(router: Router) {
   router.get('/divisions', async (_req, res) => {
