@@ -5,6 +5,7 @@ import type { components, paths } from './api-types'
 export type BlockedReleaseDate = components['schemas']['Blocked_release_date']
 export type CalenderDate = components['schemas']['Calender_date']
 export type Contact = components['schemas']['Contact']
+export type Division = components['schemas']['Division']
 export type Frequency = components['schemas']['Frequency']
 export type LevelOfDetail = components['schemas']['Level_of_detail']
 export type RegionLevel = components['schemas']['Region_level']
