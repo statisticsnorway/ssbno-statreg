@@ -89,7 +89,7 @@ components:
         application/json:
           schema:
             type: array
-            items: 
+            items:
               $ref: '#/components/schemas/Blocked_release_date'
 
   schemas:
@@ -133,6 +133,8 @@ components:
 
     Contact:
       type: object
+      required:
+        - principalName
       properties:
         name: { type: string, readOnly: true }
         principalName: { type: string, readOnly: true }
@@ -257,7 +259,11 @@ components:
         status:
           type: object
           properties:
-            code: { type: string, description: "Is one of K (Kommende), A (Aktiv), IA (Ikke-aktiv), UT (Opphørt), SA (Sammenslått) or SP (Splittet)" }
+            code:
+              {
+                type: string,
+                description: 'Is one of K (Kommende), A (Aktiv), IA (Ikke-aktiv), UT (Opphørt), SA (Sammenslått) or SP (Splittet)',
+              }
         name: { type: string }
         name_en: { type: string }
         approval_status: { type: string, description: " Is one of 'GODKJENT', 'AVVIST' or 'FORSLAG'" }
@@ -351,7 +357,7 @@ components:
         created_at: { type: string, format: date-time, readOnly: true }
         variants:
           type: array
-          items: 
+          items:
             $ref: '#/components/schemas/Variant'
         contacts:
           type: array
@@ -402,7 +408,7 @@ paths:
             application/json:
               schema:
                 type: array
-                items: 
+                items:
                   $ref: '#/components/schemas/Contact'
         default:
           $ref: '#/components/responses/Error'
@@ -482,7 +488,7 @@ paths:
                     type: integer
                   statistics:
                     type: array
-                    items: 
+                    items:
                       $ref: '#/components/schemas/Statistic_listing'
         default:
           $ref: '#/components/responses/Error'
@@ -703,6 +709,8 @@ paths:
               schema:
                 type: array
                 items: { $ref: '#/components/schemas/Contact' }
+        default:
+          $ref: '#/components/responses/Error'
 
   /releases:
     get:
@@ -741,7 +749,7 @@ paths:
                     type: integer
                   releases:
                     type: array
-                    items: 
+                    items:
                       $ref: '#/components/schemas/Release_listing'
         default:
           $ref: '#/components/responses/Error'
