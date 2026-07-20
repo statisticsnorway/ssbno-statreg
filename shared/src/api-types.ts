@@ -1066,9 +1066,14 @@ export interface components {
       name?: string | null
       name_en?: string | null
     }
-    /** @description Valid region levels are (name in parethesis): L (Land), LD (Landsdel), F (Fylke), K (Kommune), BD (Bydel og krets) */
+    /**
+     * @description L (Land), LD (Landsdel), F (Fylke), K (Kommune), BD (Bydel og krets)
+     * @enum {string}
+     */
+    Region_level_code: 'L' | 'LD' | 'F' | 'K' | 'BD'
+    /** @description Valid region levels */
     Region_level: {
-      code?: string
+      code?: components['schemas']['Region_level_code']
       name?: string
     }
     /** @description A shortname with its identifier */
@@ -1124,45 +1129,82 @@ export interface components {
     Revision: {
       code?: string
     }
+    /**
+     * @description K (Kommende), A (Aktiv), IA (Ikke-aktiv), UT (Opphørt), SA (Sammenslått) or SP (Splittet)
+     * @enum {string}
+     */
+    Statistic_status_code: 'K' | 'A' | 'IA' | 'UT' | 'SA' | 'SP'
+    /** @enum {string} */
+    Statistic_approval_status: 'GODKJENT' | 'AVVIST' | 'FORSLAG'
+    /**
+     * @description Main language will be either 'nn' or 'nb' for statistics
+     * @enum {string}
+     */
+    Statistic_main_language: 'nn' | 'nb'
     Statistic: {
       readonly shortname?: string
-      /** @description Main language will be either 'nn' or 'nb' for statistics */
-      main_language?: string
+      main_language?: components['schemas']['Statistic_main_language']
       status?: {
-        /** @description Is one of K (Kommende), A (Aktiv), IA (Ikke-aktiv), UT (Opphørt), SA (Sammenslått) or SP (Splittet) */
-        code?: string
+        code?: components['schemas']['Statistic_status_code']
       }
       name?: string
       name_en?: string
-      /** @description Is one of 'GODKJENT', 'AVVIST' or 'FORSLAG' */
-      approval_status?: string
+      approval_status?: components['schemas']['Statistic_approval_status']
     }
     Statistic_create_base: {
-      division?: string | null
+      name?: string
+      name_en?: string
+      division?: string
+      main_language?: components['schemas']['Statistic_main_language']
+      /** Format: date */
+      first_released_at?: string
+      yearly_reporting?: boolean
+      statistic_region_levels?: components['schemas']['Region_level_code'][]
+      previous_topic_codes?: string
+      comment?: string
+      variants?: components['schemas']['Variant'][]
+      /** @description List of principal names to set as contacts for the statistic */
+      contacts?: string[]
+    }
+    Statistic_create_upcoming: {
+      name: string
+      division: string
+      /**
+       * @description Must be "K" for creation of upcoming statistics
+       * @constant
+       */
+      status: 'K'
+      main_language?: components['schemas']['Statistic_main_language']
+      name_en?: string
       /** Format: date */
       first_released_at?: string | null
       yearly_reporting?: boolean
-      statistic_region_levels?: {
-        code?: string
-      }[]
+      statistic_region_levels?: components['schemas']['Region_level_code'][]
       previous_topic_codes?: string | null
       comment?: string
       variants?: components['schemas']['Variant'][]
-      contacts?: {
-        principalName?: string
-      }[]
-    } & components['schemas']['Statistic']
-    Statistic_create_upcoming: components['schemas']['Statistic_create_base'] & {
-      status?: {
-        /** @description Must be "K" for creation of upcoming statistics */
-        code: string
-      }
+      /** @description List of principal names to set as contacts for the statistic */
+      contacts?: string[]
     }
-    Statistic_create_active: components['schemas']['Statistic_create_base'] & {
-      status: {
-        /** @description Must be "A" for creation of active statistics */
-        code: string
-      }
+    Statistic_create_active: {
+      name: string
+      name_en: string
+      division: string
+      main_language: components['schemas']['Statistic_main_language']
+      /**
+       * @description Must be "A" for creation of active statistics
+       * @constant
+       */
+      status: 'A'
+      /** Format: date */
+      first_released_at?: string | null
+      yearly_reporting?: boolean
+      statistic_region_levels?: components['schemas']['Region_level_code'][]
+      previous_topic_codes?: string | null
+      comment?: string
+      variants: components['schemas']['Variant'][]
+      /** @description List of principal names to set as contacts for the statistic */
+      contacts: string[]
     }
     Statistic_create:
       | components['schemas']['Statistic_create_upcoming']
