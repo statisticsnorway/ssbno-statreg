@@ -25,15 +25,8 @@ import client from '../api'
 
 import './CreateStatistic.css'
 
-import {
-  isCreateStatisticFieldRequired,
-  ApprovalStatus,
-} from '@ssbno-statreg/shared'
-import type {
-  CreatableStatisticStatus,
-  Division,
-  Contact,
-} from '@ssbno-statreg/shared'
+import { isCreateStatisticFieldRequired, ApprovalStatus } from '@ssbno-statreg/shared'
+import type { CreatableStatisticStatus, Division, Contact } from '@ssbno-statreg/shared'
 import ErrorPage, { ErrorType } from './ErrorPage'
 import { ErrorAlert } from '../components/ErrorAlert'
 import { CreateShortnameModal } from '../components/CreateShortnameModal'
@@ -181,6 +174,9 @@ export default function CreateStatistic() {
             }))
           : [],
         approval_status: ApprovalStatus['ACCEPTED'],
+        contacts: selectedContacts.map((principalName) => ({
+          principalName,
+        })),
       },
     })
 
@@ -310,12 +306,17 @@ export default function CreateStatistic() {
               />
             </Field>
             <Divider />
-            <Heading level={2}>Kontakter</Heading>
-            <Field>
-              <Label>Søk og legg til kontakt</Label>
-              <Field.Description>Navn vises under overskriften 'Kontakt' på statistikksiden på ssb.no</Field.Description>
-              <ContactSelection contacts={contacts} selected={selectedContacts} setSelected={setSelectedContacts} />
-            </Field>
+            <div className='contact-section'>
+              <Heading level={2} data-size='xs'>
+                Kontakter
+              </Heading>
+              <Paragraph className='contact-section-description'>
+                Søk og legg til kontakt. Navn vises under overskriften 'Kontakt' på statistikksiden på ssb.no
+              </Paragraph>
+              <Field className='contact-field'>
+                <ContactSelection contacts={contacts} selected={selectedContacts} setSelected={setSelectedContacts} />
+              </Field>
+            </div>
             <Divider />
             <Heading level={2}>Detaljer</Heading>
             <Field>
