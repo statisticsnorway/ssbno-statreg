@@ -379,7 +379,7 @@ export async function updateContacts(
 
   const existingStatistic = await prisma.statistic.findFirst({
     where: { shortname: { name: safeShortname } },
-    select: { id: true },
+    select: { id: true, status: true },
   })
   if (!existingStatistic) {
     return Promise.reject({ status: 404, statregError: `Shortname '${safeShortname}' not found` })
@@ -399,6 +399,11 @@ export async function updateContacts(
       })
     )
   )
+
+  if (existingStatistic.status === StatisticStatus.A && newContacts.length === 0) {
+    return Promise.reject({ statregError: 'An active statistic needs at least one contact' })
+  }
+
   const updatedStatistic = await prisma.statistic.update({
     // https://docs.prisma.io/docs/orm/reference/prisma-client-reference#set
     where: { id: existingStatistic.id },
