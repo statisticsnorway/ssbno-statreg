@@ -3,14 +3,14 @@ import { useNavigate } from 'react-router'
 import { Button, Heading, Dialog, Field, Input, ValidationMessage, Paragraph } from '@digdir/designsystemet-react'
 
 import client from '../api'
-import type { ShortnameListing, Shortname } from '@ssbno-statreg/shared'
+import type { ShortnameListing } from '@ssbno-statreg/shared'
 import { useAuth } from '../context/AuthContext'
 import { ErrorAlert } from '../components/ErrorAlert'
 
 type CreateShortnameModalProps = {
   openCreateShortnameModal: boolean
   setOpenCreateReleaseModal: (open: boolean) => void
-  setCreatedShortname: (shortname: Shortname) => void
+  setCreatedShortname: (shortname: string) => void
 }
 
 export function CreateShortnameModal({
@@ -83,7 +83,7 @@ export function CreateShortnameModal({
       setApiError((prev) => [...prev, error.message])
       return
     }
-    setCreatedShortname(data)
+    setCreatedShortname(data.shortname)
     setOpenCreateReleaseModal(false)
   }
 

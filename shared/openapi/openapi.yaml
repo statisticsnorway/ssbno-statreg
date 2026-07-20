@@ -279,7 +279,9 @@ components:
         statistic_region_levels:
           type: array
           items:
-            $ref: '#/components/schemas/Region_level'
+            type: object
+            properties:
+              code: { type: string }
         previous_topic_codes: { type: string, nullable: true }
         comment: { type: string }
         variants:
@@ -461,6 +463,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Division'
+        default:
+          $ref: '#/components/responses/Error'
   /statistics:
     get:
       summary: List of all statistics
@@ -511,6 +515,12 @@ paths:
     post:
       summary: Create a new statistic
       tags: [statistics]
+      parameters:
+      - name: shortname
+        in: path
+        required: true
+        schema:
+          type: string
       requestBody:
         required: true
         content:

@@ -530,6 +530,7 @@ describe('statisticService', () => {
         version: 1,
         desk_appoval_status: ApprovalStatus.PENDING,
         status: 'K',
+        statistic_region_levels: [],
       })
 
       await createStatistic(
@@ -560,6 +561,9 @@ describe('statisticService', () => {
           date_created: now,
           last_updated: now,
           desk_appoval_status: ApprovalStatus.ACCEPTED,
+          statistic_region_levels: {
+            create: [],
+          },
           shortname: {
             connect: {
               name: 'kpi',
@@ -733,6 +737,7 @@ describe('statisticService', () => {
         main_language: 'nb',
         comment: '',
         first_released_at: new Date('2024-04-01T00:00:00.000Z'),
+        statistic_region_levels: [],
       }
     })
 
