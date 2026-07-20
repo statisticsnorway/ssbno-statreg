@@ -290,10 +290,9 @@ components:
             $ref: '#/components/schemas/Variant'
         contacts:
           type: array
+          description: List of principal names to set as contacts for the statistic.
           items:
-            type: object
-            properties:
-              principalName: { type: string }
+            type: string
 
     Statistic_create_upcoming:
       allOf:

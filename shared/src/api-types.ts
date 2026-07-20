@@ -1148,9 +1148,8 @@ export interface components {
       previous_topic_codes?: string | null
       comment?: string
       variants?: components['schemas']['Variant'][]
-      contacts?: {
-        principalName?: string
-      }[]
+      /** @description List of principal names to set as contacts for the statistic. */
+      contacts?: string[]
     } & components['schemas']['Statistic']
     Statistic_create_upcoming: components['schemas']['Statistic_create_base'] & {
       status?: {

@@ -174,9 +174,7 @@ export default function CreateStatistic() {
             }))
           : [],
         approval_status: ApprovalStatus['ACCEPTED'],
-        contacts: selectedContacts.map((principalName) => ({
-          principalName,
-        })),
+        contacts: selectedContacts,
       },
     })
 
