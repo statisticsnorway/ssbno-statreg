@@ -106,6 +106,42 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/divisions': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** List of all divisions in our organization. */
+    get: {
+      parameters: {
+        query?: never
+        header?: never
+        path?: never
+        cookie?: never
+      }
+      requestBody?: never
+      responses: {
+        /** @description List of divisions */
+        200: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            'application/json': components['schemas']['Division']
+          }
+        }
+      }
+    }
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/statistics': {
     parameters: {
       query?: never
@@ -1013,6 +1049,11 @@ export interface components {
       readonly name?: string
       readonly principalName: string
     }
+    Division: {
+      code?: string
+      readonly name?: string
+      note?: string | null
+    }
     Frequency: {
       name?: string
       code?: string
@@ -1126,10 +1167,7 @@ export interface components {
     } & components['schemas']['Statistic_create_base']
     Statistic_details: {
       version?: number
-      division?: {
-        code?: string | null
-        readonly name?: string
-      }
+      division?: components['schemas']['Division']
       /** Format: date */
       first_released_at?: string | null
       yearly_reporting?: boolean
@@ -1149,10 +1187,7 @@ export interface components {
       statistic_region_levels?: components['schemas']['Region_level'][]
     } & components['schemas']['Statistic']
     Statistic_listing: {
-      division?: {
-        code?: string | null
-        readonly name?: string
-      }
+      division?: components['schemas']['Division']
       contacts?: components['schemas']['Contact'][]
     } & components['schemas']['Statistic']
     Variant: {
