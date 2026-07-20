@@ -27,13 +27,17 @@ import './CreateStatistic.css'
 
 import {
   isCreateStatisticFieldRequired,
-  type CreatableStatisticStatus,
   ApprovalStatus,
-  type Division,
+} from '@ssbno-statreg/shared'
+import type {
+  CreatableStatisticStatus,
+  Division,
+  Contact,
 } from '@ssbno-statreg/shared'
 import ErrorPage, { ErrorType } from './ErrorPage'
 import { ErrorAlert } from '../components/ErrorAlert'
 import { CreateShortnameModal } from '../components/CreateShortnameModal'
+import { ContactSelection } from '../components/ContactSelection'
 
 type StatisticFormValues = {
   status: CreatableStatisticStatus
@@ -51,6 +55,8 @@ export default function CreateStatistic() {
   const [openCreateShortnameModal, setOpenCreateShortnameModal] = useState<boolean>(true)
   const [createdShortname, setCreatedShortname] = useState<string>('')
   const [divisions, setDivisions] = useState<Division[]>([])
+  const [contacts, setContacts] = useState<Contact[]>([])
+  const [selectedContacts, setSelectedContacts] = useState<string[]>([])
 
   const { getCheckboxProps, value: regionLevelValues } = useCheckboxGroup({
     name: 'region-level-checkbox',
@@ -112,6 +118,22 @@ export default function CreateStatistic() {
       setDivisions((Object.values(data) as Division[]) ?? [])
     }
     fetchDivisions()
+  }, [createdShortname, isAdmin])
+
+  useEffect(() => {
+    if (!createdShortname || !isAdmin) return
+
+    async function fetchContacts() {
+      const { data, error } = await client.GET('/contacts')
+
+      if (error) {
+        setApiError((prev) => [...prev, error.message])
+        return
+      }
+
+      setContacts(data ?? [])
+    }
+    fetchContacts()
   }, [createdShortname, isAdmin])
 
   function isRequired(field: keyof StatisticFormValues) {
@@ -286,6 +308,13 @@ export default function CreateStatistic() {
                 value={values.name_en}
                 onChange={(e) => setValues((prevValues) => ({ ...prevValues, name_en: e.target.value }))}
               />
+            </Field>
+            <Divider />
+            <Heading level={2}>Kontakter</Heading>
+            <Field>
+              <Label>Søk og legg til kontakt</Label>
+              <Field.Description>Navn vises under overskriften 'Kontakt' på statistikksiden på ssb.no</Field.Description>
+              <ContactSelection contacts={contacts} selected={selectedContacts} setSelected={setSelectedContacts} />
             </Field>
             <Divider />
             <Heading level={2}>Detaljer</Heading>
