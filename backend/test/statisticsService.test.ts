@@ -1,14 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { vi, describe, test, expect, beforeEach } from 'vitest'
-import { ApprovalStatus, StatisticStatus, type StatisticCreate, type StatisticUpdate } from '@ssbno-statreg/shared'
+import { ApprovalStatus, StatisticStatus, type StatisticUpdate } from '@ssbno-statreg/shared'
 import { statisticsAsserts } from '@/lib/asserts'
 import {
   getFilteredStatistics,
   getStatisticByShortname,
   parseStatisticVariants,
   mapStatisticDetails,
-  parseStatisticInput,
+  parseCreateStatisticInput,
+  parseUpdateStatisticInput,
   updateStatistic,
+  updateContacts,
   createStatistic,
   StatisticsDetailedIncludes,
   parseDivision,
@@ -28,10 +30,10 @@ const { getAllUsersFromCacheMock, fetchDivisionMock } = vi.hoisted(() => ({
       },
     }
   }),
-  fetchDivisionMock: vi.fn((code: number, language?: string) => {
-    if (code === 104 && language === 'en') return { code: 104, name: 'Division A1' }
-    if (code === 104) return { code: 104, name: 'Seksjon A1' }
-    if (code === 105) return { code: 105, name: 'Seksjon B1' }
+  fetchDivisionMock: vi.fn((code: string, language?: string) => {
+    if (code === '104' && language === 'en') return { code: '104', name: 'Division A1' }
+    if (code === '104') return { code: '104', name: 'Seksjon A1' }
+    if (code === '105') return { code: '105', name: 'Seksjon B1' }
   }),
 }))
 
@@ -82,6 +84,9 @@ describe('statisticService', () => {
       },
       shortname: {
         findUnique: vi.fn(() => Promise.resolve({ name: 'kpi', id: 1 })),
+      },
+      responsiblePerson: {
+        upsert: vi.fn(),
       },
     }
     statisticsAsserts.assertFilteredShortnamesExist = vi.fn(async () => true) as any
@@ -429,6 +434,78 @@ describe('statisticService', () => {
     })
   })
 
+  describe('updateContacts ', async () => {
+    beforeEach(() => {
+      prismaMock.statistic.findFirst.mockResolvedValue({ id: 1 })
+
+      getAllUsersFromCacheMock.mockImplementation(async () => ({
+        'abc@ssb.no': {
+          displayName: 'Alice',
+          userPrincipalName: 'abc@ssb.no',
+          mail: 'alice@ssb.no',
+          businessPhones: [],
+        },
+        'bcd@ssb.no': {
+          displayName: 'Bob',
+          userPrincipalName: 'bcd@ssb.no',
+          mail: 'bob@ssb.no',
+          businessPhones: ['11223344'],
+        },
+      }))
+
+      prismaMock.responsiblePerson.upsert.mockResolvedValueOnce({ id: 2 }).mockResolvedValueOnce({ id: 3 })
+
+      prismaMock.statistic.update.mockResolvedValue({
+        responsiblePersons: [{ principalName: 'abc@ssb.no' }, { principalName: 'bcd@ssb.no' }],
+      })
+    })
+
+    test('returns updated contacts when valid shortname and principal names are provided', async () => {
+      const result = await updateContacts('helse', ['abc@ssb.no', 'bcd@ssb.no'], prismaMock)
+
+      expect(prismaMock.statistic.findFirst).toHaveBeenCalledExactlyOnceWith({
+        where: { shortname: { name: 'helse' } },
+        select: { id: true },
+      })
+      expect(prismaMock.responsiblePerson.upsert).toHaveBeenCalledTimes(2)
+      expect(prismaMock.responsiblePerson.upsert).toHaveBeenNthCalledWith(1, {
+        where: { principalName: 'abc@ssb.no' },
+        create: { principalName: 'abc@ssb.no' },
+        update: {},
+      })
+      expect(prismaMock.responsiblePerson.upsert).toHaveBeenNthCalledWith(2, {
+        where: { principalName: 'bcd@ssb.no' },
+        create: { principalName: 'bcd@ssb.no' },
+        update: {},
+      })
+      expect(prismaMock.statistic.update).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({
+          where: { id: 1 },
+          data: {
+            responsiblePersons: {
+              set: [{ id: 2 }, { id: 3 }],
+            },
+          },
+        })
+      )
+      expect(result).toStrictEqual([
+        { name: 'Alice', principalName: 'abc@ssb.no' },
+        { name: 'Bob', principalName: 'bcd@ssb.no' },
+      ])
+    })
+
+    test('throws error when shortname is not found', async () => {
+      prismaMock.statistic.findFirst.mockResolvedValue(null)
+
+      await expect(() => updateContacts('helse', ['abc@ssb.no'], prismaMock)).rejects.toMatchObject({
+        status: 404,
+        statregError: "Shortname 'helse' not found",
+      })
+      expect(prismaMock.responsiblePerson.upsert).toHaveBeenCalledTimes(0)
+      expect(prismaMock.statistic.update).toHaveBeenCalledTimes(0)
+    })
+  })
+
   describe('createStatistic ', () => {
     let now: Date
     beforeEach(() => {
@@ -441,6 +518,8 @@ describe('statisticService', () => {
         id: 1,
         version: 1,
         desk_appoval_status: ApprovalStatus.PENDING,
+        status: 'K',
+        statistic_region_levels: [],
       })
 
       await createStatistic(
@@ -452,6 +531,7 @@ describe('statisticService', () => {
           division: '104',
           first_released_at: '2024-04-01',
           main_language: 'nb',
+          status: { code: 'K' },
         },
         now
       )
@@ -470,6 +550,9 @@ describe('statisticService', () => {
           date_created: now,
           last_updated: now,
           desk_appoval_status: ApprovalStatus.ACCEPTED,
+          statistic_region_levels: {
+            create: [],
+          },
           shortname: {
             connect: {
               name: 'kpi',
@@ -482,15 +565,14 @@ describe('statisticService', () => {
 
     test('reject with error message if body is missing', async () => {
       await expect(() => createStatistic(prismaMock, 'kpi', undefined, now)).rejects.toMatchObject({
-        statregError: 'Missing required field(s): division, name, name_en, first_released_at',
+        statregError: "Field 'status' must be one of these: K, A.",
       })
       expect(prismaMock.statistic.create).toHaveBeenCalledTimes(0)
     })
 
     test('rejects with error message any of the required fields are missing', async () => {
-      // TODO: Add more fields to this test when validation logic are in place
-      await expect(() => createStatistic(prismaMock, 'kpi', {}, now)).rejects.toMatchObject({
-        statregError: 'Missing required field(s): division, name, name_en, first_released_at',
+      await expect(() => createStatistic(prismaMock, 'kpi', { status: { code: 'A' } }, now)).rejects.toMatchObject({
+        statregError: 'Missing required field(s): name, name_en, variants, contacts, division, main_language',
       })
       expect(prismaMock.statistic.create).toHaveBeenCalledTimes(0)
     })
@@ -626,82 +708,77 @@ describe('statisticService', () => {
     })
   })
 
-  describe('validateAndParseStatisticInput ', async () => {
-    describe('create', async () => {
-      let input: any
-      let expectedResult: any
-      const requiredCreateFields = ['division', 'name', 'name_en', 'first_released_at'] as (keyof StatisticCreate)[]
+  describe('parseCreateStatisticInput ', async () => {
+    let input: any
+    let expectedResult: any
 
-      beforeEach(() => {
-        input = {
-          division: '104',
-          name: 'Helse og helsetjenester',
-          name_en: 'Health and health services',
-          first_released_at: '2024-04-01',
-          main_language: 'nn',
-          comment: 'Kommentar om statistikken',
-        }
+    beforeEach(() => {
+      input = {
+        status: { code: 'K' },
+        division: '104',
+        name: 'Helse og helsetjenester',
+        first_released_at: '2024-04-01',
+      }
 
-        expectedResult = {
-          division: '104',
-          name: 'Helse og helsetjenester',
-          name_en: 'Health and health services',
-          first_released_at: new Date('2024-04-01T00:00:00.000Z'),
-          main_language: 'nn',
-          comment: 'Kommentar om statistikken',
-        }
-      })
+      expectedResult = {
+        division: '104',
+        name: 'Helse og helsetjenester',
+        main_language: 'nb',
+        comment: '',
+        first_released_at: new Date('2024-04-01T00:00:00.000Z'),
+        statistic_region_levels: [],
+      }
+    })
 
-      test('returns validated statistic input when all conditionals succeed', () => {
-        const result = parseStatisticInput(input, requiredCreateFields)
+    test('returns validated statistic input when all conditionals succeed', () => {
+      const result = parseCreateStatisticInput(input, 'K')
 
-        expect(result).toStrictEqual(expectedResult)
-      })
+      expect(result).toStrictEqual(expectedResult)
+    })
 
-      test('throws error when name is an empty string', () => {
-        input.name = ''
+    test('throws error when name is an empty string', () => {
+      input.name = ''
 
-        expect(() => parseStatisticInput(input, requiredCreateFields)).toThrow({
-          statregError: "Field 'name' must be a non-empty string.",
-        })
-      })
-
-      test('throws error when division is not a number', () => {
-        input.division = 'division-a'
-
-        expect(() => parseStatisticInput(input, requiredCreateFields)).toThrow({
-          statregError: "Field 'division' must be a number.",
-        })
-      })
-
-      test('throws error when division lookup does not find a match', () => {
-        input.division = '106'
-
-        expect(() => parseStatisticInput(input, requiredCreateFields)).toThrow({
-          statregError: "Field 'division' does not correspond to an existing division.",
-        })
-      })
-
-      test("throws error main_language is neither 'nb' or 'nn'", () => {
-        input.main_language = 'en'
-        expectedResult.main_language = 'nb'
-
-        expect(() => parseStatisticInput(input, requiredCreateFields)).toThrow({
-          statregError: "Field 'main_language' must be either 'nb' or 'nn'.",
-        })
-      })
-
-      test('falls back to empty string when comment is missing', () => {
-        input.comment = undefined
-        expectedResult.comment = ''
-
-        const result = parseStatisticInput(input, requiredCreateFields)
-
-        expect(result).toStrictEqual(expectedResult)
+      expect(() => parseCreateStatisticInput(input, 'K')).toThrow({
+        statregError: "Field 'name' must be a non-empty string.",
       })
     })
 
-    describe('update', async () => {
+    test('throws error when division is not a number', () => {
+      input.division = 'division-a'
+
+      expect(() => parseCreateStatisticInput(input, 'K')).toThrow({
+        statregError: "Field 'division' must be a number.",
+      })
+    })
+
+    test('throws error when division lookup does not find a match', () => {
+      input.division = '106'
+
+      expect(() => parseCreateStatisticInput(input, 'K')).toThrow({
+        statregError: "Field 'division' does not correspond to an existing division.",
+      })
+    })
+
+    test("throws error main_language is neither 'nb' or 'nn'", () => {
+      input.main_language = 'en'
+      expectedResult.main_language = 'nb'
+
+      expect(() => parseCreateStatisticInput(input, 'K')).toThrow({
+        statregError: "Field 'main_language' must be either 'nb' or 'nn'.",
+      })
+    })
+
+    test('falls back to empty string when comment is missing', () => {
+      input.comment = undefined
+      expectedResult.comment = ''
+
+      const result = parseCreateStatisticInput(input, 'K')
+
+      expect(result).toStrictEqual(expectedResult)
+    })
+
+    describe('parseUpdateStatisticInput', async () => {
       let input: any
       let expectedResult: any
       const requiredUpdateFields = [
@@ -749,7 +826,7 @@ describe('statisticService', () => {
       })
 
       test('returns validated statistic input when all conditionals succeed', () => {
-        const result = parseStatisticInput(input, requiredUpdateFields, 'update')
+        const result = parseUpdateStatisticInput(input, requiredUpdateFields)
 
         expect(result).toStrictEqual(expectedResult)
       })
@@ -757,7 +834,7 @@ describe('statisticService', () => {
       test('throws error when comment is an empty string', () => {
         input.comment = ''
 
-        expect(() => parseStatisticInput(input, requiredUpdateFields, 'update')).toThrow({
+        expect(() => parseUpdateStatisticInput(input, requiredUpdateFields)).toThrow({
           statregError: "Field 'comment' must be a non-empty string.",
         })
       })
@@ -765,7 +842,7 @@ describe('statisticService', () => {
       test('throws error when yearly_reporting is not a valid boolean', () => {
         input.yearly_reporting = 'not-a-boolean'
 
-        expect(() => parseStatisticInput(input, requiredUpdateFields, 'update')).toThrow({
+        expect(() => parseUpdateStatisticInput(input, requiredUpdateFields)).toThrow({
           statregError: "Field 'yearly_reporting' must be a boolean.",
         })
       })
@@ -773,7 +850,7 @@ describe('statisticService', () => {
       test('throws error when relation id is an invalid format', () => {
         input.relation = 'abc'
 
-        expect(() => parseStatisticInput(input, requiredUpdateFields, 'update')).toThrow({
+        expect(() => parseUpdateStatisticInput(input, requiredUpdateFields)).toThrow({
           statregError: 'Invalid relation id format',
         })
       })
@@ -781,7 +858,7 @@ describe('statisticService', () => {
       test('throws error when status is not valid value', () => {
         input.status = 'ABC'
 
-        expect(() => parseStatisticInput(input, requiredUpdateFields, 'update')).toThrow({
+        expect(() => parseUpdateStatisticInput(input, requiredUpdateFields)).toThrow({
           statregError: "Field 'status' must be one of these: K, A, IA, UT, SA, SP.",
         })
       })
@@ -867,7 +944,7 @@ const mockStatisticsPrismaResult = [
     name: 'Energiregnskap og energibalanse',
     name_en: 'Energy account and energy balance',
     shortname: { name: 'energ' },
-    division_code: 104,
+    division_code: '104',
     responsiblePersons: [
       {
         principalName: 'abc@ssb.no',
@@ -880,7 +957,7 @@ const mockStatisticsPrismaResult = [
     name: 'Befolkning og demografi',
     name_en: 'Population and demography',
     shortname: { name: 'befolk' },
-    division_code: 105,
+    division_code: '105',
     responsiblePersons: [
       {
         principalName: 'bcd@ssb.no',
@@ -975,7 +1052,7 @@ const mockedStatisticsResult = {
       status: { code: 'SA' },
       division: {
         name: 'Seksjon A1',
-        code: 104,
+        code: '104',
       },
       name: 'Energiregnskap og energibalanse',
       name_en: 'Energy account and energy balance',
@@ -986,7 +1063,7 @@ const mockedStatisticsResult = {
       main_language: 'nb',
       status: { code: 'SA' },
       division: {
-        code: 105,
+        code: '105',
         name: 'Seksjon B1',
       },
       name: 'Befolkning og demografi',

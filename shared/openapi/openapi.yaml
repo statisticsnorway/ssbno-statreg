@@ -77,15 +77,31 @@ components:
         type: string
 
   responses:
+    Error:
+      description: Error response
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+
     FutureBlockedReleaseDays:
       description: List of future blocked release days. Includes all manually blocked days, but only automatically blocked days for the next three calendar years. Sorted from earliest to latest date.
       content:
         application/json:
           schema:
             type: array
-            items: { $ref: '#/components/schemas/Blocked_release_date' }
+            items:
+              $ref: '#/components/schemas/Blocked_release_date'
 
   schemas:
+    Error:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: Error message
+
     Blocked_release_date:
       type: object
       example: { date: '2026-12-24', automatically_blocked: false, blocked_comment: 'Christmas eve' }
@@ -117,10 +133,17 @@ components:
 
     Contact:
       type: object
+      required:
+        - principalName
       properties:
         name: { type: string, readOnly: true }
         principalName: { type: string, readOnly: true }
-
+    Division:
+      type: object
+      properties:
+        code: { type: string, nullable: false }
+        name: { type: string, nullable: false, readOnly: true }
+        note: { type: string, nullable: true }
     Frequency:
       type: object
       properties:
@@ -236,12 +259,16 @@ components:
         status:
           type: object
           properties:
-            code: { type: string }
+            code:
+              {
+                type: string,
+                description: 'Is one of K (Kommende), A (Aktiv), IA (Ikke-aktiv), UT (Opphørt), SA (Sammenslått) or SP (Splittet)',
+              }
         name: { type: string }
         name_en: { type: string }
         approval_status: { type: string, description: " Is one of 'GODKJENT', 'AVVIST' or 'FORSLAG'" }
 
-    Statistic_create:
+    Statistic_create_base:
       allOf:
         - $ref: '#/components/schemas/Statistic'
       type: object
@@ -251,13 +278,59 @@ components:
         yearly_reporting: { type: boolean }
         statistic_region_levels:
           type: array
-          items: { $ref: '#/components/schemas/Region_level' }
+          items:
+            type: object
+            properties:
+              code: { type: string }
         previous_topic_codes: { type: string, nullable: true }
         comment: { type: string }
+        variants:
+          type: array
+          items:
+            $ref: '#/components/schemas/Variant'
+        contacts:
+          type: array
+          items:
+            type: object
+            properties:
+              principalName: { type: string }
+
+    Statistic_create_upcoming:
+      allOf:
+        - $ref: '#/components/schemas/Statistic_create_base'
+        - type: object
+          required: [division, name]
+          properties:
+            status:
+              type: object
+              required: [code]
+              properties:
+                code:
+                  description: 'Must be "K" for creation of upcoming statistics'
+                  type: string
+
+    Statistic_create_active:
+      allOf:
+        - $ref: '#/components/schemas/Statistic_create_base'
+        - type: object
+          required: [division, name, name_en, main_language, contacts, variants, status]
+          properties:
+            status:
+              type: object
+              required: [code]
+              properties:
+                code:
+                  description: 'Must be "A" for creation of active statistics'
+                  type: string
+
+    Statistic_create:
+      oneOf:
+        - $ref: '#/components/schemas/Statistic_create_upcoming'
+        - $ref: '#/components/schemas/Statistic_create_active'
 
     Statistic_update:
       allOf:
-        - $ref: '#/components/schemas/Statistic_create'
+        - $ref: '#/components/schemas/Statistic_create_base'
       type: object
       properties:
         relation: { type: string, nullable: true }
@@ -269,10 +342,7 @@ components:
       properties:
         version: { type: integer }
         division:
-          type: object
-          properties:
-            code: { type: string, nullable: true }
-            name: { type: string, readOnly: true }
+          $ref: '#/components/schemas/Division'
         first_released_at: { type: string, format: date, nullable: true }
         yearly_reporting: { type: boolean }
         previous_topic_codes: { type: string, nullable: true }
@@ -287,7 +357,8 @@ components:
         created_at: { type: string, format: date-time, readOnly: true }
         variants:
           type: array
-          items: { $ref: '#/components/schemas/Variant' }
+          items:
+            $ref: '#/components/schemas/Variant'
         contacts:
           type: array
           items:
@@ -303,10 +374,7 @@ components:
       type: object
       properties:
         division:
-          type: object
-          properties:
-            code: { type: string, nullable: true }
-            name: { type: string, readOnly: true }
+          $ref: '#/components/schemas/Division'
         contacts:
           type: array
           items:
@@ -340,7 +408,10 @@ paths:
             application/json:
               schema:
                 type: array
-                items: { $ref: '#/components/schemas/Contact' }
+                items:
+                  $ref: '#/components/schemas/Contact'
+        default:
+          $ref: '#/components/responses/Error'
   /shortnames:
     get:
       summary: List of all existing shortnames
@@ -355,6 +426,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Shortname_listing'
+        default:
+          $ref: '#/components/responses/Error'
     post:
       summary: Create a new shortname
       tags: [shortnames]
@@ -377,6 +450,21 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Shortname' }
+        default:
+          $ref: '#/components/responses/Error'
+  /divisions:
+    get:
+      summary: List of all divisions in our organization.
+      security: []
+      responses:
+        '200':
+          description: List of divisions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Division'
+        default:
+          $ref: '#/components/responses/Error'
   /statistics:
     get:
       summary: List of all statistics
@@ -400,7 +488,10 @@ paths:
                     type: integer
                   statistics:
                     type: array
-                    items: { $ref: '#/components/schemas/Statistic_listing' }
+                    items:
+                      $ref: '#/components/schemas/Statistic_listing'
+        default:
+          $ref: '#/components/responses/Error'
 
   /statistics/{shortname}:
     get:
@@ -419,9 +510,17 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Statistic_details' }
+        default:
+          $ref: '#/components/responses/Error'
     post:
       summary: Create a new statistic
       tags: [statistics]
+      parameters:
+      - name: shortname
+        in: path
+        required: true
+        schema:
+          type: string
       requestBody:
         required: true
         content:
@@ -433,6 +532,8 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Statistic_details' }
+        default:
+          $ref: '#/components/responses/Error'
     put:
       summary: Update a statistic
       tags: [statistics]
@@ -453,6 +554,8 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Statistic_details' }
+        default:
+          $ref: '#/components/responses/Error'
 
   /statistics/{shortname}/variants:
     post:
@@ -469,6 +572,8 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Variant' }
+        default:
+          $ref: '#/components/responses/Error'
   /statistics/{shortname}/variants/{id}:
     put:
       summary: Update a variant
@@ -495,6 +600,8 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Variant' }
+        default:
+          $ref: '#/components/responses/Error'
   /statistics/{shortname}/variants/{id}/releases:
     get:
       summary: List all releases for one variant
@@ -525,7 +632,10 @@ paths:
                     type: integer
                   releases:
                     type: array
-                    items: { $ref: '#/components/schemas/Release_listing' }
+                    items:
+                      $ref: '#/components/schemas/Release_listing'
+        default:
+          $ref: '#/components/responses/Error'
     post:
       summary: Create a new release
       tags: [statistics]
@@ -551,6 +661,8 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Release_details' }
+        default:
+          $ref: '#/components/responses/Error'
   /statistics/{shortname}/versions:
     get:
       summary: List all versions with changes and comment. Response object TBD
@@ -561,6 +673,44 @@ paths:
           content:
             application/json:
               schema: {}
+        default:
+          $ref: '#/components/responses/Error'
+
+  /statistics/{shortname}/contacts:
+    put:
+      summary: Set contacts for a statistic
+      description: Replaces the entire contact list for the statistic with the supplied principal names.
+      tags: [statistics]
+      parameters:
+        - name: shortname
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                principalNames:
+                  type: array
+                  description: List of principal names to set as contacts for the statistic.
+                  items:
+                    type: string
+              required:
+                - principalNames
+      responses:
+        '200':
+          description: The updated list of contacts for the statistic.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Contact' }
+        default:
+          $ref: '#/components/responses/Error'
 
   /releases:
     get:
@@ -599,7 +749,10 @@ paths:
                     type: integer
                   releases:
                     type: array
-                    items: { $ref: '#/components/schemas/Release_listing' }
+                    items:
+                      $ref: '#/components/schemas/Release_listing'
+        default:
+          $ref: '#/components/responses/Error'
 
   /releases/bulk-approve:
     post:
@@ -655,6 +808,8 @@ paths:
                     status: 404
                   - id: 3
                     status: 500
+        default:
+          $ref: '#/components/responses/Error'
 
   /releases/{id}:
     get:
@@ -673,6 +828,8 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Release_details' }
+        default:
+          $ref: '#/components/responses/Error'
     put:
       summary: Update a release
       tags: [releases]
@@ -693,6 +850,8 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Release_details' }
+        default:
+          $ref: '#/components/responses/Error'
   /releases/{id}/versions:
     get:
       summary: List all versions on a release with change and comment. Response object TBD
@@ -709,6 +868,8 @@ paths:
           content:
             application/json:
               schema: {}
+        default:
+          $ref: '#/components/responses/Error'
 
   /frequencies:
     get:
@@ -722,6 +883,8 @@ paths:
               schema:
                 type: array
                 items: { $ref: '#/components/schemas/Frequency' }
+        default:
+          $ref: '#/components/responses/Error'
 
   /calendar:
     get:
@@ -749,6 +912,8 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Calender_date' }
+        default:
+          $ref: '#/components/responses/Error'
 
   /calendar/blocked-release-days:
     get:
@@ -757,6 +922,8 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/FutureBlockedReleaseDays'
+        default:
+          $ref: '#/components/responses/Error'
   /calendar/blocked-release-days/{date}:
     post:
       summary: Manually block a day
@@ -780,6 +947,8 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/FutureBlockedReleaseDays'
+        default:
+          $ref: '#/components/responses/Error'
     delete:
       summary: Delete a manually blocked day
       tags: [calendar]
@@ -798,6 +967,8 @@ paths:
               schema:
                 type: array
                 items: { $ref: '#/components/schemas/Blocked_release_date' }
+        default:
+          $ref: '#/components/responses/Error'
   /auth/authenticate:
     get:
       summary: Check authentication status and information for current user. Used for controlling front-end behaviour, not security.

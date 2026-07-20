@@ -30,6 +30,7 @@ export interface paths {
             'application/json': components['schemas']['Contact'][]
           }
         }
+        default: components['responses']['Error']
       }
     }
     put?: never
@@ -66,6 +67,7 @@ export interface paths {
             'application/json': components['schemas']['Shortname_listing'][]
           }
         }
+        default: components['responses']['Error']
       }
     }
     put?: never
@@ -95,8 +97,46 @@ export interface paths {
             'application/json': components['schemas']['Shortname']
           }
         }
+        default: components['responses']['Error']
       }
     }
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/divisions': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** List of all divisions in our organization. */
+    get: {
+      parameters: {
+        query?: never
+        header?: never
+        path?: never
+        cookie?: never
+      }
+      requestBody?: never
+      responses: {
+        /** @description List of divisions */
+        200: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            'application/json': components['schemas']['Division']
+          }
+        }
+        default: components['responses']['Error']
+      }
+    }
+    put?: never
+    post?: never
     delete?: never
     options?: never
     head?: never
@@ -152,6 +192,7 @@ export interface paths {
             }
           }
         }
+        default: components['responses']['Error']
       }
     }
     put?: never
@@ -190,6 +231,7 @@ export interface paths {
             'application/json': components['schemas']['Statistic_details']
           }
         }
+        default: components['responses']['Error']
       }
     }
     /** Update a statistic */
@@ -217,6 +259,7 @@ export interface paths {
             'application/json': components['schemas']['Statistic_details']
           }
         }
+        default: components['responses']['Error']
       }
     }
     /** Create a new statistic */
@@ -224,7 +267,9 @@ export interface paths {
       parameters: {
         query?: never
         header?: never
-        path?: never
+        path: {
+          shortname: string
+        }
         cookie?: never
       }
       requestBody: {
@@ -242,6 +287,7 @@ export interface paths {
             'application/json': components['schemas']['Statistic_details']
           }
         }
+        default: components['responses']['Error']
       }
     }
     delete?: never
@@ -282,6 +328,7 @@ export interface paths {
             'application/json': components['schemas']['Variant']
           }
         }
+        default: components['responses']['Error']
       }
     }
     delete?: never
@@ -324,6 +371,7 @@ export interface paths {
             'application/json': components['schemas']['Variant']
           }
         }
+        default: components['responses']['Error']
       }
     }
     post?: never
@@ -370,6 +418,7 @@ export interface paths {
             }
           }
         }
+        default: components['responses']['Error']
       }
     }
     put?: never
@@ -399,6 +448,7 @@ export interface paths {
             'application/json': components['schemas']['Release_details']
           }
         }
+        default: components['responses']['Error']
       }
     }
     delete?: never
@@ -433,9 +483,59 @@ export interface paths {
             'application/json': unknown
           }
         }
+        default: components['responses']['Error']
       }
     }
     put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/statistics/{shortname}/contacts': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /**
+     * Set contacts for a statistic
+     * @description Replaces the entire contact list for the statistic with the supplied principal names.
+     */
+    put: {
+      parameters: {
+        query?: never
+        header?: never
+        path: {
+          shortname: string
+        }
+        cookie?: never
+      }
+      requestBody: {
+        content: {
+          'application/json': {
+            /** @description List of principal names to set as contacts for the statistic. */
+            principalNames: string[]
+          }
+        }
+      }
+      responses: {
+        /** @description The updated list of contacts for the statistic. */
+        200: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            'application/json': components['schemas']['Contact'][]
+          }
+        }
+        default: components['responses']['Error']
+      }
+    }
     post?: never
     delete?: never
     options?: never
@@ -502,6 +602,7 @@ export interface paths {
             }
           }
         }
+        default: components['responses']['Error']
       }
     }
     put?: never
@@ -583,6 +684,7 @@ export interface paths {
             }
           }
         }
+        default: components['responses']['Error']
       }
     }
     delete?: never
@@ -619,6 +721,7 @@ export interface paths {
             'application/json': components['schemas']['Release_details']
           }
         }
+        default: components['responses']['Error']
       }
     }
     /** Update a release */
@@ -646,6 +749,7 @@ export interface paths {
             'application/json': components['schemas']['Release_details']
           }
         }
+        default: components['responses']['Error']
       }
     }
     post?: never
@@ -683,6 +787,7 @@ export interface paths {
             'application/json': unknown
           }
         }
+        default: components['responses']['Error']
       }
     }
     put?: never
@@ -719,6 +824,7 @@ export interface paths {
             'application/json': components['schemas']['Frequency'][]
           }
         }
+        default: components['responses']['Error']
       }
     }
     put?: never
@@ -758,6 +864,7 @@ export interface paths {
             'application/json': components['schemas']['Calender_date']
           }
         }
+        default: components['responses']['Error']
       }
     }
     put?: never
@@ -786,6 +893,7 @@ export interface paths {
       requestBody?: never
       responses: {
         200: components['responses']['FutureBlockedReleaseDays']
+        default: components['responses']['Error']
       }
     }
     put?: never
@@ -824,6 +932,7 @@ export interface paths {
       }
       responses: {
         200: components['responses']['FutureBlockedReleaseDays']
+        default: components['responses']['Error']
       }
     }
     /** Delete a manually blocked day */
@@ -847,6 +956,7 @@ export interface paths {
             'application/json': components['schemas']['Blocked_release_date'][]
           }
         }
+        default: components['responses']['Error']
       }
     }
     options?: never
@@ -901,6 +1011,10 @@ export interface paths {
 export type webhooks = Record<string, never>
 export interface components {
   schemas: {
+    Error: {
+      /** @description Error message */
+      message: string
+    }
     /**
      * @example {
      *       "date": "2026-12-24",
@@ -936,7 +1050,12 @@ export interface components {
     }
     Contact: {
       readonly name?: string
-      readonly principalName?: string
+      readonly principalName: string
+    }
+    Division: {
+      code?: string
+      readonly name?: string
+      note?: string | null
     }
     Frequency: {
       name?: string
@@ -1010,6 +1129,7 @@ export interface components {
       /** @description Main language will be either 'nn' or 'nb' for statistics */
       main_language?: string
       status?: {
+        /** @description Is one of K (Kommende), A (Aktiv), IA (Ikke-aktiv), UT (Opphørt), SA (Sammenslått) or SP (Splittet) */
         code?: string
       }
       name?: string
@@ -1017,24 +1137,42 @@ export interface components {
       /** @description Is one of 'GODKJENT', 'AVVIST' or 'FORSLAG' */
       approval_status?: string
     }
-    Statistic_create: {
+    Statistic_create_base: {
       division?: string | null
       /** Format: date */
       first_released_at?: string | null
       yearly_reporting?: boolean
-      statistic_region_levels?: components['schemas']['Region_level'][]
+      statistic_region_levels?: {
+        code?: string
+      }[]
       previous_topic_codes?: string | null
       comment?: string
+      variants?: components['schemas']['Variant'][]
+      contacts?: {
+        principalName?: string
+      }[]
     } & components['schemas']['Statistic']
+    Statistic_create_upcoming: components['schemas']['Statistic_create_base'] & {
+      status?: {
+        /** @description Must be "K" for creation of upcoming statistics */
+        code: string
+      }
+    }
+    Statistic_create_active: components['schemas']['Statistic_create_base'] & {
+      status: {
+        /** @description Must be "A" for creation of active statistics */
+        code: string
+      }
+    }
+    Statistic_create:
+      | components['schemas']['Statistic_create_upcoming']
+      | components['schemas']['Statistic_create_active']
     Statistic_update: {
       relation?: string | null
-    } & components['schemas']['Statistic_create']
+    } & components['schemas']['Statistic_create_base']
     Statistic_details: {
       version?: number
-      division?: {
-        code?: string | null
-        readonly name?: string
-      }
+      division?: components['schemas']['Division']
       /** Format: date */
       first_released_at?: string | null
       yearly_reporting?: boolean
@@ -1054,10 +1192,7 @@ export interface components {
       statistic_region_levels?: components['schemas']['Region_level'][]
     } & components['schemas']['Statistic']
     Statistic_listing: {
-      division?: {
-        code?: string | null
-        readonly name?: string
-      }
+      division?: components['schemas']['Division']
       contacts?: components['schemas']['Contact'][]
     } & components['schemas']['Statistic']
     Variant: {
@@ -1074,6 +1209,15 @@ export interface components {
     }
   }
   responses: {
+    /** @description Error response */
+    Error: {
+      headers: {
+        [name: string]: unknown
+      }
+      content: {
+        'application/json': components['schemas']['Error']
+      }
+    }
     /** @description List of future blocked release days. Includes all manually blocked days, but only automatically blocked days for the next three calendar years. Sorted from earliest to latest date. */
     FutureBlockedReleaseDays: {
       headers: {

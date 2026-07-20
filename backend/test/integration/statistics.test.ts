@@ -1,5 +1,11 @@
 import { afterAll, describe, expect, test, vi } from 'vitest'
-import { ShortnameListing, StatisticCreate, StatisticDetails, StatisticListingResponse } from '@ssbno-statreg/shared'
+import {
+  Contact,
+  ShortnameListing,
+  StatisticCreate,
+  StatisticDetails,
+  StatisticListingResponse,
+} from '@ssbno-statreg/shared'
 import { prisma } from '@/lib/prisma'
 import { createApp } from '@/app'
 import request from 'supertest'
@@ -12,6 +18,12 @@ import {
 vi.mock(import('@/lib/cache'), () => ({
   getAllUsersFromCache: vi.fn(() =>
     Promise.resolve({
+      'abc@ssb.no': {
+        displayName: 'Alice',
+        userPrincipalName: 'abc@ssb.no',
+        mail: 'alice@ssb.no',
+        businessPhones: null,
+      },
       'bcd@ssb.no': {
         displayName: 'Bob',
         userPrincipalName: 'bcd@ssb.no',
@@ -116,16 +128,14 @@ describe('statisticsController integration', () => {
     }
   })
 
-  test('POST /statistics/:shortname creates a new statistic in the database', async () => {
+  test('POST /statistics/:shortname creates a new upcoming statistic in the database', async () => {
     const createdShortnameName = await createTestShortname()
 
     const createPayload = {
+      status: { code: 'K' },
       division: '101',
       name: 'Integration Test Created Statistic',
-      name_en: 'Integration Test Created Statistic EN',
       first_released_at: '2024-01-01',
-      main_language: 'nb',
-      comment: 'Created by integration test',
     }
 
     const response = await request(app)
@@ -140,9 +150,9 @@ describe('statisticsController integration', () => {
     expect(toStatisticResponseShape(statistic)).toStrictEqual({
       shortname: createdShortnameName,
       name: createPayload.name,
-      name_en: createPayload.name_en,
-      main_language: createPayload.main_language,
-      comment: createPayload.comment,
+      name_en: '',
+      main_language: 'nb',
+      comment: `Create statistic with shortname: ${createdShortnameName}`,
       division_code: createPayload.division,
       yearly_reporting: false,
       status_code: 'K',
@@ -158,9 +168,9 @@ describe('statisticsController integration', () => {
     expect(toStatisticDbShape(createdStatistic)).toStrictEqual({
       shortname: createdShortnameName,
       name: createPayload.name,
-      name_en: createPayload.name_en,
-      language: createPayload.main_language,
-      comment: createPayload.comment,
+      name_en: null,
+      language: 'nb',
+      comment: `Create statistic with shortname: ${createdShortnameName}`,
       division_code: createPayload.division,
       yearly_reporting: false,
       status: 'K',
@@ -174,6 +184,7 @@ describe('statisticsController integration', () => {
     const createdShortnameName = await createTestShortname()
 
     const createPayload = {
+      status: { code: 'K' },
       division: '101',
       name: 'Integration Test Statistic To Update',
       name_en: 'Integration Test Statistic To Update EN',
@@ -290,6 +301,7 @@ describe('statisticsController integration', () => {
 
     // POST statistic for created shortname
     const createPayload: StatisticCreate = {
+      status: { code: 'K' },
       division: '101',
       name: 'Ny statistikk',
       name_en: 'New statistic',
@@ -312,5 +324,31 @@ describe('statisticsController integration', () => {
     const shortnamesListResponse = await request(app).get('/statistikkregisteret/api/shortnames')
     expect(shortnamesListResponse.status).toBe(200)
     expect(shortnamesListResponse.body.some((item: ShortnameListing) => item.shortname === 'nytt_kortnavn')).toBe(true)
+  })
+
+  test('PUT /statistics/nytt_kortnavn/contacts sets new contacts for the statistic', async () => {
+    // PUT statistics/nytt_kortnavn/contacts
+    const contactsPayload = {
+      principalNames: ['abc@ssb.no', 'bcd@ssb.no'],
+    }
+    const contactsResponse = await request(app)
+      .put('/statistikkregisteret/api/statistics/nytt_kortnavn/contacts')
+      .set('content-type', 'application/json')
+      .send(contactsPayload)
+
+    const expectedContacts: Contact[] = [
+      { name: 'Alice', principalName: 'abc@ssb.no' },
+      { name: 'Bob', principalName: 'bcd@ssb.no' },
+    ]
+
+    expect(contactsResponse.status).toBe(200)
+    expect(contactsResponse.body).toHaveLength(2)
+    expect(contactsResponse.body).toEqual(expect.arrayContaining(expectedContacts))
+
+    // GET statistic to test persistence of new contacts
+    const fetchResponse = await request(app).get('/statistikkregisteret/api/statistics/nytt_kortnavn')
+    expect(fetchResponse.status).toBe(200)
+    expect(fetchResponse.body.contacts).toHaveLength(2)
+    expect(fetchResponse.body.contacts).toEqual(expect.arrayContaining(expectedContacts))
   })
 })

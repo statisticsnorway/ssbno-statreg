@@ -64,14 +64,13 @@ export default function ListBlockedDates() {
   useEffect(() => {
     async function fetchBlockedDates() {
       const { data, error } = await client.GET('/calendar/blocked-release-days')
+
       if (error) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const errorMessage = (error as any).error
-        console.log(errorMessage)
-        setApiError((prev) => [...prev, errorMessage])
-      } else {
-        setBlockedDates(data ?? [])
+        setApiError((prev) => [...prev, error.message])
+        return
       }
+
+      setBlockedDates(data ?? [])
     }
     fetchBlockedDates()
   }, [])

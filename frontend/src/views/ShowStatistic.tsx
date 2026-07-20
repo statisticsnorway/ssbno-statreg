@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams, Link as ReactRouterLink } from 'react-router'
 import { Heading, Paragraph, List, Link, Button, Divider, Details, Card, Table } from '@digdir/designsystemet-react'
-import { PencilWritingIcon, PersonPencilIcon } from '@navikt/aksel-icons'
+import { PencilWritingIcon } from '@navikt/aksel-icons'
 import { StatisticStatusTag } from '../components/StatisticStatusTag'
 import { VariantCard } from '../components/VariantCard'
 import client from '../api'
 import {
   StatisticStatus,
+  type Contact,
   type RegionLevel,
   type ReleaseListing,
   type StatisticDetails,
@@ -14,10 +15,11 @@ import {
 } from '@ssbno-statreg/shared'
 
 import './ShowStatistic.css'
-import { formatContacts, formatPublishTime, formatRevisionName, formatVariant } from '../lib/utils'
+import { formatContact, formatPublishTime, formatRevisionName, formatVariant } from '../lib/utils'
 import { ApprovalStatusBadge } from '../components/ApprovalStatus'
 import { useAuth } from '../context/AuthContext'
 import { ErrorAlert } from '../components/ErrorAlert'
+import { ContactSelection } from '../components/ContactSelection'
 
 type ReleaseRowProps = {
   release: ReleaseListing
@@ -96,6 +98,9 @@ function SimpleReleaseRow({ release }: ReleaseRowProps) {
 export default function ShowStatistic() {
   const [statistic, setStatistic] = useState<StatisticDetails>({})
   const [releases, setReleases] = useState<ReleaseListing[]>([])
+  const [allContacts, setAllContacts] = useState<Contact[]>([])
+  const [selectedContacts, setSelectedContacts] = useState<string[]>([])
+  const [isEditingContacts, setIsEditingContacts] = useState(false)
   const { shortname } = useParams()
   const { auth } = useAuth()
   const [apiError, setApiError] = useState<string[]>([])
@@ -105,32 +110,62 @@ export default function ShowStatistic() {
       const { data, error } = await client.GET('/statistics/{shortname}', {
         params: { path: { shortname: shortname as string } },
       })
+
       if (error) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const errorMessage = (error as any).error
-        console.log(errorMessage)
-        setApiError((prev) => [...prev, errorMessage])
-      } else {
-        setStatistic(data)
+        setApiError((prev) => [...prev, error.message])
+        return
       }
+
+      setStatistic(data)
+      setSelectedContacts(data.contacts?.map((c) => c.principalName) ?? [])
     }
 
     async function fetchReleases(shortname: string) {
       const { data, error } = await client.GET('/releases', {
         params: { query: { shortname, count: 100, publish_time_after: new Date().toISOString() } },
       })
+
       if (error) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const errorMessage = (error as any).error
-        console.log(errorMessage)
-        setApiError((prev) => [...prev, errorMessage])
-      } else {
-        setReleases(data.releases ?? [])
+        setApiError((prev) => [...prev, error.message])
+        return
       }
+
+      setReleases(data.releases ?? [])
     }
     fetchStatistic()
     if (shortname) fetchReleases(shortname)
   }, [shortname])
+
+  useEffect(() => {
+    async function fetchContacts() {
+      const { data, error } = await client.GET('/contacts')
+
+      if (error) {
+        setApiError((prev) => [...prev, error.message])
+        return
+      }
+
+      setAllContacts(data ?? [])
+    }
+    fetchContacts()
+  }, [])
+
+  async function saveContacts() {
+    if (!shortname) return
+
+    const { data, error } = await client.PUT('/statistics/{shortname}/contacts', {
+      params: { path: { shortname } },
+      body: { principalNames: selectedContacts },
+    })
+
+    if (error) {
+      setApiError((prev) => [...prev, error.message])
+      return
+    }
+
+    setStatistic((prev) => ({ ...prev, contacts: data }))
+    setIsEditingContacts(false)
+  }
 
   const statusCode = statistic.status?.code as keyof typeof StatisticStatus
   const englishName = statistic.name_en ?? '-'
@@ -138,7 +173,6 @@ export default function ShowStatistic() {
   const regionLevels = statistic.statistic_region_levels ?? []
   const mainLanguage = formatMainLanguage(statistic.main_language)
   const startYear = formatStartYear(statistic.first_released_at)
-  const contacts = formatContacts(statistic.contacts)
   const mockContinuedBy = ['putegjeld', 'k2', 'k3']
   const variants = statistic.variants ?? []
   const cancelledVariants = formatCancelledVariants(variants)
@@ -213,20 +247,41 @@ export default function ShowStatistic() {
       </div>
 
       <div className='show-statistic-contacts-container'>
-        <Heading data-size='xs'>Kontaktpersoner</Heading>
-        <Paragraph>Kontaktpersoner kan endres uten godkjenning</Paragraph>
-        {contacts.map((contact) => (
-          <Paragraph key={contact}>{contact}</Paragraph>
-        ))}
-        {!auth?.isAdmin && (
-          <Button
-            variant='tertiary'
-            className='edit-contact-button'
-            onClick={() => alert('Rediger kontakter er ikke implementert ennå.')}
-          >
-            <PersonPencilIcon /> Rediger kontakt
-          </Button>
-        )}
+        <div className='show-statistic-contacts-heading'>
+          <Heading data-size='xs'>Kontaktpersoner</Heading>
+          {!auth?.isAdmin && !isEditingContacts && (
+            <Button
+              variant='tertiary'
+              data-size='sm'
+              aria-label='Rediger kontakter'
+              onClick={() => setIsEditingContacts(true)}
+            >
+              <PencilWritingIcon aria-hidden />
+            </Button>
+          )}
+        </div>
+        <Paragraph>Navn vises under overskriften 'Kontakt' på statistikksiden på ssb.no</Paragraph>
+        <div className='show-statistic-contacts-content'>
+          {!isEditingContacts &&
+            statistic.contacts?.map((contact) => (
+              <Paragraph key={contact.principalName}>
+                <Link href='#' onClick={() => alert('Kontaktside ikke implementert')}>
+                  {formatContact(contact)}
+                </Link>
+              </Paragraph>
+            ))}
+          {isEditingContacts && (
+            <>
+              <ContactSelection contacts={allContacts} selected={selectedContacts} setSelected={setSelectedContacts} />
+              <div className='show-statistic-contacts-button-wrapper'>
+                <Button onClick={saveContacts}>Lagre</Button>
+                <Button variant='tertiary' onClick={() => setIsEditingContacts(false)}>
+                  Avbryt
+                </Button>
+              </div>
+            </>
+          )}
+        </div>
       </div>
 
       <div>

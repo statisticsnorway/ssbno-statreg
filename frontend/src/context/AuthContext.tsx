@@ -13,13 +13,13 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
 async function fetchAuthState(): Promise<AuthResponse | undefined> {
   const { data, error } = await client.GET('/auth/authenticate')
+
   if (error) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const errorMessage = (error as any).error
-    console.log(errorMessage)
-  } else {
-    return data
+    console.log(error)
+    return
   }
+
+  return data
 }
 
 function readFromSessionStorage(): AuthResponse | undefined | null {
