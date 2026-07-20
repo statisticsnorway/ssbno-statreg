@@ -530,6 +530,7 @@ export interface paths {
             'application/json': components['schemas']['Contact'][]
           }
         }
+        default: components['responses']['Error']
       }
     }
     post?: never
@@ -1046,7 +1047,7 @@ export interface components {
     }
     Contact: {
       readonly name?: string
-      readonly principalName?: string
+      readonly principalName: string
     }
     Division: {
       code?: string
