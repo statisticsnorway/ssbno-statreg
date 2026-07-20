@@ -400,7 +400,7 @@ export async function updateContacts(
     )
   )
 
-  if (existingStatistic.status === StatisticStatus.A && newContacts.length === 0) {
+  if (existingStatistic.status === 'A' && newContacts.length === 0) {
     return Promise.reject({ statregError: 'An active statistic needs at least one contact' })
   }
 

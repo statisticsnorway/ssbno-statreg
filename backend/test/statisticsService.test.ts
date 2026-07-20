@@ -507,7 +507,7 @@ describe('statisticService', () => {
     })
 
     test('throws error when statistic is active and new contacts is empty', async () => {
-      prismaMock.statistic.findFirst.mockResolvedValue({ id: 1, status: 'Aktiv' })
+      prismaMock.statistic.findFirst.mockResolvedValue({ id: 1, status: 'A' })
 
       await expect(() => updateContacts('helse', [], prismaMock)).rejects.toMatchObject({
         statregError: 'An active statistic needs at least one contact',
