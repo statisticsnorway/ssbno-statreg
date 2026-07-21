@@ -42,15 +42,10 @@ export const zLevelOfDetail = z.object({
 })
 
 /**
- * L (Land), LD (Landsdel), F (Fylke), K (Kommune), BD (Bydel og krets)
- */
-export const zRegionLevelCode = z.enum(['L', 'LD', 'F', 'K', 'BD'])
-
-/**
- * Valid region levels
+ * Valid region levels are (name in parethesis): L (Land), LD (Landsdel), F (Fylke), K (Kommune), BD (Bydel og krets)
  */
 export const zRegionLevel = z.object({
-  code: zRegionLevelCode.optional(),
+  code: z.string().optional(),
   name: z.string().optional(),
 })
 
@@ -133,29 +128,17 @@ export const zReleaseListing = zReleaseGet.and(
   })
 )
 
-/**
- * K (Kommende), A (Aktiv), IA (Ikke-aktiv), UT (Opphørt), SA (Sammenslått) or SP (Splittet)
- */
-export const zStatisticStatusCode = z.enum(['K', 'A', 'IA', 'UT', 'SA', 'SP'])
-
-export const zStatisticApprovalStatus = z.enum(['GODKJENT', 'AVVIST', 'FORSLAG'])
-
-/**
- * Main language will be either 'nn' or 'nb' for statistics
- */
-export const zStatisticMainLanguage = z.enum(['nn', 'nb'])
-
 export const zStatistic = z.object({
   shortname: z.string().readonly().optional(),
-  main_language: zStatisticMainLanguage.optional(),
+  main_language: z.string().optional(),
   status: z
     .object({
-      code: zStatisticStatusCode.optional(),
+      code: z.string().optional(),
     })
     .optional(),
   name: z.string().optional(),
   name_en: z.string().optional(),
-  approval_status: zStatisticApprovalStatus.optional(),
+  approval_status: z.string().optional(),
 })
 
 export const zStatisticListing = zStatistic.and(
@@ -176,49 +159,48 @@ export const zVariant = z.object({
   revision: zRevision.optional(),
 })
 
-export const zStatisticCreateBase = z.object({
-  name: z.string().optional(),
-  name_en: z.string().optional(),
-  division: z.int().optional(),
-  main_language: zStatisticMainLanguage.optional(),
-  first_released_at: z.iso.date().optional(),
-  yearly_reporting: z.boolean().optional(),
-  statistic_region_levels: z.array(zRegionLevelCode).optional(),
-  previous_topic_codes: z.string().optional(),
-  comment: z.string().optional(),
-  variants: z.array(zVariant).optional(),
-  contacts: z.array(z.string()).optional(),
-})
+export const zStatisticCreateBase = zStatistic.and(
+  z.object({
+    division: z.string().optional(),
+    first_released_at: z.iso.date().optional(),
+    yearly_reporting: z.boolean().optional(),
+    statistic_region_levels: z
+      .array(
+        z.object({
+          code: z.string().optional(),
+        })
+      )
+      .optional(),
+    previous_topic_codes: z.string().optional(),
+    comment: z.string().optional(),
+    variants: z.array(zVariant).optional(),
+    contacts: z
+      .array(
+        z.object({
+          principalName: z.string().optional(),
+        })
+      )
+      .optional(),
+  })
+)
 
-export const zStatisticCreateUpcoming = z.object({
-  name: z.string(),
-  division: z.string(),
-  status: z.literal('K'),
-  main_language: zStatisticMainLanguage.optional(),
-  name_en: z.string().optional(),
-  first_released_at: z.iso.date().optional(),
-  yearly_reporting: z.boolean().optional(),
-  statistic_region_levels: z.array(zRegionLevelCode).optional(),
-  previous_topic_codes: z.string().optional(),
-  comment: z.string().optional(),
-  variants: z.array(zVariant).optional(),
-  contacts: z.array(z.string()).optional(),
-})
+export const zStatisticCreateUpcoming = zStatisticCreateBase.and(
+  z.object({
+    status: z
+      .object({
+        code: z.string(),
+      })
+      .optional(),
+  })
+)
 
-export const zStatisticCreateActive = z.object({
-  name: z.string(),
-  name_en: z.string(),
-  division: z.string(),
-  main_language: zStatisticMainLanguage,
-  status: z.literal('A'),
-  first_released_at: z.iso.date().optional(),
-  yearly_reporting: z.boolean().optional(),
-  statistic_region_levels: z.array(zRegionLevelCode).optional(),
-  previous_topic_codes: z.string().optional(),
-  comment: z.string().optional(),
-  variants: z.array(zVariant),
-  contacts: z.array(z.string()),
-})
+export const zStatisticCreateActive = zStatisticCreateBase.and(
+  z.object({
+    status: z.object({
+      code: z.string(),
+    }),
+  })
+)
 
 export const zStatisticCreate = z.union([zStatisticCreateUpcoming, zStatisticCreateActive])
 
@@ -310,15 +292,15 @@ export const zReleaseListingWritable = zReleaseGetWritable.and(
 )
 
 export const zStatisticWritable = z.object({
-  main_language: zStatisticMainLanguage.optional(),
+  main_language: z.string().optional(),
   status: z
     .object({
-      code: zStatisticStatusCode.optional(),
+      code: z.string().optional(),
     })
     .optional(),
   name: z.string().optional(),
   name_en: z.string().optional(),
-  approval_status: zStatisticApprovalStatus.optional(),
+  approval_status: z.string().optional(),
 })
 
 export const zStatisticListingWritable = zStatisticWritable.and(
@@ -336,49 +318,48 @@ export const zVariantWritable = z.object({
   revision: zRevision.optional(),
 })
 
-export const zStatisticCreateBaseWritable = z.object({
-  name: z.string().optional(),
-  name_en: z.string().optional(),
-  division: z.int().optional(),
-  main_language: zStatisticMainLanguage.optional(),
-  first_released_at: z.iso.date().optional(),
-  yearly_reporting: z.boolean().optional(),
-  statistic_region_levels: z.array(zRegionLevelCode).optional(),
-  previous_topic_codes: z.string().optional(),
-  comment: z.string().optional(),
-  variants: z.array(zVariantWritable).optional(),
-  contacts: z.array(z.string()).optional(),
-})
+export const zStatisticCreateBaseWritable = zStatisticWritable.and(
+  z.object({
+    division: z.string().optional(),
+    first_released_at: z.iso.date().optional(),
+    yearly_reporting: z.boolean().optional(),
+    statistic_region_levels: z
+      .array(
+        z.object({
+          code: z.string().optional(),
+        })
+      )
+      .optional(),
+    previous_topic_codes: z.string().optional(),
+    comment: z.string().optional(),
+    variants: z.array(zVariantWritable).optional(),
+    contacts: z
+      .array(
+        z.object({
+          principalName: z.string().optional(),
+        })
+      )
+      .optional(),
+  })
+)
 
-export const zStatisticCreateUpcomingWritable = z.object({
-  name: z.string(),
-  division: z.string(),
-  status: z.literal('K'),
-  main_language: zStatisticMainLanguage.optional(),
-  name_en: z.string().optional(),
-  first_released_at: z.iso.date().optional(),
-  yearly_reporting: z.boolean().optional(),
-  statistic_region_levels: z.array(zRegionLevelCode).optional(),
-  previous_topic_codes: z.string().optional(),
-  comment: z.string().optional(),
-  variants: z.array(zVariantWritable).optional(),
-  contacts: z.array(z.string()).optional(),
-})
+export const zStatisticCreateUpcomingWritable = zStatisticCreateBaseWritable.and(
+  z.object({
+    status: z
+      .object({
+        code: z.string(),
+      })
+      .optional(),
+  })
+)
 
-export const zStatisticCreateActiveWritable = z.object({
-  name: z.string(),
-  name_en: z.string(),
-  division: z.string(),
-  main_language: zStatisticMainLanguage,
-  status: z.literal('A'),
-  first_released_at: z.iso.date().optional(),
-  yearly_reporting: z.boolean().optional(),
-  statistic_region_levels: z.array(zRegionLevelCode).optional(),
-  previous_topic_codes: z.string().optional(),
-  comment: z.string().optional(),
-  variants: z.array(zVariantWritable),
-  contacts: z.array(z.string()),
-})
+export const zStatisticCreateActiveWritable = zStatisticCreateBaseWritable.and(
+  z.object({
+    status: z.object({
+      code: z.string(),
+    }),
+  })
+)
 
 export const zStatisticCreateWritable = z.union([zStatisticCreateUpcomingWritable, zStatisticCreateActiveWritable])
 
