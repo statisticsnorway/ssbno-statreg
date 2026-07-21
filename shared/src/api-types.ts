@@ -1154,7 +1154,7 @@ export interface components {
     Statistic_create_base: {
       name?: string
       name_en?: string
-      division?: string
+      division?: number
       main_language?: components['schemas']['Statistic_main_language']
       /** Format: date */
       first_released_at?: string

@@ -179,7 +179,7 @@ export const zVariant = z.object({
 export const zStatisticCreateBase = z.object({
   name: z.string().optional(),
   name_en: z.string().optional(),
-  division: z.string().optional(),
+  division: z.int().optional(),
   main_language: zStatisticMainLanguage.optional(),
   first_released_at: z.iso.date().optional(),
   yearly_reporting: z.boolean().optional(),
@@ -339,7 +339,7 @@ export const zVariantWritable = z.object({
 export const zStatisticCreateBaseWritable = z.object({
   name: z.string().optional(),
   name_en: z.string().optional(),
-  division: z.string().optional(),
+  division: z.int().optional(),
   main_language: zStatisticMainLanguage.optional(),
   first_released_at: z.iso.date().optional(),
   yearly_reporting: z.boolean().optional(),

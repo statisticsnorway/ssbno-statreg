@@ -274,39 +274,18 @@ components:
       type: object
       properties:
         shortname: { type: string, readOnly: true }
-        main_language: { $ref: '#/components/schemas/Statistic_main_language' }
+        main_language: { type: string, description: "Main language will be either 'nn' or 'nb' for statistics" }
         status:
           type: object
           properties:
-            code: { $ref: '#/components/schemas/Statistic_status_code' }
+            code:
+              {
+                type: string,
+                description: 'Is one of K (Kommende), A (Aktiv), IA (Ikke-aktiv), UT (Opphørt), SA (Sammenslått) or SP (Splittet)',
+              }
         name: { type: string }
         name_en: { type: string }
-        approval_status: { $ref: '#/components/schemas/Statistic_approval_status' }
-
-    Statistic_create_base:
-      type: object
-      properties:
-        name: { type: string }
-        name_en: { type: string }
-        division: { type: string }
-        main_language: { $ref: '#/components/schemas/Statistic_main_language' }
-        first_released_at: { type: string, format: date }
-        yearly_reporting: { type: boolean }
-        statistic_region_levels:
-          type: array
-          items:
-            $ref: '#/components/schemas/Region_level_code'
-        previous_topic_codes: { type: string }
-        comment: { type: string }
-        variants:
-          type: array
-          items:
-            $ref: '#/components/schemas/Variant'
-        contacts:
-          type: array
-          description: 'List of principal names to set as contacts for the statistic'
-          items:
-            type: string
+        approval_status: { type: string, description: " Is one of 'GODKJENT', 'AVVIST' or 'FORSLAG'" }
 
     Statistic_create_upcoming:
       type: object
