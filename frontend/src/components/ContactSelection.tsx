@@ -20,10 +20,13 @@ export function ContactSelection({ contacts, selected, setSelected }: ContactSel
     [contacts]
   )
 
-  const selectedItems: SuggestionItem[] = selected.map((principalName) => ({
-    label: formatContact(contactMap[principalName]),
-    value: principalName,
-  }))
+  const selectedItems: SuggestionItem[] = selected.map((principalName) => {
+    const contact = contactMap[principalName]
+    return {
+      label: contact ? formatContact(contact) : principalName,
+      value: principalName,
+    }
+  })
 
   const options = useMemo(
     () =>
