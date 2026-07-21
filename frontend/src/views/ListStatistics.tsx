@@ -115,16 +115,14 @@ export default function ListStatistics() {
     async function fetchFilterOptions() {
       const { data: shortnamesData, error: shortnamesError } = await client.GET('/shortnames')
       if (shortnamesError) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        setApiError((prev) => [...prev, (shortnamesError as any).error])
+        setApiError((prev) => [...prev, shortnamesError.message])
       } else {
         setShortnames(shortnamesData ?? [])
       }
 
       const { data: contactsData, error: contactsError } = await client.GET('/contacts')
       if (contactsError) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        setApiError((prev) => [...prev, (contactsError as any).error])
+        setApiError((prev) => [...prev, contactsError.message])
       } else {
         setContacts(contactsData ?? [])
       }
@@ -196,7 +194,7 @@ export default function ListStatistics() {
             <Suggestion.Clear onClick={() => onFilterChange(null)} />
             <Suggestion.List className='suggestion-list'>
               {isLoadingOptions ? (
-                <Suggestion.Empty>Laster...</Suggestion.Empty>
+                2
               ) : (
                 <>
                   <Suggestion.Empty>Ingen treff</Suggestion.Empty>
