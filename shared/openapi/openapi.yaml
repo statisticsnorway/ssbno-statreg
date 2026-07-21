@@ -292,6 +292,7 @@ components:
       type: array
       items:
         type: string
+        description: 'Valid region levels are (name in parethesis): L (Land), LD (Landsdel), F (Fylke), K (Kommune), BD (Bydel og krets)'
 
     Statistic_previous_topic_codes_input:
       type: string
@@ -308,7 +309,7 @@ components:
       type: object
       required: [status, division, name]
       properties:
-        status: { type: string, const: K }
+        status: { type: string, const: K, description: "Must be 'K' for upcoming statistic." }
         division: { $ref: '#/components/schemas/Statistic_division_input' }
         name: { $ref: '#/components/schemas/Statistic_name_input' }
         name_en: { $ref: '#/components/schemas/Statistic_name_input' }
@@ -326,7 +327,7 @@ components:
       type: object
       required: [status, division, name, name_en, main_language, contacts, variants]
       properties:
-        status: { type: string, const: A }
+        status: { type: string, const: A, description: "Must be 'A' for active statistic." }
         division: { $ref: '#/components/schemas/Statistic_division_input' }
         name: { $ref: '#/components/schemas/Statistic_name_input' }
         name_en: { $ref: '#/components/schemas/Statistic_name_en_input' }
