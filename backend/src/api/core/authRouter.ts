@@ -1,16 +1,8 @@
 import { type RequestHandler, Router } from 'express'
 import { type JWTPayload } from 'jose'
+import { isAdmin } from '@/../plugins/authMiddleware'
 
 const AUTH_PREFIX = '/api/auth'
-
-function getAdminGroups(): string[] {
-  return process.env.ADMIN_GROUPS?.split(',') ?? []
-}
-
-function isAdmin(claimGroups: string[] | undefined): boolean {
-  const adminGroups = getAdminGroups()
-  return adminGroups.some((group) => claimGroups?.includes(group))
-}
 
 export default function createAuthRouter(requireAuth: RequestHandler): Router {
   const router = Router()
@@ -29,24 +21,18 @@ export default function createAuthRouter(requireAuth: RequestHandler): Router {
     // We want a default object if auth is not available or not in use.
     if (!req.auth) {
       res.json({
-        isAdmin: false,
+        isAdmin: process.env.AUTH_ENABLED === 'false',
         email: '',
         fullName: '',
       })
       return
     }
 
-    const claims = req.auth.claims as JWTPayload & {
-      dapla?: {
-        groups?: string[]
-      }
-    }
-
-    const claimGroups = claims.dapla?.groups
+    const claims = req.auth.claims as JWTPayload
 
     res.json({
-      isAdmin: isAdmin(claimGroups),
-      email: req.auth?.email,
+      isAdmin: isAdmin(claims),
+      email: req.auth.email,
       fullName: claims.name,
     })
   })

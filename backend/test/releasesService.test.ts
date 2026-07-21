@@ -438,60 +438,87 @@ describe('releasesService ', async () => {
     })
   })
 
-  describe('updateRelease ', () => {
-    beforeEach(() => {
-      now = new Date('2026-03-23T08:00:00Z')
-    })
+describe('updateRelease ', () => {
+  beforeEach(() => {
+    now = new Date('2026-03-23T08:00:00Z')
+  })
 
-    test('updates exactly one release when input data is correct', async () => {
-      setPrismaResult(mockedSingleReleasePrismaResult)
-      const releaseUpdateInput = {
-        publish_time: '2024-10-15T08:00:00Z',
-        period_to: '2024-12-31',
-        period_from: '2024-09-01',
+  test('updates exactly one release when input data is correct', async () => {
+    setPrismaResult(mockedSingleReleasePrismaResult)
+    const releaseUpdateInput = {
+      publish_time: '2024-10-15T08:00:00Z',
+      period_to: '2024-12-31',
+      period_from: '2024-09-01',
+      release_date_precision: 'dag',
+      comment: 'Mock comment.',
+    }
+
+    await updateRelease(prismaMock, '1', releaseUpdateInput, now)
+
+    expect(prismaMock.release.update).toHaveBeenCalledExactlyOnceWith({
+      include: ReleaseDetailsIncludes,
+      where: { id: 1 },
+      data: {
+        publish_time: new Date('2024-10-15T08:00:00Z'),
+        period_to: new Date('2024-12-31T00:00:00Z'),
+        period_from: new Date('2024-09-01T00:00:00Z'),
         release_date_precision: 'dag',
+        desk_appoval_status: ApprovalStatus.PENDING,
+        last_updated: now,
         comment: 'Mock comment.',
-      }
-
-      await updateRelease(prismaMock, '1', releaseUpdateInput, now)
-
-      expect(prismaMock.release.update).toHaveBeenCalledExactlyOnceWith({
-        include: ReleaseDetailsIncludes,
-        where: { id: 1 },
-        data: {
-          publish_time: new Date('2024-10-15T08:00:00Z'),
-          period_to: new Date('2024-12-31T00:00:00Z'),
-          period_from: new Date('2024-09-01T00:00:00Z'),
-          release_date_precision: 'dag',
-          desk_appoval_status: ApprovalStatus.PENDING,
-          last_updated: now,
-          comment: 'Mock comment.',
-        },
-      })
-    })
-
-    test('rejects with error message if request body is empty', async () => {
-      await expect(() => updateRelease(prismaMock, '1', undefined, now)).rejects.toMatchObject({
-        statregError:
-          'Missing required field(s): publish_time, period_from, period_to, release_date_precision, comment',
-      })
-      expect(prismaMock.release.update).toHaveBeenCalledTimes(0)
-    })
-
-    test('rejects with error message if comment is missing', async () => {
-      const releaseUpdateInputWithoutComment = {
-        publish_time: '2026-03-19T11:52:38.903Z',
-        period_to: '2026-03-19T11:52:38.903Z',
-        period_from: '2026-03-19T11:52:38.903Z',
-        release_date_precision: 'string',
-      }
-      await expect(() => updateRelease(prismaMock, '1', releaseUpdateInputWithoutComment, now)).rejects.toMatchObject({
-        statregError: 'Missing required field(s): comment',
-      })
-
-      expect(prismaMock.release.update).toHaveBeenCalledTimes(0)
+      },
     })
   })
+
+  test('automatically approves the release when autoApprove is true', async () => {
+    setPrismaResult(mockedSingleReleasePrismaResult)
+    const releaseUpdateInput = {
+      publish_time: '2024-10-15T08:00:00Z',
+      period_to: '2024-12-31',
+      period_from: '2024-09-01',
+      release_date_precision: 'dag',
+      comment: 'Mock comment.',
+    }
+
+    await updateRelease(prismaMock, '1', releaseUpdateInput, now, true)
+
+    expect(prismaMock.release.update).toHaveBeenCalledExactlyOnceWith({
+      include: ReleaseDetailsIncludes,
+      where: { id: 1 },
+      data: {
+        publish_time: new Date('2024-10-15T08:00:00Z'),
+        period_to: new Date('2024-12-31T00:00:00Z'),
+        period_from: new Date('2024-09-01T00:00:00Z'),
+        release_date_precision: 'dag',
+        desk_appoval_status: ApprovalStatus.ACCEPTED,
+        last_updated: now,
+        comment: 'Mock comment.',
+      },
+    })
+  })
+
+  test('rejects with error message if request body is empty', async () => {
+    await expect(() => updateRelease(prismaMock, '1', undefined, now)).rejects.toMatchObject({
+      statregError:
+        'Missing required field(s): publish_time, period_from, period_to, release_date_precision, comment',
+    })
+    expect(prismaMock.release.update).toHaveBeenCalledTimes(0)
+  })
+
+  test('rejects with error message if comment is missing', async () => {
+    const releaseUpdateInputWithoutComment = {
+      publish_time: '2026-03-19T11:52:38.903Z',
+      period_to: '2026-03-19T11:52:38.903Z',
+      period_from: '2026-03-19T11:52:38.903Z',
+      release_date_precision: 'string',
+    }
+    await expect(() => updateRelease(prismaMock, '1', releaseUpdateInputWithoutComment, now)).rejects.toMatchObject({
+      statregError: 'Missing required field(s): comment',
+    })
+
+    expect(prismaMock.release.update).toHaveBeenCalledTimes(0)
+  })
+})
 
   describe('approveReleases ', () => {
     test('approves all releases and returns their statuses', async () => {

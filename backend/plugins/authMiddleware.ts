@@ -24,6 +24,24 @@ export function getBearerToken(req: Request): string | null {
   return token
 }
 
+export function isAdmin(claims: JWTPayload | undefined): boolean {
+  const claimGroups = (
+    claims as
+      | (JWTPayload & {
+          dapla?: {
+            groups?: string[]
+          }
+        })
+      | undefined
+  )?.dapla?.groups
+
+  if (!Array.isArray(claimGroups)) return false
+
+  const adminGroups = process.env.ADMIN_GROUPS?.split(',') ?? []
+
+  return adminGroups.some((group) => claimGroups.includes(group))
+}
+
 export const skipAuth: RequestHandler = (_req, _res, next) => asyncLocalStorage.run({}, next)
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ;(skipAuth as any).__skipAuth = true
@@ -94,9 +112,7 @@ export function requireAdminAuthorization(): RequestHandler {
       return forbidden(res, 'Missing authorization groups')
     }
 
-    const adminGroups = process.env.ADMIN_GROUPS?.split(',') ?? []
-
-    if (!adminGroups.some((group) => groups.includes(group))) {
+    if (!isAdmin(claims)) {
       return forbidden(res, 'Insufficient access')
     }
 

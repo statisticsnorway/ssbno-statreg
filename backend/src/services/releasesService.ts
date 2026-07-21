@@ -304,7 +304,8 @@ export async function updateRelease(
   prisma: ReleasePrisma,
   id: string,
   body: ReleaseUpdate | undefined,
-  now = new Date()
+  now = new Date(),
+  autoApprove = false
 ): Promise<ReleaseDetails> {
   const idAsNumber = parseId(id)
 
@@ -318,7 +319,7 @@ export async function updateRelease(
       period_from: validatedInput.periodFromDate,
       period_to: validatedInput.periodToDate,
       release_date_precision: validatedInput.releaseDatePrecision,
-      desk_appoval_status: ApprovalStatus.PENDING,
+      desk_appoval_status: autoApprove ? ApprovalStatus.ACCEPTED : ApprovalStatus.PENDING,
       last_updated: now,
       comment: validatedInput.comment,
     },
