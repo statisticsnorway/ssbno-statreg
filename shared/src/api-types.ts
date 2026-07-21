@@ -724,7 +724,10 @@ export interface paths {
         default: components['responses']['Error']
       }
     }
-    /** Update a release */
+    /**
+     * Update a release
+     * @description Updates a release. Non-admin users reset approval status to FORSLAG (pending). Admin users automatically set approval status to GODKJENT (approved).
+     */
     put: {
       parameters: {
         query?: never
