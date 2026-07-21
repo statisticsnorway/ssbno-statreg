@@ -436,10 +436,25 @@ export async function createStatistic(
   await statisticsAsserts.assertShortnameExists(safeShortname, prisma)
   await statisticsAsserts.assertShortnameExistsAndIsAvailable(safeShortname, prisma)
 
+  const safeName = sanitize(body.name)
+  const safeNameEn = sanitize(body.name_en)
+
+  if (!safeName) {
+    throw { statregError: "Field 'name' must be a non-empty string." }
+  }
+
+  if (status === 'A' && !safeNameEn) {
+    throw { statregError: "Field 'name_en' must be a non-empty string." }
+  }
+
+  if (body.division && !getDivisionFromCode(body.division)) {
+    throw { statregError: "Field 'division' does not correspond to an existing division." }
+  }
+
   const result = await prisma.statistic.create({
     data: {
-      name: body.name,
-      name_en: body.name_en,
+      name: safeName,
+      name_en: safeNameEn,
       priority: 1,
       yearly_reporting: false,
       status: body.status,
@@ -464,49 +479,6 @@ export async function createStatistic(
     include: StatisticsDetailedIncludes,
   })
   return await mapStatisticDetails(result)
-}
-
-export function parseCreateStatisticInput(
-  body: StatisticCreate | undefined,
-  status: CreatableStatisticStatus
-): ValidatedCreateStatisticInput {
-  const requiredFields = getRequiredStatisticFields(status)
-  const {
-    division,
-    name,
-    name_en,
-    first_released_at,
-    main_language,
-    statistic_region_levels = [],
-    comment,
-  } = ensureRequiredFieldsExists(body ?? {}, requiredFields)
-
-  const safeName = sanitize(name)
-  const safeNameEn = sanitize(name_en)
-  const safeComment = sanitize(comment)
-  const language = main_language ?? 'nb'
-
-  if (!safeName) {
-    throw { statregError: "Field 'name' must be a non-empty string." }
-  }
-
-  if (status === 'A' && !safeNameEn) {
-    throw { statregError: "Field 'name_en' must be a non-empty string." }
-  }
-
-  if (language !== 'nb' && language !== 'nn') {
-    throw { statregError: "Field 'main_language' must be either 'nb' or 'nn'." }
-  }
-
-  return {
-    division: parseDivision(division),
-    name: safeName,
-    ...(safeNameEn ? { name_en: safeNameEn } : {}),
-    ...(first_released_at ? { first_released_at: parseDateOnly(first_released_at, 'first_released_at') } : {}),
-    statistic_region_levels,
-    main_language: language,
-    comment: safeComment,
-  }
 }
 
 export function parseUpdateStatisticInput(
