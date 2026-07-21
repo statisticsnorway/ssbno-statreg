@@ -1148,7 +1148,7 @@ export interface components {
     /** Format: date */
     Statistic_first_released_at_input: string | null
     Statistic_yearly_reporting_input: boolean
-    Statistic_region_levels_input: string[]
+    Statistic_region_levels_input: ('L' | 'LD' | 'F' | 'K' | 'BD')[]
     Statistic_previous_topic_codes_input: string | null
     Statistic_comment_input: string
     Statistic_relation_input: string | null

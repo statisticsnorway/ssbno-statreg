@@ -15,7 +15,7 @@ import { getDivisionFromCode } from '@/services/klassService'
 import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
 import { statisticsAsserts } from '@/lib/asserts'
 import { getAllUsersFromCache } from '@/lib/cache'
-import { PostStatisticsByShortnameBody } from '@/parser'
+import { PostStatisticsByShortnameBody, PutStatisticsByShortnameBody } from '@/parser'
 
 export type StatisticPrisma = Pick<PrismaClient, 'statistic' | 'shortname' | 'responsiblePerson'>
 
@@ -289,23 +289,9 @@ export async function getStatisticByShortname(shortname: string, prisma: Statist
 
 export async function updateStatistic(
   shortname: string,
-  body: PostStatisticsByShortnameBody,
+  body: PutStatisticsByShortnameBody,
   prisma: StatisticPrisma
 ): Promise<StatisticDetails> {
-  const requiredFields: (keyof StatisticUpdate)[] = [
-    'division',
-    'statistic_region_levels',
-    'status',
-    'name',
-    'name_en',
-    'relation',
-    'previous_topic_codes',
-    'yearly_reporting',
-    'first_released_at',
-    'main_language',
-    'comment',
-  ]
-
   const safeShortname = sanitize(shortname)
   const existingStatistic = await prisma.statistic.findFirst({
     where: { shortname: { name: safeShortname } },
@@ -330,7 +316,7 @@ export async function updateStatistic(
 
   const regionLevelsToRemove = existingStatistic.statistic_region_levels.filter(
     (existingRegLvl) =>
-      !statistic_region_levels?.find((incomingRegLvl) => incomingRegLvl === existingRegLvl.region_level.code)
+      !body.statistic_region_levels?.find((incomingRegLvl) => incomingRegLvl === existingRegLvl.region_level.code)
   )
   const deleteRegionLevelStatement = regionLevelsToRemove.map((regLvl) => {
     return {

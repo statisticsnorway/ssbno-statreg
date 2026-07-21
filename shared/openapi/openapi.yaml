@@ -293,7 +293,8 @@ components:
       type: array
       items:
         type: string
-        description: 'Valid region levels are (name in parethesis): L (Land), LD (Landsdel), F (Fylke), K (Kommune), BD (Bydel og krets)'
+        enum: [L, LD, F, K, BD]
+        description: 'Region level - L (Land), LD (Landsdel), F (Fylke), K (Kommune), BD (Bydel og krets)'
 
     Statistic_previous_topic_codes_input:
       type: string

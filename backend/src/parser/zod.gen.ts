@@ -153,7 +153,7 @@ export const zStatisticFirstReleasedAtInput = z.iso.date()
 
 export const zStatisticYearlyReportingInput = z.boolean()
 
-export const zStatisticRegionLevelsInput = z.array(z.string())
+export const zStatisticRegionLevelsInput = z.array(z.enum(['L', 'LD', 'F', 'K', 'BD']))
 
 export const zStatisticPreviousTopicCodesInput = z.string()
 
