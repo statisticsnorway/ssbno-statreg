@@ -10,7 +10,7 @@ import {
   parseCreateStatisticInput,
   parseUpdateStatisticInput,
   updateStatistic,
-  updateContacts,
+  updateStatisticContacts,
   createStatistic,
   StatisticsDetailedIncludes,
   parseDivision,
@@ -461,7 +461,7 @@ describe('statisticService', () => {
     })
 
     test('returns updated contacts when valid shortname and principal names are provided', async () => {
-      const result = await updateContacts('helse', ['abc@ssb.no', 'bcd@ssb.no'], prismaMock)
+      const result = await updateStatisticContacts('helse', ['abc@ssb.no', 'bcd@ssb.no'], prismaMock)
 
       expect(prismaMock.statistic.findFirst).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
@@ -498,7 +498,7 @@ describe('statisticService', () => {
     test('throws error when shortname is not found', async () => {
       prismaMock.statistic.findFirst.mockResolvedValue(null)
 
-      await expect(() => updateContacts('helse', ['abc@ssb.no'], prismaMock)).rejects.toMatchObject({
+      await expect(() => updateStatisticContacts('helse', ['abc@ssb.no'], prismaMock)).rejects.toMatchObject({
         status: 404,
         statregError: "Shortname 'helse' not found",
       })
@@ -509,7 +509,7 @@ describe('statisticService', () => {
     test('throws error when statistic is active and new contacts is empty', async () => {
       prismaMock.statistic.findFirst.mockResolvedValue({ id: 1, status: 'A' })
 
-      await expect(() => updateContacts('helse', [], prismaMock)).rejects.toMatchObject({
+      await expect(() => updateStatisticContacts('helse', [], prismaMock)).rejects.toMatchObject({
         statregError: 'An active statistic needs at least one contact',
       })
       expect(prismaMock.responsiblePerson.upsert).toHaveBeenCalledTimes(0)

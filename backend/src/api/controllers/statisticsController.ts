@@ -3,7 +3,7 @@ import {
   createStatistic,
   getStatisticByShortname,
   updateStatistic,
-  updateContacts,
+  updateStatisticContacts,
   getFilteredStatistics,
 } from '@/services/statisticsService'
 import { requireAdminAuthorization, skipAuth } from '@/../plugins/authMiddleware'
@@ -65,7 +65,7 @@ export default function statisticsController(router: Router) {
       if (!Array.isArray(input) || !input.every((item) => typeof item === 'string')) {
         throw { status: 400, statregError: 'principalNames must be an array of strings' }
       }
-      const result = await updateContacts(ensureString(req.params.shortname), input, prisma)
+      const result = await updateStatisticContacts(ensureString(req.params.shortname), input, prisma)
       res.json(result)
     } catch (error) {
       return handleErrors(error, res)
