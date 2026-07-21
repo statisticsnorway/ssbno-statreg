@@ -274,7 +274,9 @@ export interface paths {
       }
       requestBody: {
         content: {
-          'application/json': components['schemas']['Statistic_create']
+          'application/json':
+            | components['schemas']['Statistic_create_upcoming']
+            | components['schemas']['Statistic_create_active']
         }
       }
       responses: {
@@ -1124,6 +1126,86 @@ export interface components {
     Revision: {
       code?: string
     }
+    /**
+     * @description Statistic status code - K (Kommende), A (Aktiv), IA (Ikke-aktiv), UT (Opphørt), SA (Sammenslått), SP (Splittet)
+     * @enum {string}
+     */
+    Statistic_status_input: 'K' | 'A' | 'IA' | 'UT' | 'SA' | 'SP'
+    Statistic_division_input: string
+    Statistic_name_input: string
+    /**
+     * @description Main language code - nn (Nynorsk), nb (Bokmål)
+     * @enum {string}
+     */
+    Statistic_main_language_input: 'nn' | 'nb'
+    Statistic_contacts_input: string[]
+    Statistic_variants_input: components['schemas']['Variant'][]
+    /**
+     * @description Approval status - GODKJENT (Approved), AVVIST (Rejected), FORSLAG (Proposal)
+     * @enum {string}
+     */
+    Statistic_approval_status_input: 'GODKJENT' | 'AVVIST' | 'FORSLAG'
+    /** Format: date */
+    Statistic_first_released_at_input: string | null
+    Statistic_yearly_reporting_input: boolean
+    Statistic_region_levels_input: string[]
+    Statistic_previous_topic_codes_input: string | null
+    Statistic_comment_input: string
+    Statistic_relation_input: string | null
+    Statistic_create_upcoming: {
+      /**
+       * @description Must be 'K' for upcoming statistic.
+       * @constant
+       */
+      status: 'K'
+      division: components['schemas']['Statistic_division_input']
+      name: components['schemas']['Statistic_name_input']
+      name_en?: components['schemas']['Statistic_name_input']
+      main_language?: components['schemas']['Statistic_main_language_input']
+      contacts?: components['schemas']['Statistic_contacts_input']
+      variants?: components['schemas']['Statistic_variants_input']
+      approval_status?: components['schemas']['Statistic_approval_status_input']
+      first_released_at?: components['schemas']['Statistic_first_released_at_input']
+      yearly_reporting?: components['schemas']['Statistic_yearly_reporting_input']
+      statistic_region_levels?: components['schemas']['Statistic_region_levels_input']
+      previous_topic_codes?: components['schemas']['Statistic_previous_topic_codes_input']
+      comment?: components['schemas']['Statistic_comment_input']
+    }
+    Statistic_create_active: {
+      /**
+       * @description Must be 'A' for active statistic.
+       * @constant
+       */
+      status: 'A'
+      division: components['schemas']['Statistic_division_input']
+      name: components['schemas']['Statistic_name_input']
+      name_en: components['schemas']['Statistic_name_input']
+      main_language: components['schemas']['Statistic_main_language_input']
+      contacts: components['schemas']['Statistic_contacts_input']
+      variants: components['schemas']['Statistic_variants_input']
+      approval_status?: components['schemas']['Statistic_approval_status_input']
+      first_released_at?: components['schemas']['Statistic_first_released_at_input']
+      yearly_reporting?: components['schemas']['Statistic_yearly_reporting_input']
+      statistic_region_levels?: components['schemas']['Statistic_region_levels_input']
+      previous_topic_codes?: components['schemas']['Statistic_previous_topic_codes_input']
+      comment?: components['schemas']['Statistic_comment_input']
+    }
+    Statistic_update: {
+      status?: components['schemas']['Statistic_status_input']
+      division?: components['schemas']['Statistic_division_input']
+      name?: components['schemas']['Statistic_name_input']
+      name_en?: components['schemas']['Statistic_name_input']
+      main_language?: components['schemas']['Statistic_main_language_input']
+      contacts?: components['schemas']['Statistic_contacts_input']
+      variants?: components['schemas']['Statistic_variants_input']
+      approval_status?: components['schemas']['Statistic_approval_status_input']
+      first_released_at?: components['schemas']['Statistic_first_released_at_input']
+      yearly_reporting?: components['schemas']['Statistic_yearly_reporting_input']
+      statistic_region_levels?: components['schemas']['Statistic_region_levels_input']
+      previous_topic_codes?: components['schemas']['Statistic_previous_topic_codes_input']
+      comment?: components['schemas']['Statistic_comment_input']
+      relation?: components['schemas']['Statistic_relation_input']
+    }
     Statistic: {
       readonly shortname?: string
       /** @description Main language will be either 'nn' or 'nb' for statistics */
@@ -1137,39 +1219,6 @@ export interface components {
       /** @description Is one of 'GODKJENT', 'AVVIST' or 'FORSLAG' */
       approval_status?: string
     }
-    Statistic_create_base: {
-      division?: string | null
-      /** Format: date */
-      first_released_at?: string | null
-      yearly_reporting?: boolean
-      statistic_region_levels?: {
-        code?: string
-      }[]
-      previous_topic_codes?: string | null
-      comment?: string
-      variants?: components['schemas']['Variant'][]
-      contacts?: {
-        principalName?: string
-      }[]
-    } & components['schemas']['Statistic']
-    Statistic_create_upcoming: components['schemas']['Statistic_create_base'] & {
-      status?: {
-        /** @description Must be "K" for creation of upcoming statistics */
-        code: string
-      }
-    }
-    Statistic_create_active: components['schemas']['Statistic_create_base'] & {
-      status: {
-        /** @description Must be "A" for creation of active statistics */
-        code: string
-      }
-    }
-    Statistic_create:
-      | components['schemas']['Statistic_create_upcoming']
-      | components['schemas']['Statistic_create_active']
-    Statistic_update: {
-      relation?: string | null
-    } & components['schemas']['Statistic_create_base']
     Statistic_details: {
       version?: number
       division?: components['schemas']['Division']
