@@ -1151,7 +1151,7 @@ export interface components {
     Statistic_region_levels_input: ('L' | 'LD' | 'F' | 'K' | 'BD')[]
     Statistic_previous_topic_codes_input: string | null
     Statistic_comment_input: string
-    Statistic_relation_input: string | null
+    Statistic_relation_input: number | null
     Statistic_create_upcoming: {
       /**
        * @description Must be 'K' for upcoming statistic.

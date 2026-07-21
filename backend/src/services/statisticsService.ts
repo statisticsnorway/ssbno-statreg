@@ -17,7 +17,7 @@ import { statisticsAsserts } from '@/lib/asserts'
 import { getAllUsersFromCache } from '@/lib/cache'
 import { PostStatisticsByShortnameBody, PutStatisticsByShortnameBody } from '@/parser'
 
-export type StatisticPrisma = Pick<PrismaClient, 'statistic' | 'shortname' | 'responsiblePerson'>
+export type StatisticPrisma = Pick<PrismaClient, 'statistic' | 'shortname' | 'responsiblePerson' | 'region_level'>
 
 type StatisticStatusCode = keyof typeof StatisticStatus
 
@@ -295,63 +295,52 @@ export async function updateStatistic(
   const safeShortname = sanitize(shortname)
   const existingStatistic = await prisma.statistic.findFirst({
     where: { shortname: { name: safeShortname } },
-    select: { id: true, statistic_region_levels: { select: { region_level: { select: { code: true, id: true } } } } },
+    select: { id: true },
   })
 
   if (!existingStatistic) return Promise.reject({ status: 404, statregError: `Shortname ${safeShortname} not found` })
 
-  const {
-    division,
-    statistic_region_levels = [],
-    status,
-    name,
-    name_en,
-    relation,
-    previous_topic_codes,
-    yearly_reporting,
-    first_released_at,
-    main_language,
-    comment,
-  } = parseUpdateStatisticInput(body, requiredFields)
+  const safeName = sanitize(body.name)
+  const safeNameEn = sanitize(body.name_en)
 
-  const regionLevelsToRemove = existingStatistic.statistic_region_levels.filter(
-    (existingRegLvl) =>
-      !body.statistic_region_levels?.find((incomingRegLvl) => incomingRegLvl === existingRegLvl.region_level.code)
-  )
-  const deleteRegionLevelStatement = regionLevelsToRemove.map((regLvl) => {
-    return {
-      statistic_id_region_level_id: { statistic_id: existingStatistic.id, region_level_id: regLvl.region_level.id },
-    }
-  })
+  if (!safeName) {
+    throw { statregError: "Field 'name' must be a non-empty string." }
+  }
 
-  const regionLevelsToAdd = statistic_region_levels.filter(
-    (incomingRegLvl) =>
-      incomingRegLvl.code &&
-      !existingStatistic.statistic_region_levels?.find(
-        (existingRegLvl) => incomingRegLvl === existingRegLvl.region_level.code
-      )
-  )
-  const createRegionLevelStatement = regionLevelsToAdd.map((regLvl) => {
-    return { region_level: { connect: { code: regLvl.code } } }
+  if (!safeNameEn) {
+    throw { statregError: "Field 'name_en' must be a non-empty string." }
+  }
+
+  if (!getDivisionFromCode(body.division)) {
+    throw { statregError: "Field 'division' does not correspond to an existing division." }
+  }
+
+  const regionLevels = await prisma.region_level.findMany({
+    where: { code: { in: body.statistic_region_levels } },
+    select: { id: true },
   })
 
   const updatedStatistic = await prisma.statistic.update({
     where: { id: existingStatistic.id },
     data: {
-      name,
-      name_en,
-      division_code: division,
+      name: safeName,
+      name_en: safeNameEn,
+      division_code: body.division,
       desk_appoval_status: ApprovalStatus.PENDING,
-      status,
-      comment,
-      language: main_language,
-      related_statistic_id: relation,
-      legacy_topic_codes: previous_topic_codes,
-      yearly_reporting,
-      first_release: first_released_at,
+      status: body.status,
+      comment: sanitize(body.status),
+      language: body.main_language,
+      related_statistic_id: body.relation,
+      legacy_topic_codes: body.previous_topic_codes,
+      yearly_reporting: body.yearly_reporting,
+      first_release: body.first_released_at,
       statistic_region_levels: {
-        create: createRegionLevelStatement,
-        delete: deleteRegionLevelStatement,
+        set: regionLevels.map((level) => ({
+          statistic_id_region_level_id: {
+            statistic_id: existingStatistic.id,
+            region_level_id: level.id,
+          },
+        })),
       },
     },
     include: StatisticsDetailedIncludes,
@@ -429,7 +418,7 @@ export async function createStatistic(
     throw { statregError: "Field 'name' must be a non-empty string." }
   }
 
-  if (status === 'A' && !safeNameEn) {
+  if (body.status === 'A' && !safeNameEn) {
     throw { statregError: "Field 'name_en' must be a non-empty string." }
   }
 

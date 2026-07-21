@@ -159,7 +159,7 @@ export const zStatisticPreviousTopicCodesInput = z.string()
 
 export const zStatisticCommentInput = z.string()
 
-export const zStatisticRelationInput = z.string()
+export const zStatisticRelationInput = z.int().gte(0)
 
 export const zStatistic = z.object({
   shortname: z.string().readonly().optional(),
