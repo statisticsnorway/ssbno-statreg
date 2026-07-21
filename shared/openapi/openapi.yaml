@@ -251,6 +251,113 @@ components:
       properties:
         code: { type: string }
 
+    Statistic_status_input:
+      type: array
+      items:
+        type: string
+        description: 'Is one of K (Kommende), A (Aktiv), IA (Ikke-aktiv), UT (Opphørt), SA (Sammenslått) or SP (Splittet)'
+
+    Statistic_division_input:
+      type: string
+
+    Statistic_name_input:
+      type: string
+
+    Statistic_main_language_input:
+      type: string
+      description: "Main language will be either 'nn' or 'nb' for statistics"
+
+    Statistic_contacts_input:
+      type: array
+      items: { type: string }
+
+    Statistic_variants_input:
+      type: array
+      items:
+        $ref: '#/components/schemas/Variant'
+
+    Statistic_approval_status_input:
+      type: string
+      description: " Is one of 'GODKJENT', 'AVVIST' or 'FORSLAG'"
+
+    Statistic_first_released_at_input:
+      type: string
+      format: date
+      nullable: true
+
+    Statistic_yearly_reporting_input:
+      type: boolean
+
+    Statistic_region_levels_input:
+      type: array
+      items:
+        type: string
+
+    Statistic_previous_topic_codes_input:
+      type: string
+      nullable: true
+
+    Statistic_comment_input:
+      type: string
+
+    Statistic_relation_input:
+      type: string
+      nullable: true
+
+    Statistic_create_upcoming:
+      type: object
+      required: [status, division, name]
+      properties:
+        status: { type: string, const: K }
+        division: { $ref: '#/components/schemas/Statistic_division_input' }
+        name: { $ref: '#/components/schemas/Statistic_name_input' }
+        name_en: { $ref: '#/components/schemas/Statistic_name_input' }
+        main_language: { $ref: '#/components/schemas/Statistic_main_language_input' }
+        contacts: { $ref: '#/components/schemas/Statistic_contacts_input' }
+        variants: { $ref: '#/components/schemas/Statistic_variants_input' }
+        approval_status: { $ref: '#/components/schemas/Statistic_approval_status_input' }
+        first_released_at: { $ref: '#/components/schemas/Statistic_first_released_at_input' }
+        yearly_reporting: { $ref: '#/components/schemas/Statistic_yearly_reporting_input' }
+        statistic_region_levels: { $ref: '#/components/schemas/Statistic_region_levels_input' }
+        previous_topic_codes: { $ref: '#/components/schemas/Statistic_previous_topic_codes_input' }
+        comment: { $ref: '#/components/schemas/Statistic_comment_input' }
+
+    Statistic_create_active:
+      type: object
+      required: [status, division, name, name_en, main_language, contacts, variants]
+      properties:
+        status: { type: string, const: A }
+        division: { $ref: '#/components/schemas/Statistic_division_input' }
+        name: { $ref: '#/components/schemas/Statistic_name_input' }
+        name_en: { $ref: '#/components/schemas/Statistic_name_en_input' }
+        main_language: { $ref: '#/components/schemas/Statistic_main_language_input' }
+        contacts: { $ref: '#/components/schemas/Statistic_contacts_input' }
+        variants: { $ref: '#/components/schemas/Statistic_variants_input' }
+        approval_status: { $ref: '#/components/schemas/Statistic_approval_status_input' }
+        first_released_at: { $ref: '#/components/schemas/Statistic_first_released_at_input' }
+        yearly_reporting: { $ref: '#/components/schemas/Statistic_yearly_reporting_input' }
+        statistic_region_levels: { $ref: '#/components/schemas/Statistic_region_levels_input' }
+        previous_topic_codes: { $ref: '#/components/schemas/Statistic_previous_topic_codes_input' }
+        comment: { $ref: '#/components/schemas/Statistic_comment_input' }
+
+    Statistic_update:
+      type: object
+      properties:
+        status: { $ref: '#/components/schemas/Statistic_status_input' }
+        division: { $ref: '#/components/schemas/Statistic_division_input' }
+        name: { $ref: '#/components/schemas/Statistic_name_input' }
+        name_en: { $ref: '#/components/schemas/Statistic_name_en_input' }
+        main_language: { $ref: '#/components/schemas/Statistic_main_language_input' }
+        contacts: { $ref: '#/components/schemas/Statistic_contacts_input' }
+        variants: { $ref: '#/components/schemas/Statistic_variants_input' }
+        approval_status: { $ref: '#/components/schemas/Statistic_approval_status_input' }
+        first_released_at: { $ref: '#/components/schemas/Statistic_first_released_at_input' }
+        yearly_reporting: { $ref: '#/components/schemas/Statistic_yearly_reporting_input' }
+        statistic_region_levels: { $ref: '#/components/schemas/Statistic_region_levels_input' }
+        previous_topic_codes: { $ref: '#/components/schemas/Statistic_previous_topic_codes_input' }
+        comment: { $ref: '#/components/schemas/Statistic_comment_input' }
+        relation: { $ref: '#/components/schemas/Statistic_relation_input' }
+
     Statistic:
       type: object
       properties:
@@ -267,121 +374,6 @@ components:
         name: { type: string }
         name_en: { type: string }
         approval_status: { type: string, description: " Is one of 'GODKJENT', 'AVVIST' or 'FORSLAG'" }
-
-    Statistic_create_upcoming:
-      type: object
-      required: [division, name]
-      properties:
-        shortname: { type: string, readOnly: true }
-        main_language: { type: string, description: "Main language will be either 'nn' or 'nb' for statistics" }
-        status:
-          type: object
-          required: [code]
-          properties:
-            code:
-              description: 'Must be "K" for creation of upcoming statistics'
-              type: string
-        name: { type: string }
-        name_en: { type: string }
-        approval_status: { type: string, description: " Is one of 'GODKJENT', 'AVVIST' or 'FORSLAG'" }
-        division: { type: string, nullable: true }
-        first_released_at: { type: string, format: date, nullable: true }
-        yearly_reporting: { type: boolean }
-        statistic_region_levels:
-          type: array
-          items:
-            type: object
-            properties:
-              code: { type: string }
-        previous_topic_codes: { type: string, nullable: true }
-        comment: { type: string }
-        variants:
-          type: array
-          items:
-            $ref: '#/components/schemas/Variant'
-        contacts:
-          type: array
-          items:
-            type: object
-            properties:
-              principalName: { type: string }
-
-    Statistic_create_active:
-      type: object
-      required: [division, name, name_en, main_language, contacts, variants, status]
-      properties:
-        shortname: { type: string, readOnly: true }
-        main_language: { type: string, description: "Main language will be either 'nn' or 'nb' for statistics" }
-        status:
-          type: object
-          required: [code]
-          properties:
-            code:
-              description: 'Must be "A" for creation of active statistics'
-              type: string
-        name: { type: string }
-        name_en: { type: string }
-        approval_status: { type: string, description: " Is one of 'GODKJENT', 'AVVIST' or 'FORSLAG'" }
-        division: { type: string, nullable: true }
-        first_released_at: { type: string, format: date, nullable: true }
-        yearly_reporting: { type: boolean }
-        statistic_region_levels:
-          type: array
-          items:
-            type: object
-            properties:
-              code: { type: string }
-        previous_topic_codes: { type: string, nullable: true }
-        comment: { type: string }
-        variants:
-          type: array
-          items:
-            $ref: '#/components/schemas/Variant'
-        contacts:
-          type: array
-          items:
-            type: object
-            properties:
-              principalName: { type: string }
-
-    Statistic_update:
-      type: object
-      properties:
-        shortname: { type: string, readOnly: true }
-        main_language: { type: string, description: "Main language will be either 'nn' or 'nb' for statistics" }
-        status:
-          type: object
-          properties:
-            code:
-              {
-                type: string,
-                description: 'Is one of K (Kommende), A (Aktiv), IA (Ikke-aktiv), UT (Opphørt), SA (Sammenslått) or SP (Splittet)',
-              }
-        name: { type: string }
-        name_en: { type: string }
-        approval_status: { type: string, description: " Is one of 'GODKJENT', 'AVVIST' or 'FORSLAG'" }
-        division: { type: string, nullable: true }
-        first_released_at: { type: string, format: date, nullable: true }
-        yearly_reporting: { type: boolean }
-        statistic_region_levels:
-          type: array
-          items:
-            type: object
-            properties:
-              code: { type: string }
-        previous_topic_codes: { type: string, nullable: true }
-        comment: { type: string }
-        variants:
-          type: array
-          items:
-            $ref: '#/components/schemas/Variant'
-        contacts:
-          type: array
-          items:
-            type: object
-            properties:
-              principalName: { type: string }
-        relation: { type: string, nullable: true }
 
     Statistic_details:
       allOf:
