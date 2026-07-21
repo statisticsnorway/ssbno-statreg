@@ -157,16 +157,11 @@ components:
         name: { type: string, nullable: true }
         name_en: { type: string, nullable: true }
 
-    Region_level_code:
-      type: string
-      enum: [L, LD, F, K, BD]
-      description: 'L (Land), LD (Landsdel), F (Fylke), K (Kommune), BD (Bydel og krets)'
-
     Region_level:
-      description: 'Valid region levels'
+      description: 'Valid region levels are (name in parethesis): L (Land), LD (Landsdel), F (Fylke), K (Kommune), BD (Bydel og krets)'
       type: object
       properties:
-        code: { $ref: '#/components/schemas/Region_level_code' }
+        code: { type: string }
         name: { type: string }
 
     Shortname:
@@ -256,20 +251,6 @@ components:
       properties:
         code: { type: string }
 
-    Statistic_status_code:
-      type: string
-      enum: [K, A, IA, UT, SA, SP]
-      description: 'K (Kommende), A (Aktiv), IA (Ikke-aktiv), UT (Opphørt), SA (Sammenslått) or SP (Splittet)'
-
-    Statistic_approval_status:
-      type: string
-      enum: [GODKJENT, AVVIST, FORSLAG]
-
-    Statistic_main_language:
-      type: string
-      enum: [nn, nb]
-      description: "Main language will be either 'nn' or 'nb' for statistics"
-
     Statistic:
       type: object
       properties:
@@ -287,23 +268,20 @@ components:
         name_en: { type: string }
         approval_status: { type: string, description: " Is one of 'GODKJENT', 'AVVIST' or 'FORSLAG'" }
 
-    Statistic_create_upcoming:
+    Statistic_create_base:
+      allOf:
+        - $ref: '#/components/schemas/Statistic'
       type: object
-      required: [status, division, name]
       properties:
-        name: { type: string }
-        division: { type: string }
-        status:
-          description: 'Must be "K" for creation of upcoming statistics'
-          const: K
-        main_language: { $ref: '#/components/schemas/Statistic_main_language' }
-        name_en: { type: string }
+        division: { type: string, nullable: true }
         first_released_at: { type: string, format: date, nullable: true }
         yearly_reporting: { type: boolean }
         statistic_region_levels:
           type: array
           items:
-            $ref: '#/components/schemas/Region_level_code'
+            type: object
+            properties:
+              code: { type: string }
         previous_topic_codes: { type: string, nullable: true }
         comment: { type: string }
         variants:
@@ -312,38 +290,38 @@ components:
             $ref: '#/components/schemas/Variant'
         contacts:
           type: array
-          description: 'List of principal names to set as contacts for the statistic'
           items:
-            type: string
+            type: object
+            properties:
+              principalName: { type: string }
+
+    Statistic_create_upcoming:
+      allOf:
+        - $ref: '#/components/schemas/Statistic_create_base'
+        - type: object
+          required: [division, name]
+          properties:
+            status:
+              type: object
+              required: [code]
+              properties:
+                code:
+                  description: 'Must be "K" for creation of upcoming statistics'
+                  type: string
 
     Statistic_create_active:
-      type: object
-      required: [status, division, name, name_en, main_language, variants, contacts]
-      properties:
-        name: { type: string }
-        name_en: { type: string }
-        division: { type: string }
-        main_language: { $ref: '#/components/schemas/Statistic_main_language' }
-        status:
-          description: 'Must be "A" for creation of active statistics'
-          const: A
-        first_released_at: { type: string, format: date, nullable: true }
-        yearly_reporting: { type: boolean }
-        statistic_region_levels:
-          type: array
-          items:
-            $ref: '#/components/schemas/Region_level_code'
-        previous_topic_codes: { type: string, nullable: true }
-        comment: { type: string }
-        variants:
-          type: array
-          items:
-            $ref: '#/components/schemas/Variant'
-        contacts:
-          type: array
-          description: 'List of principal names to set as contacts for the statistic'
-          items:
-            type: string
+      allOf:
+        - $ref: '#/components/schemas/Statistic_create_base'
+        - type: object
+          required: [division, name, name_en, main_language, contacts, variants, status]
+          properties:
+            status:
+              type: object
+              required: [code]
+              properties:
+                code:
+                  description: 'Must be "A" for creation of active statistics'
+                  type: string
 
     Statistic_create:
       oneOf:
@@ -538,11 +516,11 @@ paths:
       summary: Create a new statistic
       tags: [statistics]
       parameters:
-        - name: shortname
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: shortname
+        in: path
+        required: true
+        schema:
+          type: string
       requestBody:
         required: true
         content:

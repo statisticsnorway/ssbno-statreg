@@ -15,7 +15,6 @@ import { getDivisionFromCode } from '@/services/klassService'
 import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
 import { statisticsAsserts } from '@/lib/asserts'
 import { getAllUsersFromCache } from '@/lib/cache'
-import { PostStatisticsByShortnameBody } from '@/parser'
 
 export type StatisticPrisma = Pick<PrismaClient, 'statistic' | 'shortname' | 'responsiblePerson'>
 
@@ -428,42 +427,41 @@ export async function updateContacts(
 export async function createStatistic(
   prisma: StatisticPrisma,
   shortname: string,
-  body: PostStatisticsByShortnameBody,
+  body?: StatisticCreate,
   now = new Date()
 ): Promise<StatisticDetails> {
   const safeShortname = sanitize(shortname)
 
   await statisticsAsserts.assertShortnameExists(safeShortname, prisma)
   await statisticsAsserts.assertShortnameExistsAndIsAvailable(safeShortname, prisma)
-  if (body.division && !getDivisionFromCode(body.division)) {
-    throw { statregError: "Field 'division' does not correspond to an existing division." }
-  }
 
-  const safeName = sanitize(body.name)
-  const safeNameEn = sanitize(body.name_en)
-  if (safeName === '') {
-    throw { statregError: "Field 'name' must be a non-empty string." }
-  }
-  if (safeNameEn === '') {
-    throw { statregError: "Field 'name_en' must be a non-empty string." }
-  }
+  const createStatisticStatus = parseCreateStatisticStatus(body)
+  const {
+    division,
+    name,
+    name_en,
+    first_released_at,
+    main_language,
+    statistic_region_levels = [],
+    comment,
+  } = parseCreateStatisticInput(body, createStatisticStatus)
 
   const result = await prisma.statistic.create({
     data: {
-      name: body.name,
-      division_code: body.division,
-      name_en: body.name_en,
+      name,
+      ...(name_en ? { name_en } : {}),
       priority: 1,
       yearly_reporting: false,
-      status: body.status,
+      status: createStatisticStatus,
       desk_appoval_status: ApprovalStatus.ACCEPTED,
-      language: body.main_language ?? 'nb',
+      language: main_language,
       date_created: now,
       last_updated: now,
-      first_release: body.first_released_at,
-      comment: sanitize(body.comment) ?? `Create statistic with shortname: ${shortname}`,
+      ...(first_released_at ? { first_release: first_released_at } : {}),
+      comment: comment || `Create statistic with shortname: ${shortname}`,
+      division_code: division,
       statistic_region_levels: {
-        create: body.statistic_region_levels?.map((code) => ({
+        create: statistic_region_levels.map(({ code }) => ({
           region_level: { connect: { code } },
         })),
       },
@@ -476,6 +474,60 @@ export async function createStatistic(
     include: StatisticsDetailedIncludes,
   })
   return await mapStatisticDetails(result)
+}
+
+// TODO: MIM-2674: Add tests
+export function parseCreateStatisticStatus(body?: StatisticCreate): CreatableStatisticStatus {
+  const statusCode = body?.status?.code
+
+  if (statusCode === 'K' || statusCode === 'A') {
+    return statusCode
+  } else {
+    throw { statregError: "Field 'status' must be one of these: K, A." }
+  }
+}
+
+export function parseCreateStatisticInput(
+  body: StatisticCreate | undefined,
+  status: CreatableStatisticStatus
+): ValidatedCreateStatisticInput {
+  const requiredFields = getRequiredStatisticFields(status)
+  const {
+    division,
+    name,
+    name_en,
+    first_released_at,
+    main_language,
+    statistic_region_levels = [],
+    comment,
+  } = ensureRequiredFieldsExists(body ?? {}, requiredFields)
+
+  const safeName = sanitize(name)
+  const safeNameEn = sanitize(name_en)
+  const safeComment = sanitize(comment)
+  const language = main_language ?? 'nb'
+
+  if (!safeName) {
+    throw { statregError: "Field 'name' must be a non-empty string." }
+  }
+
+  if (status === 'A' && !safeNameEn) {
+    throw { statregError: "Field 'name_en' must be a non-empty string." }
+  }
+
+  if (language !== 'nb' && language !== 'nn') {
+    throw { statregError: "Field 'main_language' must be either 'nb' or 'nn'." }
+  }
+
+  return {
+    division: parseDivision(division),
+    name: safeName,
+    ...(safeNameEn ? { name_en: safeNameEn } : {}),
+    ...(first_released_at ? { first_released_at: parseDateOnly(first_released_at, 'first_released_at') } : {}),
+    statistic_region_levels,
+    main_language: language,
+    comment: safeComment,
+  }
 }
 
 export function parseUpdateStatisticInput(
@@ -539,6 +591,10 @@ export function parseUpdateStatisticInput(
 export function parseDivision(division?: string | null) {
   if (!division || !isNumber(division)) {
     throw { statregError: "Field 'division' must be a number." }
+  }
+
+  if (!getDivisionFromCode(division)) {
+    throw { statregError: "Field 'division' does not correspond to an existing division." }
   }
 
   return division.toString()
