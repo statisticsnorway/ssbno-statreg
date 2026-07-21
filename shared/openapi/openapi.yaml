@@ -268,11 +268,22 @@ components:
         name_en: { type: string }
         approval_status: { type: string, description: " Is one of 'GODKJENT', 'AVVIST' or 'FORSLAG'" }
 
-    Statistic_create_base:
-      allOf:
-        - $ref: '#/components/schemas/Statistic'
+    Statistic_create_upcoming:
       type: object
+      required: [division, name]
       properties:
+        shortname: { type: string, readOnly: true }
+        main_language: { type: string, description: "Main language will be either 'nn' or 'nb' for statistics" }
+        status:
+          type: object
+          required: [code]
+          properties:
+            code:
+              description: 'Must be "K" for creation of upcoming statistics'
+              type: string
+        name: { type: string }
+        name_en: { type: string }
+        approval_status: { type: string, description: " Is one of 'GODKJENT', 'AVVIST' or 'FORSLAG'" }
         division: { type: string, nullable: true }
         first_released_at: { type: string, format: date, nullable: true }
         yearly_reporting: { type: boolean }
@@ -295,44 +306,81 @@ components:
             properties:
               principalName: { type: string }
 
-    Statistic_create_upcoming:
-      allOf:
-        - $ref: '#/components/schemas/Statistic_create_base'
-        - type: object
-          required: [division, name]
-          properties:
-            status:
-              type: object
-              required: [code]
-              properties:
-                code:
-                  description: 'Must be "K" for creation of upcoming statistics'
-                  type: string
-
     Statistic_create_active:
-      allOf:
-        - $ref: '#/components/schemas/Statistic_create_base'
-        - type: object
-          required: [division, name, name_en, main_language, contacts, variants, status]
+      type: object
+      required: [division, name, name_en, main_language, contacts, variants, status]
+      properties:
+        shortname: { type: string, readOnly: true }
+        main_language: { type: string, description: "Main language will be either 'nn' or 'nb' for statistics" }
+        status:
+          type: object
+          required: [code]
           properties:
-            status:
-              type: object
-              required: [code]
-              properties:
-                code:
-                  description: 'Must be "A" for creation of active statistics'
-                  type: string
-
-    Statistic_create:
-      oneOf:
-        - $ref: '#/components/schemas/Statistic_create_upcoming'
-        - $ref: '#/components/schemas/Statistic_create_active'
+            code:
+              description: 'Must be "A" for creation of active statistics'
+              type: string
+        name: { type: string }
+        name_en: { type: string }
+        approval_status: { type: string, description: " Is one of 'GODKJENT', 'AVVIST' or 'FORSLAG'" }
+        division: { type: string, nullable: true }
+        first_released_at: { type: string, format: date, nullable: true }
+        yearly_reporting: { type: boolean }
+        statistic_region_levels:
+          type: array
+          items:
+            type: object
+            properties:
+              code: { type: string }
+        previous_topic_codes: { type: string, nullable: true }
+        comment: { type: string }
+        variants:
+          type: array
+          items:
+            $ref: '#/components/schemas/Variant'
+        contacts:
+          type: array
+          items:
+            type: object
+            properties:
+              principalName: { type: string }
 
     Statistic_update:
-      allOf:
-        - $ref: '#/components/schemas/Statistic_create_base'
       type: object
       properties:
+        shortname: { type: string, readOnly: true }
+        main_language: { type: string, description: "Main language will be either 'nn' or 'nb' for statistics" }
+        status:
+          type: object
+          properties:
+            code:
+              {
+                type: string,
+                description: 'Is one of K (Kommende), A (Aktiv), IA (Ikke-aktiv), UT (Opphørt), SA (Sammenslått) or SP (Splittet)',
+              }
+        name: { type: string }
+        name_en: { type: string }
+        approval_status: { type: string, description: " Is one of 'GODKJENT', 'AVVIST' or 'FORSLAG'" }
+        division: { type: string, nullable: true }
+        first_released_at: { type: string, format: date, nullable: true }
+        yearly_reporting: { type: boolean }
+        statistic_region_levels:
+          type: array
+          items:
+            type: object
+            properties:
+              code: { type: string }
+        previous_topic_codes: { type: string, nullable: true }
+        comment: { type: string }
+        variants:
+          type: array
+          items:
+            $ref: '#/components/schemas/Variant'
+        contacts:
+          type: array
+          items:
+            type: object
+            properties:
+              principalName: { type: string }
         relation: { type: string, nullable: true }
 
     Statistic_details:
@@ -516,16 +564,19 @@ paths:
       summary: Create a new statistic
       tags: [statistics]
       parameters:
-      - name: shortname
-        in: path
-        required: true
-        schema:
-          type: string
+        - name: shortname
+          in: path
+          required: true
+          schema:
+            type: string
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/Statistic_create' }
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/Statistic_create_upcoming'
+                - $ref: '#/components/schemas/Statistic_create_active'
       responses:
         '201':
           description: Statistic details
