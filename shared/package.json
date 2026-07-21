@@ -11,8 +11,9 @@
   "files": [
     "dist",
     "openapi.yaml"
-  ],  
-    "scripts": {
-    "build": "tsc"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "generate:api-types": "openapi-typescript ./openapi/openapi.yaml | prettier --parser typescript > ./src/api-types.ts"
   }
 }

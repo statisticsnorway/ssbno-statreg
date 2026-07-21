@@ -11,7 +11,7 @@
     "seed": "tsx prisma/seed.ts"
   },
   "scripts": {
-    "openapi-ts": "openapi-ts",
+    "generate:parser": "openapi-ts && prettier --write ./src/parser",
     "dev": "nodemon --config nodemon.json",
     "start": "node dist/main.js",
     "build": "tsc --noEmit && pkgroll",

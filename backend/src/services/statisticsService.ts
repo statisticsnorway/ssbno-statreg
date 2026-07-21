@@ -15,6 +15,7 @@ import { getDivisionFromCode } from '@/services/klassService'
 import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
 import { statisticsAsserts } from '@/lib/asserts'
 import { getAllUsersFromCache } from '@/lib/cache'
+import { PostStatisticsByShortnameBody } from '@/parser'
 
 export type StatisticPrisma = Pick<PrismaClient, 'statistic' | 'shortname' | 'responsiblePerson'>
 
@@ -427,7 +428,7 @@ export async function updateContacts(
 export async function createStatistic(
   prisma: StatisticPrisma,
   shortname: string,
-  body?: StatisticCreate,
+  body: PostStatisticsByShortnameBody,
   now = new Date()
 ): Promise<StatisticDetails> {
   const safeShortname = sanitize(shortname)
@@ -435,33 +436,22 @@ export async function createStatistic(
   await statisticsAsserts.assertShortnameExists(safeShortname, prisma)
   await statisticsAsserts.assertShortnameExistsAndIsAvailable(safeShortname, prisma)
 
-  const createStatisticStatus = parseCreateStatisticStatus(body)
-  const {
-    division,
-    name,
-    name_en,
-    first_released_at,
-    main_language,
-    statistic_region_levels = [],
-    comment,
-  } = parseCreateStatisticInput(body, createStatisticStatus)
-
   const result = await prisma.statistic.create({
     data: {
-      name,
-      ...(name_en ? { name_en } : {}),
+      name: body.name,
+      division_code: body.division,
+      name_en: body.name_en,
       priority: 1,
       yearly_reporting: false,
-      status: createStatisticStatus,
+      status: body.status,
       desk_appoval_status: ApprovalStatus.ACCEPTED,
-      language: main_language,
+      language: body.main_language ?? 'nb',
       date_created: now,
       last_updated: now,
-      ...(first_released_at ? { first_release: first_released_at } : {}),
-      comment: comment || `Create statistic with shortname: ${shortname}`,
-      division_code: division,
+      first_release: body.first_released_at,
+      comment: body.comment ?? `Create statistic with shortname: ${shortname}`,
       statistic_region_levels: {
-        create: statistic_region_levels.map(({ code }) => ({
+        create: body.statistic_region_levels?.map((code) => ({
           region_level: { connect: { code } },
         })),
       },

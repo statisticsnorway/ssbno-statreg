@@ -23,7 +23,7 @@
     "lint:fix": "eslint --fix",
     "seed": "npm run seed -w backend",
     "generate": "npm run generate -w backend",
-    "generate:api-types": "openapi-typescript ./shared/openapi/openapi.yaml | prettier --parser typescript > ./shared/src/api-types.ts"
+    "generate:api": "npm run generate:api-types -w shared && npm run generate:parser -w backend"
   },
   "overrides": {
     "hono": "4.12.26",
@@ -53,3 +53,4 @@
     "fsevents": false
   }
 }
+
