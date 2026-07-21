@@ -344,6 +344,20 @@ components:
 
     Statistic_update:
       type: object
+      required:
+        [
+          status,
+          division,
+          name,
+          name_en,
+          main_language,
+          first_released_at,
+          yearly_reporting,
+          statistic_region_levels,
+          previous_topic_codes,
+          comment,
+          relation,
+        ]
       properties:
         status: { $ref: '#/components/schemas/Statistic_status_input' }
         division: { $ref: '#/components/schemas/Statistic_division_input' }

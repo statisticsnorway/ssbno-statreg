@@ -10,7 +10,7 @@ import { requireAdminAuthorization, skipAuth } from '@/../plugins/authMiddleware
 import { handleErrors } from '@/lib/prismaErrors'
 import { prisma } from '@/lib/prisma'
 import { ensureString, ensureStringArray } from '@/lib/utils'
-import { postStatisticsByShortnameBody } from '@/parser'
+import { postStatisticsByShortnameBody, putStatisticsByShortnameBody } from '@/parser'
 
 export default function statisticsController(router: Router) {
   router.get('/statistics/:shortname', skipAuth, async (req, res) => {
@@ -24,7 +24,7 @@ export default function statisticsController(router: Router) {
 
   router.post('/statistics/:shortname', requireAdminAuthorization(), async (req, res) => {
     try {
-      const parsedBody = postStatisticsByShortnameBody.safeParse(req.body)
+      const parsedBody = postStatisticsByShortnameBody.parse(req.body)
       res.json(await createStatistic(prisma, ensureString(req.params.shortname), parsedBody))
     } catch (error) {
       return handleErrors(error, res)
@@ -51,7 +51,8 @@ export default function statisticsController(router: Router) {
 
   router.put('/statistics/:shortname', requireAdminAuthorization(), async (req, res) => {
     try {
-      const result = await updateStatistic(ensureString(req.params.shortname), req.body, prisma)
+      const parsedBody = putStatisticsByShortnameBody.parse(req.body)
+      const result = await updateStatistic(ensureString(req.params.shortname), parsedBody, prisma)
       res.json(result)
     } catch (error) {
       return handleErrors(error, res)

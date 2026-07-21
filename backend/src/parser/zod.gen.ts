@@ -227,20 +227,20 @@ export const zStatisticCreateActive = z.object({
 })
 
 export const zStatisticUpdate = z.object({
-  status: zStatisticStatusInput.optional(),
-  division: zStatisticDivisionInput.optional(),
-  name: zStatisticNameInput.optional(),
-  name_en: zStatisticNameInput.optional(),
-  main_language: zStatisticMainLanguageInput.optional(),
+  status: zStatisticStatusInput,
+  division: zStatisticDivisionInput,
+  name: zStatisticNameInput,
+  name_en: zStatisticNameInput,
+  main_language: zStatisticMainLanguageInput,
   contacts: zStatisticContactsInput.optional(),
   variants: zStatisticVariantsInput.optional(),
   approval_status: zStatisticApprovalStatusInput.optional(),
-  first_released_at: zStatisticFirstReleasedAtInput.optional(),
-  yearly_reporting: zStatisticYearlyReportingInput.optional(),
-  statistic_region_levels: zStatisticRegionLevelsInput.optional(),
-  previous_topic_codes: zStatisticPreviousTopicCodesInput.optional(),
-  comment: zStatisticCommentInput.optional(),
-  relation: zStatisticRelationInput.optional(),
+  first_released_at: zStatisticFirstReleasedAtInput,
+  yearly_reporting: zStatisticYearlyReportingInput,
+  statistic_region_levels: zStatisticRegionLevelsInput,
+  previous_topic_codes: zStatisticPreviousTopicCodesInput,
+  comment: zStatisticCommentInput,
+  relation: zStatisticRelationInput,
 })
 
 export const zStatisticDetails = zStatistic.and(
@@ -386,20 +386,20 @@ export const zStatisticCreateActiveWritable = z.object({
 })
 
 export const zStatisticUpdateWritable = z.object({
-  status: zStatisticStatusInput.optional(),
-  division: zStatisticDivisionInput.optional(),
-  name: zStatisticNameInput.optional(),
-  name_en: zStatisticNameInput.optional(),
-  main_language: zStatisticMainLanguageInput.optional(),
+  status: zStatisticStatusInput,
+  division: zStatisticDivisionInput,
+  name: zStatisticNameInput,
+  name_en: zStatisticNameInput,
+  main_language: zStatisticMainLanguageInput,
   contacts: zStatisticContactsInput.optional(),
   variants: zStatisticVariantsInputWritable.optional(),
   approval_status: zStatisticApprovalStatusInput.optional(),
-  first_released_at: zStatisticFirstReleasedAtInput.optional(),
-  yearly_reporting: zStatisticYearlyReportingInput.optional(),
-  statistic_region_levels: zStatisticRegionLevelsInput.optional(),
-  previous_topic_codes: zStatisticPreviousTopicCodesInput.optional(),
-  comment: zStatisticCommentInput.optional(),
-  relation: zStatisticRelationInput.optional(),
+  first_released_at: zStatisticFirstReleasedAtInput,
+  yearly_reporting: zStatisticYearlyReportingInput,
+  statistic_region_levels: zStatisticRegionLevelsInput,
+  previous_topic_codes: zStatisticPreviousTopicCodesInput,
+  comment: zStatisticCommentInput,
+  relation: zStatisticRelationInput,
 })
 
 export const zStatisticDetailsWritable = zStatisticWritable.and(

@@ -289,7 +289,7 @@ export async function getStatisticByShortname(shortname: string, prisma: Statist
 
 export async function updateStatistic(
   shortname: string,
-  body: StatisticUpdate,
+  body: PostStatisticsByShortnameBody,
   prisma: StatisticPrisma
 ): Promise<StatisticDetails> {
   const requiredFields: (keyof StatisticUpdate)[] = [

@@ -1191,20 +1191,20 @@ export interface components {
       comment?: components['schemas']['Statistic_comment_input']
     }
     Statistic_update: {
-      status?: components['schemas']['Statistic_status_input']
-      division?: components['schemas']['Statistic_division_input']
-      name?: components['schemas']['Statistic_name_input']
-      name_en?: components['schemas']['Statistic_name_input']
-      main_language?: components['schemas']['Statistic_main_language_input']
+      status: components['schemas']['Statistic_status_input']
+      division: components['schemas']['Statistic_division_input']
+      name: components['schemas']['Statistic_name_input']
+      name_en: components['schemas']['Statistic_name_input']
+      main_language: components['schemas']['Statistic_main_language_input']
       contacts?: components['schemas']['Statistic_contacts_input']
       variants?: components['schemas']['Statistic_variants_input']
       approval_status?: components['schemas']['Statistic_approval_status_input']
-      first_released_at?: components['schemas']['Statistic_first_released_at_input']
-      yearly_reporting?: components['schemas']['Statistic_yearly_reporting_input']
-      statistic_region_levels?: components['schemas']['Statistic_region_levels_input']
-      previous_topic_codes?: components['schemas']['Statistic_previous_topic_codes_input']
-      comment?: components['schemas']['Statistic_comment_input']
-      relation?: components['schemas']['Statistic_relation_input']
+      first_released_at: components['schemas']['Statistic_first_released_at_input']
+      yearly_reporting: components['schemas']['Statistic_yearly_reporting_input']
+      statistic_region_levels: components['schemas']['Statistic_region_levels_input']
+      previous_topic_codes: components['schemas']['Statistic_previous_topic_codes_input']
+      comment: components['schemas']['Statistic_comment_input']
+      relation: components['schemas']['Statistic_relation_input']
     }
     Statistic: {
       readonly shortname?: string
