@@ -374,7 +374,7 @@ export async function updateStatistic(
       related_statistic_id: body.relation,
       legacy_topic_codes: body.previous_topic_codes,
       yearly_reporting: body.yearly_reporting,
-      first_release: body.first_released_at,
+      first_release: new Date(body.first_released_at),
       responsiblePersons: newContacts
         ? {
             set: newContacts.map((contact) => ({ id: contact.id })),
@@ -391,7 +391,6 @@ export async function updateStatistic(
     },
     include: StatisticsDetailedIncludes,
   })
-
   return await mapStatisticDetails(updatedStatistic)
 }
 
