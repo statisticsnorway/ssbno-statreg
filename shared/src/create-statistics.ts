@@ -1,4 +1,4 @@
-import { StatisticCreate } from '.'
+import { type StatisticCreate } from '.'
 
 export type CreatableStatisticStatus = 'K' | 'A'
 type RequiredStatisticField = keyof StatisticCreate
