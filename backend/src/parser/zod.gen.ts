@@ -226,6 +226,8 @@ export const zStatisticCreateActive = z.object({
   comment: zStatisticCommentInput.optional(),
 })
 
+export const zStatisticCreate = z.discriminatedUnion('status', [zStatisticCreateUpcoming, zStatisticCreateActive])
+
 export const zStatisticUpdate = z.object({
   status: zStatisticStatusInput,
   division: zStatisticDivisionInput,
@@ -385,6 +387,11 @@ export const zStatisticCreateActiveWritable = z.object({
   comment: zStatisticCommentInput.optional(),
 })
 
+export const zStatisticCreateWritable = z.discriminatedUnion('status', [
+  zStatisticCreateUpcomingWritable,
+  zStatisticCreateActiveWritable,
+])
+
 export const zStatisticUpdateWritable = z.object({
   status: zStatisticStatusInput,
   division: zStatisticDivisionInput,
@@ -469,7 +476,7 @@ export const zGetStatisticsByShortnamePath = z.object({
   shortname: z.string(),
 })
 
-export const postStatisticsByShortnameBody = z.union([zStatisticCreateUpcomingWritable, zStatisticCreateActiveWritable])
+export const postStatisticsByShortnameBody = zStatisticCreateWritable
 
 export type PostStatisticsByShortnameBody = z.infer<typeof postStatisticsByShortnameBody>
 

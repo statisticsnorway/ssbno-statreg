@@ -274,9 +274,7 @@ export interface paths {
       }
       requestBody: {
         content: {
-          'application/json':
-            | components['schemas']['Statistic_create_upcoming']
-            | components['schemas']['Statistic_create_active']
+          'application/json': components['schemas']['Statistic_create']
         }
       }
       responses: {
@@ -1154,8 +1152,8 @@ export interface components {
     Statistic_relation_input: number | null
     Statistic_create_upcoming: {
       /**
-       * @description Must be 'K' for upcoming statistic.
-       * @constant
+       * @description Must be 'K' for upcoming statistic. (enum property replaced by openapi-typescript)
+       * @enum {string}
        */
       status: 'K'
       division: components['schemas']['Statistic_division_input']
@@ -1173,8 +1171,8 @@ export interface components {
     }
     Statistic_create_active: {
       /**
-       * @description Must be 'A' for active statistic.
-       * @constant
+       * @description Must be 'A' for active statistic. (enum property replaced by openapi-typescript)
+       * @enum {string}
        */
       status: 'A'
       division: components['schemas']['Statistic_division_input']
@@ -1190,6 +1188,9 @@ export interface components {
       previous_topic_codes?: components['schemas']['Statistic_previous_topic_codes_input']
       comment?: components['schemas']['Statistic_comment_input']
     }
+    Statistic_create:
+      | components['schemas']['Statistic_create_upcoming']
+      | components['schemas']['Statistic_create_active']
     Statistic_update: {
       status: components['schemas']['Statistic_status_input']
       division: components['schemas']['Statistic_division_input']

@@ -1,5 +1,6 @@
 import { Prisma } from '@/generated/prisma/client'
 import type { Response } from 'express'
+import { ZodError } from 'zod'
 
 // Please refer to https://www.prisma.io/docs/orm/reference/error-reference#error-codes for error codes in Prisma
 
@@ -24,6 +25,16 @@ function getLastLineFromErrorMessage(message: string): string {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function handleErrors(error: any, res: Response) {
+  if (error instanceof ZodError) {
+    const message = error.issues
+      .map((issue) => {
+        const path = issue.path.length > 0 ? `"${issue.path.join('.')}" → ` : ''
+        return path + issue.message
+      })
+      .join('; ')
+    return res.status(400).json({ message })
+  }
+
   if (error?.statregError) {
     const status = error.status ?? 400
     return res.status(status).json({ message: error.statregError })

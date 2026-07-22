@@ -344,6 +344,16 @@ components:
         previous_topic_codes: { $ref: '#/components/schemas/Statistic_previous_topic_codes_input' }
         comment: { $ref: '#/components/schemas/Statistic_comment_input' }
 
+    Statistic_create:
+      oneOf:
+        - $ref: '#/components/schemas/Statistic_create_upcoming'
+        - $ref: '#/components/schemas/Statistic_create_active'
+      discriminator:
+        propertyName: status
+        mapping:
+          K: '#/components/schemas/Statistic_create_upcoming'
+          A: '#/components/schemas/Statistic_create_active'
+
     Statistic_update:
       type: object
       required:
@@ -584,9 +594,7 @@ paths:
         content:
           application/json:
             schema:
-              oneOf:
-                - $ref: '#/components/schemas/Statistic_create_upcoming'
-                - $ref: '#/components/schemas/Statistic_create_active'
+              $ref: '#/components/schemas/Statistic_create'
       responses:
         '201':
           description: Statistic details
