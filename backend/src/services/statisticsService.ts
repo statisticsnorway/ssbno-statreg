@@ -381,11 +381,9 @@ export async function updateStatistic(
           }
         : undefined,
       statistic_region_levels: {
-        set: regionLevels.map((level) => ({
-          statistic_id_region_level_id: {
-            statistic_id: existingStatistic.id,
-            region_level_id: level.id,
-          },
+        deleteMany: {},
+        create: regionLevels.map((level) => ({
+          region_level: { connect: { id: level.id } },
         })),
       },
     },
