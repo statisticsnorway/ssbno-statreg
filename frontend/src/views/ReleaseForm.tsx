@@ -88,6 +88,12 @@ function getCreatedReleaseModalDescription(createdRelease: ReleaseDetails) {
   return `Datoen ${formatDate(createdRelease?.publish_time)} er nå sendt inn for ${createdReleaseVariant}.`
 }
 
+function addThreeMonths(check: Date): Date {
+  const date = new Date(check)
+  const inThreeMonths = new Date(date.setMonth(date.getMonth() + 3))
+  return inThreeMonths
+}
+
 function DateReleasesTable({
   selectedDate,
   calendarDates,
@@ -284,12 +290,6 @@ export default function ReleaseForm() {
     }
     fetchVariant()
   }, [shortname, variantId])
-
-  function addThreeMonths(check: Date): Date {
-    const date = new Date(check)
-    const inThreeMonths = new Date(date.setMonth(date.getMonth() + 3))
-    return inThreeMonths
-  }
 
   function validateFields(): boolean {
     const nextErrors: ReleaseFormErrors = {}
