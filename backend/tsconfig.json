@@ -7,7 +7,8 @@
     "moduleResolution": "bundler",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@ssbno-statreg/shared": ["../shared/src/index.ts"]
     },
     "strict": true,
     "noUnusedLocals": true,
