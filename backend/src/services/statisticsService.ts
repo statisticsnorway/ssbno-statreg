@@ -269,7 +269,7 @@ export async function createStatistic(
     throw { statregError: "Field 'name_en' must be a non-empty string." }
   }
 
-  if (body.division && !getDivisionFromCode(body.division)) {
+  if (!getDivisionFromCode(body.division)) {
     throw { statregError: "Field 'division' does not correspond to an existing division." }
   }
 
@@ -284,6 +284,11 @@ export async function createStatistic(
 
   const result = await prisma.statistic.create({
     data: {
+      shortname: {
+        connect: {
+          name: safeShortname,
+        },
+      },
       name: safeName,
       name_en: safeNameEn,
       priority: 1,
@@ -293,24 +298,23 @@ export async function createStatistic(
       language: body.main_language ?? 'nb',
       date_created: now,
       last_updated: now,
-      first_release: body.first_released_at,
       comment: sanitize(body.comment) || `Create statistic with shortname: ${shortname}`,
       division_code: body.division,
-      responsiblePersons: newContacts
-        ? {
-            connect: newContacts.map((contact) => ({ id: contact.id })),
-          }
-        : undefined,
-      statistic_region_levels: {
-        create: body.statistic_region_levels?.map((code) => ({
-          region_level: { connect: { code } },
-        })),
-      },
-      shortname: {
-        connect: {
-          name: safeShortname,
+      ...(body.first_released_at && {
+        first_release: new Date(body.first_released_at),
+      }),
+      ...(body.statistic_region_levels && {
+        statistic_region_levels: {
+          create: body.statistic_region_levels.map((code) => ({
+            region_level: { connect: { code } },
+          })),
         },
-      },
+      }),
+      ...(newContacts && {
+        responsiblePersons: {
+          connect: newContacts.map((contact) => ({ id: contact.id })),
+        },
+      }),
     },
     include: StatisticsDetailedIncludes,
   })
@@ -356,11 +360,6 @@ export async function updateStatistic(
     }
   }
 
-  const regionLevels = await prisma.region_level.findMany({
-    where: { code: { in: body.statistic_region_levels } },
-    select: { id: true },
-  })
-
   const updatedStatistic = await prisma.statistic.update({
     where: { id: existingStatistic.id },
     data: {
@@ -369,23 +368,23 @@ export async function updateStatistic(
       division_code: body.division,
       desk_appoval_status: ApprovalStatus.PENDING,
       status: body.status,
-      comment: sanitize(body.status),
+      comment: sanitize(body.comment),
       language: body.main_language,
       related_statistic_id: body.relation,
       legacy_topic_codes: body.previous_topic_codes,
       yearly_reporting: body.yearly_reporting,
       first_release: new Date(body.first_released_at),
-      responsiblePersons: newContacts
-        ? {
-            set: newContacts.map((contact) => ({ id: contact.id })),
-          }
-        : undefined,
       statistic_region_levels: {
         deleteMany: {},
-        create: regionLevels.map((level) => ({
-          region_level: { connect: { id: level.id } },
+        create: body.statistic_region_levels.map((code) => ({
+          region_level: { connect: { code } },
         })),
       },
+      ...(newContacts && {
+        responsiblePersons: {
+          set: newContacts.map((contact) => ({ id: contact.id })),
+        },
+      }),
     },
     include: StatisticsDetailedIncludes,
   })
