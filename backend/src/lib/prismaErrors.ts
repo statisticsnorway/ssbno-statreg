@@ -26,13 +26,13 @@ function getLastLineFromErrorMessage(message: string): string {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function handleErrors(error: any, res: Response) {
   if (error instanceof ZodError) {
-    const message = error.issues
-      .map((issue) => {
-        const path = issue.path.length > 0 ? `"${issue.path.join('.')}" → ` : ''
-        return path + issue.message
-      })
-      .join('; ')
-    return res.status(400).json({ message })
+    return res.status(400).json({
+      message: 'Invalid request body',
+      details: error.issues.map((issue) => ({
+        field: issue.path.join('.'),
+        message: issue.message,
+      })),
+    })
   }
 
   if (error?.statregError) {
