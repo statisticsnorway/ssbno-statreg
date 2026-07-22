@@ -95,12 +95,20 @@ components:
   schemas:
     Error:
       type: object
-      required:
-        - message
+      required: [message]
       properties:
         message:
           type: string
-          description: Error message
+          description: Human-readable error message
+        details:
+          type: array
+          description: List of per-field error messages
+          items:
+            type: object
+            required: [field, message]
+            properties:
+              field: { type: string }
+              message: { type: string }
 
     Blocked_release_date:
       type: object

@@ -1012,8 +1012,13 @@ export type webhooks = Record<string, never>
 export interface components {
   schemas: {
     Error: {
-      /** @description Error message */
+      /** @description Human-readable error message */
       message: string
+      /** @description List of per-field error messages */
+      details?: {
+        field: string
+        message: string
+      }[]
     }
     /**
      * @example {

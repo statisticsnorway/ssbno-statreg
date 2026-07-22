@@ -4,6 +4,14 @@ import * as z from 'zod'
 
 export const zError = z.object({
   message: z.string(),
+  details: z
+    .array(
+      z.object({
+        field: z.string(),
+        message: z.string(),
+      })
+    )
+    .optional(),
 })
 
 export const zBlockedReleaseDate = z.object({
