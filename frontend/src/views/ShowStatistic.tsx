@@ -1,12 +1,26 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams, Link as ReactRouterLink } from 'react-router'
-import { Heading, Paragraph, List, Link, Button, Divider, Details, Card, Table } from '@digdir/designsystemet-react'
-import { PencilWritingIcon, PersonPencilIcon } from '@navikt/aksel-icons'
+import {
+  Heading,
+  Paragraph,
+  List,
+  Link,
+  Button,
+  Divider,
+  Details,
+  Card,
+  Table,
+  ValidationMessage,
+  ErrorSummary,
+  Field,
+} from '@digdir/designsystemet-react'
+import { PencilWritingIcon } from '@navikt/aksel-icons'
 import { StatisticStatusTag } from '../components/StatisticStatusTag'
 import { VariantCard } from '../components/VariantCard'
 import client from '../api'
 import {
   StatisticStatus,
+  type Contact,
   type RegionLevel,
   type ReleaseListing,
   type StatisticDetails,
@@ -14,10 +28,11 @@ import {
 } from '@ssbno-statreg/shared'
 
 import './ShowStatistic.css'
-import { formatContacts, formatPublishTime, formatRevisionName, formatVariant } from '../lib/utils'
+import { formatContact, formatPublishTime, formatRevisionName, formatVariant } from '../lib/utils'
 import { ApprovalStatusBadge } from '../components/ApprovalStatus'
 import { useAuth } from '../context/AuthContext'
 import { ErrorAlert } from '../components/ErrorAlert'
+import { ContactSelection } from '../components/ContactSelection'
 
 type ReleaseRowProps = {
   release: ReleaseListing
@@ -96,6 +111,10 @@ function SimpleReleaseRow({ release }: ReleaseRowProps) {
 export default function ShowStatistic() {
   const [statistic, setStatistic] = useState<StatisticDetails>({})
   const [releases, setReleases] = useState<ReleaseListing[]>([])
+  const [allContacts, setAllContacts] = useState<Contact[]>([])
+  const [selectedContacts, setSelectedContacts] = useState<string[]>([])
+  const [isEditingContacts, setIsEditingContacts] = useState(false)
+  const [contactValidationError, setContactValidationError] = useState(false)
   const { shortname } = useParams()
   const { auth } = useAuth()
   const [apiError, setApiError] = useState<string[]>([])
@@ -112,6 +131,7 @@ export default function ShowStatistic() {
       }
 
       setStatistic(data)
+      setSelectedContacts(data.contacts?.map((c) => c.principalName) ?? [])
     }
 
     async function fetchReleases(shortname: string) {
@@ -130,13 +150,50 @@ export default function ShowStatistic() {
     if (shortname) fetchReleases(shortname)
   }, [shortname])
 
+  useEffect(() => {
+    async function fetchContacts() {
+      const { data, error } = await client.GET('/contacts')
+
+      if (error) {
+        setApiError((prev) => [...prev, error.message])
+        return
+      }
+
+      setAllContacts(data ?? [])
+    }
+    fetchContacts()
+  }, [])
+
+  async function saveContacts() {
+    if (!shortname) return
+
+    if (statusCode === 'A' && selectedContacts.length === 0) {
+      setContactValidationError(true)
+      return
+    }
+
+    setContactValidationError(false)
+
+    const { data, error } = await client.PUT('/statistics/{shortname}/contacts', {
+      params: { path: { shortname } },
+      body: { principalNames: selectedContacts },
+    })
+
+    if (error) {
+      setApiError((prev) => [...prev, error.message])
+      return
+    }
+
+    setStatistic((prev) => ({ ...prev, contacts: data }))
+    setIsEditingContacts(false)
+  }
+
   const statusCode = statistic.status?.code as keyof typeof StatisticStatus
   const englishName = statistic.name_en ?? '-'
   const division = formatDivision(statistic.division)
   const regionLevels = statistic.statistic_region_levels ?? []
   const mainLanguage = formatMainLanguage(statistic.main_language)
   const startYear = formatStartYear(statistic.first_released_at)
-  const contacts = formatContacts(statistic.contacts)
   const mockContinuedBy = ['putegjeld', 'k2', 'k3']
   const variants = statistic.variants ?? []
   const cancelledVariants = formatCancelledVariants(variants)
@@ -211,20 +268,67 @@ export default function ShowStatistic() {
       </div>
 
       <div className='show-statistic-contacts-container'>
-        <Heading data-size='xs'>Kontaktpersoner</Heading>
-        <Paragraph>Kontaktpersoner kan endres uten godkjenning</Paragraph>
-        {contacts.map((contact) => (
-          <Paragraph key={contact}>{contact}</Paragraph>
-        ))}
-        {!auth?.isAdmin && (
-          <Button
-            variant='tertiary'
-            className='edit-contact-button'
-            onClick={() => alert('Rediger kontakter er ikke implementert ennå.')}
-          >
-            <PersonPencilIcon /> Rediger kontakt
-          </Button>
-        )}
+        <div className='show-statistic-contacts-heading'>
+          <Heading data-size='xs'>Kontaktpersoner</Heading>
+          {!auth?.isAdmin && !isEditingContacts && (
+            <Button
+              variant='tertiary'
+              data-size='sm'
+              aria-label='Rediger kontakter'
+              onClick={() => setIsEditingContacts(true)}
+            >
+              <PencilWritingIcon aria-hidden />
+            </Button>
+          )}
+        </div>
+        <Paragraph>Navn vises under overskriften 'Kontakt' på statistikksiden på ssb.no</Paragraph>
+        <div className='show-statistic-contacts-content'>
+          {!isEditingContacts &&
+            statistic.contacts?.map((contact) => (
+              <Paragraph key={contact.principalName}>
+                <Link href='#' onClick={() => alert('Kontaktside ikke implementert')}>
+                  {formatContact(contact)}
+                </Link>
+              </Paragraph>
+            ))}
+          {isEditingContacts && (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault()
+                saveContacts()
+              }}
+            >
+              <Field id='contact-selection'>
+                <ContactSelection
+                  contacts={allContacts}
+                  selected={selectedContacts}
+                  setSelected={setSelectedContacts}
+                />
+                {contactValidationError && selectedContacts.length === 0 && (
+                  <ValidationMessage>Legg til minst én kontakt</ValidationMessage>
+                )}
+              </Field>
+              {contactValidationError && selectedContacts.length === 0 && (
+                <div className='show-statistic-contacts-error-summary'>
+                  <ErrorSummary>
+                    <ErrorSummary.Heading>For å gå videre må du rette opp følgende feil:</ErrorSummary.Heading>
+                    <ErrorSummary.List>
+                      <ErrorSummary.Item>
+                        <ErrorSummary.Link href='#contact-selection'>Legg til minst én kontakt</ErrorSummary.Link>
+                      </ErrorSummary.Item>
+                    </ErrorSummary.List>
+                  </ErrorSummary>
+                </div>
+              )}
+              <div className='show-statistic-contacts-button-wrapper'>
+                <Button type='submit'>Lagre</Button>
+                <Button variant='tertiary' onClick={() => setIsEditingContacts(false)}>
+                  Avbryt
+                </Button>
+              </div>
+            </form>
+          )}
+        </div>
       </div>
 
       <div>
