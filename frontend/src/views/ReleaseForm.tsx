@@ -90,6 +90,12 @@ function getCreatedReleaseModalDescription(createdRelease: ReleaseDetails) {
   return `Datoen ${formatDate(createdRelease?.publish_time)} er nå sendt inn for ${createdReleaseVariant}.`
 }
 
+function addThreeMonths(check: Date): Date {
+  const date = new Date(check)
+  const inThreeMonths = new Date(date.setMonth(date.getMonth() + 3))
+  return inThreeMonths
+}
+
 function DateReleasesTable({
   selectedDate,
   calendarDates,
@@ -294,6 +300,9 @@ export default function ReleaseForm() {
     if (!values.publishTime) nextErrors.publishTime = 'Opprett en gyldig publiseringsdato'
     if (!values.periodFrom) nextErrors.periodFrom = 'Opprett en gyldig fra-dato'
     if (!values.periodTo) nextErrors.periodTo = 'Opprett en gyldig til-dato'
+    if (!auth?.isAdmin && values.publishTime && values.publishTime < addThreeMonths(new Date())) {
+      nextErrors.publishTime = 'Publiseringsdato tidligere enn tre måneder fra dags dato må opprettes av desken'
+    }
 
     // TODO: MIM-2582: Review comparison logic, error messages, and implement onChange
     if (values.periodFrom && values.periodTo && values.periodFrom > values.periodTo) {

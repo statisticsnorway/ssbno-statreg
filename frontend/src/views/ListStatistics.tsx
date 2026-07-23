@@ -1,5 +1,5 @@
 import './ListStatistics.css'
-import { useEffect, useState } from 'react'
+import { useDeferredValue, useEffect, useMemo, useState } from 'react'
 import client from '../api'
 import type { Contact, ShortnameListing, StatisticListing } from '@ssbno-statreg/shared'
 import { PaginatedStatisticsTable } from '../components/StatisticsTable'
@@ -29,13 +29,48 @@ export default function ListStatistics() {
   const [shortnames, setShortnames] = useState<ShortnameListing[]>([])
   const [contacts, setContacts] = useState<Contact[]>([])
   const [apiError, setApiError] = useState<string[]>([])
+  const [isLoadingOptions, setIsLoadingOptions] = useState(true)
   const { auth } = useAuth()
 
-  const selectedFilter = shortnameQuery
-    ? { label: shortnameQuery, value: `shortname:${shortnameQuery}` }
-    : contactQuery
-      ? { label: contactQuery, value: `contact:${contactQuery}` }
-      : null
+  // Defer building the (potentially large) option lists so the initial render of the
+  // statistics table paints first and stays responsive while the options fill in.
+  const deferredShortnames = useDeferredValue(shortnames, [])
+  const deferredContacts = useDeferredValue(contacts, [])
+
+  const shortnameOptions = useMemo(
+    () =>
+      deferredShortnames.map((shortname) => {
+        const value = `shortname:${shortname.shortname}`
+        return (
+          <Suggestion.Option className='suggestion-item' key={value} label={shortname.shortname} value={value}>
+            {shortname.shortname}
+            <div className='category-label'>Kortnavn</div>
+          </Suggestion.Option>
+        )
+      }),
+    [deferredShortnames]
+  )
+
+  const contactOptions = useMemo(
+    () =>
+      deferredContacts.map((contact) => {
+        const value = `contact:${contact.principalName}`
+        return (
+          <Suggestion.Option className='suggestion-item' key={value} label={contact.principalName} value={value}>
+            {contact.name} ({contact.principalName})<div className='category-label'>Kontakt</div>
+          </Suggestion.Option>
+        )
+      }),
+    [deferredContacts]
+  )
+
+  let selectedFilter: SuggestionItem | null = null
+
+  if (shortnameQuery) {
+    selectedFilter = { label: shortnameQuery, value: `shortname:${shortnameQuery}` }
+  } else if (contactQuery) {
+    selectedFilter = { label: contactQuery, value: `contact:${contactQuery}` }
+  }
 
   useEffect(() => {
     fetchStatistics(start, count, shortnameQuery, contactQuery, sortQuery)
@@ -77,31 +112,25 @@ export default function ListStatistics() {
   }
 
   useEffect(() => {
-    async function fetchShortnames() {
-      const { data, error } = await client.GET('/shortnames')
-
-      if (error) {
-        setApiError((prev) => [...prev, error.message])
-        return
+    async function fetchFilterOptions() {
+      const { data: shortnamesData, error: shortnamesError } = await client.GET('/shortnames')
+      if (shortnamesError) {
+        setApiError((prev) => [...prev, shortnamesError.message])
+      } else {
+        setShortnames(shortnamesData ?? [])
       }
 
-      setShortnames(data ?? [])
-    }
-    fetchShortnames()
-  }, [])
-
-  useEffect(() => {
-    async function fetchContacts() {
-      const { data, error } = await client.GET('/contacts')
-
-      if (error) {
-        setApiError((prev) => [...prev, error.message])
-        return
+      const { data: contactsData, error: contactsError } = await client.GET('/contacts')
+      if (contactsError) {
+        setApiError((prev) => [...prev, contactsError.message])
+      } else {
+        setContacts(contactsData ?? [])
       }
 
-      setContacts(data ?? [])
+      setIsLoadingOptions(false)
     }
-    fetchContacts()
+
+    fetchFilterOptions()
   }, [])
 
   function updateRowCount(newCount: number) {
@@ -164,29 +193,14 @@ export default function ListStatistics() {
             <Suggestion.Input />
             <Suggestion.Clear onClick={() => onFilterChange(null)} />
             <Suggestion.List className='suggestion-list'>
-              <Suggestion.Empty>Ingen treff</Suggestion.Empty>
-              {shortnames.map((shortname) => {
-                const value = `shortname:${shortname.shortname}`
-                return (
-                  <Suggestion.Option className='suggestion-item' key={value} label={shortname.shortname} value={value}>
-                    {shortname.shortname}
-                    <div className='category-label'>Kortnavn</div>
-                  </Suggestion.Option>
-                )
-              })}
-              {contacts.map((contact) => {
-                const value = `contact:${contact.principalName}`
-                return (
-                  <Suggestion.Option
-                    className='suggestion-item'
-                    key={value}
-                    label={contact.principalName}
-                    value={value}
-                  >
-                    {contact.name} ({contact.principalName})<div className='category-label'>Kontakt</div>
-                  </Suggestion.Option>
-                )
-              })}
+              {isLoadingOptions ? (
+                2
+              ) : (
+                <>
+                  <Suggestion.Empty>Ingen treff</Suggestion.Empty>
+                  {shortnameOptions} {contactOptions}
+                </>
+              )}
             </Suggestion.List>
           </Suggestion>
         </Field>
