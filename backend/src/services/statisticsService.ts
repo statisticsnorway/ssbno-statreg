@@ -373,7 +373,24 @@ export async function updateStatistic(
   return await mapStatisticDetails(updatedStatistic)
 }
 
-export async function updateContacts(
+async function upsertContacts(principalNames: string[], prisma: StatisticPrisma) {
+  const users = await getAllUsersFromCache()
+
+  const uniquePrincipalNames = [...new Set(principalNames)]
+  const knownPrincipalNames = uniquePrincipalNames.filter((principalName) => users[principalName])
+
+  return await Promise.all(
+    knownPrincipalNames.map((principalName) =>
+      prisma.responsiblePerson.upsert({
+        where: { principalName },
+        create: { principalName },
+        update: {},
+      })
+    )
+  )
+}
+
+export async function updateStatisticContacts(
   shortname: string,
   newPrincipalNames: string[],
   prisma: StatisticPrisma
@@ -388,20 +405,7 @@ export async function updateContacts(
     return Promise.reject({ status: 404, statregError: `Shortname '${safeShortname}' not found` })
   }
 
-  const users = await getAllUsersFromCache()
-
-  const uniquePrincipalNames = [...new Set(newPrincipalNames)]
-  const knownPrincipalNames = uniquePrincipalNames.filter((principalName) => users[principalName])
-
-  const newContacts = await Promise.all(
-    knownPrincipalNames.map((principalName) =>
-      prisma.responsiblePerson.upsert({
-        where: { principalName },
-        create: { principalName },
-        update: {},
-      })
-    )
-  )
+  const newContacts = await upsertContacts(newPrincipalNames, prisma)
 
   if (existingStatistic.status === 'A' && newContacts.length === 0) {
     return Promise.reject({ statregError: 'An active statistic needs at least one contact' })
@@ -418,6 +422,7 @@ export async function updateContacts(
     select: { responsiblePersons: { select: { principalName: true } } },
   })
 
+  const users = await getAllUsersFromCache()
   return updatedStatistic.responsiblePersons.map((person) => ({
     name: users[person.principalName]?.displayName ?? '',
     principalName: person.principalName,
