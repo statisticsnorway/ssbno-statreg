@@ -176,7 +176,7 @@ export default function ShowStatistic() {
 
     const { data, error } = await client.PUT('/statistics/{shortname}/contacts', {
       params: { path: { shortname } },
-      body: { principalNames: selectedContacts },
+      body: selectedContacts,
     })
 
     if (error) {
