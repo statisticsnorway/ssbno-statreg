@@ -1,6 +1,5 @@
 import { type RequestHandler, Router } from 'express'
-import { type JWTPayload } from 'jose'
-import { isAdmin } from '@/../plugins/authMiddleware'
+import { isCurrentUserAdmin } from '@/lib/context'
 
 const AUTH_PREFIX = '/api/auth'
 
@@ -21,19 +20,17 @@ export default function createAuthRouter(requireAuth: RequestHandler): Router {
     // We want a default object if auth is not available or not in use.
     if (!req.auth) {
       res.json({
-        isAdmin: process.env.AUTH_ENABLED === 'false',
+        isAdmin: isCurrentUserAdmin(),
         email: '',
-        fullName: '',
+        name: '',
       })
       return
     }
 
-    const claims = req.auth.claims as JWTPayload
-
     res.json({
-      isAdmin: isAdmin(claims),
-      email: req.auth?.email,
-      fullName: claims.name,
+      isAdmin: isCurrentUserAdmin(),
+      email: req.auth.email,
+      name: req.auth.name,
     })
   })
 

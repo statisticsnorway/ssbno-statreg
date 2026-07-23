@@ -5,6 +5,7 @@ export interface AuthContext {
   claims?: JWTPayload | unknown
   username?: string
   email?: string
+  name?: string
 }
 
 export interface RequestContext {
