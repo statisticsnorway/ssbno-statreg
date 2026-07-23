@@ -301,7 +301,7 @@ describe('statisticsController integration', () => {
 
     // POST statistic for created shortname
     const createPayload: StatisticCreate = {
-      status: { code: 'K' },
+      status: 'K',
       division: '101',
       name: 'Ny statistikk',
       name_en: 'New statistic',
