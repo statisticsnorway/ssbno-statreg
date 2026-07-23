@@ -328,9 +328,8 @@ describe('statisticsController integration', () => {
 
   test('PUT /statistics/nytt_kortnavn/contacts sets new contacts for the statistic', async () => {
     // PUT statistics/nytt_kortnavn/contacts
-    const contactsPayload = {
-      principalNames: ['abc@ssb.no', 'bcd@ssb.no'],
-    }
+    const contactsPayload = ['abc@ssb.no', 'bcd@ssb.no']
+
     const contactsResponse = await request(app)
       .put('/statistikkregisteret/api/statistics/nytt_kortnavn/contacts')
       .set('content-type', 'application/json')

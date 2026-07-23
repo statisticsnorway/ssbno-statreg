@@ -15,7 +15,6 @@
       margin-bottom: var(--ds-size-4);
     }
 
-
     .create-statistic-form-status-label {
       display: flex;
       align-items: center;
@@ -23,12 +22,21 @@
 
     .create-statistic-form-buttons {
       display: flex;
-      gap: var(--ds-size-4)
+      gap: var(--ds-size-4);
     }
   }
 
-  .ds-field, .ds-alert {
+  .ds-field,
+  .ds-alert {
     max-width: 50%;
   }
-}
 
+    .contact-field {
+      max-width: 100%;
+      margin-top: var(--ds-size-4);
+    }
+
+    .contact-section-description {
+      color: var(--ds-color-neutral-text-subtle);
+    }
+}
