@@ -199,6 +199,8 @@ function useDatepicker(
   })
 }
 
+const inThreeMonths = new Date(new Date().setMonth(new Date().getMonth() + 3))
+
 export default function ReleaseForm() {
   // for creation, path is /statistikk/:shortname/:variantId/opprett
   // for editing, path is /publisering/:id/rediger
@@ -207,7 +209,7 @@ export default function ReleaseForm() {
   const isEditing = !!releaseId
 
   // TODO: MIM-2581: This is a temporary suggested publish time (3 months ahead of date) for create release
-  const [suggestedPublishTime] = useState(() => new Date(new Date().setMonth(new Date().getMonth() + 3)))
+  const [suggestedPublishTime] = useState(inThreeMonths)
   const [values, setValues] = useState<ReleaseFormTypes>({
     publishTime: suggestedPublishTime,
   })
@@ -292,7 +294,7 @@ export default function ReleaseForm() {
     if (!values.publishTime) nextErrors.publishTime = 'Opprett en gyldig publiseringsdato'
     if (!values.periodFrom) nextErrors.periodFrom = 'Opprett en gyldig fra-dato'
     if (!values.periodTo) nextErrors.periodTo = 'Opprett en gyldig til-dato'
-    if (!auth?.isAdmin && values.publishTime && values.publishTime < suggestedPublishTime) {
+    if (!auth?.isAdmin && values.publishTime && values.publishTime < inThreeMonths) {
       nextErrors.publishTime = 'Publiseringsdato tidligere enn tre måneder fra dags dato må opprettes av desken'
     }
 
@@ -363,7 +365,7 @@ export default function ReleaseForm() {
     Boolean
   )
 
-  const showEarlyPublishTimeWarning = auth?.isAdmin && values.publishTime && values.publishTime < suggestedPublishTime
+  const showEarlyPublishTimeWarning = auth?.isAdmin && values.publishTime && values.publishTime < inThreeMonths
 
   return (
     <>
