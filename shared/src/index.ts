@@ -17,6 +17,8 @@ export type Revision = components['schemas']['Revision']
 export type Shortname = components['schemas']['Shortname']
 export type ShortnameListing = components['schemas']['Shortname_listing']
 export type StatisticDetails = components['schemas']['Statistic_details']
+export type StatisticCreate = components['schemas']['Statistic_create']
+export type StatisticUpdate = components['schemas']['Statistic_update']
 export type StatisticListing = components['schemas']['Statistic_listing']
 export type Variant = components['schemas']['Variant']
 

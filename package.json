@@ -23,7 +23,7 @@
     "lint:fix": "eslint --fix",
     "seed": "npm run seed -w backend",
     "generate": "npm run generate -w backend",
-    "generate:api": "npm run generate:api-types -w shared && npm run generate:parser -w backend"
+    "generate:api-types": "npm run generate:api-types -w shared && npm run generate:parser -w backend"
   },
   "overrides": {
     "hono": "4.12.26",
@@ -53,4 +53,3 @@
     "fsevents": false
   }
 }
-

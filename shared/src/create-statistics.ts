@@ -1,6 +1,20 @@
-export type CreatableStatisticStatus = 'K' | 'A'
+import { type StatisticCreate } from '.'
 
-export const requiredStatisticFieldsByStatus = {
+export type CreatableStatisticStatus = 'K' | 'A'
+type RequiredStatisticField = keyof StatisticCreate
+
+export const requiredStatisticFieldsByStatus: Record<CreatableStatisticStatus, RequiredStatisticField[]> = {
   K: ['name', 'division'],
   A: ['name', 'name_en', 'variants', 'contacts', 'division', 'main_language'],
-} as const
+}
+
+export function getRequiredStatisticFields(status: CreatableStatisticStatus): RequiredStatisticField[] {
+  return requiredStatisticFieldsByStatus[status]
+}
+
+export function isCreateStatisticFieldRequired(
+  status: CreatableStatisticStatus,
+  field: RequiredStatisticField
+): boolean {
+  return requiredStatisticFieldsByStatus[status].includes(field)
+}
