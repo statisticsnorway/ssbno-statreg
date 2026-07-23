@@ -369,6 +369,8 @@ export default function ReleaseForm() {
     Boolean
   )
 
+  const showEarlyPublishTimeWarning = auth?.isAdmin && values.publishTime && values.publishTime < suggestedPublishTime
+
   return (
     <>
       {errorsCombined.length > 0 && <ErrorAlert message={errorsCombined} />}
@@ -421,6 +423,11 @@ export default function ReleaseForm() {
             apiErrorEmit={setCalendarApiError}
           />
           {errors.publishTime && <ValidationMessage>{errors.publishTime}</ValidationMessage>}
+          {showEarlyPublishTimeWarning && (
+            <ValidationMessage data-color='warning'>
+              Du har valgt en dato tidligere enn tre måneder fra i dag.
+            </ValidationMessage>
+          )}
         </Field>
 
         <Fieldset>
