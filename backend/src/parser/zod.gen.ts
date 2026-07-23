@@ -152,11 +152,6 @@ export const zStatisticMainLanguageInput = z.enum(['nn', 'nb'])
 
 export const zStatisticContactsInput = z.array(z.string())
 
-/**
- * Approval status - GODKJENT (Approved), AVVIST (Rejected), FORSLAG (Proposal)
- */
-export const zStatisticApprovalStatusInput = z.enum(['GODKJENT', 'AVVIST', 'FORSLAG'])
-
 export const zStatisticFirstReleasedAtInput = z.iso.date()
 
 export const zStatisticYearlyReportingInput = z.boolean()

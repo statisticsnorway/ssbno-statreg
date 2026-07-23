@@ -284,11 +284,6 @@ components:
       items:
         $ref: '#/components/schemas/Variant'
 
-    Statistic_approval_status_input:
-      type: string
-      enum: [GODKJENT, AVVIST, FORSLAG]
-      description: Approval status - GODKJENT (Approved), AVVIST (Rejected), FORSLAG (Proposal)
-
     Statistic_first_released_at_input:
       type: string
       format: date

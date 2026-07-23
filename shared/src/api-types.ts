@@ -1143,11 +1143,6 @@ export interface components {
     Statistic_main_language_input: 'nn' | 'nb'
     Statistic_contacts_input: string[]
     Statistic_variants_input: components['schemas']['Variant'][]
-    /**
-     * @description Approval status - GODKJENT (Approved), AVVIST (Rejected), FORSLAG (Proposal)
-     * @enum {string}
-     */
-    Statistic_approval_status_input: 'GODKJENT' | 'AVVIST' | 'FORSLAG'
     /** Format: date */
     Statistic_first_released_at_input: string | null
     Statistic_yearly_reporting_input: boolean
