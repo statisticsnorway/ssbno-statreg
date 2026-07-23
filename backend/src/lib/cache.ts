@@ -36,22 +36,6 @@ export async function getDivisionsCache(): Promise<Division[]> {
 }
 
 export async function setUsersCache(): Promise<void> {
-  // Return mocked users for tests and development where application often restarts and/or is missing Azure Entra access
-  if (process.env.MOCK_ENTRA_USERS === 'true') {
-    cacheDay.set(
-      ENTRA_USERS_CACHE_KEY,
-      indexUsersByPrincipalName([
-        {
-          displayName: 'Admin SSB',
-          mail: 'admin.ssb@ssb.no',
-          userPrincipalName: 'admin@ssb.no',
-          businessPhones: null,
-        },
-      ])
-    )
-    return
-  }
-
   try {
     const token = await entraClient.getAccessToken()
 

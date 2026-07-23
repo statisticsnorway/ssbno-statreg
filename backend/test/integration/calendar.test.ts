@@ -1,6 +1,24 @@
-import { describe, expect, test } from 'vitest'
+import { describe, expect, test, vi } from 'vitest'
 import { createApp } from '@/app'
 import request from 'supertest'
+vi.mock(import('@/lib/cache'), () => ({
+  getAllUsersFromCache: vi.fn(() =>
+    Promise.resolve({
+      'abc@ssb.no': {
+        displayName: 'Alice',
+        userPrincipalName: 'abc@ssb.no',
+        mail: 'alice@ssb.no',
+        businessPhones: null,
+      },
+      'bcd@ssb.no': {
+        displayName: 'Bob',
+        userPrincipalName: 'bcd@ssb.no',
+        mail: 'bob@ssb.no',
+        businessPhones: ['11223344'],
+      },
+    })
+  ),
+}))
 
 const app = await createApp()
 

@@ -21,7 +21,6 @@ services:
       NODE_ENV: test
       PGURL: postgresql://test_user:test_pass@db:5432/statreg_db?sslmode=disable
       AUTH_ENABLED: "false"
-      MOCK_ENTRA_USERS: "true"
     depends_on:
       db:
         condition: service_healthy
