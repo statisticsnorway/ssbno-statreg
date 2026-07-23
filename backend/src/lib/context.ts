@@ -9,6 +9,11 @@ export interface AuthContext {
 
 export interface RequestContext {
   auth?: AuthContext
+  isAdmin?: boolean
+}
+
+export function isCurrentUserAdmin(): boolean {
+  return asyncLocalStorage.getStore()?.isAdmin === true
 }
 
 export const asyncLocalStorage = new AsyncLocalStorage<RequestContext>()

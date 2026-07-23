@@ -32,7 +32,7 @@ export default function createAuthRouter(requireAuth: RequestHandler): Router {
 
     res.json({
       isAdmin: isAdmin(claims),
-      email: req.auth.email,
+      email: req.auth?.email,
       fullName: claims.name,
     })
   })

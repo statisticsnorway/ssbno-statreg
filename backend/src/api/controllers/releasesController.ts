@@ -1,5 +1,4 @@
 import type { Router } from 'express'
-import type { JWTPayload } from 'jose'
 import {
   getVariantReleases,
   getFilteredReleases,
@@ -8,7 +7,7 @@ import {
   updateRelease,
   bulkApproveReleases,
 } from '@/services/releasesService'
-import { isAdmin, requireAdminAuthorization, skipAuth } from '@/../plugins/authMiddleware'
+import { requireAdminAuthorization, skipAuth } from '@/../plugins/authMiddleware'
 import { handleErrors } from '@/lib/prismaErrors'
 import { prisma } from '@/lib/prisma'
 import { isNumber, ensureString, ensureStringArray, ensureRequiredFieldsExists } from '@/lib/utils'
@@ -63,10 +62,7 @@ export default function releasesController(router: Router) {
   router.put('/releases/:id', async (req, res) => {
     try {
       const id = ensureString(req.params.id)
-      const claims = req.auth?.claims as JWTPayload | undefined
-      const autoApprove = process.env.AUTH_ENABLED === 'false' || isAdmin(claims)
-
-      const result = await updateRelease(prisma, id!, req.body, new Date(), autoApprove)
+      const result = await updateRelease(prisma, id!, req.body)
       res.json(result)
     } catch (error) {
       return handleErrors(error, res)

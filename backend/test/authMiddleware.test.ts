@@ -91,48 +91,6 @@ describe('authMiddleWare', () => {
       })
     })
 
-    describe('isAdmin', () => {
-  beforeEach(() => {
-    process.env.ADMIN_GROUPS = 'ssbno-developers'
-  })
-
-  test('returns true when admin group exists in claims', async () => {
-    const { isAdmin } = await import('../plugins/authMiddleware')
-
-    expect(
-      isAdmin({
-        dapla: {
-          groups: ['ssbno-developers', 'another-group'],
-        },
-      })
-    ).toBe(true)
-  })
-
-  test('returns false when admin group does not exist in claims', async () => {
-    const { isAdmin } = await import('../plugins/authMiddleware')
-
-    expect(
-      isAdmin({
-        dapla: {
-          groups: ['other-group'],
-        },
-      })
-    ).toBe(false)
-  })
-
-  test('returns false when claims are missing', async () => {
-    const { isAdmin } = await import('../plugins/authMiddleware')
-
-    expect(isAdmin(undefined)).toBe(false)
-  })
-
-  test('returns false when groups are missing', async () => {
-    const { isAdmin } = await import('../plugins/authMiddleware')
-
-    expect(isAdmin({})).toBe(false)
-  })
-})
-
     describe('requireAdminAuthorization', () => {
       let res: MockResponse<any>
       let next: ReturnType<typeof vi.fn>

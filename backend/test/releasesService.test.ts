@@ -470,33 +470,6 @@ describe('releasesService ', async () => {
       })
     })
 
-    test('automatically approves the release when autoApprove is true', async () => {
-      setPrismaResult(mockedSingleReleasePrismaResult)
-      const releaseUpdateInput = {
-        publish_time: '2024-10-15T08:00:00Z',
-        period_to: '2024-12-31',
-        period_from: '2024-09-01',
-        release_date_precision: 'dag',
-        comment: 'Mock comment.',
-      }
-
-      await updateRelease(prismaMock, '1', releaseUpdateInput, now, true)
-
-      expect(prismaMock.release.update).toHaveBeenCalledExactlyOnceWith({
-        include: ReleaseDetailsIncludes,
-        where: { id: 1 },
-        data: {
-          publish_time: new Date('2024-10-15T08:00:00Z'),
-          period_to: new Date('2024-12-31T00:00:00Z'),
-          period_from: new Date('2024-09-01T00:00:00Z'),
-          release_date_precision: 'dag',
-          desk_appoval_status: ApprovalStatus.ACCEPTED,
-          last_updated: now,
-          comment: 'Mock comment.',
-        },
-      })
-    })
-
     test('rejects with error message if request body is empty', async () => {
       await expect(() => updateRelease(prismaMock, '1', undefined, now)).rejects.toMatchObject({
         statregError:

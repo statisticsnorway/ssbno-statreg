@@ -25,7 +25,7 @@ export function getBearerToken(req: Request): string | null {
 }
 
 export function isAdmin(claims: JWTPayload | undefined): boolean {
-  const claimGroups = (
+  const groups = (
     claims as
       | (JWTPayload & {
           dapla?: {
@@ -35,11 +35,11 @@ export function isAdmin(claims: JWTPayload | undefined): boolean {
       | undefined
   )?.dapla?.groups
 
-  if (!Array.isArray(claimGroups)) return false
+  if (!Array.isArray(groups)) return false
 
   const adminGroups = process.env.ADMIN_GROUPS?.split(',') ?? []
 
-  return adminGroups.some((group) => claimGroups.includes(group))
+  return adminGroups.some((group) => groups.includes(group))
 }
 
 export const skipAuth: RequestHandler = (_req, _res, next) => asyncLocalStorage.run({}, next)
@@ -67,7 +67,7 @@ export function createKeycloakAuthMiddleware(issuer: string, jwksUri: string, au
       }
 
       // Adding the auth to application context, this is isolated per request and thread so we can read the context in other parts of the application without passing props.
-      asyncLocalStorage.run({ auth: req.auth }, next)
+      asyncLocalStorage.run({ auth: req.auth, isAdmin: isAdmin(payload) }, next)
     } catch {
       return unauthorized(res, 'Invalid or expired token')
     }
@@ -112,7 +112,9 @@ export function requireAdminAuthorization(): RequestHandler {
       return forbidden(res, 'Missing authorization groups')
     }
 
-    if (!isAdmin(claims)) {
+    const adminGroups = process.env.ADMIN_GROUPS?.split(',') ?? []
+
+    if (!adminGroups.some((group) => groups.includes(group))) {
       return forbidden(res, 'Insufficient access')
     }
 
