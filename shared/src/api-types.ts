@@ -517,10 +517,7 @@ export interface paths {
       }
       requestBody: {
         content: {
-          'application/json': {
-            /** @description List of principal names to set as contacts for the statistic. */
-            principalNames: string[]
-          }
+          'application/json': string[]
         }
       }
       responses: {

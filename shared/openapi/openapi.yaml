@@ -515,11 +515,11 @@ paths:
       summary: Create a new statistic
       tags: [statistics]
       parameters:
-      - name: shortname
-        in: path
-        required: true
-        schema:
-          type: string
+        - name: shortname
+          in: path
+          required: true
+          schema:
+            type: string
       requestBody:
         required: true
         content:
@@ -691,15 +691,10 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                principalNames:
-                  type: array
-                  description: List of principal names to set as contacts for the statistic.
-                  items:
-                    type: string
-              required:
-                - principalNames
+              type: array
+              description: List of principal names to set as contacts for the statistic.
+              items:
+                type: string
       responses:
         '200':
           description: The updated list of contacts for the statistic.

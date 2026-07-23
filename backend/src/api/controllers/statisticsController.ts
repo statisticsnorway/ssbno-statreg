@@ -58,7 +58,7 @@ export default function statisticsController(router: Router) {
 
   router.put('/statistics/:shortname/contacts', async (req, res) => {
     try {
-      const input = req.body.principalNames
+      const input = req.body
       if (!Array.isArray(input) || !input.every((item) => typeof item === 'string')) {
         throw { status: 400, statregError: 'principalNames must be an array of strings' }
       }
