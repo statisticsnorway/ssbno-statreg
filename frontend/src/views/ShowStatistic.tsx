@@ -1,6 +1,19 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams, Link as ReactRouterLink } from 'react-router'
-import { Heading, Paragraph, List, Link, Button, Divider, Details, Card, Table } from '@digdir/designsystemet-react'
+import {
+  Heading,
+  Paragraph,
+  List,
+  Link,
+  Button,
+  Divider,
+  Details,
+  Card,
+  Table,
+  ValidationMessage,
+  ErrorSummary,
+  Field,
+} from '@digdir/designsystemet-react'
 import { PencilWritingIcon } from '@navikt/aksel-icons'
 import { StatisticStatusTag } from '../components/StatisticStatusTag'
 import { VariantCard } from '../components/VariantCard'
@@ -101,6 +114,7 @@ export default function ShowStatistic() {
   const [allContacts, setAllContacts] = useState<Contact[]>([])
   const [selectedContacts, setSelectedContacts] = useState<string[]>([])
   const [isEditingContacts, setIsEditingContacts] = useState(false)
+  const [contactValidationError, setContactValidationError] = useState(false)
   const { shortname } = useParams()
   const { auth } = useAuth()
   const [apiError, setApiError] = useState<string[]>([])
@@ -152,6 +166,13 @@ export default function ShowStatistic() {
 
   async function saveContacts() {
     if (!shortname) return
+
+    if (statusCode === 'A' && selectedContacts.length === 0) {
+      setContactValidationError(true)
+      return
+    }
+
+    setContactValidationError(false)
 
     const { data, error } = await client.PUT('/statistics/{shortname}/contacts', {
       params: { path: { shortname } },
@@ -271,15 +292,41 @@ export default function ShowStatistic() {
               </Paragraph>
             ))}
           {isEditingContacts && (
-            <>
-              <ContactSelection contacts={allContacts} selected={selectedContacts} setSelected={setSelectedContacts} />
+            <form
+              onSubmit={(e) => {
+                e.preventDefault()
+                saveContacts()
+              }}
+            >
+              <Field id='contact-selection'>
+                <ContactSelection
+                  contacts={allContacts}
+                  selected={selectedContacts}
+                  setSelected={setSelectedContacts}
+                />
+                {contactValidationError && selectedContacts.length === 0 && (
+                  <ValidationMessage>Legg til minst én kontakt</ValidationMessage>
+                )}
+              </Field>
+              {contactValidationError && selectedContacts.length === 0 && (
+                <div className='show-statistic-contacts-error-summary'>
+                  <ErrorSummary>
+                    <ErrorSummary.Heading>For å gå videre må du rette opp følgende feil:</ErrorSummary.Heading>
+                    <ErrorSummary.List>
+                      <ErrorSummary.Item>
+                        <ErrorSummary.Link href='#contact-selection'>Legg til minst én kontakt</ErrorSummary.Link>
+                      </ErrorSummary.Item>
+                    </ErrorSummary.List>
+                  </ErrorSummary>
+                </div>
+              )}
               <div className='show-statistic-contacts-button-wrapper'>
-                <Button onClick={saveContacts}>Lagre</Button>
+                <Button type='submit'>Lagre</Button>
                 <Button variant='tertiary' onClick={() => setIsEditingContacts(false)}>
                   Avbryt
                 </Button>
               </div>
-            </>
+            </form>
           )}
         </div>
       </div>

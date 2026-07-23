@@ -11,7 +11,7 @@
     "build": "npm run build --ws && cp -Rf frontend/dist/* backend/dist",
     "start": "npm run start -w backend",
     "db:deploy": "npm run db:deploy -w backend",
-    "check": "npm run build -w shared && tsc --noEmit -p backend && tsc -b frontend",
+    "check": "tsc --noEmit -p backend && tsc -b frontend",
     "test": "vitest --exclude '**/integration/**'",
     "ci-test": "vitest run  --exclude '**/integration/**'",
     "test:backend": "vitest --project backend",
