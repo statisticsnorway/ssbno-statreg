@@ -327,7 +327,6 @@ components:
         main_language: { $ref: '#/components/schemas/Statistic_main_language_input' }
         contacts: { $ref: '#/components/schemas/Statistic_contacts_input' }
         variants: { $ref: '#/components/schemas/Statistic_variants_input' }
-        approval_status: { $ref: '#/components/schemas/Statistic_approval_status_input' }
         first_released_at: { $ref: '#/components/schemas/Statistic_first_released_at_input' }
         yearly_reporting: { $ref: '#/components/schemas/Statistic_yearly_reporting_input' }
         statistic_region_levels: { $ref: '#/components/schemas/Statistic_region_levels_input' }
@@ -345,7 +344,6 @@ components:
         main_language: { $ref: '#/components/schemas/Statistic_main_language_input' }
         contacts: { $ref: '#/components/schemas/Statistic_contacts_input' }
         variants: { $ref: '#/components/schemas/Statistic_variants_input' }
-        approval_status: { $ref: '#/components/schemas/Statistic_approval_status_input' }
         first_released_at: { $ref: '#/components/schemas/Statistic_first_released_at_input' }
         yearly_reporting: { $ref: '#/components/schemas/Statistic_yearly_reporting_input' }
         statistic_region_levels: { $ref: '#/components/schemas/Statistic_region_levels_input' }
@@ -386,7 +384,6 @@ components:
         main_language: { $ref: '#/components/schemas/Statistic_main_language_input' }
         contacts: { $ref: '#/components/schemas/Statistic_contacts_input' }
         variants: { $ref: '#/components/schemas/Statistic_variants_input' }
-        approval_status: { $ref: '#/components/schemas/Statistic_approval_status_input' }
         first_released_at: { $ref: '#/components/schemas/Statistic_first_released_at_input' }
         yearly_reporting: { $ref: '#/components/schemas/Statistic_yearly_reporting_input' }
         statistic_region_levels: { $ref: '#/components/schemas/Statistic_region_levels_input' }
