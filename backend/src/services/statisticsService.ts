@@ -451,11 +451,11 @@ export async function createStatistic(
     comment,
   } = parseCreateStatisticInput(body, createStatisticStatus)
 
-  let newContacts
+  let contacts
   if (body?.contacts) {
-    newContacts = await upsertContacts(body.contacts, prisma)
+    contacts = await upsertContacts(body.contacts, prisma)
 
-    if (body?.status?.code === 'A' && newContacts.length === 0) {
+    if (body?.status?.code === 'A' && contacts.length === 0) {
       return Promise.reject({ statregError: 'An active statistic needs at least one contact' })
     }
   }
@@ -484,9 +484,9 @@ export async function createStatistic(
           name: safeShortname,
         },
       },
-      ...(newContacts && {
+      ...(contacts && {
         responsiblePersons: {
-          connect: newContacts.map((contact) => ({ id: contact.id })),
+          connect: contacts.map((contact) => ({ id: contact.id })),
         },
       }),
     },
