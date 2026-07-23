@@ -451,6 +451,15 @@ export async function createStatistic(
     comment,
   } = parseCreateStatisticInput(body, createStatisticStatus)
 
+  let newContacts
+  if (body?.contacts) {
+    newContacts = await upsertContacts(body.contacts, prisma)
+
+    if (body?.status?.code === 'A' && newContacts.length === 0) {
+      return Promise.reject({ statregError: 'An active statistic needs at least one contact' })
+    }
+  }
+
   const result = await prisma.statistic.create({
     data: {
       name,
@@ -475,6 +484,11 @@ export async function createStatistic(
           name: safeShortname,
         },
       },
+      ...(newContacts && {
+        responsiblePersons: {
+          connect: newContacts.map((contact) => ({ id: contact.id })),
+        },
+      }),
     },
     include: StatisticsDetailedIncludes,
   })
