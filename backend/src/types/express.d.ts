@@ -4,6 +4,7 @@ type AuthContext = {
   claims: unknown
   username?: string
   email?: string
+  name?: string
 }
 
 declare global {

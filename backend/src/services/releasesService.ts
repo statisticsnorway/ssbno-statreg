@@ -20,6 +20,7 @@ import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
 import type { Prisma } from '@/generated/prisma/client'
 import { releaseAsserts } from '@/lib/asserts'
 import { checkForKnownPrismaErrors } from '@/lib/prismaErrors'
+import { isCurrentUserAdmin } from '@/lib/context'
 
 export type ReleasePrisma = Pick<PrismaClient, 'release' | 'statistic' | 'variant' | 'shortname'>
 
@@ -221,7 +222,7 @@ export async function createRelease(
       cancelled: false,
       last_updated: now,
       date_created: now,
-      desk_appoval_status: ApprovalStatus.PENDING,
+      desk_appoval_status: isCurrentUserAdmin() ? ApprovalStatus.ACCEPTED : ApprovalStatus.PENDING,
       comment: '',
       variant: {
         connect: {
@@ -318,7 +319,7 @@ export async function updateRelease(
       period_from: validatedInput.periodFromDate,
       period_to: validatedInput.periodToDate,
       release_date_precision: validatedInput.releaseDatePrecision,
-      desk_appoval_status: ApprovalStatus.PENDING,
+      desk_appoval_status: isCurrentUserAdmin() ? ApprovalStatus.ACCEPTED : ApprovalStatus.PENDING,
       last_updated: now,
       comment: validatedInput.comment,
     },

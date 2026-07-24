@@ -73,14 +73,16 @@ function parseDateFromString(dateString: string | undefined): Date | undefined {
   return dateString ? new Date(dateString) : undefined
 }
 
-function getReleaseModalTitle(isEditing: boolean) {
-  return isEditing ? 'Endringer må godkjennes' : 'Publiseringsdato er registrert'
+function getReleaseModalTitle(isEditing: boolean, isAdmin: boolean) {
+  if (!isEditing) return 'Publiseringsdato er registrert'
+
+  return isAdmin ? 'Endringene er lagret og godkjent' : 'Endringer må godkjennes'
 }
 
-function getReleaseModalDescription(isEditing: boolean, createdRelease: ReleaseDetails) {
-  return isEditing
-    ? 'Endringer på meldt dato må godkjennes på nytt.'
-    : getCreatedReleaseModalDescription(createdRelease)
+function getReleaseModalDescription(isEditing: boolean, updatedRelease: ReleaseDetails, isAdmin: boolean) {
+  if (!isEditing) return getCreatedReleaseModalDescription(updatedRelease)
+
+  return isAdmin ? 'Endringene er lagret og godkjent.' : 'Endringer på meldt dato må godkjennes på nytt.'
 }
 
 function getCreatedReleaseModalDescription(createdRelease: ReleaseDetails) {
@@ -504,8 +506,8 @@ export default function ReleaseForm() {
       </form>
 
       <ReleaseFormModal
-        modalHeading={getReleaseModalTitle(isEditing)}
-        modalDescription={getReleaseModalDescription(isEditing, newOrUpdatedRelease)}
+        modalHeading={getReleaseModalTitle(isEditing, auth?.isAdmin ?? false)}
+        modalDescription={getReleaseModalDescription(isEditing, newOrUpdatedRelease, auth?.isAdmin ?? false)}
         openCreateReleaseModal={openReleaseModal}
         newOrUpdatedRelease={newOrUpdatedRelease}
         setOpenCreateReleaseModal={setOpenReleaseModal}
