@@ -63,7 +63,7 @@ describe('release data is persisted when ', () => {
     expect(fetched.status).toBe(200)
 
     // test persistence
-    expect(fetched.body.id, picked.id)
+    expect(fetched.body.id).toBe(picked.id)
     assertEqualReleaseData(fetched.body, updateBody)
   })
 })
