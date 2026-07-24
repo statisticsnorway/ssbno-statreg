@@ -85,14 +85,14 @@ describe('/releases/bulk-approve', () => {
       .set(headers)
       .send(body)
     expect(created1.status).toBe(200)
-    expect(created1.body.approval_status).toBe('FORSLAG')
+    expect(created1.body.approval_status).toBe('GODKJENT')
 
     const created2 = await request(app)
       .post(`/statistikkregisteret/api/statistics/${shortname}/variants/${variantId}/releases`)
       .set(headers)
       .send(body)
     expect(created2.status).toBe(200)
-    expect(created2.body.approval_status).toBe('FORSLAG')
+    expect(created2.body.approval_status).toBe('GODKJENT')
 
     // POST bulk approve the two releases
     const approveResponse = await request(app)
