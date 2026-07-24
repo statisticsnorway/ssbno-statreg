@@ -222,7 +222,7 @@ export async function createRelease(
       cancelled: false,
       last_updated: now,
       date_created: now,
-      desk_appoval_status: ApprovalStatus.PENDING,
+      desk_appoval_status: isCurrentUserAdmin() ? ApprovalStatus.ACCEPTED : ApprovalStatus.PENDING,
       comment: '',
       variant: {
         connect: {

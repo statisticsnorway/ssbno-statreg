@@ -638,6 +638,40 @@ describe('releasesService ', async () => {
       })
     })
 
+    test('creates release with accepted status when current user is admin', async () => {
+      setPrismaResult({
+        ...mockedSingleReleasePrismaResult,
+        id: 1,
+        version: 1,
+        desk_appoval_status: ApprovalStatus.ACCEPTED,
+      })
+
+      await asyncLocalStorage.run({ isAdmin: true }, () =>
+        createRelease(prismaMock, 'kpi', '1', mockCreateReleaseInput, now)
+      )
+
+      expect(prismaMock.release.create).toHaveBeenCalledExactlyOnceWith({
+        data: {
+          publish_time: new Date('2024-10-15T08:00:00Z'),
+          period_to: new Date('2024-12-31T00:00:00Z'),
+          period_from: new Date('2024-09-01T00:00:00Z'),
+          desk_appoval_status: ApprovalStatus.ACCEPTED,
+          release_date_precision: 'dag',
+          has_versions: false,
+          last_updated: now,
+          date_created: now,
+          cancelled: false,
+          comment: '',
+          variant: {
+            connect: {
+              id: 1,
+            },
+          },
+        },
+        include: ReleaseDetailsIncludes,
+      })
+    })
+
     test('returns 400 if request body is empty', async () => {
       await expect(() => createRelease(prismaMock, 'kpi', '1', undefined, now)).rejects.toMatchObject({
         statregError: 'Missing required field(s): publish_time, period_from, period_to, release_date_precision',
