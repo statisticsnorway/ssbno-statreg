@@ -22,7 +22,7 @@ export default function createAuthRouter(requireAuth: RequestHandler): Router {
       res.json({
         isAdmin: isCurrentUserAdmin(),
         email: '',
-        name: '',
+        fullName: '',
       })
       return
     }
@@ -30,7 +30,7 @@ export default function createAuthRouter(requireAuth: RequestHandler): Router {
     res.json({
       isAdmin: isCurrentUserAdmin(),
       email: req.auth.email,
-      name: req.auth.name,
+      fullName: req.auth.name,
     })
   })
 
