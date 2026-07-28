@@ -18,6 +18,12 @@ import { ApprovalStatus } from '@ssbno-statreg/shared'
 import { Prisma } from '@/generated/prisma/client'
 import { asyncLocalStorage } from '@/lib/context'
 
+vi.mock('@/lib/blockedDates', () => ({
+  isDateBlocked: vi.fn(),
+}))
+
+import { isDateBlocked } from '@/lib/blockedDates'
+
 let prismaMock: any
 let releasesResult: object | null
 let now: Date
@@ -689,6 +695,35 @@ describe('releasesService ', async () => {
         statregError: 'Missing required field(s): period_from, period_to',
       })
       expect(prismaMock.release.create).toHaveBeenCalledTimes(0)
+    })
+
+    test('rejects when non-admin sets publish time on a blocked date', async () => {
+      vi.mocked(isDateBlocked).mockResolvedValue(true)
+
+      await expect(() =>
+        asyncLocalStorage.run({ isAdmin: false }, () =>
+          createRelease(prismaMock, 'kpi', '1', mockCreateReleaseInput, now)
+        )
+      ).rejects.toMatchObject({
+        statregError: 'The given date is full or blocked',
+      })
+      expect(prismaMock.release.create).toHaveBeenCalledTimes(0)
+    })
+
+    test('allows admin to set publish time on a blocked date', async () => {
+      vi.mocked(isDateBlocked).mockResolvedValue(true)
+      setPrismaResult({
+        ...mockedSingleReleasePrismaResult,
+        id: 1,
+        version: 1,
+        desk_appoval_status: ApprovalStatus.ACCEPTED,
+      })
+
+      await asyncLocalStorage.run({ isAdmin: true }, () =>
+        createRelease(prismaMock, 'kpi', '1', mockCreateReleaseInput, now)
+      )
+
+      expect(prismaMock.release.create).toHaveBeenCalledTimes(1)
     })
   })
 })

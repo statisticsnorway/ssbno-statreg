@@ -213,7 +213,7 @@ export async function createRelease(
 
   const { publishTimeDate, periodFromDate, periodToDate, releaseDatePrecision } = parseReleaseInput(body)
 
-  if (!isCurrentUserAdmin && (await isDateBlocked(publishTimeDate.toISOString(), prisma))) {
+  if (!isCurrentUserAdmin() && (await isDateBlocked(publishTimeDate.toISOString(), prisma))) {
     return Promise.reject({ statregError: 'The given date is full or blocked' })
   }
 
