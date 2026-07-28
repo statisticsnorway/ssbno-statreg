@@ -21,8 +21,9 @@ import type { Prisma } from '@/generated/prisma/client'
 import { releaseAsserts } from '@/lib/asserts'
 import { checkForKnownPrismaErrors } from '@/lib/prismaErrors'
 import { isCurrentUserAdmin } from '@/lib/context'
+import { isDateBlocked } from '@/lib/blockedDates'
 
-export type ReleasePrisma = Pick<PrismaClient, 'release' | 'statistic' | 'variant' | 'shortname'>
+export type ReleasePrisma = Pick<PrismaClient, 'release' | 'statistic' | 'variant' | 'shortname' | 'calender_date'>
 
 export async function getReleases(
   {
@@ -211,6 +212,10 @@ export async function createRelease(
   await releaseAsserts.assertVariantMatchesShortname(parsedVariantId, safeShortname, prisma)
 
   const { publishTimeDate, periodFromDate, periodToDate, releaseDatePrecision } = parseReleaseInput(body)
+
+  if (!isCurrentUserAdmin && (await isDateBlocked(publishTimeDate.toISOString(), prisma))) {
+    return Promise.reject({ statregError: 'The given date is full or blocked' })
+  }
 
   const release = await prisma.release.create({
     data: {
