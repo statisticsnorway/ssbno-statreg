@@ -25,15 +25,12 @@ import client from '../api'
 
 import './CreateStatistic.css'
 
-import {
-  isCreateStatisticFieldRequired,
-  type CreatableStatisticStatus,
-  ApprovalStatus,
-  type Division,
-} from '@ssbno-statreg/shared'
+import { isCreateStatisticFieldRequired, ApprovalStatus } from '@ssbno-statreg/shared'
+import type { CreatableStatisticStatus, Division, Contact } from '@ssbno-statreg/shared'
 import ErrorPage, { ErrorType } from './ErrorPage'
 import { ErrorAlert } from '../components/ErrorAlert'
 import { CreateShortnameModal } from '../components/CreateShortnameModal'
+import { ContactSelection } from '../components/ContactSelection'
 
 type StatisticFormValues = {
   status: CreatableStatisticStatus
@@ -51,6 +48,8 @@ export default function CreateStatistic() {
   const [openCreateShortnameModal, setOpenCreateShortnameModal] = useState<boolean>(true)
   const [createdShortname, setCreatedShortname] = useState<string>('')
   const [divisions, setDivisions] = useState<Division[]>([])
+  const [contacts, setContacts] = useState<Contact[]>([])
+  const [selectedContacts, setSelectedContacts] = useState<string[]>([])
 
   const { getCheckboxProps, value: regionLevelValues } = useCheckboxGroup({
     name: 'region-level-checkbox',
@@ -114,6 +113,22 @@ export default function CreateStatistic() {
     fetchDivisions()
   }, [createdShortname, isAdmin])
 
+  useEffect(() => {
+    if (!createdShortname || !isAdmin) return
+
+    async function fetchContacts() {
+      const { data, error } = await client.GET('/contacts')
+
+      if (error) {
+        setApiError((prev) => [...prev, error.message])
+        return
+      }
+
+      setContacts(data ?? [])
+    }
+    fetchContacts()
+  }, [createdShortname, isAdmin])
+
   function isRequired(field: keyof StatisticFormValues) {
     return isCreateStatisticFieldRequired(values.status, field)
   }
@@ -159,6 +174,7 @@ export default function CreateStatistic() {
             }))
           : [],
         approval_status: ApprovalStatus['ACCEPTED'],
+        contacts: selectedContacts,
       },
     })
 
@@ -287,6 +303,18 @@ export default function CreateStatistic() {
                 onChange={(e) => setValues((prevValues) => ({ ...prevValues, name_en: e.target.value }))}
               />
             </Field>
+            <Divider />
+            <div className='contact-section'>
+              <Heading level={2} data-size='xs'>
+                Kontakter
+              </Heading>
+              <Paragraph className='contact-section-description'>
+                Søk og legg til kontakt. Navn vises under overskriften 'Kontakt' på statistikksiden på ssb.no
+              </Paragraph>
+              <Field className='contact-field'>
+                <ContactSelection contacts={contacts} selected={selectedContacts} setSelected={setSelectedContacts} />
+              </Field>
+            </div>
             <Divider />
             <Heading level={2}>Detaljer</Heading>
             <Field>

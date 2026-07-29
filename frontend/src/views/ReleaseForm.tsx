@@ -73,25 +73,21 @@ function parseDateFromString(dateString: string | undefined): Date | undefined {
   return dateString ? new Date(dateString) : undefined
 }
 
-function getReleaseModalTitle(isEditing: boolean) {
-  return isEditing ? 'Endringer må godkjennes' : 'Publiseringsdato er registrert'
+function getReleaseModalTitle(isEditing: boolean, isAdmin: boolean) {
+  if (!isEditing) return 'Publiseringsdato er registrert'
+
+  return isAdmin ? 'Endringene er lagret og godkjent' : 'Endringer må godkjennes'
 }
 
-function getReleaseModalDescription(isEditing: boolean, createdRelease: ReleaseDetails) {
-  return isEditing
-    ? 'Endringer på meldt dato må godkjennes på nytt.'
-    : getCreatedReleaseModalDescription(createdRelease)
+function getReleaseModalDescription(isEditing: boolean, updatedRelease: ReleaseDetails, isAdmin: boolean) {
+  if (!isEditing) return getCreatedReleaseModalDescription(updatedRelease)
+
+  return isAdmin ? 'Endringene er lagret og godkjent.' : 'Endringer på meldt dato må godkjennes på nytt.'
 }
 
 function getCreatedReleaseModalDescription(createdRelease: ReleaseDetails) {
   const createdReleaseVariant = formatVariant(createdRelease?.variant).toLowerCase()
   return `Datoen ${formatDate(createdRelease?.publish_time)} er nå sendt inn for ${createdReleaseVariant}.`
-}
-
-function addThreeMonths(check: Date): Date {
-  const date = new Date(check)
-  const inThreeMonths = new Date(date.setMonth(date.getMonth() + 3))
-  return inThreeMonths
 }
 
 function DateReleasesTable({
@@ -205,6 +201,8 @@ function useDatepicker(
   })
 }
 
+const inThreeMonths = new Date(new Date().setMonth(new Date().getMonth() + 3))
+
 export default function ReleaseForm() {
   // for creation, path is /statistikk/:shortname/:variantId/opprett
   // for editing, path is /publisering/:id/rediger
@@ -213,7 +211,7 @@ export default function ReleaseForm() {
   const isEditing = !!releaseId
 
   // TODO: MIM-2581: This is a temporary suggested publish time (3 months ahead of date) for create release
-  const [suggestedPublishTime] = useState(() => new Date(new Date().setMonth(new Date().getMonth() + 3)))
+  const [suggestedPublishTime] = useState(inThreeMonths)
   const [values, setValues] = useState<ReleaseFormTypes>({
     publishTime: suggestedPublishTime,
   })
@@ -298,7 +296,7 @@ export default function ReleaseForm() {
     if (!values.publishTime) nextErrors.publishTime = 'Opprett en gyldig publiseringsdato'
     if (!values.periodFrom) nextErrors.periodFrom = 'Opprett en gyldig fra-dato'
     if (!values.periodTo) nextErrors.periodTo = 'Opprett en gyldig til-dato'
-    if (!auth?.isAdmin && values.publishTime && values.publishTime < addThreeMonths(new Date())) {
+    if (!auth?.isAdmin && values.publishTime && values.publishTime < inThreeMonths) {
       nextErrors.publishTime = 'Publiseringsdato tidligere enn tre måneder fra dags dato må opprettes av desken'
     }
 
@@ -369,6 +367,8 @@ export default function ReleaseForm() {
     Boolean
   )
 
+  const showEarlyPublishTimeWarning = auth?.isAdmin && values.publishTime && values.publishTime < inThreeMonths
+
   return (
     <>
       {errorsCombined.length > 0 && <ErrorAlert message={errorsCombined} />}
@@ -421,6 +421,11 @@ export default function ReleaseForm() {
             apiErrorEmit={setCalendarApiError}
           />
           {errors.publishTime && <ValidationMessage>{errors.publishTime}</ValidationMessage>}
+          {showEarlyPublishTimeWarning && (
+            <ValidationMessage data-color='warning'>
+              Du har valgt en dato tidligere enn tre måneder fra i dag.
+            </ValidationMessage>
+          )}
         </Field>
 
         <Fieldset>
@@ -501,8 +506,8 @@ export default function ReleaseForm() {
       </form>
 
       <ReleaseFormModal
-        modalHeading={getReleaseModalTitle(isEditing)}
-        modalDescription={getReleaseModalDescription(isEditing, newOrUpdatedRelease)}
+        modalHeading={getReleaseModalTitle(isEditing, auth?.isAdmin ?? false)}
+        modalDescription={getReleaseModalDescription(isEditing, newOrUpdatedRelease, auth?.isAdmin ?? false)}
         openCreateReleaseModal={openReleaseModal}
         newOrUpdatedRelease={newOrUpdatedRelease}
         setOpenCreateReleaseModal={setOpenReleaseModal}
