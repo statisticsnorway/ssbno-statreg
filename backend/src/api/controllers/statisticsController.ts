@@ -1,5 +1,5 @@
 import type { Router } from 'express'
-import { getStatisticByShortname, updateStatisticContacts, getFilteredStatistics } from '@/services/statisticsService'
+import { getStatisticByShortname, getFilteredStatistics, updateStatisticContacts } from '@/services/statisticsService'
 import { createStatistic, updateStatistic } from '@/services/statisticsServiceRefactored'
 import { requireAdminAuthorization, skipAuth } from '@/../plugins/authMiddleware'
 import { handleErrors } from '@/lib/prismaErrors'
