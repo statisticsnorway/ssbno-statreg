@@ -44,7 +44,7 @@ export async function createStatistic(
     newContacts = await upsertContacts(body.contacts, prisma)
 
     if (body.status === 'A' && newContacts.length === 0) {
-      return Promise.reject({ statregError: 'An active statistic needs at least one contact' })
+      throw { statregError: 'An active statistic needs at least one contact' }
     }
   }
 
@@ -100,7 +100,7 @@ export async function updateStatistic(
     select: { id: true },
   })
 
-  if (!existingStatistic) return Promise.reject({ status: 404, statregError: `Shortname ${safeShortname} not found` })
+  if (!existingStatistic) throw { status: 404, statregError: `Shortname ${safeShortname} not found` }
 
   const safeName = sanitize(body.name)
   const safeNameEn = sanitize(body.name_en)
@@ -122,7 +122,7 @@ export async function updateStatistic(
     newContacts = await upsertContacts(body.contacts, prisma)
 
     if (body.status === 'A' && newContacts.length === 0) {
-      return Promise.reject({ statregError: 'An active statistic needs at least one contact' })
+      throw { statregError: 'An active statistic needs at least one contact' }
     }
   }
 
