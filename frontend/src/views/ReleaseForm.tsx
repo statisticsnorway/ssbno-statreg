@@ -92,9 +92,13 @@ function getCreatedReleaseModalDescription(createdRelease: ReleaseDetails) {
 
 function DateReleasesTable({
   selectedDate,
-  calendarDates,
+  selectedDateStatus,
   apiErrorEmit,
-}: Readonly<{ selectedDate?: Date; calendarDates?: CalenderDate; apiErrorEmit?: (message: string) => void }>) {
+}: Readonly<{
+  selectedDate?: Date
+  selectedDateStatus?: keyof typeof DayStatus
+  apiErrorEmit?: (message: string) => void
+}>) {
   const [releases, setReleases] = useState<ReleaseListing[]>([])
   const [sortBy, setSortBy] = useState<string>('-publish_time')
 
@@ -113,11 +117,6 @@ function DateReleasesTable({
     }
     fetchReleases()
   }, [sortBy, selectedDate, apiErrorEmit])
-
-  const selectedDateStatus =
-    selectedDate &&
-    calendarDates &&
-    (calendarDates?.[getDateOnlyAsString(selectedDate)]?.status as keyof typeof DayStatus)
 
   return (
     <>
@@ -240,6 +239,11 @@ export default function ReleaseForm() {
     }
   }
 
+  const selectedDateStatus =
+    values.publishTime &&
+    calendarDates &&
+    (calendarDates?.[getDateOnlyAsString(values.publishTime)]?.status as keyof typeof DayStatus)
+
   // when id exists in url-path, fetch release and prefill form
   useEffect(() => {
     async function setPrefilledValues() {
@@ -298,6 +302,12 @@ export default function ReleaseForm() {
     if (!values.periodTo) nextErrors.periodTo = 'Opprett en gyldig til-dato'
     if (!auth?.isAdmin && values.publishTime && values.publishTime < inThreeMonths) {
       nextErrors.publishTime = 'Publiseringsdato tidligere enn tre måneder fra dags dato må opprettes av desken'
+    }
+    if (!auth?.isAdmin && selectedDateStatus === 'FULL') {
+      nextErrors.publishTime = 'Velg en annen dato som ikke er full, eller kontakt desken@ssb.no'
+    }
+    if (!auth?.isAdmin && selectedDateStatus === 'BLOCKED') {
+      nextErrors.publishTime = 'Velg en annen dato som ikke er sperret, eller kontakt desken@ssb.no'
     }
 
     // TODO: MIM-2582: Review comparison logic, error messages, and implement onChange
@@ -526,7 +536,7 @@ export default function ReleaseForm() {
         <Tabs.Panel className='p-0' value='selected-publish-date'>
           <DateReleasesTable
             selectedDate={values.publishTime}
-            calendarDates={calendarDates}
+            selectedDateStatus={selectedDateStatus}
             apiErrorEmit={setSameDateReleasesApiError}
           />
         </Tabs.Panel>
