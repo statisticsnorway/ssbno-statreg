@@ -1,4 +1,4 @@
-import { type Contact, type StatisticDetails, ApprovalStatus, StatisticListingResponse } from '@ssbno-statreg/shared'
+import { type StatisticDetails, ApprovalStatus } from '@ssbno-statreg/shared'
 import { dateToISOString, sanitize } from '@/lib/utils'
 import type { Prisma } from '@/generated/prisma/client'
 import { getDivisionFromCode } from '@/services/klassService'
@@ -9,241 +9,7 @@ import { PostStatisticsByShortnameBody, PutStatisticsByShortnameBody } from '@/p
 
 export type StatisticPrisma = Pick<PrismaClient, 'statistic' | 'shortname' | 'responsiblePerson' | 'region_level'>
 
-// Statistic listing
-
-export async function getFilteredStatistics(
-  {
-    start = 0,
-    count = 10,
-    filterByShortnames,
-    filterByContactPrincipalName,
-    sort,
-  }: {
-    start?: number
-    count?: number
-    filterByShortnames?: string[]
-    filterByContactPrincipalName?: string[]
-    sort?: string
-  },
-  prisma: StatisticPrisma
-): Promise<StatisticListingResponse> {
-  const safeFilterByShortnames = filterByShortnames?.length
-    ? filterByShortnames.map((shortname) => sanitize(shortname))
-    : undefined
-
-  const where = await buildStatisticFilter(
-    { filterByShortnames: safeFilterByShortnames, filterByContactPrincipalName },
-    prisma
-  )
-
-  return getStatistics({ start, count, where, orderBy: parseStatisticSortQuery(sort) }, prisma)
-}
-
-function parseStatisticSortQuery(sort?: string): Prisma.StatisticOrderByWithRelationInput | undefined {
-  if (sort === 'shortname') {
-    return { shortname: { name: 'asc' } }
-  }
-  if (sort === '-shortname') {
-    return { shortname: { name: 'desc' } }
-  }
-  return undefined
-}
-
-export async function buildStatisticFilter(
-  {
-    filterByShortnames,
-    filterByContactPrincipalName,
-  }: { filterByShortnames?: string[]; filterByContactPrincipalName?: string[] },
-  prisma: StatisticPrisma
-) {
-  if (filterByShortnames?.length) {
-    await statisticsAsserts.assertFilteredShortnamesExist(filterByShortnames, prisma)
-  }
-
-  return {
-    ...(filterByShortnames?.length && {
-      OR: filterByShortnames.map((shortname) => ({
-        shortname: {
-          name: shortname,
-        },
-      })),
-    }),
-    ...(filterByContactPrincipalName?.length && {
-      responsiblePersons: {
-        some: {
-          principalName: { in: filterByContactPrincipalName },
-        },
-      },
-    }),
-  }
-}
-
-export async function getStatistics(
-  {
-    start = 0,
-    count = 10,
-    where,
-    orderBy,
-  }: {
-    start?: number
-    count?: number
-    where?: Prisma.StatisticWhereInput
-    orderBy?: Prisma.StatisticOrderByWithRelationInput
-  },
-  prisma: StatisticPrisma
-): Promise<StatisticListingResponse> {
-  const statistics = await prisma.statistic.findMany({
-    skip: start,
-    take: count,
-    where,
-    orderBy,
-    select: {
-      language: true,
-      status: true,
-      name: true,
-      name_en: true,
-      shortname: { select: { name: true } },
-      responsiblePersons: { select: { principalName: true } },
-      division_code: true,
-    },
-  })
-  const total = await prisma.statistic.count({ where })
-  const users = await getAllUsersFromCache()
-
-  return {
-    total,
-    statistics: statistics.map((statistic) => {
-      const main_language = statistic.language
-      const divisionCode = statistic.division_code ?? ''
-      const contacts = statistic.responsiblePersons.map(({ principalName }) => {
-        const user = users[principalName]
-        return {
-          name: user?.displayName ?? '',
-          principalName: principalName,
-        }
-      })
-
-      return {
-        shortname: statistic.shortname.name,
-        main_language,
-        status: {
-          code: statistic.status,
-        },
-        division: {
-          name: getDivisionFromCode(divisionCode)?.name,
-          code: divisionCode,
-        },
-        name: statistic.name,
-        name_en: statistic.name_en ?? '',
-        contacts,
-      }
-    }),
-  }
-}
-
-// Statistic details
-
 type StatisticPrismaResult = Prisma.StatisticGetPayload<{ include: typeof StatisticsDetailedIncludes }>
-
-const VariantSelect = {
-  omit: { version: true, statistic_id: true, freq_id: true },
-  include: {
-    frequency: { select: { name: true, code: true } },
-  },
-}
-
-export const StatisticsDetailedIncludes = {
-  shortname: { select: { name: true } },
-  responsiblePersons: { select: { principalName: true } },
-  related_statistic: { select: { language: true, name: true, name_en: true, shortname: { select: { name: true } } } },
-  statistic_region_levels: {
-    select: { region_level: { select: { name: true, code: true } } },
-  },
-  variants: VariantSelect,
-}
-
-export function parseStatisticVariants(
-  variants: Prisma.VariantGetPayload<typeof VariantSelect>[] | undefined
-): StatisticDetails['variants'] {
-  if (!variants?.length) return []
-
-  return variants.map((variant) => ({
-    id: variant.id,
-    updated_at: dateToISOString(variant.last_updated),
-    level_of_detail: {
-      name: variant.level_of_detail ?? '',
-      name_en: variant.level_of_detail_en ?? '',
-    },
-    created_at: dateToISOString(variant.date_created),
-    cancelled: variant.cancelled,
-    frequency: {
-      name: variant.frequency.name,
-      code: variant.frequency.code,
-    },
-    revision: {
-      code: variant.revision,
-    },
-  }))
-}
-
-export async function mapStatisticDetails(statistic: StatisticPrismaResult): Promise<StatisticDetails> {
-  const main_language = statistic.language
-  const division_code = statistic.division_code ?? ''
-  const relation = statistic.related_statistic?.shortname
-    ? {
-        shortname: statistic.related_statistic?.shortname?.name,
-        name: statistic.related_statistic?.name,
-        name_en: statistic.related_statistic?.name_en ?? '',
-      }
-    : {}
-  const users = await getAllUsersFromCache()
-
-  return {
-    version: statistic.version,
-    shortname: statistic.shortname.name,
-    approval_status: statistic.desk_appoval_status ?? ApprovalStatus.PENDING,
-    main_language,
-    division: {
-      code: division_code,
-      name: getDivisionFromCode(division_code)?.name,
-    },
-    first_released_at: dateToISOString(statistic.first_release),
-    yearly_reporting: statistic.yearly_reporting,
-    status: {
-      code: statistic.status,
-    },
-    previous_topic_codes: statistic.legacy_topic_codes,
-    relation,
-    name: statistic.name,
-    name_en: statistic.name_en ?? '',
-    updated_at: dateToISOString(statistic.last_updated),
-    comment: statistic.comment,
-    created_at: dateToISOString(statistic.date_created),
-    variants: parseStatisticVariants(statistic.variants),
-    contacts: statistic.responsiblePersons.map(({ principalName }) => {
-      const user = users[principalName]
-      return {
-        name: user?.displayName ?? '',
-        principalName: principalName,
-      }
-    }),
-    statistic_region_levels: statistic.statistic_region_levels?.map(({ region_level }) => {
-      return { name: region_level.name, code: region_level.code ?? '' }
-    }),
-  }
-}
-
-export async function getStatisticByShortname(shortname: string, prisma: StatisticPrisma): Promise<StatisticDetails> {
-  const safeShortname = sanitize(shortname)
-
-  const statistic = await prisma.statistic.findFirst({
-    where: { shortname: { name: safeShortname } },
-    include: StatisticsDetailedIncludes,
-  })
-  if (!statistic) return Promise.reject({ status: 404, statregError: 'Shortname not found' })
-
-  return await mapStatisticDetails(statistic)
-}
 
 // Create statistic
 
@@ -391,7 +157,7 @@ export async function updateStatistic(
   return await mapStatisticDetails(updatedStatistic)
 }
 
-// Update statistic contacts
+// Helpers
 
 async function upsertContacts(principalNames: string[], prisma: StatisticPrisma) {
   const users = await getAllUsersFromCache()
@@ -410,41 +176,90 @@ async function upsertContacts(principalNames: string[], prisma: StatisticPrisma)
   )
 }
 
-export async function updateStatisticContacts(
-  shortname: string,
-  newPrincipalNames: string[],
-  prisma: StatisticPrisma
-): Promise<Contact[]> {
-  const safeShortname = sanitize(shortname)
+const VariantSelect = {
+  omit: { version: true, statistic_id: true, freq_id: true },
+  include: {
+    frequency: { select: { name: true, code: true } },
+  },
+}
 
-  const existingStatistic = await prisma.statistic.findFirst({
-    where: { shortname: { name: safeShortname } },
-    select: { id: true, status: true },
-  })
-  if (!existingStatistic) {
-    return Promise.reject({ status: 404, statregError: `Shortname '${safeShortname}' not found` })
-  }
+export const StatisticsDetailedIncludes = {
+  shortname: { select: { name: true } },
+  responsiblePersons: { select: { principalName: true } },
+  related_statistic: { select: { language: true, name: true, name_en: true, shortname: { select: { name: true } } } },
+  statistic_region_levels: {
+    select: { region_level: { select: { name: true, code: true } } },
+  },
+  variants: VariantSelect,
+}
 
-  const newContacts = await upsertContacts(newPrincipalNames, prisma)
-
-  if (existingStatistic.status === 'A' && newContacts.length === 0) {
-    return Promise.reject({ statregError: 'An active statistic needs at least one contact' })
-  }
-
-  const updatedStatistic = await prisma.statistic.update({
-    // https://docs.prisma.io/docs/orm/reference/prisma-client-reference#set
-    where: { id: existingStatistic.id },
-    data: {
-      responsiblePersons: {
-        set: newContacts.map((contact) => ({ id: contact.id })),
-      },
-    },
-    select: { responsiblePersons: { select: { principalName: true } } },
-  })
-
+export async function mapStatisticDetails(statistic: StatisticPrismaResult): Promise<StatisticDetails> {
+  const main_language = statistic.language
+  const division_code = statistic.division_code ?? ''
+  const relation = statistic.related_statistic?.shortname
+    ? {
+        shortname: statistic.related_statistic?.shortname?.name,
+        name: statistic.related_statistic?.name,
+        name_en: statistic.related_statistic?.name_en ?? '',
+      }
+    : {}
   const users = await getAllUsersFromCache()
-  return updatedStatistic.responsiblePersons.map((person) => ({
-    name: users[person.principalName]?.displayName ?? '',
-    principalName: person.principalName,
+
+  return {
+    version: statistic.version,
+    shortname: statistic.shortname.name,
+    approval_status: statistic.desk_appoval_status ?? ApprovalStatus.PENDING,
+    main_language,
+    division: {
+      code: division_code,
+      name: getDivisionFromCode(division_code)?.name,
+    },
+    first_released_at: dateToISOString(statistic.first_release),
+    yearly_reporting: statistic.yearly_reporting,
+    status: {
+      code: statistic.status,
+    },
+    previous_topic_codes: statistic.legacy_topic_codes,
+    relation,
+    name: statistic.name,
+    name_en: statistic.name_en ?? '',
+    updated_at: dateToISOString(statistic.last_updated),
+    comment: statistic.comment,
+    created_at: dateToISOString(statistic.date_created),
+    variants: mapStatisticVariants(statistic.variants),
+    contacts: statistic.responsiblePersons.map(({ principalName }) => {
+      const user = users[principalName]
+      return {
+        name: user?.displayName ?? '',
+        principalName: principalName,
+      }
+    }),
+    statistic_region_levels: statistic.statistic_region_levels?.map(({ region_level }) => {
+      return { name: region_level.name, code: region_level.code ?? '' }
+    }),
+  }
+}
+
+export function mapStatisticVariants(
+  variants: Prisma.VariantGetPayload<typeof VariantSelect>[] | undefined
+): StatisticDetails['variants'] {
+  if (!variants?.length) return []
+
+  return variants.map((variant) => ({
+    id: variant.id,
+    updated_at: dateToISOString(variant.last_updated),
+    level_of_detail: {
+      name: variant.level_of_detail ?? '',
+      name_en: variant.level_of_detail_en ?? '',
+    },
+    created_at: dateToISOString(variant.date_created),
+    cancelled: variant.cancelled,
+    frequency: {
+      name: variant.frequency.name,
+      code: variant.frequency.code,
+    },
+    revision: {
+      code: variant.revision,
+    },
   }))
 }
