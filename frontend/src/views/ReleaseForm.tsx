@@ -378,7 +378,8 @@ export default function ReleaseForm() {
   )
 
   const showEarlyPublishTimeWarning = auth?.isAdmin && values.publishTime && values.publishTime < inThreeMonths
-
+  const showFullPublishDateWarning = auth?.isAdmin && selectedDateStatus === 'FULL'
+  const showBlockedPublishDateWarning = auth?.isAdmin && selectedDateStatus === 'BLOCKED'
   return (
     <>
       {errorsCombined.length > 0 && <ErrorAlert message={errorsCombined} />}
@@ -433,7 +434,17 @@ export default function ReleaseForm() {
           {errors.publishTime && <ValidationMessage>{errors.publishTime}</ValidationMessage>}
           {showEarlyPublishTimeWarning && (
             <ValidationMessage data-color='warning'>
-              Du har valgt en dato tidligere enn tre måneder fra i dag.
+              Du har valgt en dato tidligere enn tre måneder fra i dag. Du kan fortsatt melde dato som admin.
+            </ValidationMessage>
+          )}
+          {showFullPublishDateWarning && (
+            <ValidationMessage data-color='warning'>
+              Denne dagen er allerede full. Du kan fortsatt melde dato som admin.
+            </ValidationMessage>
+          )}
+          {showBlockedPublishDateWarning && (
+            <ValidationMessage data-color='warning'>
+              Denne dagen er sperret. Du kan fortsatt melde dato som admin.
             </ValidationMessage>
           )}
         </Field>
