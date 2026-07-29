@@ -1,16 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { vi, describe, test, expect, beforeEach } from 'vitest'
-import { ApprovalStatus } from '@ssbno-statreg/shared'
+import { ApprovalStatus, StatisticStatus, type StatisticUpdate } from '@ssbno-statreg/shared'
 import { statisticsAsserts } from '@/lib/asserts'
 import {
   getFilteredStatistics,
   getStatisticByShortname,
   parseStatisticVariants,
   mapStatisticDetails,
+  parseCreateStatisticInput,
+  parseUpdateStatisticInput,
   updateStatistic,
   updateStatisticContacts,
   createStatistic,
   StatisticsDetailedIncludes,
+  parseDivision,
+  parseStatusCode,
+  parseRelation,
   buildStatisticFilter,
 } from '@/services/statisticsService'
 
@@ -361,16 +366,17 @@ describe('statisticService', () => {
     beforeEach(() => {
       input = {
         division: '105',
-        status: 'SP',
+        status: { code: 'SP' },
         name: 'Helse',
         name_en: 'Health',
-        relation: 2,
+        approval_status: 'FORSLAG',
+        relation: '2',
         previous_topic_codes: '05.01.02',
         yearly_reporting: false,
         first_released_at: '2026-03-25',
         main_language: 'nn',
         comment: 'Beskrivelse av endring',
-        statistic_region_levels: ['L'],
+        statistic_region_levels: [{ code: 'L' }],
       }
     })
 
@@ -392,8 +398,8 @@ describe('statisticService', () => {
         division_code: input.division,
         name: input.name,
         name_en: input.name_en,
-        status: input.status,
-        desk_appoval_status: ApprovalStatus.PENDING,
+        status: input.status.code,
+        desk_appoval_status: input.approval_status,
         language: input.main_language,
         previous_topic_codes: input.previous_topic_codes,
         yearly_reporting: input.yearly_reporting,
@@ -536,7 +542,7 @@ describe('statisticService', () => {
           division: '104',
           first_released_at: '2024-04-01',
           main_language: 'nb',
-          status: 'K',
+          status: { code: 'K' },
         },
         now
       )
@@ -568,38 +574,16 @@ describe('statisticService', () => {
       })
     })
 
-    test('rejects with error when name is empty', async () => {
-      await expect(
-        createStatistic(
-          prismaMock,
-          'kpi',
-          {
-            name: '',
-            division: '104',
-            status: 'K',
-          },
-          now
-        )
-      ).rejects.toMatchObject({
-        statregError: "Field 'name' must be a non-empty string.",
+    test('reject with error message if body is missing', async () => {
+      await expect(() => createStatistic(prismaMock, 'kpi', undefined, now)).rejects.toMatchObject({
+        statregError: "Field 'status' must be one of these: K, A.",
       })
       expect(prismaMock.statistic.create).toHaveBeenCalledTimes(0)
     })
 
-    test('rejects with error when division does not exist', async () => {
-      await expect(
-        createStatistic(
-          prismaMock,
-          'kpi',
-          {
-            name: 'Test',
-            division: '999',
-            status: 'K',
-          },
-          now
-        )
-      ).rejects.toMatchObject({
-        statregError: "Field 'division' does not correspond to an existing division.",
+    test('rejects with error message any of the required fields are missing', async () => {
+      await expect(() => createStatistic(prismaMock, 'kpi', { status: { code: 'A' } }, now)).rejects.toMatchObject({
+        statregError: 'Missing required field(s): name, name_en, variants, contacts, division, main_language',
       })
       expect(prismaMock.statistic.create).toHaveBeenCalledTimes(0)
     })
@@ -732,6 +716,233 @@ describe('statisticService', () => {
       const result = await mapStatisticDetails(input)
 
       expect(result).toStrictEqual(expectedResult)
+    })
+  })
+
+  describe('parseCreateStatisticInput ', async () => {
+    let input: any
+    let expectedResult: any
+
+    beforeEach(() => {
+      input = {
+        status: { code: 'K' },
+        division: '104',
+        name: 'Helse og helsetjenester',
+        first_released_at: '2024-04-01',
+      }
+
+      expectedResult = {
+        division: '104',
+        name: 'Helse og helsetjenester',
+        main_language: 'nb',
+        comment: '',
+        first_released_at: new Date('2024-04-01T00:00:00.000Z'),
+        statistic_region_levels: [],
+      }
+    })
+
+    test('returns validated statistic input when all conditionals succeed', () => {
+      const result = parseCreateStatisticInput(input, 'K')
+
+      expect(result).toStrictEqual(expectedResult)
+    })
+
+    test('throws error when name is an empty string', () => {
+      input.name = ''
+
+      expect(() => parseCreateStatisticInput(input, 'K')).toThrow({
+        statregError: "Field 'name' must be a non-empty string.",
+      })
+    })
+
+    test('throws error when division is not a number', () => {
+      input.division = 'division-a'
+
+      expect(() => parseCreateStatisticInput(input, 'K')).toThrow({
+        statregError: "Field 'division' must be a number.",
+      })
+    })
+
+    test('throws error when division lookup does not find a match', () => {
+      input.division = '106'
+
+      expect(() => parseCreateStatisticInput(input, 'K')).toThrow({
+        statregError: "Field 'division' does not correspond to an existing division.",
+      })
+    })
+
+    test("throws error main_language is neither 'nb' or 'nn'", () => {
+      input.main_language = 'en'
+      expectedResult.main_language = 'nb'
+
+      expect(() => parseCreateStatisticInput(input, 'K')).toThrow({
+        statregError: "Field 'main_language' must be either 'nb' or 'nn'.",
+      })
+    })
+
+    test('falls back to empty string when comment is missing', () => {
+      input.comment = undefined
+      expectedResult.comment = ''
+
+      const result = parseCreateStatisticInput(input, 'K')
+
+      expect(result).toStrictEqual(expectedResult)
+    })
+
+    describe('parseUpdateStatisticInput', async () => {
+      let input: any
+      let expectedResult: any
+      const requiredUpdateFields = [
+        'division',
+        'statistic_region_levels',
+        'status',
+        'name',
+        'name_en',
+        'relation',
+        'previous_topic_codes',
+        'yearly_reporting',
+        'first_released_at',
+        'main_language',
+        'comment',
+      ] as (keyof StatisticUpdate)[]
+
+      beforeEach(() => {
+        input = {
+          division: '104',
+          name: 'Helse og helsetjenester',
+          name_en: 'Health and health services',
+          first_released_at: '2024-04-01',
+          main_language: 'nn',
+          comment: 'Kommentar om statistikken',
+          status: { code: 'SA' },
+          relation: 2,
+          previous_topic_codes: '05.01.02',
+          yearly_reporting: false,
+          statistic_region_levels: [],
+        }
+
+        expectedResult = {
+          division: '104',
+          name: 'Helse og helsetjenester',
+          name_en: 'Health and health services',
+          first_released_at: new Date('2024-04-01T00:00:00.000Z'),
+          main_language: 'nn',
+          comment: 'Kommentar om statistikken',
+          status: 'SA',
+          relation: 2,
+          previous_topic_codes: '05.01.02',
+          yearly_reporting: false,
+          statistic_region_levels: [],
+        }
+      })
+
+      test('returns validated statistic input when all conditionals succeed', () => {
+        const result = parseUpdateStatisticInput(input, requiredUpdateFields)
+
+        expect(result).toStrictEqual(expectedResult)
+      })
+
+      test('throws error when comment is an empty string', () => {
+        input.comment = ''
+
+        expect(() => parseUpdateStatisticInput(input, requiredUpdateFields)).toThrow({
+          statregError: "Field 'comment' must be a non-empty string.",
+        })
+      })
+
+      test('throws error when yearly_reporting is not a valid boolean', () => {
+        input.yearly_reporting = 'not-a-boolean'
+
+        expect(() => parseUpdateStatisticInput(input, requiredUpdateFields)).toThrow({
+          statregError: "Field 'yearly_reporting' must be a boolean.",
+        })
+      })
+
+      test('throws error when relation id is an invalid format', () => {
+        input.relation = 'abc'
+
+        expect(() => parseUpdateStatisticInput(input, requiredUpdateFields)).toThrow({
+          statregError: 'Invalid relation id format',
+        })
+      })
+
+      test('throws error when status is not valid value', () => {
+        input.status = 'ABC'
+
+        expect(() => parseUpdateStatisticInput(input, requiredUpdateFields)).toThrow({
+          statregError: "Field 'status' must be one of these: K, A, IA, UT, SA, SP.",
+        })
+      })
+    })
+  })
+
+  describe('parseDivision ', () => {
+    test('returns division as string when valid', () => {
+      expect(parseDivision('104')).toBe('104')
+    })
+
+    test('throws when division is undefined', () => {
+      expect(() => parseDivision(undefined)).toThrow({ statregError: "Field 'division' must be a number." })
+    })
+
+    test('throws when division is null', () => {
+      expect(() => parseDivision(null)).toThrow({ statregError: "Field 'division' must be a number." })
+    })
+
+    test('throws when division is not a number', () => {
+      expect(() => parseDivision('abc')).toThrow({ statregError: "Field 'division' must be a number." })
+    })
+
+    test('throws when division does not correspond to an existing division', () => {
+      expect(() => parseDivision('999')).toThrow({
+        statregError: "Field 'division' does not correspond to an existing division.",
+      })
+    })
+  })
+
+  describe('parseStatusCode', () => {
+    const expectedError = `Field 'status' must be one of these: ${Object.keys(StatisticStatus).join(', ')}.`
+
+    test('returns statusCode when valid', () => {
+      expect(parseStatusCode('K')).toBe('K')
+    })
+
+    test('throws when statusCode is undefined', () => {
+      expect(() => parseStatusCode(undefined)).toThrow({ statregError: expectedError })
+    })
+
+    test('throws when statusCode is empty string', () => {
+      expect(() => parseStatusCode('')).toThrow({ statregError: expectedError })
+    })
+
+    test('throws when statusCode is not a valid status', () => {
+      expect(() => parseStatusCode('INVALID_STATUS')).toThrow({ statregError: expectedError })
+    })
+
+    test('is case-sensitive', () => {
+      expect(() => parseStatusCode('k')).toThrow({ statregError: expectedError })
+    })
+  })
+
+  describe('parseRelation', () => {
+    test('returns null when relationId is undefined', () => {
+      expect(parseRelation(undefined)).toBeNull()
+    })
+
+    test('returns null when relationId is null', () => {
+      expect(parseRelation(null)).toBeNull()
+    })
+
+    test('returns null when relationId is empty string', () => {
+      expect(parseRelation('')).toBeNull()
+    })
+
+    test('returns parsed number when relationId is valid', () => {
+      expect(parseRelation('42')).toBe(42)
+    })
+
+    test('throws when relationId is not a valid id', () => {
+      expect(() => parseRelation('abc')).toThrow({ statregError: 'Invalid relation id format' })
     })
   })
 })
@@ -946,13 +1157,20 @@ const mockUpdateStatisticPrismaUpdateData = {
     name_en: 'Health',
     related_statistic_id: 2,
     statistic_region_levels: {
-      deleteMany: {},
       create: [
         {
           region_level: {
             connect: {
               code: 'L',
             },
+          },
+        },
+      ],
+      delete: [
+        {
+          statistic_id_region_level_id: {
+            region_level_id: 1,
+            statistic_id: 5,
           },
         },
       ],

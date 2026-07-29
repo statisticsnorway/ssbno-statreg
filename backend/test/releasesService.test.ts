@@ -16,6 +16,7 @@ import {
 } from '@/services/releasesService'
 import { ApprovalStatus } from '@ssbno-statreg/shared'
 import { Prisma } from '@/generated/prisma/client'
+import { asyncLocalStorage } from '@/lib/context'
 
 let prismaMock: any
 let releasesResult: object | null
@@ -453,7 +454,7 @@ describe('releasesService ', async () => {
         comment: 'Mock comment.',
       }
 
-      await updateRelease(prismaMock, '1', releaseUpdateInput, now)
+      await asyncLocalStorage.run({ isAdmin: false }, () => updateRelease(prismaMock, '1', releaseUpdateInput, now))
 
       expect(prismaMock.release.update).toHaveBeenCalledExactlyOnceWith({
         include: ReleaseDetailsIncludes,
@@ -464,6 +465,33 @@ describe('releasesService ', async () => {
           period_from: new Date('2024-09-01T00:00:00Z'),
           release_date_precision: 'dag',
           desk_appoval_status: ApprovalStatus.PENDING,
+          last_updated: now,
+          comment: 'Mock comment.',
+        },
+      })
+    })
+
+    test('updates release with accepted status when current user is admin', async () => {
+      setPrismaResult(mockedSingleReleasePrismaResult)
+      const releaseUpdateInput = {
+        publish_time: '2024-10-15T08:00:00Z',
+        period_to: '2024-12-31',
+        period_from: '2024-09-01',
+        release_date_precision: 'dag',
+        comment: 'Mock comment.',
+      }
+
+      await asyncLocalStorage.run({ isAdmin: true }, () => updateRelease(prismaMock, '1', releaseUpdateInput, now))
+
+      expect(prismaMock.release.update).toHaveBeenCalledExactlyOnceWith({
+        include: ReleaseDetailsIncludes,
+        where: { id: 1 },
+        data: {
+          publish_time: new Date('2024-10-15T08:00:00Z'),
+          period_to: new Date('2024-12-31T00:00:00Z'),
+          period_from: new Date('2024-09-01T00:00:00Z'),
+          release_date_precision: 'dag',
+          desk_appoval_status: ApprovalStatus.ACCEPTED,
           last_updated: now,
           comment: 'Mock comment.',
         },
@@ -594,6 +622,40 @@ describe('releasesService ', async () => {
           period_to: new Date('2024-12-31T00:00:00Z'),
           period_from: new Date('2024-09-01T00:00:00Z'),
           desk_appoval_status: ApprovalStatus.PENDING,
+          release_date_precision: 'dag',
+          has_versions: false,
+          last_updated: now,
+          date_created: now,
+          cancelled: false,
+          comment: '',
+          variant: {
+            connect: {
+              id: 1,
+            },
+          },
+        },
+        include: ReleaseDetailsIncludes,
+      })
+    })
+
+    test('creates release with accepted status when current user is admin', async () => {
+      setPrismaResult({
+        ...mockedSingleReleasePrismaResult,
+        id: 1,
+        version: 1,
+        desk_appoval_status: ApprovalStatus.ACCEPTED,
+      })
+
+      await asyncLocalStorage.run({ isAdmin: true }, () =>
+        createRelease(prismaMock, 'kpi', '1', mockCreateReleaseInput, now)
+      )
+
+      expect(prismaMock.release.create).toHaveBeenCalledExactlyOnceWith({
+        data: {
+          publish_time: new Date('2024-10-15T08:00:00Z'),
+          period_to: new Date('2024-12-31T00:00:00Z'),
+          period_from: new Date('2024-09-01T00:00:00Z'),
+          desk_appoval_status: ApprovalStatus.ACCEPTED,
           release_date_precision: 'dag',
           has_versions: false,
           last_updated: now,

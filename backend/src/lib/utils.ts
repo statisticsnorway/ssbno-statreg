@@ -239,3 +239,11 @@ export function parseHumanReadableMeasuringPeriod(frequencyCode: string, period_
 
   return `${formatDayMonthYear(period_from)}-${formatDayMonthYear(period_to)}`
 }
+
+export function parseAdminGroupsFromEnv(): string[] {
+  return (
+    process.env.ADMIN_GROUPS?.split(',')
+      .map((group) => group.trim())
+      .filter(Boolean) ?? []
+  )
+}
