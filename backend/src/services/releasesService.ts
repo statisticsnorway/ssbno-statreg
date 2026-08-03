@@ -211,7 +211,7 @@ export async function createRelease(
   await releaseAsserts.assertVariantExists(parsedVariantId, prisma)
   await releaseAsserts.assertVariantMatchesShortname(parsedVariantId, safeShortname, prisma)
 
-  const { publishTimeDate, periodFromDate, periodToDate, releaseDatePrecision } = parseReleaseInput(prisma, body)
+  const { publishTimeDate, periodFromDate, periodToDate, releaseDatePrecision } = await parseReleaseInput(prisma, body)
 
   const release = await prisma.release.create({
     data: {
@@ -310,7 +310,7 @@ export async function updateRelease(
 ): Promise<ReleaseDetails> {
   const idAsNumber = parseId(id)
 
-  const validatedInput = parseReleaseInput(body, 'update')
+  const validatedInput = await parseReleaseInput(prisma, body, 'update')
 
   const release = await prisma.release.update({
     include: ReleaseDetailsIncludes,

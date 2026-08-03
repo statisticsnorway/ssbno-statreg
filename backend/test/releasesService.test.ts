@@ -54,6 +54,7 @@ describe('releasesService ', async () => {
     releaseAsserts.assertVariantMatchesShortname = vi.fn(async () => true) as any
     releaseAsserts.assertFilteredShortnamesExist = vi.fn(async () => true) as any
     releaseAsserts.assertReleaseDateIsMoreThanThreeMonthsAway = vi.fn(() => true) as any
+    vi.mocked(isDateBlocked).mockReset().mockResolvedValue(false)
   })
 
   describe('getReleases ', () => {
@@ -452,15 +453,8 @@ describe('releasesService ', async () => {
 
     test('updates exactly one release when input data is correct', async () => {
       setPrismaResult(mockedSingleReleasePrismaResult)
-      const releaseUpdateInput = {
-        publish_time: '2024-10-15T08:00:00Z',
-        period_to: '2024-12-31',
-        period_from: '2024-09-01',
-        release_date_precision: 'dag',
-        comment: 'Mock comment.',
-      }
 
-      await asyncLocalStorage.run({ isAdmin: false }, () => updateRelease(prismaMock, '1', releaseUpdateInput, now))
+      await asyncLocalStorage.run({ isAdmin: false }, () => updateRelease(prismaMock, '1', mockUpdateReleaseInput, now))
 
       expect(prismaMock.release.update).toHaveBeenCalledExactlyOnceWith({
         include: ReleaseDetailsIncludes,
@@ -479,15 +473,8 @@ describe('releasesService ', async () => {
 
     test('updates release with accepted status when current user is admin', async () => {
       setPrismaResult(mockedSingleReleasePrismaResult)
-      const releaseUpdateInput = {
-        publish_time: '2024-10-15T08:00:00Z',
-        period_to: '2024-12-31',
-        period_from: '2024-09-01',
-        release_date_precision: 'dag',
-        comment: 'Mock comment.',
-      }
 
-      await asyncLocalStorage.run({ isAdmin: true }, () => updateRelease(prismaMock, '1', releaseUpdateInput, now))
+      await asyncLocalStorage.run({ isAdmin: true }, () => updateRelease(prismaMock, '1', mockUpdateReleaseInput, now))
 
       expect(prismaMock.release.update).toHaveBeenCalledExactlyOnceWith({
         include: ReleaseDetailsIncludes,
@@ -524,6 +511,54 @@ describe('releasesService ', async () => {
       })
 
       expect(prismaMock.release.update).toHaveBeenCalledTimes(0)
+    })
+
+    test('rejects when non-admin sets publish time within three months from now', async () => {
+      releaseAsserts.assertReleaseDateIsMoreThanThreeMonthsAway = vi.fn(() => false) as any
+
+      await expect(() =>
+        asyncLocalStorage.run({ isAdmin: false }, () =>
+          updateRelease(prismaMock, '1', mockUpdateReleaseInput, now)
+        )
+      ).rejects.toMatchObject({
+        statregError: 'Publish time must be later than three months from now',
+      })
+      expect(prismaMock.release.update).toHaveBeenCalledTimes(0)
+    })
+
+    test('allows admin to set publish time within three months from now', async () => {
+      releaseAsserts.assertReleaseDateIsMoreThanThreeMonthsAway = vi.fn(() => false) as any
+      setPrismaResult(mockedSingleReleasePrismaResult)
+
+      await asyncLocalStorage.run({ isAdmin: true }, () =>
+        updateRelease(prismaMock, '1', mockUpdateReleaseInput, now)
+      )
+
+      expect(prismaMock.release.update).toHaveBeenCalledTimes(1)
+    })
+
+    test('rejects when non-admin sets publish time on a blocked date', async () => {
+      vi.mocked(isDateBlocked).mockResolvedValueOnce(true)
+
+      await expect(() =>
+        asyncLocalStorage.run({ isAdmin: false }, () =>
+          updateRelease(prismaMock, '1', mockUpdateReleaseInput, now)
+        )
+      ).rejects.toMatchObject({
+        statregError: 'The given date is full or blocked',
+      })
+      expect(prismaMock.release.update).toHaveBeenCalledTimes(0)
+    })
+
+    test('allows admin to set publish time on a blocked date', async () => {
+      vi.mocked(isDateBlocked).mockResolvedValueOnce(true)
+      setPrismaResult(mockedSingleReleasePrismaResult)
+
+      await asyncLocalStorage.run({ isAdmin: true }, () =>
+        updateRelease(prismaMock, '1', mockUpdateReleaseInput, now)
+      )
+
+      expect(prismaMock.release.update).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -946,4 +981,9 @@ const mockCreateReleaseInput = {
   period_to: '2024-12-31',
   period_from: '2024-09-01',
   release_date_precision: 'dag',
+}
+
+const mockUpdateReleaseInput = {
+  ...mockCreateReleaseInput,
+  comment: 'Mock comment.',
 }
