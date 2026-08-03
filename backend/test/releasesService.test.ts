@@ -517,9 +517,7 @@ describe('releasesService ', async () => {
       releaseAsserts.assertReleaseDateIsMoreThanThreeMonthsAway = vi.fn(() => false) as any
 
       await expect(() =>
-        asyncLocalStorage.run({ isAdmin: false }, () =>
-          updateRelease(prismaMock, '1', mockUpdateReleaseInput, now)
-        )
+        asyncLocalStorage.run({ isAdmin: false }, () => updateRelease(prismaMock, '1', mockUpdateReleaseInput, now))
       ).rejects.toMatchObject({
         statregError: 'Publish time must be later than three months from now',
       })
@@ -530,9 +528,7 @@ describe('releasesService ', async () => {
       releaseAsserts.assertReleaseDateIsMoreThanThreeMonthsAway = vi.fn(() => false) as any
       setPrismaResult(mockedSingleReleasePrismaResult)
 
-      await asyncLocalStorage.run({ isAdmin: true }, () =>
-        updateRelease(prismaMock, '1', mockUpdateReleaseInput, now)
-      )
+      await asyncLocalStorage.run({ isAdmin: true }, () => updateRelease(prismaMock, '1', mockUpdateReleaseInput, now))
 
       expect(prismaMock.release.update).toHaveBeenCalledTimes(1)
     })
@@ -541,9 +537,7 @@ describe('releasesService ', async () => {
       vi.mocked(isDateBlocked).mockResolvedValueOnce(true)
 
       await expect(() =>
-        asyncLocalStorage.run({ isAdmin: false }, () =>
-          updateRelease(prismaMock, '1', mockUpdateReleaseInput, now)
-        )
+        asyncLocalStorage.run({ isAdmin: false }, () => updateRelease(prismaMock, '1', mockUpdateReleaseInput, now))
       ).rejects.toMatchObject({
         statregError: 'The given date is full or blocked',
       })
@@ -554,9 +548,7 @@ describe('releasesService ', async () => {
       vi.mocked(isDateBlocked).mockResolvedValueOnce(true)
       setPrismaResult(mockedSingleReleasePrismaResult)
 
-      await asyncLocalStorage.run({ isAdmin: true }, () =>
-        updateRelease(prismaMock, '1', mockUpdateReleaseInput, now)
-      )
+      await asyncLocalStorage.run({ isAdmin: true }, () => updateRelease(prismaMock, '1', mockUpdateReleaseInput, now))
 
       expect(prismaMock.release.update).toHaveBeenCalledTimes(1)
     })
