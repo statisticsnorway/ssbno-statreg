@@ -495,7 +495,6 @@ export async function createStatistic(
   return await mapStatisticDetails(result)
 }
 
-// TODO: MIM-2674: Add tests
 export function parseCreateStatisticStatus(body?: StatisticCreate): CreatableStatisticStatus {
   const statusCode = body?.status?.code
 
