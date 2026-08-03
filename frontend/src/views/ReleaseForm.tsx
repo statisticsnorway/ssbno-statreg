@@ -229,12 +229,13 @@ export default function ReleaseForm() {
   const [sameDateReleasesApiError, setSameDateReleasesApiError] = useState<string>('')
 
   const { auth } = useAuth()
+  const isAdmin = auth?.isAdmin ?? false
 
   let submitButtonText = 'Meld dato'
   if (isEditing) {
     submitButtonText = 'Lagre og godkjenn'
 
-    if (!auth?.isAdmin) {
+    if (!isAdmin) {
       submitButtonText = 'Send endringsforslag'
     }
   }
@@ -300,13 +301,13 @@ export default function ReleaseForm() {
     if (!values.publishTime) nextErrors.publishTime = 'Opprett en gyldig publiseringsdato'
     if (!values.periodFrom) nextErrors.periodFrom = 'Opprett en gyldig fra-dato'
     if (!values.periodTo) nextErrors.periodTo = 'Opprett en gyldig til-dato'
-    if (!auth?.isAdmin && values.publishTime && values.publishTime < inThreeMonths) {
+    if (!isAdmin && values.publishTime && values.publishTime < inThreeMonths) {
       nextErrors.publishTime = 'Publiseringsdato tidligere enn tre måneder fra dags dato må opprettes av desken'
     }
-    if (!auth?.isAdmin && selectedDateStatus === 'FULL') {
+    if (!isAdmin && selectedDateStatus === 'FULL') {
       nextErrors.publishTime = 'Velg en annen dato som ikke er full, eller kontakt desken@ssb.no'
     }
-    if (!auth?.isAdmin && selectedDateStatus === 'BLOCKED') {
+    if (!isAdmin && selectedDateStatus === 'BLOCKED') {
       nextErrors.publishTime = 'Velg en annen dato som ikke er sperret, eller kontakt desken@ssb.no'
     }
 
@@ -377,7 +378,6 @@ export default function ReleaseForm() {
     Boolean
   )
 
-  const isAdmin = auth?.isAdmin
   const showEarlyPublishTimeWarning = isAdmin && values.publishTime && values.publishTime < inThreeMonths
   const showFullPublishDateWarning = isAdmin && selectedDateStatus === 'FULL'
   const showBlockedPublishDateWarning = isAdmin && selectedDateStatus === 'BLOCKED'
@@ -529,8 +529,8 @@ export default function ReleaseForm() {
       </form>
 
       <ReleaseFormModal
-        modalHeading={getReleaseModalTitle(isEditing, auth?.isAdmin ?? false)}
-        modalDescription={getReleaseModalDescription(isEditing, newOrUpdatedRelease, auth?.isAdmin ?? false)}
+        modalHeading={getReleaseModalTitle(isEditing, isAdmin)}
+        modalDescription={getReleaseModalDescription(isEditing, newOrUpdatedRelease, isAdmin)}
         openCreateReleaseModal={openReleaseModal}
         newOrUpdatedRelease={newOrUpdatedRelease}
         setOpenCreateReleaseModal={setOpenReleaseModal}
