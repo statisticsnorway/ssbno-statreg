@@ -206,6 +206,7 @@ export async function createRelease(
 ): Promise<ReleaseDetails> {
   const parsedVariantId = parseId(variantId)
   const safeShortname = sanitize(shortname)
+  const isAdmin = isCurrentUserAdmin()
 
   await releaseAsserts.assertStatisticExists(safeShortname, prisma)
   await releaseAsserts.assertVariantExists(parsedVariantId, prisma)
@@ -215,6 +216,11 @@ export async function createRelease(
 
   if (!isCurrentUserAdmin() && (await isDateBlocked(publishTimeDate.toISOString(), prisma))) {
     throw { statregError: 'The given date is full or blocked' }
+  }
+
+  // Non-admins can only create releases with a publish time more than three months from now
+  if (!isAdmin && !releaseAsserts.assertReleaseDateIsMoreThanThreeMonthsAway(publishTimeDate)) {
+    throw { statregError: 'Publish time must be later than three months from now' }
   }
 
   const release = await prisma.release.create({

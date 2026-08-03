@@ -18,12 +18,6 @@ import { ApprovalStatus } from '@ssbno-statreg/shared'
 import { Prisma } from '@/generated/prisma/client'
 import { asyncLocalStorage } from '@/lib/context'
 
-vi.mock('@/lib/blockedDates', () => ({
-  isDateBlocked: vi.fn(),
-}))
-
-import { isDateBlocked } from '@/lib/blockedDates'
-
 let prismaMock: any
 let releasesResult: object | null
 let now: Date
@@ -54,6 +48,7 @@ describe('releasesService ', async () => {
     releaseAsserts.assertVariantExists = vi.fn(async () => true) as any
     releaseAsserts.assertVariantMatchesShortname = vi.fn(async () => true) as any
     releaseAsserts.assertFilteredShortnamesExist = vi.fn(async () => true) as any
+    releaseAsserts.assertReleaseDateIsMoreThanThreeMonthsAway = vi.fn(() => true) as any
   })
 
   describe('getReleases ', () => {
@@ -697,21 +692,21 @@ describe('releasesService ', async () => {
       expect(prismaMock.release.create).toHaveBeenCalledTimes(0)
     })
 
-    test('rejects when non-admin sets publish time on a blocked date', async () => {
-      vi.mocked(isDateBlocked).mockResolvedValue(true)
+    test('rejects when non-admin sets publish time within three months from now', async () => {
+      releaseAsserts.assertReleaseDateIsMoreThanThreeMonthsAway = vi.fn(() => false) as any
 
       await expect(() =>
         asyncLocalStorage.run({ isAdmin: false }, () =>
           createRelease(prismaMock, 'kpi', '1', mockCreateReleaseInput, now)
         )
       ).rejects.toMatchObject({
-        statregError: 'The given date is full or blocked',
+        statregError: 'Publish time must be later than three months from now',
       })
       expect(prismaMock.release.create).toHaveBeenCalledTimes(0)
     })
 
-    test('allows admin to set publish time on a blocked date', async () => {
-      vi.mocked(isDateBlocked).mockResolvedValue(true)
+    test('allows admin to set publish time within three months from now', async () => {
+      releaseAsserts.assertReleaseDateIsMoreThanThreeMonthsAway = vi.fn(() => false) as any
       setPrismaResult({
         ...mockedSingleReleasePrismaResult,
         id: 1,
@@ -723,6 +718,7 @@ describe('releasesService ', async () => {
         createRelease(prismaMock, 'kpi', '1', mockCreateReleaseInput, now)
       )
 
+      expect(releaseAsserts.assertReleaseDateIsMoreThanThreeMonthsAway).not.toHaveBeenCalled()
       expect(prismaMock.release.create).toHaveBeenCalledTimes(1)
     })
   })
