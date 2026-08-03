@@ -66,6 +66,102 @@ describe('authMiddleWare', () => {
       })
     })
 
+    describe('isAdmin', () => {
+      test('returns true when one configured admin group is present', async () => {
+        process.env.ADMIN_GROUPS = 'ssbno-developers, desk'
+
+        const { isAdmin } = await import('../plugins/authMiddleware')
+
+        const result = isAdmin({
+          dapla: {
+            groups: ['other-group', 'desk'],
+          },
+        } as any)
+
+        expect(result).toBe(true)
+      })
+
+      test('returns false when no configured admin group is present', async () => {
+        process.env.ADMIN_GROUPS = 'ssbno-developers,desk'
+
+        const { isAdmin } = await import('../plugins/authMiddleware')
+
+        const result = isAdmin({
+          dapla: {
+            groups: ['other-group'],
+          },
+        } as any)
+
+        expect(result).toBe(false)
+      })
+
+      test('returns false when dapla.groups is missing', async () => {
+        process.env.ADMIN_GROUPS = 'ssbno-developers'
+
+        const { isAdmin } = await import('../plugins/authMiddleware')
+
+        expect(isAdmin({})).toBe(false)
+      })
+
+      test('returns false when ADMIN_GROUPS is missing', async () => {
+        delete process.env.ADMIN_GROUPS
+
+        const { isAdmin } = await import('../plugins/authMiddleware')
+
+        const result = isAdmin({
+          dapla: {
+            groups: ['ssbno-developers'],
+          },
+        } as any)
+
+        expect(result).toBe(false)
+      })
+    })
+
+    describe('skipAuth', () => {
+      test('sets isAdmin true in request context when AUTH_ENABLED=false', async () => {
+        process.env.AUTH_ENABLED = 'false'
+
+        const { skipAuth } = await import('../plugins/authMiddleware')
+        const { asyncLocalStorage } = await import('../src/lib/context')
+
+        const req = httpMocks.createRequest()
+        const res = httpMocks.createResponse()
+
+        let isAdminInContext: boolean | undefined
+
+        const next = vi.fn(() => {
+          isAdminInContext = asyncLocalStorage.getStore()?.isAdmin
+        })
+
+        await skipAuth(req, res, next)
+
+        expect(next).toHaveBeenCalledOnce()
+        expect(isAdminInContext).toBe(true)
+      })
+
+      test('sets isAdmin false in request context when AUTH_ENABLED=true', async () => {
+        process.env.AUTH_ENABLED = 'true'
+
+        const { skipAuth } = await import('../plugins/authMiddleware')
+        const { asyncLocalStorage } = await import('../src/lib/context')
+
+        const req = httpMocks.createRequest()
+        const res = httpMocks.createResponse()
+
+        let isAdminInContext: boolean | undefined
+
+        const next = vi.fn(() => {
+          isAdminInContext = asyncLocalStorage.getStore()?.isAdmin
+        })
+
+        await skipAuth(req, res, next)
+
+        expect(next).toHaveBeenCalledOnce()
+        expect(isAdminInContext).toBe(false)
+      })
+    })
+
     describe('keycloakAuth', () => {
       test('throws when AUTH_ENABLED=true and dev env vars are missing', async () => {
         delete process.env.KEYCLOAK_REALM_ISSUER
@@ -105,17 +201,25 @@ describe('authMiddleWare', () => {
         process.env = { ...OLD_ENV }
       })
 
-      test('bypasses when AUTH_ENABLED=false and calls next()', async () => {
+      test('bypasses and provides admin context when AUTH_ENABLED=false', async () => {
         process.env.AUTH_ENABLED = 'false'
 
         const { requireAdminAuthorization: requireAdminAuthorization } = await import('../plugins/authMiddleware')
+        const { asyncLocalStorage } = await import('../src/lib/context')
 
         const handler = requireAdminAuthorization()
         const req = httpMocks.createRequest()
 
-        await handler(req, res, next as any)
+        let isAdminInContext: boolean | undefined
 
-        expect(next).toHaveBeenCalledOnce()
+        const nextWithContextCheck = vi.fn(() => {
+          isAdminInContext = asyncLocalStorage.getStore()?.isAdmin
+        })
+
+        await handler(req, res, nextWithContextCheck as any)
+
+        expect(nextWithContextCheck).toHaveBeenCalledOnce()
+        expect(isAdminInContext).toBe(true)
       })
 
       test('returns 401 when not authenticated', async () => {

@@ -22,31 +22,31 @@
     "test:integration": "vitest run --project integration"
   },
   "dependencies": {
-    "@cacheable/node-cache": "^3.0.1",
+    "@cacheable/node-cache": "^3.1.1",
     "@prisma/adapter-pg": "7.8.0",
     "@prisma/client": "7.8.0",
     "@ssbno-statreg/shared": "*",
     "dotenv": "17.4.2",
     "express": "5.2.1",
     "express-prom-bundle": "8.0.0",
-    "helmet": "8.2.0",
-    "jose": "6.2.3",
+    "helmet": "8.3.0",
+    "jose": "6.2.4",
     "lightship": "9.0.4",
     "swagger-ui-express": "5.0.1",
-    "tsx": "4.22.4",
+    "tsx": "4.23.1",
     "yaml": "2.9.0"
   },
   "devDependencies": {
     "@types/express": "5.0.6",
-    "@types/supertest": "7.2.0",
+    "@types/supertest": "7.2.1",
     "@types/swagger-ui-express": "4.1.8",
     "dotenv": "17.4.2",
     "eslint-plugin-prettier": "5.5.6",
-    "node-mocks-http": "1.17.2",
+    "node-mocks-http": "1.18.1",
     "nodemon": "3.1.14",
     "pkgroll": "2.27.1",
     "prisma": "7.8.0",
-    "rollup": "4.62.2",
+    "rollup": "4.62.3",
     "supertest": "7.2.2"
   }
 }

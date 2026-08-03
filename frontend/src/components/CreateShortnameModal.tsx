@@ -3,14 +3,14 @@ import { useNavigate } from 'react-router'
 import { Button, Heading, Dialog, Field, Input, ValidationMessage, Paragraph } from '@digdir/designsystemet-react'
 
 import client from '../api'
-import type { ShortnameListing, Shortname } from '@ssbno-statreg/shared'
+import type { ShortnameListing } from '@ssbno-statreg/shared'
 import { useAuth } from '../context/AuthContext'
 import { ErrorAlert } from '../components/ErrorAlert'
 
 type CreateShortnameModalProps = {
   openCreateShortnameModal: boolean
   setOpenCreateReleaseModal: (open: boolean) => void
-  setCreatedShortname: (shortname: Shortname) => void
+  setCreatedShortname: (shortname: string) => void
 }
 
 export function CreateShortnameModal({
@@ -80,14 +80,11 @@ export function CreateShortnameModal({
       },
     })
     if (error) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const errorMessage = (error as any).error
-      console.log(errorMessage)
-      setApiError((prev) => [...prev, errorMessage])
-    } else {
-      setCreatedShortname(data)
-      setOpenCreateReleaseModal(false)
+      setApiError((prev) => [...prev, error.message])
+      return
     }
+    setCreatedShortname(data.shortname)
+    setOpenCreateReleaseModal(false)
   }
 
   function handleOnSubmit(e: React.ChangeEvent<HTMLFormElement>) {

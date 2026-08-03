@@ -11,7 +11,7 @@ import {
   parseCreateStatisticInput,
   parseUpdateStatisticInput,
   updateStatistic,
-  updateContacts,
+  updateStatisticContacts,
   createStatistic,
   StatisticsDetailedIncludes,
   parseDivision,
@@ -31,10 +31,10 @@ const { getAllUsersFromCacheMock, fetchDivisionMock } = vi.hoisted(() => ({
       },
     }
   }),
-  fetchDivisionMock: vi.fn((code: number, language?: string) => {
-    if (code === 104 && language === 'en') return { code: 104, name: 'Division A1' }
-    if (code === 104) return { code: 104, name: 'Seksjon A1' }
-    if (code === 105) return { code: 105, name: 'Seksjon B1' }
+  fetchDivisionMock: vi.fn((code: string, language?: string) => {
+    if (code === '104' && language === 'en') return { code: '104', name: 'Division A1' }
+    if (code === '104') return { code: '104', name: 'Seksjon A1' }
+    if (code === '105') return { code: '105', name: 'Seksjon B1' }
   }),
 }))
 
@@ -462,12 +462,13 @@ describe('statisticService', () => {
     })
 
     test('returns updated contacts when valid shortname and principal names are provided', async () => {
-      const result = await updateContacts('helse', ['abc@ssb.no', 'bcd@ssb.no'], prismaMock)
+      const result = await updateStatisticContacts('helse', ['abc@ssb.no', 'bcd@ssb.no'], prismaMock)
 
-      expect(prismaMock.statistic.findFirst).toHaveBeenCalledExactlyOnceWith({
-        where: { shortname: { name: 'helse' } },
-        select: { id: true },
-      })
+      expect(prismaMock.statistic.findFirst).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({
+          where: { shortname: { name: 'helse' } },
+        })
+      )
       expect(prismaMock.responsiblePerson.upsert).toHaveBeenCalledTimes(2)
       expect(prismaMock.responsiblePerson.upsert).toHaveBeenNthCalledWith(1, {
         where: { principalName: 'abc@ssb.no' },
@@ -498,9 +499,19 @@ describe('statisticService', () => {
     test('throws error when shortname is not found', async () => {
       prismaMock.statistic.findFirst.mockResolvedValue(null)
 
-      await expect(() => updateContacts('helse', ['abc@ssb.no'], prismaMock)).rejects.toMatchObject({
+      await expect(() => updateStatisticContacts('helse', ['abc@ssb.no'], prismaMock)).rejects.toMatchObject({
         status: 404,
         statregError: "Shortname 'helse' not found",
+      })
+      expect(prismaMock.responsiblePerson.upsert).toHaveBeenCalledTimes(0)
+      expect(prismaMock.statistic.update).toHaveBeenCalledTimes(0)
+    })
+
+    test('throws error when statistic is active and new contacts is empty', async () => {
+      prismaMock.statistic.findFirst.mockResolvedValue({ id: 1, status: 'A' })
+
+      await expect(() => updateStatisticContacts('helse', [], prismaMock)).rejects.toMatchObject({
+        statregError: 'An active statistic needs at least one contact',
       })
       expect(prismaMock.responsiblePerson.upsert).toHaveBeenCalledTimes(0)
       expect(prismaMock.statistic.update).toHaveBeenCalledTimes(0)
@@ -520,6 +531,7 @@ describe('statisticService', () => {
         version: 1,
         desk_appoval_status: ApprovalStatus.PENDING,
         status: 'K',
+        statistic_region_levels: [],
       })
 
       await createStatistic(
@@ -550,6 +562,9 @@ describe('statisticService', () => {
           date_created: now,
           last_updated: now,
           desk_appoval_status: ApprovalStatus.ACCEPTED,
+          statistic_region_levels: {
+            create: [],
+          },
           shortname: {
             connect: {
               name: 'kpi',
@@ -723,6 +738,7 @@ describe('statisticService', () => {
         main_language: 'nb',
         comment: '',
         first_released_at: new Date('2024-04-01T00:00:00.000Z'),
+        statistic_region_levels: [],
       }
     })
 
@@ -990,7 +1006,7 @@ const mockStatisticsPrismaResult = [
     name: 'Energiregnskap og energibalanse',
     name_en: 'Energy account and energy balance',
     shortname: { name: 'energ' },
-    division_code: 104,
+    division_code: '104',
     responsiblePersons: [
       {
         principalName: 'abc@ssb.no',
@@ -1003,7 +1019,7 @@ const mockStatisticsPrismaResult = [
     name: 'Befolkning og demografi',
     name_en: 'Population and demography',
     shortname: { name: 'befolk' },
-    division_code: 105,
+    division_code: '105',
     responsiblePersons: [
       {
         principalName: 'bcd@ssb.no',
@@ -1098,7 +1114,7 @@ const mockedStatisticsResult = {
       status: { code: 'SA' },
       division: {
         name: 'Seksjon A1',
-        code: 104,
+        code: '104',
       },
       name: 'Energiregnskap og energibalanse',
       name_en: 'Energy account and energy balance',
@@ -1109,7 +1125,7 @@ const mockedStatisticsResult = {
       main_language: 'nb',
       status: { code: 'SA' },
       division: {
-        code: 105,
+        code: '105',
         name: 'Seksjon B1',
       },
       name: 'Befolkning og demografi',

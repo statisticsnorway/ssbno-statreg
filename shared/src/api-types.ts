@@ -106,6 +106,43 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/divisions': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** List of all divisions in our organization. */
+    get: {
+      parameters: {
+        query?: never
+        header?: never
+        path?: never
+        cookie?: never
+      }
+      requestBody?: never
+      responses: {
+        /** @description List of divisions */
+        200: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            'application/json': components['schemas']['Division']
+          }
+        }
+        default: components['responses']['Error']
+      }
+    }
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/statistics': {
     parameters: {
       query?: never
@@ -230,7 +267,9 @@ export interface paths {
       parameters: {
         query?: never
         header?: never
-        path?: never
+        path: {
+          shortname: string
+        }
         cookie?: never
       }
       requestBody: {
@@ -478,10 +517,7 @@ export interface paths {
       }
       requestBody: {
         content: {
-          'application/json': {
-            /** @description List of principal names to set as contacts for the statistic. */
-            principalNames: string[]
-          }
+          'application/json': string[]
         }
       }
       responses: {
@@ -494,6 +530,7 @@ export interface paths {
             'application/json': components['schemas']['Contact'][]
           }
         }
+        default: components['responses']['Error']
       }
     }
     post?: never
@@ -1010,7 +1047,12 @@ export interface components {
     }
     Contact: {
       readonly name?: string
-      readonly principalName?: string
+      readonly principalName: string
+    }
+    Division: {
+      code?: string
+      readonly name?: string
+      note?: string | null
     }
     Frequency: {
       name?: string
@@ -1097,13 +1139,14 @@ export interface components {
       /** Format: date */
       first_released_at?: string | null
       yearly_reporting?: boolean
-      statistic_region_levels?: components['schemas']['Region_level'][]
+      statistic_region_levels?: {
+        code?: string
+      }[]
       previous_topic_codes?: string | null
       comment?: string
       variants?: components['schemas']['Variant'][]
-      contacts?: {
-        principalName?: string
-      }[]
+      /** @description List of principal names to set as contacts for the statistic. */
+      contacts?: string[]
     } & components['schemas']['Statistic']
     Statistic_create_upcoming: components['schemas']['Statistic_create_base'] & {
       status?: {
@@ -1125,10 +1168,7 @@ export interface components {
     } & components['schemas']['Statistic_create_base']
     Statistic_details: {
       version?: number
-      division?: {
-        code?: string | null
-        readonly name?: string
-      }
+      division?: components['schemas']['Division']
       /** Format: date */
       first_released_at?: string | null
       yearly_reporting?: boolean
@@ -1148,10 +1188,7 @@ export interface components {
       statistic_region_levels?: components['schemas']['Region_level'][]
     } & components['schemas']['Statistic']
     Statistic_listing: {
-      division?: {
-        code?: string | null
-        readonly name?: string
-      }
+      division?: components['schemas']['Division']
       contacts?: components['schemas']['Contact'][]
     } & components['schemas']['Statistic']
     Variant: {

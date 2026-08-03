@@ -11,7 +11,7 @@
     "build": "npm run build --ws && cp -Rf frontend/dist/* backend/dist",
     "start": "npm run start -w backend",
     "db:deploy": "npm run db:deploy -w backend",
-    "check": "npm run build -w shared && tsc --noEmit -p backend && tsc -b frontend",
+    "check": "tsc --noEmit -p backend && tsc -b frontend",
     "test": "vitest --exclude '**/integration/**'",
     "ci-test": "vitest run  --exclude '**/integration/**'",
     "test:backend": "vitest --project backend",
@@ -37,16 +37,16 @@
     }
   },
   "devDependencies": {
-    "@eslint-react/eslint-plugin": "5.9.1",
+    "@eslint-react/eslint-plugin": "5.17.3",
     "@eslint/js": "10.0.1",
-    "@types/node": "24.13.2",
-    "@vitejs/plugin-react": "6.0.2",
-    "concurrently": "10.0.3",
-    "eslint": "10.5.0",
+    "@types/node": "24.13.3",
+    "@vitejs/plugin-react": "6.0.4",
+    "concurrently": "10.0.4",
+    "eslint": "10.7.0",
     "openapi-typescript": "7.13.0",
     "typescript": "5.9.3",
-    "typescript-eslint": "8.61.1",
-    "vitest": "4.1.9"
+    "typescript-eslint": "8.64.0",
+    "vitest": "4.1.10"
   },
   "allowScripts": {
     "@scarf/scarf": false,

@@ -73,14 +73,16 @@ function parseDateFromString(dateString: string | undefined): Date | undefined {
   return dateString ? new Date(dateString) : undefined
 }
 
-function getReleaseModalTitle(isEditing: boolean) {
-  return isEditing ? 'Endringer må godkjennes' : 'Publiseringsdato er registrert'
+function getReleaseModalTitle(isEditing: boolean, isAdmin: boolean) {
+  if (!isEditing) return 'Publiseringsdato er registrert'
+
+  return isAdmin ? 'Endringene er lagret og godkjent' : 'Endringer må godkjennes'
 }
 
-function getReleaseModalDescription(isEditing: boolean, createdRelease: ReleaseDetails) {
-  return isEditing
-    ? 'Endringer på meldt dato må godkjennes på nytt.'
-    : getCreatedReleaseModalDescription(createdRelease)
+function getReleaseModalDescription(isEditing: boolean, updatedRelease: ReleaseDetails, isAdmin: boolean) {
+  if (!isEditing) return getCreatedReleaseModalDescription(updatedRelease)
+
+  return isAdmin ? 'Endringene er lagret og godkjent.' : 'Endringer på meldt dato må godkjennes på nytt.'
 }
 
 function getCreatedReleaseModalDescription(createdRelease: ReleaseDetails) {
@@ -149,14 +151,11 @@ function VariantReleasesTable({
         params: { path: { shortname, id: variantId }, query: { start, count, sort: sortBy } },
       })
       if (error) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const errorMessage = (error as any).error
-        console.log(errorMessage)
-        apiErrorEmit?.(`Variant releases table error: ${errorMessage}`)
-      } else {
-        setReleases(data?.releases ?? [])
-        setTotal(data.total ?? 0)
+        apiErrorEmit?.(`Variant releases table error: ${error.message}`)
+        return
       }
+      setReleases(data.releases ?? [])
+      setTotal(data.total ?? 0)
     }
     fetchVariantReleases()
   }, [shortname, variantId, count, start, sortBy, apiErrorEmit])
@@ -202,6 +201,8 @@ function useDatepicker(
   })
 }
 
+const inThreeMonths = new Date(new Date().setMonth(new Date().getMonth() + 3))
+
 export default function ReleaseForm() {
   // for creation, path is /statistikk/:shortname/:variantId/opprett
   // for editing, path is /publisering/:id/rediger
@@ -210,7 +211,7 @@ export default function ReleaseForm() {
   const isEditing = !!releaseId
 
   // TODO: MIM-2581: This is a temporary suggested publish time (3 months ahead of date) for create release
-  const [suggestedPublishTime] = useState(() => new Date(new Date().setMonth(new Date().getMonth() + 3)))
+  const [suggestedPublishTime] = useState(inThreeMonths)
   const [values, setValues] = useState<ReleaseFormTypes>({
     publishTime: suggestedPublishTime,
   })
@@ -295,6 +296,9 @@ export default function ReleaseForm() {
     if (!values.publishTime) nextErrors.publishTime = 'Opprett en gyldig publiseringsdato'
     if (!values.periodFrom) nextErrors.periodFrom = 'Opprett en gyldig fra-dato'
     if (!values.periodTo) nextErrors.periodTo = 'Opprett en gyldig til-dato'
+    if (!auth?.isAdmin && values.publishTime && values.publishTime < inThreeMonths) {
+      nextErrors.publishTime = 'Publiseringsdato tidligere enn tre måneder fra dags dato må opprettes av desken'
+    }
 
     // TODO: MIM-2582: Review comparison logic, error messages, and implement onChange
     if (values.periodFrom && values.periodTo && values.periodFrom > values.periodTo) {
@@ -318,14 +322,11 @@ export default function ReleaseForm() {
     })
 
     if (error) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const errorMessage = (error as any).error
-      console.log(errorMessage)
-      setApiError((prev) => [...prev, errorMessage])
-    } else {
-      setOpenReleaseModal(true)
-      setNewOrUpdatedRelease(data)
+      setApiError((prev) => [...prev, error.message])
+      return
     }
+    setOpenReleaseModal(true)
+    setNewOrUpdatedRelease(data)
   }
 
   async function createRelease(body: ReleaseCreate) {
@@ -335,14 +336,11 @@ export default function ReleaseForm() {
     })
 
     if (error) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const errorMessage = (error as any).error
-      console.log(errorMessage)
-      setApiError((prev) => [...prev, errorMessage])
-    } else {
-      setOpenReleaseModal(true)
-      setNewOrUpdatedRelease(data)
+      setApiError((prev) => [...prev, error.message])
+      return
     }
+    setOpenReleaseModal(true)
+    setNewOrUpdatedRelease(data)
   }
 
   function handleOnSubmit(e: React.SubmitEvent<HTMLFormElement>) {
@@ -368,6 +366,8 @@ export default function ReleaseForm() {
   const errorsCombined = [...apiError, calendarApiError, sameDateReleasesApiError, variantReleasesApiError].filter(
     Boolean
   )
+
+  const showEarlyPublishTimeWarning = auth?.isAdmin && values.publishTime && values.publishTime < inThreeMonths
 
   return (
     <>
@@ -421,6 +421,11 @@ export default function ReleaseForm() {
             apiErrorEmit={setCalendarApiError}
           />
           {errors.publishTime && <ValidationMessage>{errors.publishTime}</ValidationMessage>}
+          {showEarlyPublishTimeWarning && (
+            <ValidationMessage data-color='warning'>
+              Du har valgt en dato tidligere enn tre måneder fra i dag.
+            </ValidationMessage>
+          )}
         </Field>
 
         <Fieldset>
@@ -501,8 +506,8 @@ export default function ReleaseForm() {
       </form>
 
       <ReleaseFormModal
-        modalHeading={getReleaseModalTitle(isEditing)}
-        modalDescription={getReleaseModalDescription(isEditing, newOrUpdatedRelease)}
+        modalHeading={getReleaseModalTitle(isEditing, auth?.isAdmin ?? false)}
+        modalDescription={getReleaseModalDescription(isEditing, newOrUpdatedRelease, auth?.isAdmin ?? false)}
         openCreateReleaseModal={openReleaseModal}
         newOrUpdatedRelease={newOrUpdatedRelease}
         setOpenCreateReleaseModal={setOpenReleaseModal}

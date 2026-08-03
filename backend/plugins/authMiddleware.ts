@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction, RequestHandler } from 'express'
 import { createRemoteJWKSet, jwtVerify, type JWTPayload } from 'jose'
 import { asyncLocalStorage } from '../src/lib/context'
+import { parseAdminGroupsFromEnv } from '@/lib/utils'
 
 export function unauthorized(res: Response, message: string) {
   return res.status(401).json({ error: message })
@@ -24,7 +25,24 @@ export function getBearerToken(req: Request): string | null {
   return token
 }
 
-export const skipAuth: RequestHandler = (_req, _res, next) => asyncLocalStorage.run({}, next)
+export function isAdmin(claims: JWTPayload | undefined): boolean {
+  const groups = (
+    claims as
+      | (JWTPayload & {
+          dapla?: {
+            groups?: string[]
+          }
+        })
+      | undefined
+  )?.dapla?.groups
+
+  if (!Array.isArray(groups)) return false
+  const adminGroups = parseAdminGroupsFromEnv()
+  return adminGroups.some((group) => groups.includes(group))
+}
+
+export const skipAuth: RequestHandler = (_req, _res, next) =>
+  asyncLocalStorage.run({ isAdmin: process.env.AUTH_ENABLED === 'false' }, next)
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ;(skipAuth as any).__skipAuth = true
 
@@ -46,10 +64,11 @@ export function createKeycloakAuthMiddleware(issuer: string, jwksUri: string, au
         claims: payload,
         username: typeof payload.preferred_username === 'string' ? payload.preferred_username : undefined,
         email: typeof payload.email === 'string' ? payload.email : undefined,
+        name: typeof payload.name === 'string' ? payload.name : undefined,
       }
 
       // Adding the auth to application context, this is isolated per request and thread so we can read the context in other parts of the application without passing props.
-      asyncLocalStorage.run({ auth: req.auth }, next)
+      asyncLocalStorage.run({ auth: req.auth, isAdmin: isAdmin(payload) }, next)
     } catch {
       return unauthorized(res, 'Invalid or expired token')
     }
@@ -94,9 +113,7 @@ export function requireAdminAuthorization(): RequestHandler {
       return forbidden(res, 'Missing authorization groups')
     }
 
-    const adminGroups = process.env.ADMIN_GROUPS?.split(',') ?? []
-
-    if (!adminGroups.some((group) => groups.includes(group))) {
+    if (!isAdmin(claims)) {
       return forbidden(res, 'Insufficient access')
     }
 

@@ -26,6 +26,9 @@ type ValidatedCreateStatisticInput = {
   name_en?: string
   first_released_at?: Date
   main_language: string
+  statistic_region_levels?: {
+    code?: string
+  }[]
   comment: string
   contacts?: StatisticCreate['contacts']
   variants?: StatisticCreate['variants']
@@ -34,7 +37,7 @@ type ValidatedCreateStatisticInput = {
 type ValidatedStatisticInput = {
   division: string | null | undefined
   statistic_region_levels?: {
-    code?: string | undefined
+    code?: string
   }[]
   status?: string
   name: string
@@ -168,7 +171,7 @@ export async function getStatistics(
           code: parseStatusCode(statistic.status),
         },
         division: {
-          name: getDivisionFromCode(Number(divisionCode))?.name,
+          name: getDivisionFromCode(divisionCode)?.name,
           code: divisionCode,
         },
         name: statistic.name,
@@ -226,7 +229,7 @@ export function parseStatisticVariants(
 
 export async function mapStatisticDetails(statistic: StatisticPrismaResult): Promise<StatisticDetails> {
   const main_language = statistic.language
-  const division_code = statistic.division_code
+  const division_code = statistic.division_code ?? ''
   const relation = statistic.related_statistic?.shortname
     ? {
         shortname: statistic.related_statistic?.shortname?.name,
@@ -243,7 +246,7 @@ export async function mapStatisticDetails(statistic: StatisticPrismaResult): Pro
     main_language,
     division: {
       code: division_code,
-      name: getDivisionFromCode(Number(division_code))?.name,
+      name: getDivisionFromCode(division_code)?.name,
     },
     first_released_at: dateToISOString(statistic.first_release),
     yearly_reporting: statistic.yearly_reporting,
@@ -370,27 +373,13 @@ export async function updateStatistic(
   return await mapStatisticDetails(updatedStatistic)
 }
 
-export async function updateContacts(
-  shortname: string,
-  newPrincipalNames: string[],
-  prisma: StatisticPrisma
-): Promise<Contact[]> {
-  const safeShortname = sanitize(shortname)
-
-  const existingStatistic = await prisma.statistic.findFirst({
-    where: { shortname: { name: safeShortname } },
-    select: { id: true },
-  })
-  if (!existingStatistic) {
-    return Promise.reject({ status: 404, statregError: `Shortname '${safeShortname}' not found` })
-  }
-
+async function upsertContacts(principalNames: string[], prisma: StatisticPrisma) {
   const users = await getAllUsersFromCache()
 
-  const uniquePrincipalNames = [...new Set(newPrincipalNames)]
+  const uniquePrincipalNames = [...new Set(principalNames)]
   const knownPrincipalNames = uniquePrincipalNames.filter((principalName) => users[principalName])
 
-  const newContacts = await Promise.all(
+  return await Promise.all(
     knownPrincipalNames.map((principalName) =>
       prisma.responsiblePerson.upsert({
         where: { principalName },
@@ -399,6 +388,29 @@ export async function updateContacts(
       })
     )
   )
+}
+
+export async function updateStatisticContacts(
+  shortname: string,
+  newPrincipalNames: string[],
+  prisma: StatisticPrisma
+): Promise<Contact[]> {
+  const safeShortname = sanitize(shortname)
+
+  const existingStatistic = await prisma.statistic.findFirst({
+    where: { shortname: { name: safeShortname } },
+    select: { id: true, status: true },
+  })
+  if (!existingStatistic) {
+    return Promise.reject({ status: 404, statregError: `Shortname '${safeShortname}' not found` })
+  }
+
+  const newContacts = await upsertContacts(newPrincipalNames, prisma)
+
+  if (existingStatistic.status === 'A' && newContacts.length === 0) {
+    return Promise.reject({ statregError: 'An active statistic needs at least one contact' })
+  }
+
   const updatedStatistic = await prisma.statistic.update({
     // https://docs.prisma.io/docs/orm/reference/prisma-client-reference#set
     where: { id: existingStatistic.id },
@@ -410,6 +422,7 @@ export async function updateContacts(
     select: { responsiblePersons: { select: { principalName: true } } },
   })
 
+  const users = await getAllUsersFromCache()
   return updatedStatistic.responsiblePersons.map((person) => ({
     name: users[person.principalName]?.displayName ?? '',
     principalName: person.principalName,
@@ -428,10 +441,24 @@ export async function createStatistic(
   await statisticsAsserts.assertShortnameExistsAndIsAvailable(safeShortname, prisma)
 
   const createStatisticStatus = parseCreateStatisticStatus(body)
-  const { division, name, name_en, first_released_at, main_language, comment } = parseCreateStatisticInput(
-    body,
-    createStatisticStatus
-  )
+  const {
+    division,
+    name,
+    name_en,
+    first_released_at,
+    main_language,
+    statistic_region_levels = [],
+    comment,
+  } = parseCreateStatisticInput(body, createStatisticStatus)
+
+  let contacts
+  if (body?.contacts) {
+    contacts = await upsertContacts(body.contacts, prisma)
+
+    if (body?.status?.code === 'A' && contacts.length === 0) {
+      return Promise.reject({ statregError: 'An active statistic needs at least one contact' })
+    }
+  }
 
   const result = await prisma.statistic.create({
     data: {
@@ -447,11 +474,21 @@ export async function createStatistic(
       ...(first_released_at ? { first_release: first_released_at } : {}),
       comment: comment || `Create statistic with shortname: ${shortname}`,
       division_code: division,
+      statistic_region_levels: {
+        create: statistic_region_levels.map(({ code }) => ({
+          region_level: { connect: { code } },
+        })),
+      },
       shortname: {
         connect: {
           name: safeShortname,
         },
       },
+      ...(contacts && {
+        responsiblePersons: {
+          connect: contacts.map((contact) => ({ id: contact.id })),
+        },
+      }),
     },
     include: StatisticsDetailedIncludes,
   })
@@ -473,10 +510,15 @@ export function parseCreateStatisticInput(
   status: CreatableStatisticStatus
 ): ValidatedCreateStatisticInput {
   const requiredFields = getRequiredStatisticFields(status)
-  const { division, name, name_en, first_released_at, main_language, comment } = ensureRequiredFieldsExists(
-    body ?? {},
-    requiredFields
-  )
+  const {
+    division,
+    name,
+    name_en,
+    first_released_at,
+    main_language,
+    statistic_region_levels = [],
+    comment,
+  } = ensureRequiredFieldsExists(body ?? {}, requiredFields)
 
   const safeName = sanitize(name)
   const safeNameEn = sanitize(name_en)
@@ -500,6 +542,7 @@ export function parseCreateStatisticInput(
     name: safeName,
     ...(safeNameEn ? { name_en: safeNameEn } : {}),
     ...(first_released_at ? { first_released_at: parseDateOnly(first_released_at, 'first_released_at') } : {}),
+    statistic_region_levels,
     main_language: language,
     comment: safeComment,
   }
@@ -568,7 +611,7 @@ export function parseDivision(division?: string | null) {
     throw { statregError: "Field 'division' must be a number." }
   }
 
-  if (!getDivisionFromCode(Number(division))) {
+  if (!getDivisionFromCode(division)) {
     throw { statregError: "Field 'division' does not correspond to an existing division." }
   }
 

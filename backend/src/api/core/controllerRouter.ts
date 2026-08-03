@@ -6,6 +6,7 @@ import releasesController from '../controllers/releasesController'
 import calendarController from '../controllers/calendarController'
 import shortnamesController from '../controllers/shortnamesController'
 import contactsController from '../controllers/contactsController'
+import divisionsController from '../controllers/divisionController'
 
 const API_PREFIX = '/api'
 const ROUTE_METHODS = ['get', 'post', 'put', 'delete'] as const
@@ -18,6 +19,7 @@ const CONTROLLERS = [
   calendarController,
   shortnamesController,
   contactsController,
+  divisionsController,
 ]
 
 type PublicRouteRule = {
