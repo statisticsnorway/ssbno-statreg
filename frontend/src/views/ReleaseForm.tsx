@@ -425,13 +425,6 @@ export default function ReleaseForm() {
             For kortere frister, kontakt mmj@ssb.no.
           </Field.Description>
           <Input id='publishTime' size={10} {...publishTimePicker.inputProps} aria-invalid={!!errors.publishTime} />
-          <DatePicker
-            {...publishTimePicker.datepickerProps}
-            showColorCodingExplanation
-            calendarDatesEmit={setCalendarDates}
-            apiErrorEmit={setCalendarApiError}
-          />
-          {errors.publishTime && <ValidationMessage>{errors.publishTime}</ValidationMessage>}
           {showEarlyPublishTimeWarning && (
             <ValidationMessage data-color='warning'>
               Du har valgt en dato tidligere enn tre måneder fra i dag. Du kan fortsatt melde dato som admin.
@@ -447,6 +440,13 @@ export default function ReleaseForm() {
               Denne dagen er sperret. Du kan fortsatt melde dato som admin.
             </ValidationMessage>
           )}
+          <DatePicker
+            {...publishTimePicker.datepickerProps}
+            showColorCodingExplanation
+            calendarDatesEmit={setCalendarDates}
+            apiErrorEmit={setCalendarApiError}
+          />
+          {errors.publishTime && <ValidationMessage>{errors.publishTime}</ValidationMessage>}
         </Field>
 
         <Fieldset>
