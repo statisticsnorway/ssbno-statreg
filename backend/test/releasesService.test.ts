@@ -17,9 +17,10 @@ import {
 import { ApprovalStatus } from '@ssbno-statreg/shared'
 import { Prisma } from '@/generated/prisma/client'
 import { asyncLocalStorage } from '@/lib/context'
+import { isDateBlocked } from '@/lib/blockedDates'
 
 vi.mock('@/lib/blockedDates', () => ({
-  isDateBlocked: vi.fn(),
+  isDateBlocked: vi.fn(() => Promise.resolve(false)),
 }))
 
 import { isDateBlocked } from '@/lib/blockedDates'
