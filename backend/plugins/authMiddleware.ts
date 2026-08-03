@@ -4,11 +4,11 @@ import { asyncLocalStorage } from '../src/lib/context'
 import { parseAdminGroupsFromEnv } from '@/lib/utils'
 
 export function unauthorized(res: Response, message: string) {
-  return res.status(401).json({ error: message })
+  return res.status(401).json({ message: message })
 }
 
 export function forbidden(res: Response, message: string) {
-  return res.status(403).json({ error: message })
+  return res.status(403).json({ message: message })
 }
 
 export function getBearerToken(req: Request): string | null {
