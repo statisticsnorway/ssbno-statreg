@@ -742,7 +742,7 @@ describe('releasesService ', async () => {
     })
 
     test('allows admin to set publish time on a blocked date', async () => {
-      vi.mocked(isDateBlocked).mockResolvedValue(true)
+      vi.mocked(isDateBlocked).mockResolvedValueOnce(true)
       setPrismaResult({
         ...mockedSingleReleasePrismaResult,
         id: 1,
