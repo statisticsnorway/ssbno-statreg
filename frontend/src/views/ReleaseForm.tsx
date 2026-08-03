@@ -377,9 +377,11 @@ export default function ReleaseForm() {
     Boolean
   )
 
-  const showEarlyPublishTimeWarning = auth?.isAdmin && values.publishTime && values.publishTime < inThreeMonths
-  const showFullPublishDateWarning = auth?.isAdmin && selectedDateStatus === 'FULL'
-  const showBlockedPublishDateWarning = auth?.isAdmin && selectedDateStatus === 'BLOCKED'
+  const isAdmin = auth?.isAdmin
+  const showEarlyPublishTimeWarning = isAdmin && values.publishTime && values.publishTime < inThreeMonths
+  const showFullPublishDateWarning = isAdmin && selectedDateStatus === 'FULL'
+  const showBlockedPublishDateWarning = isAdmin && selectedDateStatus === 'BLOCKED'
+
   return (
     <>
       {errorsCombined.length > 0 && <ErrorAlert message={errorsCombined} />}
