@@ -23,8 +23,6 @@ vi.mock('@/lib/blockedDates', () => ({
   isDateBlocked: vi.fn(() => Promise.resolve(false)),
 }))
 
-import { isDateBlocked } from '@/lib/blockedDates'
-
 let prismaMock: any
 let releasesResult: object | null
 let now: Date
