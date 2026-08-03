@@ -729,7 +729,7 @@ describe('releasesService ', async () => {
     })
 
     test('rejects when non-admin sets publish time on a blocked date', async () => {
-      vi.mocked(isDateBlocked).mockResolvedValue(true)
+      vi.mocked(isDateBlocked).mockResolvedValueOnce(true)
 
       await expect(() =>
         asyncLocalStorage.run({ isAdmin: false }, () =>
