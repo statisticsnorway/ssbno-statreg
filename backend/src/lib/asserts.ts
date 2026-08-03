@@ -112,11 +112,23 @@ export async function assertDayNotManuallyBlocked(prisma: CalendarDatePrisma, da
   return !manuallyBlockedDay
 }
 
+function addThreeMonths(check: Date): Date {
+  const date = new Date(check)
+  const inThreeMonths = new Date(date.setMonth(date.getMonth() + 3))
+  return inThreeMonths
+}
+
+export function assertReleaseDateIsMoreThanThreeMonthsAway(candiDate: Date): boolean {
+  const now = new Date()
+  return candiDate > addThreeMonths(now)
+}
+
 export const releaseAsserts = {
   assertFilteredShortnamesExist,
   assertStatisticExists,
   assertVariantExists,
   assertVariantMatchesShortname,
+  assertReleaseDateIsMoreThanThreeMonthsAway,
 }
 
 export const statisticsAsserts = {

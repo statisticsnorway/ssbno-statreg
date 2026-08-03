@@ -205,12 +205,18 @@ export async function createRelease(
 ): Promise<ReleaseDetails> {
   const parsedVariantId = parseId(variantId)
   const safeShortname = sanitize(shortname)
+  const isAdmin = isCurrentUserAdmin()
 
   await releaseAsserts.assertStatisticExists(safeShortname, prisma)
   await releaseAsserts.assertVariantExists(parsedVariantId, prisma)
   await releaseAsserts.assertVariantMatchesShortname(parsedVariantId, safeShortname, prisma)
 
   const { publishTimeDate, periodFromDate, periodToDate, releaseDatePrecision } = parseReleaseInput(body)
+
+  // Non-admins can only create releases with a publish time more than three months from now
+  if (!isAdmin && !releaseAsserts.assertReleaseDateIsMoreThanThreeMonthsAway(publishTimeDate)) {
+    throw { statregError: 'Publish time must be later than three months from now' }
+  }
 
   const release = await prisma.release.create({
     data: {

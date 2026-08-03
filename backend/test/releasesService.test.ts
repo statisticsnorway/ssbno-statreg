@@ -48,6 +48,7 @@ describe('releasesService ', async () => {
     releaseAsserts.assertVariantExists = vi.fn(async () => true) as any
     releaseAsserts.assertVariantMatchesShortname = vi.fn(async () => true) as any
     releaseAsserts.assertFilteredShortnamesExist = vi.fn(async () => true) as any
+    releaseAsserts.assertReleaseDateIsMoreThanThreeMonthsAway = vi.fn(() => true) as any
   })
 
   describe('getReleases ', () => {
@@ -689,6 +690,36 @@ describe('releasesService ', async () => {
         statregError: 'Missing required field(s): period_from, period_to',
       })
       expect(prismaMock.release.create).toHaveBeenCalledTimes(0)
+    })
+
+    test('rejects when non-admin sets publish time within three months from now', async () => {
+      releaseAsserts.assertReleaseDateIsMoreThanThreeMonthsAway = vi.fn(() => false) as any
+
+      await expect(() =>
+        asyncLocalStorage.run({ isAdmin: false }, () =>
+          createRelease(prismaMock, 'kpi', '1', mockCreateReleaseInput, now)
+        )
+      ).rejects.toMatchObject({
+        statregError: 'Publish time must be later than three months from now',
+      })
+      expect(prismaMock.release.create).toHaveBeenCalledTimes(0)
+    })
+
+    test('allows admin to set publish time within three months from now', async () => {
+      releaseAsserts.assertReleaseDateIsMoreThanThreeMonthsAway = vi.fn(() => false) as any
+      setPrismaResult({
+        ...mockedSingleReleasePrismaResult,
+        id: 1,
+        version: 1,
+        desk_appoval_status: ApprovalStatus.ACCEPTED,
+      })
+
+      await asyncLocalStorage.run({ isAdmin: true }, () =>
+        createRelease(prismaMock, 'kpi', '1', mockCreateReleaseInput, now)
+      )
+
+      expect(releaseAsserts.assertReleaseDateIsMoreThanThreeMonthsAway).not.toHaveBeenCalled()
+      expect(prismaMock.release.create).toHaveBeenCalledTimes(1)
     })
   })
 })
