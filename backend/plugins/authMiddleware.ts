@@ -8,7 +8,7 @@ export function unauthorized(res: Response, message: string) {
 }
 
 export function forbidden(res: Response, message: string) {
-  return res.status(403).json({ message: message })
+  return res.status(403).json({ message })
 }
 
 export function getBearerToken(req: Request): string | null {
