@@ -392,7 +392,7 @@ export async function parseReleaseInput(
   const publishTimeDate = parseDateISO(publish_time, 'publish_time')
   const isAdmin = isCurrentUserAdmin()
 
-  if (!isAdmin && (await isDateBlocked(publishTimeDate.toISOString(), prisma))) {
+  if (!isAdmin && (await isDateBlocked(getDateOnlyAsString(publishTimeDate), prisma))) {
     throw { statregError: 'The given date is full or blocked' }
   }
 
@@ -402,7 +402,6 @@ export async function parseReleaseInput(
   }
 
   // TODO check that release_data_precision is enum
-  // TODO: MIM-2577: Use function for blocked days once it's implemented
   // TODO: Automatic suggestion of period_to and period_from is going to be solved in a seperate task
   return {
     publishTimeDate,

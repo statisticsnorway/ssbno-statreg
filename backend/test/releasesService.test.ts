@@ -750,6 +750,7 @@ describe('releasesService ', async () => {
         createRelease(prismaMock, 'kpi', '1', mockCreateReleaseInput, now)
       )
 
+      expect(isDateBlocked).not.toHaveBeenCalled()
       expect(releaseAsserts.assertReleaseDateIsMoreThanThreeMonthsAway).not.toHaveBeenCalled()
       expect(prismaMock.release.create).toHaveBeenCalledTimes(1)
     })
@@ -764,6 +765,7 @@ describe('releasesService ', async () => {
       ).rejects.toMatchObject({
         statregError: 'The given date is full or blocked',
       })
+      expect(isDateBlocked).toHaveBeenCalledWith(mockCreateReleaseInput.publish_time.slice(0, 10), prismaMock)
       expect(prismaMock.release.create).toHaveBeenCalledTimes(0)
     })
 
