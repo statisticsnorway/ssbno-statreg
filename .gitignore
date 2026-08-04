@@ -9,6 +9,3 @@ coverage/
 .env
 */.env
 .DS_Store
-
-# Local docker compose overrides
-docker-compose.override.yaml
