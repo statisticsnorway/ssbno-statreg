@@ -13,21 +13,21 @@ function holiday(date: string, name: string): BlockedReleaseDate {
   }
 }
 
-export function isDateAutoBlocked(dateString: string): boolean {
-  const date = parseDateOnly(dateString)
+export function isDateAutoBlocked(dateOnlyString: string): boolean {
+  const date = parseDateOnly(dateOnlyString)
   const sunday = 0
   const saturday = 6
   if (date.getUTCDay() === saturday || date.getUTCDay() === sunday) return true
 
-  const year = dateString.slice(0, 4)
+  const year = dateOnlyString.slice(0, 4)
   const holidays = getHolidayDates(Number(year))
 
-  return holidays.includes(dateString)
+  return holidays.includes(dateOnlyString)
 }
 
-export async function isDateBlocked(dateString: string, prisma: CalendarDatePrisma): Promise<boolean> {
-  if (isDateAutoBlocked(dateString)) return true
-  if (!(await assertDayNotManuallyBlocked(prisma, dateString))) return true
+export async function isDateBlocked(dateOnlyString: string, prisma: CalendarDatePrisma): Promise<boolean> {
+  if (isDateAutoBlocked(dateOnlyString)) return true
+  if (!(await assertDayNotManuallyBlocked(prisma, dateOnlyString))) return true
 
   return false
 }
