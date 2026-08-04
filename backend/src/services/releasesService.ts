@@ -21,8 +21,9 @@ import type { Prisma } from '@/generated/prisma/client'
 import { releaseAsserts } from '@/lib/asserts'
 import { checkForKnownPrismaErrors } from '@/lib/prismaErrors'
 import { isCurrentUserAdmin } from '@/lib/context'
+import { isDateBlocked } from '@/lib/blockedDates'
 
-export type ReleasePrisma = Pick<PrismaClient, 'release' | 'statistic' | 'variant' | 'shortname'>
+export type ReleasePrisma = Pick<PrismaClient, 'release' | 'statistic' | 'variant' | 'shortname' | 'calender_date'>
 
 export async function getReleases(
   {
@@ -205,18 +206,12 @@ export async function createRelease(
 ): Promise<ReleaseDetails> {
   const parsedVariantId = parseId(variantId)
   const safeShortname = sanitize(shortname)
-  const isAdmin = isCurrentUserAdmin()
 
   await releaseAsserts.assertStatisticExists(safeShortname, prisma)
   await releaseAsserts.assertVariantExists(parsedVariantId, prisma)
   await releaseAsserts.assertVariantMatchesShortname(parsedVariantId, safeShortname, prisma)
 
-  const { publishTimeDate, periodFromDate, periodToDate, releaseDatePrecision } = parseReleaseInput(body)
-
-  // Non-admins can only create releases with a publish time more than three months from now
-  if (!isAdmin && !releaseAsserts.assertReleaseDateIsMoreThanThreeMonthsAway(publishTimeDate)) {
-    throw { statregError: 'Publish time must be later than three months from now' }
-  }
+  const { publishTimeDate, periodFromDate, periodToDate, releaseDatePrecision } = await parseReleaseInput(prisma, body)
 
   const release = await prisma.release.create({
     data: {
@@ -315,7 +310,7 @@ export async function updateRelease(
 ): Promise<ReleaseDetails> {
   const idAsNumber = parseId(id)
 
-  const validatedInput = parseReleaseInput(body, 'update')
+  const validatedInput = await parseReleaseInput(prisma, body, 'update')
 
   const release = await prisma.release.update({
     include: ReleaseDetailsIncludes,
@@ -375,10 +370,11 @@ type ValidatedReleaseInput = {
   comment: string
 }
 
-export function parseReleaseInput(
+export async function parseReleaseInput(
+  prisma: ReleasePrisma,
   body: ReleaseUpdate | undefined,
   type: 'create' | 'update' = 'create'
-): ValidatedReleaseInput {
+): Promise<ValidatedReleaseInput> {
   const createFields: (keyof ReleaseCreate)[] = ['publish_time', 'period_from', 'period_to', 'release_date_precision']
 
   const requiredFields: (keyof ReleaseUpdate)[] = type === 'create' ? createFields : [...createFields, 'comment']
@@ -393,11 +389,23 @@ export function parseReleaseInput(
     }
   }
 
+  const publishTimeDate = parseDateISO(publish_time, 'publish_time')
+  const isAdmin = isCurrentUserAdmin()
+
+  if (!isAdmin && (await isDateBlocked(publishTimeDate.toISOString(), prisma))) {
+    throw { statregError: 'The given date is full or blocked' }
+  }
+
+  // Non-admins can only create releases with a publish time more than three months from now
+  if (!isAdmin && !releaseAsserts.assertReleaseDateIsMoreThanThreeMonthsAway(publishTimeDate)) {
+    throw { statregError: 'Publish time must be later than three months from now' }
+  }
+
   // TODO check that release_data_precision is enum
   // TODO: MIM-2577: Use function for blocked days once it's implemented
   // TODO: Automatic suggestion of period_to and period_from is going to be solved in a seperate task
   return {
-    publishTimeDate: parseDateISO(publish_time, 'publish_time'),
+    publishTimeDate,
     periodFromDate: parseDateOnly(period_from, 'period_from'),
     periodToDate: parseDateOnly(period_to, 'period_to'),
     releaseDatePrecision: sanitize(release_date_precision!),
