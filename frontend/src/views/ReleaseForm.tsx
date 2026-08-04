@@ -92,9 +92,13 @@ function getCreatedReleaseModalDescription(createdRelease: ReleaseDetails) {
 
 function DateReleasesTable({
   selectedDate,
-  calendarDates,
+  selectedDateStatus,
   apiErrorEmit,
-}: Readonly<{ selectedDate?: Date; calendarDates?: CalenderDate; apiErrorEmit?: (message: string) => void }>) {
+}: Readonly<{
+  selectedDate?: Date
+  selectedDateStatus?: keyof typeof DayStatus
+  apiErrorEmit?: (message: string) => void
+}>) {
   const [releases, setReleases] = useState<ReleaseListing[]>([])
   const [sortBy, setSortBy] = useState<string>('-publish_time')
 
@@ -113,11 +117,6 @@ function DateReleasesTable({
     }
     fetchReleases()
   }, [sortBy, selectedDate, apiErrorEmit])
-
-  const selectedDateStatus =
-    selectedDate &&
-    calendarDates &&
-    (calendarDates?.[getDateOnlyAsString(selectedDate)]?.status as keyof typeof DayStatus)
 
   return (
     <>
@@ -230,15 +229,21 @@ export default function ReleaseForm() {
   const [sameDateReleasesApiError, setSameDateReleasesApiError] = useState<string>('')
 
   const { auth } = useAuth()
+  const isAdmin = auth?.isAdmin ?? false
 
   let submitButtonText = 'Meld dato'
   if (isEditing) {
     submitButtonText = 'Lagre og godkjenn'
 
-    if (!auth?.isAdmin) {
+    if (!isAdmin) {
       submitButtonText = 'Send endringsforslag'
     }
   }
+
+  const selectedDateStatus =
+    values.publishTime &&
+    calendarDates &&
+    (calendarDates?.[getDateOnlyAsString(values.publishTime)]?.status as keyof typeof DayStatus)
 
   // when id exists in url-path, fetch release and prefill form
   useEffect(() => {
@@ -296,8 +301,14 @@ export default function ReleaseForm() {
     if (!values.publishTime) nextErrors.publishTime = 'Opprett en gyldig publiseringsdato'
     if (!values.periodFrom) nextErrors.periodFrom = 'Opprett en gyldig fra-dato'
     if (!values.periodTo) nextErrors.periodTo = 'Opprett en gyldig til-dato'
-    if (!auth?.isAdmin && values.publishTime && values.publishTime < inThreeMonths) {
+    if (!isAdmin && values.publishTime && values.publishTime < inThreeMonths) {
       nextErrors.publishTime = 'Publiseringsdato tidligere enn tre måneder fra dags dato må opprettes av desken'
+    }
+    if (!isAdmin && selectedDateStatus === 'FULL') {
+      nextErrors.publishTime = 'Velg en annen dato som ikke er full, eller kontakt desken@ssb.no'
+    }
+    if (!isAdmin && selectedDateStatus === 'BLOCKED') {
+      nextErrors.publishTime = 'Velg en annen dato som ikke er sperret, eller kontakt desken@ssb.no'
     }
 
     // TODO: MIM-2582: Review comparison logic, error messages, and implement onChange
@@ -367,7 +378,9 @@ export default function ReleaseForm() {
     Boolean
   )
 
-  const showEarlyPublishTimeWarning = auth?.isAdmin && values.publishTime && values.publishTime < inThreeMonths
+  const showEarlyPublishTimeWarning = isAdmin && values.publishTime && values.publishTime < inThreeMonths
+  const showFullPublishDateWarning = isAdmin && selectedDateStatus === 'FULL'
+  const showBlockedPublishDateWarning = isAdmin && selectedDateStatus === 'BLOCKED'
 
   return (
     <>
@@ -414,18 +427,28 @@ export default function ReleaseForm() {
             For kortere frister, kontakt mmj@ssb.no.
           </Field.Description>
           <Input id='publishTime' size={10} {...publishTimePicker.inputProps} aria-invalid={!!errors.publishTime} />
+          {errors.publishTime && <ValidationMessage>{errors.publishTime}</ValidationMessage>}
+          {showEarlyPublishTimeWarning && (
+            <ValidationMessage data-color='warning'>
+              Du har valgt en dato tidligere enn tre måneder fra i dag. Du kan fortsatt melde dato som admin.
+            </ValidationMessage>
+          )}
+          {showFullPublishDateWarning && (
+            <ValidationMessage data-color='warning'>
+              Denne dagen er allerede full. Du kan fortsatt melde dato som admin.
+            </ValidationMessage>
+          )}
+          {showBlockedPublishDateWarning && (
+            <ValidationMessage data-color='warning'>
+              Denne dagen er sperret. Du kan fortsatt melde dato som admin.
+            </ValidationMessage>
+          )}
           <DatePicker
             {...publishTimePicker.datepickerProps}
             showColorCodingExplanation
             calendarDatesEmit={setCalendarDates}
             apiErrorEmit={setCalendarApiError}
           />
-          {errors.publishTime && <ValidationMessage>{errors.publishTime}</ValidationMessage>}
-          {showEarlyPublishTimeWarning && (
-            <ValidationMessage data-color='warning'>
-              Du har valgt en dato tidligere enn tre måneder fra i dag.
-            </ValidationMessage>
-          )}
         </Field>
 
         <Fieldset>
@@ -506,8 +529,8 @@ export default function ReleaseForm() {
       </form>
 
       <ReleaseFormModal
-        modalHeading={getReleaseModalTitle(isEditing, auth?.isAdmin ?? false)}
-        modalDescription={getReleaseModalDescription(isEditing, newOrUpdatedRelease, auth?.isAdmin ?? false)}
+        modalHeading={getReleaseModalTitle(isEditing, isAdmin)}
+        modalDescription={getReleaseModalDescription(isEditing, newOrUpdatedRelease, isAdmin)}
         openCreateReleaseModal={openReleaseModal}
         newOrUpdatedRelease={newOrUpdatedRelease}
         setOpenCreateReleaseModal={setOpenReleaseModal}
@@ -526,7 +549,7 @@ export default function ReleaseForm() {
         <Tabs.Panel className='p-0' value='selected-publish-date'>
           <DateReleasesTable
             selectedDate={values.publishTime}
-            calendarDates={calendarDates}
+            selectedDateStatus={selectedDateStatus}
             apiErrorEmit={setSameDateReleasesApiError}
           />
         </Tabs.Panel>
