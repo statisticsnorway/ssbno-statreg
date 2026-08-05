@@ -27,7 +27,7 @@
 
     .created-variants-container {
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
       gap: var(--ds-size-6);
     }
   }

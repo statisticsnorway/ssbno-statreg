@@ -237,6 +237,13 @@ export default function CreateStatistic() {
 
       {createdShortname && (
         <div className='create-statistic-container'>
+          {openCreateVariantModal && (
+            <CreateVariantModal
+              openCreateVariantModal={openCreateVariantModal}
+              setOpenCreateVariantModal={setOpenCreateVariantModal}
+              setCreatedVariants={setCreatedVariants}
+            />
+          )}
           {apiError.length > 0 && <ErrorAlert message={apiError} />}
           <Alert data-color='success'>
             <Heading level={2} data-size='xs'>
@@ -314,12 +321,12 @@ export default function CreateStatistic() {
             <Paragraph>Legg til variant for å kunne melde publiseringsdato på statistikken</Paragraph>
             {createdVariants.length > 0 && (
               <div className='created-variants-container'>
-                {createdVariants.map((variant, index) => (
+                {createdVariants.map((variant) => (
                   <Card
-                    key={`created-variant-${variant.frequency?.code}-${variant.revision?.code}-${index}`}
+                    key={['created-variant', variant.frequency?.name, variant.revision?.code].join('-')}
                     data-color='neutral'
                     variant='tinted'
-                    style={{ height: '180px' }}
+                    style={{ height: '180px', minWidth: '30%' }}
                   >
                     <Card.Block>
                       <Heading>{formatVariant(variant)}</Heading>
@@ -332,14 +339,7 @@ export default function CreateStatistic() {
                 ))}
               </div>
             )}
-            {openCreateVariantModal && (
-              <CreateVariantModal
-                openCreateVariantModal={openCreateVariantModal}
-                setOpenCreateVariantModal={setOpenCreateVariantModal}
-                setCreatedVariants={setCreatedVariants}
-              />
-            )}
-            <Button variant='secondary' onClick={() => setOpenCreateVariantModal(true)}>
+            <Button type='button' variant='secondary' onClick={() => setOpenCreateVariantModal(true)}>
               <PlusCircleIcon /> Legg til variant
             </Button>
             <Divider />
