@@ -9,13 +9,13 @@ import { ErrorAlert } from '../components/ErrorAlert'
 
 type CreateShortnameModalProps = {
   openCreateShortnameModal: boolean
-  setOpenCreateReleaseModal: (open: boolean) => void
+  setOpenCreateShortnameModal: (open: boolean) => void
   setCreatedShortname: (shortname: string) => void
 }
 
 export function CreateShortnameModal({
   openCreateShortnameModal,
-  setOpenCreateReleaseModal,
+  setOpenCreateShortnameModal,
   setCreatedShortname,
 }: Readonly<CreateShortnameModalProps>) {
   const { auth } = useAuth()
@@ -84,7 +84,7 @@ export function CreateShortnameModal({
       return
     }
     setCreatedShortname(data.shortname)
-    setOpenCreateReleaseModal(false)
+    setOpenCreateShortnameModal(false)
   }
 
   function handleOnSubmit(e: React.ChangeEvent<HTMLFormElement>) {
@@ -95,7 +95,7 @@ export function CreateShortnameModal({
   }
 
   function handleCloseModal() {
-    setOpenCreateReleaseModal(false)
+    setOpenCreateShortnameModal(false)
     navigate(-1) // Navigate back to the previous page
   }
 
