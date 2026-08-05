@@ -224,7 +224,7 @@ export default function CreateStatistic() {
       {openCreateShortnameModal && (
         <CreateShortnameModal
           openCreateShortnameModal={openCreateShortnameModal}
-          setOpenCreateReleaseModal={setOpenCreateShortnameModal}
+          setOpenCreateShortnameModal={setOpenCreateShortnameModal}
           setCreatedShortname={setCreatedShortname}
         />
       )}
