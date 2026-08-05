@@ -449,6 +449,7 @@ export async function createStatistic(
     main_language,
     statistic_region_levels = [],
     comment,
+    variants,
   } = parseCreateStatisticInput(body, createStatisticStatus)
 
   let contacts
@@ -489,6 +490,24 @@ export async function createStatistic(
           connect: contacts.map((contact) => ({ id: contact.id })),
         },
       }),
+      ...(variants?.length
+        ? {
+            variant: {
+              create: variants.map((variant) => ({
+                date_created: now,
+                last_updated: now,
+                revision: variant.revision?.code,
+                frequency: {
+                  connect: {
+                    code: variant.frequency?.code,
+                  },
+                },
+                ...(variant.level_of_detail?.name ? { level_of_detail: variant.level_of_detail.name } : {}),
+                ...(variant.level_of_detail?.name_en ? { level_of_detail_en: variant.level_of_detail.name_en } : {}),
+              })),
+            },
+          }
+        : {}),
     },
     include: StatisticsDetailedIncludes,
   })
