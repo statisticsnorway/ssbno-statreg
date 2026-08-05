@@ -26,14 +26,13 @@ import client from '../api'
 
 import './CreateStatistic.css'
 
-import { isCreateStatisticFieldRequired, ApprovalStatus } from '@ssbno-statreg/shared'
+import { isCreateStatisticFieldRequired, ApprovalStatus, RevisionNames } from '@ssbno-statreg/shared'
 import type { CreatableStatisticStatus, Division, Contact, Variant } from '@ssbno-statreg/shared'
 import ErrorPage, { ErrorType } from './ErrorPage'
 import { ErrorAlert } from '../components/ErrorAlert'
 import { CreateShortnameModal } from '../components/CreateShortnameModal'
 import { ContactSelection } from '../components/ContactSelection'
-import { CreateVariantModal } from '../components/CreateVariantModal'
-import { formatVariant } from '../lib/utils'
+import { FrequencyNames, CreateVariantModal } from '../components/CreateVariantModal'
 
 type StatisticFormValues = {
   status: CreatableStatisticStatus
@@ -325,12 +324,15 @@ export default function CreateStatistic() {
               <div className='created-variants-container'>
                 {createdVariants.map((variant) => (
                   <Card
-                    key={['created-variant', variant.frequency?.name, variant.revision?.code].join('-')}
+                    key={['created-variant', variant.frequency!.name, variant.revision!.code].join('-')}
                     data-color='neutral'
                     variant='tinted'
                   >
                     <Card.Block>
-                      <Heading>{formatVariant(variant)}</Heading>
+                      <Heading>
+                        {FrequencyNames[variant.frequency!.code as keyof typeof FrequencyNames]},
+                        {RevisionNames[variant.revision!.code as keyof typeof RevisionNames]}
+                      </Heading>
                       <Paragraph>
                         Detaljnivå: {variant.level_of_detail?.name} <br />
                         Engelsk detaljnivå: {variant.level_of_detail?.name_en}

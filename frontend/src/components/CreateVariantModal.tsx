@@ -2,7 +2,6 @@ import { useState, type Dispatch, type SetStateAction } from 'react'
 import { Button, Heading, Dialog, Field, Label, Input, Select } from '@digdir/designsystemet-react'
 
 import { RevisionNames, type Variant } from '@ssbno-statreg/shared'
-import { ErrorAlert } from '../components/ErrorAlert'
 
 type CreateVariantModalProps = {
   openCreateVariantModal: boolean
@@ -12,12 +11,13 @@ type CreateVariantModalProps = {
 
 type CreateVariantFormValues = {
   revision_code: string
-  frequency_name: string
+  frequency_code: string
   level_of_detail_name: string
   level_of_detail_name_en: string
 }
 
-const FrequencyNames = {
+// TODO: Fetch from backend/api
+export const FrequencyNames = {
   U: 'Uke',
   M: 'Måned',
   K: 'Kvartal',
@@ -38,32 +38,24 @@ export function CreateVariantModal({
 }: Readonly<CreateVariantModalProps>) {
   const [values, setValues] = useState<CreateVariantFormValues>({
     revision_code: 'I',
-    frequency_name: 'Uke',
+    frequency_code: 'Uke',
     level_of_detail_name: '',
     level_of_detail_name_en: '',
   })
-  const [apiError, setApiError] = useState<string[]>([])
 
-  // TODO: Form submition
-  async function createVariant() {
+  function createVariant() {
     setCreatedVariants((prevVariants: Variant[]) => [
       ...prevVariants,
       {
         revision: { code: values.revision_code },
-        frequency: { name: values.frequency_name },
+        frequency: { code: values.frequency_code },
         level_of_detail: {
           name: values.level_of_detail_name,
           name_en: values.level_of_detail_name_en,
         },
       },
     ])
-    setApiError([])
     handleCloseModal()
-  }
-
-  function handleOnSubmit(e: React.ChangeEvent<HTMLFormElement>) {
-    e.preventDefault()
-    createVariant()
   }
 
   function handleCloseModal() {
@@ -76,59 +68,56 @@ export function CreateVariantModal({
         <Heading data-size='xs'>Legg til variant</Heading>
       </Dialog.Block>
       <Dialog.Block>
-        {apiError.length > 0 && <ErrorAlert message={apiError} />}
-        <form onSubmit={handleOnSubmit}>
-          <Field>
-            <Label>Revisjon</Label>
-            <Select
-              value={values.revision_code}
-              onChange={(e) => setValues((prevValues) => ({ ...prevValues, revision_code: e.target.value }))}
-            >
-              {Object.entries(RevisionNames).map(([code, name]) => (
-                <Select.Option key={`revision-${code}`} value={code}>
-                  {name}
-                </Select.Option>
-              ))}
-            </Select>
-          </Field>
-          {/* TODO: Fetch frequency from api */}
-          <Field>
-            <Label>Frekvens</Label>
-            <Select
-              value={values.frequency_name}
-              onChange={(e) => setValues((prevValues) => ({ ...prevValues, frequency_code: e.target.value }))}
-            >
-              {Object.values(FrequencyNames).map((name) => (
-                <Select.Option key={`frequency-${name}`} value={name}>
-                  {name}
-                </Select.Option>
-              ))}
-            </Select>
-          </Field>
-          <Field>
-            <Label>Detaljnivå</Label>
-            <Field.Description>Nivået på detaljene i publiserte data</Field.Description>
-            <Input
-              value={values.level_of_detail_name}
-              onChange={(e) => setValues((prevValues) => ({ ...prevValues, level_of_detail_name: e.target.value }))}
-            />
-          </Field>
-          <Field>
-            <Label>Detaljnivå på engelsk</Label>
-            <Input
-              value={values.level_of_detail_name_en}
-              onChange={(e) => setValues((prevValues) => ({ ...prevValues, level_of_detail_name_en: e.target.value }))}
-            />
-          </Field>
-          <div style={{ display: 'flex', marginTop: 'var(--ds-size-3)' }}>
-            <Button variant='primary' type='submit'>
-              Legg til
-            </Button>
-            <Button variant='tertiary' onClick={handleCloseModal}>
-              Avbryt
-            </Button>
-          </div>
-        </form>
+        <Field>
+          <Label>Revisjon</Label>
+          <Select
+            value={values.revision_code}
+            onChange={(e) => setValues((prevValues) => ({ ...prevValues, revision_code: e.target.value }))}
+          >
+            {Object.entries(RevisionNames).map(([code, name]) => (
+              <Select.Option key={`revision-${code}`} value={code}>
+                {name}
+              </Select.Option>
+            ))}
+          </Select>
+        </Field>
+        {/* TODO: Fetch frequency from api */}
+        <Field>
+          <Label>Frekvens</Label>
+          <Select
+            value={values.frequency_code}
+            onChange={(e) => setValues((prevValues) => ({ ...prevValues, frequency_code: e.target.value }))}
+          >
+            {Object.values(FrequencyNames).map((name) => (
+              <Select.Option key={`frequency-${name}`} value={name}>
+                {name}
+              </Select.Option>
+            ))}
+          </Select>
+        </Field>
+        <Field>
+          <Label>Detaljnivå</Label>
+          <Field.Description>Nivået på detaljene i publiserte data</Field.Description>
+          <Input
+            value={values.level_of_detail_name}
+            onChange={(e) => setValues((prevValues) => ({ ...prevValues, level_of_detail_name: e.target.value }))}
+          />
+        </Field>
+        <Field>
+          <Label>Detaljnivå på engelsk</Label>
+          <Input
+            value={values.level_of_detail_name_en}
+            onChange={(e) => setValues((prevValues) => ({ ...prevValues, level_of_detail_name_en: e.target.value }))}
+          />
+        </Field>
+        <div style={{ display: 'flex', marginTop: 'var(--ds-size-3)' }}>
+          <Button variant='primary' onClick={createVariant}>
+            Legg til
+          </Button>
+          <Button variant='tertiary' onClick={handleCloseModal}>
+            Avbryt
+          </Button>
+        </div>
       </Dialog.Block>
     </Dialog>
   )
