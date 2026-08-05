@@ -11,7 +11,5 @@ export async function getFrequencies(prisma: FrequencyPrisma): Promise<Frequency
     },
   })
 
-  const result = frequencies.map((frequency) => frequency)
-
-  return result
+  return frequencies.map((frequency) => frequency)
 }
