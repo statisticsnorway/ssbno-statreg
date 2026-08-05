@@ -18,19 +18,22 @@ import {
   ValidationMessage,
   Tag,
   ErrorSummary,
+  Card,
 } from '@digdir/designsystemet-react'
-import { QuestionmarkCircleIcon } from '@navikt/aksel-icons'
+import { QuestionmarkCircleIcon, PlusCircleIcon } from '@navikt/aksel-icons'
 
 import client from '../api'
 
 import './CreateStatistic.css'
 
 import { isCreateStatisticFieldRequired, ApprovalStatus } from '@ssbno-statreg/shared'
-import type { CreatableStatisticStatus, Division, Contact } from '@ssbno-statreg/shared'
+import type { CreatableStatisticStatus, Division, Contact, Variant } from '@ssbno-statreg/shared'
 import ErrorPage, { ErrorType } from './ErrorPage'
 import { ErrorAlert } from '../components/ErrorAlert'
 import { CreateShortnameModal } from '../components/CreateShortnameModal'
 import { ContactSelection } from '../components/ContactSelection'
+import { CreateVariantModal } from '../components/CreateVariantModal'
+import { formatVariant } from '../lib/utils'
 
 type StatisticFormValues = {
   status: CreatableStatisticStatus
@@ -50,6 +53,9 @@ export default function CreateStatistic() {
   const [divisions, setDivisions] = useState<Division[]>([])
   const [contacts, setContacts] = useState<Contact[]>([])
   const [selectedContacts, setSelectedContacts] = useState<string[]>([])
+
+  const [openCreateVariantModal, setOpenCreateVariantModal] = useState<boolean>(false)
+  const [createdVariants, setCreatedVariants] = useState<Variant[]>([])
 
   const { getCheckboxProps, value: regionLevelValues } = useCheckboxGroup({
     name: 'region-level-checkbox',
@@ -303,6 +309,39 @@ export default function CreateStatistic() {
                 onChange={(e) => setValues((prevValues) => ({ ...prevValues, name_en: e.target.value }))}
               />
             </Field>
+            <Divider />
+            <Heading level={2}>Variant</Heading>
+            <Paragraph>Legg til variant for å kunne melde publiseringsdato på statistikken</Paragraph>
+            {createdVariants.length > 0 && (
+              <div className='created-variants-container'>
+                {createdVariants.map((variant, index) => (
+                  <Card
+                    key={`created-variant-${variant.frequency?.code}-${variant.revision?.code}-${index}`}
+                    data-color='neutral'
+                    variant='tinted'
+                    style={{ height: '180px' }}
+                  >
+                    <Card.Block>
+                      <Heading>{formatVariant(variant)}</Heading>
+                      <Paragraph>
+                        Detaljnivå: {variant.level_of_detail?.name} <br />
+                        Engelsk detaljnivå: {variant.level_of_detail?.name_en}
+                      </Paragraph>
+                    </Card.Block>
+                  </Card>
+                ))}
+              </div>
+            )}
+            {openCreateVariantModal && (
+              <CreateVariantModal
+                openCreateVariantModal={openCreateVariantModal}
+                setOpenCreateVariantModal={setOpenCreateVariantModal}
+                setCreatedVariants={setCreatedVariants}
+              />
+            )}
+            <Button variant='secondary' onClick={() => setOpenCreateVariantModal(true)}>
+              <PlusCircleIcon /> Legg til variant
+            </Button>
             <Divider />
             <div className='contact-section'>
               <Heading level={2} data-size='xs'>

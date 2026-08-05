@@ -1,13 +1,13 @@
-import { useState } from 'react'
+import { useState, type Dispatch, type SetStateAction } from 'react'
 import { Button, Heading, Dialog, Field, Label, Input, Select } from '@digdir/designsystemet-react'
 
-import { RevisionNames, FrequencyNames, type Variant } from '@ssbno-statreg/shared'
+import { RevisionNames, type Variant } from '@ssbno-statreg/shared'
 import { ErrorAlert } from '../components/ErrorAlert'
 
 type CreateVariantModalProps = {
   openCreateVariantModal: boolean
   setOpenCreateVariantModal: (open: boolean) => void
-  setCreatedVariant: (variant: Variant) => void
+  setCreatedVariants: Dispatch<SetStateAction<Variant[]>>
 }
 
 type CreateVariantFormValues = {
@@ -17,10 +17,24 @@ type CreateVariantFormValues = {
   level_of_detail_name_en: string
 }
 
+const FrequencyNames = {
+  U: 'Uke',
+  M: 'Måned',
+  K: 'Kvartal',
+  H: 'Halvår',
+  A: 'År',
+  '2A': 'Hvert 2 år',
+  '3A': 'Hvert 3 år',
+  '4A': 'Hvert 4 år',
+  '5A': 'Hvert 5 år',
+  '10A': 'Hvert 10 år',
+  T: 'Termin',
+} as const
+
 export function CreateVariantModal({
   openCreateVariantModal,
   setOpenCreateVariantModal,
-  setCreatedVariant,
+  setCreatedVariants,
 }: Readonly<CreateVariantModalProps>) {
   const [values, setValues] = useState<CreateVariantFormValues>({
     revision_code: 'I',
@@ -32,14 +46,17 @@ export function CreateVariantModal({
 
   // TODO: Form submition
   async function createVariant() {
-    setCreatedVariant({
-      revision: { code: values.revision_code },
-      frequency: { code: values.frequency_code },
-      level_of_detail: {
-        name: values.level_of_detail_name,
-        name_en: values.level_of_detail_name_en,
+    setCreatedVariants((prevVariants: Variant[]) => [
+      ...prevVariants,
+      {
+        revision: { code: values.revision_code },
+        frequency: { code: values.frequency_code },
+        level_of_detail: {
+          name: values.level_of_detail_name,
+          name_en: values.level_of_detail_name_en,
+        },
       },
-    })
+    ])
     setApiError([])
   }
 
@@ -68,7 +85,7 @@ export function CreateVariantModal({
             >
               {Object.entries(RevisionNames).map(([code, name]) => (
                 <Select.Option key={`revision-${code}`} value={code}>
-                  {name} ({code})
+                  {name}
                 </Select.Option>
               ))}
             </Select>
@@ -82,13 +99,14 @@ export function CreateVariantModal({
             >
               {Object.entries(FrequencyNames).map(([code, name]) => (
                 <Select.Option key={`frequency-${code}`} value={code}>
-                  {name} ({code})
+                  {name}
                 </Select.Option>
               ))}
             </Select>
           </Field>
           <Field>
             <Label>Detaljnivå</Label>
+            <Field.Description>Nivået på detaljene i publiserte data</Field.Description>
             <Input
               value={values.level_of_detail_name}
               onChange={(e) => setValues((prevValues) => ({ ...prevValues, level_of_detail_name: e.target.value }))}
