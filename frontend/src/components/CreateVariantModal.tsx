@@ -1,5 +1,5 @@
 import { useState, type Dispatch, type SetStateAction } from 'react'
-import { Button, Heading, Dialog, Field, Label, Input, Select } from '@digdir/designsystemet-react'
+import { Button, Heading, Dialog, Field, Label, Input, Select, Paragraph } from '@digdir/designsystemet-react'
 
 import { RevisionNames, type Variant } from '@ssbno-statreg/shared'
 
@@ -16,7 +16,7 @@ type CreateVariantFormValues = {
   level_of_detail_name_en: string
 }
 
-// TODO: Fetch from backend/api
+// TODO: MIM-2980: Fetch from backend/api
 export const FrequencyNames = {
   U: 'Uke',
   M: 'Måned',
@@ -67,7 +67,11 @@ export function CreateVariantModal({
       <Dialog.Block>
         <Heading data-size='xs'>Legg til variant</Heading>
       </Dialog.Block>
-      <Dialog.Block>
+      <Dialog.Block style={{ display: 'flex', flexDirection: 'column', gap: 'var(--ds-size-9)' }}>
+        <Paragraph>
+          En variant definerer frekvens og detaljnivå for statistikken. Du trenger minst én variant for å kunne melde
+          publiseringsdato.
+        </Paragraph>
         <Field>
           <Label>Revisjon</Label>
           <Select
@@ -81,7 +85,7 @@ export function CreateVariantModal({
             ))}
           </Select>
         </Field>
-        {/* TODO: Fetch frequency from api */}
+        {/* TODO: MIM-2980: Fetch frequency from api and update respective components */}
         <Field>
           <Label>Frekvens</Label>
           <Select
@@ -110,7 +114,7 @@ export function CreateVariantModal({
             onChange={(e) => setValues((prevValues) => ({ ...prevValues, level_of_detail_name_en: e.target.value }))}
           />
         </Field>
-        <div style={{ display: 'flex', marginTop: 'var(--ds-size-3)' }}>
+        <div style={{ display: 'flex', marginTop: 'var(--ds-size-3)', gap: 'var(--ds-size-6)' }}>
           <Button variant='primary' onClick={createVariant}>
             Legg til
           </Button>
