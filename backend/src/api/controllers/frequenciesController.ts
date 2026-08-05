@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { handleErrors } from '@/lib/prismaErrors'
-import { getFrequencies } from '@/services/frequencyService'
+import { getFrequencies } from '@/services/frequenciesService'
 import { Router } from 'express'
 
 export default function frequencyController(router: Router) {
