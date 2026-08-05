@@ -324,14 +324,15 @@ export default function CreateStatistic() {
               <div className='created-variants-container'>
                 {createdVariants.map((variant) => (
                   <Card
-                    key={['created-variant', variant.frequency!.name, variant.revision!.code].join('-')}
+                    key={['created-variant', variant.frequency!.code, variant.revision!.code].join('-')}
                     data-color='neutral'
                     variant='tinted'
                   >
                     <Card.Block>
                       <Heading>
-                        {FrequencyNames[variant.frequency!.code as keyof typeof FrequencyNames]},
-                        {RevisionNames[variant.revision!.code as keyof typeof RevisionNames]}
+                        {FrequencyNames[variant.frequency!.code as keyof typeof FrequencyNames]}
+                        {', '}
+                        {RevisionNames[variant.revision!.code as keyof typeof RevisionNames].toLocaleLowerCase()}
                       </Heading>
                       <Paragraph>
                         Detaljnivå: {variant.level_of_detail?.name} <br />

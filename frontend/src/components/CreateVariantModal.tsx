@@ -38,7 +38,7 @@ export function CreateVariantModal({
 }: Readonly<CreateVariantModalProps>) {
   const [values, setValues] = useState<CreateVariantFormValues>({
     revision_code: 'I',
-    frequency_code: 'Uke',
+    frequency_code: 'U',
     level_of_detail_name: '',
     level_of_detail_name_en: '',
   })
@@ -88,8 +88,8 @@ export function CreateVariantModal({
             value={values.frequency_code}
             onChange={(e) => setValues((prevValues) => ({ ...prevValues, frequency_code: e.target.value }))}
           >
-            {Object.values(FrequencyNames).map((name) => (
-              <Select.Option key={`frequency-${name}`} value={name}>
+            {Object.entries(FrequencyNames).map(([code, name]) => (
+              <Select.Option key={`frequency-${name}`} value={code}>
                 {name}
               </Select.Option>
             ))}
