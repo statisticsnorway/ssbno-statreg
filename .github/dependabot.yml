@@ -21,6 +21,8 @@ updates:
     dependencies-minor-updates:
       update-types:
       - "minor"
+  cooldown:
+    default-days: 7
 - package-ecosystem: "github-actions"
   directory: "/"
   schedule:
@@ -34,3 +36,5 @@ updates:
     interval: "weekly"
   commit-message: 
     prefix: "build: "
+  cooldown:
+    default-days: 7
