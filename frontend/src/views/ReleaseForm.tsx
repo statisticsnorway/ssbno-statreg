@@ -227,6 +227,7 @@ export default function ReleaseForm() {
   const [calendarApiError, setCalendarApiError] = useState<string>('')
   const [variantReleasesApiError, setVariantReleasesApiError] = useState<string>('')
   const [sameDateReleasesApiError, setSameDateReleasesApiError] = useState<string>('')
+  const [approvalStatus, setApprovalStatus] = useState<string>(ApprovalStatus.PENDING)
 
   const { auth } = useAuth()
   const isAdmin = auth?.isAdmin ?? false
@@ -262,6 +263,7 @@ export default function ReleaseForm() {
         comment: '',
       }
 
+      setApprovalStatus(response?.approval_status ?? ApprovalStatus.PENDING)
       setValues(loaded)
       publishTimePicker.setSelected(loaded.publishTime)
       periodFromPicker.setSelected(loaded.periodFrom)
@@ -392,7 +394,7 @@ export default function ReleaseForm() {
         <Heading data-size='xs' level={2}>
           {statistic?.name} ({statistic?.shortname}) og {variant?.frequency?.name?.toLowerCase()}
         </Heading>
-        <ApprovalStatusTag status={statistic?.approval_status ?? ApprovalStatus.PENDING} />
+        <ApprovalStatusTag status={approvalStatus} />
       </div>
 
       <form onSubmit={handleOnSubmit} className='release-form'>
