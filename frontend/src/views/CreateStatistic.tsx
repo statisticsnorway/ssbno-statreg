@@ -317,8 +317,10 @@ export default function CreateStatistic() {
               />
             </Field>
             <Divider />
-            <Heading level={2}>Variant</Heading>
-            <Paragraph>Legg til variant for å kunne melde publiseringsdato på statistikken</Paragraph>
+            <div className='created-variants-title-container'>
+              <Heading level={2}>Variant</Heading>
+              <Paragraph>Legg til variant for å kunne melde publiseringsdato på statistikken</Paragraph>
+            </div>
             {createdVariants.length > 0 && (
               <div className='created-variants-container'>
                 {createdVariants.map((variant) => (
@@ -326,7 +328,6 @@ export default function CreateStatistic() {
                     key={['created-variant', variant.frequency?.name, variant.revision?.code].join('-')}
                     data-color='neutral'
                     variant='tinted'
-                    style={{ height: '180px', minWidth: '30%' }}
                   >
                     <Card.Block>
                       <Heading>{formatVariant(variant)}</Heading>

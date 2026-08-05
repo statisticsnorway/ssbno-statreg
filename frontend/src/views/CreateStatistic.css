@@ -29,6 +29,11 @@
       display: flex;
       flex-direction: row;
       gap: var(--ds-size-6);
+
+      > * {
+        height: 180px;
+        min-width: 30%;
+      }
     }
   }
 
