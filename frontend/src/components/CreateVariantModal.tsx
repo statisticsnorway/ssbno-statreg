@@ -1,6 +1,7 @@
 import { useState, type Dispatch, type SetStateAction } from 'react'
 import { Button, Heading, Dialog, Field, Label, Input, Select, Paragraph } from '@digdir/designsystemet-react'
 
+import './CreateVariantModal.css'
 import { RevisionNames, type Variant } from '@ssbno-statreg/shared'
 
 type CreateVariantModalProps = {
@@ -67,7 +68,7 @@ export function CreateVariantModal({
       <Dialog.Block>
         <Heading data-size='xs'>Legg til variant</Heading>
       </Dialog.Block>
-      <Dialog.Block style={{ display: 'flex', flexDirection: 'column', gap: 'var(--ds-size-9)' }}>
+      <Dialog.Block className='create-variant-modal-form'>
         <Paragraph>
           En variant definerer frekvens og detaljnivå for statistikken. Du trenger minst én variant for å kunne melde
           publiseringsdato.
@@ -114,7 +115,7 @@ export function CreateVariantModal({
             onChange={(e) => setValues((prevValues) => ({ ...prevValues, level_of_detail_name_en: e.target.value }))}
           />
         </Field>
-        <div style={{ display: 'flex', marginTop: 'var(--ds-size-3)', gap: 'var(--ds-size-6)' }}>
+        <div className='create-variant-modal-form-buttons'>
           <Button variant='primary' onClick={createVariant}>
             Legg til
           </Button>
