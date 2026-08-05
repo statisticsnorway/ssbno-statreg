@@ -23,6 +23,21 @@ export const RevisionNames = {
   IG: 'Integrert',
 } as const
 
+// TODO: Burde hentes fra api endepunkt
+export const FrequencyNames = {
+  U: 'Uke',
+  M: 'Måned',
+  K: 'Kvartal',
+  H: 'Halvår',
+  A: 'År',
+  '2A': 'Hvert 2 år',
+  '3A': 'Hvert 3 år',
+  '4A': 'Hvert 4 år',
+  '5A': 'Hvert 5 år',
+  '10A': 'Hvert 10 år',
+  T: 'Termin',
+} as const
+
 export const DayStatus = {
   BLOCKED: 'Sperret',
   NONE: 'Ledig',
