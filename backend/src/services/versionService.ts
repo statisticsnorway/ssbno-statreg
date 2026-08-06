@@ -34,7 +34,7 @@ function auditlogEntryToVersion(entry: Prisma.AuditLogGetPayload<null>): Version
   const oldObject = entry.old_value ? JSON.parse(entry.old_value) : {}
   const newObject = entry.new_value ? JSON.parse(entry.new_value) : {}
   return {
-    change_type: entry.event_name as 'create' | 'update' | 'delete',
+    change_type: entry.event_name,
     changed_at: entry.last_updated.toISOString(),
     changed_by: entry.actor,
     changed_values: entry.event_name === 'update' ? diffObjects(oldObject, newObject) : undefined,
