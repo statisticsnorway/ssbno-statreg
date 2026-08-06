@@ -50,7 +50,7 @@ function auditlogEntryToVersion(entry: AuditLogEntry): Version {
     changed_at: entry.last_updated.toISOString(),
     changed_by: entry.actor,
     changed_values: entry.event_name === 'update' ? diffObjects(oldObject, newObject) : undefined,
-    comment: newObject.comment ?? '', // TODO comment should be part of audit log entry
+    comment: newObject.comment ?? '',
   }
 }
 
@@ -64,7 +64,6 @@ export async function getVersions(resourceType: string, id: number, prisma: Vers
       last_updated: 'desc',
     },
   })
-
   return entries.map(auditlogEntryToVersion)
 }
 
