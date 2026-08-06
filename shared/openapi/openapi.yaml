@@ -556,51 +556,6 @@ paths:
         default:
           $ref: '#/components/responses/Error'
 
-  /statistics/{shortname}/variants:
-    post:
-      summary: Create a variant on a spesific statistic
-      tags: [statistics]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: '#/components/schemas/Variant' }
-      responses:
-        '201':
-          description: The created variant
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/Variant' }
-        default:
-          $ref: '#/components/responses/Error'
-  /statistics/{shortname}/variants/{id}:
-    put:
-      summary: Update a variant
-      tags: [statistics]
-      parameters:
-        - name: shortname
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: '#/components/schemas/Variant' }
-      responses:
-        '200':
-          description: Updated variant details
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/Variant' }
-        default:
-          $ref: '#/components/responses/Error'
   /statistics/{shortname}/variants/{id}/releases:
     get:
       summary: List all releases for one variant
