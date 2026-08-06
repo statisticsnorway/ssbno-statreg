@@ -1194,12 +1194,13 @@ export interface components {
       contacts?: components['schemas']['Contact'][]
     } & components['schemas']['Statistic']
     Version: {
-      /** @enum {string} */
-      change_type: 'create' | 'update' | 'delete'
+      /** @description One of "create", "update" or "delete". */
+      change_type: string
       /** Format: date-time */
       changed_at: string
       /** @description The principal name of the user who made the change. */
       changed_by: string
+      comment?: string
       changed_values: {
         /** @description The name of the field that changed. */
         field_name: string
@@ -1208,7 +1209,6 @@ export interface components {
         /** @description Human-readable version of the new value. Null if change_type is "delete". */
         new_value: string | null
       }[]
-      comment?: string
     }
     Variant: {
       readonly id?: number

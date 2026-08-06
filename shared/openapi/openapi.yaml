@@ -387,11 +387,10 @@ components:
         - changed_by
         - changed_values
       properties:
-        change_type:
-          type: string
-          enum: [create, update, delete]
+        change_type: { type: string, description: 'One of "create", "update" or "delete".' }
         changed_at: { type: string, format: date-time }
         changed_by: { type: string, description: 'The principal name of the user who made the change.' }
+        comment: { type: string }
         changed_values:
           type: array
           items:
@@ -412,7 +411,6 @@ components:
                   type: [string, 'null'],
                   description: 'Human-readable version of the new value. Null if change_type is "delete".',
                 }
-        comment: { type: string }
 
     Variant:
       type: object
