@@ -30,7 +30,7 @@ function diffObjects(
   return changes
 }
 
-function auditlogEntryToVersion(entry: Prisma.AuditLogGetPayload<{}>): Version {
+function auditlogEntryToVersion(entry: Prisma.AuditLogGetPayload<null>): Version {
   const oldObject = entry.old_value ? JSON.parse(entry.old_value) : {}
   const newObject = entry.new_value ? JSON.parse(entry.new_value) : {}
   return {
