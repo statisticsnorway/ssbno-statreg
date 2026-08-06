@@ -1,8 +1,11 @@
-import { useState, type Dispatch, type SetStateAction } from 'react'
+import { useState, useEffect, type Dispatch, type SetStateAction } from 'react'
 import { Button, Heading, Dialog, Field, Label, Input, Select, Paragraph } from '@digdir/designsystemet-react'
 
 import './CreateVariantModal.css'
-import { RevisionNames, type Variant } from '@ssbno-statreg/shared'
+import client from '../api'
+import { RevisionNames, type Frequency, type Variant } from '@ssbno-statreg/shared'
+import { useAuth } from '../context/AuthContext'
+import { ErrorAlert } from '../components/ErrorAlert'
 
 type CreateVariantModalProps = {
   openCreateVariantModal: boolean
@@ -17,32 +20,35 @@ type CreateVariantFormValues = {
   level_of_detail_name_en: string
 }
 
-// TODO: MIM-2980: Fetch from backend/api
-export const FrequencyNames = {
-  U: 'Uke',
-  M: 'Måned',
-  K: 'Kvartal',
-  H: 'Halvår',
-  A: 'År',
-  '2A': 'Hvert 2 år',
-  '3A': 'Hvert 3 år',
-  '4A': 'Hvert 4 år',
-  '5A': 'Hvert 5 år',
-  '10A': 'Hvert 10 år',
-  T: 'Termin',
-} as const
-
 export function CreateVariantModal({
   openCreateVariantModal,
   setOpenCreateVariantModal,
   setCreatedVariants,
 }: Readonly<CreateVariantModalProps>) {
+  const { auth } = useAuth()
+  const isAdmin = auth?.isAdmin ?? false
+
+  const [frequencies, setFrequencies] = useState<Frequency[]>([])
+  const [apiError, setApiError] = useState<string[]>([])
   const [values, setValues] = useState<CreateVariantFormValues>({
     revision_code: 'I',
     frequency_code: 'U',
     level_of_detail_name: '',
     level_of_detail_name_en: '',
   })
+
+  useEffect(() => {
+    if (!isAdmin) return
+    async function fetchFrequencies() {
+      const { data, error } = await client.GET('/frequencies')
+      if (error) {
+        setApiError((prev) => [...prev, error.message])
+        return
+      }
+      setFrequencies(data)
+    }
+    fetchFrequencies()
+  }, [isAdmin])
 
   function createVariant() {
     setCreatedVariants((prevVariants: Variant[]) => [
@@ -69,6 +75,7 @@ export function CreateVariantModal({
         <Heading data-size='xs'>Legg til variant</Heading>
       </Dialog.Block>
       <Dialog.Block className='create-variant-modal-form'>
+        {apiError.length > 0 && <ErrorAlert message={apiError} />}
         <Paragraph>
           En variant definerer frekvens og detaljnivå for statistikken. Du trenger minst én variant for å kunne melde
           publiseringsdato.
@@ -86,15 +93,14 @@ export function CreateVariantModal({
             ))}
           </Select>
         </Field>
-        {/* TODO: MIM-2980: Fetch frequency from api and update respective components */}
         <Field>
           <Label>Frekvens</Label>
           <Select
             value={values.frequency_code}
             onChange={(e) => setValues((prevValues) => ({ ...prevValues, frequency_code: e.target.value }))}
           >
-            {Object.entries(FrequencyNames).map(([code, name]) => (
-              <Select.Option key={`frequency-${name}`} value={code}>
+            {frequencies.map(({ code, name }) => (
+              <Select.Option key={`frequency-${code}`} value={code}>
                 {name}
               </Select.Option>
             ))}
