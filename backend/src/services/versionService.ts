@@ -6,42 +6,27 @@ export type VersionPrisma = Pick<PrismaClient, 'auditLog' | 'statistic' | 'short
 
 export type ChangedValue = {
   field_name: string
-  old_value: string | null
-  new_value: string | null
+  old_value: string
+  new_value: string
 }
 
 export type Version = {
   change_type: 'create' | 'update' | 'delete'
   changed_at: string
   changed_by: string
-  changed_values: ChangedValue[]
+  changed_values?: ChangedValue[]
   comment?: string
 }
 
 type AuditLogEntry = Prisma.AuditLogGetPayload<Record<string, never>>
 
-function diffObjects(oldJson: string | null, newJson: string | null, eventName: string): ChangedValue[] {
-  const oldObject = oldJson ? JSON.parse(oldJson) : {}
-  const newObject = newJson ? JSON.parse(newJson) : {}
-
-  if (eventName === 'create') {
-    return Object.entries(newObject).map(([key, value]) => ({
-      field_name: key,
-      old_value: null,
-      new_value: JSON.stringify(value),
-    }))
-  }
-
-  if (eventName === 'delete') {
-    return Object.entries(oldObject).map(([key, value]) => ({
-      field_name: key,
-      old_value: JSON.stringify(value),
-      new_value: null,
-    }))
-  }
-
+function diffObjects(oldObject: Record<string, unknown>, newObject: Record<string, unknown>): ChangedValue[] {
   const changes: ChangedValue[] = []
   for (const key of Object.keys(oldObject)) {
+    if (key === 'comment') {
+      continue
+    }
+
     const oldValue = oldObject[key]
     const newValue = newObject[key]
 
@@ -58,21 +43,18 @@ function diffObjects(oldJson: string | null, newJson: string | null, eventName: 
 }
 
 function auditlogEntryToVersion(entry: AuditLogEntry): Version {
+  const oldObject = entry.old_value ? JSON.parse(entry.old_value) : {}
+  const newObject = entry.new_value ? JSON.parse(entry.new_value) : {}
   return {
     change_type: entry.event_name as 'create' | 'update' | 'delete',
     changed_at: entry.last_updated.toISOString(),
     changed_by: entry.actor,
-    changed_values: diffObjects(entry.old_value, entry.new_value, entry.event_name),
+    changed_values: entry.event_name === 'update' ? diffObjects(oldObject, newObject) : undefined,
+    comment: newObject.comment ?? '', // TODO comment should be part of audit log entry
   }
 }
 
 export async function getVersions(resourceType: string, id: number, prisma: VersionPrisma): Promise<Version[]> {
-  const where = {
-    class_name: resourceType,
-    persisted_object_id: id,
-  }
-
-  console.log(where)
   const entries = await prisma.auditLog.findMany({
     where: {
       class_name: resourceType,
@@ -82,8 +64,6 @@ export async function getVersions(resourceType: string, id: number, prisma: Vers
       last_updated: 'desc',
     },
   })
-
-  console.log(entries)
 
   return entries.map(auditlogEntryToVersion)
 }
