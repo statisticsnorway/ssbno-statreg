@@ -4,7 +4,6 @@ import { Button, Heading, Dialog, Field, Label, Input, Select, Paragraph } from 
 import './CreateVariantModal.css'
 import client from '../api'
 import { RevisionNames, type Frequency, type Variant } from '@ssbno-statreg/shared'
-import { useAuth } from '../context/AuthContext'
 import { ErrorAlert } from '../components/ErrorAlert'
 
 type CreateVariantModalProps = {
@@ -25,9 +24,6 @@ export function CreateVariantModal({
   setOpenCreateVariantModal,
   setCreatedVariants,
 }: Readonly<CreateVariantModalProps>) {
-  const { auth } = useAuth()
-  const isAdmin = auth?.isAdmin ?? false
-
   const [frequencies, setFrequencies] = useState<Frequency[]>([])
   const [apiError, setApiError] = useState<string[]>([])
   const [values, setValues] = useState<CreateVariantFormValues>({
@@ -38,7 +34,6 @@ export function CreateVariantModal({
   })
 
   useEffect(() => {
-    if (!isAdmin) return
     async function fetchFrequencies() {
       const { data, error } = await client.GET('/frequencies')
       if (error) {
@@ -48,7 +43,7 @@ export function CreateVariantModal({
       setFrequencies(data)
     }
     fetchFrequencies()
-  }, [isAdmin])
+  }, [])
 
   function createVariant() {
     const selectedFrequency = frequencies.find(({ code }) => code === values.frequency_code)
