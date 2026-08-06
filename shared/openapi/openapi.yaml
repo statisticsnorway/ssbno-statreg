@@ -385,7 +385,6 @@ components:
         - change_type
         - changed_at
         - changed_by
-        - changed_values
       properties:
         change_type: { type: string, description: 'One of "create", "update" or "delete".' }
         changed_at: { type: string, format: date-time }
@@ -393,6 +392,7 @@ components:
         comment: { type: string }
         changed_values:
           type: array
+          description: 'Only present when change_type is "update".'
           items:
             type: object
             required:
@@ -403,13 +403,13 @@ components:
               field_name: { type: string, description: 'The name of the field that changed.' }
               old_value:
                 {
-                  type: [string, 'null'],
-                  description: 'Human-readable version of the old value. Null if change_type is "create".',
+                  type: string,
+                  description: 'Human-readable version of the old value.',
                 }
               new_value:
                 {
-                  type: [string, 'null'],
-                  description: 'Human-readable version of the new value. Null if change_type is "delete".',
+                  type: string,
+                  description: 'Human-readable version of the new value.',
                 }
 
     Variant:

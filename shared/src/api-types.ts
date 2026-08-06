@@ -1116,13 +1116,14 @@ export interface components {
       /** @description The principal name of the user who made the change. */
       changed_by: string
       comment?: string
-      changed_values: {
+      /** @description Only present when change_type is "update". */
+      changed_values?: {
         /** @description The name of the field that changed. */
         field_name: string
-        /** @description Human-readable version of the old value. Null if change_type is "create". */
-        old_value: string | null
-        /** @description Human-readable version of the new value. Null if change_type is "delete". */
-        new_value: string | null
+        /** @description Human-readable version of the old value. */
+        old_value: string
+        /** @description Human-readable version of the new value. */
+        new_value: string
       }[]
     }
     Variant: {
