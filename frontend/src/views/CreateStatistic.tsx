@@ -18,19 +18,21 @@ import {
   ValidationMessage,
   Tag,
   ErrorSummary,
+  Card,
 } from '@digdir/designsystemet-react'
-import { QuestionmarkCircleIcon } from '@navikt/aksel-icons'
+import { QuestionmarkCircleIcon, PlusCircleIcon } from '@navikt/aksel-icons'
 
 import client from '../api'
 
 import './CreateStatistic.css'
 
-import { isCreateStatisticFieldRequired, ApprovalStatus } from '@ssbno-statreg/shared'
-import type { CreatableStatisticStatus, Division, Contact } from '@ssbno-statreg/shared'
+import { isCreateStatisticFieldRequired, ApprovalStatus, RevisionNames } from '@ssbno-statreg/shared'
+import type { CreatableStatisticStatus, Division, Contact, Variant } from '@ssbno-statreg/shared'
 import ErrorPage, { ErrorType } from './ErrorPage'
 import { ErrorAlert } from '../components/ErrorAlert'
 import { CreateShortnameModal } from '../components/CreateShortnameModal'
 import { ContactSelection } from '../components/ContactSelection'
+import { FrequencyNames, CreateVariantModal } from '../components/CreateVariantModal'
 
 type StatisticFormValues = {
   status: CreatableStatisticStatus
@@ -50,6 +52,9 @@ export default function CreateStatistic() {
   const [divisions, setDivisions] = useState<Division[]>([])
   const [contacts, setContacts] = useState<Contact[]>([])
   const [selectedContacts, setSelectedContacts] = useState<string[]>([])
+
+  const [openCreateVariantModal, setOpenCreateVariantModal] = useState<boolean>(false)
+  const [createdVariants, setCreatedVariants] = useState<Variant[]>([])
 
   const { getCheckboxProps, value: regionLevelValues } = useCheckboxGroup({
     name: 'region-level-checkbox',
@@ -224,13 +229,20 @@ export default function CreateStatistic() {
       {openCreateShortnameModal && (
         <CreateShortnameModal
           openCreateShortnameModal={openCreateShortnameModal}
-          setOpenCreateReleaseModal={setOpenCreateShortnameModal}
+          setOpenCreateShortnameModal={setOpenCreateShortnameModal}
           setCreatedShortname={setCreatedShortname}
         />
       )}
 
       {createdShortname && (
         <div className='create-statistic-container'>
+          {openCreateVariantModal && (
+            <CreateVariantModal
+              openCreateVariantModal={openCreateVariantModal}
+              setOpenCreateVariantModal={setOpenCreateVariantModal}
+              setCreatedVariants={setCreatedVariants}
+            />
+          )}
           {apiError.length > 0 && <ErrorAlert message={apiError} />}
           <Alert data-color='success'>
             <Heading level={2} data-size='xs'>
@@ -303,6 +315,37 @@ export default function CreateStatistic() {
                 onChange={(e) => setValues((prevValues) => ({ ...prevValues, name_en: e.target.value }))}
               />
             </Field>
+            <Divider />
+            <div className='created-variants-title-container'>
+              <Heading level={2}>Variant</Heading>
+              <Paragraph>Legg til variant for å kunne melde publiseringsdato på statistikken</Paragraph>
+            </div>
+            {createdVariants.length > 0 && (
+              <div className='created-variants-container'>
+                {createdVariants.map((variant) => (
+                  <Card
+                    key={['created-variant', variant.frequency!.code, variant.revision!.code].join('-')}
+                    data-color='neutral'
+                    variant='tinted'
+                  >
+                    <Card.Block>
+                      <Heading>
+                        {FrequencyNames[variant.frequency!.code as keyof typeof FrequencyNames]}
+                        {', '}
+                        {RevisionNames[variant.revision!.code as keyof typeof RevisionNames].toLocaleLowerCase()}
+                      </Heading>
+                      <Paragraph>
+                        Detaljnivå: {variant.level_of_detail?.name} <br />
+                        Engelsk detaljnivå: {variant.level_of_detail?.name_en}
+                      </Paragraph>
+                    </Card.Block>
+                  </Card>
+                ))}
+              </div>
+            )}
+            <Button type='button' variant='secondary' onClick={() => setOpenCreateVariantModal(true)}>
+              <PlusCircleIcon /> Legg til variant
+            </Button>
             <Divider />
             <div className='contact-section'>
               <Heading level={2} data-size='xs'>
