@@ -652,7 +652,6 @@ describe('statisticService', () => {
       })
       expect(result).toStrictEqual([
         {
-          cancelled: false,
           frequency: {
             code: 'M',
           },

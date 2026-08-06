@@ -497,6 +497,7 @@ export async function createStatistic(
         ? {
             variant: {
               create: variants.map((variant) => ({
+                cancelled: false,
                 date_created: now,
                 last_updated: now,
                 revision: variant.revision,
@@ -546,7 +547,6 @@ export async function parseVariantsInput(
       }
 
       return {
-        cancelled: false,
         frequency,
         revision,
         level_of_detail: variant.level_of_detail,
