@@ -6,8 +6,10 @@ import {
   type StatisticCreate,
   ApprovalStatus,
   StatisticStatus,
+  RevisionNames,
   StatisticListingResponse,
   getRequiredStatisticFields,
+  Variant,
 } from '@ssbno-statreg/shared'
 import { dateToISOString, sanitize, parseDateOnly, ensureRequiredFieldsExists, isNumber, parseId } from '@/lib/utils'
 import type { Prisma } from '@/generated/prisma/client'
@@ -16,7 +18,7 @@ import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
 import { statisticsAsserts } from '@/lib/asserts'
 import { getAllUsersFromCache } from '@/lib/cache'
 
-export type StatisticPrisma = Pick<PrismaClient, 'statistic' | 'shortname' | 'responsiblePerson'>
+export type StatisticPrisma = Pick<PrismaClient, 'statistic' | 'shortname' | 'responsiblePerson' | 'frequency'>
 
 type StatisticStatusCode = keyof typeof StatisticStatus
 
@@ -449,7 +451,6 @@ export async function createStatistic(
     main_language,
     statistic_region_levels = [],
     comment,
-    variants,
   } = parseCreateStatisticInput(body, createStatisticStatus)
 
   let contacts
@@ -460,6 +461,8 @@ export async function createStatistic(
       return Promise.reject({ statregError: 'An active statistic needs at least one contact' })
     }
   }
+
+  const variants = await parseVariantsInput(body?.variants, prisma)
 
   const result = await prisma.statistic.create({
     data: {
@@ -522,6 +525,34 @@ export function parseCreateStatisticStatus(body?: StatisticCreate): CreatableSta
   } else {
     throw { statregError: "Field 'status' must be one of these: K, A." }
   }
+}
+
+async function parseVariantsInput(
+  variants: Variant[] | undefined,
+  prisma: StatisticPrisma
+): Promise<Variant[] | undefined> {
+  if (!variants?.length) {
+    return undefined
+  }
+
+  return await Promise.all(
+    variants.map(async (variant) => {
+      const frequency = variant.frequency
+      await statisticsAsserts.assertFrequencyExists(frequency?.code ?? '', prisma)
+
+      const revision = variant.revision
+      if (!Object.keys(RevisionNames).includes(revision?.code ?? '')) {
+        throw { statregError: "Field 'revision' must be one of these: I, B, E, F, R, IG." }
+      }
+
+      return {
+        cancelled: false,
+        frequency,
+        revision,
+        level_of_detail: variant.level_of_detail,
+      }
+    })
+  )
 }
 
 export function parseCreateStatisticInput(
