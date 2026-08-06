@@ -51,11 +51,15 @@ export function CreateVariantModal({
   }, [isAdmin])
 
   function createVariant() {
+    const selectedFrequency = frequencies.find(({ code }) => code === values.frequency_code)
+
     setCreatedVariants((prevVariants: Variant[]) => [
       ...prevVariants,
       {
-        revision: { code: values.revision_code },
-        frequency: { code: values.frequency_code },
+        revision: {
+          code: values.revision_code,
+        },
+        frequency: selectedFrequency,
         level_of_detail: {
           name: values.level_of_detail_name,
           name_en: values.level_of_detail_name_en,
