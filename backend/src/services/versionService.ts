@@ -3,7 +3,7 @@ import { sanitize } from '@/lib/utils'
 import type { Prisma } from '@/generated/prisma/client'
 import type { Version } from '@ssbno-statreg/shared'
 
-export type VersionPrisma = Pick<PrismaClient, 'auditLog' | 'statistic' | 'shortname'>
+export type VersionPrisma = Pick<PrismaClient, 'auditLog' | 'statistic'>
 
 function diffObjects(
   oldObject: Record<string, unknown>,
