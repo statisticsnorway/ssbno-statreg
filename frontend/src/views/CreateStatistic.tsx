@@ -32,7 +32,7 @@ import ErrorPage, { ErrorType } from './ErrorPage'
 import { ErrorAlert } from '../components/ErrorAlert'
 import { CreateShortnameModal } from '../components/CreateShortnameModal'
 import { ContactSelection } from '../components/ContactSelection'
-import { FrequencyNames, CreateVariantModal } from '../components/CreateVariantModal'
+import { CreateVariantModal } from '../components/CreateVariantModal'
 
 type StatisticFormValues = {
   status: CreatableStatisticStatus
@@ -330,9 +330,10 @@ export default function CreateStatistic() {
                   >
                     <Card.Block>
                       <Heading>
-                        {FrequencyNames[variant.frequency!.code as keyof typeof FrequencyNames]}
-                        {', '}
-                        {RevisionNames[variant.revision!.code as keyof typeof RevisionNames].toLocaleLowerCase()}
+                        {[
+                          variant.frequency!.name,
+                          RevisionNames[variant.revision!.code as keyof typeof RevisionNames].toLocaleLowerCase(),
+                        ].join(', ')}
                       </Heading>
                       <Paragraph>
                         Detaljnivå: {variant.level_of_detail?.name} <br />
