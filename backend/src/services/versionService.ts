@@ -1,8 +1,8 @@
 import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
-import { dateToISOString } from '@/lib/utils'
+import { sanitize } from '@/lib/utils'
 import type { Prisma } from '@/generated/prisma/client'
 
-export type VersionPrisma = Pick<PrismaClient, 'auditLog'>
+export type VersionPrisma = Pick<PrismaClient, 'auditLog' | 'statistic' | 'shortname'>
 
 export type ChangedValue = {
   field_name: string
@@ -67,6 +67,12 @@ function auditlogEntryToVersion(entry: AuditLogEntry): Version {
 }
 
 export async function getVersions(resourceType: string, id: number, prisma: VersionPrisma): Promise<Version[]> {
+  const where = {
+    class_name: resourceType,
+    persisted_object_id: id,
+  }
+
+  console.log(where)
   const entries = await prisma.auditLog.findMany({
     where: {
       class_name: resourceType,
@@ -77,5 +83,20 @@ export async function getVersions(resourceType: string, id: number, prisma: Vers
     },
   })
 
+  console.log(entries)
+
   return entries.map(auditlogEntryToVersion)
+}
+
+export async function getStatisticVersions(shortname: string, prisma: VersionPrisma): Promise<Version[]> {
+  const safeShortname = sanitize(shortname)
+
+  const statistic = await prisma.statistic.findFirst({
+    where: { shortname: { name: safeShortname } },
+    select: { id: true },
+  })
+
+  if (!statistic) return Promise.reject({ status: 404, statregError: `Shortname '${safeShortname}' not found` })
+
+  return getVersions('Statistic', statistic.id, prisma)
 }
