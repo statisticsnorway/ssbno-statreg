@@ -379,6 +379,39 @@ components:
           items:
             $ref: '#/components/schemas/Contact'
 
+    Version:
+      type: object
+      required:
+        - change_type
+        - changed_at
+        - changed_by
+      properties:
+        change_type: { type: string, description: 'One of "create", "update" or "delete".' }
+        changed_at: { type: string, format: date-time }
+        changed_by: { type: string, description: 'The principal name of the user who made the change.' }
+        comment: { type: string }
+        changed_values:
+          type: array
+          description: 'Only present when change_type is "update".'
+          items:
+            type: object
+            required:
+              - field_name
+              - old_value
+              - new_value
+            properties:
+              field_name: { type: string, description: 'The name of the field that changed.' }
+              old_value:
+                {
+                  type: string,
+                  description: 'Human-readable version of the old value.',
+                }
+              new_value:
+                {
+                  type: string,
+                  description: 'Human-readable version of the new value.',
+                }
+
     Variant:
       type: object
       properties:
@@ -556,51 +589,6 @@ paths:
         default:
           $ref: '#/components/responses/Error'
 
-  /statistics/{shortname}/variants:
-    post:
-      summary: Create a variant on a spesific statistic
-      tags: [statistics]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: '#/components/schemas/Variant' }
-      responses:
-        '201':
-          description: The created variant
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/Variant' }
-        default:
-          $ref: '#/components/responses/Error'
-  /statistics/{shortname}/variants/{id}:
-    put:
-      summary: Update a variant
-      tags: [statistics]
-      parameters:
-        - name: shortname
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: '#/components/schemas/Variant' }
-      responses:
-        '200':
-          description: Updated variant details
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/Variant' }
-        default:
-          $ref: '#/components/responses/Error'
   /statistics/{shortname}/variants/{id}/releases:
     get:
       summary: List all releases for one variant
@@ -664,14 +652,23 @@ paths:
           $ref: '#/components/responses/Error'
   /statistics/{shortname}/versions:
     get:
-      summary: List all versions with changes and comment. Response object TBD
+      summary: List all versions with changes and comment for a statistic
       tags: [statistics]
+      parameters:
+        - name: shortname
+          in: path
+          required: true
+          schema:
+            type: string
       responses:
         '200':
-          description: List of versions. Response object TBD
+          description: List of versions for the statistic
           content:
             application/json:
-              schema: {}
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Version'
         default:
           $ref: '#/components/responses/Error'
 
@@ -848,20 +845,23 @@ paths:
           $ref: '#/components/responses/Error'
   /releases/{id}/versions:
     get:
-      summary: List all versions on a release with change and comment. Response object TBD
+      summary: List all versions on a release with changes and comment
       tags: [releases]
       parameters:
         - name: id
           in: path
           required: true
           schema:
-            type: string
+            type: integer
       responses:
         '200':
-          description: List of versions. Response object TBD
+          description: List of versions for the release
           content:
             application/json:
-              schema: {}
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Version'
         default:
           $ref: '#/components/responses/Error'
 
