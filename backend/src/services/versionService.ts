@@ -63,7 +63,7 @@ export async function getStatisticVersions(shortname: string, prisma: VersionPri
     select: { id: true },
   })
 
-  if (!statistic) return Promise.reject({ status: 404, statregError: `Shortname '${safeShortname}' not found` })
+  if (!statistic) throw { status: 404, statregError: `Shortname '${safeShortname}' not found` }
 
   return getVersions('Statistic', statistic.id, prisma)
 }
