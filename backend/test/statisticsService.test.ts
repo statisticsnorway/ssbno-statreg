@@ -5,6 +5,7 @@ import { statisticsAsserts } from '@/lib/asserts'
 import {
   getFilteredStatistics,
   getStatisticByShortname,
+  parseVariantsInput,
   parseStatisticVariants,
   mapStatisticDetails,
   parseCreateStatisticStatus,
@@ -591,7 +592,7 @@ describe('statisticService', () => {
           variant: {
             create: [
               expect.objectContaining({
-                revision: 'I',
+                revision: { code: 'I' },
                 frequency: {
                   connect: {
                     code: 'M',
@@ -617,6 +618,98 @@ describe('statisticService', () => {
         statregError: 'Missing required field(s): name, name_en, variants, contacts, division, main_language',
       })
       expect(prismaMock.statistic.create).toHaveBeenCalledTimes(0)
+    })
+  })
+
+  describe('parseVariantsInput ', () => {
+    test('returns undefined when variants are not provided', async () => {
+      await expect(parseVariantsInput(undefined, prismaMock)).resolves.toBeUndefined()
+    })
+
+    test('returns parsed variants and revision', async () => {
+      const result = await parseVariantsInput(
+        [
+          {
+            frequency: {
+              code: 'M',
+            },
+            revision: {
+              code: 'I',
+            },
+            level_of_detail: {
+              name: 'Kommentar',
+              name_en: 'Comment',
+            },
+          },
+        ],
+        prismaMock
+      )
+
+      expect(prismaMock.frequency.findUnique).toHaveBeenCalledWith({
+        where: {
+          code: 'M',
+        },
+      })
+      expect(result).toStrictEqual([
+        {
+          cancelled: false,
+          frequency: {
+            code: 'M',
+          },
+          revision: {
+            code: 'I',
+          },
+          level_of_detail: {
+            name: 'Kommentar',
+            name_en: 'Comment',
+          },
+        },
+      ])
+    })
+
+    test('throws when revision code is invalid', async () => {
+      await expect(
+        parseVariantsInput(
+          [
+            {
+              frequency: {
+                code: 'M',
+              },
+              revision: {
+                code: 'BAD',
+              },
+            },
+          ],
+          prismaMock
+        )
+      ).rejects.toMatchObject({
+        statregError: "Field 'revision' must be one of these: I, B, E, F, R, IG.",
+      })
+    })
+
+    test('throws when frequency code does not exist', async () => {
+      statisticsAsserts.assertFrequencyExists = vi.fn(async () => {
+        throw { status: 404, statregError: "Frequency 'BAD' not found" }
+      }) as any
+
+      await expect(() =>
+        parseVariantsInput(
+          [
+            {
+              frequency: {
+                code: 'BAD',
+              },
+              revision: {
+                code: 'I',
+              },
+            },
+          ],
+          prismaMock
+        )
+      ).rejects.toMatchObject({
+        status: 404,
+        statregError: "Frequency 'BAD' not found",
+      })
     })
   })
 

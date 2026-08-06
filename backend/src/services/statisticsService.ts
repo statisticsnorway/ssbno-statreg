@@ -499,7 +499,7 @@ export async function createStatistic(
               create: variants.map((variant) => ({
                 date_created: now,
                 last_updated: now,
-                revision: variant.revision?.code,
+                revision: variant.revision,
                 frequency: {
                   connect: {
                     code: variant.frequency?.code,
@@ -527,7 +527,7 @@ export function parseCreateStatisticStatus(body?: StatisticCreate): CreatableSta
   }
 }
 
-async function parseVariantsInput(
+export async function parseVariantsInput(
   variants: Variant[] | undefined,
   prisma: StatisticPrisma
 ): Promise<Variant[] | undefined> {

@@ -132,7 +132,7 @@ export async function assertFrequencyExists(frequencyCode: string, prisma: Frequ
   })
 
   if (!foundFrequency) {
-    throw { status: 404, statregError: `Frequency '${frequencyCode}' does not exist` }
+    throw { status: 404, statregError: `Frequency '${frequencyCode}' not found` }
   }
 
   return true
