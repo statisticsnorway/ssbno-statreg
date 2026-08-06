@@ -1,27 +1,15 @@
 import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
 import { sanitize } from '@/lib/utils'
 import type { Prisma } from '@/generated/prisma/client'
+import type { Version } from '@ssbno-statreg/shared'
 
 export type VersionPrisma = Pick<PrismaClient, 'auditLog' | 'statistic' | 'shortname'>
 
-export type ChangedValue = {
-  field_name: string
-  old_value: string
-  new_value: string
-}
-
-export type Version = {
-  change_type: 'create' | 'update' | 'delete'
-  changed_at: string
-  changed_by: string
-  changed_values?: ChangedValue[]
-  comment?: string
-}
-
-type AuditLogEntry = Prisma.AuditLogGetPayload<Record<string, never>>
-
-function diffObjects(oldObject: Record<string, unknown>, newObject: Record<string, unknown>): ChangedValue[] {
-  const changes: ChangedValue[] = []
+function diffObjects(
+  oldObject: Record<string, unknown>,
+  newObject: Record<string, unknown>
+): Version['changed_values'] {
+  const changes = []
   for (const key of Object.keys(oldObject)) {
     if (key === 'comment') {
       continue
@@ -30,7 +18,7 @@ function diffObjects(oldObject: Record<string, unknown>, newObject: Record<strin
     const oldValue = oldObject[key]
     const newValue = newObject[key]
 
-    if (JSON.stringify(oldValue) !== JSON.stringify(newValue)) {
+    if (oldValue !== newValue) {
       changes.push({
         field_name: key,
         old_value: JSON.stringify(oldValue),
@@ -42,7 +30,7 @@ function diffObjects(oldObject: Record<string, unknown>, newObject: Record<strin
   return changes
 }
 
-function auditlogEntryToVersion(entry: AuditLogEntry): Version {
+function auditlogEntryToVersion(entry: Prisma.AuditLogGetPayload<{}>): Version {
   const oldObject = entry.old_value ? JSON.parse(entry.old_value) : {}
   const newObject = entry.new_value ? JSON.parse(entry.new_value) : {}
   return {
