@@ -83,6 +83,9 @@ describe('statisticService', () => {
         create: vi.fn(() => Promise.resolve(statisticsResult)),
         count: vi.fn(() => Promise.resolve(statisticsResult ? (statisticsResult as any).length : 0)),
       },
+      frequency: {
+        findUnique: vi.fn(() => Promise.resolve({ code: 'M', name: 'Måned' })),
+      },
       shortname: {
         findUnique: vi.fn(() => Promise.resolve({ name: 'kpi', id: 1 })),
       },
@@ -544,10 +547,25 @@ describe('statisticService', () => {
           first_released_at: '2024-04-01',
           main_language: 'nb',
           status: { code: 'K' },
+          variants: [
+            {
+              frequency: {
+                code: 'M',
+              },
+              revision: {
+                code: 'I',
+              },
+            },
+          ],
         },
         now
       )
 
+      expect(prismaMock.frequency.findUnique).toHaveBeenCalledWith({
+        where: {
+          code: 'M',
+        },
+      })
       expect(prismaMock.statistic.create).toHaveBeenCalledExactlyOnceWith({
         data: {
           name: 'Konsumprisindeksen',
@@ -569,6 +587,18 @@ describe('statisticService', () => {
             connect: {
               name: 'kpi',
             },
+          },
+          variant: {
+            create: [
+              expect.objectContaining({
+                revision: 'I',
+                frequency: {
+                  connect: {
+                    code: 'M',
+                  },
+                },
+              }),
+            ],
           },
         },
         include: StatisticsDetailedIncludes,
