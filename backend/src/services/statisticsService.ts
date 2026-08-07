@@ -495,7 +495,7 @@ export async function createStatistic(
       }),
       ...(variants?.length
         ? {
-            variant: {
+            variants: {
               create: variants.map((variant) => ({
                 cancelled: false,
                 date_created: now,

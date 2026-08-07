@@ -589,7 +589,7 @@ describe('statisticService', () => {
               name: 'kpi',
             },
           },
-          variant: {
+          variants: {
             create: [
               expect.objectContaining({
                 revision: 'I',
