@@ -11,7 +11,7 @@ type VariantModalProps = {
   openVariantModal: boolean
   setOpenVariantModal: (open: boolean) => void
   setCreatedVariants: Dispatch<SetStateAction<Variant[]>>
-  variantToEdit?: Variant
+  editVariantValues?: Variant
   editVariantIndex?: number | null
 }
 
@@ -22,12 +22,12 @@ type CreateVariantFormValues = {
   level_of_detail_name_en: string
 }
 
-function getVariantFormValues(variantToEdit?: Variant): CreateVariantFormValues {
+function getVariantFormValues(editVariantValues?: Variant): CreateVariantFormValues {
   return {
-    revision_code: variantToEdit?.revision?.code ?? 'I',
-    frequency_code: variantToEdit?.frequency?.code ?? 'U',
-    level_of_detail_name: variantToEdit?.level_of_detail?.name ?? '',
-    level_of_detail_name_en: variantToEdit?.level_of_detail?.name_en ?? '',
+    revision_code: editVariantValues?.revision?.code ?? 'I',
+    frequency_code: editVariantValues?.frequency?.code ?? 'U',
+    level_of_detail_name: editVariantValues?.level_of_detail?.name ?? '',
+    level_of_detail_name_en: editVariantValues?.level_of_detail?.name_en ?? '',
   }
 }
 
@@ -35,12 +35,12 @@ export function VariantModal({
   openVariantModal,
   setOpenVariantModal,
   setCreatedVariants,
-  variantToEdit,
+  editVariantValues,
   editVariantIndex,
 }: Readonly<VariantModalProps>) {
   const [frequencies, setFrequencies] = useState<Frequency[]>([])
   const [apiError, setApiError] = useState<string[]>([])
-  const [values, setValues] = useState<CreateVariantFormValues>(() => getVariantFormValues(variantToEdit))
+  const [values, setValues] = useState<CreateVariantFormValues>(() => getVariantFormValues(editVariantValues))
 
   const isEditMode = typeof editVariantIndex === 'number'
 

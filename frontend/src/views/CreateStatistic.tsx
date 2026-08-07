@@ -261,7 +261,7 @@ export default function CreateStatistic() {
               setOpenVariantModal={handleSetOpenVariantModal}
               setCreatedVariants={setCreatedVariants}
               editVariantIndex={editVariantIndex}
-              variantToEdit={editVariantIndex === null ? undefined : createdVariants[editVariantIndex]}
+              editVariantValues={editVariantIndex !== null ? createdVariants[editVariantIndex] : undefined}
             />
           )}
           {apiError.length > 0 && <ErrorAlert message={apiError} />}
