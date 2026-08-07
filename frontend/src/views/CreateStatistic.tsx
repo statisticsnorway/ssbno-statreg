@@ -32,7 +32,7 @@ import ErrorPage, { ErrorType } from './ErrorPage'
 import { ErrorAlert } from '../components/ErrorAlert'
 import { CreateShortnameModal } from '../components/CreateShortnameModal'
 import { ContactSelection } from '../components/ContactSelection'
-import { CreateVariantModal } from '../components/CreateVariantModal'
+import { VariantModal } from '../components/VariantModal'
 
 type StatisticFormValues = {
   status: CreatableStatisticStatus
@@ -53,7 +53,7 @@ export default function CreateStatistic() {
   const [contacts, setContacts] = useState<Contact[]>([])
   const [selectedContacts, setSelectedContacts] = useState<string[]>([])
 
-  const [openCreateVariantModal, setOpenCreateVariantModal] = useState<boolean>(false)
+  const [openVariantModal, setOpenVariantModal] = useState<boolean>(false)
   const [createdVariants, setCreatedVariants] = useState<Variant[]>([])
   const [editVariantIndex, setEditVariantIndex] = useState<number | null>(null)
 
@@ -212,18 +212,18 @@ export default function CreateStatistic() {
     createStatistic()
   }
 
-  function handleOpenCreateVariantModal() {
+  function handleOpenVariantModal() {
     setEditVariantIndex(null)
-    setOpenCreateVariantModal(true)
+    setOpenVariantModal(true)
   }
 
   function handleOpenEditVariantModal(index: number) {
     setEditVariantIndex(index)
-    setOpenCreateVariantModal(true)
+    setOpenVariantModal(true)
   }
 
-  function handleSetOpenCreateVariantModal(open: boolean) {
-    setOpenCreateVariantModal(open)
+  function handleSetOpenVariantModal(open: boolean) {
+    setOpenVariantModal(open)
     if (!open) {
       setEditVariantIndex(null)
     }
@@ -255,10 +255,10 @@ export default function CreateStatistic() {
 
       {createdShortname && (
         <div className='create-statistic-container'>
-          {openCreateVariantModal && (
-            <CreateVariantModal
-              openCreateVariantModal={openCreateVariantModal}
-              setOpenCreateVariantModal={handleSetOpenCreateVariantModal}
+          {openVariantModal && (
+            <VariantModal
+              openVariantModal={openVariantModal}
+              setOpenVariantModal={handleSetOpenVariantModal}
               setCreatedVariants={setCreatedVariants}
               editVariantIndex={editVariantIndex}
               variantToEdit={editVariantIndex === null ? undefined : createdVariants[editVariantIndex]}
@@ -348,7 +348,6 @@ export default function CreateStatistic() {
                     key={['created-variant', variant.frequency?.code ?? index, variant.revision?.code ?? index].join(
                       '-'
                     )}
-                    data-color='neutral'
                     variant='tinted'
                   >
                     <Card.Block>
@@ -359,7 +358,11 @@ export default function CreateStatistic() {
                             RevisionNames[variant.revision!.code as keyof typeof RevisionNames].toLocaleLowerCase(),
                           ].join(', ')}
                         </Heading>
-                        <Button variant='tertiary' onClick={() => handleOpenEditVariantModal(index)}>
+                        <Button
+                          variant='tertiary'
+                          data-color='danger'
+                          onClick={() => handleOpenEditVariantModal(index)}
+                        >
                           <PencilWritingIcon /> Rediger
                         </Button>
                       </div>
@@ -372,7 +375,7 @@ export default function CreateStatistic() {
                 ))}
               </div>
             )}
-            <Button variant='secondary' onClick={handleOpenCreateVariantModal}>
+            <Button variant='secondary' onClick={handleOpenVariantModal}>
               <PlusCircleIcon /> Legg til variant
             </Button>
             <Divider />

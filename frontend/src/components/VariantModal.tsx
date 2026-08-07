@@ -2,14 +2,14 @@ import { useState, useEffect, type Dispatch, type SetStateAction } from 'react'
 import { Button, Heading, Dialog, Field, Label, Input, Select, Paragraph } from '@digdir/designsystemet-react'
 import { TrashIcon } from '@navikt/aksel-icons'
 
-import './CreateVariantModal.css'
+import './VariantModal.css'
 import client from '../api'
 import { RevisionNames, type Frequency, type Variant } from '@ssbno-statreg/shared'
-import { ErrorAlert } from '../components/ErrorAlert'
+import { ErrorAlert } from './ErrorAlert'
 
-type CreateVariantModalProps = {
-  openCreateVariantModal: boolean
-  setOpenCreateVariantModal: (open: boolean) => void
+type VariantModalProps = {
+  openVariantModal: boolean
+  setOpenVariantModal: (open: boolean) => void
   setCreatedVariants: Dispatch<SetStateAction<Variant[]>>
   variantToEdit?: Variant
   editVariantIndex?: number | null
@@ -31,13 +31,13 @@ function getVariantFormValues(variantToEdit?: Variant): CreateVariantFormValues 
   }
 }
 
-export function CreateVariantModal({
-  openCreateVariantModal,
-  setOpenCreateVariantModal,
+export function VariantModal({
+  openVariantModal,
+  setOpenVariantModal,
   setCreatedVariants,
   variantToEdit,
   editVariantIndex,
-}: Readonly<CreateVariantModalProps>) {
+}: Readonly<VariantModalProps>) {
   const [frequencies, setFrequencies] = useState<Frequency[]>([])
   const [apiError, setApiError] = useState<string[]>([])
   const [values, setValues] = useState<CreateVariantFormValues>(() => getVariantFormValues(variantToEdit))
@@ -88,15 +88,15 @@ export function CreateVariantModal({
   }
 
   function handleCloseModal() {
-    setOpenCreateVariantModal(false)
+    setOpenVariantModal(false)
   }
 
   return (
-    <Dialog id='create-variant-modal' open={openCreateVariantModal} onClose={handleCloseModal}>
+    <Dialog id='variant-modal' open={openVariantModal} onClose={handleCloseModal}>
       <Dialog.Block>
         <Heading data-size='xs'>{isEditMode ? 'Rediger variant' : 'Legg til variant'}</Heading>
       </Dialog.Block>
-      <Dialog.Block className='create-variant-modal-form'>
+      <Dialog.Block className='variant-modal-form'>
         {apiError.length > 0 && <ErrorAlert message={apiError} />}
         <Paragraph>
           En variant definerer frekvens og detaljnivå for statistikken. Du trenger minst én variant for å kunne melde
@@ -143,8 +143,8 @@ export function CreateVariantModal({
             onChange={(e) => setValues((prevValues) => ({ ...prevValues, level_of_detail_name_en: e.target.value }))}
           />
         </Field>
-        <div className='create-variant-modal-form-buttons'>
-          <div className='create-variant-modal-form-buttons-left'>
+        <div className='variant-modal-form-buttons'>
+          <div className='variant-modal-form-buttons-left'>
             <Button variant='primary' onClick={createVariant}>
               Legg til
             </Button>
@@ -153,7 +153,7 @@ export function CreateVariantModal({
             </Button>
           </div>
           {isEditMode && (
-            <Button variant='secondary' data-color='danger' onClick={deleteVariant}>
+            <Button variant='tertiary' data-color='danger' onClick={deleteVariant}>
               <TrashIcon /> Slett
             </Button>
           )}
