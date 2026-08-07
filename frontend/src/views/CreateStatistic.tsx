@@ -212,7 +212,7 @@ export default function CreateStatistic() {
     createStatistic()
   }
 
-  function handleOpenVariantModal() {
+  function handleOpenCreateVariantModal() {
     setEditVariantIndex(null)
     setOpenVariantModal(true)
   }
@@ -375,7 +375,7 @@ export default function CreateStatistic() {
                 ))}
               </div>
             )}
-            <Button variant='secondary' onClick={handleOpenVariantModal}>
+            <Button variant='secondary' onClick={handleOpenCreateVariantModal}>
               <PlusCircleIcon /> Legg til variant
             </Button>
             <Divider />

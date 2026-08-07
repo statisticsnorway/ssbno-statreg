@@ -22,15 +22,6 @@ type CreateVariantFormValues = {
   level_of_detail_name_en: string
 }
 
-function getVariantFormValues(editVariantValues?: Variant): CreateVariantFormValues {
-  return {
-    revision_code: editVariantValues?.revision?.code ?? 'I',
-    frequency_code: editVariantValues?.frequency?.code ?? 'U',
-    level_of_detail_name: editVariantValues?.level_of_detail?.name ?? '',
-    level_of_detail_name_en: editVariantValues?.level_of_detail?.name_en ?? '',
-  }
-}
-
 export function VariantModal({
   openVariantModal,
   setOpenVariantModal,
@@ -40,7 +31,12 @@ export function VariantModal({
 }: Readonly<VariantModalProps>) {
   const [frequencies, setFrequencies] = useState<Frequency[]>([])
   const [apiError, setApiError] = useState<string[]>([])
-  const [values, setValues] = useState<CreateVariantFormValues>(() => getVariantFormValues(editVariantValues))
+  const [values, setValues] = useState<CreateVariantFormValues>({
+    revision_code: editVariantValues?.revision?.code ?? 'I',
+    frequency_code: editVariantValues?.frequency?.code ?? 'U',
+    level_of_detail_name: editVariantValues?.level_of_detail?.name ?? '',
+    level_of_detail_name_en: editVariantValues?.level_of_detail?.name_en ?? '',
+  })
 
   const isEditMode = typeof editVariantIndex === 'number'
 
