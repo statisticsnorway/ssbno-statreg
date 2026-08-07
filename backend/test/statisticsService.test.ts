@@ -767,34 +767,42 @@ describe('statisticService', () => {
     test('throws error when name is an empty string', () => {
       input.name = ''
 
-      expect(() => parseCreateStatisticInput(input, 'K')).toThrow({
-        statregError: "Field 'name' must be a non-empty string.",
-      })
+      expect(() => parseCreateStatisticInput(input, 'K')).toThrow(
+        expect.objectContaining({
+          statregError: "Field 'name' must be a non-empty string.",
+        })
+      )
     })
 
     test('throws error when division is not a number', () => {
       input.division = 'division-a'
 
-      expect(() => parseCreateStatisticInput(input, 'K')).toThrow({
-        statregError: "Field 'division' must be a number.",
-      })
+      expect(() => parseCreateStatisticInput(input, 'K')).toThrow(
+        expect.objectContaining({
+          statregError: "Field 'division' must be a number.",
+        })
+      )
     })
 
     test('throws error when division lookup does not find a match', () => {
       input.division = '106'
 
-      expect(() => parseCreateStatisticInput(input, 'K')).toThrow({
-        statregError: "Field 'division' does not correspond to an existing division.",
-      })
+      expect(() => parseCreateStatisticInput(input, 'K')).toThrow(
+        expect.objectContaining({
+          statregError: "Field 'division' does not correspond to an existing division.",
+        })
+      )
     })
 
     test("throws error main_language is neither 'nb' or 'nn'", () => {
       input.main_language = 'en'
       expectedResult.main_language = 'nb'
 
-      expect(() => parseCreateStatisticInput(input, 'K')).toThrow({
-        statregError: "Field 'main_language' must be either 'nb' or 'nn'.",
-      })
+      expect(() => parseCreateStatisticInput(input, 'K')).toThrow(
+        expect.objectContaining({
+          statregError: "Field 'main_language' must be either 'nb' or 'nn'.",
+        })
+      )
     })
 
     test('falls back to empty string when comment is missing', () => {
@@ -813,9 +821,11 @@ describe('statisticService', () => {
       input.variants = []
       input.contacts = []
 
-      expect(() => parseCreateStatisticInput(input, 'A')).toThrow({
-        statregError: "Field 'name_en' must be a non-empty string.",
-      })
+      expect(() => parseCreateStatisticInput(input, 'A')).toThrow(
+        expect.objectContaining({
+          statregError: "Field 'name_en' must be a non-empty string.",
+        })
+      )
     })
 
     describe('parseCreateStatisticStatus', () => {
@@ -828,15 +838,19 @@ describe('statisticService', () => {
       })
 
       test('throws when status code is missing', () => {
-        expect(() => parseCreateStatisticStatus(undefined)).toThrow({
-          statregError: "Field 'status' must be one of these: K, A.",
-        })
+        expect(() => parseCreateStatisticStatus(undefined)).toThrow(
+          expect.objectContaining({
+            statregError: "Field 'status' must be one of these: K, A.",
+          })
+        )
       })
 
       test('throws when status code is not creatable', () => {
-        expect(() => parseCreateStatisticStatus({ status: { code: 'IA' } } as any)).toThrow({
-          statregError: "Field 'status' must be one of these: K, A.",
-        })
+        expect(() => parseCreateStatisticStatus({ status: { code: 'IA' } } as any)).toThrow(
+          expect.objectContaining({
+            statregError: "Field 'status' must be one of these: K, A.",
+          })
+        )
       })
     })
 
@@ -896,33 +910,41 @@ describe('statisticService', () => {
       test('throws error when comment is an empty string', () => {
         input.comment = ''
 
-        expect(() => parseUpdateStatisticInput(input, requiredUpdateFields)).toThrow({
-          statregError: "Field 'comment' must be a non-empty string.",
-        })
+        expect(() => parseUpdateStatisticInput(input, requiredUpdateFields)).toThrow(
+          expect.objectContaining({
+            statregError: "Field 'comment' must be a non-empty string.",
+          })
+        )
       })
 
       test('throws error when yearly_reporting is not a valid boolean', () => {
         input.yearly_reporting = 'not-a-boolean'
 
-        expect(() => parseUpdateStatisticInput(input, requiredUpdateFields)).toThrow({
-          statregError: "Field 'yearly_reporting' must be a boolean.",
-        })
+        expect(() => parseUpdateStatisticInput(input, requiredUpdateFields)).toThrow(
+          expect.objectContaining({
+            statregError: "Field 'yearly_reporting' must be a boolean.",
+          })
+        )
       })
 
       test('throws error when relation id is an invalid format', () => {
         input.relation = 'abc'
 
-        expect(() => parseUpdateStatisticInput(input, requiredUpdateFields)).toThrow({
-          statregError: 'Invalid relation id format',
-        })
+        expect(() => parseUpdateStatisticInput(input, requiredUpdateFields)).toThrow(
+          expect.objectContaining({
+            statregError: 'Invalid relation id format',
+          })
+        )
       })
 
       test('throws error when status is not valid value', () => {
         input.status = 'ABC'
 
-        expect(() => parseUpdateStatisticInput(input, requiredUpdateFields)).toThrow({
-          statregError: "Field 'status' must be one of these: K, A, IA, UT, SA, SP.",
-        })
+        expect(() => parseUpdateStatisticInput(input, requiredUpdateFields)).toThrow(
+          expect.objectContaining({
+            statregError: "Field 'status' must be one of these: K, A, IA, UT, SA, SP.",
+          })
+        )
       })
     })
   })
@@ -933,21 +955,29 @@ describe('statisticService', () => {
     })
 
     test('throws when division is undefined', () => {
-      expect(() => parseDivision(undefined)).toThrow({ statregError: "Field 'division' must be a number." })
+      expect(() => parseDivision(undefined)).toThrow(
+        expect.objectContaining({ statregError: "Field 'division' must be a number." })
+      )
     })
 
     test('throws when division is null', () => {
-      expect(() => parseDivision(null)).toThrow({ statregError: "Field 'division' must be a number." })
+      expect(() => parseDivision(null)).toThrow(
+        expect.objectContaining({ statregError: "Field 'division' must be a number." })
+      )
     })
 
     test('throws when division is not a number', () => {
-      expect(() => parseDivision('abc')).toThrow({ statregError: "Field 'division' must be a number." })
+      expect(() => parseDivision('abc')).toThrow(
+        expect.objectContaining({ statregError: "Field 'division' must be a number." })
+      )
     })
 
     test('throws when division does not correspond to an existing division', () => {
-      expect(() => parseDivision('999')).toThrow({
-        statregError: "Field 'division' does not correspond to an existing division.",
-      })
+      expect(() => parseDivision('999')).toThrow(
+        expect.objectContaining({
+          statregError: "Field 'division' does not correspond to an existing division.",
+        })
+      )
     })
   })
 
@@ -959,19 +989,19 @@ describe('statisticService', () => {
     })
 
     test('throws when statusCode is undefined', () => {
-      expect(() => parseStatusCode(undefined)).toThrow({ statregError: expectedError })
+      expect(() => parseStatusCode(undefined)).toThrow(expect.objectContaining({ statregError: expectedError }))
     })
 
     test('throws when statusCode is empty string', () => {
-      expect(() => parseStatusCode('')).toThrow({ statregError: expectedError })
+      expect(() => parseStatusCode('')).toThrow(expect.objectContaining({ statregError: expectedError }))
     })
 
     test('throws when statusCode is not a valid status', () => {
-      expect(() => parseStatusCode('INVALID_STATUS')).toThrow({ statregError: expectedError })
+      expect(() => parseStatusCode('INVALID_STATUS')).toThrow(expect.objectContaining({ statregError: expectedError }))
     })
 
     test('is case-sensitive', () => {
-      expect(() => parseStatusCode('k')).toThrow({ statregError: expectedError })
+      expect(() => parseStatusCode('k')).toThrow(expect.objectContaining({ statregError: expectedError }))
     })
   })
 
@@ -993,7 +1023,9 @@ describe('statisticService', () => {
     })
 
     test('throws when relationId is not a valid id', () => {
-      expect(() => parseRelation('abc')).toThrow({ statregError: 'Invalid relation id format' })
+      expect(() => parseRelation('abc')).toThrow(
+        expect.objectContaining({ statregError: 'Invalid relation id format' })
+      )
     })
   })
 })

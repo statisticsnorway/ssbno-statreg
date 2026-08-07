@@ -1,3 +1,5 @@
+import { StatregError } from '@/lib/statregError'
+
 export function dateToISOString(date: Date | null): string | undefined {
   if (!date) return
 
@@ -18,19 +20,17 @@ export function parseDateOnly(dateString: DateString, fieldName = ''): Date {
 
 export function parseDateISO(dateString: DateString, fieldName = '', originalDateStringValue?: DateString): Date {
   const dateISORegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/ // YYYY-MM-DDTHH:mm:ssZ
-  const errorMessage = () => ({
-    statregError: ['Invalid', fieldName, 'date format:', originalDateStringValue ?? dateString]
-      .filter(Boolean)
-      .join(' '),
-  })
+  const errorMessage = ['Invalid', fieldName, 'date format:', originalDateStringValue ?? dateString]
+    .filter(Boolean)
+    .join(' ')
 
   if (!dateString || Array.isArray(dateString) || !dateISORegex.test(dateString)) {
-    throw errorMessage()
+    throw new StatregError(errorMessage)
   }
 
   const date = new Date(dateString)
   if (date.toString() === 'Invalid Date') {
-    throw errorMessage()
+    throw new StatregError(errorMessage)
   }
 
   return date
@@ -46,7 +46,7 @@ export function ensureStringArray(value?: string): string[] {
 
 export function parseId(id: string | number, fieldName?: string): number {
   if (!isNumber(id) || Number(id) < 0) {
-    throw { statregError: ['Invalid', fieldName, 'id format'].filter(Boolean).join(' ') }
+    throw new StatregError(['Invalid', fieldName, 'id format'].filter(Boolean).join(' '))
   }
 
   return Number(id)
@@ -61,9 +61,7 @@ export function ensureRequiredFieldsExists<T extends Record<string, any>>(
   const missingFields = validBody ? requiredFields.filter((key) => !Object.hasOwn(body ?? {}, key)) : requiredFields
 
   if (missingFields?.length) {
-    throw {
-      statregError: `Missing required field(s): ${missingFields.join(', ')}`,
-    }
+    throw new StatregError(`Missing required field(s): ${missingFields.join(', ')}`)
   }
 
   return body as T
