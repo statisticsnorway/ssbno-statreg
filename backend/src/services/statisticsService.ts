@@ -500,10 +500,10 @@ export async function createStatistic(
                 cancelled: false,
                 date_created: now,
                 last_updated: now,
-                revision: variant.revision?.code,
+                revision: variant.revision!.code as string,
                 frequency: {
                   connect: {
-                    code: variant.frequency?.code,
+                    code: variant.frequency!.code as string,
                   },
                 },
                 ...(variant.level_of_detail?.name ? { level_of_detail: variant.level_of_detail.name } : {}),
@@ -542,8 +542,9 @@ export async function parseVariantsInput(
       await statisticsAsserts.assertFrequencyExists(frequency?.code ?? '', prisma)
 
       const revision = variant.revision
-      if (!Object.keys(RevisionNames).includes(revision?.code ?? '')) {
-        throw { statregError: "Field 'revision' must be one of these: I, B, E, F, R, IG." }
+      const revisionCodes = Object.keys(RevisionNames)
+      if (!revisionCodes.includes(revision?.code ?? '')) {
+        throw { statregError: `Field 'revision' must be one of these: ${revisionCodes.join(', ')}.` }
       }
 
       return {

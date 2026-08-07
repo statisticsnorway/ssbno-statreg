@@ -666,6 +666,23 @@ describe('statisticService', () => {
       ])
     })
 
+    test('throws when revision not defined', async () => {
+      await expect(
+        parseVariantsInput(
+          [
+            {
+              frequency: {
+                code: 'M',
+              },
+            },
+          ],
+          prismaMock
+        )
+      ).rejects.toMatchObject({
+        statregError: "Field 'revision' must be one of these: I, B, E, F, R, IG.",
+      })
+    })
+
     test('throws when revision code is invalid', async () => {
       await expect(
         parseVariantsInput(
