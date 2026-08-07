@@ -592,7 +592,7 @@ describe('statisticService', () => {
           variant: {
             create: [
               expect.objectContaining({
-                revision: { code: 'I' },
+                revision: 'I',
                 frequency: {
                   connect: {
                     code: 'M',

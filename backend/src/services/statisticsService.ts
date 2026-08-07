@@ -500,7 +500,7 @@ export async function createStatistic(
                 cancelled: false,
                 date_created: now,
                 last_updated: now,
-                revision: variant.revision,
+                revision: variant.revision?.code,
                 frequency: {
                   connect: {
                     code: variant.frequency?.code,
