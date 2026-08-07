@@ -20,7 +20,7 @@ import {
   ErrorSummary,
   Card,
 } from '@digdir/designsystemet-react'
-import { QuestionmarkCircleIcon, PlusCircleIcon } from '@navikt/aksel-icons'
+import { QuestionmarkCircleIcon, PlusCircleIcon, PencilWritingIcon } from '@navikt/aksel-icons'
 
 import client from '../api'
 
@@ -55,6 +55,7 @@ export default function CreateStatistic() {
 
   const [openCreateVariantModal, setOpenCreateVariantModal] = useState<boolean>(false)
   const [createdVariants, setCreatedVariants] = useState<Variant[]>([])
+  const [editVariantIndex, setEditVariantIndex] = useState<number | null>(null)
 
   const { getCheckboxProps, value: regionLevelValues } = useCheckboxGroup({
     name: 'region-level-checkbox',
@@ -180,6 +181,7 @@ export default function CreateStatistic() {
           : [],
         approval_status: ApprovalStatus['ACCEPTED'],
         contacts: selectedContacts,
+        variants: createdVariants,
       },
     })
 
@@ -208,6 +210,23 @@ export default function CreateStatistic() {
     if (Object.keys(nextErrors).length) return
 
     createStatistic()
+  }
+
+  function handleOpenCreateVariantModal() {
+    setEditVariantIndex(null)
+    setOpenCreateVariantModal(true)
+  }
+
+  function handleOpenEditVariantModal(index: number) {
+    setEditVariantIndex(index)
+    setOpenCreateVariantModal(true)
+  }
+
+  function handleSetOpenCreateVariantModal(open: boolean) {
+    setOpenCreateVariantModal(open)
+    if (!open) {
+      setEditVariantIndex(null)
+    }
   }
 
   if (!isAdmin) return <ErrorPage type={ErrorType.NOTAUTH} />
@@ -239,8 +258,10 @@ export default function CreateStatistic() {
           {openCreateVariantModal && (
             <CreateVariantModal
               openCreateVariantModal={openCreateVariantModal}
-              setOpenCreateVariantModal={setOpenCreateVariantModal}
+              setOpenCreateVariantModal={handleSetOpenCreateVariantModal}
               setCreatedVariants={setCreatedVariants}
+              editVariantIndex={editVariantIndex}
+              variantToEdit={editVariantIndex === null ? undefined : createdVariants[editVariantIndex]}
             />
           )}
           {apiError.length > 0 && <ErrorAlert message={apiError} />}
@@ -322,19 +343,26 @@ export default function CreateStatistic() {
             </div>
             {createdVariants.length > 0 && (
               <div className='created-variants-container'>
-                {createdVariants.map((variant) => (
+                {createdVariants.map((variant, index) => (
                   <Card
-                    key={['created-variant', variant.frequency!.code, variant.revision!.code].join('-')}
+                    key={['created-variant', variant.frequency?.code ?? index, variant.revision?.code ?? index].join(
+                      '-'
+                    )}
                     data-color='neutral'
                     variant='tinted'
                   >
                     <Card.Block>
-                      <Heading>
-                        {[
-                          variant.frequency!.name,
-                          RevisionNames[variant.revision!.code as keyof typeof RevisionNames].toLocaleLowerCase(),
-                        ].join(', ')}
-                      </Heading>
+                      <div className='created-variant-heading-container'>
+                        <Heading>
+                          {[
+                            variant.frequency!.name,
+                            RevisionNames[variant.revision!.code as keyof typeof RevisionNames].toLocaleLowerCase(),
+                          ].join(', ')}
+                        </Heading>
+                        <Button variant='tertiary' onClick={() => handleOpenEditVariantModal(index)}>
+                          <PencilWritingIcon /> Rediger
+                        </Button>
+                      </div>
                       <Paragraph>
                         Detaljnivå: {variant.level_of_detail?.name} <br />
                         Engelsk detaljnivå: {variant.level_of_detail?.name_en}
@@ -344,7 +372,7 @@ export default function CreateStatistic() {
                 ))}
               </div>
             )}
-            <Button type='button' variant='secondary' onClick={() => setOpenCreateVariantModal(true)}>
+            <Button variant='secondary' onClick={handleOpenCreateVariantModal}>
               <PlusCircleIcon /> Legg til variant
             </Button>
             <Divider />

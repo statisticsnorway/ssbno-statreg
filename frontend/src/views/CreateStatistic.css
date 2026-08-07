@@ -30,6 +30,11 @@
       flex-direction: row;
       gap: var(--ds-size-6);
 
+      .created-variant-heading-container {
+        display: flex;
+        justify-content: space-between;
+      }
+
       > * {
         height: 180px;
         min-width: 30%;
