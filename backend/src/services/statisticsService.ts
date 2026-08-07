@@ -506,10 +506,8 @@ export async function createStatistic(
                     code: variant.frequency!.code as string,
                   },
                 },
-                ...(variant.level_of_detail?.name ? { level_of_detail: sanitize(variant.level_of_detail.name) } : {}),
-                ...(variant.level_of_detail?.name_en
-                  ? { level_of_detail_en: sanitize(variant.level_of_detail.name_en) }
-                  : {}),
+                ...(variant.level_of_detail?.name ? { level_of_detail: variant.level_of_detail.name } : {}),
+                ...(variant.level_of_detail?.name_en ? { level_of_detail_en: variant.level_of_detail.name_en } : {}),
               })),
             },
           }
@@ -552,7 +550,10 @@ export async function parseVariantsInput(
       return {
         frequency,
         revision,
-        level_of_detail: variant.level_of_detail,
+        level_of_detail: {
+          name: variant.level_of_detail?.name ? sanitize(variant.level_of_detail.name) : undefined,
+          name_en: variant.level_of_detail?.name_en ? sanitize(variant.level_of_detail.name_en) : undefined,
+        },
       }
     })
   )
