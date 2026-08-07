@@ -550,9 +550,9 @@ export async function parseVariantsInput(
       return {
         frequency,
         revision,
-        level_of_detail: {
-          name: variant.level_of_detail?.name ? sanitize(variant.level_of_detail.name) : undefined,
-          name_en: variant.level_of_detail?.name_en ? sanitize(variant.level_of_detail.name_en) : undefined,
+        level_of_detail: variant.level_of_detail && {
+          name: sanitize(variant.level_of_detail.name),
+          name_en: sanitize(variant.level_of_detail.name_en),
         },
       }
     })
