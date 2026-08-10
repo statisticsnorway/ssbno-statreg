@@ -41,6 +41,20 @@ export async function cleanupCreatedStatistics(
 ): Promise<void> {
   for (const created of createdStatistics) {
     if (created.statisticId !== null) {
+      const variants = await prisma.variant.findMany({
+        where: {
+          statistic_id: created.statisticId,
+        },
+      })
+
+      for (const variant of variants) {
+        await prisma.variant.delete({
+          where: {
+            id: variant.id,
+          },
+        })
+      }
+
       await prisma.statistic.delete({
         where: {
           id: created.statisticId,
