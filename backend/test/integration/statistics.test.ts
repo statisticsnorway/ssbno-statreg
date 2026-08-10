@@ -195,6 +195,10 @@ describe('statisticsController integration', () => {
         {
           frequency: { code: 'U' },
           revision: { code: 'I' },
+          level_of_detail: {
+            name: 'Detaljnivå',
+            name_en: 'Level of detail',
+          },
         },
       ],
     }
@@ -235,8 +239,8 @@ describe('statisticsController integration', () => {
           code: 'U',
         },
         level_of_detail: {
-          name: '',
-          name_en: '',
+          name: 'Detaljnivå',
+          name_en: 'Level of detail',
         },
       }),
     ])

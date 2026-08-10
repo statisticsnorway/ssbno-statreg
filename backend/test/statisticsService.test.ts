@@ -528,7 +528,7 @@ describe('statisticService', () => {
       now = new Date('2026-03-23T08:00:00Z')
     })
 
-    test('creates a new statistic when input data is valid', async () => {
+    test('creates an upcoming statistic when input data is valid', async () => {
       setStatisticsResult({
         ...mockedStatisticCreatedPrismaResult,
         id: 1,
@@ -588,6 +588,89 @@ describe('statisticService', () => {
             connect: {
               name: 'kpi',
             },
+          },
+          variants: {
+            create: [
+              expect.objectContaining({
+                revision: 'I',
+                frequency: {
+                  connect: {
+                    code: 'M',
+                  },
+                },
+              }),
+            ],
+          },
+        },
+        include: StatisticsDetailedIncludes,
+      })
+    })
+
+    test('creates an active statistic when input data is valid', async () => {
+      setStatisticsResult({
+        ...mockedStatisticCreatedPrismaResult,
+        id: 1,
+        version: 1,
+        desk_appoval_status: ApprovalStatus.PENDING,
+        status: 'A',
+        statistic_region_levels: [],
+      })
+      prismaMock.responsiblePerson.upsert.mockResolvedValueOnce({ id: 2 })
+
+      await createStatistic(
+        prismaMock,
+        'kpi',
+        {
+          name: 'Konsumprisindeksen',
+          name_en: 'Consumer price index',
+          division: '104',
+          first_released_at: '2024-04-01',
+          main_language: 'nb',
+          status: { code: 'A' },
+          contacts: ['bcd@ssb.no'],
+          variants: [
+            {
+              frequency: {
+                code: 'M',
+              },
+              revision: {
+                code: 'I',
+              },
+            },
+          ],
+        },
+        now
+      )
+
+      expect(prismaMock.frequency.findUnique).toHaveBeenCalledWith({
+        where: {
+          code: 'M',
+        },
+      })
+      expect(prismaMock.statistic.create).toHaveBeenCalledExactlyOnceWith({
+        data: {
+          name: 'Konsumprisindeksen',
+          priority: 1,
+          name_en: 'Consumer price index',
+          yearly_reporting: false,
+          status: 'A',
+          division_code: '104',
+          first_release: new Date('2024-04-01T00:00:00.000Z'),
+          comment: 'Create statistic with shortname: kpi',
+          language: 'nb',
+          date_created: now,
+          last_updated: now,
+          desk_appoval_status: ApprovalStatus.ACCEPTED,
+          statistic_region_levels: {
+            create: [],
+          },
+          shortname: {
+            connect: {
+              name: 'kpi',
+            },
+          },
+          responsiblePersons: {
+            connect: [{ id: 2 }],
           },
           variants: {
             create: [
