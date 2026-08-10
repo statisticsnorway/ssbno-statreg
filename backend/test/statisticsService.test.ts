@@ -505,7 +505,7 @@ describe('statisticService', () => {
 
       await expect(() => updateStatisticContacts('helse', ['abc@ssb.no'], prismaMock)).rejects.toMatchObject({
         status: 404,
-        statregError: "Shortname 'helse' not found",
+        statregError: "Shortname 'helse' not found.",
       })
       expect(prismaMock.responsiblePerson.upsert).toHaveBeenCalledTimes(0)
       expect(prismaMock.statistic.update).toHaveBeenCalledTimes(0)
@@ -515,7 +515,7 @@ describe('statisticService', () => {
       prismaMock.statistic.findFirst.mockResolvedValue({ id: 1, status: 'A' })
 
       await expect(() => updateStatisticContacts('helse', [], prismaMock)).rejects.toMatchObject({
-        statregError: 'An active statistic needs at least one contact',
+        statregError: 'An active statistic needs at least one contact.',
       })
       expect(prismaMock.responsiblePerson.upsert).toHaveBeenCalledTimes(0)
       expect(prismaMock.statistic.update).toHaveBeenCalledTimes(0)
@@ -622,8 +622,8 @@ describe('statisticService', () => {
   })
 
   describe('parseVariantsInput ', () => {
-    test('returns undefined when variants are not provided', async () => {
-      await expect(parseVariantsInput(undefined, prismaMock)).resolves.toBeUndefined()
+    test('returns undefined when variants are not provided for upcoming statistic', async () => {
+      await expect(parseVariantsInput(undefined, 'K', prismaMock)).resolves.toBeUndefined()
     })
 
     test('returns parsed variants and revision', async () => {
@@ -642,6 +642,7 @@ describe('statisticService', () => {
             },
           },
         ],
+        'A',
         prismaMock
       )
 
@@ -676,6 +677,7 @@ describe('statisticService', () => {
               },
             },
           ],
+          'K',
           prismaMock
         )
       ).rejects.toMatchObject({
@@ -696,6 +698,7 @@ describe('statisticService', () => {
               },
             },
           ],
+          'K',
           prismaMock
         )
       ).rejects.toMatchObject({
@@ -720,11 +723,18 @@ describe('statisticService', () => {
               },
             },
           ],
+          'K',
           prismaMock
         )
       ).rejects.toMatchObject({
         status: 404,
         statregError: "Frequency 'BAD' not found",
+      })
+    })
+
+    test('throws error when variant is not provided for active statistic', async () => {
+      await expect(parseVariantsInput(undefined, 'A', prismaMock)).rejects.toMatchObject({
+        statregError: 'An active statistic needs at least one variant.',
       })
     })
   })
