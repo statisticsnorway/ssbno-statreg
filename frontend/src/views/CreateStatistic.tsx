@@ -460,6 +460,8 @@ export default function CreateStatistic() {
                 variant='tertiary'
                 onClick={() => {
                   setValues(defaultValues)
+                  setCreatedVariants([])
+                  setSelectedContacts([])
                   setErrors({})
                 }}
               >
