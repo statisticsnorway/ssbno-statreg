@@ -6,6 +6,7 @@ import {
   getFilteredStatistics,
   updateStatisticContacts,
 } from '@/services/statisticsService'
+import { getStatisticVersions } from '@/services/versionService'
 import { requireAdminAuthorization, skipAuth } from '@/../plugins/authMiddleware'
 import { handleErrors } from '@/lib/prismaErrors'
 import { prisma } from '@/lib/prisma'
@@ -64,6 +65,15 @@ export default function statisticsController(router: Router) {
       }
       const result = await updateStatisticContacts(ensureString(req.params.shortname), input, prisma)
       res.json(result)
+    } catch (error) {
+      return handleErrors(error, res)
+    }
+  })
+
+  router.get('/statistics/:shortname/versions', async (req, res) => {
+    try {
+      const data = await getStatisticVersions(ensureString(req.params.shortname), prisma)
+      res.json(data)
     } catch (error) {
       return handleErrors(error, res)
     }
