@@ -32,7 +32,7 @@ export default function StatisticVersions() {
   }, [shortname])
 
   return (
-    <section>
+    <>
       {apiError.length > 0 && <ErrorAlert message={apiError} />}
       <Heading level={1} data-size='sm'>
         Versjonshistorikk
@@ -40,6 +40,6 @@ export default function StatisticVersions() {
       {/* TODO: get statistic name */}
       <p>Statistikknavn ({shortname ?? ''})</p>
       <ChangeLogTable versions={versions} />
-    </section>
+    </>
   )
 }
