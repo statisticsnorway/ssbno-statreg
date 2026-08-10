@@ -20,7 +20,7 @@ import {
   ErrorSummary,
   Card,
 } from '@digdir/designsystemet-react'
-import { QuestionmarkCircleIcon, PlusCircleIcon } from '@navikt/aksel-icons'
+import { QuestionmarkCircleIcon, PlusCircleIcon, PencilWritingIcon } from '@navikt/aksel-icons'
 
 import client from '../api'
 
@@ -32,7 +32,7 @@ import ErrorPage, { ErrorType } from './ErrorPage'
 import { ErrorAlert } from '../components/ErrorAlert'
 import { CreateShortnameModal } from '../components/CreateShortnameModal'
 import { ContactSelection } from '../components/ContactSelection'
-import { CreateVariantModal } from '../components/CreateVariantModal'
+import { VariantModal } from '../components/VariantModal'
 
 type StatisticFormValues = {
   status: CreatableStatisticStatus
@@ -53,8 +53,9 @@ export default function CreateStatistic() {
   const [contacts, setContacts] = useState<Contact[]>([])
   const [selectedContacts, setSelectedContacts] = useState<string[]>([])
 
-  const [openCreateVariantModal, setOpenCreateVariantModal] = useState<boolean>(false)
+  const [openVariantModal, setOpenVariantModal] = useState<boolean>(false)
   const [createdVariants, setCreatedVariants] = useState<Variant[]>([])
+  const [editVariantIndex, setEditVariantIndex] = useState<number | null>(null)
 
   const { getCheckboxProps, value: regionLevelValues } = useCheckboxGroup({
     name: 'region-level-checkbox',
@@ -180,6 +181,7 @@ export default function CreateStatistic() {
           : [],
         approval_status: ApprovalStatus['ACCEPTED'],
         contacts: selectedContacts,
+        variants: createdVariants,
       },
     })
 
@@ -210,6 +212,23 @@ export default function CreateStatistic() {
     createStatistic()
   }
 
+  function handleOpenCreateVariantModal() {
+    setEditVariantIndex(null)
+    setOpenVariantModal(true)
+  }
+
+  function handleOpenEditVariantModal(index: number) {
+    setEditVariantIndex(index)
+    setOpenVariantModal(true)
+  }
+
+  function handleSetOpenVariantModal(open: boolean) {
+    setOpenVariantModal(open)
+    if (!open) {
+      setEditVariantIndex(null)
+    }
+  }
+
   if (!isAdmin) return <ErrorPage type={ErrorType.NOTAUTH} />
 
   function getFieldLabel(label: string, field: keyof StatisticFormValues) {
@@ -236,11 +255,13 @@ export default function CreateStatistic() {
 
       {createdShortname && (
         <div className='create-statistic-container'>
-          {openCreateVariantModal && (
-            <CreateVariantModal
-              openCreateVariantModal={openCreateVariantModal}
-              setOpenCreateVariantModal={setOpenCreateVariantModal}
+          {openVariantModal && (
+            <VariantModal
+              openVariantModal={openVariantModal}
+              setOpenVariantModal={handleSetOpenVariantModal}
               setCreatedVariants={setCreatedVariants}
+              editVariantIndex={editVariantIndex}
+              editVariantValues={editVariantIndex !== null ? createdVariants[editVariantIndex] : undefined}
             />
           )}
           {apiError.length > 0 && <ErrorAlert message={apiError} />}
@@ -322,19 +343,29 @@ export default function CreateStatistic() {
             </div>
             {createdVariants.length > 0 && (
               <div className='created-variants-container'>
-                {createdVariants.map((variant) => (
+                {createdVariants.map((variant, index) => (
                   <Card
-                    key={['created-variant', variant.frequency!.code, variant.revision!.code].join('-')}
-                    data-color='neutral'
+                    key={['created-variant', variant.frequency?.code ?? index, variant.revision?.code ?? index].join(
+                      '-'
+                    )}
                     variant='tinted'
                   >
                     <Card.Block>
-                      <Heading>
-                        {[
-                          variant.frequency!.name,
-                          RevisionNames[variant.revision!.code as keyof typeof RevisionNames].toLocaleLowerCase(),
-                        ].join(', ')}
-                      </Heading>
+                      <div className='created-variant-heading-container'>
+                        <Heading>
+                          {[
+                            variant.frequency!.name,
+                            RevisionNames[variant.revision!.code as keyof typeof RevisionNames].toLocaleLowerCase(),
+                          ].join(', ')}
+                        </Heading>
+                        <Button
+                          variant='tertiary'
+                          data-color='danger'
+                          onClick={() => handleOpenEditVariantModal(index)}
+                        >
+                          <PencilWritingIcon /> Rediger
+                        </Button>
+                      </div>
                       <Paragraph>
                         Detaljnivå: {variant.level_of_detail?.name} <br />
                         Engelsk detaljnivå: {variant.level_of_detail?.name_en}
@@ -344,7 +375,7 @@ export default function CreateStatistic() {
                 ))}
               </div>
             )}
-            <Button type='button' variant='secondary' onClick={() => setOpenCreateVariantModal(true)}>
+            <Button variant='secondary' onClick={handleOpenCreateVariantModal}>
               <PlusCircleIcon /> Legg til variant
             </Button>
             <Divider />
@@ -429,6 +460,8 @@ export default function CreateStatistic() {
                 variant='tertiary'
                 onClick={() => {
                   setValues(defaultValues)
+                  setCreatedVariants([])
+                  setSelectedContacts([])
                   setErrors({})
                 }}
               >

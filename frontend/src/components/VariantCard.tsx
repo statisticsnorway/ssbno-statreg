@@ -4,7 +4,7 @@ import { formatVariant } from '../lib/utils'
 
 export function VariantCard({ shortname, variant }: { shortname: string; variant: Variant }) {
   return (
-    <Card data-color='neutral' variant='tinted' style={{ height: '180px' }}>
+    <Card variant='tinted' style={{ height: '180px' }}>
       <Card.Block>
         <Heading>
           <Link href={`/statistikkregisteret/statistikk/${shortname}/${variant.id}/opprett`}>
