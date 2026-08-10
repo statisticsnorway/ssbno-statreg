@@ -28,7 +28,7 @@ import {
 } from '@ssbno-statreg/shared'
 
 import './ShowStatistic.css'
-import { formatContact, formatPublishTime, formatRevisionName, formatVariant } from '../lib/utils'
+import { formatContact, formatDateTime, formatRevisionName, formatVariant } from '../lib/utils'
 import { ApprovalStatusBadge } from '../components/ApprovalStatus'
 import { useAuth } from '../context/AuthContext'
 import { ErrorAlert } from '../components/ErrorAlert'
@@ -97,7 +97,7 @@ function SimpleReleaseRow({ release }: ReleaseRowProps) {
       }}
       className='selectable-row'
     >
-      <Table.Cell>{formatPublishTime(release.publish_time)}</Table.Cell>
+      <Table.Cell>{formatDateTime(release.publish_time)}</Table.Cell>
       <Table.Cell>
         {release.frequency?.name ?? ''}, {formatRevisionName(release.revision?.code).toLocaleLowerCase()}
       </Table.Cell>
@@ -362,7 +362,9 @@ export default function ShowStatistic() {
       <div>
         <Heading data-size='xs'>Endringer</Heading>
         <Paragraph>
-          <Link href='#'>Se versjonshistorikken til statistikken</Link>
+          <Link href={`/statistikkregisteret/statistikk/${shortname}/versions`} target='_blank'>
+            Se versjonshistorikken til statistikken (åpnes i ny fane)
+          </Link>
         </Paragraph>
       </div>
 
