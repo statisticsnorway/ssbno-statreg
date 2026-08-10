@@ -545,7 +545,7 @@ export async function parseVariantsInput(
       const revision = variant.revision
       const revisionCodes = Object.keys(RevisionNames)
       if (!revisionCodes.includes(revision?.code ?? '')) {
-        throw { statregError: `Field 'revision' must be one of these: ${revisionCodes.join(', ')}.` }
+        throw new StatregError(`Field 'revision' must be one of these: ${revisionCodes.join(', ')}.`)
       }
 
       return {

@@ -11,6 +11,7 @@ import { requireAdminAuthorization, skipAuth } from '@/../plugins/authMiddleware
 import { handleErrors } from '@/lib/prismaErrors'
 import { prisma } from '@/lib/prisma'
 import { isNumber, ensureString, ensureStringArray, ensureRequiredFieldsExists } from '@/lib/utils'
+import { StatregError } from '@/lib/statregError'
 
 export default function releasesController(router: Router) {
   router.get('/releases/:id', skipAuth, async (req, res) => {
@@ -49,7 +50,7 @@ export default function releasesController(router: Router) {
       const body = ensureRequiredFieldsExists(req.body, ['ids'])
       const input = body.ids
       if (!Array.isArray(input) || input.some((item) => !isNumber(item))) {
-        throw { statregError: `Invalid format for field 'ids'. Expected an array of integers.` }
+        throw new StatregError(`Invalid format for field 'ids'. Expected an array of integers.`, 400)
       }
       const ids = input.map(Number)
       const result = await bulkApproveReleases(prisma, ids)
