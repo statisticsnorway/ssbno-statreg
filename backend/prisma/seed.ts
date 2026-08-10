@@ -7,8 +7,8 @@ async function main() {
     update: {},
     create: {
       code: 'W',
-      name_en: 'Week',
-      name: 'Uke',
+      name_en: 'Week (U)',
+      name: 'Uke (U)',
       version: 1,
     },
   })
@@ -46,8 +46,8 @@ async function main() {
     update: {},
     create: {
       code: 'U',
-      name_en: 'Week',
-      name: 'Uke',
+      name_en: 'Week (U)',
+      name: 'Uke (U)',
       version: 1,
     },
   })
