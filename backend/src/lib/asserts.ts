@@ -1,6 +1,7 @@
 import { CalendarDatePrisma } from '@/services/calendarService'
 import { ReleasePrisma } from '@/services/releasesService'
 import { StatisticPrisma } from '@/services/statisticsService'
+import { FrequencyPrisma } from '@/services/frequenciesService'
 import { parseDateOnly } from '@/lib/utils'
 
 export async function assertStatisticExists(shortname: string, prisma: ReleasePrisma | StatisticPrisma) {
@@ -123,6 +124,20 @@ export function assertReleaseDateIsMoreThanThreeMonthsAway(candiDate: Date): boo
   return candiDate > addThreeMonths(now)
 }
 
+export async function assertFrequencyExists(frequencyCode: string, prisma: FrequencyPrisma): Promise<boolean> {
+  const foundFrequency = await prisma.frequency.findUnique({
+    where: {
+      code: frequencyCode,
+    },
+  })
+
+  if (!foundFrequency) {
+    throw { status: 404, statregError: `Frequency '${frequencyCode}' not found` }
+  }
+
+  return true
+}
+
 export const releaseAsserts = {
   assertFilteredShortnamesExist,
   assertStatisticExists,
@@ -135,4 +150,5 @@ export const statisticsAsserts = {
   assertShortnameExists,
   assertShortnameExistsAndIsAvailable,
   assertFilteredShortnamesExist,
+  assertFrequencyExists,
 }

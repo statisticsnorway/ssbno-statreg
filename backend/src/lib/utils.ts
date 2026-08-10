@@ -6,7 +6,7 @@ export function dateToISOString(date: Date | null): string | undefined {
   return date.toISOString()
 }
 
-export function sanitize(input: string | undefined): string {
+export function sanitize(input: string | undefined | null): string {
   if (typeof input !== 'string') return ''
 
   return input.trim().replace(/[^a-zA-Z0-9æøåÆØÅ.,:;!?()/_\-\s]/g, '')

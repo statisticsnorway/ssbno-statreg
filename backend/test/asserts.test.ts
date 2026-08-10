@@ -2,6 +2,7 @@
 import { vi, describe, test, expect, beforeEach } from 'vitest'
 import {
   assertDayNotManuallyBlocked,
+  assertFrequencyExists,
   assertShortnameExists,
   assertShortnameExistsAndIsAvailable,
   assertFilteredShortnamesExist,
@@ -23,6 +24,9 @@ describe('asserts', () => {
         findFirst: vi.fn(),
       },
       shortname: {
+        findUnique: vi.fn(),
+      },
+      frequency: {
         findUnique: vi.fn(),
       },
       calender_date: {
@@ -150,6 +154,30 @@ describe('asserts', () => {
       await expect(() => assertFilteredShortnamesExist(['KPI', 'LAKS', 'BAD'], prismaMock)).rejects.toMatchObject({
         status: 404,
         statregError: 'Shortname(s) not found: BAD',
+      })
+    })
+  })
+
+  describe('assertFrequencyExists()', () => {
+    test('returns true when frequency exists', async () => {
+      prismaMock.frequency.findUnique = vi.fn(() => Promise.resolve({ code: 'M' }))
+
+      const result = await assertFrequencyExists('M', prismaMock)
+
+      expect(result).toBe(true)
+      expect(prismaMock.frequency.findUnique).toHaveBeenCalledWith({
+        where: {
+          code: 'M',
+        },
+      })
+    })
+
+    test('throws when frequency not found', async () => {
+      prismaMock.frequency.findUnique = vi.fn(() => Promise.resolve(null))
+
+      await expect(() => assertFrequencyExists('BAD', prismaMock)).rejects.toMatchObject({
+        status: 404,
+        statregError: "Frequency 'BAD' not found",
       })
     })
   })

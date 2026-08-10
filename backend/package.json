@@ -22,9 +22,9 @@
     "test:integration": "vitest run --project integration"
   },
   "dependencies": {
-    "@cacheable/node-cache": "^3.1.1",
-    "@prisma/adapter-pg": "7.8.0",
-    "@prisma/client": "7.8.0",
+    "@cacheable/node-cache": "3.1.1",
+    "@prisma/adapter-pg": "7.9.1",
+    "@prisma/client": "7.9.1",
     "@ssbno-statreg/shared": "*",
     "dotenv": "17.4.2",
     "express": "5.2.1",
@@ -45,7 +45,7 @@
     "node-mocks-http": "1.18.1",
     "nodemon": "3.1.14",
     "pkgroll": "2.27.1",
-    "prisma": "7.8.0",
+    "prisma": "7.9.1",
     "rollup": "4.62.3",
     "supertest": "7.2.2"
   }

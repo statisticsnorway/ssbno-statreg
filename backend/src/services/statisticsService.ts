@@ -6,8 +6,10 @@ import {
   type StatisticCreate,
   ApprovalStatus,
   StatisticStatus,
+  RevisionNames,
   StatisticListingResponse,
   getRequiredStatisticFields,
+  Variant,
 } from '@ssbno-statreg/shared'
 import { dateToISOString, sanitize, parseDateOnly, ensureRequiredFieldsExists, isNumber, parseId } from '@/lib/utils'
 import type { Prisma } from '@/generated/prisma/client'
@@ -17,7 +19,7 @@ import { statisticsAsserts } from '@/lib/asserts'
 import { getAllUsersFromCache } from '@/lib/cache'
 import { StatregError } from '@/lib/statregError'
 
-export type StatisticPrisma = Pick<PrismaClient, 'statistic' | 'shortname' | 'responsiblePerson'>
+export type StatisticPrisma = Pick<PrismaClient, 'statistic' | 'shortname' | 'responsiblePerson' | 'frequency'>
 
 type StatisticStatusCode = keyof typeof StatisticStatus
 
@@ -461,6 +463,8 @@ export async function createStatistic(
     }
   }
 
+  const variants = await parseVariantsInput(body?.variants, prisma)
+
   const result = await prisma.statistic.create({
     data: {
       name,
@@ -490,6 +494,25 @@ export async function createStatistic(
           connect: contacts.map((contact) => ({ id: contact.id })),
         },
       }),
+      ...(variants?.length
+        ? {
+            variants: {
+              create: variants.map((variant) => ({
+                cancelled: false,
+                date_created: now,
+                last_updated: now,
+                revision: variant.revision!.code as string,
+                frequency: {
+                  connect: {
+                    code: variant.frequency!.code as string,
+                  },
+                },
+                ...(variant.level_of_detail?.name ? { level_of_detail: variant.level_of_detail.name } : {}),
+                ...(variant.level_of_detail?.name_en ? { level_of_detail_en: variant.level_of_detail.name_en } : {}),
+              })),
+            },
+          }
+        : {}),
     },
     include: StatisticsDetailedIncludes,
   })
@@ -504,6 +527,37 @@ export function parseCreateStatisticStatus(body?: StatisticCreate): CreatableSta
   } else {
     throw new StatregError("Field 'status' must be one of these: K, A.")
   }
+}
+
+export async function parseVariantsInput(
+  variants: Variant[] | undefined,
+  prisma: StatisticPrisma
+): Promise<Variant[] | undefined> {
+  if (!variants?.length) {
+    return undefined
+  }
+
+  return await Promise.all(
+    variants.map(async (variant) => {
+      const frequency = variant.frequency
+      await statisticsAsserts.assertFrequencyExists(frequency?.code ?? '', prisma)
+
+      const revision = variant.revision
+      const revisionCodes = Object.keys(RevisionNames)
+      if (!revisionCodes.includes(revision?.code ?? '')) {
+        throw { statregError: `Field 'revision' must be one of these: ${revisionCodes.join(', ')}.` }
+      }
+
+      return {
+        frequency,
+        revision,
+        level_of_detail: variant.level_of_detail && {
+          name: sanitize(variant.level_of_detail.name),
+          name_en: sanitize(variant.level_of_detail.name_en),
+        },
+      }
+    })
+  )
 }
 
 export function parseCreateStatisticInput(

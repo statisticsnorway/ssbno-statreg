@@ -1,15 +1,18 @@
 import { useState, useEffect, type Dispatch, type SetStateAction } from 'react'
 import { Button, Heading, Dialog, Field, Label, Input, Select, Paragraph } from '@digdir/designsystemet-react'
+import { TrashIcon } from '@navikt/aksel-icons'
 
-import './CreateVariantModal.css'
+import './VariantModal.css'
 import client from '../api'
 import { RevisionNames, type Frequency, type Variant } from '@ssbno-statreg/shared'
-import { ErrorAlert } from '../components/ErrorAlert'
+import { ErrorAlert } from './ErrorAlert'
 
-type CreateVariantModalProps = {
-  openCreateVariantModal: boolean
-  setOpenCreateVariantModal: (open: boolean) => void
+type VariantModalProps = {
+  openVariantModal: boolean
+  setOpenVariantModal: (open: boolean) => void
   setCreatedVariants: Dispatch<SetStateAction<Variant[]>>
+  editVariantValues?: Variant
+  editVariantIndex?: number | null
 }
 
 type CreateVariantFormValues = {
@@ -19,19 +22,23 @@ type CreateVariantFormValues = {
   level_of_detail_name_en: string
 }
 
-export function CreateVariantModal({
-  openCreateVariantModal,
-  setOpenCreateVariantModal,
+export function VariantModal({
+  openVariantModal,
+  setOpenVariantModal,
   setCreatedVariants,
-}: Readonly<CreateVariantModalProps>) {
+  editVariantValues,
+  editVariantIndex,
+}: Readonly<VariantModalProps>) {
   const [frequencies, setFrequencies] = useState<Frequency[]>([])
   const [apiError, setApiError] = useState<string[]>([])
   const [values, setValues] = useState<CreateVariantFormValues>({
-    revision_code: 'I',
-    frequency_code: 'U',
-    level_of_detail_name: '',
-    level_of_detail_name_en: '',
+    revision_code: editVariantValues?.revision?.code ?? 'I',
+    frequency_code: editVariantValues?.frequency?.code ?? 'U',
+    level_of_detail_name: editVariantValues?.level_of_detail?.name ?? '',
+    level_of_detail_name_en: editVariantValues?.level_of_detail?.name_en ?? '',
   })
+
+  const isEditMode = typeof editVariantIndex === 'number'
 
   useEffect(() => {
     async function fetchFrequencies() {
@@ -48,9 +55,8 @@ export function CreateVariantModal({
   function createVariant() {
     const selectedFrequency = frequencies.find(({ code }) => code === values.frequency_code)
 
-    setCreatedVariants((prevVariants: Variant[]) => [
-      ...prevVariants,
-      {
+    setCreatedVariants((prevVariants: Variant[]) => {
+      const nextVariant: Variant = {
         revision: {
           code: values.revision_code,
         },
@@ -59,21 +65,34 @@ export function CreateVariantModal({
           name: values.level_of_detail_name,
           name_en: values.level_of_detail_name_en,
         },
-      },
-    ])
+      }
+
+      if (!isEditMode) {
+        return [...prevVariants, nextVariant]
+      }
+
+      return prevVariants.map((variant, index) => (index === editVariantIndex ? nextVariant : variant))
+    })
+    handleCloseModal()
+  }
+
+  function deleteVariant() {
+    if (!isEditMode) return
+
+    setCreatedVariants((prevVariants: Variant[]) => prevVariants.filter((_, index) => index !== editVariantIndex))
     handleCloseModal()
   }
 
   function handleCloseModal() {
-    setOpenCreateVariantModal(false)
+    setOpenVariantModal(false)
   }
 
   return (
-    <Dialog id='create-variant-modal' open={openCreateVariantModal} onClose={handleCloseModal}>
+    <Dialog id='variant-modal' open={openVariantModal} onClose={handleCloseModal}>
       <Dialog.Block>
-        <Heading data-size='xs'>Legg til variant</Heading>
+        <Heading data-size='xs'>{isEditMode ? 'Rediger variant' : 'Legg til variant'}</Heading>
       </Dialog.Block>
-      <Dialog.Block className='create-variant-modal-form'>
+      <Dialog.Block className='variant-modal-form'>
         {apiError.length > 0 && <ErrorAlert message={apiError} />}
         <Paragraph>
           En variant definerer frekvens og detaljnivå for statistikken. Du trenger minst én variant for å kunne melde
@@ -120,13 +139,20 @@ export function CreateVariantModal({
             onChange={(e) => setValues((prevValues) => ({ ...prevValues, level_of_detail_name_en: e.target.value }))}
           />
         </Field>
-        <div className='create-variant-modal-form-buttons'>
-          <Button variant='primary' onClick={createVariant}>
-            Legg til
-          </Button>
-          <Button variant='tertiary' onClick={handleCloseModal}>
-            Avbryt
-          </Button>
+        <div className='variant-modal-form-buttons'>
+          <div className='variant-modal-form-buttons-left'>
+            <Button variant='primary' onClick={createVariant}>
+              Legg til
+            </Button>
+            <Button variant='tertiary' onClick={handleCloseModal}>
+              Avbryt
+            </Button>
+          </div>
+          {isEditMode && (
+            <Button variant='tertiary' data-color='danger' onClick={deleteVariant}>
+              <TrashIcon /> Slett
+            </Button>
+          )}
         </div>
       </Dialog.Block>
     </Dialog>
