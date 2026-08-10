@@ -30,9 +30,15 @@
       flex-direction: row;
       gap: var(--ds-size-6);
 
+      .created-variant-heading-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
       > * {
         height: 180px;
-        min-width: 30%;
+        min-width: 40%;
       }
     }
   }
