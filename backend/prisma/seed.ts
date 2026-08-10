@@ -121,7 +121,7 @@ async function main() {
   console.log('Created responsiblePerson1: \n' + JSON.stringify(responsiblePerson1, null, 2))
 
   const responsiblePerson2 = await prisma.responsiblePerson.upsert({
-    where: { principalName: 'bcd@ssb.no' },
+    where: { principalName: 'bob@ssb.no' },
     update: {},
     create: {
       principalName: 'bob@ssb.no',
@@ -131,7 +131,7 @@ async function main() {
   console.log('Created responsiblePerson2: \n' + JSON.stringify(responsiblePerson2, null, 2))
 
   const responsiblePerson3 = await prisma.responsiblePerson.upsert({
-    where: { principalName: 'cde@ssb.no' },
+    where: { principalName: 'carol@ssb.no' },
     update: {},
     create: {
       principalName: 'carol@ssb.no',
