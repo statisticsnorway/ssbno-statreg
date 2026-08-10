@@ -98,7 +98,7 @@ async function main() {
   console.log('Created shortnames from seed: \n' + shortname1 + shortname2 + shortname3 + shortname4 + shortname5)
 
   const responsiblePerson1 = await prisma.responsiblePerson.upsert({
-    where: { principalName: 'alice@ssb.no' },
+    where: { principalName: 'abc@ssb.no' },
     update: {},
     create: {
       principalName: 'abc@ssb.no',
@@ -111,7 +111,7 @@ async function main() {
     where: { principalName: 'bob@ssb.no' },
     update: {},
     create: {
-      principalName: 'bcd@ssb.no',
+      principalName: 'bob@ssb.no',
     },
   })
 
@@ -121,7 +121,7 @@ async function main() {
     where: { principalName: 'carol@ssb.no' },
     update: {},
     create: {
-      principalName: 'cde@ssb.no',
+      principalName: 'carol@ssb.no',
     },
   })
 
