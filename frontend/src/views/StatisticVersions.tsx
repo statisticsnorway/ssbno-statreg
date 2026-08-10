@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router'
-import { Heading } from '@digdir/designsystemet-react'
+import { Heading, Link } from '@digdir/designsystemet-react'
 import type { Version } from '@ssbno-statreg/shared'
 import client from '../api'
 import { ErrorAlert } from '../components/ErrorAlert'
@@ -34,6 +34,8 @@ export default function StatisticVersions() {
   return (
     <>
       {apiError.length > 0 && <ErrorAlert message={apiError} />}
+      {/* TODO: Vis pil foran linken */}
+      <Link href={`/statistikkregisteret/statistikk/${shortname}`}>{`Tilbake til (${shortname})`}</Link>
       <Heading level={1} data-size='sm'>
         Versjonshistorikk
       </Heading>

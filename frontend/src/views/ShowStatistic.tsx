@@ -362,8 +362,8 @@ export default function ShowStatistic() {
       <div>
         <Heading data-size='xs'>Endringer</Heading>
         <Paragraph>
-          <Link href={`/statistikkregisteret/statistikk/${shortname}/versions`} target='_blank'>
-            Se versjonshistorikken til statistikken (åpnes i ny fane)
+          <Link href={`/statistikkregisteret/statistikk/${shortname}/versjoner`}>
+            Se versjonshistorikken til statistikken
           </Link>
         </Paragraph>
       </div>
