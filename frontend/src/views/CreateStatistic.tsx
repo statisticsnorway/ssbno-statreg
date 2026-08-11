@@ -135,24 +135,24 @@ export default function CreateStatistic() {
       setApiError([])
 
       const {
-        data: shortnameExists,
-        error: shortnamesError,
+        data: shortnameData,
+        error: shortnameError,
         response,
       } = await client.GET('/shortnames/{shortname}', {
         params: { path: { shortname: createdShortname } },
       })
 
-      if (shortnamesError) {
+      if (shortnameError) {
         if (response.status === 404) {
           setInvalidShortname(true)
           return
         }
 
-        setApiError([shortnamesError.message])
+        setApiError([shortnameError.message])
         return
       }
 
-      const statisticExists = shortnameExists.statistic_name
+      const statisticExists = shortnameData.statistic_name
 
       if (statisticExists) {
         navigate(`/statistikk/${createdShortname}`)
