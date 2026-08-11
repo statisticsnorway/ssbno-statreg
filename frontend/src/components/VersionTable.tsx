@@ -28,7 +28,7 @@ function VersionRow({ version }: Readonly<VersionRowProps>) {
       {/* TODO: Show changes according to figma */}
       <Table.Cell>
         {version.changed_values
-          ?.map((change) => `${change.field_name}: ${change.old_value} -> ${change.new_value}`)
+          ?.map((change) => `${change.field_name}: ${change.old_value} / ${change.new_value}`)
           .join(', ') ?? ''}
       </Table.Cell>
       <Table.Cell>{version.comment ?? ''}</Table.Cell>
