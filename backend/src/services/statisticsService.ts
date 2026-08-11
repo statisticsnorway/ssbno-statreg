@@ -405,13 +405,13 @@ export async function updateStatisticContacts(
     select: { id: true, status: true },
   })
   if (!existingStatistic) {
-    throw new StatregError(`Shortname '${safeShortname}' not found`, 404)
+    throw new StatregError(`Shortname '${safeShortname}' not found.`, 404)
   }
 
   const newContacts = await upsertContacts(newPrincipalNames, prisma)
 
   if (existingStatistic.status === 'A' && newContacts.length === 0) {
-    throw new StatregError('An active statistic needs at least one contact')
+    throw new StatregError('An active statistic needs at least one contact.')
   }
 
   const updatedStatistic = await prisma.statistic.update({
@@ -454,16 +454,18 @@ export async function createStatistic(
     comment,
   } = parseCreateStatisticInput(body, createStatisticStatus)
 
+  const statusCode = body?.status?.code
+
   let contacts
   if (body?.contacts) {
     contacts = await upsertContacts(body.contacts, prisma)
 
-    if (body?.status?.code === 'A' && contacts.length === 0) {
-      throw new StatregError('An active statistic needs at least one contact')
+    if (statusCode === 'A' && contacts.length === 0) {
+      throw new StatregError('An active statistic needs at least one contact.')
     }
   }
 
-  const variants = await parseVariantsInput(body?.variants, prisma)
+  const variants = await parseVariantsInput(body?.variants, statusCode, prisma)
 
   const result = await prisma.statistic.create({
     data: {
@@ -531,8 +533,13 @@ export function parseCreateStatisticStatus(body?: StatisticCreate): CreatableSta
 
 export async function parseVariantsInput(
   variants: Variant[] | undefined,
+  status: string | undefined,
   prisma: StatisticPrisma
 ): Promise<Variant[] | undefined> {
+  if (status === 'A' && !variants?.length) {
+    throw new StatregError('An active statistic needs at least one variant.')
+  }
+
   if (!variants?.length) {
     return undefined
   }
