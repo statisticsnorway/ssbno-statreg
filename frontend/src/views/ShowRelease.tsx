@@ -5,7 +5,7 @@ import { PencilWritingIcon } from '@navikt/aksel-icons'
 import { ApprovalStatusTag } from '../components/ApprovalStatus'
 import client from '../api'
 import { type ReleaseDetails } from '@ssbno-statreg/shared'
-import { formatPublishTime, formatDate, formatVariant } from '../lib/utils'
+import { formatDateTime, formatDate, formatVariant } from '../lib/utils'
 import { ErrorAlert } from '../components/ErrorAlert'
 
 function formatStatisticName(statistic: ReleaseDetails['statistic']): string {
@@ -39,7 +39,7 @@ export default function ShowRelease() {
   const approvalStatus = release.approval_status
   const statisticName = formatStatisticName(release.statistic)
   const period = formatPeriod(release.period_from, release.period_to)
-  const publishTime = formatPublishTime(release.publish_time)
+  const publishTime = formatDateTime(release.publish_time)
   const variant = formatVariant(release.variant)
 
   return (
