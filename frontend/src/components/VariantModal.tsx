@@ -98,62 +98,64 @@ export function VariantModal({
           En variant definerer frekvens og detaljnivå for statistikken. Du trenger minst én variant for å kunne melde
           publiseringsdato.
         </Paragraph>
-        <Field>
-          <Label>Revisjon</Label>
-          <Select
-            value={values.revision_code}
-            onChange={(e) => setValues((prevValues) => ({ ...prevValues, revision_code: e.target.value }))}
-          >
-            {Object.entries(RevisionNames).map(([code, name]) => (
-              <Select.Option key={`revision-${code}`} value={code}>
-                {name}
-              </Select.Option>
-            ))}
-          </Select>
-        </Field>
-        <Field>
-          <Label>Frekvens</Label>
-          <Select
-            value={values.frequency_code}
-            onChange={(e) => setValues((prevValues) => ({ ...prevValues, frequency_code: e.target.value }))}
-          >
-            {frequencies.map(({ code, name }) => (
-              <Select.Option key={`frequency-${code}`} value={code}>
-                {name}
-              </Select.Option>
-            ))}
-          </Select>
-        </Field>
-        <Field>
-          <Label>Detaljnivå</Label>
-          <Field.Description>Nivået på detaljene i publiserte data</Field.Description>
-          <Input
-            value={values.level_of_detail_name}
-            onChange={(e) => setValues((prevValues) => ({ ...prevValues, level_of_detail_name: e.target.value }))}
-          />
-        </Field>
-        <Field>
-          <Label>Detaljnivå på engelsk</Label>
-          <Input
-            value={values.level_of_detail_name_en}
-            onChange={(e) => setValues((prevValues) => ({ ...prevValues, level_of_detail_name_en: e.target.value }))}
-          />
-        </Field>
-        <div className='variant-modal-form-buttons'>
-          <div className='variant-modal-form-buttons-left'>
-            <Button variant='primary' onClick={createVariant}>
-              Legg til
-            </Button>
-            <Button variant='tertiary' onClick={handleCloseModal}>
-              Avbryt
-            </Button>
+        <form>
+          <Field>
+            <Label>Revisjon</Label>
+            <Select
+              value={values.revision_code}
+              onChange={(e) => setValues((prevValues) => ({ ...prevValues, revision_code: e.target.value }))}
+            >
+              {Object.entries(RevisionNames).map(([code, name]) => (
+                <Select.Option key={`revision-${code}`} value={code}>
+                  {name}
+                </Select.Option>
+              ))}
+            </Select>
+          </Field>
+          <Field>
+            <Label>Frekvens</Label>
+            <Select
+              value={values.frequency_code}
+              onChange={(e) => setValues((prevValues) => ({ ...prevValues, frequency_code: e.target.value }))}
+            >
+              {frequencies.map(({ code, name }) => (
+                <Select.Option key={`frequency-${code}`} value={code}>
+                  {name}
+                </Select.Option>
+              ))}
+            </Select>
+          </Field>
+          <Field>
+            <Label>Detaljnivå</Label>
+            <Field.Description>Nivået på detaljene i publiserte data</Field.Description>
+            <Input
+              value={values.level_of_detail_name}
+              onChange={(e) => setValues((prevValues) => ({ ...prevValues, level_of_detail_name: e.target.value }))}
+            />
+          </Field>
+          <Field>
+            <Label>Detaljnivå på engelsk</Label>
+            <Input
+              value={values.level_of_detail_name_en}
+              onChange={(e) => setValues((prevValues) => ({ ...prevValues, level_of_detail_name_en: e.target.value }))}
+            />
+          </Field>
+          <div className='variant-modal-form-buttons'>
+            <div className='variant-modal-form-buttons-left'>
+              <Button variant='primary' onClick={createVariant}>
+                Legg til
+              </Button>
+              <Button variant='tertiary' onClick={handleCloseModal}>
+                Avbryt
+              </Button>
+            </div>
+            {isEditMode && (
+              <Button variant='tertiary' data-color='danger' onClick={deleteVariant}>
+                <TrashIcon /> Slett
+              </Button>
+            )}
           </div>
-          {isEditMode && (
-            <Button variant='tertiary' data-color='danger' onClick={deleteVariant}>
-              <TrashIcon /> Slett
-            </Button>
-          )}
-        </div>
+        </form>
       </Dialog.Block>
     </Dialog>
   )
