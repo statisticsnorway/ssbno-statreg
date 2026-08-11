@@ -4,7 +4,7 @@ import { sanitize } from '@/lib/utils'
 import type { Prisma } from '@/generated/prisma/client'
 import type { Version } from '@ssbno-statreg/shared'
 
-export type VersionPrisma = Pick<PrismaClient, 'auditLog' | 'statistic'>
+export type VersionPrisma = Pick<PrismaClient, 'auditLog' | 'statistic' | 'release'>
 
 function diffObjects(
   oldObject: Record<string, unknown>,
@@ -12,7 +12,7 @@ function diffObjects(
 ): Version['changed_values'] {
   const changes = []
   for (const key of Object.keys(oldObject)) {
-    if (key === 'comment') {
+    if (key === 'comment' || key === 'last_updated') {
       continue
     }
 
@@ -67,4 +67,15 @@ export async function getStatisticVersions(shortname: string, prisma: VersionPri
   if (!statistic) throw new StatregError(`Shortname '${safeShortname}' not found`, 404)
 
   return getVersions('Statistic', statistic.id, prisma)
+}
+
+export async function getReleaseVersions(releaseId: number, prisma: VersionPrisma): Promise<Version[]> {
+  const release = await prisma.release.findFirst({
+    where: { id: releaseId },
+    select: { id: true },
+  })
+
+  if (!release) throw new StatregError(`Release '${releaseId}' not found`, 404)
+
+  return getVersions('Release', releaseId, prisma)
 }
