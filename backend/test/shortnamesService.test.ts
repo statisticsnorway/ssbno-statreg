@@ -28,18 +28,20 @@ describe('shortnamesService ', async () => {
     }
 
     test('throws when shortname is not a string', () => {
-      expect(() => parseShortname(123)).toThrow({ statregError: "Field 'shortname' must be a string." })
+      expect(() => parseShortname(123)).toThrow(
+        expect.objectContaining({ statregError: "Field 'shortname' must be a string." })
+      )
     })
     test('throws when shortname contains uppercase letters', () => {
-      expect(() => parseShortname('Invalid_Name')).toThrow(expectedError)
+      expect(() => parseShortname('Invalid_Name')).toThrow(expect.objectContaining(expectedError))
     })
 
     test('throws when shortname is longer than 14 characters', () => {
-      expect(() => parseShortname('this_name_is_too_long')).toThrow(expectedError)
+      expect(() => parseShortname('this_name_is_too_long')).toThrow(expect.objectContaining(expectedError))
     })
 
     test('throws when shortname contains invalid characters', () => {
-      expect(() => parseShortname('invalid-name')).toThrow(expectedError)
+      expect(() => parseShortname('invalid-name')).toThrow(expect.objectContaining(expectedError))
     })
     test('returns the shortname when it is valid', () => {
       const result = parseShortname('valid_name')
@@ -59,7 +61,7 @@ describe('shortnamesService ', async () => {
     })
 
     test('throws when the body is missing the shortname field', async () => {
-      await expect(createShortname(prismaMock, {})).rejects.toThrow({
+      await expect(createShortname(prismaMock, {})).rejects.toMatchObject({
         statregError: "Missing required field 'shortname'.",
       })
     })
@@ -67,7 +69,7 @@ describe('shortnamesService ', async () => {
     test('throws when the shortname already exists', async () => {
       prismaMock.shortname.findUnique = vi.fn(() => Promise.resolve({ id: 1 }))
 
-      await expect(createShortname(prismaMock, { shortname: 'existing' })).rejects.toThrow({
+      await expect(createShortname(prismaMock, { shortname: 'existing' })).rejects.toMatchObject({
         statregError: "Shortname 'existing' already exists",
       })
     })

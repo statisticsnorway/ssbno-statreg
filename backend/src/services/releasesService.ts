@@ -20,6 +20,7 @@ import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
 import type { Prisma } from '@/generated/prisma/client'
 import { releaseAsserts } from '@/lib/asserts'
 import { checkForKnownPrismaErrors } from '@/lib/prismaErrors'
+import { StatregError } from '@/lib/statregError'
 import { isCurrentUserAdmin } from '@/lib/context'
 import { isDateBlocked } from '@/lib/blockedDates'
 
@@ -192,7 +193,7 @@ export async function getReleaseById(id: string, prisma: ReleasePrisma): Promise
     include: ReleaseDetailsIncludes,
   })
 
-  if (!release) return Promise.reject({ status: 404, statregError: `Release ${idAsNumber} not found` })
+  if (!release) throw new StatregError(`Release ${idAsNumber} not found`, 404)
 
   return mapToReleaseDetails(release)
 }
@@ -385,7 +386,7 @@ export async function parseReleaseInput(
   const safeComment = sanitize(comment)
   if (type === 'update') {
     if (!safeComment) {
-      throw { statregError: "Field 'comment' must be a non-empty string." }
+      throw new StatregError("Field 'comment' must be a non-empty string.")
     }
   }
 
@@ -393,12 +394,12 @@ export async function parseReleaseInput(
   const isAdmin = isCurrentUserAdmin()
 
   if (!isAdmin && (await isDateBlocked(getDateOnlyAsString(publishTimeDate), prisma))) {
-    throw { statregError: 'The given date is full or blocked' }
+    throw new StatregError('The given date is full or blocked')
   }
 
   // Non-admins can only create releases with a publish time more than three months from now
   if (!isAdmin && !releaseAsserts.assertReleaseDateIsMoreThanThreeMonthsAway(publishTimeDate)) {
-    throw { statregError: 'Publish time must be later than three months from now' }
+    throw new StatregError('Publish time must be later than three months from now')
   }
 
   // TODO check that release_data_precision is enum
