@@ -360,7 +360,7 @@ describe('statisticService', () => {
     test('throws Error when shortname is not found', async () => {
       setStatisticsResult(null)
       await expect(() => getStatisticByShortname('', prismaMock)).rejects.toMatchObject({
-        statregError: 'Shortname not found',
+        statregError: `Statistic with shortname '' not found.`,
       })
     })
   })
