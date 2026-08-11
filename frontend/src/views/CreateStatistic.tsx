@@ -44,7 +44,8 @@ type StatisticFormValues = {
   comment: string
 }
 
-type StatisticFormErrors = Partial<Record<keyof StatisticFormValues, string>>
+type StatisticFormField = keyof StatisticFormValues | 'variants' | 'contacts'
+type StatisticFormErrors = Partial<Record<StatisticFormField, string>>
 
 export default function CreateStatistic() {
   const [openCreateShortnameModal, setOpenCreateShortnameModal] = useState<boolean>(true)
@@ -135,16 +136,27 @@ export default function CreateStatistic() {
     fetchContacts()
   }, [createdShortname, isAdmin])
 
-  function isRequired(field: keyof StatisticFormValues) {
+  function isRequired(field: StatisticFormField) {
     return isCreateStatisticFieldRequired(values.status, field)
   }
 
-  function validateField(field: keyof StatisticFormValues, nextValues: StatisticFormValues): string {
+  function validateField(field: StatisticFormField, nextValues: StatisticFormValues): string {
+    if (field === 'variants') {
+      if (!isRequired(field) || createdVariants.length > 0) return ''
+      return 'Opprett minst en variant for statistikken'
+    }
+
+    if (field === 'contacts') {
+      if (!isRequired(field) || selectedContacts.length > 0) return ''
+      return 'Velg minst en ansvarlig person for statistikken'
+    }
+
     if (!isRequired(field) && !nextValues[field]) {
       return ''
     }
 
     if (field === 'name' && !nextValues.name) return 'Fyll inn norsk statistikknavn'
+    if (field === 'name_en' && !nextValues.name_en) return 'Fyll inn engelsk statistikknavn'
     if (field === 'division' && !nextValues.division) return 'Velg ansvarlig seksjon for statistikken'
 
     // Optional fields
@@ -155,7 +167,7 @@ export default function CreateStatistic() {
     return ''
   }
 
-  function handleOnBlur(field: keyof StatisticFormValues) {
+  function handleOnBlur(field: StatisticFormField) {
     setErrors((currentErrors) => {
       const nextErrors = { ...currentErrors }
       const error = validateField(field, values)
@@ -198,8 +210,13 @@ export default function CreateStatistic() {
     e.preventDefault()
 
     const nextErrors: StatisticFormErrors = {}
+    const fieldsToValidate: StatisticFormField[] = [
+      ...Object.keys(values),
+      'variants',
+      'contacts',
+    ] as StatisticFormField[]
 
-    for (const field of Object.keys(values) as (keyof StatisticFormValues)[]) {
+    for (const field of fieldsToValidate) {
       const error = validateField(field, values)
       if (error) nextErrors[field] = error
     }
@@ -231,7 +248,7 @@ export default function CreateStatistic() {
 
   if (!isAdmin) return <ErrorPage type={ErrorType.NOTAUTH} />
 
-  function getFieldLabel(label: string, field: keyof StatisticFormValues) {
+  function getFieldLabel(label: string, field: StatisticFormField) {
     if (isRequired(field)) {
       return (
         <span>
@@ -310,6 +327,7 @@ export default function CreateStatistic() {
                 }
               >
                 <Select.Option value='K'>Kommende</Select.Option>
+                <Select.Option value='A'>Aktiv</Select.Option>
               </Select>
             </Field>
             <Divider />
@@ -337,8 +355,8 @@ export default function CreateStatistic() {
               />
             </Field>
             <Divider />
-            <div className='created-variants-title-container'>
-              <Heading level={2}>Variant</Heading>
+            <div id='variants' className='created-variants-title-container'>
+              <Label>{getFieldLabel('Variant', 'variants')}</Label>
               <Paragraph>Legg til variant for å kunne melde publiseringsdato på statistikken</Paragraph>
             </div>
             {createdVariants.length > 0 && (
@@ -378,17 +396,17 @@ export default function CreateStatistic() {
             <Button variant='secondary' onClick={handleOpenCreateVariantModal}>
               <PlusCircleIcon /> Legg til variant
             </Button>
+            {errors.variants && <ValidationMessage>{errors.variants}</ValidationMessage>}
             <Divider />
-            <div className='contact-section'>
-              <Heading level={2} data-size='xs'>
-                Kontakter
-              </Heading>
+            <div id='contacts' className='contact-section'>
+              <Label>{getFieldLabel('Kontakter', 'contacts')}</Label>
               <Paragraph className='contact-section-description'>
                 Søk og legg til kontakt. Navn vises under overskriften 'Kontakt' på statistikksiden på ssb.no
               </Paragraph>
               <Field className='contact-field'>
                 <ContactSelection contacts={contacts} selected={selectedContacts} setSelected={setSelectedContacts} />
               </Field>
+              {errors.contacts && <ValidationMessage>{errors.contacts}</ValidationMessage>}
             </div>
             <Divider />
             <Heading level={2}>Detaljer</Heading>

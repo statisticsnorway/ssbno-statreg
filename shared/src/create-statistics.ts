@@ -5,7 +5,7 @@ type RequiredStatisticField = keyof StatisticCreate
 
 export const requiredStatisticFieldsByStatus: Record<CreatableStatisticStatus, RequiredStatisticField[]> = {
   K: ['name', 'division'],
-  A: ['name', 'name_en', 'variants', 'contacts', 'division', 'main_language'],
+  A: ['name', 'name_en', 'variants', 'contacts', 'division'],
 }
 
 export function getRequiredStatisticFields(status: CreatableStatisticStatus): RequiredStatisticField[] {
