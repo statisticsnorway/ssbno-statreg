@@ -161,7 +161,7 @@ function mapCalenderDate(raw: any): CalenderDateCreate {
   return {
     id: Number(raw.id),
     version: Number(raw.version),
-    comment: String(raw.kommentar),
+    comment: 'Programmatisk endring ifm migrering til nytt statistikkregister',
     day: parseOldOsloDateStringAsUTC(raw.dag)!,
   } as CalenderDateCreate
 }
@@ -273,7 +273,7 @@ function mapRelease(raw: any): ReleaseCreate {
     publish_time: parseOldOsloDateStringAsUTC(raw.tidspunkt)!, // required
     has_versions: toBool(raw.has_versions ?? raw.har_versjoner) ?? false,
     last_updated: parseOldOsloDateStringAsUTC(raw.last_updated)!, // required
-    comment: String(raw.intern_kommentar),
+    comment: 'Programmatisk endring ifm migrering til nytt statistikkregister',
     period_to: parseOldOsloDateStringAsUTC(raw.periode_til)!, // required
     desk_appoval_status: raw.desk_flyt,
     variant_id: Number(raw.variant_id), // FK → Variant
@@ -399,7 +399,7 @@ function mapStatistic(raw: any): StatisticCreate {
     related_statistic_id: Number(raw.relasjon_id), // self-rel
     name: raw.statistikknavn,
     last_updated: parseOldOsloDateStringAsUTC(raw.last_updated)!, // required
-    comment: String(raw.intern_kommentar),
+    comment: 'Programmatisk endring ifm migrering til nytt statistikkregister', // required
     name_en: raw.statistikknavn_en,
     date_created: parseOldOsloDateStringAsUTC(raw.date_created)!, // required
     legacy_topic_codes: raw.gamle_emnekoder,
