@@ -1,6 +1,6 @@
 import { RevisionNames, type Contact, type Variant } from '@ssbno-statreg/shared'
 
-export function formatPublishTime(publishTime: string | undefined, timeZone?: string): string {
+export function formatDateTime(publishTime: string | undefined, timeZone?: string): string {
   if (!publishTime) return '-'
   return new Date(publishTime)
     .toLocaleString('nb-NO', {

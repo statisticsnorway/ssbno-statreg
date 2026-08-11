@@ -1,6 +1,6 @@
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest'
 import {
-  formatPublishTime,
+  formatDateTime,
   formatDate,
   getFirstDayOfNthMonth,
   getDateOnlyAsString,
@@ -18,9 +18,9 @@ beforeEach(() => vi.useFakeTimers())
 afterEach(() => vi.useRealTimers())
 
 describe('utils', () => {
-  describe('formatPublishTime', () => {
+  describe('formatDateTime', () => {
     test('returns "-" when publishTime is undefined', () => {
-      const result = formatPublishTime(undefined)
+      const result = formatDateTime(undefined)
 
       expect(result).toBe('-')
     })
@@ -28,7 +28,7 @@ describe('utils', () => {
     test('formats ISO datetime correctly in nb-NO locale', () => {
       const iso = '2024-01-15T10:30:00Z'
 
-      const result = formatPublishTime(iso, timeZone)
+      const result = formatDateTime(iso, timeZone)
 
       expect(result).toBe('15.01.2024 kl 11:30')
     })
@@ -36,7 +36,7 @@ describe('utils', () => {
     test('formats single-digit day and month with leading zeros', () => {
       const iso = '2024-03-04T08:05:00Z'
 
-      const result = formatPublishTime(iso, timeZone)
+      const result = formatDateTime(iso, timeZone)
 
       expect(result).toBe('04.03.2024 kl 09:05')
     })
@@ -44,7 +44,7 @@ describe('utils', () => {
 
   describe('formatDate', () => {
     test('returns an empty string when input is undefined', () => {
-      const result = formatPublishTime(undefined)
+      const result = formatDateTime(undefined)
 
       expect(result).toBe('-')
     })

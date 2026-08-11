@@ -1,4 +1,5 @@
 import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
+import { StatregError } from '@/lib/statregError'
 import { sanitize } from '@/lib/utils'
 import type { Prisma } from '@/generated/prisma/client'
 import type { Version } from '@ssbno-statreg/shared'
@@ -63,7 +64,7 @@ export async function getStatisticVersions(shortname: string, prisma: VersionPri
     select: { id: true },
   })
 
-  if (!statistic) throw { status: 404, statregError: `Shortname '${safeShortname}' not found` }
+  if (!statistic) throw new StatregError(`Shortname '${safeShortname}' not found`, 404)
 
   return getVersions('Statistic', statistic.id, prisma)
 }

@@ -1,5 +1,6 @@
 import { getBlockedDatesInPeriod, isDateBlocked, getHolidays } from '@/lib/blockedDates'
 import type { ExtendedPrismaClient } from '@/lib/prisma'
+import { StatregError } from '@/lib/statregError'
 import { sanitize, parseDateOnly, ensureRequiredFieldsExists, getDateOnlyAsString } from '@/lib/utils'
 import { type BlockedReleaseDate, type CalenderDate, DayStatus } from '@ssbno-statreg/shared'
 
@@ -42,14 +43,12 @@ export async function createBlockedReleaseDay(
   const { blocked_comment } = ensureRequiredFieldsExists(body, ['blocked_comment'])
   const comment = sanitize(blocked_comment)
   if (!comment) {
-    return Promise.reject({ statregError: `Field 'blocked_comment' must be a non-empty string.` })
+    throw new StatregError(`Field 'blocked_comment' must be a non-empty string.`)
   }
 
   const isAlreadyBlocked = await isDateBlocked(dateString as string, prisma)
   if (isAlreadyBlocked) {
-    return Promise.reject({
-      statregError: 'Date is already blocked, either manually, weekend or public holiday',
-    })
+    throw new StatregError('Date is already blocked, either manually, weekend or public holiday')
   }
 
   await prisma.calender_date.create({
@@ -86,7 +85,7 @@ export async function getDateStatusForRange(
   }
   to.setUTCHours(23, 59, 59, 999)
 
-  if (to < from) throw { status: 400, statregError: 'todate have to be after fromDate' }
+  if (to < from) throw new StatregError('todate have to be after fromDate', 400)
 
   const releasesInTimerange = await prisma.release.findMany({
     where: { publish_time: { gt: from, lte: to } },

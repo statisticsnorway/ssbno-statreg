@@ -2,7 +2,7 @@ import { Table } from '@digdir/designsystemet-react'
 
 import { type ReleaseListing } from '@ssbno-statreg/shared'
 import { ApprovalStatusBadge } from '../components/ApprovalStatus'
-import { formatPublishTime, formatDate, toggleSort, getSortDirection } from '../lib/utils'
+import { formatDateTime, formatDate, toggleSort, getSortDirection } from '../lib/utils'
 import { Pagination, type PaginationProps } from './Pagination'
 import '../views/ListReleases.css'
 import { Link } from 'react-router'
@@ -64,7 +64,7 @@ function ReleaseRow({ release, openInNewTab }: Readonly<ReleaseRowProps>) {
       <Table.Cell>{release.measuring_period_title ?? ''}</Table.Cell>
       <Table.Cell>{formatDate(release.period_from)}</Table.Cell>
       <Table.Cell>{formatDate(release.period_to)}</Table.Cell>
-      <Table.Cell>{formatPublishTime(release.publish_time)}</Table.Cell>
+      <Table.Cell>{formatDateTime(release.publish_time)}</Table.Cell>
       <Table.Cell className='status-column'>
         <ApprovalStatusBadge status={release.approval_status} />
       </Table.Cell>
