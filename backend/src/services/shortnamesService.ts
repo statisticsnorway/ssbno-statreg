@@ -24,7 +24,7 @@ export async function getShortnames(prisma: ShortnamePrisma): Promise<ShortnameL
 export async function getShortname(prisma: ShortnamePrisma, shortname: string): Promise<ShortnameListing> {
   const safeShortname = sanitize(shortname)
 
-  const shortnames = await prisma.shortname.findFirst({
+  const shortnameDetail = await prisma.shortname.findFirst({
     where: { name: safeShortname },
     select: {
       name: true,
@@ -32,11 +32,11 @@ export async function getShortname(prisma: ShortnamePrisma, shortname: string): 
     },
   })
 
-  if (!shortnames) {
+  if (!shortnameDetail) {
     throw new StatregError(`Shortname '${shortname}' not found.`, 404)
   }
 
-  return { shortname: shortnames.name, statistic_name: shortnames.statistic?.name ?? '' }
+  return { shortname: shortnameDetail.name, statistic_name: shortnameDetail.statistic?.name ?? '' }
 }
 
 export async function createShortname(prisma: ShortnamePrisma, body: unknown): Promise<Shortname> {
