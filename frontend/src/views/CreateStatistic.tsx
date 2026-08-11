@@ -292,7 +292,6 @@ export default function CreateStatistic() {
   return (
     <>
       {!createdShortname && <CreateShortnameModal openCreateShortnameModal />}
-
       {createdShortname && (
         <div className='create-statistic-container'>
           {openVariantModal && (
