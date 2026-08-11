@@ -1,5 +1,6 @@
 import type { ExtendedPrismaClient } from '@/lib/prisma'
 import { StatregError } from '@/lib/statregError'
+import { sanitize } from '@/lib/utils'
 import { type Shortname, type ShortnameListing } from '@ssbno-statreg/shared'
 
 export type ShortnamePrisma = Pick<ExtendedPrismaClient, 'shortname' | 'statistic'>
@@ -21,8 +22,10 @@ export async function getShortnames(prisma: ShortnamePrisma): Promise<ShortnameL
 }
 
 export async function getShortname(prisma: ShortnamePrisma, shortname: string): Promise<ShortnameListing> {
+  const safeShortname = sanitize(shortname)
+
   const shortnames = await prisma.shortname.findFirst({
-    where: { name: shortname },
+    where: { name: safeShortname },
     select: {
       name: true,
       statistic: { select: { name: true } },
@@ -30,10 +33,10 @@ export async function getShortname(prisma: ShortnamePrisma, shortname: string): 
   })
 
   if (!shortnames) {
-    throw { statregError: `Shortname '${shortname}' not found` }
+    throw new StatregError(`Shortname '${shortname}' not found.`, 404)
   }
 
-  return { shortname: shortnames.name, statistic_name: shortnames.statistic!.name }
+  return { shortname: shortnames.name, statistic_name: shortnames.statistic?.name ?? '' }
 }
 
 export async function createShortname(prisma: ShortnamePrisma, body: unknown): Promise<Shortname> {
