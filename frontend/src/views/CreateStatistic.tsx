@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router'
+import { useNavigate, useParams } from 'react-router'
 import { useAuth } from '../context/AuthContext'
 import { useState, useEffect } from 'react'
 import {
@@ -27,7 +27,7 @@ import client from '../api'
 import './CreateStatistic.css'
 
 import { isCreateStatisticFieldRequired, ApprovalStatus, RevisionNames } from '@ssbno-statreg/shared'
-import type { CreatableStatisticStatus, Division, Contact, Variant } from '@ssbno-statreg/shared'
+import type { CreatableStatisticStatus, Division, Contact, Variant, Shortname } from '@ssbno-statreg/shared'
 import ErrorPage, { ErrorType } from './ErrorPage'
 import { ErrorAlert } from '../components/ErrorAlert'
 import { CreateShortnameModal } from '../components/CreateShortnameModal'
@@ -47,8 +47,9 @@ type StatisticFormValues = {
 type StatisticFormErrors = Partial<Record<keyof StatisticFormValues, string>>
 
 export default function CreateStatistic() {
-  const [openCreateShortnameModal, setOpenCreateShortnameModal] = useState<boolean>(true)
-  const [createdShortname, setCreatedShortname] = useState<string>('')
+  const { shortname } = useParams<Shortname['shortname']>()
+  const createdShortname = shortname ?? ''
+
   const [divisions, setDivisions] = useState<Division[]>([])
   const [contacts, setContacts] = useState<Contact[]>([])
   const [selectedContacts, setSelectedContacts] = useState<string[]>([])
@@ -101,6 +102,7 @@ export default function CreateStatistic() {
 
   const { auth } = useAuth()
   const isAdmin = auth?.isAdmin ?? false
+
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -245,13 +247,7 @@ export default function CreateStatistic() {
 
   return (
     <>
-      {openCreateShortnameModal && (
-        <CreateShortnameModal
-          openCreateShortnameModal={openCreateShortnameModal}
-          setOpenCreateShortnameModal={setOpenCreateShortnameModal}
-          setCreatedShortname={setCreatedShortname}
-        />
-      )}
+      {!createdShortname && <CreateShortnameModal openCreateShortnameModal />}
 
       {createdShortname && (
         <div className='create-statistic-container'>
@@ -454,15 +450,11 @@ export default function CreateStatistic() {
             </Field>
             <div className='create-statistic-form-buttons'>
               <Button type='submit'>Opprett</Button>
-              {/* TODO: Double check the flow/behavior for "Avbryt" button with designer. Set to form clear for now */}
               <Button
                 type='button'
                 variant='tertiary'
                 onClick={() => {
-                  setValues(defaultValues)
-                  setCreatedVariants([])
-                  setSelectedContacts([])
-                  setErrors({})
+                  navigate(-1) // Navigate back to the previous page
                 }}
               >
                 Avbryt
