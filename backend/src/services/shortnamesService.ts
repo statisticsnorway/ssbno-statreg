@@ -19,6 +19,22 @@ export async function getShortnames(prisma: ShortnamePrisma): Promise<ShortnameL
   return result
 }
 
+export async function getShortname(prisma: ShortnamePrisma, shortname: string): Promise<ShortnameListing> {
+  const shortnames = await prisma.shortname.findFirst({
+    where: { name: shortname },
+    select: {
+      name: true,
+      statistic: { select: { name: true } },
+    },
+  })
+
+  if (!shortnames) {
+    throw { statregError: `Shortname '${shortname}' not found` }
+  }
+
+  return { shortname: shortnames.name, statistic_name: shortnames.statistic!.name }
+}
+
 export async function createShortname(prisma: ShortnamePrisma, body: unknown): Promise<Shortname> {
   if (!body || typeof body !== 'object' || !('shortname' in body)) {
     throw { statregError: "Missing required field 'shortname'." }
