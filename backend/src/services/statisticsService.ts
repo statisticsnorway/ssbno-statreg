@@ -537,7 +537,7 @@ export async function parseVariantsInput(
   prisma: StatisticPrisma
 ): Promise<Variant[] | undefined> {
   if (status === 'A' && !variants?.length) {
-    throw { statregError: 'An active statistic needs at least one variant.' }
+    throw new StatregError('An active statistic needs at least one variant.')
   }
 
   if (!variants?.length) {
