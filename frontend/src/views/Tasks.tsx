@@ -21,7 +21,7 @@ import client from '../api'
 
 import './Tasks.css'
 
-import { formatPublishTime, formatDate, toggleSort, getSortDirection } from '../lib/utils'
+import { formatDateTime, formatDate, toggleSort, getSortDirection } from '../lib/utils'
 import { useAuth } from '../context/AuthContext'
 import { RowCountSelect } from '../components/RowCountSelect'
 import { PaginatedReleasesTable, TruncatedTableCell } from '../components/ReleasesTable'
@@ -71,7 +71,7 @@ function PendingReleaseRow({ pendingRelease, getCheckboxProps }: Readonly<Pendin
       <Table.Cell>{pendingRelease.frequency?.name ?? ''}</Table.Cell>
       <Table.Cell>{formatDate(pendingRelease.period_from)}</Table.Cell>
       <Table.Cell>{formatDate(pendingRelease.period_to)}</Table.Cell>
-      <Table.Cell>{formatPublishTime(pendingRelease.publish_time)}</Table.Cell>
+      <Table.Cell>{formatDateTime(pendingRelease.publish_time)}</Table.Cell>
     </Table.Row>
   )
 }

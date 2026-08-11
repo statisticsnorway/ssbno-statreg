@@ -17,6 +17,7 @@ import { getDivisionFromCode } from '@/services/klassService'
 import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
 import { statisticsAsserts } from '@/lib/asserts'
 import { getAllUsersFromCache } from '@/lib/cache'
+import { StatregError } from '@/lib/statregError'
 
 export type StatisticPrisma = Pick<PrismaClient, 'statistic' | 'shortname' | 'responsiblePerson' | 'frequency'>
 
@@ -283,7 +284,7 @@ export async function getStatisticByShortname(shortname: string, prisma: Statist
     where: { shortname: { name: safeShortname } },
     include: StatisticsDetailedIncludes,
   })
-  if (!statistic) return Promise.reject({ status: 404, statregError: 'Shortname not found' })
+  if (!statistic) throw new StatregError('Shortname not found', 404)
 
   return await mapStatisticDetails(statistic)
 }
@@ -313,7 +314,7 @@ export async function updateStatistic(
     select: { id: true, statistic_region_levels: { select: { region_level: { select: { code: true, id: true } } } } },
   })
 
-  if (!existingStatistic) return Promise.reject({ status: 404, statregError: `Shortname ${safeShortname} not found` })
+  if (!existingStatistic) throw new StatregError(`Shortname ${safeShortname} not found`, 404)
 
   const {
     division,
@@ -404,13 +405,13 @@ export async function updateStatisticContacts(
     select: { id: true, status: true },
   })
   if (!existingStatistic) {
-    return Promise.reject({ status: 404, statregError: `Shortname '${safeShortname}' not found.` })
+    throw new StatregError(`Shortname '${safeShortname}' not found.`, 404)
   }
 
   const newContacts = await upsertContacts(newPrincipalNames, prisma)
 
   if (existingStatistic.status === 'A' && newContacts.length === 0) {
-    return Promise.reject({ statregError: 'An active statistic needs at least one contact.' })
+    throw new StatregError('An active statistic needs at least one contact.')
   }
 
   const updatedStatistic = await prisma.statistic.update({
@@ -460,7 +461,7 @@ export async function createStatistic(
     contacts = await upsertContacts(body.contacts, prisma)
 
     if (statusCode === 'A' && contacts.length === 0) {
-      return Promise.reject({ statregError: 'An active statistic needs at least one contact.' })
+      throw new StatregError('An active statistic needs at least one contact.')
     }
   }
 
@@ -526,7 +527,7 @@ export function parseCreateStatisticStatus(body?: StatisticCreate): CreatableSta
   if (statusCode === 'K' || statusCode === 'A') {
     return statusCode
   } else {
-    throw { statregError: "Field 'status' must be one of these: K, A." }
+    throw new StatregError("Field 'status' must be one of these: K, A.")
   }
 }
 
@@ -551,7 +552,7 @@ export async function parseVariantsInput(
       const revision = variant.revision
       const revisionCodes = Object.keys(RevisionNames)
       if (!revisionCodes.includes(revision?.code ?? '')) {
-        throw { statregError: `Field 'revision' must be one of these: ${revisionCodes.join(', ')}.` }
+        throw new StatregError(`Field 'revision' must be one of these: ${revisionCodes.join(', ')}.`)
       }
 
       return {
@@ -587,15 +588,15 @@ export function parseCreateStatisticInput(
   const language = main_language ?? 'nb'
 
   if (!safeName) {
-    throw { statregError: "Field 'name' must be a non-empty string." }
+    throw new StatregError("Field 'name' must be a non-empty string.")
   }
 
   if (status === 'A' && !safeNameEn) {
-    throw { statregError: "Field 'name_en' must be a non-empty string." }
+    throw new StatregError("Field 'name_en' must be a non-empty string.")
   }
 
   if (language !== 'nb' && language !== 'nn') {
-    throw { statregError: "Field 'main_language' must be either 'nb' or 'nn'." }
+    throw new StatregError("Field 'main_language' must be either 'nb' or 'nn'.")
   }
 
   return {
@@ -632,11 +633,11 @@ export function parseUpdateStatisticInput(
   const safeComment = sanitize(comment)
 
   if (!safeName) {
-    throw { statregError: "Field 'name' must be a non-empty string." }
+    throw new StatregError("Field 'name' must be a non-empty string.")
   }
 
   if (main_language !== 'nb' && main_language !== 'nn') {
-    throw { statregError: "Field 'main_language' must be either 'nb' or 'nn'." }
+    throw new StatregError("Field 'main_language' must be either 'nb' or 'nn'.")
   }
 
   const validatedInput = {
@@ -649,11 +650,11 @@ export function parseUpdateStatisticInput(
   }
 
   if (typeof yearly_reporting !== 'boolean') {
-    throw { statregError: "Field 'yearly_reporting' must be a boolean." }
+    throw new StatregError("Field 'yearly_reporting' must be a boolean.")
   }
 
   if (!safeComment) {
-    throw { statregError: "Field 'comment' must be a non-empty string." }
+    throw new StatregError("Field 'comment' must be a non-empty string.")
   }
 
   return {
@@ -669,11 +670,11 @@ export function parseUpdateStatisticInput(
 
 export function parseDivision(division?: string | null) {
   if (!division || !isNumber(division)) {
-    throw { statregError: "Field 'division' must be a number." }
+    throw new StatregError("Field 'division' must be a number.")
   }
 
   if (!getDivisionFromCode(division)) {
-    throw { statregError: "Field 'division' does not correspond to an existing division." }
+    throw new StatregError("Field 'division' does not correspond to an existing division.")
   }
 
   return division.toString()
@@ -681,7 +682,7 @@ export function parseDivision(division?: string | null) {
 
 export function parseStatusCode(statusCode?: string): StatisticStatusCode {
   if (!statusCode || !Object.keys(StatisticStatus).includes(statusCode)) {
-    throw { statregError: `Field 'status' must be one of these: ${Object.keys(StatisticStatus).join(', ')}.` }
+    throw new StatregError(`Field 'status' must be one of these: ${Object.keys(StatisticStatus).join(', ')}.`)
   }
   return statusCode as StatisticStatusCode
 }
