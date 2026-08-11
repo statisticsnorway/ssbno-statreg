@@ -76,8 +76,7 @@ export default function CreateStatistic() {
   const [values, setValues] = useState<StatisticFormValues>(defaultValues)
   const [errors, setErrors] = useState<StatisticFormErrors>({})
   const [apiError, setApiError] = useState<string[]>([])
-  const [isRouteValidated, setIsRouteValidated] = useState(false)
-  const [hasInvalidShortname, setHasInvalidShortname] = useState(false)
+  const [validRoute, setValidRoute] = useState(false)
 
   const regionLevelCheckboxData = [
     {
@@ -133,8 +132,7 @@ export default function CreateStatistic() {
     if (!createdShortname || !isAdmin) return
 
     async function initializeCreateStatistic() {
-      setIsRouteValidated(true)
-      setHasInvalidShortname(false)
+      setValidRoute(true)
       setApiError([])
 
       const { data: shortnameExists, error: shortnamesError } = await client.GET('/shortnames/{shortname}', {
@@ -143,13 +141,7 @@ export default function CreateStatistic() {
 
       if (shortnamesError) {
         setApiError([shortnamesError.message])
-        setIsRouteValidated(false)
-        return
-      }
-
-      if (!shortnameExists) {
-        setHasInvalidShortname(true)
-        setIsRouteValidated(false)
+        setValidRoute(false)
         return
       }
 
@@ -162,7 +154,7 @@ export default function CreateStatistic() {
 
       await Promise.all([fetchDivisions(), fetchContacts()])
 
-      setIsRouteValidated(false)
+      setValidRoute(false)
     }
 
     initializeCreateStatistic()
@@ -263,7 +255,7 @@ export default function CreateStatistic() {
   }
 
   if (!isAdmin) return <ErrorPage type={ErrorType.NOTAUTH} />
-  if (hasInvalidShortname) return <ErrorPage type={ErrorType.NOTFOUND} />
+  if (!validRoute) return <ErrorPage type={ErrorType.NOTFOUND} />
 
   function getFieldLabel(label: string, field: keyof StatisticFormValues) {
     if (isRequired(field)) {
@@ -291,8 +283,8 @@ export default function CreateStatistic() {
               editVariantValues={editVariantIndex !== null ? createdVariants[editVariantIndex] : undefined}
             />
           )}
-          {!isRouteValidated && apiError.length > 0 && <ErrorAlert message={apiError} />}
-          {!isRouteValidated && (
+          {!validRoute && apiError.length > 0 && <ErrorAlert message={apiError} />}
+          {!validRoute && (
             <>
               <Alert data-color='success'>
                 <Heading level={2} data-size='xs'>

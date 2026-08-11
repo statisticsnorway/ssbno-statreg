@@ -12,6 +12,7 @@ import ListBlockedDates from './views/ListBlockedDates'
 import CreateBlockedDate from './views/CreateBlockedDate'
 import Tasks from './views/Tasks'
 import StatisticVersions from './views/StatisticVersions'
+import ErrorPage, { ErrorType } from './views/ErrorPage'
 
 function App() {
   return (
