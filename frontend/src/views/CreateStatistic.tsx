@@ -454,7 +454,7 @@ export default function CreateStatistic() {
                 type='button'
                 variant='tertiary'
                 onClick={() => {
-                  navigate(-1) // Navigate back to the previous page
+                  navigate('/statistikk')
                 }}
               >
                 Avbryt

@@ -88,7 +88,7 @@ export function CreateShortnameModal({ openCreateShortnameModal }: Readonly<Crea
   }
 
   function handleCloseModal() {
-    navigate(-1) // Navigate back to the previous page
+    navigate('/statistikk')
   }
 
   return (
