@@ -88,9 +88,9 @@ export async function getVersions(resourceType: string, id: number, prisma: Vers
 
   //attach comment to old entries
   return versions.map((version) => {
-    const oldComment = commentMap[version.changed_at]
-    if (oldComment) {
-      return { ...version, comment: oldComment }
+    const comment = commentMap[version.changed_at]
+    if (comment) {
+      return { ...version, comment: comment }
     } else {
       return version
     }
