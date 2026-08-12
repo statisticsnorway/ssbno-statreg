@@ -35,7 +35,7 @@ function VersionRow({ version }: Readonly<VersionRowProps>) {
       <Table.Cell>
         {version.changed_values?.map((change, index) => (
           <span key={`${version.changed_at}-${change.field_name}`}>
-            {index > 0 ? ', ' : ''}
+            {index > 0 ? <br /> : ''}
             {change.field_name}: <span style={{ color: 'red' }}>{change.old_value}</span> / {change.new_value}
           </span>
         )) ?? ''}
