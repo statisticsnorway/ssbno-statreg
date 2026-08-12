@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router'
+import { useNavigate, useParams } from 'react-router'
 import { useAuth } from '../context/AuthContext'
 import { useState, useEffect, type SetStateAction } from 'react'
 import {
@@ -27,7 +27,7 @@ import client from '../api'
 import './CreateStatistic.css'
 
 import { isCreateStatisticFieldRequired, ApprovalStatus, RevisionNames } from '@ssbno-statreg/shared'
-import type { CreatableStatisticStatus, Division, Contact, Variant } from '@ssbno-statreg/shared'
+import type { CreatableStatisticStatus, Division, Contact, Variant, Shortname } from '@ssbno-statreg/shared'
 import ErrorPage, { ErrorType } from './ErrorPage'
 import { ErrorAlert } from '../components/ErrorAlert'
 import { CreateShortnameModal } from '../components/CreateShortnameModal'
@@ -53,8 +53,9 @@ type StatisticValidationState = {
 }
 
 export default function CreateStatistic() {
-  const [openCreateShortnameModal, setOpenCreateShortnameModal] = useState<boolean>(true)
-  const [createdShortname, setCreatedShortname] = useState<string>('')
+  const { shortname } = useParams<Shortname['shortname']>()
+  const createdShortname = shortname ?? ''
+
   const [divisions, setDivisions] = useState<Division[]>([])
   const [contacts, setContacts] = useState<Contact[]>([])
   const [selectedContacts, setSelectedContacts] = useState<string[]>([])
@@ -87,6 +88,7 @@ export default function CreateStatistic() {
   const [values, setValues] = useState<StatisticFormValues>(defaultValues)
   const [errors, setErrors] = useState<StatisticFormErrors>({})
   const [apiError, setApiError] = useState<string[]>([])
+  const [invalidShortname, setInvalidShortname] = useState(false)
 
   const regionLevelCheckboxData = [
     {
@@ -113,39 +115,67 @@ export default function CreateStatistic() {
 
   const { auth } = useAuth()
   const isAdmin = auth?.isAdmin ?? false
+
   const navigate = useNavigate()
 
+  async function fetchDivisions() {
+    const { data, error } = await client.GET('/divisions')
+
+    if (error) {
+      setApiError((prev) => [...prev, error.message])
+      return
+    }
+
+    setDivisions((Object.values(data) as Division[]) ?? [])
+  }
+
+  async function fetchContacts() {
+    const { data, error } = await client.GET('/contacts')
+
+    if (error) {
+      setApiError((prev) => [...prev, error.message])
+      return
+    }
+
+    setContacts(data ?? [])
+  }
+
   useEffect(() => {
     if (!createdShortname || !isAdmin) return
 
-    async function fetchDivisions() {
-      const { data, error } = await client.GET('/divisions')
+    async function initializeCreateStatistic() {
+      setApiError([])
 
-      if (error) {
-        setApiError((prev) => [...prev, error.message])
+      const {
+        data: shortnameData,
+        error: shortnameError,
+        response,
+      } = await client.GET('/shortnames/{shortname}', {
+        params: { path: { shortname: createdShortname } },
+      })
+
+      if (shortnameError) {
+        if (response.status === 404) {
+          setInvalidShortname(true)
+          return
+        }
+
+        setApiError([shortnameError.message])
         return
       }
 
-      setDivisions((Object.values(data) as Division[]) ?? [])
-    }
-    fetchDivisions()
-  }, [createdShortname, isAdmin])
+      const statisticExists = shortnameData.statistic_name
 
-  useEffect(() => {
-    if (!createdShortname || !isAdmin) return
-
-    async function fetchContacts() {
-      const { data, error } = await client.GET('/contacts')
-
-      if (error) {
-        setApiError((prev) => [...prev, error.message])
+      if (statisticExists) {
+        navigate(`/statistikk/${createdShortname}`)
         return
       }
 
-      setContacts(data ?? [])
+      await Promise.all([fetchDivisions(), fetchContacts()])
     }
-    fetchContacts()
-  }, [createdShortname, isAdmin])
+
+    initializeCreateStatistic()
+  }, [createdShortname, isAdmin, navigate])
 
   function isRequired(field: StatisticFormField) {
     return isCreateStatisticFieldRequired(status, field)
@@ -308,6 +338,7 @@ export default function CreateStatistic() {
   }
 
   if (!isAdmin) return <ErrorPage type={ErrorType.NOTAUTH} />
+  if (invalidShortname) return <ErrorPage type={ErrorType.NOTFOUND} />
 
   function getFieldLabel(label: string, field: StatisticFormField) {
     if (isRequired(field)) {
@@ -323,14 +354,7 @@ export default function CreateStatistic() {
 
   return (
     <>
-      {openCreateShortnameModal && (
-        <CreateShortnameModal
-          openCreateShortnameModal={openCreateShortnameModal}
-          setOpenCreateShortnameModal={setOpenCreateShortnameModal}
-          setCreatedShortname={setCreatedShortname}
-        />
-      )}
-
+      {!createdShortname && <CreateShortnameModal openCreateShortnameModal />}
       {createdShortname && (
         <div className='create-statistic-container'>
           {openVariantModal && (
@@ -390,7 +414,6 @@ export default function CreateStatistic() {
               </Select>
             </Field>
             <Divider />
-            <Heading level={2}>Navn</Heading>
             <Field>
               <Label>Kortnavn</Label>
               <Field.Description>Kortnavnet kan ikke endres etter statistikken har blitt opprettet.</Field.Description>
@@ -531,16 +554,11 @@ export default function CreateStatistic() {
             </Field>
             <div className='create-statistic-form-buttons'>
               <Button type='submit'>Opprett</Button>
-              {/* TODO: Double check the flow/behavior for "Avbryt" button with designer. Set to form clear for now */}
               <Button
                 type='button'
                 variant='tertiary'
                 onClick={() => {
-                  setStatus('K')
-                  setValues(defaultValues)
-                  setCreatedVariants([])
-                  setSelectedContacts([])
-                  setErrors({})
+                  navigate('/statistikk')
                 }}
               >
                 Avbryt

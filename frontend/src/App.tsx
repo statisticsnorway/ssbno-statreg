@@ -30,6 +30,7 @@ function App() {
           <Route path=':shortname/versjoner' element={<StatisticVersions />} />
           <Route path=':shortname/:variantId/opprett' element={<ReleaseForm />} />
           <Route path=':shortname/rediger' element={<EditStatistic />} />
+          <Route path=':shortname/opprett' element={<CreateStatistic />} />
           <Route path='opprett' element={<CreateStatistic />} />
         </Route>
 
