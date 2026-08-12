@@ -350,9 +350,11 @@ export default function CreateStatistic() {
             <Field>
               <Label>{getFieldLabel('Engelsk statistikknavn', 'name_en')}</Label>
               <Input
+                aria-invalid={!!errors.name_en}
                 value={values.name_en}
                 onChange={(e) => setValues((prevValues) => ({ ...prevValues, name_en: e.target.value }))}
               />
+              {errors.name_en && <ValidationMessage>{errors.name_en}</ValidationMessage>}
             </Field>
             <Divider />
             <div id='variants' className='created-variants-title-container'>
