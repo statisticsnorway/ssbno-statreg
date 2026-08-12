@@ -15,7 +15,7 @@ type VersionTableProps = {
 const TABLE_HEADER_CELLS = [
   { label: 'Dato', field: 'version.changed_at' },
   { label: 'Bruker', field: 'version.changed_by' },
-  { label: 'Endringslogg', field: 'version.changed_values' },
+  { label: 'Endringer', field: 'version.changed_values' },
   { label: 'Kommentar', field: 'version.comment' },
 ]
 
@@ -27,12 +27,9 @@ function VersionRow({ version }: Readonly<VersionRowProps>) {
       <Table.Cell>{version.changed_by ?? ''}</Table.Cell>
       {/* TODO: Show changes according to figma */}
       <Table.Cell>
-        {version.changed_values?.map((change) => (
-          <span key={change.field_name}>
-            {change.field_name}: <span style={{ color: 'red' }}>{change.old_value}</span> / {change.new_value}
-            <br />
-          </span>
-        )) ?? ''}
+        {version.changed_values
+          ?.map((change) => `${change.field_name}: ${change.old_value} / ${change.new_value}`)
+          .join(', ') ?? ''}
       </Table.Cell>
       <Table.Cell>{version.comment ?? ''}</Table.Cell>
     </Table.Row>
