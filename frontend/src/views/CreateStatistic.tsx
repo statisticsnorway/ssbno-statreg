@@ -167,7 +167,7 @@ export default function CreateStatistic() {
       const statisticExists = shortnameData.statistic_name
 
       if (statisticExists) {
-        navigate(`/statistikk/${createdShortname}`)
+        navigate(`/statistikk/${createdShortname}/rediger`)
         return
       }
 
