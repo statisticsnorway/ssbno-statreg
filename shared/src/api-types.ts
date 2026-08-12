@@ -106,6 +106,45 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/shortnames/{shortname}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get shortname detail by shortname */
+    get: {
+      parameters: {
+        query?: never
+        header?: never
+        path: {
+          shortname: string
+        }
+        cookie?: never
+      }
+      requestBody?: never
+      responses: {
+        /** @description Shortname detail with statistic name */
+        200: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            'application/json': components['schemas']['Shortname_listing']
+          }
+        }
+        default: components['responses']['Error']
+      }
+    }
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/divisions': {
     parameters: {
       query?: never
