@@ -9,19 +9,47 @@ import { ErrorAlert } from '../components/ErrorAlert'
 
 type CreateShortnameModalProps = {
   openCreateShortnameModal: boolean
+  initialShortname?: string
+  onShortnameCreated?: (shortname: string) => void
 }
 
-export function CreateShortnameModal({ openCreateShortnameModal }: Readonly<CreateShortnameModalProps>) {
+export function CreateShortnameModal({
+  openCreateShortnameModal,
+  initialShortname,
+  onShortnameCreated,
+}: Readonly<CreateShortnameModalProps>) {
   const { auth } = useAuth()
 
   const [shortnames, setShortnames] = useState<ShortnameListing['shortname'][]>([])
   const [apiError, setApiError] = useState<string[]>([])
 
-  const [validationError, setValidationError] = useState('')
-  const [shortnameInput, setShortnameInput] = useState('')
+  const [shortnameInput, setShortnameInput] = useState(initialShortname ?? '')
+  const [showValidationMessage, setShowValidationMessage] = useState(Boolean(initialShortname))
 
   const navigate = useNavigate()
   const isAdmin = auth?.isAdmin ?? false
+
+  function getValidationError(shortname: string) {
+    if (!shortname) {
+      return 'Fyll ut et kortnavn'
+    }
+
+    const invalidShortnameCharacters = shortname.match(/[^a-z_]/g)
+    if (invalidShortnameCharacters) {
+      const invalidChars = [...new Set(invalidShortnameCharacters)]
+      return `Kortnavnet inneholder ugyldige tegn: ${invalidChars.join(', ')}`
+    }
+
+    if (shortname.length > 14) {
+      return 'Kortnavnet kan ikke være lengre enn 14 tegn'
+    }
+
+    if (shortnames.includes(shortname)) {
+      return 'Dette kortnavnet er ikke ledig'
+    }
+
+    return ''
+  }
 
   useEffect(() => {
     if (!isAdmin) return
@@ -36,31 +64,11 @@ export function CreateShortnameModal({ openCreateShortnameModal }: Readonly<Crea
     fetchShortnames()
   }, [isAdmin])
 
-  function validateShortname() {
-    if (!shortnameInput) {
-      setValidationError('Fyll ut et kortnavn')
-      return false
-    }
+  const validationError = showValidationMessage ? getValidationError(shortnameInput) : ''
 
-    const invalidShortnameCharacters = shortnameInput.match(/[^a-z_]/g)
-    if (invalidShortnameCharacters) {
-      const invalidChars = [...new Set(invalidShortnameCharacters)]
-      setValidationError(`Kortnavnet inneholder ugyldige tegn: ${invalidChars.join(', ')}`)
-      return false
-    }
-
-    if (shortnameInput.length > 14) {
-      setValidationError('Kortnavnet kan ikke være lengre enn 14 tegn')
-      return false
-    }
-
-    if (shortnames.includes(shortnameInput)) {
-      setValidationError('Dette kortnavnet er ikke ledig')
-      return false
-    }
-
-    setValidationError('')
-    return true
+  function validateShortname(shortname = shortnameInput) {
+    setShowValidationMessage(true)
+    return !getValidationError(shortname)
   }
 
   function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -77,6 +85,8 @@ export function CreateShortnameModal({ openCreateShortnameModal }: Readonly<Crea
       setApiError((prev) => [...prev, error.message])
       return
     }
+
+    onShortnameCreated?.(data.shortname)
     navigate(`/statistikk/${data.shortname}/opprett`)
   }
 
@@ -105,7 +115,12 @@ export function CreateShortnameModal({ openCreateShortnameModal }: Readonly<Crea
               ikke endres etter at statistikken har blitt opprettet. Maks 14 tegn, kun små bokstaver og understrek er
               lov.
             </Field.Description>
-            <Input aria-invalid={!!validationError} onChange={handleInputChange} onBlur={validateShortname} />
+            <Input
+              aria-invalid={!!validationError}
+              value={shortnameInput}
+              onChange={handleInputChange}
+              onBlur={() => validateShortname()}
+            />
             <Paragraph data-limit='14' data-field='counter' />
             {validationError ? (
               <ValidationMessage>{validationError}</ValidationMessage>

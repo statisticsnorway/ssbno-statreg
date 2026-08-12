@@ -171,11 +171,22 @@ export default function CreateStatistic() {
         return
       }
 
+      setInvalidShortname(false)
       await Promise.all([fetchDivisions(), fetchContacts()])
     }
 
     initializeCreateStatistic()
   }, [createdShortname, isAdmin, navigate])
+
+  function handleShortnameCreated(registeredShortname: string) {
+    if (registeredShortname !== createdShortname) {
+      return
+    }
+
+    setInvalidShortname(false)
+    setApiError([])
+    void Promise.all([fetchDivisions(), fetchContacts()])
+  }
 
   function isRequired(field: StatisticFormField) {
     return isCreateStatisticFieldRequired(status, field)
@@ -338,7 +349,6 @@ export default function CreateStatistic() {
   }
 
   if (!isAdmin) return <ErrorPage type={ErrorType.NOTAUTH} />
-  if (invalidShortname) return <ErrorPage type={ErrorType.NOTFOUND} />
 
   function getFieldLabel(label: string, field: StatisticFormField) {
     if (isRequired(field)) {
@@ -354,8 +364,15 @@ export default function CreateStatistic() {
 
   return (
     <>
-      {!createdShortname && <CreateShortnameModal openCreateShortnameModal />}
-      {createdShortname && (
+      {(!createdShortname || invalidShortname) && (
+        <CreateShortnameModal
+          key={createdShortname || 'create-shortname'}
+          openCreateShortnameModal
+          initialShortname={createdShortname}
+          onShortnameCreated={handleShortnameCreated}
+        />
+      )}
+      {createdShortname && !invalidShortname && (
         <div className='create-statistic-container'>
           {openVariantModal && (
             <VariantModal
