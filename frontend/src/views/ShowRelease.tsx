@@ -66,7 +66,7 @@ export default function ShowRelease() {
   }
 
   return (
-    <div className='show-release'>
+    <>
       {apiError.length > 0 && <ErrorAlert message={apiError} />}
       <div>
         <Heading data-size='md' level={1}>
@@ -87,13 +87,15 @@ export default function ShowRelease() {
         <Heading data-size='xs'>Måleperiode</Heading>
         <Paragraph>{period}</Paragraph>
       </div>
-      <div>
+      <div style={{ width: '100%' }}>
         <Card>
           <Details>
             <Details.Summary onClick={fetchVersions}>Versjonshistorikk</Details.Summary>
             <Details.Content>
               {isLoadingVersions ? (
-                <Spinner aria-label='Henter versjonshistorikk' />
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                  <Spinner aria-label='Henter versjonshistorikk' />
+                </div>
               ) : (
                 <ChangeLogTable versions={versions ?? []} />
               )}
@@ -108,6 +110,6 @@ export default function ShowRelease() {
           </ReactRouterLink>
         </Button>
       </div>
-    </div>
+    </>
   )
 }
