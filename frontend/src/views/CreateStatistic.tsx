@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router'
 import { useAuth } from '../context/AuthContext'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, type SetStateAction } from 'react'
 import {
   Alert,
   Heading,
@@ -35,7 +35,6 @@ import { ContactSelection } from '../components/ContactSelection'
 import { VariantModal } from '../components/VariantModal'
 
 type StatisticFormValues = {
-  status: CreatableStatisticStatus
   name: string
   name_en: string
   division: string
@@ -46,6 +45,12 @@ type StatisticFormValues = {
 
 type StatisticFormField = keyof StatisticFormValues | 'variants' | 'contacts'
 type StatisticFormErrors = Partial<Record<StatisticFormField, string>>
+type StatisticValidationState = {
+  status: CreatableStatisticStatus
+  values: StatisticFormValues
+  selectedContacts: string[]
+  createdVariants: Variant[]
+}
 
 export default function CreateStatistic() {
   const [openCreateShortnameModal, setOpenCreateShortnameModal] = useState<boolean>(true)
@@ -64,7 +69,6 @@ export default function CreateStatistic() {
   })
 
   const defaultValues: StatisticFormValues = {
-    status: 'K',
     name: '',
     name_en: '',
     division: '',
@@ -73,6 +77,13 @@ export default function CreateStatistic() {
     comment: '',
   }
 
+  const fieldsToValidate: StatisticFormField[] = [
+    ...Object.keys(defaultValues),
+    'variants',
+    'contacts',
+  ] as StatisticFormField[]
+
+  const [status, setStatus] = useState<CreatableStatisticStatus>('K')
   const [values, setValues] = useState<StatisticFormValues>(defaultValues)
   const [errors, setErrors] = useState<StatisticFormErrors>({})
   const [apiError, setApiError] = useState<string[]>([])
@@ -137,40 +148,94 @@ export default function CreateStatistic() {
   }, [createdShortname, isAdmin])
 
   function isRequired(field: StatisticFormField) {
-    return isCreateStatisticFieldRequired(values.status, field)
+    return isCreateStatisticFieldRequired(status, field)
   }
 
-  function validateField(field: StatisticFormField, nextValues: StatisticFormValues): string {
-    if (field === 'variants') {
-      if (!isRequired(field) || createdVariants.length > 0) return ''
-      return 'Opprett minst en variant for statistikken'
+  function getValidationState(
+    nextValues = values,
+    nextStatus = status,
+    nextSelectedContacts = selectedContacts,
+    nextCreatedVariants = createdVariants
+  ): StatisticValidationState {
+    return {
+      status: nextStatus,
+      values: nextValues,
+      selectedContacts: nextSelectedContacts,
+      createdVariants: nextCreatedVariants,
     }
+  }
 
-    if (field === 'contacts') {
-      if (!isRequired(field) || selectedContacts.length > 0) return ''
-      return 'Velg minst en ansvarlig person for statistikken'
-    }
-
-    if (!isRequired(field) && !nextValues[field]) {
+  function validateField(field: StatisticFormField, validationState: StatisticValidationState): string {
+    if (!isCreateStatisticFieldRequired(validationState.status, field)) {
       return ''
     }
 
-    if (field === 'name' && !nextValues.name) return 'Fyll inn norsk statistikknavn'
-    if (field === 'name_en' && !nextValues.name_en) return 'Fyll inn engelsk statistikknavn'
-    if (field === 'division' && !nextValues.division) return 'Velg ansvarlig seksjon for statistikken'
+    if (field === 'name' && !validationState.values.name) return 'Fyll inn norsk statistikknavn'
+    if (field === 'name_en' && !validationState.values.name_en) return 'Fyll inn engelsk statistikknavn'
+    if (field === 'division' && !validationState.values.division) return 'Velg ansvarlig seksjon for statistikken'
+    if (field === 'variants' && validationState.createdVariants.length === 0) return 'Legg til minst én variant'
+    if (field === 'contacts' && validationState.selectedContacts.length === 0) return 'Legg til minst én kontakt'
 
-    // Optional fields
-    if (field === 'first_released_at' && !/^\d{4}$/.test(nextValues.first_released_at)) {
+    if (field === 'first_released_at' && !/^\d{4}$/.test(validationState.values.first_released_at)) {
       return 'Statistikkens startår må være et gyldig år med fire siffer'
     }
 
     return ''
   }
 
+  function updateFieldErrors(
+    fields: StatisticFormField[],
+    validationState: StatisticValidationState,
+    shouldAddNewErrors = true
+  ) {
+    setErrors((currentErrors) => {
+      const nextErrors = { ...currentErrors }
+
+      for (const field of fields) {
+        const error = validateField(field, validationState)
+
+        if (error) {
+          if (shouldAddNewErrors || nextErrors[field]) {
+            nextErrors[field] = error
+          }
+        } else {
+          delete nextErrors[field]
+        }
+      }
+
+      return nextErrors
+    })
+  }
+
+  function handleValueChange<K extends keyof StatisticFormValues>(field: K, value: StatisticFormValues[K]) {
+    const nextValues = { ...values, [field]: value }
+
+    setValues(nextValues)
+    updateFieldErrors([field], getValidationState(nextValues))
+  }
+
+  function handleStatusChange(nextStatus: CreatableStatisticStatus) {
+    setStatus(nextStatus)
+    updateFieldErrors(fieldsToValidate, getValidationState(values, nextStatus), false)
+  }
+
+  function handleContactsChange(nextSelectedContacts: string[]) {
+    setSelectedContacts(nextSelectedContacts)
+    updateFieldErrors(['contacts'], getValidationState(values, status, nextSelectedContacts))
+  }
+
+  function handleVariantsChange(nextCreatedVariants: SetStateAction<Variant[]>) {
+    const resolvedVariants =
+      typeof nextCreatedVariants === 'function' ? nextCreatedVariants(createdVariants) : nextCreatedVariants
+
+    setCreatedVariants(resolvedVariants)
+    updateFieldErrors(['variants'], getValidationState(values, status, selectedContacts, resolvedVariants))
+  }
+
   function handleOnBlur(field: StatisticFormField) {
     setErrors((currentErrors) => {
       const nextErrors = { ...currentErrors }
-      const error = validateField(field, values)
+      const error = validateField(field, getValidationState())
 
       if (error) nextErrors[field] = error
       else delete nextErrors[field]
@@ -184,7 +249,7 @@ export default function CreateStatistic() {
       params: { path: { shortname: createdShortname } },
       body: {
         ...values,
-        status: { code: values.status },
+        status: { code: status },
         first_released_at: values.first_released_at ? `${values.first_released_at}-12-31` : '',
         statistic_region_levels: regionLevelValues.length
           ? regionLevelValues.map((code: string) => ({
@@ -210,14 +275,10 @@ export default function CreateStatistic() {
     e.preventDefault()
 
     const nextErrors: StatisticFormErrors = {}
-    const fieldsToValidate: StatisticFormField[] = [
-      ...Object.keys(values),
-      'variants',
-      'contacts',
-    ] as StatisticFormField[]
+    const validationState = getValidationState()
 
     for (const field of fieldsToValidate) {
-      const error = validateField(field, values)
+      const error = validateField(field, validationState)
       if (error) nextErrors[field] = error
     }
 
@@ -276,7 +337,7 @@ export default function CreateStatistic() {
             <VariantModal
               openVariantModal={openVariantModal}
               setOpenVariantModal={handleSetOpenVariantModal}
-              setCreatedVariants={setCreatedVariants}
+              setCreatedVariants={handleVariantsChange}
               editVariantIndex={editVariantIndex}
               editVariantValues={editVariantIndex !== null ? createdVariants[editVariantIndex] : undefined}
             />
@@ -321,10 +382,8 @@ export default function CreateStatistic() {
               </Field.Description>
               <Select
                 width='auto'
-                value={values.status}
-                onChange={(e) =>
-                  setValues((prevValues) => ({ ...prevValues, status: e.target.value as CreatableStatisticStatus }))
-                }
+                value={status}
+                onChange={(e) => handleStatusChange(e.target.value as CreatableStatisticStatus)}
               >
                 <Select.Option value='K'>Kommende</Select.Option>
                 <Select.Option value='A'>Aktiv</Select.Option>
@@ -342,7 +401,7 @@ export default function CreateStatistic() {
               <Input
                 aria-invalid={!!errors.name}
                 value={values.name}
-                onChange={(e) => setValues((prevValues) => ({ ...prevValues, name: e.target.value }))}
+                onChange={(e) => handleValueChange('name', e.target.value)}
                 onBlur={() => handleOnBlur('name')}
               />
               {errors.name && <ValidationMessage>{errors.name}</ValidationMessage>}
@@ -352,7 +411,8 @@ export default function CreateStatistic() {
               <Input
                 aria-invalid={!!errors.name_en}
                 value={values.name_en}
-                onChange={(e) => setValues((prevValues) => ({ ...prevValues, name_en: e.target.value }))}
+                onChange={(e) => handleValueChange('name_en', e.target.value)}
+                onBlur={() => handleOnBlur('name_en')}
               />
               {errors.name_en && <ValidationMessage>{errors.name_en}</ValidationMessage>}
             </Field>
@@ -406,9 +466,9 @@ export default function CreateStatistic() {
                 Søk og legg til kontakt. Navn vises under overskriften 'Kontakt' på statistikksiden på ssb.no
               </Paragraph>
               <Field className='contact-field'>
-                <ContactSelection contacts={contacts} selected={selectedContacts} setSelected={setSelectedContacts} />
+                <ContactSelection contacts={contacts} selected={selectedContacts} setSelected={handleContactsChange} />
+                {errors.contacts && <ValidationMessage>{errors.contacts}</ValidationMessage>}
               </Field>
-              {errors.contacts && <ValidationMessage>{errors.contacts}</ValidationMessage>}
             </div>
             <Divider />
             <Heading level={2}>Detaljer</Heading>
@@ -417,7 +477,7 @@ export default function CreateStatistic() {
               <Select
                 aria-invalid={!!errors.division}
                 value={values.division}
-                onChange={(e) => setValues((prevValues) => ({ ...prevValues, division: e.target.value }))}
+                onChange={(e) => handleValueChange('division', e.target.value)}
                 onBlur={() => handleOnBlur('division')}
               >
                 <Select.Option value='' disabled />
@@ -444,7 +504,7 @@ export default function CreateStatistic() {
               <Select
                 width='auto'
                 value={values.main_language}
-                onChange={(e) => setValues((prevValues) => ({ ...prevValues, main_language: e.target.value }))}
+                onChange={(e) => handleValueChange('main_language', e.target.value)}
               >
                 <Select.Option value='nb'>Bokmål</Select.Option>
                 <Select.Option value='nn'>Nynorsk</Select.Option>
@@ -458,7 +518,7 @@ export default function CreateStatistic() {
                 size={4}
                 aria-invalid={!!errors.first_released_at}
                 value={values.first_released_at}
-                onChange={(e) => setValues((prevValues) => ({ ...prevValues, first_released_at: e.target.value }))}
+                onChange={(e) => handleValueChange('first_released_at', e.target.value)}
                 onBlur={() => handleOnBlur('first_released_at')}
               />
               {errors.first_released_at && <ValidationMessage>{errors.first_released_at}</ValidationMessage>}
@@ -467,10 +527,7 @@ export default function CreateStatistic() {
             <Field>
               <Label>Kommentar (Valgfritt)</Label>
               <Field.Description>Annen relevant informasjon.</Field.Description>
-              <Input
-                value={values.comment}
-                onChange={(e) => setValues((prevValues) => ({ ...prevValues, comment: e.target.value }))}
-              />
+              <Input value={values.comment} onChange={(e) => handleValueChange('comment', e.target.value)} />
             </Field>
             <div className='create-statistic-form-buttons'>
               <Button type='submit'>Opprett</Button>
@@ -479,6 +536,7 @@ export default function CreateStatistic() {
                 type='button'
                 variant='tertiary'
                 onClick={() => {
+                  setStatus('K')
                   setValues(defaultValues)
                   setCreatedVariants([])
                   setSelectedContacts([])
