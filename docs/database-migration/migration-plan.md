@@ -69,4 +69,8 @@ npx tsx ./src/scripts/addResponsiblePersonFromOldContact.ts
 ```
 npx tsx ./src/scripts/rewriteAuditLogClassNames.ts
 ```
-16. Drop legacy tables that are no longer needed e.g. Division and Contacts. Drop assosiated columns with dropped tables as well. This can be done in a PR with an adjustment of Prisma schema a while after data migration.
+16. Run script `rewriteAuditLogClassNames.ts` to set consistent event_names in audit_log table by running: 
+```
+npx tsx ./src/scripts/rewriteAuditLogEventNames.ts
+```
+17. Drop legacy tables that are no longer needed e.g. Division and Contacts. Drop assosiated columns with dropped tables as well. This can be done in a PR with an adjustment of Prisma schema a while after data migration.
