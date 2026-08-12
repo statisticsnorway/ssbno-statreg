@@ -20,21 +20,27 @@ const TABLE_HEADER_CELLS = [
 ]
 
 function VersionRow({ version }: Readonly<VersionRowProps>) {
+  let comment = ''
+  if (version.comment) {
+    comment = version.comment
+  } else if (version.change_type === 'create') {
+    comment = 'Opprettet'
+  } else if (version.change_type === 'delete') {
+    comment = 'Slettet'
+  }
   return (
-    <Table.Row key={`${version.changed_at}`}>
+    <Table.Row key={`${version.changed_at}-${version.changed_values?.[0]?.field_name ?? ''}`}>
       <Table.Cell>{formatDateTime(version.changed_at)}</Table.Cell>
-      {/* TODO: Get user display name */}
       <Table.Cell>{version.changed_by ?? ''}</Table.Cell>
-      {/* TODO: Show changes according to figma */}
       <Table.Cell>
-        {version.changed_values?.map((change) => (
-          <span key={change.field_name}>
+        {version.changed_values?.map((change, index) => (
+          <span key={`${version.changed_at}-${change.field_name}`}>
+            {index > 0 ? ', ' : ''}
             {change.field_name}: <span style={{ color: 'red' }}>{change.old_value}</span> / {change.new_value}
-            <br />
           </span>
         )) ?? ''}
       </Table.Cell>
-      <Table.Cell>{version.comment ?? ''}</Table.Cell>
+      <Table.Cell>{comment}</Table.Cell>
     </Table.Row>
   )
 }
@@ -51,7 +57,10 @@ export function ChangeLogTable({ versions }: Readonly<VersionTableProps>) {
       </Table.Head>
       <Table.Body>
         {versions?.map((version) => (
-          <VersionRow key={`${version.changed_at}`} version={version} />
+          <VersionRow
+            key={`${version.changed_at}-${version.changed_values?.[0]?.field_name ?? ''}`}
+            version={version}
+          />
         ))}
       </Table.Body>
     </Table>
