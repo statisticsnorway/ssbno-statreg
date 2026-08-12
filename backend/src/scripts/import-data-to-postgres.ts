@@ -74,7 +74,6 @@ function toBool(value: any): boolean | undefined {
   return undefined
 }
 
-//TODO MIM-2546: Test function
 export function parseOldOsloDateStringAsUTC(dateString: string): Date | undefined {
   // Match "DD.MM.YYYY HH.MM.SS,xxxxxxxxx"
   const match = dateString.match(/^(\d{2})\.(\d{2})\.(\d{4}) (\d{2})\.(\d{2})\.(\d{2})/)
@@ -85,6 +84,18 @@ export function parseOldOsloDateStringAsUTC(dateString: string): Date | undefine
   const isoLocal = `${yyyy}-${mm}-${dd}T${HH}:${MM}:${SS}`
 
   return fromZonedTime(isoLocal, 'Europe/Oslo')
+}
+
+export function parseDateOnly(dateString: string): Date | undefined {
+  // Match "DD.MM.YYYY HH.MM.SS,xxxxxxxxx"
+  const match = dateString.match(/^(\d{2})\.(\d{2})\.(\d{4}) (\d{2})\.(\d{2})\.(\d{2})/)
+  if (!match) return
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_, dd, mm, yyyy, HH, MM, SS] = match
+  const isoDateGMT = `${yyyy}-${mm}-${dd}T00:00:00.000Z` // Treat as UTC midnight
+
+  return new Date(isoDateGMT)
 }
 
 async function runImportStream<T extends Record<string, any>>(
@@ -162,7 +173,7 @@ function mapCalenderDate(raw: any): CalenderDateCreate {
     id: Number(raw.id),
     version: Number(raw.version),
     comment: 'Programmatisk endring ifm migrering til nytt statistikkregister',
-    day: parseOldOsloDateStringAsUTC(raw.dag)!,
+    day: parseDateOnly(raw.dag)!,
   } as CalenderDateCreate
 }
 
@@ -274,10 +285,10 @@ function mapRelease(raw: any): ReleaseCreate {
     has_versions: toBool(raw.has_versions ?? raw.har_versjoner) ?? false,
     last_updated: parseOldOsloDateStringAsUTC(raw.last_updated)!, // required
     comment: 'Programmatisk endring ifm migrering til nytt statistikkregister',
-    period_to: parseOldOsloDateStringAsUTC(raw.periode_til)!, // required
+    period_to: parseDateOnly(raw.periode_til)!, // required
     desk_appoval_status: raw.desk_flyt,
     variant_id: Number(raw.variant_id), // FK → Variant
-    period_from: parseOldOsloDateStringAsUTC(raw.periode_fra)!, // required
+    period_from: parseDateOnly(raw.periode_fra)!, // required
     cancelled: toBool(raw.er_avlyst) ?? false,
     date_created: parseOldOsloDateStringAsUTC(raw.date_created)!, // required
     release_date_precision: String(raw.datotype),
@@ -393,7 +404,7 @@ function mapStatistic(raw: any): StatisticCreate {
     search_phrases_en: raw.triggerord_en,
     division_code: '',
     division_id: raw.eierseksjon_id, // FK → Division_DoNotUse
-    first_release: parseOldOsloDateStringAsUTC(raw.forstegangspublisering),
+    first_release: parseDateOnly(raw.forstegangspublisering),
     yearly_reporting: toBool(raw.arsrapportering) ?? false,
     status: String(raw.status),
     related_statistic_id: Number(raw.relasjon_id), // self-rel
