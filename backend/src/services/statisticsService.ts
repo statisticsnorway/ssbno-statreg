@@ -284,7 +284,7 @@ export async function getStatisticByShortname(shortname: string, prisma: Statist
     where: { shortname: { name: safeShortname } },
     include: StatisticsDetailedIncludes,
   })
-  if (!statistic) throw new StatregError('Shortname not found', 404)
+  if (!statistic) throw new StatregError(`Statistic with shortname '${shortname}' not found.`, 404)
 
   return await mapStatisticDetails(statistic)
 }
