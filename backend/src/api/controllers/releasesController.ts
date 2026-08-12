@@ -7,10 +7,11 @@ import {
   updateRelease,
   bulkApproveReleases,
 } from '@/services/releasesService'
+import { getReleaseVersions } from '@/services/versionService'
 import { requireAdminAuthorization, skipAuth } from '@/../plugins/authMiddleware'
 import { handleErrors } from '@/lib/prismaErrors'
 import { prisma } from '@/lib/prisma'
-import { isNumber, ensureString, ensureStringArray, ensureRequiredFieldsExists } from '@/lib/utils'
+import { isNumber, ensureString, ensureStringArray, ensureRequiredFieldsExists, parseId } from '@/lib/utils'
 import { StatregError } from '@/lib/statregError'
 
 export default function releasesController(router: Router) {
@@ -95,6 +96,16 @@ export default function releasesController(router: Router) {
         req.body
       )
       res.json(result)
+    } catch (error) {
+      return handleErrors(error, res)
+    }
+  })
+
+  router.get('/releases/:id/versions', async (req, res) => {
+    try {
+      const id = parseId(req.params.id)
+      const data = await getReleaseVersions(id, prisma)
+      res.json(data)
     } catch (error) {
       return handleErrors(error, res)
     }
