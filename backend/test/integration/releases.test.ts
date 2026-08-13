@@ -42,7 +42,14 @@ describe('release data is persisted when ', () => {
   })
 
   test('client picks release and updates fields', async () => {
-    // GET release listing and pick release
+    // This integration test simulates the following events in the frontend:
+    // 1. User clicks on a release in the releases page
+    // 2. The release details page is opened
+    // 3. User opens release form, changes a couple of fields and submits
+    // 4. The user opens the updated release details page
+    // 5. User opens version history to check that change is registered
+
+    // 1. GET release listing and pick release
     const list = await request(app).get(
       `/statistikkregisteret/api/statistics/${shortname}/variants/${variantId}/releases`
     )
@@ -50,12 +57,12 @@ describe('release data is persisted when ', () => {
     expect(list.body.total).toBeGreaterThan(1)
     const picked = list.body.releases[0]
 
-    // GET release to get full details of picked release
+    // 2. GET release to get full details of picked release
     const pickedReleaseResponse = await request(app).get(`/statistikkregisteret/api/releases/${picked.id}`)
     expect(pickedReleaseResponse.status).toBe(200)
     const pickedRelease = pickedReleaseResponse.body as ReleaseDetails
 
-    // PUT release with updated fields
+    // 3. PUT release with updated fields
     const updateBody = {
       publish_time: addMonthsToDate(pickedRelease.publish_time!, 3),
       period_from: pickedRelease.period_from,
@@ -69,14 +76,14 @@ describe('release data is persisted when ', () => {
       .send(updateBody)
     expect(putResponse.status).toBe(200)
 
-    // GET release to check persistence of changes
+    // 4. GET release to check persistence of changes
     const updatedReleaseResponse = await request(app).get(`/statistikkregisteret/api/releases/${picked.id}`)
     expect(updatedReleaseResponse.status).toBe(200)
     expect(updatedReleaseResponse.body.id).toBe(picked.id)
     const updatedRelease = updatedReleaseResponse.body as ReleaseDetails
     assertEqualReleaseData(updatedRelease, updateBody)
 
-    // GET versions to check that update event is registered in auditlog
+    // 5. GET versions to check that the update is registered
     const versions = await request(app).get(`/statistikkregisteret/api/releases/${picked.id}/versions`)
     expect(versions.status).toBe(200)
     const lastVersion = versions.body[0]
