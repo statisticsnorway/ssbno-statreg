@@ -206,6 +206,7 @@ export default function CreateStatistic() {
     if (field === 'variants' && validationState.createdVariants.length === 0) return 'Legg til minst én variant'
     if (field === 'contacts' && validationState.selectedContacts.length === 0) return 'Legg til minst én kontakt'
 
+    // Optional field validation
     if (field === 'first_released_at' && !/^\d{4}$/.test(validationState.values.first_released_at)) {
       return 'Statistikkens startår må være et gyldig år med fire siffer'
     }
