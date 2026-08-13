@@ -57,7 +57,7 @@ const SEEDED_STATISTIC = {
 
 const createdStatistics: Array<{ statisticId: number | null; shortname: string | null }> = []
 
-function parseStatisticComment(shortname: string) {
+function expectedCreateShortnameComment(shortname: string) {
   return `Create statistic with shortname: ${shortname}`
 }
 
@@ -83,7 +83,7 @@ function createActiveStatisticPayload(): StatisticCreate {
   }
 }
 
-function mockCreateShortname(prefix = 'nytt_') {
+function generateUniqueMockShortname(prefix = 'nytt_') {
   const suffix = Date.now()
     .toString()
     .slice(-8)
@@ -216,7 +216,7 @@ describe('statisticsController integration', () => {
       name: createPayload.name,
       name_en: '',
       main_language: 'nb',
-      comment: parseStatisticComment(createdShortnameName),
+      comment: expectedCreateShortnameComment(createdShortnameName),
       division_code: createPayload.division,
       yearly_reporting: false,
       status_code: 'K',
@@ -230,7 +230,7 @@ describe('statisticsController integration', () => {
       name: createPayload.name,
       name_en: null,
       language: 'nb',
-      comment: parseStatisticComment(createdShortnameName),
+      comment: expectedCreateShortnameComment(createdShortnameName),
       division_code: createPayload.division,
       yearly_reporting: false,
       status: 'K',
@@ -256,7 +256,7 @@ describe('statisticsController integration', () => {
       name: createPayload.name,
       name_en: createPayload.name_en,
       main_language: 'nb',
-      comment: parseStatisticComment(createdShortnameName),
+      comment: expectedCreateShortnameComment(createdShortnameName),
       division_code: createPayload.division,
       yearly_reporting: false,
       status_code: 'A',
@@ -409,7 +409,7 @@ describe('statisticsController integration', () => {
   })
 
   test('POST /shortnames creates a shortname that can be used to create and fetch a statistic', async () => {
-    const createdShortnameName = mockCreateShortname()
+    const createdShortnameName = generateUniqueMockShortname()
 
     // POST shortname
     await createShortname(createdShortnameName)
