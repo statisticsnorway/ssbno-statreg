@@ -15,23 +15,32 @@ type VersionTableProps = {
 const TABLE_HEADER_CELLS = [
   { label: 'Dato', field: 'version.changed_at' },
   { label: 'Bruker', field: 'version.changed_by' },
-  { label: 'Endringer', field: 'version.changed_values' },
+  { label: 'Endringslogg', field: 'version.changed_values' },
   { label: 'Kommentar', field: 'version.comment' },
 ]
 
 function VersionRow({ version }: Readonly<VersionRowProps>) {
+  let comment = ''
+  if (version.comment) {
+    comment = version.comment
+  } else if (version.change_type === 'create') {
+    comment = 'Opprettet'
+  } else if (version.change_type === 'delete') {
+    comment = 'Slettet'
+  }
   return (
-    <Table.Row key={`${version.changed_at}`}>
+    <Table.Row key={`${version.changed_at}-${version.changed_values?.[0]?.field_name ?? ''}`}>
       <Table.Cell>{formatDateTime(version.changed_at)}</Table.Cell>
-      {/* TODO: Get user display name */}
       <Table.Cell>{version.changed_by ?? ''}</Table.Cell>
-      {/* TODO: Show changes according to figma */}
       <Table.Cell>
-        {version.changed_values
-          ?.map((change) => `${change.field_name}: ${change.old_value} / ${change.new_value}`)
-          .join(', ') ?? ''}
+        {version.changed_values?.map((change, index) => (
+          <span key={`${version.changed_at}-${change.field_name}`}>
+            {index > 0 ? <br /> : ''}
+            {change.field_name}: <span style={{ color: 'red' }}>{change.old_value}</span> / {change.new_value}
+          </span>
+        )) ?? ''}
       </Table.Cell>
-      <Table.Cell>{version.comment ?? ''}</Table.Cell>
+      <Table.Cell>{comment}</Table.Cell>
     </Table.Row>
   )
 }
@@ -48,7 +57,10 @@ export function ChangeLogTable({ versions }: Readonly<VersionTableProps>) {
       </Table.Head>
       <Table.Body>
         {versions?.map((version) => (
-          <VersionRow key={`${version.changed_at}`} version={version} />
+          <VersionRow
+            key={`${version.changed_at}-${version.changed_values?.[0]?.field_name ?? ''}`}
+            version={version}
+          />
         ))}
       </Table.Body>
     </Table>
