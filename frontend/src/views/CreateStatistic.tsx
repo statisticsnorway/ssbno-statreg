@@ -479,10 +479,17 @@ export default function CreateStatistic() {
                 ))}
               </div>
             )}
-            <Button variant='secondary' onClick={handleOpenCreateVariantModal}>
-              <PlusCircleIcon /> Legg til variant
-            </Button>
-            {errors.variants && <ValidationMessage>{errors.variants}</ValidationMessage>}
+            <div className='create-variant-button-container'>
+              <Button
+                variant='secondary'
+                aria-invalid={!!errors.variants}
+                data-color={errors.variants ? 'danger' : undefined}
+                onClick={handleOpenCreateVariantModal}
+              >
+                <PlusCircleIcon /> Legg til variant
+              </Button>
+              {errors.variants && <ValidationMessage>{errors.variants}</ValidationMessage>}
+            </div>
             <Divider />
             <div id='contacts' className='contact-section'>
               <Label>{getFieldLabel('Kontakter', 'contacts')}</Label>
@@ -490,7 +497,12 @@ export default function CreateStatistic() {
                 Søk og legg til kontakt. Navn vises under overskriften 'Kontakt' på statistikksiden på ssb.no
               </Paragraph>
               <Field className='contact-field'>
-                <ContactSelection contacts={contacts} selected={selectedContacts} setSelected={handleContactsChange} />
+                <ContactSelection
+                  ariaInvalid={!!errors.contacts}
+                  contacts={contacts}
+                  selected={selectedContacts}
+                  setSelected={handleContactsChange}
+                />
                 {errors.contacts && <ValidationMessage>{errors.contacts}</ValidationMessage>}
               </Field>
             </div>
