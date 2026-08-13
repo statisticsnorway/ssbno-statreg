@@ -5,13 +5,14 @@ import type { Contact } from '@ssbno-statreg/shared'
 import { formatContact } from '../lib/utils'
 
 export type ContactSelectionProps = {
+  id?: string
   ariaInvalid?: boolean
   contacts: Contact[]
   selected: string[]
   setSelected: (selected: string[]) => void
 }
 
-export function ContactSelection({ ariaInvalid, contacts, selected, setSelected }: ContactSelectionProps) {
+export function ContactSelection({ id, ariaInvalid, contacts, selected, setSelected }: ContactSelectionProps) {
   const contactMap = useMemo(
     () =>
       contacts.reduce<Record<string, Contact>>((record, contact) => {
@@ -52,7 +53,7 @@ export function ContactSelection({ ariaInvalid, contacts, selected, setSelected 
         onSelectedChange={(items) => setSelected(items.map((item) => item.value))}
         selected={selectedItems}
       >
-        <Suggestion.Input aria-invalid={ariaInvalid} />
+        <Suggestion.Input id={id} aria-invalid={ariaInvalid} />
         <Suggestion.Clear aria-label='Tøm valgte kontakter' />
         <Suggestion.List className='contact-selection-list'>
           <Suggestion.Empty>Ingen treff</Suggestion.Empty>
