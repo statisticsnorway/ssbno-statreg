@@ -12,7 +12,13 @@ export type ContactSelectionProps = {
   setSelected: (selected: string[]) => void
 }
 
-export function ContactSelection({ id, ariaInvalid, contacts, selected, setSelected }: ContactSelectionProps) {
+export function ContactSelection({
+  id,
+  ariaInvalid,
+  contacts,
+  selected,
+  setSelected,
+}: Readonly<ContactSelectionProps>) {
   const contactMap = useMemo(
     () =>
       contacts.reduce<Record<string, Contact>>((record, contact) => {
