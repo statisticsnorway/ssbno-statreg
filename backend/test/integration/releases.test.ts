@@ -46,7 +46,7 @@ describe('release data is persisted when ', () => {
     // 1. User clicks on a release in the releases page
     // 2. The release details page is opened
     // 3. User opens release form, changes a couple of fields and submits
-    // 4. The user opens the updated release details page
+    // 4. User opens the updated release details page
     // 5. User opens version history to check that change is registered
 
     // 1. GET release listing and pick release
