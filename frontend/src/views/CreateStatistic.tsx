@@ -181,10 +181,6 @@ export default function CreateStatistic() {
     return isCreateStatisticFieldRequired(status, field)
   }
 
-  function getFieldAnchorId(field: StatisticFormField) {
-    return field
-  }
-
   function getValidationState(
     nextValues = values,
     nextStatus = status,
@@ -427,7 +423,7 @@ export default function CreateStatistic() {
             <Field>
               <Label>{getFieldLabel('Norsk statistikknavn', 'name')}</Label>
               <Input
-                id={getFieldAnchorId('name')}
+                id='name'
                 aria-invalid={!!errors.name}
                 value={values.name}
                 onChange={(e) => handleValueChange('name', e.target.value)}
@@ -438,7 +434,7 @@ export default function CreateStatistic() {
             <Field>
               <Label>{getFieldLabel('Engelsk statistikknavn', 'name_en')}</Label>
               <Input
-                id={getFieldAnchorId('name_en')}
+                id='name_en'
                 aria-invalid={!!errors.name_en}
                 value={values.name_en}
                 onChange={(e) => handleValueChange('name_en', e.target.value)}
@@ -447,7 +443,7 @@ export default function CreateStatistic() {
               {errors.name_en && <ValidationMessage>{errors.name_en}</ValidationMessage>}
             </Field>
             <Divider />
-            <div id={getFieldAnchorId('variants')} className='created-variants-title-container'>
+            <div className='created-variants-title-container'>
               <Label>{getFieldLabel('Variant', 'variants')}</Label>
               <Paragraph>Legg til variant for å kunne melde publiseringsdato på statistikken</Paragraph>
             </div>
@@ -487,9 +483,9 @@ export default function CreateStatistic() {
             )}
             <div className='create-variant-button-container'>
               <Button
+                id='variants'
                 variant='secondary'
                 aria-invalid={!!errors.variants}
-                data-color={errors.variants ? 'danger' : undefined}
                 onClick={handleOpenCreateVariantModal}
               >
                 <PlusCircleIcon /> Legg til variant
@@ -504,7 +500,7 @@ export default function CreateStatistic() {
               </Paragraph>
               <Field className='contact-field'>
                 <ContactSelection
-                  id={getFieldAnchorId('contacts')}
+                  id='contacts'
                   ariaInvalid={!!errors.contacts}
                   contacts={contacts}
                   selected={selectedContacts}
@@ -518,7 +514,7 @@ export default function CreateStatistic() {
             <Field>
               <Label>{getFieldLabel('Seksjon', 'division')}</Label>
               <Select
-                id={getFieldAnchorId('division')}
+                id='division'
                 aria-invalid={!!errors.division}
                 value={values.division}
                 onChange={(e) => handleValueChange('division', e.target.value)}
@@ -546,7 +542,6 @@ export default function CreateStatistic() {
             <Field>
               <Label>{getFieldLabel('Målform', 'main_language')}</Label>
               <Select
-                id={getFieldAnchorId('main_language')}
                 width='auto'
                 value={values.main_language}
                 onChange={(e) => handleValueChange('main_language', e.target.value)}
@@ -559,7 +554,7 @@ export default function CreateStatistic() {
               <Label>Statistikkens startår</Label>
               <Field.Description>F.eks 1876</Field.Description>
               <Input
-                id={getFieldAnchorId('first_released_at')}
+                id='first_released_at'
                 maxLength={4}
                 size={4}
                 aria-invalid={!!errors.first_released_at}
@@ -595,9 +590,7 @@ export default function CreateStatistic() {
                     if (message) {
                       return (
                         <ErrorSummary.Item key={message}>
-                          <ErrorSummary.Link href={`#${getFieldAnchorId(key as StatisticFormField)}`}>
-                            {message}
-                          </ErrorSummary.Link>
+                          <ErrorSummary.Link href={`#${key}`}>{message}</ErrorSummary.Link>
                         </ErrorSummary.Item>
                       )
                     }
