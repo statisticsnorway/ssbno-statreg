@@ -9,6 +9,10 @@ body {
 
 .selectable-row {
   position: relative;
+  /* Safari doesn't treat position: relative on <tr> as a containing block for absolutely
+     positioned descendants, so the stretched link below escapes the row bounds (e.g. covering
+     unrelated elements higher up the page). A transform forces Safari to establish one correctly. */
+  transform: translate(0);
 
   &:hover {
     background-color: var(--ds-color-surface-hover);
