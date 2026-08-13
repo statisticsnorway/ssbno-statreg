@@ -10,8 +10,8 @@ spec:
     majorVersion: '17'
     resources:
       cpu: 200m
-      diskSize: 4Gi
-      memory: 4Gi
+      diskSize: 2Gi
+      memory: 2Gi
   database:
     collation: nb_NO
 
@@ -66,6 +66,11 @@ spec:
         - /statistikkregisteret/docs/**
         - /statistikkregisteret/api
         - /statistikkregisteret/api/**
+
+  resources:
+    requests:
+      cpu: 1Gi
+      memory: 4Gi
 
   postgres:
     clusterName: statreg-api-test-db
