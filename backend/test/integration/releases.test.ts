@@ -34,7 +34,7 @@ describe('release data is persisted when ', () => {
     expect(fetched.body.id).toBe(created.body.id)
     assertEqualReleaseData(fetched.body, body)
 
-    // GET versions
+    // GET versions to check that create event is registered in auditlog
     const versions = await request(app).get(`/statistikkregisteret/api/releases/${created.body.id}/versions`)
     expect(versions.status).toBe(200)
     expect(versions.body).toHaveLength(1)
@@ -75,7 +75,7 @@ describe('release data is persisted when ', () => {
     expect(updatedReleaseResponse.body.id).toBe(picked.id)
     assertEqualReleaseData(updatedReleaseResponse.body, updateBody)
 
-    // GET versions to check that changes are registered in auditlog
+    // GET versions to check that update event is registered in auditlog
     const versions = await request(app).get(`/statistikkregisteret/api/releases/${picked.id}/versions`)
     expect(versions.status).toBe(200)
     const lastVersion = versions.body[0]
