@@ -78,10 +78,11 @@ describe('release data is persisted when ', () => {
     // GET versions to check that changes are registered in auditlog
     const versions = await request(app).get(`/statistikkregisteret/api/releases/${picked.id}/versions`)
     expect(versions.status).toBe(200)
-    expect(versions.body[0].change_type).toBe('update')
-    expect(versions.body[0].comment).toBe(updateBody.comment)
-    expect(versions.body[0].changed_values).toHaveLength(2)
-    expect(versions.body[0].changed_values).toEqual(
+    const lastVersion = versions.body[0]
+    expect(lastVersion.change_type).toBe('update')
+    expect(lastVersion.comment).toBe(updateBody.comment)
+    expect(lastVersion.changed_values).toHaveLength(2)
+    expect(lastVersion.changed_values).toEqual(
       expect.arrayContaining([
         {
           field_name: 'publish_time',
