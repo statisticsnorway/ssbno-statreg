@@ -86,13 +86,13 @@ describe('release data is persisted when ', () => {
       expect.arrayContaining([
         {
           field_name: 'publish_time',
-          old_value: JSON.stringify(pickedRelease.publish_time),
-          new_value: JSON.stringify(updateBody.publish_time),
+          old_value: pickedRelease.publish_time,
+          new_value: updateBody.publish_time,
         },
         {
           field_name: 'release_date_precision',
-          old_value: JSON.stringify(pickedRelease.release_date_precision),
-          new_value: JSON.stringify(updateBody.release_date_precision),
+          old_value: pickedRelease.release_date_precision,
+          new_value: updateBody.release_date_precision,
         },
       ])
     )

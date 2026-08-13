@@ -22,8 +22,8 @@ function diffObjects(
     if (oldValue !== newValue) {
       changes.push({
         field_name: key,
-        old_value: JSON.stringify(oldValue),
-        new_value: JSON.stringify(newValue),
+        old_value: String(oldValue),
+        new_value: String(newValue),
       })
     }
   }
@@ -40,7 +40,7 @@ function auditlogEntryToVersion(entry: Prisma.AuditLogGetPayload<null>): Version
     if (entry.property_name) {
       changedValues = [
         {
-          field_name: String(entry.property_name),
+          field_name: entry.property_name,
           old_value: String(entry.old_value),
           new_value: String(entry.new_value),
         },
