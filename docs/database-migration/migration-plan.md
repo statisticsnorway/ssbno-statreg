@@ -22,7 +22,7 @@ Before performing the migration, we need to allow the prisma methods deleteMany 
 
 ### Load data to PostgreSQL
 
-4.  In `backend/src/lib/prisma.ts`, comment out the overrides that block `createMany`, `updateMany`, and `deleteMany`, which the migration scripts use.
+4.  In `backend/src/lib/prisma.ts`, comment out the overrides that block `createMany`, `updateMany`, and `deleteMany`, so the migration scripts can use these operations.
 
 5.  Install additional dependencies required by the migration scripts:
 
