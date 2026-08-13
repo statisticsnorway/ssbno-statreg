@@ -70,7 +70,7 @@ Before performing the migration, we need to allow the prisma methods deleteMany 
 
 10. (Nais only) Open a shell in the same pod, and complete the remaining steps there. We recommend using [`k9s`](https://k9scli.io/topics/install/), which lets you navigate through the list of pods and press `s` to open a shell.
 
-11. `cd` into the `backend` directory and run the following scripts there.
+11. `cd` into the `backend` directory and run the below scripts there.
 
 12. Delete all existing data in the database and load data from JSON files into PostgreSQL:
 
