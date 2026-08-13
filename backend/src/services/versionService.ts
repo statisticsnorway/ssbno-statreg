@@ -74,7 +74,7 @@ export async function getVersions(resourceType: string, id: number, prisma: Vers
     },
   })
 
-  // remove old entries that only had comment, and store the comment
+  // remove old entries that was the internal comment and connect them as comment on other entries with the exact same last_update timestamp
   const commentMap: Record<string, string> = {}
   const filteredEntries = entries.filter((entry) => {
     if (entry.property_name === 'internKommentar' && entry.new_value) {
@@ -86,7 +86,6 @@ export async function getVersions(resourceType: string, id: number, prisma: Vers
 
   const versions = filteredEntries.map(auditlogEntryToVersion)
 
-  //attach comment to old entries
   return versions.map((version) => {
     const comment = commentMap[version.changed_at]
     if (comment) {
