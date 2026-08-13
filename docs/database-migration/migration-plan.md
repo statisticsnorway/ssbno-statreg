@@ -27,6 +27,7 @@ Before performing the migration, we need to allow the prisma methods deleteMany 
 5.  Install additional dependencies required by the migration scripts:
 
 ```bash
+cd backend
 npm i JSONStream
 npm i date-fns-tz
 ```
