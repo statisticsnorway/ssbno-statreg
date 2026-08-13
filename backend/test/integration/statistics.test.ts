@@ -36,6 +36,13 @@ vi.mock(import('@/lib/cache'), () => ({
 
 const app = await createApp()
 
+const jsonHeaders = {
+  'content-type': 'application/json',
+}
+
+const statisticsApiPath = '/statistikkregisteret/api/statistics'
+const shortnamesApiPath = '/statistikkregisteret/api/shortnames'
+
 const SEEDED_STATISTIC = {
   shortname: 'helse',
   name: 'Helse og helsetjenester',
@@ -49,6 +56,66 @@ const SEEDED_STATISTIC = {
 }
 
 const createdStatistics: Array<{ statisticId: number | null; shortname: string | null }> = []
+
+function parseStatisticComment(shortname: string) {
+  return `Create statistic with shortname: ${shortname}`
+}
+
+function createActiveStatisticPayload(): StatisticCreate {
+  return {
+    status: { code: 'A' },
+    division: '101',
+    name: 'Integrationstest for oppretting av statistikk',
+    name_en: 'Integration Test Created Statistic',
+    main_language: 'nb',
+    first_released_at: '2026-08-10',
+    contacts: ['abc@ssb.no'],
+    variants: [
+      {
+        frequency: { code: 'U' },
+        revision: { code: 'I' },
+        level_of_detail: {
+          name: 'Detaljnivå',
+          name_en: 'Level of detail',
+        },
+      },
+    ],
+  }
+}
+
+function mockCreateShortname(prefix = 'nytt_') {
+  const suffix = Date.now()
+    .toString()
+    .slice(-8)
+    .replace(/[0-9]/g, (digit) => String.fromCharCode(97 + Number(digit)))
+
+  return `${prefix}${suffix}`
+}
+
+async function postStatistic(shortname: string, payload: StatisticCreate) {
+  return request(app).post(`${statisticsApiPath}/${shortname}`).set(jsonHeaders).send(payload)
+}
+
+async function createShortname(shortname: string) {
+  const shortnameResponse = await request(app).post(shortnamesApiPath).set(jsonHeaders).send({ shortname })
+
+  expect(shortnameResponse.status).toBe(201)
+  expect(shortnameResponse.body).toMatchObject({
+    id: expect.any(Number),
+    shortname,
+  })
+}
+
+async function createdStatisticFromDb(shortname: string): Promise<StatisticWithShortname> {
+  const createdStatistic = await readStatisticFromDb(shortname)
+
+  createdStatistics.push({
+    statisticId: createdStatistic.id,
+    shortname,
+  })
+
+  return createdStatistic
+}
 
 function toStatisticResponseShape(statistic: StatisticDetails) {
   return {
@@ -87,7 +154,7 @@ afterAll(async () => {
 
 describe('statisticsController integration', () => {
   test('GET /statistics returns a list of statistics', async () => {
-    const response = await request(app).get('/statistikkregisteret/api/statistics')
+    const response = await request(app).get(statisticsApiPath)
 
     expect(response.status).toBe(200)
 
@@ -110,7 +177,7 @@ describe('statisticsController integration', () => {
   })
 
   test('GET /statistics/:shortname returns statistic details', async () => {
-    const response = await request(app).get(`/statistikkregisteret/api/statistics/${SEEDED_STATISTIC.shortname}`)
+    const response = await request(app).get(`${statisticsApiPath}/${SEEDED_STATISTIC.shortname}`)
 
     expect(response.status).toBe(200)
 
@@ -131,17 +198,14 @@ describe('statisticsController integration', () => {
   test('POST /statistics/:shortname creates a new upcoming statistic in the database', async () => {
     const createdShortnameName = await createTestShortname()
 
-    const createPayload = {
+    const createPayload: StatisticCreate = {
       status: { code: 'K' },
       division: '101',
       name: 'Integration Test Created Statistic',
       first_released_at: '2024-01-01',
     }
 
-    const response = await request(app)
-      .post(`/statistikkregisteret/api/statistics/${createdShortnameName}`)
-      .set('content-type', 'application/json')
-      .send(createPayload)
+    const response = await postStatistic(createdShortnameName, createPayload)
 
     expect(response.status).toBe(200)
 
@@ -152,25 +216,21 @@ describe('statisticsController integration', () => {
       name: createPayload.name,
       name_en: '',
       main_language: 'nb',
-      comment: `Create statistic with shortname: ${createdShortnameName}`,
+      comment: parseStatisticComment(createdShortnameName),
       division_code: createPayload.division,
       yearly_reporting: false,
       status_code: 'K',
       first_released_at: '2024-01-01T00:00:00.000Z',
     })
 
-    const createdStatistic = await readStatisticFromDb(createdShortnameName)
-    createdStatistics.push({
-      statisticId: createdStatistic.id,
-      shortname: createdShortnameName,
-    })
+    const createdStatistic = await createdStatisticFromDb(createdShortnameName)
 
     expect(toStatisticDbShape(createdStatistic)).toStrictEqual({
       shortname: createdShortnameName,
       name: createPayload.name,
       name_en: null,
       language: 'nb',
-      comment: `Create statistic with shortname: ${createdShortnameName}`,
+      comment: parseStatisticComment(createdShortnameName),
       division_code: createPayload.division,
       yearly_reporting: false,
       status: 'K',
@@ -183,30 +243,9 @@ describe('statisticsController integration', () => {
   test('POST /statistics/:shortname creates a new active statistic in the database', async () => {
     const createdShortnameName = await createTestShortname()
 
-    const createPayload = {
-      status: { code: 'A' },
-      division: '101',
-      name: 'Integrationstest for oppretting av statistikk',
-      name_en: 'Integration Test Created Statistic',
-      main_language: 'nb',
-      first_released_at: '2026-08-10',
-      contacts: ['abc@ssb.no'],
-      variants: [
-        {
-          frequency: { code: 'U' },
-          revision: { code: 'I' },
-          level_of_detail: {
-            name: 'Detaljnivå',
-            name_en: 'Level of detail',
-          },
-        },
-      ],
-    }
+    const createPayload = createActiveStatisticPayload()
 
-    const response = await request(app)
-      .post(`/statistikkregisteret/api/statistics/${createdShortnameName}`)
-      .set('content-type', 'application/json')
-      .send(createPayload)
+    const response = await postStatistic(createdShortnameName, createPayload)
 
     expect(response.status).toBe(200)
 
@@ -217,7 +256,7 @@ describe('statisticsController integration', () => {
       name: createPayload.name,
       name_en: createPayload.name_en,
       main_language: 'nb',
-      comment: `Create statistic with shortname: ${createdShortnameName}`,
+      comment: parseStatisticComment(createdShortnameName),
       division_code: createPayload.division,
       yearly_reporting: false,
       status_code: 'A',
@@ -245,11 +284,7 @@ describe('statisticsController integration', () => {
       }),
     ])
 
-    const createdStatistic = await readStatisticFromDb(createdShortnameName)
-    createdStatistics.push({
-      statisticId: createdStatistic.id,
-      shortname: createdShortnameName,
-    })
+    const createdStatistic = await createdStatisticFromDb(createdShortnameName)
 
     expect(toStatisticDbShape(createdStatistic)).toStrictEqual({
       shortname: createdShortnameName,
@@ -269,7 +304,7 @@ describe('statisticsController integration', () => {
   test('PUT /statistics/:shortname updates an existing statistic in the database', async () => {
     const createdShortnameName = await createTestShortname()
 
-    const createPayload = {
+    const createPayload: StatisticCreate = {
       status: { code: 'K' },
       division: '101',
       name: 'Integration Test Statistic To Update',
@@ -279,18 +314,11 @@ describe('statisticsController integration', () => {
       comment: 'Created for update integration test',
     }
 
-    const createResponse = await request(app)
-      .post(`/statistikkregisteret/api/statistics/${createdShortnameName}`)
-      .set('content-type', 'application/json')
-      .send(createPayload)
+    const createResponse = await postStatistic(createdShortnameName, createPayload)
 
     expect(createResponse.status).toBe(200)
 
-    const createdStatistic = await readStatisticFromDb(createdShortnameName)
-    createdStatistics.push({
-      statisticId: createdStatistic.id,
-      shortname: createdShortnameName,
-    })
+    await createdStatisticFromDb(createdShortnameName)
 
     const updatePayload = {
       division: '101',
@@ -307,8 +335,8 @@ describe('statisticsController integration', () => {
     }
 
     const updateResponse = await request(app)
-      .put(`/statistikkregisteret/api/statistics/${createdShortnameName}`)
-      .set('content-type', 'application/json')
+      .put(`${statisticsApiPath}/${createdShortnameName}`)
+      .set(jsonHeaders)
       .send(updatePayload)
 
     expect(updateResponse.status).toBe(200)
@@ -345,9 +373,7 @@ describe('statisticsController integration', () => {
   })
 
   test('GET /statistics with shortname filter and sort', async () => {
-    const response = await request(app)
-      .get('/statistikkregisteret/api/statistics')
-      .query('shortname=helse,energ&sort=-shortname')
+    const response = await request(app).get(statisticsApiPath).query('shortname=helse,energ&sort=-shortname')
 
     expect(response.status).toBe(200)
 
@@ -359,32 +385,34 @@ describe('statisticsController integration', () => {
   })
 
   test('GET /statistics with contact filter and sort', async () => {
-    const response = await request(app)
-      .get('/statistikkregisteret/api/statistics')
-      .query('contact=abc@ssb.no&sort=shortname')
+    const beforeResponse = await request(app).get(statisticsApiPath).query('contact=abc@ssb.no&sort=shortname')
+    expect(beforeResponse.status).toBe(200)
+
+    const beforeStatistics = beforeResponse.body as StatisticListingResponse
+    const createdShortnameName = await createTestShortname()
+    const createPayload = createActiveStatisticPayload()
+
+    const createResponse = await postStatistic(createdShortnameName, createPayload)
+    expect(createResponse.status).toBe(200)
+    await createdStatisticFromDb(createdShortnameName)
+
+    const response = await request(app).get(statisticsApiPath).query('contact=abc@ssb.no&sort=shortname')
 
     expect(response.status).toBe(200)
 
     const statistics = response.body as StatisticListingResponse
 
-    expect(statistics.statistics?.length).toBe(3)
-    expect(statistics.statistics?.[0]?.shortname).toBe('energ')
-    expect(statistics.statistics?.[1]?.shortname).toContain('it-stat')
-    expect(statistics.statistics?.[2]?.shortname).toBe('kpi')
+    expect(statistics.statistics?.length).toBe((beforeStatistics.statistics?.length ?? 0) + 1)
+    expect(statistics.statistics?.map((statistic) => statistic.shortname)).toEqual(
+      expect.arrayContaining(['energ', createdShortnameName, 'kpi'])
+    )
   })
 
   test('POST /shortnames creates a shortname that can be used to create and fetch a statistic', async () => {
-    // POST shortname
-    const shortnameResponse = await request(app)
-      .post('/statistikkregisteret/api/shortnames')
-      .set('content-type', 'application/json')
-      .send({ shortname: 'nytt_kortnavn' })
+    const createdShortnameName = mockCreateShortname()
 
-    expect(shortnameResponse.status).toBe(201)
-    expect(shortnameResponse.body).toMatchObject({
-      id: expect.any(Number),
-      shortname: 'nytt_kortnavn',
-    })
+    // POST shortname
+    await createShortname(createdShortnameName)
 
     // POST statistic for created shortname
     const createPayload: StatisticCreate = {
@@ -395,31 +423,45 @@ describe('statisticsController integration', () => {
       first_released_at: '2027-01-01',
       main_language: 'nb',
     }
-    const createResponse = await request(app)
-      .post('/statistikkregisteret/api/statistics/nytt_kortnavn')
-      .set('content-type', 'application/json')
-      .send(createPayload)
+    const createResponse = await postStatistic(createdShortnameName, createPayload)
 
     expect(createResponse.status).toBe(200)
+    await createdStatisticFromDb(createdShortnameName)
 
     // GET statistic to test persistence
-    const fetchResponse = await request(app).get('/statistikkregisteret/api/statistics/nytt_kortnavn')
+    const fetchResponse = await request(app).get(`${statisticsApiPath}/${createdShortnameName}`)
     expect(fetchResponse.status).toBe(200)
-    expect(fetchResponse.body.shortname).toBe('nytt_kortnavn')
+    expect(fetchResponse.body.shortname).toBe(createdShortnameName)
 
     // GET shortnames to verify created shortname is listed
-    const shortnamesListResponse = await request(app).get('/statistikkregisteret/api/shortnames')
+    const shortnamesListResponse = await request(app).get(shortnamesApiPath)
     expect(shortnamesListResponse.status).toBe(200)
-    expect(shortnamesListResponse.body.some((item: ShortnameListing) => item.shortname === 'nytt_kortnavn')).toBe(true)
+    expect(shortnamesListResponse.body.some((item: ShortnameListing) => item.shortname === createdShortnameName)).toBe(
+      true
+    )
   })
 
-  test('PUT /statistics/nytt_kortnavn/contacts sets new contacts for the statistic', async () => {
-    // PUT statistics/nytt_kortnavn/contacts
+  test('PUT /statistics/:shortname/contacts sets new contacts for the statistic', async () => {
+    const createdShortnameName = await createTestShortname()
+    const createPayload: StatisticCreate = {
+      status: { code: 'K' },
+      division: '101',
+      name: 'Ny statistikk for kontaktoppdatering',
+      name_en: 'New statistic for contact update',
+      first_released_at: '2027-01-01',
+      main_language: 'nb',
+    }
+
+    const createResponse = await postStatistic(createdShortnameName, createPayload)
+    expect(createResponse.status).toBe(200)
+    await createdStatisticFromDb(createdShortnameName)
+
+    // PUT statistics/:shortname/contacts
     const contactsPayload = ['abc@ssb.no', 'bcd@ssb.no']
 
     const contactsResponse = await request(app)
-      .put('/statistikkregisteret/api/statistics/nytt_kortnavn/contacts')
-      .set('content-type', 'application/json')
+      .put(`${statisticsApiPath}/${createdShortnameName}/contacts`)
+      .set(jsonHeaders)
       .send(contactsPayload)
 
     const expectedContacts: Contact[] = [
@@ -432,7 +474,7 @@ describe('statisticsController integration', () => {
     expect(contactsResponse.body).toEqual(expect.arrayContaining(expectedContacts))
 
     // GET statistic to test persistence of new contacts
-    const fetchResponse = await request(app).get('/statistikkregisteret/api/statistics/nytt_kortnavn')
+    const fetchResponse = await request(app).get(`${statisticsApiPath}/${createdShortnameName}`)
     expect(fetchResponse.status).toBe(200)
     expect(fetchResponse.body.contacts).toHaveLength(2)
     expect(fetchResponse.body.contacts).toEqual(expect.arrayContaining(expectedContacts))
