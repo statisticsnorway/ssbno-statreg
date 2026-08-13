@@ -67,14 +67,6 @@ spec:
         - /statistikkregisteret/api
         - /statistikkregisteret/api/**
 
-  resources:
-    requests:
-      cpu: 500m
-      memory: 4Gi
-    limits:
-      cpu: 500m
-      memory: 4Gi
-
   postgres:
     clusterName: statreg-api-test-db
 

@@ -66,9 +66,9 @@ const extendedPrisma = prisma.$extends({
         }
       },
       // We can comment out these three overrides on create, update and delete Many. We need them for data migration. We can not implement audit logging on these functions and they must be disabled in our project.
-      // async createMany() {
-      //   throw new Error('CreateMany is not supported by auditLog middleware!')
-      // },
+      async createMany() {
+        throw new Error('CreateMany is not supported by auditLog middleware!')
+      },
       async createManyAndReturn() {
         throw new Error('CreateManyAndReturn is not supported by auditLog middleware!')
       },
@@ -97,9 +97,9 @@ const extendedPrisma = prisma.$extends({
           return query(args)
         }
       },
-      // async updateMany() {
-      //   throw new Error('UpdateMany is not supported by auditLog middleware!')
-      // },
+      async updateMany() {
+        throw new Error('UpdateMany is not supported by auditLog middleware!')
+      },
       async updateManyAndReturn() {
         throw new Error('UpdateManyAndReturn is not supported by auditLog middleware!')
       },
@@ -127,9 +127,9 @@ const extendedPrisma = prisma.$extends({
           return query(args)
         }
       },
-      // async deleteMany() {
-      //   throw new Error('DeleteMany is not supported by auditLog middleware!')
-      // },
+      async deleteMany() {
+        throw new Error('DeleteMany is not supported by auditLog middleware!')
+      },
     },
   },
 })
