@@ -39,7 +39,7 @@ Copy tableStats into pod (replace with the actual pod name)
 kubectl cp ~/repos/ssbno-statreg/docs/database-migration/tableStatsExample.json ssbno-statreg-5665547945-nvjpb:/tmp
 ```
 
-7. Run script `import-data-to-postgres.ts` to delete all existing data in database, load data from JSON files to PostgreSQL by running command in the pod or locally in the terminal:
+7. Run script `import-data-to-postgres.ts` to delete all existing data in database, load data from JSON files to PostgreSQL. In advance make sure JSONStream and date-fns-tz is installed and that `createMany`, `updateMany` and `deleteMany` commands are accepted in `prisma.ts`. Then run command in the pod or locally in the terminal:
 ```
 npm exec tsx ./src/scripts/import-data-to-postgres.ts /tmp/STATREG_TABLES_JSON
 ``` 
@@ -65,4 +65,12 @@ npx tsx ./src/scripts/addDivisionCodeToStatistic.ts
 ```
 npx tsx ./src/scripts/addResponsiblePersonFromOldContact.ts
 ```
-15. Drop legacy tables that are no longer needed e.g. Division and Contacts. Drop assosiated columns with dropped tables as well. This can be done in a PR with an adjustment of Prisma schema a while after data migration.
+15. Run script `rewriteAuditLogClassNames.ts` to set consistent class_names in audit_log table by running: 
+```
+npx tsx ./src/scripts/rewriteAuditLogClassNames.ts
+```
+16. Run script `rewriteAuditLogClassNames.ts` to set consistent event_names in audit_log table by running: 
+```
+npx tsx ./src/scripts/rewriteAuditLogEventNames.ts
+```
+17. Drop legacy tables that are no longer needed e.g. Division and Contacts. Drop assosiated columns with dropped tables as well. This can be done in a PR with an adjustment of Prisma schema a while after data migration.
