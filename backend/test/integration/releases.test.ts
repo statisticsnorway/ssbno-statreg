@@ -57,7 +57,7 @@ describe('release data is persisted when ', () => {
     expect(list.body.total).toBeGreaterThan(1)
     const picked = list.body.releases[0]
 
-    // 2. GET release to get full details of picked release
+    // 2. GET release to see full details of picked release
     const pickedReleaseResponse = await request(app).get(`/statistikkregisteret/api/releases/${picked.id}`)
     expect(pickedReleaseResponse.status).toBe(200)
     const pickedRelease = pickedReleaseResponse.body as ReleaseDetails
@@ -76,14 +76,14 @@ describe('release data is persisted when ', () => {
       .send(updateBody)
     expect(putResponse.status).toBe(200)
 
-    // 4. GET release to check persistence of changes
+    // 4. GET release to check persistence of new values
     const updatedReleaseResponse = await request(app).get(`/statistikkregisteret/api/releases/${picked.id}`)
     expect(updatedReleaseResponse.status).toBe(200)
     expect(updatedReleaseResponse.body.id).toBe(picked.id)
     const updatedRelease = updatedReleaseResponse.body as ReleaseDetails
     assertEqualReleaseData(updatedRelease, updateBody)
 
-    // 5. GET versions to check that the update is registered
+    // 5. GET versions to check that change is registered
     const versions = await request(app).get(`/statistikkregisteret/api/releases/${picked.id}/versions`)
     expect(versions.status).toBe(200)
     const lastVersion = versions.body[0]
