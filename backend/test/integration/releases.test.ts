@@ -73,7 +73,8 @@ describe('release data is persisted when ', () => {
     const updatedReleaseResponse = await request(app).get(`/statistikkregisteret/api/releases/${picked.id}`)
     expect(updatedReleaseResponse.status).toBe(200)
     expect(updatedReleaseResponse.body.id).toBe(picked.id)
-    assertEqualReleaseData(updatedReleaseResponse.body, updateBody)
+    const updatedRelease = updatedReleaseResponse.body as ReleaseDetails
+    assertEqualReleaseData(updatedRelease, updateBody)
 
     // GET versions to check that update event is registered in auditlog
     const versions = await request(app).get(`/statistikkregisteret/api/releases/${picked.id}/versions`)
@@ -87,12 +88,12 @@ describe('release data is persisted when ', () => {
         {
           field_name: 'publish_time',
           old_value: pickedRelease.publish_time,
-          new_value: updateBody.publish_time,
+          new_value: updatedRelease.publish_time,
         },
         {
           field_name: 'release_date_precision',
           old_value: pickedRelease.release_date_precision,
-          new_value: updateBody.release_date_precision,
+          new_value: updatedRelease.release_date_precision,
         },
       ])
     )
