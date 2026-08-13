@@ -42,7 +42,7 @@ describe('release data is persisted when ', () => {
   })
 
   test('client picks release and updates fields', async () => {
-    // This integration test simulates the following events in the frontend:
+    // This integration test simulates the following events:
     // 1. User opens the release listing page
     // 2. User clicks on a release to open the release details page
     // 3. User clicks "edit", changes a couple of fields and submits
