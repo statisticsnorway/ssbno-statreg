@@ -32,7 +32,7 @@ npm i JSONStream
 npm i date-fns-tz
 ```
 
-6. (Nais only) In the Nais manifest for the application (not the database!), add the resource limits required by the migration scripts:
+6. (Nais only) In the Nais manifest for the application (not the database!), add higher resource limits required by the migration scripts:
 
 ```yaml
 resources:
