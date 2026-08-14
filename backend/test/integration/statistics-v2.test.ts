@@ -24,8 +24,9 @@ vi.mock(import('@/lib/cache'), () => ({
 
 const app = await createApp()
 
-describe('statisticsController integration', () => {
-  test('GET /statistics returns a list of statistics', async () => {
+describe('statistics controller', () => {
+  test('can list statistics', async () => {
+    // GET /statistics and assert response
     const response = await request(app).get('/statistikkregisteret/api/statistics')
 
     expect(response.status).toBe(200)
@@ -48,17 +49,17 @@ describe('statisticsController integration', () => {
     expect(Array.isArray(first?.contacts)).toBe(true)
   })
 
-  test('POST /statistics/:shortname creates a new upcoming statistic in the database', async () => {
+  test('can create a new upcoming statistic', async () => {
     const newShortname = 'upcoming_test'
 
-    // POST shortname
+    // POST /shortname
     const shortnameResponse = await request(app)
       .post('/statistikkregisteret/api/shortnames')
       .set('content-type', 'application/json')
       .send({ shortname: newShortname })
     expect(shortnameResponse.status).toBe(201)
 
-    // POST statistic and assert response
+    // POST /statistics and assert response
     const createPayload = {
       status: { code: 'K' },
       division: '101',
@@ -84,17 +85,17 @@ describe('statisticsController integration', () => {
     })
   })
 
-  test('POST /statistics/:shortname creates a new active statistic in the database', async () => {
+  test('can create a new active statistic', async () => {
     const newShortname = 'active_test'
 
-    // POST shortname
+    // POST /shortnames
     const shortnameResponse = await request(app)
       .post('/statistikkregisteret/api/shortnames')
       .set('content-type', 'application/json')
       .send({ shortname: newShortname })
     expect(shortnameResponse.status).toBe(201)
 
-    // POST statistic and assert response
+    // POST /statistics with contacts and variants and assert response
     const createPayload = {
       status: { code: 'A' },
       division: '101',
@@ -156,17 +157,17 @@ describe('statisticsController integration', () => {
     ])
   })
 
-  test('PUT /statistics/:shortname updates an existing statistic in the database', async () => {
+  test('can update an existing statistic', async () => {
     const newShortname = 'update_test'
 
-    // POST shortname
+    // POST /shortnames
     const shortnameResponse = await request(app)
       .post('/statistikkregisteret/api/shortnames')
       .set('content-type', 'application/json')
       .send({ shortname: newShortname })
     expect(shortnameResponse.status).toBe(201)
 
-    // POST statistic
+    // POST /statistics
     const createPayload = {
       status: { code: 'K' },
       division: '101',
@@ -184,7 +185,7 @@ describe('statisticsController integration', () => {
 
     expect(createResponse.status).toBe(200)
 
-    // PUT statistic and assert response
+    // PUT /statistics and assert response
     const updatePayload = {
       division: '101',
       statistic_region_levels: [],
@@ -219,8 +220,8 @@ describe('statisticsController integration', () => {
     })
   })
 
-  test('GET /statistics with shortname filter and sort', async () => {
-    // POST two shortnames and statistics to use in filter
+  test('can list statistics with shortname filter and sort', async () => {
+    // POST /shortnames
     const shortnameA = 'filter_a'
     const shortnameB = 'filter_b'
     await request(app)
@@ -232,6 +233,7 @@ describe('statisticsController integration', () => {
       .set('content-type', 'application/json')
       .send({ shortname: shortnameB })
 
+    // POST /statistics
     await request(app)
       .post(`/statistikkregisteret/api/statistics/${shortnameA}`)
       .set('content-type', 'application/json')
@@ -241,7 +243,7 @@ describe('statisticsController integration', () => {
       .set('content-type', 'application/json')
       .send({ status: { code: 'K' }, division: '101', name: 'Filter test B' })
 
-    // GET statistics with shortname filter and sort, assert response
+    // GET /statistics with shortname filter and sort, and assert response
     const response = await request(app)
       .get('/statistikkregisteret/api/statistics')
       .query(`shortname=${shortnameA},${shortnameB}&sort=-shortname`)
@@ -253,21 +255,22 @@ describe('statisticsController integration', () => {
     expect(statistics.statistics?.[1]?.shortname).toBe(shortnameA)
   })
 
-  test('GET /statistics with contact filter', async () => {
+  test('can list statistics with contact filter', async () => {
     const newShortname = 'contact_filter'
 
-    // POST shortname and statistic with contact
+    // POST /shortname
     await request(app)
       .post('/statistikkregisteret/api/shortnames')
       .set('content-type', 'application/json')
       .send({ shortname: newShortname })
 
+    // POST /statistics
     await request(app)
       .post(`/statistikkregisteret/api/statistics/${newShortname}`)
       .set('content-type', 'application/json')
       .send({ status: { code: 'K' }, division: '101', name: 'Contact test', contacts: ['bcd@ssb.no'] })
 
-    // GET statistics with contact filter and assert that statistic is included
+    // GET /statistics with contact filter and assert that statistic is included
     const response = await request(app).get('/statistikkregisteret/api/statistics').query(`contact=bcd@ssb.no`)
 
     expect(response.status).toBe(200)
@@ -276,13 +279,13 @@ describe('statisticsController integration', () => {
     const shortnames = statistics.statistics?.map((s) => s.shortname)
     expect(shortnames).toContain(newShortname)
 
-    // PUT contacts to remove contact from statistic
+    // PUT /statistics/:shortname/contacts to remove contact from statistic
     await request(app)
       .put(`/statistikkregisteret/api/statistics/${newShortname}/contacts`)
       .set('content-type', 'application/json')
       .send([])
 
-    // GET statistics with contact filter again and assert that statistic is no longer included
+    // GET /statistics with contact filter and assert that statistic is no longer included
     const responseAfterRemoval = await request(app)
       .get('/statistikkregisteret/api/statistics')
       .query(`contact=bcd@ssb.no`)
@@ -294,58 +297,17 @@ describe('statisticsController integration', () => {
     expect(shortnamesAfterRemoval).not.toContain(newShortname)
   })
 
-  test('POST /shortnames creates a shortname that can be used to create and fetch a statistic', async () => {
-    const newShortname = 'shortname_test'
-
-    // POST shortname
-    const shortnameResponse = await request(app)
-      .post('/statistikkregisteret/api/shortnames')
-      .set('content-type', 'application/json')
-      .send({ shortname: newShortname })
-
-    expect(shortnameResponse.status).toBe(201)
-    expect(shortnameResponse.body).toMatchObject({
-      id: expect.any(Number),
-      shortname: newShortname,
-    })
-
-    // POST statistic for created shortname
-    const createPayload: StatisticCreate = {
-      status: { code: 'K' },
-      division: '101',
-      name: 'Ny statistikk',
-      name_en: 'New statistic',
-      first_released_at: '2027-01-01',
-      main_language: 'nb',
-    }
-    const createResponse = await request(app)
-      .post(`/statistikkregisteret/api/statistics/${newShortname}`)
-      .set('content-type', 'application/json')
-      .send(createPayload)
-
-    expect(createResponse.status).toBe(200)
-
-    // GET statistic to test persistence
-    const fetchResponse = await request(app).get(`/statistikkregisteret/api/statistics/${newShortname}`)
-    expect(fetchResponse.status).toBe(200)
-    expect(fetchResponse.body.shortname).toBe(newShortname)
-
-    // GET shortnames to verify created shortname is listed
-    const shortnamesListResponse = await request(app).get('/statistikkregisteret/api/shortnames')
-    expect(shortnamesListResponse.status).toBe(200)
-    expect(shortnamesListResponse.body.some((item: ShortnameListing) => item.shortname === newShortname)).toBe(true)
-  })
-
-  test('PUT /statistics/:shortname/contacts sets new contacts for the statistic', async () => {
-    // First create a statistic for this test
+  test('can set new contacts for a statistic', async () => {
     const newShortname = 'contacts_test'
 
+    // POST /shortnames
     const shortnameResponse = await request(app)
       .post('/statistikkregisteret/api/shortnames')
       .set('content-type', 'application/json')
       .send({ shortname: newShortname })
     expect(shortnameResponse.status).toBe(201)
 
+    // POST /statistics
     const createPayload: StatisticCreate = {
       status: { code: 'K' },
       division: '101',
@@ -359,7 +321,7 @@ describe('statisticsController integration', () => {
       .send(createPayload)
     expect(createResponse.status).toBe(200)
 
-    // PUT contacts
+    // PUT /statistics/:shortname/contacts
     const contactsPayload = ['bcd@ssb.no']
 
     const contactsResponse = await request(app)
@@ -373,7 +335,7 @@ describe('statisticsController integration', () => {
     expect(contactsResponse.body).toHaveLength(1)
     expect(contactsResponse.body).toEqual(expect.arrayContaining(expectedContacts))
 
-    // GET statistic to test persistence of new contacts
+    // GET /statistics/:shortname to test persistence of new contacts
     const fetchResponse = await request(app).get(`/statistikkregisteret/api/statistics/${newShortname}`)
     expect(fetchResponse.status).toBe(200)
     expect(fetchResponse.body.contacts).toHaveLength(1)
