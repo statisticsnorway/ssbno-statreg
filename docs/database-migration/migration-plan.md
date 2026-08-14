@@ -32,7 +32,7 @@ Before performing the migration, we need to allow the prisma methods deleteMany 
     npm i date-fns-tz
     ```
 
-#### 👌Nais preparation
+**👌Nais preparation (6-10):**
 
 6.  In the Nais manifest for the application (not the database!), add higher resource limits required by the migration scripts:
 
@@ -125,7 +125,7 @@ Before performing the migration, we need to allow the prisma methods deleteMany 
 
 20. Drop legacy tables that are no longer needed e.g. Division and Contacts. Drop assosiated columns with dropped tables as well. This can be done in a PR with an adjustment of Prisma schema a while after data migration.
 
-#### 👌Nais cleanup
+**👌Nais cleanup:**
 
 19. Remove the temporary JSON files:
 
