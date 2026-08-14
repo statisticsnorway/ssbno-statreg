@@ -19,7 +19,7 @@
     "lint:fix": "eslint --fix",
     "seed": "pnpm --filter 'backend' run seed",
     "generate": "pnpm --filter 'backend' run generate",
-    "generate:api-types": "openapi-typescript ./shared/openapi/openapi.yaml | pnpm prettier --parser typescript > ./shared/src/api-types.ts"
+    "generate:api-types": "openapi-typescript ./shared/openapi/openapi.yaml -o ./shared/src/api-types.ts && prettier --write ./shared/src/api-types.ts"
   },
   "overrides": {
     "valibot": "1.2.0",
@@ -39,6 +39,7 @@
     "concurrently": "10.0.4",
     "eslint": "10.7.0",
     "openapi-typescript": "7.13.0",
+    "prettier": "3.5.3",
     "typescript": "5.9.3",
     "typescript-eslint": "8.64.0",
     "vitest": "4.1.10"
