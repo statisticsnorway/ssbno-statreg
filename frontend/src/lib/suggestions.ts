@@ -1,9 +1,5 @@
-import { type CalenderDate, type ReleaseListing } from '@ssbno-statreg/shared'
-import client from '../api'
+import { type ReleaseListing } from '@ssbno-statreg/shared'
 import { getDateOnlyAsString } from './utils'
-
-// Avoid an unbounded loop if calendarDates has no non-blocked day nearby.
-const MAX_ROLLBACK_DAYS = 14
 
 function getLatestRelease(releases: ReleaseListing[]): ReleaseListing | undefined {
   return releases
@@ -43,17 +39,15 @@ export type SuggestedRelease = {
   periodTo: Date
 }
 
-// Mirrors the old bliSiste() Groovy logic: known frequencies step by calendar unit (quarter/month also
-// snap periodTo to the end of month), others repeat the previous release's period length (in days).
 function getNextRelease(latestRelease: ReleaseListing): SuggestedRelease | undefined {
   if (!latestRelease.publish_time || !latestRelease.period_from || !latestRelease.period_to) return undefined
 
   const publishTime = new Date(latestRelease.publish_time)
   const periodFrom = new Date(latestRelease.period_from)
   const periodTo = new Date(latestRelease.period_to)
-  const frequencyName = latestRelease.frequency?.name
+  const frequencyCode = latestRelease.frequency?.code?.toUpperCase()
 
-  if (frequencyName === 'År') {
+  if (frequencyCode === 'Y' || frequencyCode === 'A') {
     return {
       publishTime: addYears(publishTime, 1),
       periodFrom: addYears(periodFrom, 1),
@@ -61,23 +55,31 @@ function getNextRelease(latestRelease: ReleaseListing): SuggestedRelease | undef
     }
   }
 
-  if (frequencyName === 'Kvartal') {
+  if (frequencyCode === 'K') {
     return {
       publishTime: addMonths(publishTime, 3),
       periodFrom: addMonths(periodFrom, 3),
-      periodTo: getLastDayOfMonth(addMonths(periodTo, 3)),
+      periodTo: getLastDayOfMonth(addMonths(periodFrom, 5)),
     }
   }
 
-  if (frequencyName === 'Måned') {
+  if (frequencyCode === 'M') {
     return {
       publishTime: addMonths(publishTime, 1),
       periodFrom: addMonths(periodFrom, 1),
-      periodTo: getLastDayOfMonth(addMonths(periodTo, 1)),
+      periodTo: getLastDayOfMonth(addMonths(periodFrom, 1)),
     }
   }
 
-  if (frequencyName === 'Uke') {
+  if (frequencyCode === 'T') {
+    return {
+      publishTime: addMonths(publishTime, 2),
+      periodFrom: addMonths(periodFrom, 2),
+      periodTo: getLastDayOfMonth(addMonths(periodFrom, 3)),
+    }
+  }
+
+  if (frequencyCode === 'W' || frequencyCode === 'U') {
     return { publishTime: addDays(publishTime, 7), periodFrom: addDays(periodFrom, 7), periodTo: addDays(periodTo, 7) }
   }
 
@@ -94,51 +96,54 @@ function isWeekend(date: Date): boolean {
   return day === 0 || day === 6
 }
 
-async function fetchBlockedDatesForMonth(monthDate: Date): Promise<CalenderDate> {
-  const from = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1)
-  const to = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0)
-  const { data, error } = await client.GET('/calendar', {
-    params: { query: { fromDate: getDateOnlyAsString(from), toDate: getDateOnlyAsString(to) } },
-  })
-
-  return error ? {} : data
+function getEasterSunday(year: number): Date {
+  const a = year % 19
+  const b = Math.floor(year / 100)
+  const c = year % 100
+  const d = Math.floor(b / 4)
+  const e = b % 4
+  const f = Math.floor((b + 8) / 25)
+  const g = Math.floor((b - f + 1) / 3)
+  const h = (19 * a + b - d - g + 15) % 30
+  const i = Math.floor(c / 4)
+  const k = c % 4
+  const l = (32 + 2 * e + 2 * i - h - k) % 7
+  const m = Math.floor((a + 11 * h + 22 * l) / 451)
+  const n = Math.floor((h + l - 7 * m + 114) / 31)
+  const p = ((h + l - 7 * m + 114) % 31) + 1
+  return new Date(Date.UTC(year, n - 1, p))
 }
 
-// Rolls back to the previous working day, matching the old kalenderService.forrigeArbeidsdag behavior.
-// Only fetches an earlier month's blocked dates on demand, once the rollback crosses before its 1st.
-async function rollBackToWorkingDay(date: Date, calendarDates: CalenderDate): Promise<Date> {
-  const result = new Date(date)
-  let knownDates = calendarDates
-  const fetchedMonths = new Set<string>()
+function isPublicHoliday(date: Date): boolean {
+  const year = date.getFullYear()
+  const easterSunday = getEasterSunday(year)
+  const movableHolidays = [-3, -2, 0, 1, 39, 49, 50].map((offset) => addDays(easterSunday, offset))
+  const fixedHolidays = [
+    new Date(Date.UTC(year, 0, 1)),
+    new Date(Date.UTC(year, 4, 1)),
+    new Date(Date.UTC(year, 4, 17)),
+    new Date(Date.UTC(year, 11, 25)),
+    new Date(Date.UTC(year, 11, 26)),
+  ]
 
-  for (let i = 0; i < MAX_ROLLBACK_DAYS; i++) {
-    if (result.getDate() === 1) {
-      const monthKey = `${result.getFullYear()}-${result.getMonth()}`
-      if (!fetchedMonths.has(monthKey)) {
-        fetchedMonths.add(monthKey)
-        const previousMonth = new Date(result.getFullYear(), result.getMonth() - 1, 1)
-        knownDates = { ...knownDates, ...(await fetchBlockedDatesForMonth(previousMonth)) }
-      }
-    }
+  const dateOnlyString = getDateOnlyAsString(date)
+  return [...movableHolidays, ...fixedHolidays].some((holiday) => getDateOnlyAsString(holiday) === dateOnlyString)
+}
 
-    const isBlocked = knownDates[getDateOnlyAsString(result)]?.status === 'BLOCKED'
-    if (!isWeekend(result) && !isBlocked) return result
-    result.setDate(result.getDate() - 1)
+function rollBackToWorkingDay(date: Date): Date {
+  const publishDate = new Date(date)
+  while (isWeekend(publishDate) || isPublicHoliday(publishDate)) {
+    publishDate.setUTCDate(publishDate.getUTCDate() - 1)
   }
-
-  return result
+  return publishDate
 }
 
-/** Suggests the next release's publish date, periodFrom and periodTo based on the latest release. */
-export async function suggestNextRelease(
-  releases: ReleaseListing[],
-  calendarDates: CalenderDate = {}
-): Promise<SuggestedRelease | undefined> {
+export function suggestNextRelease(releases: ReleaseListing[]): SuggestedRelease | undefined {
   const latestRelease = getLatestRelease(releases)
   if (!latestRelease) return undefined
 
   const nextRelease = getNextRelease(latestRelease)
   if (!nextRelease) return undefined
 
-  return { ...nextRelease, publishTime: await rollBackToWorkingDay(nextRelease.publishTime, calendarDates) }
+  return { ...nextRelease, publishTime: rollBackToWorkingDay(nextRelease.publishTime) }
 }
