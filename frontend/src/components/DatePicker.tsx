@@ -3,7 +3,7 @@ import './DatePicker.css'
 import '@navikt/ds-css/dist/global/tokens.css'
 import '@navikt/ds-css/dist/components.css'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { DatePicker as AkselDatePicker } from '@navikt/ds-react/DatePicker'
 import { type CalenderDate, DayStatus } from '@ssbno-statreg/shared'
@@ -82,6 +82,7 @@ export function DatePicker({ showColorCodingExplanation, calendarDatesEmit, apiE
   const [calendarDates, setCalendarDates] = useState<CalenderDate>({})
   const displayedMonth = props.month
   const selectedDate = props.selected
+  const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     async function fetchCalendarDates() {
@@ -105,6 +106,28 @@ export function DatePicker({ showColorCodingExplanation, calendarDatesEmit, apiE
     fetchCalendarDates()
   }, [displayedMonth, calendarDatesEmit, apiErrorEmit])
 
+  // Aksel's DayButton hardcodes its aria-label, so append the day status here instead of via a "labels" prop.
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container || !displayedMonth) return
+
+    const dayButtons = container.querySelectorAll<HTMLButtonElement>('button.rdp-day')
+    dayButtons.forEach((button) => {
+      if (button.getAttribute('aria-hidden') === 'true') return
+
+      const baseLabel = button.dataset.baseAriaLabel ?? button.getAttribute('aria-label')
+      const dayNumber = Number(baseLabel?.match(/(\d+)\s*$/)?.[1])
+      if (!baseLabel || !dayNumber) return
+
+      button.dataset.baseAriaLabel = baseLabel
+      const date = new Date(displayedMonth.getFullYear(), displayedMonth.getMonth(), dayNumber)
+      const status = calendarDates[getDateOnlyAsString(date)]?.status as keyof typeof DayStatus | undefined
+      const statusLabel = DayStatus[status ?? 'NONE']
+
+      button.setAttribute('aria-label', `${baseLabel}, ${statusLabel}`)
+    })
+  }, [calendarDates, displayedMonth])
+
   const full: Date[] = []
   const many: Date[] = []
   const few: Date[] = []
@@ -125,7 +148,7 @@ export function DatePicker({ showColorCodingExplanation, calendarDatesEmit, apiE
   }
 
   return (
-    <div className='datepicker-container'>
+    <div className='datepicker-container' ref={containerRef}>
       <AkselDatePicker.Standalone
         key={selectedDate ? getDateOnlyAsString(selectedDate as Date) : getDateOnlyAsString(displayedMonth)}
         className='datepicker-wrapper'
