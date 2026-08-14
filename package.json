@@ -7,6 +7,7 @@
     "frontend"
   ],
   "scripts": {
+    "preinstall": "npx only-allow pnpm",
     "dev": "concurrently \"npm run dev -w backend\" \"npm run dev -w frontend\"",
     "build": "npm run build --ws && cp -Rf frontend/dist/* backend/dist",
     "start": "npm run start -w backend",
