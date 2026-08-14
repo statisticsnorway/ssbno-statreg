@@ -95,43 +95,40 @@ Before performing the migration, we need to allow the prisma methods deleteMany 
 
     This checks the number of rows and the highest and lowest IDs.
 
-14. (Nais only) Delete the copied JSON files.
-
-15. Fill in missing division codes:
+14. Fill in missing division codes:
 
     ```
     npx tsx ./src/scripts/addDivisionCodeToStatistic.ts
     ```
 
-16. (Optional) Update the approval status field(s) for Releases and Statistics if new statuses should be applied or we get any new status column. No script generated since current migration supports existing data fields. Double check that this still applies before running migration.
+15. (Optional) Update the approval status field(s) for Releases and Statistics if new statuses should be applied or we get any new status column. No script generated since current migration supports existing data fields. Double check that this still applies before running migration.
 
-17. Fill the new ResponsiblePerson table, deriving data from the existing Contact relation:
+16. Fill the new ResponsiblePerson table, deriving data from the existing Contact relation:
 
     ```
     npx tsx ./src/scripts/addResponsiblePersonFromOldContact.ts
     ```
 
-18. Set consistent class_names in audit_log table:
+17. Set consistent class_names in audit_log table:
 
     ```
     npx tsx ./src/scripts/rewriteAuditLogClassNames.ts
     ```
 
-19. Set consistent event_names in audit_log table:
+18. Set consistent event_names in audit_log table:
 
     ```
     npx tsx ./src/scripts/rewriteAuditLogEventNames.ts
     ```
 
-20. Drop legacy tables that are no longer needed e.g. Division and Contacts. Drop assosiated columns with dropped tables as well. This can be done in a PR with an adjustment of Prisma schema a while after data migration.
+19. Drop legacy tables that are no longer needed e.g. Division and Contacts. Drop assosiated columns with dropped tables as well. This can be done in a PR with an adjustment of Prisma schema a while after data migration.
 
 **👌Nais cleanup:**
 
-19. Remove the temporary JSON files:
+20. Remove the temporary JSON files:
 
 ```sh
 rm -r /tmp/STATREG_TABLES_JSON
-rm /tmp/tableStatsExample.json
 ```
 
-20. Revert Nais manifest and `backend/src/lib/prisma.ts`. Remove the installed packages from `backend/package.json`. Open and merge a PR to revert the changes in Nais.
+21. Revert Nais manifest and `backend/src/lib/prisma.ts`. Remove the installed packages from `backend/package.json`. Open and merge a PR to revert the changes in Nais.
