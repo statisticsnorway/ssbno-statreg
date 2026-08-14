@@ -698,7 +698,7 @@ describe('statisticService', () => {
 
     test('rejects with error message any of the required fields are missing', async () => {
       await expect(() => createStatistic(prismaMock, 'kpi', { status: { code: 'A' } }, now)).rejects.toMatchObject({
-        statregError: 'Missing required field(s): name, name_en, variants, contacts, division, main_language',
+        statregError: 'Missing required field(s): name, name_en, variants, contacts, division',
       })
       expect(prismaMock.statistic.create).toHaveBeenCalledTimes(0)
     })

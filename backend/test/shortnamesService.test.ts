@@ -1,5 +1,5 @@
 import { vi, describe, test, expect, beforeEach } from 'vitest'
-import { getShortnames, parseShortname, createShortname } from '@/services/shortnamesService'
+import { getShortnames, getShortname, parseShortname, createShortname } from '@/services/shortnamesService'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let prismaMock: any
@@ -9,6 +9,7 @@ describe('shortnamesService ', async () => {
     prismaMock = {
       shortname: {
         findMany: vi.fn(() => Promise.resolve([{ name: 'kpi', statistic: { name: 'Konsumprisindeksen' } }])),
+        findFirst: vi.fn(() => Promise.resolve({ name: 'kpi', statistic: { name: 'Konsumprisindeksen' } })),
       },
     }
   })
@@ -18,6 +19,25 @@ describe('shortnamesService ', async () => {
       const result = await getShortnames(prismaMock)
 
       expect(result).toStrictEqual([{ shortname: 'kpi', statistic_name: 'Konsumprisindeksen' }])
+    })
+  })
+
+  describe('getShortname ', () => {
+    test('returns mocked data', async () => {
+      const result = await getShortname(prismaMock, 'kpi')
+
+      expect(result).toStrictEqual({ shortname: 'kpi', statistic_name: 'Konsumprisindeksen' })
+    })
+
+    test('throws error when shortname is not found', async () => {
+      prismaMock.shortname.findFirst = vi.fn(async () => {
+        throw { status: 404, statregError: "Shortname 'BAD' not found." }
+      })
+
+      await expect(() => getShortname(prismaMock, 'BAD')).rejects.toMatchObject({
+        status: 404,
+        statregError: "Shortname 'BAD' not found.",
+      })
     })
   })
 
