@@ -157,7 +157,7 @@ describe('statistics controller', () => {
     ])
   })
 
-  test('can update an existing statistic', async () => {
+  test('can update an statistic', async () => {
     const newShortname = 'update_test'
 
     // POST /shortnames
