@@ -3,10 +3,10 @@
   "private": true,
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "dev": "concurrently \"npm run dev -w backend\" \"npm run dev -w frontend\"",
-    "build": "npm run build --ws && cp -Rf frontend/dist/* backend/dist",
-    "start": "npm run start -w backend",
-    "db:deploy": "npm run db:deploy -w backend",
+    "dev": "concurrently \"pnpm --filter 'backend' run dev\" \"pnpm --filter 'frontend' run dev\"",
+    "build": "pnpm -r run build && cp -Rf frontend/dist/* backend/dist",
+    "start": "pnpm --filter 'backend' run start",
+    "db:deploy": "pnpm --filter 'backend' run db:deploy",
     "check": "tsc --noEmit -p backend && tsc -b frontend",
     "test": "vitest --exclude '**/integration/**'",
     "ci-test": "vitest run  --exclude '**/integration/**'",
@@ -17,9 +17,9 @@
     "dev:auth": "docker-compose --env-file ./backend/.env up --build",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
-    "seed": "npm run seed -w backend",
-    "generate": "npm run generate -w backend",
-    "generate:api-types": "openapi-typescript ./shared/openapi/openapi.yaml | prettier --parser typescript > ./shared/src/api-types.ts"
+    "seed": "pnpm --filter 'backend' run seed",
+    "generate": "pnpm --filter 'backend' run generate",
+    "generate:api-types": "openapi-typescript ./shared/openapi/openapi.yaml | pnpm prettier --parser typescript > ./shared/src/api-types.ts"
   },
   "overrides": {
     "valibot": "1.2.0",
@@ -28,7 +28,7 @@
     "qs": "6.14.1",
     "lodash": "4.17.23",
     "vite": {
-      "rollup": "npm:@rollup/wasm-node"
+      "rollup": "pnpm:@rollup/wasm-node"
     }
   },
   "devDependencies": {
