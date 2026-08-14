@@ -149,7 +149,6 @@ export function DatePicker({ showColorCodingExplanation, calendarDatesEmit, apiE
   return (
     <div className='datepicker-container' ref={containerRef}>
       <AkselDatePicker.Standalone
-        // Only remount on month changes - keying on selectedDate too would remount (and drop focus) on every date selection.
         key={getDateOnlyAsString(displayedMonth)}
         className='datepicker-wrapper'
         // @ts-expect-error: Allow custom "modifiers" prop for color coding
