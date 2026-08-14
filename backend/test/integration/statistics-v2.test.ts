@@ -1,5 +1,5 @@
 import { describe, expect, test, vi } from 'vitest'
-import { Contact, ShortnameListing, StatisticCreate, StatisticListingResponse } from '@ssbno-statreg/shared'
+import { Contact, StatisticCreate, StatisticListingResponse } from '@ssbno-statreg/shared'
 import { createApp } from '@/app'
 import request from 'supertest'
 
