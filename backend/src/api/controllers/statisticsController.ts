@@ -6,10 +6,12 @@ import {
   getFilteredStatistics,
   updateStatisticContacts,
 } from '@/services/statisticsService'
+import { getStatisticVersions } from '@/services/versionService'
 import { requireAdminAuthorization, skipAuth } from '@/../plugins/authMiddleware'
 import { handleErrors } from '@/lib/prismaErrors'
 import { prisma } from '@/lib/prisma'
 import { ensureString, ensureStringArray } from '@/lib/utils'
+import { StatregError } from '@/lib/statregError'
 
 export default function statisticsController(router: Router) {
   router.get('/statistics/:shortname', skipAuth, async (req, res) => {
@@ -60,10 +62,19 @@ export default function statisticsController(router: Router) {
     try {
       const input = req.body
       if (!Array.isArray(input) || !input.every((item) => typeof item === 'string')) {
-        throw { status: 400, statregError: 'principalNames must be an array of strings' }
+        throw new StatregError('principalNames must be an array of strings', 400)
       }
       const result = await updateStatisticContacts(ensureString(req.params.shortname), input, prisma)
       res.json(result)
+    } catch (error) {
+      return handleErrors(error, res)
+    }
+  })
+
+  router.get('/statistics/:shortname/versions', async (req, res) => {
+    try {
+      const data = await getStatisticVersions(ensureString(req.params.shortname), prisma)
+      res.json(data)
     } catch (error) {
       return handleErrors(error, res)
     }

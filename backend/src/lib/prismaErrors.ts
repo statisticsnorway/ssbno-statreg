@@ -1,4 +1,5 @@
 import { Prisma } from '@/generated/prisma/client'
+import { StatregError } from '@/lib/statregError'
 import type { Response } from 'express'
 
 // Please refer to https://www.prisma.io/docs/orm/reference/error-reference#error-codes for error codes in Prisma
@@ -24,9 +25,8 @@ function getLastLineFromErrorMessage(message: string): string {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function handleErrors(error: any, res: Response) {
-  if (error?.statregError) {
-    const status = error.status ?? 400
-    return res.status(status).json({ message: error.statregError })
+  if (error instanceof StatregError) {
+    return res.status(error.status).json({ message: error.statregError })
   }
 
   const knownErrorMessage = checkForKnownPrismaErrors(error)

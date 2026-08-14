@@ -26,7 +26,6 @@
     "generate:api-types": "openapi-typescript ./shared/openapi/openapi.yaml | prettier --parser typescript > ./shared/src/api-types.ts"
   },
   "overrides": {
-    "hono": "4.12.26",
     "valibot": "1.2.0",
     "body-parser": "2.2.1",
     "fastify": "5.8.5",
@@ -40,8 +39,8 @@
     "@eslint-react/eslint-plugin": "5.17.3",
     "@eslint/js": "10.0.1",
     "@types/node": "24.13.3",
-    "@vitejs/plugin-react": "6.0.3",
-    "concurrently": "10.0.3",
+    "@vitejs/plugin-react": "6.0.4",
+    "concurrently": "10.0.4",
     "eslint": "10.7.0",
     "openapi-typescript": "7.13.0",
     "typescript": "5.9.3",

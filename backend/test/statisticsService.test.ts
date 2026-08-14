@@ -5,8 +5,10 @@ import { statisticsAsserts } from '@/lib/asserts'
 import {
   getFilteredStatistics,
   getStatisticByShortname,
+  parseVariantsInput,
   parseStatisticVariants,
   mapStatisticDetails,
+  parseCreateStatisticStatus,
   parseCreateStatisticInput,
   parseUpdateStatisticInput,
   updateStatistic,
@@ -81,6 +83,9 @@ describe('statisticService', () => {
         update: vi.fn(() => Promise.resolve(updateStatisticsResult)),
         create: vi.fn(() => Promise.resolve(statisticsResult)),
         count: vi.fn(() => Promise.resolve(statisticsResult ? (statisticsResult as any).length : 0)),
+      },
+      frequency: {
+        findUnique: vi.fn(() => Promise.resolve({ code: 'M', name: 'Måned' })),
       },
       shortname: {
         findUnique: vi.fn(() => Promise.resolve({ name: 'kpi', id: 1 })),
@@ -355,7 +360,7 @@ describe('statisticService', () => {
     test('throws Error when shortname is not found', async () => {
       setStatisticsResult(null)
       await expect(() => getStatisticByShortname('', prismaMock)).rejects.toMatchObject({
-        statregError: 'Shortname not found',
+        statregError: `Statistic with shortname '' not found.`,
       })
     })
   })
@@ -500,7 +505,7 @@ describe('statisticService', () => {
 
       await expect(() => updateStatisticContacts('helse', ['abc@ssb.no'], prismaMock)).rejects.toMatchObject({
         status: 404,
-        statregError: "Shortname 'helse' not found",
+        statregError: "Shortname 'helse' not found.",
       })
       expect(prismaMock.responsiblePerson.upsert).toHaveBeenCalledTimes(0)
       expect(prismaMock.statistic.update).toHaveBeenCalledTimes(0)
@@ -510,7 +515,7 @@ describe('statisticService', () => {
       prismaMock.statistic.findFirst.mockResolvedValue({ id: 1, status: 'A' })
 
       await expect(() => updateStatisticContacts('helse', [], prismaMock)).rejects.toMatchObject({
-        statregError: 'An active statistic needs at least one contact',
+        statregError: 'An active statistic needs at least one contact.',
       })
       expect(prismaMock.responsiblePerson.upsert).toHaveBeenCalledTimes(0)
       expect(prismaMock.statistic.update).toHaveBeenCalledTimes(0)
@@ -523,7 +528,7 @@ describe('statisticService', () => {
       now = new Date('2026-03-23T08:00:00Z')
     })
 
-    test('creates a new statistic when input data is valid', async () => {
+    test('creates an upcoming statistic when input data is valid', async () => {
       setStatisticsResult({
         ...mockedStatisticCreatedPrismaResult,
         id: 1,
@@ -543,10 +548,25 @@ describe('statisticService', () => {
           first_released_at: '2024-04-01',
           main_language: 'nb',
           status: { code: 'K' },
+          variants: [
+            {
+              frequency: {
+                code: 'M',
+              },
+              revision: {
+                code: 'I',
+              },
+            },
+          ],
         },
         now
       )
 
+      expect(prismaMock.frequency.findUnique).toHaveBeenCalledWith({
+        where: {
+          code: 'M',
+        },
+      })
       expect(prismaMock.statistic.create).toHaveBeenCalledExactlyOnceWith({
         data: {
           name: 'Konsumprisindeksen',
@@ -569,6 +589,101 @@ describe('statisticService', () => {
               name: 'kpi',
             },
           },
+          variants: {
+            create: [
+              expect.objectContaining({
+                revision: 'I',
+                frequency: {
+                  connect: {
+                    code: 'M',
+                  },
+                },
+              }),
+            ],
+          },
+        },
+        include: StatisticsDetailedIncludes,
+      })
+    })
+
+    test('creates an active statistic when input data is valid', async () => {
+      setStatisticsResult({
+        ...mockedStatisticCreatedPrismaResult,
+        id: 1,
+        version: 1,
+        desk_appoval_status: ApprovalStatus.PENDING,
+        status: 'A',
+        statistic_region_levels: [],
+      })
+      prismaMock.responsiblePerson.upsert.mockResolvedValueOnce({ id: 2 })
+
+      await createStatistic(
+        prismaMock,
+        'kpi',
+        {
+          name: 'Konsumprisindeksen',
+          name_en: 'Consumer price index',
+          division: '104',
+          first_released_at: '2024-04-01',
+          main_language: 'nb',
+          status: { code: 'A' },
+          contacts: ['bcd@ssb.no'],
+          variants: [
+            {
+              frequency: {
+                code: 'M',
+              },
+              revision: {
+                code: 'I',
+              },
+            },
+          ],
+        },
+        now
+      )
+
+      expect(prismaMock.frequency.findUnique).toHaveBeenCalledWith({
+        where: {
+          code: 'M',
+        },
+      })
+      expect(prismaMock.statistic.create).toHaveBeenCalledExactlyOnceWith({
+        data: {
+          name: 'Konsumprisindeksen',
+          priority: 1,
+          name_en: 'Consumer price index',
+          yearly_reporting: false,
+          status: 'A',
+          division_code: '104',
+          first_release: new Date('2024-04-01T00:00:00.000Z'),
+          comment: 'Create statistic with shortname: kpi',
+          language: 'nb',
+          date_created: now,
+          last_updated: now,
+          desk_appoval_status: ApprovalStatus.ACCEPTED,
+          statistic_region_levels: {
+            create: [],
+          },
+          shortname: {
+            connect: {
+              name: 'kpi',
+            },
+          },
+          responsiblePersons: {
+            connect: [{ id: 2 }],
+          },
+          variants: {
+            create: [
+              expect.objectContaining({
+                revision: 'I',
+                frequency: {
+                  connect: {
+                    code: 'M',
+                  },
+                },
+              }),
+            ],
+          },
         },
         include: StatisticsDetailedIncludes,
       })
@@ -583,9 +698,127 @@ describe('statisticService', () => {
 
     test('rejects with error message any of the required fields are missing', async () => {
       await expect(() => createStatistic(prismaMock, 'kpi', { status: { code: 'A' } }, now)).rejects.toMatchObject({
-        statregError: 'Missing required field(s): name, name_en, variants, contacts, division, main_language',
+        statregError: 'Missing required field(s): name, name_en, variants, contacts, division',
       })
       expect(prismaMock.statistic.create).toHaveBeenCalledTimes(0)
+    })
+  })
+
+  describe('parseVariantsInput ', () => {
+    test('returns undefined when variants are not provided for upcoming statistic', async () => {
+      await expect(parseVariantsInput(undefined, 'K', prismaMock)).resolves.toBeUndefined()
+    })
+
+    test('returns parsed variants and revision', async () => {
+      const result = await parseVariantsInput(
+        [
+          {
+            frequency: {
+              code: 'M',
+            },
+            revision: {
+              code: 'I',
+            },
+            level_of_detail: {
+              name: 'Kommentar',
+              name_en: 'Comment',
+            },
+          },
+        ],
+        'A',
+        prismaMock
+      )
+
+      expect(prismaMock.frequency.findUnique).toHaveBeenCalledWith({
+        where: {
+          code: 'M',
+        },
+      })
+      expect(result).toStrictEqual([
+        {
+          frequency: {
+            code: 'M',
+          },
+          revision: {
+            code: 'I',
+          },
+          level_of_detail: {
+            name: 'Kommentar',
+            name_en: 'Comment',
+          },
+        },
+      ])
+    })
+
+    test('throws when revision not defined', async () => {
+      await expect(
+        parseVariantsInput(
+          [
+            {
+              frequency: {
+                code: 'M',
+              },
+            },
+          ],
+          'K',
+          prismaMock
+        )
+      ).rejects.toMatchObject({
+        statregError: "Field 'revision' must be one of these: I, B, E, F, R, IG.",
+      })
+    })
+
+    test('throws when revision code is invalid', async () => {
+      await expect(
+        parseVariantsInput(
+          [
+            {
+              frequency: {
+                code: 'M',
+              },
+              revision: {
+                code: 'BAD',
+              },
+            },
+          ],
+          'K',
+          prismaMock
+        )
+      ).rejects.toMatchObject({
+        statregError: "Field 'revision' must be one of these: I, B, E, F, R, IG.",
+      })
+    })
+
+    test('throws when frequency code does not exist', async () => {
+      statisticsAsserts.assertFrequencyExists = vi.fn(async () => {
+        throw { status: 404, statregError: "Frequency 'BAD' not found" }
+      }) as any
+
+      await expect(() =>
+        parseVariantsInput(
+          [
+            {
+              frequency: {
+                code: 'BAD',
+              },
+              revision: {
+                code: 'I',
+              },
+            },
+          ],
+          'K',
+          prismaMock
+        )
+      ).rejects.toMatchObject({
+        status: 404,
+        statregError: "Frequency 'BAD' not found",
+      })
+    })
+
+    test('throws error when variant is not provided for active statistic', async () => {
+      await expect(parseVariantsInput(undefined, 'A', prismaMock)).rejects.toMatchObject({
+        statregError: 'An active statistic needs at least one variant.',
+      })
     })
   })
 
@@ -747,37 +980,61 @@ describe('statisticService', () => {
       expect(result).toStrictEqual(expectedResult)
     })
 
+    test('returns validated statistic input for approved status when english name is provided', () => {
+      input.status = { code: 'A' }
+      input.name_en = 'Health and health services'
+      input.main_language = 'nn'
+      input.variants = []
+      input.contacts = []
+
+      const result = parseCreateStatisticInput(input, 'A')
+
+      expect(result).toStrictEqual({
+        ...expectedResult,
+        name_en: 'Health and health services',
+        main_language: 'nn',
+      })
+    })
+
     test('throws error when name is an empty string', () => {
       input.name = ''
 
-      expect(() => parseCreateStatisticInput(input, 'K')).toThrow({
-        statregError: "Field 'name' must be a non-empty string.",
-      })
+      expect(() => parseCreateStatisticInput(input, 'K')).toThrow(
+        expect.objectContaining({
+          statregError: "Field 'name' must be a non-empty string.",
+        })
+      )
     })
 
     test('throws error when division is not a number', () => {
       input.division = 'division-a'
 
-      expect(() => parseCreateStatisticInput(input, 'K')).toThrow({
-        statregError: "Field 'division' must be a number.",
-      })
+      expect(() => parseCreateStatisticInput(input, 'K')).toThrow(
+        expect.objectContaining({
+          statregError: "Field 'division' must be a number.",
+        })
+      )
     })
 
     test('throws error when division lookup does not find a match', () => {
       input.division = '106'
 
-      expect(() => parseCreateStatisticInput(input, 'K')).toThrow({
-        statregError: "Field 'division' does not correspond to an existing division.",
-      })
+      expect(() => parseCreateStatisticInput(input, 'K')).toThrow(
+        expect.objectContaining({
+          statregError: "Field 'division' does not correspond to an existing division.",
+        })
+      )
     })
 
     test("throws error main_language is neither 'nb' or 'nn'", () => {
       input.main_language = 'en'
       expectedResult.main_language = 'nb'
 
-      expect(() => parseCreateStatisticInput(input, 'K')).toThrow({
-        statregError: "Field 'main_language' must be either 'nb' or 'nn'.",
-      })
+      expect(() => parseCreateStatisticInput(input, 'K')).toThrow(
+        expect.objectContaining({
+          statregError: "Field 'main_language' must be either 'nb' or 'nn'.",
+        })
+      )
     })
 
     test('falls back to empty string when comment is missing', () => {
@@ -787,6 +1044,46 @@ describe('statisticService', () => {
       const result = parseCreateStatisticInput(input, 'K')
 
       expect(result).toStrictEqual(expectedResult)
+    })
+
+    test('throws error when approved status has empty english name', () => {
+      input.status = { code: 'A' }
+      input.main_language = 'nb'
+      input.name_en = ''
+      input.variants = []
+      input.contacts = []
+
+      expect(() => parseCreateStatisticInput(input, 'A')).toThrow(
+        expect.objectContaining({
+          statregError: "Field 'name_en' must be a non-empty string.",
+        })
+      )
+    })
+
+    describe('parseCreateStatisticStatus', () => {
+      test('returns K when status code is K', () => {
+        expect(parseCreateStatisticStatus({ status: { code: 'K' } } as any)).toBe('K')
+      })
+
+      test('returns A when status code is A', () => {
+        expect(parseCreateStatisticStatus({ status: { code: 'A' } } as any)).toBe('A')
+      })
+
+      test('throws when status code is missing', () => {
+        expect(() => parseCreateStatisticStatus(undefined)).toThrow(
+          expect.objectContaining({
+            statregError: "Field 'status' must be one of these: K, A.",
+          })
+        )
+      })
+
+      test('throws when status code is not creatable', () => {
+        expect(() => parseCreateStatisticStatus({ status: { code: 'IA' } } as any)).toThrow(
+          expect.objectContaining({
+            statregError: "Field 'status' must be one of these: K, A.",
+          })
+        )
+      })
     })
 
     describe('parseUpdateStatisticInput', async () => {
@@ -845,33 +1142,41 @@ describe('statisticService', () => {
       test('throws error when comment is an empty string', () => {
         input.comment = ''
 
-        expect(() => parseUpdateStatisticInput(input, requiredUpdateFields)).toThrow({
-          statregError: "Field 'comment' must be a non-empty string.",
-        })
+        expect(() => parseUpdateStatisticInput(input, requiredUpdateFields)).toThrow(
+          expect.objectContaining({
+            statregError: "Field 'comment' must be a non-empty string.",
+          })
+        )
       })
 
       test('throws error when yearly_reporting is not a valid boolean', () => {
         input.yearly_reporting = 'not-a-boolean'
 
-        expect(() => parseUpdateStatisticInput(input, requiredUpdateFields)).toThrow({
-          statregError: "Field 'yearly_reporting' must be a boolean.",
-        })
+        expect(() => parseUpdateStatisticInput(input, requiredUpdateFields)).toThrow(
+          expect.objectContaining({
+            statregError: "Field 'yearly_reporting' must be a boolean.",
+          })
+        )
       })
 
       test('throws error when relation id is an invalid format', () => {
         input.relation = 'abc'
 
-        expect(() => parseUpdateStatisticInput(input, requiredUpdateFields)).toThrow({
-          statregError: 'Invalid relation id format',
-        })
+        expect(() => parseUpdateStatisticInput(input, requiredUpdateFields)).toThrow(
+          expect.objectContaining({
+            statregError: 'Invalid relation id format',
+          })
+        )
       })
 
       test('throws error when status is not valid value', () => {
         input.status = 'ABC'
 
-        expect(() => parseUpdateStatisticInput(input, requiredUpdateFields)).toThrow({
-          statregError: "Field 'status' must be one of these: K, A, IA, UT, SA, SP.",
-        })
+        expect(() => parseUpdateStatisticInput(input, requiredUpdateFields)).toThrow(
+          expect.objectContaining({
+            statregError: "Field 'status' must be one of these: K, A, IA, UT, SA, SP.",
+          })
+        )
       })
     })
   })
@@ -882,21 +1187,29 @@ describe('statisticService', () => {
     })
 
     test('throws when division is undefined', () => {
-      expect(() => parseDivision(undefined)).toThrow({ statregError: "Field 'division' must be a number." })
+      expect(() => parseDivision(undefined)).toThrow(
+        expect.objectContaining({ statregError: "Field 'division' must be a number." })
+      )
     })
 
     test('throws when division is null', () => {
-      expect(() => parseDivision(null)).toThrow({ statregError: "Field 'division' must be a number." })
+      expect(() => parseDivision(null)).toThrow(
+        expect.objectContaining({ statregError: "Field 'division' must be a number." })
+      )
     })
 
     test('throws when division is not a number', () => {
-      expect(() => parseDivision('abc')).toThrow({ statregError: "Field 'division' must be a number." })
+      expect(() => parseDivision('abc')).toThrow(
+        expect.objectContaining({ statregError: "Field 'division' must be a number." })
+      )
     })
 
     test('throws when division does not correspond to an existing division', () => {
-      expect(() => parseDivision('999')).toThrow({
-        statregError: "Field 'division' does not correspond to an existing division.",
-      })
+      expect(() => parseDivision('999')).toThrow(
+        expect.objectContaining({
+          statregError: "Field 'division' does not correspond to an existing division.",
+        })
+      )
     })
   })
 
@@ -908,19 +1221,19 @@ describe('statisticService', () => {
     })
 
     test('throws when statusCode is undefined', () => {
-      expect(() => parseStatusCode(undefined)).toThrow({ statregError: expectedError })
+      expect(() => parseStatusCode(undefined)).toThrow(expect.objectContaining({ statregError: expectedError }))
     })
 
     test('throws when statusCode is empty string', () => {
-      expect(() => parseStatusCode('')).toThrow({ statregError: expectedError })
+      expect(() => parseStatusCode('')).toThrow(expect.objectContaining({ statregError: expectedError }))
     })
 
     test('throws when statusCode is not a valid status', () => {
-      expect(() => parseStatusCode('INVALID_STATUS')).toThrow({ statregError: expectedError })
+      expect(() => parseStatusCode('INVALID_STATUS')).toThrow(expect.objectContaining({ statregError: expectedError }))
     })
 
     test('is case-sensitive', () => {
-      expect(() => parseStatusCode('k')).toThrow({ statregError: expectedError })
+      expect(() => parseStatusCode('k')).toThrow(expect.objectContaining({ statregError: expectedError }))
     })
   })
 
@@ -942,7 +1255,9 @@ describe('statisticService', () => {
     })
 
     test('throws when relationId is not a valid id', () => {
-      expect(() => parseRelation('abc')).toThrow({ statregError: 'Invalid relation id format' })
+      expect(() => parseRelation('abc')).toThrow(
+        expect.objectContaining({ statregError: 'Invalid relation id format' })
+      )
     })
   })
 })

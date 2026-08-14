@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useParams, Link as ReactRouterLink } from 'react-router'
 import {
   Heading,
@@ -28,7 +28,7 @@ import {
 } from '@ssbno-statreg/shared'
 
 import './ShowStatistic.css'
-import { formatContact, formatPublishTime, formatRevisionName, formatVariant } from '../lib/utils'
+import { formatContact, formatDateTime, formatRevisionName, formatVariant } from '../lib/utils'
 import { ApprovalStatusBadge } from '../components/ApprovalStatus'
 import { useAuth } from '../context/AuthContext'
 import { ErrorAlert } from '../components/ErrorAlert'
@@ -97,7 +97,7 @@ function SimpleReleaseRow({ release }: ReleaseRowProps) {
       }}
       className='selectable-row'
     >
-      <Table.Cell>{formatPublishTime(release.publish_time)}</Table.Cell>
+      <Table.Cell>{formatDateTime(release.publish_time)}</Table.Cell>
       <Table.Cell>
         {release.frequency?.name ?? ''}, {formatRevisionName(release.revision?.code).toLocaleLowerCase()}
       </Table.Cell>
@@ -118,6 +118,21 @@ export default function ShowStatistic() {
   const { shortname } = useParams()
   const { auth } = useAuth()
   const [apiError, setApiError] = useState<string[]>([])
+  const editContactsButtonRef = useRef<HTMLButtonElement>(null)
+  const returnFocusRef = useRef(false)
+
+  // The edit button only mounts once isEditingContacts becomes false, so focus it after that render commits.
+  useEffect(() => {
+    if (!isEditingContacts && returnFocusRef.current) {
+      returnFocusRef.current = false
+      editContactsButtonRef.current?.focus()
+    }
+  }, [isEditingContacts])
+
+  function closeContactsEditing() {
+    returnFocusRef.current = true
+    setIsEditingContacts(false)
+  }
 
   useEffect(() => {
     async function fetchStatistic() {
@@ -185,7 +200,7 @@ export default function ShowStatistic() {
     }
 
     setStatistic((prev) => ({ ...prev, contacts: data }))
-    setIsEditingContacts(false)
+    closeContactsEditing()
   }
 
   const statusCode = statistic.status?.code as keyof typeof StatisticStatus
@@ -272,6 +287,7 @@ export default function ShowStatistic() {
           <Heading data-size='xs'>Kontaktpersoner</Heading>
           {!auth?.isAdmin && !isEditingContacts && (
             <Button
+              ref={editContactsButtonRef}
               variant='tertiary'
               data-size='sm'
               aria-label='Rediger kontakter'
@@ -298,11 +314,14 @@ export default function ShowStatistic() {
                 saveContacts()
               }}
             >
-              <Field id='contact-selection'>
+              <Field>
                 <ContactSelection
+                  id='contact-selection'
+                  ariaInvalid={contactValidationError && selectedContacts.length === 0}
                   contacts={allContacts}
                   selected={selectedContacts}
                   setSelected={setSelectedContacts}
+                  autoFocus
                 />
                 {contactValidationError && selectedContacts.length === 0 && (
                   <ValidationMessage>Legg til minst én kontakt</ValidationMessage>
@@ -322,7 +341,7 @@ export default function ShowStatistic() {
               )}
               <div className='show-statistic-contacts-button-wrapper'>
                 <Button type='submit'>Lagre</Button>
-                <Button variant='tertiary' onClick={() => setIsEditingContacts(false)}>
+                <Button variant='tertiary' type='button' onClick={closeContactsEditing}>
                   Avbryt
                 </Button>
               </div>
@@ -362,7 +381,9 @@ export default function ShowStatistic() {
       <div>
         <Heading data-size='xs'>Endringer</Heading>
         <Paragraph>
-          <Link href='#'>Se versjonshistorikken til statistikken</Link>
+          <Link href={`/statistikkregisteret/statistikk/${shortname}/versjoner`}>
+            Se versjonshistorikken til statistikken
+          </Link>
         </Paragraph>
       </div>
 

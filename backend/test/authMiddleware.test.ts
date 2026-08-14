@@ -15,7 +15,7 @@ describe('authMiddleWare', () => {
 
       const response = unauthorized(httpMocks.createResponse(), 'You are unautorized')
       expect(response.statusCode).toBe(401)
-      expect((response as any)._getJSONData().error).toBe('You are unautorized')
+      expect((response as any)._getJSONData().message).toBe('You are unautorized')
       expect((response as any)._isEndCalled()).toBeTruthy()
     })
   })
@@ -26,7 +26,7 @@ describe('authMiddleWare', () => {
 
       const response = forbidden(httpMocks.createResponse(), 'You have no access')
       expect(response.statusCode).toBe(403)
-      expect((response as any)._getJSONData().error).toBe('You have no access')
+      expect((response as any)._getJSONData().message).toBe('You have no access')
       expect((response as any)._isEndCalled()).toBeTruthy()
     })
 
@@ -233,7 +233,7 @@ describe('authMiddleWare', () => {
         await handler(req, res, next as any)
 
         expect(res.statusCode).toBe(401)
-        expect(res._getJSONData().error).toBe('Not authenticated')
+        expect(res._getJSONData().message).toBe('Not authenticated')
         expect(next).toHaveBeenCalledTimes(0)
       })
 
@@ -249,7 +249,7 @@ describe('authMiddleWare', () => {
         await handler(req, res, next as any)
 
         expect(res.statusCode).toBe(403)
-        expect(res._getJSONData().error).toBe('Missing authorization groups')
+        expect(res._getJSONData().message).toBe('Missing authorization groups')
         expect(next).toHaveBeenCalledTimes(0)
       })
 
@@ -272,7 +272,7 @@ describe('authMiddleWare', () => {
         await handler(req, res, next as any)
 
         expect(res.statusCode).toBe(403)
-        expect(res._getJSONData().error).toBe('Insufficient access')
+        expect(res._getJSONData().message).toBe('Insufficient access')
         expect(next).toHaveBeenCalledTimes(0)
       })
 
@@ -312,7 +312,7 @@ describe('authMiddleWare', () => {
         await handler(req, res, next)
 
         expect(res.statusCode).toBe(401)
-        expect(res._getJSONData().error).toBe('Missing Bearer token')
+        expect(res._getJSONData().message).toBe('Missing Bearer token')
       })
     })
   })

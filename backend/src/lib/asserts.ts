@@ -1,7 +1,9 @@
 import { CalendarDatePrisma } from '@/services/calendarService'
 import { ReleasePrisma } from '@/services/releasesService'
 import { StatisticPrisma } from '@/services/statisticsService'
+import { FrequencyPrisma } from '@/services/frequenciesService'
 import { parseDateOnly } from '@/lib/utils'
+import { StatregError } from '@/lib/statregError'
 
 export async function assertStatisticExists(shortname: string, prisma: ReleasePrisma | StatisticPrisma) {
   const exists = await prisma.statistic.findFirst({
@@ -10,7 +12,7 @@ export async function assertStatisticExists(shortname: string, prisma: ReleasePr
   })
 
   if (!exists) {
-    throw { status: 404, statregError: `Statistic '${shortname}' not found` }
+    throw new StatregError(`Statistic '${shortname}' not found`, 404)
   }
 }
 
@@ -21,7 +23,7 @@ export async function assertVariantExists(variantId: number, prisma: ReleasePris
   })
 
   if (!exists) {
-    throw { status: 404, statregError: `Variant '${variantId}' not found` }
+    throw new StatregError(`Variant '${variantId}' not found`, 404)
   }
 }
 
@@ -39,10 +41,7 @@ export async function assertVariantMatchesShortname(variantId: number, shortname
   })
 
   if (!variant) {
-    throw {
-      status: 404,
-      statregError: `Variant does not belong to statistic '${shortname}'`,
-    }
+    throw new StatregError(`Variant does not belong to statistic '${shortname}'`, 404)
   }
 }
 
@@ -54,7 +53,7 @@ export async function assertShortnameExists(shortname: string, prisma: Statistic
   })
 
   if (!foundShortname) {
-    throw { status: 404, statregError: `Shortname '${shortname}' does not exist` }
+    throw new StatregError(`Shortname '${shortname}' does not exist`, 404)
   }
 
   return true
@@ -77,10 +76,7 @@ export async function assertFilteredShortnamesExist(
   const missingShortnames = shortname.filter((name) => !foundShortnames.includes(name))
 
   if (missingShortnames.length) {
-    throw {
-      status: 404,
-      statregError: `Shortname(s) not found: ${missingShortnames.join(', ')}`,
-    }
+    throw new StatregError(`Shortname(s) not found: ${missingShortnames.join(', ')}`, 404)
   }
 
   return true
@@ -98,7 +94,7 @@ export async function assertShortnameExistsAndIsAvailable(
   })
 
   if (!foundShortname) {
-    throw { status: 400, statregError: `Shortname '${shortname}' is already in use` }
+    throw new StatregError(`Shortname '${shortname}' is already in use`, 400)
   }
 
   return !!foundShortname
@@ -112,15 +108,42 @@ export async function assertDayNotManuallyBlocked(prisma: CalendarDatePrisma, da
   return !manuallyBlockedDay
 }
 
+function addThreeMonths(check: Date): Date {
+  const date = new Date(check)
+  const inThreeMonths = new Date(date.setMonth(date.getMonth() + 3))
+  return inThreeMonths
+}
+
+export function assertReleaseDateIsMoreThanThreeMonthsAway(candiDate: Date): boolean {
+  const now = new Date()
+  return candiDate > addThreeMonths(now)
+}
+
+export async function assertFrequencyExists(frequencyCode: string, prisma: FrequencyPrisma): Promise<boolean> {
+  const foundFrequency = await prisma.frequency.findUnique({
+    where: {
+      code: frequencyCode,
+    },
+  })
+
+  if (!foundFrequency) {
+    throw new StatregError(`Frequency '${frequencyCode}' not found`, 404)
+  }
+
+  return true
+}
+
 export const releaseAsserts = {
   assertFilteredShortnamesExist,
   assertStatisticExists,
   assertVariantExists,
   assertVariantMatchesShortname,
+  assertReleaseDateIsMoreThanThreeMonthsAway,
 }
 
 export const statisticsAsserts = {
   assertShortnameExists,
   assertShortnameExistsAndIsAvailable,
   assertFilteredShortnamesExist,
+  assertFrequencyExists,
 }

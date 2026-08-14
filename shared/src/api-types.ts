@@ -106,6 +106,45 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/shortnames/{shortname}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get shortname detail by shortname */
+    get: {
+      parameters: {
+        query?: never
+        header?: never
+        path: {
+          shortname: string
+        }
+        cookie?: never
+      }
+      requestBody?: never
+      responses: {
+        /** @description Shortname detail with statistic name */
+        200: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            'application/json': components['schemas']['Shortname_listing']
+          }
+        }
+        default: components['responses']['Error']
+      }
+    }
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/divisions': {
     parameters: {
       query?: never
@@ -296,91 +335,6 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  '/statistics/{shortname}/variants': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    put?: never
-    /** Create a variant on a spesific statistic */
-    post: {
-      parameters: {
-        query?: never
-        header?: never
-        path?: never
-        cookie?: never
-      }
-      requestBody: {
-        content: {
-          'application/json': components['schemas']['Variant']
-        }
-      }
-      responses: {
-        /** @description The created variant */
-        201: {
-          headers: {
-            [name: string]: unknown
-          }
-          content: {
-            'application/json': components['schemas']['Variant']
-          }
-        }
-        default: components['responses']['Error']
-      }
-    }
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/statistics/{shortname}/variants/{id}': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    /** Update a variant */
-    put: {
-      parameters: {
-        query?: never
-        header?: never
-        path: {
-          shortname: string
-          id: string
-        }
-        cookie?: never
-      }
-      requestBody: {
-        content: {
-          'application/json': components['schemas']['Variant']
-        }
-      }
-      responses: {
-        /** @description Updated variant details */
-        200: {
-          headers: {
-            [name: string]: unknown
-          }
-          content: {
-            'application/json': components['schemas']['Variant']
-          }
-        }
-        default: components['responses']['Error']
-      }
-    }
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
   '/statistics/{shortname}/variants/{id}/releases': {
     parameters: {
       query?: never
@@ -464,23 +418,25 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    /** List all versions with changes and comment. Response object TBD */
+    /** List all versions with changes and comment for a statistic */
     get: {
       parameters: {
         query?: never
         header?: never
-        path?: never
+        path: {
+          shortname: string
+        }
         cookie?: never
       }
       requestBody?: never
       responses: {
-        /** @description List of versions. Response object TBD */
+        /** @description List of versions for the statistic */
         200: {
           headers: {
             [name: string]: unknown
           }
           content: {
-            'application/json': unknown
+            'application/json': components['schemas']['Version'][]
           }
         }
         default: components['responses']['Error']
@@ -763,25 +719,25 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    /** List all versions on a release with change and comment. Response object TBD */
+    /** List all versions on a release with changes and comment */
     get: {
       parameters: {
         query?: never
         header?: never
         path: {
-          id: string
+          id: number
         }
         cookie?: never
       }
       requestBody?: never
       responses: {
-        /** @description List of versions. Response object TBD */
+        /** @description List of versions for the release */
         200: {
           headers: {
             [name: string]: unknown
           }
           content: {
-            'application/json': unknown
+            'application/json': components['schemas']['Version'][]
           }
         }
         default: components['responses']['Error']
@@ -1191,6 +1147,24 @@ export interface components {
       division?: components['schemas']['Division']
       contacts?: components['schemas']['Contact'][]
     } & components['schemas']['Statistic']
+    Version: {
+      /** @description One of "create", "update" or "delete". */
+      change_type: string
+      /** Format: date-time */
+      changed_at: string
+      /** @description The principal name of the user who made the change. */
+      changed_by: string
+      comment?: string
+      /** @description Only present when change_type is "update". */
+      changed_values?: {
+        /** @description The name of the field that changed. */
+        field_name: string
+        /** @description Human-readable version of the old value. */
+        old_value: string
+        /** @description Human-readable version of the new value. */
+        new_value: string
+      }[]
+    }
     Variant: {
       readonly id?: number
       version?: number

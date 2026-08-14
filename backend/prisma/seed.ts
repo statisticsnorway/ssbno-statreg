@@ -7,8 +7,8 @@ async function main() {
     update: {},
     create: {
       code: 'W',
-      name_en: 'Week',
-      name: 'Uke',
+      name_en: 'Week (W)',
+      name: 'Uke (W)',
       version: 1,
     },
   })
@@ -40,6 +40,19 @@ async function main() {
   })
 
   console.log('Created frequency from seed: \n' + JSON.stringify(freq3, null, 2))
+
+  const freq4 = await prisma.frequency.upsert({
+    where: { code: 'U' },
+    update: {},
+    create: {
+      code: 'U',
+      name_en: 'Week (U)',
+      name: 'Uke (U)',
+      version: 1,
+    },
+  })
+
+  console.log('Created frequency from seed: \n' + JSON.stringify(freq4, null, 2))
 
   const shortname1 = await prisma.shortname.upsert({
     where: { name: 'energ' },
@@ -98,7 +111,7 @@ async function main() {
   console.log('Created shortnames from seed: \n' + shortname1 + shortname2 + shortname3 + shortname4 + shortname5)
 
   const responsiblePerson1 = await prisma.responsiblePerson.upsert({
-    where: { principalName: 'alice@ssb.no' },
+    where: { principalName: 'abc@ssb.no' },
     update: {},
     create: {
       principalName: 'abc@ssb.no',
@@ -111,7 +124,7 @@ async function main() {
     where: { principalName: 'bob@ssb.no' },
     update: {},
     create: {
-      principalName: 'bcd@ssb.no',
+      principalName: 'bob@ssb.no',
     },
   })
 
@@ -121,7 +134,7 @@ async function main() {
     where: { principalName: 'carol@ssb.no' },
     update: {},
     create: {
-      principalName: 'cde@ssb.no',
+      principalName: 'carol@ssb.no',
     },
   })
 

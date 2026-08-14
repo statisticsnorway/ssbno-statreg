@@ -1,4 +1,6 @@
 import type { ExtendedPrismaClient } from '@/lib/prisma'
+import { StatregError } from '@/lib/statregError'
+import { sanitize } from '@/lib/utils'
 import { type Shortname, type ShortnameListing } from '@ssbno-statreg/shared'
 
 export type ShortnamePrisma = Pick<ExtendedPrismaClient, 'shortname' | 'statistic'>
@@ -19,9 +21,27 @@ export async function getShortnames(prisma: ShortnamePrisma): Promise<ShortnameL
   return result
 }
 
+export async function getShortname(prisma: ShortnamePrisma, shortname: string): Promise<ShortnameListing> {
+  const safeShortname = sanitize(shortname)
+
+  const shortnameDetail = await prisma.shortname.findFirst({
+    where: { name: safeShortname },
+    select: {
+      name: true,
+      statistic: { select: { name: true } },
+    },
+  })
+
+  if (!shortnameDetail) {
+    throw new StatregError(`Shortname '${shortname}' not found.`, 404)
+  }
+
+  return { shortname: shortnameDetail.name, statistic_name: shortnameDetail.statistic?.name ?? '' }
+}
+
 export async function createShortname(prisma: ShortnamePrisma, body: unknown): Promise<Shortname> {
   if (!body || typeof body !== 'object' || !('shortname' in body)) {
-    throw { statregError: "Missing required field 'shortname'." }
+    throw new StatregError("Missing required field 'shortname'.")
   }
 
   const shortname = parseShortname(body.shortname)
@@ -32,7 +52,7 @@ export async function createShortname(prisma: ShortnamePrisma, body: unknown): P
   })
 
   if (existing) {
-    throw { statregError: `Shortname '${shortname}' already exists` }
+    throw new StatregError(`Shortname '${shortname}' already exists`)
   }
 
   const now = new Date()
@@ -49,14 +69,13 @@ export async function createShortname(prisma: ShortnamePrisma, body: unknown): P
 
 export function parseShortname(value: unknown): string {
   if (typeof value !== 'string') {
-    throw { statregError: "Field 'shortname' must be a string." }
+    throw new StatregError("Field 'shortname' must be a string.")
   }
 
   if (!/^[a-z_]{1,14}$/.test(value)) {
-    throw {
-      statregError:
-        "Field 'shortname' must only contain lowercase letters (a-z) and underscore (_), and be at most 14 characters.",
-    }
+    throw new StatregError(
+      "Field 'shortname' must only contain lowercase letters (a-z) and underscore (_), and be at most 14 characters."
+    )
   }
 
   return value

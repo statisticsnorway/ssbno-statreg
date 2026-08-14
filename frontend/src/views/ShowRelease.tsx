@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link as ReactRouterLink } from 'react-router'
-import { Heading, Link, Paragraph, Details, Card, Button } from '@digdir/designsystemet-react'
+import { Heading, Link, Paragraph, Details, Card, Button, Spinner } from '@digdir/designsystemet-react'
 import { PencilWritingIcon } from '@navikt/aksel-icons'
 import { ApprovalStatusTag } from '../components/ApprovalStatus'
 import client from '../api'
-import { type ReleaseDetails } from '@ssbno-statreg/shared'
-import { formatPublishTime, formatDate, formatVariant } from '../lib/utils'
+import { type ReleaseDetails, type Version } from '@ssbno-statreg/shared'
+import { formatDateTime, formatDate, formatVariant } from '../lib/utils'
 import { ErrorAlert } from '../components/ErrorAlert'
+import { ChangeLogTable } from '../components/VersionTable'
 
 function formatStatisticName(statistic: ReleaseDetails['statistic']): string {
   if (!statistic || !statistic.name || !statistic.shortname) return '-'
@@ -19,6 +20,8 @@ function formatPeriod(from?: string, to?: string): string {
 
 export default function ShowRelease() {
   const [release, setRelease] = useState<ReleaseDetails>({})
+  const [versions, setVersions] = useState<Version[] | null>(null)
+  const [isLoadingVersions, setIsLoadingVersions] = useState(false)
   const [apiError, setApiError] = useState<string[]>([])
   const { id } = useParams()
 
@@ -39,8 +42,28 @@ export default function ShowRelease() {
   const approvalStatus = release.approval_status
   const statisticName = formatStatisticName(release.statistic)
   const period = formatPeriod(release.period_from, release.period_to)
-  const publishTime = formatPublishTime(release.publish_time)
+  const publishTime = formatDateTime(release.publish_time)
   const variant = formatVariant(release.variant)
+
+  async function fetchVersions() {
+    if (!id || versions !== null || isLoadingVersions) return
+
+    setIsLoadingVersions(true)
+
+    const { data, error } = await client.GET('/releases/{id}/versions', {
+      params: { path: { id: Number(id) } },
+    })
+
+    if (error) {
+      setApiError((prev) => [...prev, error.message])
+      setIsLoadingVersions(false)
+      setVersions([])
+      return
+    }
+
+    setVersions(data ?? [])
+    setIsLoadingVersions(false)
+  }
 
   return (
     <>
@@ -64,11 +87,19 @@ export default function ShowRelease() {
         <Heading data-size='xs'>Måleperiode</Heading>
         <Paragraph>{period}</Paragraph>
       </div>
-      <div>
+      <div style={{ width: '100%' }}>
         <Card>
           <Details>
-            <Details.Summary>Versjonshistorikk</Details.Summary>
-            <Details.Content>Kommer snart.</Details.Content>
+            <Details.Summary onClick={fetchVersions}>Versjonshistorikk</Details.Summary>
+            <Details.Content>
+              {isLoadingVersions ? (
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                  <Spinner aria-label='Henter versjonshistorikk' />
+                </div>
+              ) : (
+                <ChangeLogTable versions={versions ?? []} />
+              )}
+            </Details.Content>
           </Details>
         </Card>
       </div>

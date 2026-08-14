@@ -17,6 +17,11 @@ import {
 import { ApprovalStatus } from '@ssbno-statreg/shared'
 import { Prisma } from '@/generated/prisma/client'
 import { asyncLocalStorage } from '@/lib/context'
+import { isDateBlocked } from '@/lib/blockedDates'
+
+vi.mock('@/lib/blockedDates', () => ({
+  isDateBlocked: vi.fn(() => Promise.resolve(false)),
+}))
 
 let prismaMock: any
 let releasesResult: object | null
@@ -48,6 +53,8 @@ describe('releasesService ', async () => {
     releaseAsserts.assertVariantExists = vi.fn(async () => true) as any
     releaseAsserts.assertVariantMatchesShortname = vi.fn(async () => true) as any
     releaseAsserts.assertFilteredShortnamesExist = vi.fn(async () => true) as any
+    releaseAsserts.assertReleaseDateIsMoreThanThreeMonthsAway = vi.fn(() => true) as any
+    vi.mocked(isDateBlocked).mockReset().mockResolvedValue(false)
   })
 
   describe('getReleases ', () => {
@@ -446,15 +453,8 @@ describe('releasesService ', async () => {
 
     test('updates exactly one release when input data is correct', async () => {
       setPrismaResult(mockedSingleReleasePrismaResult)
-      const releaseUpdateInput = {
-        publish_time: '2024-10-15T08:00:00Z',
-        period_to: '2024-12-31',
-        period_from: '2024-09-01',
-        release_date_precision: 'dag',
-        comment: 'Mock comment.',
-      }
 
-      await asyncLocalStorage.run({ isAdmin: false }, () => updateRelease(prismaMock, '1', releaseUpdateInput, now))
+      await asyncLocalStorage.run({ isAdmin: false }, () => updateRelease(prismaMock, '1', mockUpdateReleaseInput, now))
 
       expect(prismaMock.release.update).toHaveBeenCalledExactlyOnceWith({
         include: ReleaseDetailsIncludes,
@@ -473,15 +473,8 @@ describe('releasesService ', async () => {
 
     test('updates release with accepted status when current user is admin', async () => {
       setPrismaResult(mockedSingleReleasePrismaResult)
-      const releaseUpdateInput = {
-        publish_time: '2024-10-15T08:00:00Z',
-        period_to: '2024-12-31',
-        period_from: '2024-09-01',
-        release_date_precision: 'dag',
-        comment: 'Mock comment.',
-      }
 
-      await asyncLocalStorage.run({ isAdmin: true }, () => updateRelease(prismaMock, '1', releaseUpdateInput, now))
+      await asyncLocalStorage.run({ isAdmin: true }, () => updateRelease(prismaMock, '1', mockUpdateReleaseInput, now))
 
       expect(prismaMock.release.update).toHaveBeenCalledExactlyOnceWith({
         include: ReleaseDetailsIncludes,
@@ -518,6 +511,46 @@ describe('releasesService ', async () => {
       })
 
       expect(prismaMock.release.update).toHaveBeenCalledTimes(0)
+    })
+
+    test('rejects when non-admin sets publish time within three months from now', async () => {
+      releaseAsserts.assertReleaseDateIsMoreThanThreeMonthsAway = vi.fn(() => false) as any
+
+      await expect(() =>
+        asyncLocalStorage.run({ isAdmin: false }, () => updateRelease(prismaMock, '1', mockUpdateReleaseInput, now))
+      ).rejects.toMatchObject({
+        statregError: 'Publish time must be later than three months from now',
+      })
+      expect(prismaMock.release.update).toHaveBeenCalledTimes(0)
+    })
+
+    test('allows admin to set publish time within three months from now', async () => {
+      releaseAsserts.assertReleaseDateIsMoreThanThreeMonthsAway = vi.fn(() => false) as any
+      setPrismaResult(mockedSingleReleasePrismaResult)
+
+      await asyncLocalStorage.run({ isAdmin: true }, () => updateRelease(prismaMock, '1', mockUpdateReleaseInput, now))
+
+      expect(prismaMock.release.update).toHaveBeenCalledTimes(1)
+    })
+
+    test('rejects when non-admin sets publish time on a blocked date', async () => {
+      vi.mocked(isDateBlocked).mockResolvedValueOnce(true)
+
+      await expect(() =>
+        asyncLocalStorage.run({ isAdmin: false }, () => updateRelease(prismaMock, '1', mockUpdateReleaseInput, now))
+      ).rejects.toMatchObject({
+        statregError: 'The given date is full or blocked',
+      })
+      expect(prismaMock.release.update).toHaveBeenCalledTimes(0)
+    })
+
+    test('allows admin to set publish time on a blocked date', async () => {
+      vi.mocked(isDateBlocked).mockResolvedValueOnce(true)
+      setPrismaResult(mockedSingleReleasePrismaResult)
+
+      await asyncLocalStorage.run({ isAdmin: true }, () => updateRelease(prismaMock, '1', mockUpdateReleaseInput, now))
+
+      expect(prismaMock.release.update).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -689,6 +722,67 @@ describe('releasesService ', async () => {
         statregError: 'Missing required field(s): period_from, period_to',
       })
       expect(prismaMock.release.create).toHaveBeenCalledTimes(0)
+    })
+
+    test('rejects when non-admin sets publish time within three months from now', async () => {
+      releaseAsserts.assertReleaseDateIsMoreThanThreeMonthsAway = vi.fn(() => false) as any
+
+      await expect(() =>
+        asyncLocalStorage.run({ isAdmin: false }, () =>
+          createRelease(prismaMock, 'kpi', '1', mockCreateReleaseInput, now)
+        )
+      ).rejects.toMatchObject({
+        statregError: 'Publish time must be later than three months from now',
+      })
+      expect(prismaMock.release.create).toHaveBeenCalledTimes(0)
+    })
+
+    test('allows admin to set publish time within three months from now', async () => {
+      releaseAsserts.assertReleaseDateIsMoreThanThreeMonthsAway = vi.fn(() => false) as any
+      setPrismaResult({
+        ...mockedSingleReleasePrismaResult,
+        id: 1,
+        version: 1,
+        desk_appoval_status: ApprovalStatus.ACCEPTED,
+      })
+
+      await asyncLocalStorage.run({ isAdmin: true }, () =>
+        createRelease(prismaMock, 'kpi', '1', mockCreateReleaseInput, now)
+      )
+
+      expect(isDateBlocked).not.toHaveBeenCalled()
+      expect(releaseAsserts.assertReleaseDateIsMoreThanThreeMonthsAway).not.toHaveBeenCalled()
+      expect(prismaMock.release.create).toHaveBeenCalledTimes(1)
+    })
+
+    test('rejects when non-admin sets publish time on a blocked date', async () => {
+      vi.mocked(isDateBlocked).mockResolvedValueOnce(true)
+
+      await expect(() =>
+        asyncLocalStorage.run({ isAdmin: false }, () =>
+          createRelease(prismaMock, 'kpi', '1', mockCreateReleaseInput, now)
+        )
+      ).rejects.toMatchObject({
+        statregError: 'The given date is full or blocked',
+      })
+      expect(isDateBlocked).toHaveBeenCalledWith(mockCreateReleaseInput.publish_time.slice(0, 10), prismaMock)
+      expect(prismaMock.release.create).toHaveBeenCalledTimes(0)
+    })
+
+    test('allows admin to set publish time on a blocked date', async () => {
+      vi.mocked(isDateBlocked).mockResolvedValueOnce(true)
+      setPrismaResult({
+        ...mockedSingleReleasePrismaResult,
+        id: 1,
+        version: 1,
+        desk_appoval_status: ApprovalStatus.ACCEPTED,
+      })
+
+      await asyncLocalStorage.run({ isAdmin: true }, () =>
+        createRelease(prismaMock, 'kpi', '1', mockCreateReleaseInput, now)
+      )
+
+      expect(prismaMock.release.create).toHaveBeenCalledTimes(1)
     })
   })
 })
@@ -881,4 +975,9 @@ const mockCreateReleaseInput = {
   period_to: '2024-12-31',
   period_from: '2024-09-01',
   release_date_precision: 'dag',
+}
+
+const mockUpdateReleaseInput = {
+  ...mockCreateReleaseInput,
+  comment: 'Mock comment.',
 }

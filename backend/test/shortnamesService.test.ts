@@ -1,5 +1,5 @@
 import { vi, describe, test, expect, beforeEach } from 'vitest'
-import { getShortnames, parseShortname, createShortname } from '@/services/shortnamesService'
+import { getShortnames, getShortname, parseShortname, createShortname } from '@/services/shortnamesService'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let prismaMock: any
@@ -9,6 +9,7 @@ describe('shortnamesService ', async () => {
     prismaMock = {
       shortname: {
         findMany: vi.fn(() => Promise.resolve([{ name: 'kpi', statistic: { name: 'Konsumprisindeksen' } }])),
+        findFirst: vi.fn(() => Promise.resolve({ name: 'kpi', statistic: { name: 'Konsumprisindeksen' } })),
       },
     }
   })
@@ -21,6 +22,25 @@ describe('shortnamesService ', async () => {
     })
   })
 
+  describe('getShortname ', () => {
+    test('returns mocked data', async () => {
+      const result = await getShortname(prismaMock, 'kpi')
+
+      expect(result).toStrictEqual({ shortname: 'kpi', statistic_name: 'Konsumprisindeksen' })
+    })
+
+    test('throws error when shortname is not found', async () => {
+      prismaMock.shortname.findFirst = vi.fn(async () => {
+        throw { status: 404, statregError: "Shortname 'BAD' not found." }
+      })
+
+      await expect(() => getShortname(prismaMock, 'BAD')).rejects.toMatchObject({
+        status: 404,
+        statregError: "Shortname 'BAD' not found.",
+      })
+    })
+  })
+
   describe('parseShortname', () => {
     const expectedError = {
       statregError:
@@ -28,18 +48,20 @@ describe('shortnamesService ', async () => {
     }
 
     test('throws when shortname is not a string', () => {
-      expect(() => parseShortname(123)).toThrow({ statregError: "Field 'shortname' must be a string." })
+      expect(() => parseShortname(123)).toThrow(
+        expect.objectContaining({ statregError: "Field 'shortname' must be a string." })
+      )
     })
     test('throws when shortname contains uppercase letters', () => {
-      expect(() => parseShortname('Invalid_Name')).toThrow(expectedError)
+      expect(() => parseShortname('Invalid_Name')).toThrow(expect.objectContaining(expectedError))
     })
 
     test('throws when shortname is longer than 14 characters', () => {
-      expect(() => parseShortname('this_name_is_too_long')).toThrow(expectedError)
+      expect(() => parseShortname('this_name_is_too_long')).toThrow(expect.objectContaining(expectedError))
     })
 
     test('throws when shortname contains invalid characters', () => {
-      expect(() => parseShortname('invalid-name')).toThrow(expectedError)
+      expect(() => parseShortname('invalid-name')).toThrow(expect.objectContaining(expectedError))
     })
     test('returns the shortname when it is valid', () => {
       const result = parseShortname('valid_name')
@@ -59,7 +81,7 @@ describe('shortnamesService ', async () => {
     })
 
     test('throws when the body is missing the shortname field', async () => {
-      await expect(createShortname(prismaMock, {})).rejects.toThrow({
+      await expect(createShortname(prismaMock, {})).rejects.toMatchObject({
         statregError: "Missing required field 'shortname'.",
       })
     })
@@ -67,7 +89,7 @@ describe('shortnamesService ', async () => {
     test('throws when the shortname already exists', async () => {
       prismaMock.shortname.findUnique = vi.fn(() => Promise.resolve({ id: 1 }))
 
-      await expect(createShortname(prismaMock, { shortname: 'existing' })).rejects.toThrow({
+      await expect(createShortname(prismaMock, { shortname: 'existing' })).rejects.toMatchObject({
         statregError: "Shortname 'existing' already exists",
       })
     })

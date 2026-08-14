@@ -9,15 +9,9 @@ import { ErrorAlert } from '../components/ErrorAlert'
 
 type CreateShortnameModalProps = {
   openCreateShortnameModal: boolean
-  setOpenCreateReleaseModal: (open: boolean) => void
-  setCreatedShortname: (shortname: string) => void
 }
 
-export function CreateShortnameModal({
-  openCreateShortnameModal,
-  setOpenCreateReleaseModal,
-  setCreatedShortname,
-}: Readonly<CreateShortnameModalProps>) {
+export function CreateShortnameModal({ openCreateShortnameModal }: Readonly<CreateShortnameModalProps>) {
   const { auth } = useAuth()
 
   const [shortnames, setShortnames] = useState<ShortnameListing['shortname'][]>([])
@@ -83,8 +77,7 @@ export function CreateShortnameModal({
       setApiError((prev) => [...prev, error.message])
       return
     }
-    setCreatedShortname(data.shortname)
-    setOpenCreateReleaseModal(false)
+    navigate(`/statistikk/${data.shortname}/opprett`)
   }
 
   function handleOnSubmit(e: React.ChangeEvent<HTMLFormElement>) {
@@ -95,8 +88,7 @@ export function CreateShortnameModal({
   }
 
   function handleCloseModal() {
-    setOpenCreateReleaseModal(false)
-    navigate(-1) // Navigate back to the previous page
+    navigate('/statistikk')
   }
 
   return (

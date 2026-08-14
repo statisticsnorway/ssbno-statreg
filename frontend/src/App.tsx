@@ -11,6 +11,7 @@ import EditStatistic from './views/EditStatistic'
 import ListBlockedDates from './views/ListBlockedDates'
 import CreateBlockedDate from './views/CreateBlockedDate'
 import Tasks from './views/Tasks'
+import StatisticVersions from './views/StatisticVersions'
 
 function App() {
   return (
@@ -26,8 +27,10 @@ function App() {
         <Route path='statistikk'>
           <Route index element={<ListStatistics />} />
           <Route path=':shortname' element={<ShowStatistic />} />
+          <Route path=':shortname/versjoner' element={<StatisticVersions />} />
           <Route path=':shortname/:variantId/opprett' element={<ReleaseForm />} />
           <Route path=':shortname/rediger' element={<EditStatistic />} />
+          <Route path=':shortname/opprett' element={<CreateStatistic />} />
           <Route path='opprett' element={<CreateStatistic />} />
         </Route>
 

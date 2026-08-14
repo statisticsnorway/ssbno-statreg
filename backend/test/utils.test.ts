@@ -63,21 +63,21 @@ describe('utils', () => {
     })
 
     test('returns 400 for date ISO format', async () => {
-      await expect(() => parseDateOnly('2026-03-25T12:30:00Z')).toThrow({
-        statregError: 'Invalid date format: 2026-03-25T12:30:00Z',
-      })
+      await expect(() => parseDateOnly('2026-03-25T12:30:00Z')).toThrow(
+        expect.objectContaining({ statregError: 'Invalid date format: 2026-03-25T12:30:00Z' })
+      )
     })
 
     test('returns 400 for invalid date string format', async () => {
-      expect(() => parseDateOnly('24. des')).toThrow({
-        statregError: 'Invalid date format: 24. des',
-      })
+      expect(() => parseDateOnly('24. des')).toThrow(
+        expect.objectContaining({ statregError: 'Invalid date format: 24. des' })
+      )
     })
 
     test('returns 400 if date parsing fails', async () => {
-      expect(() => parseDateOnly('9999-11-00')).toThrow({
-        statregError: 'Invalid date format: 9999-11-00',
-      })
+      expect(() => parseDateOnly('9999-11-00')).toThrow(
+        expect.objectContaining({ statregError: 'Invalid date format: 9999-11-00' })
+      )
     })
   })
 
@@ -98,33 +98,31 @@ describe('utils', () => {
     })
 
     test('returns 400 for missing date', () => {
-      expect(() => parseDateISO(undefined)).toThrow({
-        statregError: 'Invalid date format:',
-      })
+      expect(() => parseDateISO(undefined)).toThrow(expect.objectContaining({ statregError: 'Invalid date format:' }))
     })
 
     test('returns 400 for invalid date only format', () => {
-      expect(() => parseDateISO('2026-03-25', 'publish_time')).toThrow({
-        statregError: 'Invalid publish_time date format: 2026-03-25',
-      })
+      expect(() => parseDateISO('2026-03-25', 'publish_time')).toThrow(
+        expect.objectContaining({ statregError: 'Invalid publish_time date format: 2026-03-25' })
+      )
     })
 
     test('returns 400 for invalid date with missing timezone', () => {
-      expect(() => parseDateISO('2026-03-25T12:30:00')).toThrow({
-        statregError: 'Invalid date format: 2026-03-25T12:30:00',
-      })
+      expect(() => parseDateISO('2026-03-25T12:30:00')).toThrow(
+        expect.objectContaining({ statregError: 'Invalid date format: 2026-03-25T12:30:00' })
+      )
     })
 
     test('returns 400 for invalid date with space instead of T', () => {
-      expect(() => parseDateISO('2026-03-25 12:30:00Z')).toThrow({
-        statregError: 'Invalid date format: 2026-03-25 12:30:00Z',
-      })
+      expect(() => parseDateISO('2026-03-25 12:30:00Z')).toThrow(
+        expect.objectContaining({ statregError: 'Invalid date format: 2026-03-25 12:30:00Z' })
+      )
     })
 
     test('returns 400 for invalid date if not colon in offset', () => {
-      expect(() => parseDateISO('2026-03-25T12:30:00+0100')).toThrow({
-        statregError: 'Invalid date format: 2026-03-25T12:30:00+0100',
-      })
+      expect(() => parseDateISO('2026-03-25T12:30:00+0100')).toThrow(
+        expect.objectContaining({ statregError: 'Invalid date format: 2026-03-25T12:30:00+0100' })
+      )
     })
   })
 
@@ -175,11 +173,13 @@ describe('utils', () => {
     })
 
     test('throws error for invalid numeric format', () => {
-      expect(() => parseId('abc')).toThrow({ statregError: 'Invalid id format' })
+      expect(() => parseId('abc')).toThrow(expect.objectContaining({ statregError: 'Invalid id format' }))
     })
 
     test('throws error for negative number', () => {
-      expect(() => parseId('-1', 'variant')).toThrow({ statregError: 'Invalid variant id format' })
+      expect(() => parseId('-1', 'variant')).toThrow(
+        expect.objectContaining({ statregError: 'Invalid variant id format' })
+      )
     })
   })
 
@@ -195,16 +195,16 @@ describe('utils', () => {
 
     test('return 400 when body is undefined', () => {
       const requiredFields = ['field_1', 'field_2']
-      expect(() => ensureRequiredFieldsExists(undefined, requiredFields)).toThrow({
-        statregError: 'Missing required field(s): field_1, field_2',
-      })
+      expect(() => ensureRequiredFieldsExists(undefined, requiredFields)).toThrow(
+        expect.objectContaining({ statregError: 'Missing required field(s): field_1, field_2' })
+      )
     })
 
     test('return 400 when body object is empty', () => {
       const requiredFields = ['field_1', 'field_2']
-      expect(() => ensureRequiredFieldsExists({}, requiredFields as never[])).toThrow({
-        statregError: 'Missing required field(s): field_1, field_2',
-      })
+      expect(() => ensureRequiredFieldsExists({}, requiredFields as never[])).toThrow(
+        expect.objectContaining({ statregError: 'Missing required field(s): field_1, field_2' })
+      )
     })
   })
 
