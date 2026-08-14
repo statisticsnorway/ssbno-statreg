@@ -127,8 +127,8 @@ Before performing the migration, we need to allow the prisma methods deleteMany 
 
 20. Remove the temporary JSON files:
 
-```sh
-rm -r /tmp/STATREG_TABLES_JSON
-```
+    ```sh
+    rm -r /tmp/STATREG_TABLES_JSON
+    ```
 
 21. Revert Nais manifest and `backend/src/lib/prisma.ts`. Remove the installed packages from `backend/package.json`. Open and merge a PR to revert the changes in Nais.
