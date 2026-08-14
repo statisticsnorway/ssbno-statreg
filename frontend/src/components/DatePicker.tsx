@@ -81,7 +81,6 @@ export function DatePickerColorLegend({ statusColors }: Readonly<{ statusColors:
 export function DatePicker({ showColorCodingExplanation, calendarDatesEmit, apiErrorEmit, ...props }: DatePickerProps) {
   const [calendarDates, setCalendarDates] = useState<CalenderDate>({})
   const displayedMonth = props.month
-  const selectedDate = props.selected
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -115,19 +114,18 @@ export function DatePicker({ showColorCodingExplanation, calendarDatesEmit, apiE
     dayButtons.forEach((button) => {
       if (button.getAttribute('aria-hidden') === 'true') return
 
-      const baseLabel = button.getAttribute('aria-label')
+      const baseLabel = button.dataset.baseAriaLabel ?? button.getAttribute('aria-label')
       const dayNumber = Number(baseLabel?.match(/(\d+)\s*$/)?.[1])
       if (!baseLabel || !dayNumber) return
 
+      button.dataset.baseAriaLabel = baseLabel
       const date = new Date(displayedMonth.getFullYear(), displayedMonth.getMonth(), dayNumber)
       const status = calendarDates[getDateOnlyAsString(date)]?.status as keyof typeof DayStatus | undefined
       const statusLabel = DayStatus[status ?? 'NONE']
 
-      if (!baseLabel.endsWith(statusLabel)) {
-        button.setAttribute('aria-label', `${baseLabel}, ${statusLabel}`)
-      }
+      button.setAttribute('aria-label', `${baseLabel}, ${statusLabel}`)
     })
-  })
+  }, [calendarDates, displayedMonth])
 
   const full: Date[] = []
   const many: Date[] = []
@@ -151,7 +149,7 @@ export function DatePicker({ showColorCodingExplanation, calendarDatesEmit, apiE
   return (
     <div className='datepicker-container' ref={containerRef}>
       <AkselDatePicker.Standalone
-        key={selectedDate ? getDateOnlyAsString(selectedDate as Date) : getDateOnlyAsString(displayedMonth)}
+        key={getDateOnlyAsString(displayedMonth)}
         className='datepicker-wrapper'
         // @ts-expect-error: Allow custom "modifiers" prop for color coding
         modifiers={{ full, many, few, blocked }}

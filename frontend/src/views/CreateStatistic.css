@@ -41,6 +41,12 @@
         min-width: 40%;
       }
     }
+
+    .create-variant-button-container {
+      display: flex;
+      flex-direction: column;
+      gap: var(--ds-size-3);
+    }
   }
 
   .ds-field,
