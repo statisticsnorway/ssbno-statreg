@@ -7,26 +7,40 @@ Both unit tests and integration tests runs in our ci pipeline and shall always p
 All buisness shall be covered by unit tests. We are using vitest for unit testing.
 
 To run tests:
+
 ```
 npm run test
 ```
 
 ## Integration tests
 
+Patterns to follow. TODO
+
 ### Running locally
 
-Test against running instance (e.g. after running `npm run dev`):
+It's recommended to create a dedicated database for integration tests that can safely be reset between runs:
 
-```bash
-npm run test:integration
+```sh
+createdb statreg_db_integration_test
 ```
 
-This runs fast, but modifies the local database instance.
+Switch to the dedicated database when working on the integration tests.
+This is done by changing `backend/.env`:
 
-Test in a Docker container:
-
-```bash
-docker-compose -f docker-compose-test.yaml up --abort-on-container-exit --exit-code-from tests
+```env
+PGURL=postgresql://<USERNAME>@localhost:5432/statreg_db_integration_test?sslmode=disable
 ```
 
-This takes a while, but rebuilds a fresh database and application on every run.
+Run the integration tests with the following command:
+
+```sh
+cd backend
+npx prisma migrate reset && npm run seed && npm run test:integration
+```
+
+This will always prompt you before resetting the database.
+You may remove the prompt by adding a `--force` flag:
+
+```sh
+npx prisma migrate reset --force && npm run seed && npm run test:integration
+```
