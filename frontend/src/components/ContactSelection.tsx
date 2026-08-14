@@ -8,6 +8,7 @@ export type ContactSelectionProps = {
   id?: string
   ariaInvalid?: boolean
   onBlur?: () => void
+  autoFocus?: boolean
   contacts: Contact[]
   selected: string[]
   setSelected: (selected: string[]) => void
@@ -17,6 +18,7 @@ export function ContactSelection({
   id,
   ariaInvalid,
   onBlur,
+  autoFocus = false,
   contacts,
   selected,
   setSelected,
@@ -61,7 +63,7 @@ export function ContactSelection({
         onSelectedChange={(items) => setSelected(items.map((item) => item.value))}
         selected={selectedItems}
       >
-        <Suggestion.Input id={id} aria-invalid={ariaInvalid} onBlur={onBlur} autoFocus />
+        <Suggestion.Input id={id} aria-invalid={ariaInvalid} onBlur={onBlur} autoFocus={autoFocus} />
         <Suggestion.Clear aria-label='Tøm valgte kontakter' />
         <Suggestion.List className='contact-selection-list'>
           <Suggestion.Empty>Ingen treff</Suggestion.Empty>
