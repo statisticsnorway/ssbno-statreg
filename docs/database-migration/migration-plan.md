@@ -20,7 +20,7 @@ Before performing the migration, we need to allow the prisma methods deleteMany 
    ./src/scripts/json-validation.sh ../docs/database-migration/tableStatsExample.json ~/Documents/STATREG_TABLES_JSON
    ```
 
-### Load data to PostgreSQL
+### Prepare for migration
 
 4.  In `backend/src/lib/prisma.ts`, comment out the overrides that block `createMany`, `updateMany`, and `deleteMany`, so the migration scripts can use these operations.
 
@@ -32,7 +32,9 @@ Before performing the migration, we need to allow the prisma methods deleteMany 
     npm i date-fns-tz
     ```
 
-6.  (Nais only) In the Nais manifest for the application (not the database!), add higher resource limits required by the migration scripts:
+#### 👌Nais preparation
+
+6.  In the Nais manifest for the application (not the database!), add higher resource limits required by the migration scripts:
 
     ```yaml
     resources:
@@ -44,11 +46,11 @@ Before performing the migration, we need to allow the prisma methods deleteMany 
         memory: 4Gi
     ```
 
-7.  (Nais only) Open and merge a PR for the above changes and ensure it's deployed to Nais.
+7.  Open and merge a PR for the above changes and ensure it's deployed to Nais.
 
-8.  (Nais only) Ensure you are connected to Naisdevice and logged in to Nais. See [Naisdevice](https://doc.nais.io/operate/naisdevice/how-to/install/) and [Nais login](https://cli.nais.io/#getting-started).
+8.  Ensure you are connected to Naisdevice and logged in to Nais. See [Naisdevice](https://doc.nais.io/operate/naisdevice/how-to/install/) and [Nais login](https://cli.nais.io/#getting-started).
 
-9.  (Nais only) Copy the JSON files (both data and validation metadata) from localhost to a temporary location in the pod on NAIS using the [kubernetes CLI](https://kubernetes.io/docs/tasks/tools/#kubectl).
+9.  Copy the JSON files (both data and validation metadata) from localhost to a temporary location in the pod on NAIS using the [kubernetes CLI](https://kubernetes.io/docs/tasks/tools/#kubectl).
 
     Get pod name:
 
@@ -68,9 +70,11 @@ Before performing the migration, we need to allow the prisma methods deleteMany 
     kubectl cp ~/repos/ssbno-statreg/docs/database-migration/tableStatsExample.json ssbno-statreg-5665547945-nvjpb:/tmp
     ```
 
-10. (Nais only) Open a shell in the same pod, and complete the remaining steps there. We recommend using [`k9s`](https://k9scli.io/topics/install/), which lets you navigate through the list of pods and press `s` to open a shell.
+10. Open a shell in the same pod, and complete the next section from there. We recommend using [`k9s`](https://k9scli.io/topics/install/), which lets you navigate through the list of pods and press `s` to open a shell.
 
-11. `cd` into the `backend` directory and run the below scripts there.
+### Run migration scripts
+
+11. `cd` into the `backend` directory and complete the remaining steps from there.
 
 12. Delete all existing data in the database and load data from JSON files into PostgreSQL:
 
@@ -92,8 +96,6 @@ Before performing the migration, we need to allow the prisma methods deleteMany 
     This checks the number of rows and the highest and lowest IDs.
 
 14. (Nais only) Delete the copied JSON files.
-
-### Migrate data to new data columns in PostgreSQL
 
 15. Fill in missing division codes:
 
@@ -121,6 +123,15 @@ Before performing the migration, we need to allow the prisma methods deleteMany 
     npx tsx ./src/scripts/rewriteAuditLogEventNames.ts
     ```
 
-20. Revert Nais manifest and `backend/src/lib/prisma.ts`. Remove the installed packages. (Open and merge a PR to revert the changes in Nais.)
+20. Drop legacy tables that are no longer needed e.g. Division and Contacts. Drop assosiated columns with dropped tables as well. This can be done in a PR with an adjustment of Prisma schema a while after data migration.
 
-21. Drop legacy tables that are no longer needed e.g. Division and Contacts. Drop assosiated columns with dropped tables as well. This can be done in a PR with an adjustment of Prisma schema a while after data migration.
+#### 👌Nais cleanup
+
+19. Remove the temporary JSON files:
+
+```sh
+rm -r /tmp/STATREG_TABLES_JSON
+rm /tmp/tableStatsExample.json
+```
+
+20. Revert Nais manifest and `backend/src/lib/prisma.ts`. Remove the installed packages from `backend/package.json`. Open and merge a PR to revert the changes in Nais.
