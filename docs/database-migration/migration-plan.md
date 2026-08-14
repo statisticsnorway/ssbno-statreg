@@ -46,7 +46,7 @@ Before performing the migration, we need to allow the prisma methods deleteMany 
         memory: 4Gi
     ```
 
-7.  Open and merge a PR for the above changes and ensure it's deployed to Nais.
+7.  Open and merge a PR for the above three changes and ensure it's deployed to Nais.
 
 8.  Ensure you are connected to Naisdevice and logged in to Nais. See [Naisdevice](https://doc.nais.io/operate/naisdevice/how-to/install/) and [Nais login](https://cli.nais.io/#getting-started).
 
