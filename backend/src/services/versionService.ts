@@ -73,7 +73,27 @@ export async function getVersions(resourceType: string, id: number, prisma: Vers
       last_updated: 'desc',
     },
   })
-  return entries.map(auditlogEntryToVersion)
+
+  // remove old entries that was the internal comment and connect them as comment on other entries with the exact same last_update timestamp
+  const commentMap: Record<string, string> = {}
+  const filteredEntries = entries.filter((entry) => {
+    if (entry.property_name === 'internKommentar' && entry.new_value) {
+      commentMap[entry.last_updated.toISOString()] = entry.new_value
+      return false
+    }
+    return true
+  })
+
+  const versions = filteredEntries.map(auditlogEntryToVersion)
+
+  return versions.map((version) => {
+    const comment = commentMap[version.changed_at]
+    if (comment) {
+      return { ...version, comment: comment }
+    } else {
+      return version
+    }
+  })
 }
 
 export async function getStatisticVersions(shortname: string, prisma: VersionPrisma): Promise<Version[]> {

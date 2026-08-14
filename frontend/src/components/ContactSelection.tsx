@@ -51,7 +51,7 @@ export function ContactSelection({ contacts, selected, setSelected }: ContactSel
         onSelectedChange={(items) => setSelected(items.map((item) => item.value))}
         selected={selectedItems}
       >
-        <Suggestion.Input />
+        <Suggestion.Input autoFocus />
         <Suggestion.Clear aria-label='Tøm valgte kontakter' />
         <Suggestion.List className='contact-selection-list'>
           <Suggestion.Empty>Ingen treff</Suggestion.Empty>
