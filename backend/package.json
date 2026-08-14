@@ -25,7 +25,7 @@
     "@cacheable/node-cache": "3.1.1",
     "@prisma/adapter-pg": "7.9.1",
     "@prisma/client": "7.9.1",
-    "@ssbno-statreg/shared": "*",
+    "@ssbno-statreg/shared": "workspace:*",
     "dotenv": "17.4.2",
     "express": "5.2.1",
     "express-prom-bundle": "8.0.0",

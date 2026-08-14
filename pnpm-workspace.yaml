@@ -1,4 +1,9 @@
 packages:
-  - "backend/**"
-  - "frontend/**"
-  - "shared/**"
+  - "backend"
+  - "frontend"
+  - "shared"
+allowBuilds:
+  "@prisma/engines": false
+  "@scarf/scarf": false
+  esbuild: false
+  prisma: true
