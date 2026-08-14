@@ -314,11 +314,13 @@ export default function ShowStatistic() {
                 saveContacts()
               }}
             >
-              <Field id='contact-selection'>
+              <Field>
                 <ContactSelection
+                  id='contact-selection'
                   contacts={allContacts}
                   selected={selectedContacts}
                   setSelected={setSelectedContacts}
+                  ariaInvalid={!!contactValidationError}
                 />
                 {contactValidationError && selectedContacts.length === 0 && (
                   <ValidationMessage>Legg til minst én kontakt</ValidationMessage>
