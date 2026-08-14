@@ -7,6 +7,7 @@ import { formatContact } from '../lib/utils'
 export type ContactSelectionProps = {
   id?: string
   ariaInvalid?: boolean
+  onBlur?: () => void
   contacts: Contact[]
   selected: string[]
   setSelected: (selected: string[]) => void
@@ -15,6 +16,7 @@ export type ContactSelectionProps = {
 export function ContactSelection({
   id,
   ariaInvalid,
+  onBlur,
   contacts,
   selected,
   setSelected,
@@ -59,7 +61,7 @@ export function ContactSelection({
         onSelectedChange={(items) => setSelected(items.map((item) => item.value))}
         selected={selectedItems}
       >
-        <Suggestion.Input id={id} aria-invalid={ariaInvalid} autoFocus />
+        <Suggestion.Input id={id} aria-invalid={ariaInvalid} onBlur={onBlur} autoFocus />
         <Suggestion.Clear aria-label='Tøm valgte kontakter' />
         <Suggestion.List className='contact-selection-list'>
           <Suggestion.Empty>Ingen treff</Suggestion.Empty>

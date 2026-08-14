@@ -487,6 +487,7 @@ export default function CreateStatistic() {
                 variant='secondary'
                 aria-invalid={!!errors.variants}
                 onClick={handleOpenCreateVariantModal}
+                onBlur={() => handleOnBlur('variants')}
               >
                 <PlusCircleIcon /> Legg til variant
               </Button>
@@ -505,6 +506,7 @@ export default function CreateStatistic() {
                   contacts={contacts}
                   selected={selectedContacts}
                   setSelected={handleContactsChange}
+                  onBlur={() => handleOnBlur('contacts')}
                 />
                 {errors.contacts && <ValidationMessage>{errors.contacts}</ValidationMessage>}
               </Field>
