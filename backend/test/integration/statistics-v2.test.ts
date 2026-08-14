@@ -220,32 +220,89 @@ describe('statisticsController integration', () => {
   })
 
   test('GET /statistics with shortname filter and sort', async () => {
+    // POST two shortnames and statistics to use in filter
+    const shortnameA = `filter-test-a-${Date.now()}`
+    const shortnameB = `filter-test-b-${Date.now()}`
+    await request(app)
+      .post('/statistikkregisteret/api/shortnames')
+      .set('content-type', 'application/json')
+      .send({ shortname: shortnameA })
+    await request(app)
+      .post('/statistikkregisteret/api/shortnames')
+      .set('content-type', 'application/json')
+      .send({ shortname: shortnameB })
+
+    await request(app)
+      .post(`/statistikkregisteret/api/statistics/${shortnameA}`)
+      .set('content-type', 'application/json')
+      .send({ status: { code: 'K' }, division: '101', name: 'Filter test A' })
+    await request(app)
+      .post(`/statistikkregisteret/api/statistics/${shortnameB}`)
+      .set('content-type', 'application/json')
+      .send({ status: { code: 'K' }, division: '101', name: 'Filter test B' })
+
+    // GET statistics with shortname filter and sort, assert response
     const response = await request(app)
       .get('/statistikkregisteret/api/statistics')
-      .query('shortname=helse,energ&sort=-shortname')
-
-    expect(response.status).toBe(200)
-
+      .query(`shortname=${shortnameA},${shortnameB}&sort=-shortname`)
     const statistics = response.body as StatisticListingResponse
 
+    expect(response.status).toBe(200)
     expect(statistics.statistics?.length).toBe(2)
-    expect(statistics.statistics?.[0]?.shortname).toBe('helse')
-    expect(statistics.statistics?.[1]?.shortname).toBe('energ')
+    expect(statistics.statistics?.[0]?.shortname).toBe(shortnameB)
+    expect(statistics.statistics?.[1]?.shortname).toBe(shortnameA)
   })
 
-  test('GET /statistics with contact filter and sort', async () => {
-    const response = await request(app)
-      .get('/statistikkregisteret/api/statistics')
-      .query('contact=abc@ssb.no&sort=shortname')
+  test('POST /statistic/:shortname/contacts and GET /statistics with contact filter', async () => {
+    const shortname1 = `contact-filter-1-${Date.now()}`
+    const shortname2 = `contact-filter-2-${Date.now()}`
+
+    // POST two shortnames and statistics with the same contact
+    await request(app)
+      .post('/statistikkregisteret/api/shortnames')
+      .set('content-type', 'application/json')
+      .send({ shortname: shortname1 })
+    await request(app)
+      .post('/statistikkregisteret/api/shortnames')
+      .set('content-type', 'application/json')
+      .send({ shortname: shortname2 })
+
+    await request(app)
+      .post(`/statistikkregisteret/api/statistics/${shortname1}`)
+      .set('content-type', 'application/json')
+      .send({ status: { code: 'K' }, division: '101', name: 'Contact 1', contacts: ['abc@ssb.no'] })
+    await request(app)
+      .post(`/statistikkregisteret/api/statistics/${shortname2}`)
+      .set('content-type', 'application/json')
+      .send({ status: { code: 'K' }, division: '101', name: 'Contact 2', contacts: ['abc@ssb.no'] })
+
+    // GET statistics with contact filter and assert that both statistics are included
+    const response = await request(app).get('/statistikkregisteret/api/statistics').query(`contact=abc@ssb.no`)
 
     expect(response.status).toBe(200)
 
     const statistics = response.body as StatisticListingResponse
 
-    expect(statistics.statistics?.length).toBeGreaterThanOrEqual(3)
-    expect(statistics.statistics?.[0]?.shortname).toBe('energ')
-    expect(statistics.statistics?.[1]?.shortname).toContain('it-stat')
-    expect(statistics.statistics?.[2]?.shortname).toBe('kpi')
+    expect(statistics.statistics?.length).toBeGreaterThanOrEqual(2)
+    const shortnames = statistics.statistics?.map((s) => s.shortname)
+    expect(shortnames).toContain(shortname1)
+    expect(shortnames).toContain(shortname2)
+
+    // Remove contact from one statistic
+    await request(app)
+      .put(`/statistikkregisteret/api/statistics/${shortname1}/contacts`)
+      .set('content-type', 'application/json')
+      .send([])
+
+    // GET statistics with contact filter again and assert that only one statistic is included
+    const responseAfterRemoval = await request(app).get('/statistikkregisteret/api/statistics').query(`contact=abc@ssb.no`)
+
+    expect(responseAfterRemoval.status).toBe(200)
+
+    const statisticsAfterRemoval = responseAfterRemoval.body as StatisticListingResponse
+    const shortnamesAfterRemoval = statisticsAfterRemoval.statistics?.map((s) => s.shortname)
+    expect(shortnamesAfterRemoval).not.toContain(shortname1)
+    expect(shortnamesAfterRemoval).toContain(shortname2)
   })
 
   test('POST /shortnames creates a shortname that can be used to create and fetch a statistic', async () => {
