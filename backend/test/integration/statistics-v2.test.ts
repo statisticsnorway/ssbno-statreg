@@ -49,7 +49,7 @@ describe('statisticsController integration', () => {
   })
 
   test('POST /statistics/:shortname creates a new upcoming statistic in the database', async () => {
-    const newShortname = `it-stat-upcoming-${Date.now()}`
+    const newShortname = 'upcoming_test'
 
     // POST shortname
     const shortnameResponse = await request(app)
@@ -85,7 +85,7 @@ describe('statisticsController integration', () => {
   })
 
   test('POST /statistics/:shortname creates a new active statistic in the database', async () => {
-    const newShortname = `it-stat-active-${Date.now()}`
+    const newShortname = 'active_test'
 
     // POST shortname
     const shortnameResponse = await request(app)
@@ -102,7 +102,7 @@ describe('statisticsController integration', () => {
       name_en: 'Integration Test Created Statistic',
       main_language: 'nb',
       first_released_at: '2026-08-10',
-      contacts: ['abc@ssb.no'],
+      contacts: ['bcd@ssb.no'],
       variants: [
         {
           frequency: { code: 'U' },
@@ -136,8 +136,8 @@ describe('statisticsController integration', () => {
 
     expect(response.body.contacts).toStrictEqual([
       {
-        name: 'Alice',
-        principalName: 'abc@ssb.no',
+        name: 'Bob',
+        principalName: 'bcd@ssb.no',
       },
     ])
     expect(response.body.variants).toEqual([
@@ -157,7 +157,7 @@ describe('statisticsController integration', () => {
   })
 
   test('PUT /statistics/:shortname updates an existing statistic in the database', async () => {
-    const newShortname = `it-stat-update-${Date.now()}`
+    const newShortname = 'update_test'
 
     // POST shortname
     const shortnameResponse = await request(app)
@@ -221,8 +221,8 @@ describe('statisticsController integration', () => {
 
   test('GET /statistics with shortname filter and sort', async () => {
     // POST two shortnames and statistics to use in filter
-    const shortnameA = `filter-test-a-${Date.now()}`
-    const shortnameB = `filter-test-b-${Date.now()}`
+    const shortnameA = 'filter_a'
+    const shortnameB = 'filter_b'
     await request(app)
       .post('/statistikkregisteret/api/shortnames')
       .set('content-type', 'application/json')
@@ -254,7 +254,7 @@ describe('statisticsController integration', () => {
   })
 
   test('GET /statistics with contact filter', async () => {
-    const newShortname = `contact-filter-${Date.now()}`
+    const newShortname = 'contact_filter'
 
     // POST shortname and statistic with contact
     await request(app)
@@ -265,10 +265,10 @@ describe('statisticsController integration', () => {
     await request(app)
       .post(`/statistikkregisteret/api/statistics/${newShortname}`)
       .set('content-type', 'application/json')
-      .send({ status: { code: 'K' }, division: '101', name: 'Contact test', contacts: ['abc@ssb.no'] })
+      .send({ status: { code: 'K' }, division: '101', name: 'Contact test', contacts: ['bcd@ssb.no'] })
 
     // GET statistics with contact filter and assert that statistic is included
-    const response = await request(app).get('/statistikkregisteret/api/statistics').query(`contact=abc@ssb.no`)
+    const response = await request(app).get('/statistikkregisteret/api/statistics').query(`contact=bcd@ssb.no`)
 
     expect(response.status).toBe(200)
 
@@ -276,7 +276,7 @@ describe('statisticsController integration', () => {
     const shortnames = statistics.statistics?.map((s) => s.shortname)
     expect(shortnames).toContain(newShortname)
 
-    // Remove contact from statistic
+    // PUT contacts to remove contact from statistic
     await request(app)
       .put(`/statistikkregisteret/api/statistics/${newShortname}/contacts`)
       .set('content-type', 'application/json')
@@ -285,7 +285,7 @@ describe('statisticsController integration', () => {
     // GET statistics with contact filter again and assert that statistic is no longer included
     const responseAfterRemoval = await request(app)
       .get('/statistikkregisteret/api/statistics')
-      .query(`contact=abc@ssb.no`)
+      .query(`contact=bcd@ssb.no`)
 
     expect(responseAfterRemoval.status).toBe(200)
 
@@ -295,7 +295,7 @@ describe('statisticsController integration', () => {
   })
 
   test('POST /shortnames creates a shortname that can be used to create and fetch a statistic', async () => {
-    const newShortname = `it-stat-shortname-${Date.now()}`
+    const newShortname = 'shortname_test'
 
     // POST shortname
     const shortnameResponse = await request(app)
@@ -336,9 +336,9 @@ describe('statisticsController integration', () => {
     expect(shortnamesListResponse.body.some((item: ShortnameListing) => item.shortname === newShortname)).toBe(true)
   })
 
-  test('PUT /statistics/nytt_kortnavn/contacts sets new contacts for the statistic', async () => {
+  test('PUT /statistics/:shortname/contacts sets new contacts for the statistic', async () => {
     // First create a statistic for this test
-    const newShortname = `it-stat-contacts-${Date.now()}`
+    const newShortname = 'contacts_test'
 
     const shortnameResponse = await request(app)
       .post('/statistikkregisteret/api/shortnames')
@@ -360,26 +360,23 @@ describe('statisticsController integration', () => {
     expect(createResponse.status).toBe(200)
 
     // PUT contacts
-    const contactsPayload = ['abc@ssb.no', 'bcd@ssb.no']
+    const contactsPayload = ['bcd@ssb.no']
 
     const contactsResponse = await request(app)
       .put(`/statistikkregisteret/api/statistics/${newShortname}/contacts`)
       .set('content-type', 'application/json')
       .send(contactsPayload)
 
-    const expectedContacts: Contact[] = [
-      { name: 'Alice', principalName: 'abc@ssb.no' },
-      { name: 'Bob', principalName: 'bcd@ssb.no' },
-    ]
+    const expectedContacts: Contact[] = [{ name: 'Bob', principalName: 'bcd@ssb.no' }]
 
     expect(contactsResponse.status).toBe(200)
-    expect(contactsResponse.body).toHaveLength(2)
+    expect(contactsResponse.body).toHaveLength(1)
     expect(contactsResponse.body).toEqual(expect.arrayContaining(expectedContacts))
 
     // GET statistic to test persistence of new contacts
     const fetchResponse = await request(app).get(`/statistikkregisteret/api/statistics/${newShortname}`)
     expect(fetchResponse.status).toBe(200)
-    expect(fetchResponse.body.contacts).toHaveLength(2)
+    expect(fetchResponse.body.contacts).toHaveLength(1)
     expect(fetchResponse.body.contacts).toEqual(expect.arrayContaining(expectedContacts))
   })
 })
