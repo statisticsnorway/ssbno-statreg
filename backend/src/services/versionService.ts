@@ -32,45 +32,48 @@ export function diffObjects(
 }
 
 export function auditlogEntryToVersion(entry: Prisma.AuditLogGetPayload<null>): Version {
-  let changedValues: Version['changed_values'] = undefined
-  let comment: string = ''
+  const version = {
+    change_type: entry.event_name,
+    changed_at: entry.last_updated.toISOString(),
+    changed_by: entry.actor,
+  }
 
-  if (entry.event_name === 'update') {
-    // auditlog entries from old statreg:
-    if (entry.property_name) {
-      changedValues = [
+  if (entry.event_name === 'create') {
+    return { ...version, changed_values: undefined, comment: '' }
+  }
+
+  // auditlog entries from old statreg:
+  if (entry.property_name) {
+    return {
+      ...version,
+      changed_values: [
         {
           field_name: entry.property_name,
           old_value: String(entry.old_value),
           new_value: String(entry.new_value),
         },
-      ]
-    } else
-    // auditlog entries from new statreg:
-    {
-      try {
-        const oldObject = entry.old_value ? JSON.parse(entry.old_value) : {}
-        const newObject = entry.new_value ? JSON.parse(entry.new_value) : {}
-        changedValues = diffObjects(oldObject, newObject)
-        comment = newObject.comment
-      } catch {
-        changedValues = [
-          {
-            field_name: entry.class_name,
-            old_value: String(entry.old_value),
-            new_value: String(entry.new_value),
-          },
-        ]
-      }
+      ],
+      comment: '',
     }
   }
 
-  return {
-    change_type: entry.event_name,
-    changed_at: entry.last_updated.toISOString(),
-    changed_by: entry.actor,
-    changed_values: changedValues,
-    comment: comment,
+  // auditlog entries from new statreg:
+  try {
+    const oldObject = entry.old_value ? JSON.parse(entry.old_value) : {}
+    const newObject = entry.new_value ? JSON.parse(entry.new_value) : {}
+    return { ...version, changed_values: diffObjects(oldObject, newObject), comment: newObject.comment }
+  } catch {
+    return {
+      ...version,
+      changed_values: [
+        {
+          field_name: entry.class_name,
+          old_value: String(entry.old_value),
+          new_value: String(entry.new_value),
+        },
+      ],
+      comment: '',
+    }
   }
 }
 
