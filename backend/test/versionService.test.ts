@@ -235,6 +235,23 @@ describe('versionService ', () => {
       })
     })
 
+    test('handles delete event', () => {
+      const entry = {
+        ...baseAuditlogEntry,
+        event_name: 'delete',
+      }
+
+      const result = auditlogEntryToVersion(entry)
+
+      expect(result).toStrictEqual({
+        change_type: entry.event_name,
+        changed_at: baseAuditlogEntry.last_updated.toISOString(),
+        changed_by: baseAuditlogEntry.actor,
+        changed_values: undefined,
+        comment: '',
+      })
+    })
+
     test('handles old statreg update event', () => {
       const entry = {
         ...baseAuditlogEntry,
