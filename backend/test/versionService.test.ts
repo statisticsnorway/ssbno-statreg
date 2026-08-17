@@ -281,8 +281,6 @@ describe('versionService ', () => {
     })
 
     test('handles new statreg update event with unparseable old_value', () => {
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-
       const entry = {
         ...baseAuditlogEntry,
         old_value: 'invalid json {',
@@ -292,18 +290,19 @@ describe('versionService ', () => {
 
       const result = auditlogEntryToVersion(entry)
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        `Old or new value of auditlog entry with id ${baseAuditlogEntry.id} could not be parsed`
-      )
       expect(result).toMatchObject({
         change_type: 'update',
         changed_at: baseAuditlogEntry.last_updated.toISOString(),
         changed_by: baseAuditlogEntry.actor,
-        changed_values: undefined,
+        changed_values: [
+          {
+            field_name: baseAuditlogEntry.class_name,
+            old_value: entry.old_value,
+            new_value: entry.new_value,
+          },
+        ],
         comment: '',
       })
-
-      consoleErrorSpy.mockRestore()
     })
   })
 
