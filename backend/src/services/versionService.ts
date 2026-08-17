@@ -6,7 +6,7 @@ import type { Version } from '@ssbno-statreg/shared'
 
 export type VersionPrisma = Pick<PrismaClient, 'auditLog' | 'statistic' | 'release'>
 
-function diffObjects(
+export function diffObjects(
   oldObject: Record<string, unknown>,
   newObject: Record<string, unknown>
 ): Version['changed_values'] {
@@ -31,8 +31,8 @@ function diffObjects(
   return changes
 }
 
-function auditlogEntryToVersion(entry: Prisma.AuditLogGetPayload<null>): Version {
-  let changedValues: Version['changed_values']
+export function auditlogEntryToVersion(entry: Prisma.AuditLogGetPayload<null>): Version {
+  let changedValues: Version['changed_values'] = undefined
   let comment: string = ''
 
   if (entry.event_name === 'update') {
@@ -45,12 +45,15 @@ function auditlogEntryToVersion(entry: Prisma.AuditLogGetPayload<null>): Version
           new_value: String(entry.new_value),
         },
       ]
-      // auditlog entries from new statreg:
-    } else {
+    }
+    // auditlog entries from new statreg:
+    try {
       const oldObject = entry.old_value ? JSON.parse(entry.old_value) : {}
       const newObject = entry.new_value ? JSON.parse(entry.new_value) : {}
       changedValues = diffObjects(oldObject, newObject)
       comment = newObject.comment
+    } catch {
+      console.error(`Old or new value of auditlog entry with id ${entry.id} could not be parsed`)
     }
   }
 
