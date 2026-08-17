@@ -36,10 +36,12 @@ export function auditlogEntryToVersion(entry: Prisma.AuditLogGetPayload<null>): 
     change_type: entry.event_name,
     changed_at: entry.last_updated.toISOString(),
     changed_by: entry.actor,
+    changed_values: undefined,
+    comment: '',
   }
 
-  if (entry.event_name === 'create') {
-    return { ...version, changed_values: undefined, comment: '' }
+  if (entry.event_name === 'create' || entry.event_name === 'delete') {
+    return version
   }
 
   // auditlog entries from old statreg:
@@ -53,11 +55,10 @@ export function auditlogEntryToVersion(entry: Prisma.AuditLogGetPayload<null>): 
           new_value: String(entry.new_value),
         },
       ],
-      comment: '',
     }
   }
 
-  // auditlog entries from new statreg:
+  // auditlog update entries from new statreg:
   try {
     const oldObject = entry.old_value ? JSON.parse(entry.old_value) : {}
     const newObject = entry.new_value ? JSON.parse(entry.new_value) : {}
@@ -72,7 +73,6 @@ export function auditlogEntryToVersion(entry: Prisma.AuditLogGetPayload<null>): 
           new_value: String(entry.new_value),
         },
       ],
-      comment: '',
     }
   }
 }
