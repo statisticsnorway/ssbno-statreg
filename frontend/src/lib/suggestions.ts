@@ -27,6 +27,11 @@ export function getLastDayOfMonth(date: Date): Date {
   return new Date(date.getFullYear(), date.getMonth() + 1, 0)
 }
 
+function parseDateOnly(value: string): Date {
+  const [year, month, day] = value.split('-').map(Number)
+  return new Date(year, month - 1, day)
+}
+
 export type SuggestedRelease = {
   publishTime: Date
   periodFrom: Date
@@ -37,8 +42,8 @@ export function getNextRelease(latestRelease: ReleaseListing): SuggestedRelease 
   if (!latestRelease.publish_time || !latestRelease.period_from || !latestRelease.period_to) return undefined
 
   const publishTime = new Date(latestRelease.publish_time)
-  const periodFrom = new Date(latestRelease.period_from)
-  const periodTo = new Date(latestRelease.period_to)
+  const periodFrom = parseDateOnly(latestRelease.period_from)
+  const periodTo = parseDateOnly(latestRelease.period_to)
   const frequencyCode = latestRelease.frequency?.code?.toUpperCase()
 
   if (frequencyCode === 'Y' || frequencyCode === 'A') {

@@ -108,89 +108,126 @@ describe('suggestNextRelease', () => {
     expect(suggestNextRelease(release({ period_to: undefined }))).toBeUndefined()
   })
 
-  test('uses the latest published release and ignores unpublished releases', () => {
-    const result = suggestNextRelease(release({ publish_time: '2024-02-15T09:00:00+01:00', frequency: { code: 'W' } }))
-
-    expect(result).toEqual({
-      publishTime: new Date('2024-02-22T09:00:00+01:00'),
-      periodFrom: new Date('2024-01-08'),
-      periodTo: new Date('2024-02-07'),
-    })
-  })
-
-  test.each([
-    ['Y', '2025-01-15T09:00:00+01:00', '2025-01-01', '2025-01-31'],
-    ['a', '2025-01-15T09:00:00+01:00', '2025-01-01', '2025-01-31'],
-  ])('adds one year for %s frequency', (frequencyCode, publishTime, periodFrom, periodTo) => {
-    expect(
-      suggestNextRelease(release({ frequency: { code: frequencyCode }, publish_time: '2024-01-15T09:00:00+01:00' }))
-    ).toEqual({
-      publishTime: new Date(publishTime),
-      periodFrom: new Date(periodFrom),
-      periodTo: new Date(periodTo),
-    })
-  })
-
-  test('adds three months and uses the end of the fifth following month for quarterly frequency', () => {
-    expect(
-      suggestNextRelease(release({ frequency: { code: 'K' }, period_from: '2024-01-15', period_to: '2024-01-31' }))
-    ).toEqual({
-      publishTime: new Date('2024-04-15T09:00:00+02:00'),
-      periodFrom: new Date('2024-04-15T00:00:00+01:00'),
-      periodTo: new Date('2024-06-30T00:00:00+02:00'),
-    })
-  })
-
-  test('adds one month and ends the suggested monthly period at month end', () => {
-    expect(suggestNextRelease(release({ frequency: { code: 'M' }, period_from: '2024-01-15' }))).toEqual({
-      publishTime: new Date('2024-02-15T09:00:00+01:00'),
-      periodFrom: new Date('2024-02-15'),
-      periodTo: new Date('2024-02-29T00:00:00+01:00'),
-    })
-  })
-
-  test('adds two months and ends the suggested two-month period at month end', () => {
-    expect(suggestNextRelease(release({ frequency: { code: 'T' }, period_from: '2024-01-15' }))).toEqual({
-      publishTime: new Date('2024-03-15T09:00:00+01:00'),
-      periodFrom: new Date('2024-03-15'),
-      periodTo: new Date('2024-04-30T00:00:00+02:00'),
-    })
-  })
-
-  test.each(['W', 'u'])('adds one week for %s frequency', (frequencyCode) => {
-    expect(suggestNextRelease(release({ frequency: { code: frequencyCode } }))).toEqual({
+  test('suggests the next weekly release', () => {
+    const input1: ReleaseListing = {
+      publish_time: '2024-01-15T09:00:00+01:00',
+      period_from: '2024-01-01',
+      period_to: '2024-01-07',
+      frequency: { code: 'W' },
+    }
+    const input2: ReleaseListing = { ...input1, frequency: { code: 'U' } }
+    const expected = {
       publishTime: new Date('2024-01-22T09:00:00+01:00'),
-      periodFrom: new Date('2024-01-08'),
-      periodTo: new Date('2024-02-07'),
-    })
+      periodFrom: new Date('2024-01-08T00:00:00+01:00'),
+      periodTo: new Date('2024-01-14T00:00:00+01:00'),
+    }
+
+    expect(suggestNextRelease(input1)).toEqual(expected)
+    expect(suggestNextRelease(input2)).toEqual(expected)
+  })
+
+  test('suggests the next monthly release', () => {
+    const input: ReleaseListing = {
+      publish_time: '2024-01-15T09:00:00+01:00',
+      period_from: '2024-01-01',
+      period_to: '2024-01-31',
+      frequency: { code: 'M' },
+    }
+    const expected = {
+      publishTime: new Date('2024-02-15T09:00:00+01:00'),
+      periodFrom: new Date('2024-02-01T00:00:00+01:00'),
+      periodTo: new Date('2024-02-29T00:00:00+01:00'),
+    }
+
+    expect(suggestNextRelease(input)).toEqual(expected)
+  })
+
+  test('suggests the next term release', () => {
+    const input: ReleaseListing = {
+      publish_time: '2024-01-15T09:00:00+01:00',
+      period_from: '2024-01-01',
+      period_to: '2024-02-29',
+      frequency: { code: 'T' },
+    }
+    const expected = {
+      publishTime: new Date('2024-03-15T09:00:00+01:00'),
+      periodFrom: new Date('2024-03-01T00:00:00+01:00'),
+      periodTo: new Date('2024-04-30T00:00:00+02:00'),
+    }
+
+    expect(suggestNextRelease(input)).toEqual(expected)
+  })
+
+  test('suggests the next quarterly release', () => {
+    const input: ReleaseListing = {
+      publish_time: '2024-01-15T09:00:00+01:00',
+      period_from: '2024-01-01',
+      period_to: '2024-03-31',
+      frequency: { code: 'K' },
+    }
+    const expected = {
+      publishTime: new Date('2024-04-15T09:00:00+02:00'),
+      periodFrom: new Date('2024-04-01T00:00:00+02:00'),
+      periodTo: new Date('2024-06-30T00:00:00+02:00'),
+    }
+
+    expect(suggestNextRelease(input)).toEqual(expected)
+  })
+
+  test('suggests the next yearly release', () => {
+    const input1: ReleaseListing = {
+      publish_time: '2024-01-15T09:00:00+01:00',
+      period_from: '2024-01-01',
+      period_to: '2024-12-31',
+      frequency: { code: 'Y' },
+    }
+    const input2: ReleaseListing = { ...input1, frequency: { code: 'A' } }
+    const expected = {
+      publishTime: new Date('2025-01-15T09:00:00+01:00'),
+      periodFrom: new Date('2025-01-01T00:00:00+01:00'),
+      periodTo: new Date('2025-12-31T00:00:00+01:00'),
+    }
+
+    expect(suggestNextRelease(input1)).toEqual(expected)
+    expect(suggestNextRelease(input2)).toEqual(expected)
   })
 
   test('uses the period duration for an unknown or missing frequency', () => {
+    const input1: ReleaseListing = {
+      publish_time: '2024-01-15T09:00:00+01:00',
+      period_from: '2024-01-01',
+      period_to: '2024-01-31',
+      frequency: { code: 'D' },
+    }
+    const input2: ReleaseListing = { ...input1, frequency: undefined }
     const expected = {
       publishTime: new Date('2024-02-14T09:00:00+01:00'),
-      periodFrom: new Date('2024-02-01'),
-      periodTo: new Date('2024-03-01'),
+      periodFrom: new Date('2024-02-01T00:00:00+01:00'),
+      periodTo: new Date('2024-03-01T00:00:00+01:00'),
     }
 
-    expect(suggestNextRelease(release({ frequency: { code: 'D' } }))).toEqual(expected)
-    expect(suggestNextRelease(release({ frequency: undefined }))).toEqual(expected)
+    expect(suggestNextRelease(input1)).toEqual(expected)
+    expect(suggestNextRelease(input2)).toEqual(expected)
   })
 
   test('rolls a weekend publish date back to the preceding working day', () => {
-    const result = suggestNextRelease(release({ frequency: { code: 'W' }, publish_time: '2024-01-13T09:00:00+01:00' }))
+    const input = release({ frequency: { code: 'W' }, publish_time: '2024-01-13T09:00:00+01:00' })
+    const expected = new Date('2024-01-19T09:00:00+01:00')
 
-    expect(result?.publishTime).toEqual(new Date('2024-01-19T09:00:00+01:00'))
+    expect(suggestNextRelease(input)?.publishTime).toEqual(expected)
   })
 
   test('rolls a public holiday back over consecutive holidays', () => {
-    const result = suggestNextRelease(release({ frequency: { code: 'M' }, publish_time: '2024-11-25T09:00:00+01:00' }))
+    const input = release({ frequency: { code: 'M' }, publish_time: '2024-11-25T09:00:00+01:00' })
+    const expected = new Date('2024-12-24T09:00:00+01:00')
 
-    expect(result?.publishTime).toEqual(new Date('2024-12-24T09:00:00+01:00'))
+    expect(suggestNextRelease(input)?.publishTime).toEqual(expected)
   })
 
   test('rolls Easter Sunday back over the Easter holidays', () => {
-    const result = suggestNextRelease(release({ frequency: { code: 'M' }, publish_time: '2024-02-29T09:00:00+01:00' }))
+    const input = release({ frequency: { code: 'M' }, publish_time: '2024-02-29T09:00:00+01:00' })
+    const expected = new Date('2024-03-27T09:00:00+01:00')
 
-    expect(result?.publishTime).toEqual(new Date('2024-03-27T09:00:00+01:00'))
+    expect(suggestNextRelease(input)?.publishTime).toEqual(expected)
   })
 })
