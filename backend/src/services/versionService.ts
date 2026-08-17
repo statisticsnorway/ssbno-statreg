@@ -45,15 +45,23 @@ export function auditlogEntryToVersion(entry: Prisma.AuditLogGetPayload<null>): 
           new_value: String(entry.new_value),
         },
       ]
-    }
+    } else
     // auditlog entries from new statreg:
-    try {
-      const oldObject = entry.old_value ? JSON.parse(entry.old_value) : {}
-      const newObject = entry.new_value ? JSON.parse(entry.new_value) : {}
-      changedValues = diffObjects(oldObject, newObject)
-      comment = newObject.comment
-    } catch {
-      console.error(`Old or new value of auditlog entry with id ${entry.id} could not be parsed`)
+    {
+      try {
+        const oldObject = entry.old_value ? JSON.parse(entry.old_value) : {}
+        const newObject = entry.new_value ? JSON.parse(entry.new_value) : {}
+        changedValues = diffObjects(oldObject, newObject)
+        comment = newObject.comment
+      } catch {
+        changedValues = [
+          {
+            field_name: entry.class_name,
+            old_value: String(entry.old_value),
+            new_value: String(entry.new_value),
+          },
+        ]
+      }
     }
   }
 
