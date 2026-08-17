@@ -92,7 +92,7 @@ describe('versionService ', () => {
       expect(result).toStrictEqual([
         {
           change_type: 'update',
-          changed_at: baseAuditlogEntry.last_updated.toISOString(),
+           changed_at: '2026-03-01T00:00:00.000Z',
           changed_by: baseAuditlogEntry.actor,
           changed_values: [
             { field_name: 'status', old_value: 'K', new_value: 'A' },
@@ -102,21 +102,21 @@ describe('versionService ', () => {
         },
         {
           change_type: 'update',
-          changed_at: baseAuditlogEntryOld.last_updated.toISOString(),
+           changed_at: '2020-03-01T00:00:00.000Z',
           changed_by: baseAuditlogEntryOld.actor,
           changed_values: [{ field_name: 'deskFlyt', old_value: 'GODKJENT', new_value: 'FORSLAG' }],
           comment: 'Fjernet C fra kontaktpersoner.',
         },
         {
           change_type: 'update',
-          changed_at: baseAuditlogEntryOld.last_updated.toISOString(),
+           changed_at: '2020-03-01T00:00:00.000Z',
           changed_by: baseAuditlogEntryOld.actor,
           changed_values: [{ field_name: 'kontakter', old_value: '[A, B, C]', new_value: '[A, B]' }],
           comment: 'Fjernet C fra kontaktpersoner.',
         },
         {
           change_type: 'create',
-          changed_at: baseAuditlogEntry.last_updated.toISOString(),
+           changed_at: '2026-03-01T00:00:00.000Z',
           changed_by: baseAuditlogEntry.actor,
           changed_values: undefined,
           comment: '',
@@ -186,7 +186,7 @@ describe('versionService ', () => {
 
       expect(result).toStrictEqual({
         change_type: 'create',
-        changed_at: baseAuditlogEntry.last_updated.toISOString(),
+        changed_at: '2026-03-01T00:00:00.000Z',
         changed_by: baseAuditlogEntry.actor,
         changed_values: undefined,
         comment: '',
@@ -203,7 +203,7 @@ describe('versionService ', () => {
 
       expect(result).toStrictEqual({
         change_type: entry.event_name,
-        changed_at: baseAuditlogEntry.last_updated.toISOString(),
+        changed_at: '2026-03-01T00:00:00.000Z',
         changed_by: baseAuditlogEntry.actor,
         changed_values: undefined,
         comment: '',
@@ -223,7 +223,7 @@ describe('versionService ', () => {
 
       expect(result).toStrictEqual({
         change_type: 'update',
-        changed_at: baseAuditlogEntry.last_updated.toISOString(),
+        changed_at: '2026-03-01T00:00:00.000Z',
         changed_by: baseAuditlogEntry.actor,
         changed_values: [
           {
@@ -248,7 +248,7 @@ describe('versionService ', () => {
 
       expect(result).toMatchObject({
         change_type: 'update',
-        changed_at: baseAuditlogEntry.last_updated.toISOString(),
+        changed_at: '2026-03-01T00:00:00.000Z',
         changed_by: baseAuditlogEntry.actor,
         changed_values: [],
         comment: 'Test comment',
@@ -267,7 +267,7 @@ describe('versionService ', () => {
 
       expect(result).toMatchObject({
         change_type: 'update',
-        changed_at: baseAuditlogEntry.last_updated.toISOString(),
+        changed_at: '2026-03-01T00:00:00.000Z',
         changed_by: baseAuditlogEntry.actor,
         changed_values: [
           {
