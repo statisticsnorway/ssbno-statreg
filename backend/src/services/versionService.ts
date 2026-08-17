@@ -44,21 +44,6 @@ export function auditlogEntryToVersion(entry: Prisma.AuditLogGetPayload<null>): 
     return version
   }
 
-  // auditlog update entry from old statreg db:
-  if (entry.property_name) {
-    return {
-      ...version,
-      changed_values: [
-        {
-          field_name: entry.property_name,
-          old_value: String(entry.old_value),
-          new_value: String(entry.new_value),
-        },
-      ],
-    }
-  }
-
-  // auditlog update entry from new statreg db:
   try {
     const oldObject = entry.old_value ? JSON.parse(entry.old_value) : {}
     const newObject = entry.new_value ? JSON.parse(entry.new_value) : {}
@@ -68,7 +53,7 @@ export function auditlogEntryToVersion(entry: Prisma.AuditLogGetPayload<null>): 
       ...version,
       changed_values: [
         {
-          field_name: entry.class_name,
+          field_name: entry.property_name ?? entry.class_name,
           old_value: String(entry.old_value),
           new_value: String(entry.new_value),
         },
