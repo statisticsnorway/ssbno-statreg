@@ -14,9 +14,9 @@
     "dev": "nodemon --config nodemon.json",
     "start": "node dist/main.js",
     "build": "tsc --noEmit && pkgroll",
-    "generate": "prisma generate",
+    "generate": "pnpm dlx prisma generate --schema ./prisma/schema.prisma",
     "seed": "prisma db seed",
-    "db:deploy": "prisma migrate deploy",
+    "db:deploy": "pnpm dlx prisma migrate deploy",
     "test": "vitest --project backend ",
     "ci-test": "vitest run --project backend",
     "test:integration": "vitest run --project integration"
