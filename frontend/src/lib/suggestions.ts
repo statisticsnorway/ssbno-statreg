@@ -1,12 +1,6 @@
 import { type ReleaseListing } from '@ssbno-statreg/shared'
 import { getDateOnlyAsString } from './utils'
 
-function getLatestRelease(releases: ReleaseListing[]): ReleaseListing | undefined {
-  return releases
-    .filter((release) => release.publish_time)
-    .sort((a, b) => new Date(b.publish_time as string).getTime() - new Date(a.publish_time as string).getTime())[0]
-}
-
 function addYears(date: Date, years: number): Date {
   const result = new Date(date)
   result.setFullYear(result.getFullYear() + years)
@@ -138,11 +132,10 @@ function rollBackToWorkingDay(date: Date): Date {
   return publishDate
 }
 
-export function suggestNextRelease(releases: ReleaseListing[]): SuggestedRelease | undefined {
-  const latestRelease = getLatestRelease(releases)
-  if (!latestRelease) return undefined
+export function suggestNextRelease(release: ReleaseListing | undefined): SuggestedRelease | undefined {
+  if (!release) return undefined
 
-  const nextRelease = getNextRelease(latestRelease)
+  const nextRelease = getNextRelease(release)
   if (!nextRelease) return undefined
 
   return { ...nextRelease, publishTime: rollBackToWorkingDay(nextRelease.publishTime) }

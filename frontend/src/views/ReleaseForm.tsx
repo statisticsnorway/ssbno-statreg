@@ -305,7 +305,7 @@ export default function ReleaseForm() {
     if (isEditing || hasSuggestedReleaseRef.current) return
     hasSuggestedReleaseRef.current = true
 
-    const suggestedRelease = suggestNextRelease(latestRelease ? [latestRelease] : [])
+    const suggestedRelease = suggestNextRelease(latestRelease)
     if (!suggestedRelease) return
 
     setValues((v) => ({
