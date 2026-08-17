@@ -10,6 +10,21 @@ import {
 
 let prismaMock: any
 
+const baseAuditlogEntry = {
+  id: 1,
+  last_updated: new Date(2026, 2, 1),
+  property_name: null,
+  old_value: null,
+  new_value: null,
+  actor: 'user',
+  uri: null,
+  persisted_object_version: 1,
+  date_created: new Date(2026, 2, 1),
+  class_name: 'Statistic',
+  event_name: 'update',
+  persisted_object_id: 1,
+}
+
 describe('versionService ', () => {
   beforeEach(() => {
     prismaMock = {
@@ -205,26 +220,16 @@ describe('versionService ', () => {
   describe('auditlogEntryToVersion', () => {
     test('handles create event', () => {
       const entry = {
-        id: 1,
-        last_updated: new Date(2016, 0, 1),
-        property_name: null,
-        old_value: null,
-        new_value: null,
-        actor: 'system',
-        uri: null,
-        persisted_object_version: null,
-        date_created: new Date(2016, 0, 1),
-        class_name: 'Statistic',
+        ...baseAuditlogEntry,
         event_name: 'create',
-        persisted_object_id: 1,
       }
 
       const result = auditlogEntryToVersion(entry)
 
       expect(result).toStrictEqual({
         change_type: 'create',
-        changed_at: '2016-01-01T00:00:00.000Z',
-        changed_by: 'system',
+        changed_at: baseAuditlogEntry.last_updated.toISOString(),
+        changed_by: baseAuditlogEntry.actor,
         changed_values: undefined,
         comment: '',
       })
@@ -232,53 +237,44 @@ describe('versionService ', () => {
 
     test('handles old statreg update event', () => {
       const entry = {
-        id: 4,
-        last_updated: new Date(2026, 2, 1),
+        ...baseAuditlogEntry,
         property_name: 'deskFlyt',
         old_value: 'GODKJENT',
         new_value: 'FORSLAG',
-        actor: 'user2',
-        uri: null,
-        persisted_object_version: 1,
-        date_created: new Date(2026, 2, 1),
-        class_name: 'Statistic',
         event_name: 'update',
-        persisted_object_id: 1,
       }
 
       const result = auditlogEntryToVersion(entry)
 
       expect(result).toStrictEqual({
         change_type: 'update',
-        changed_at: '2026-03-01T00:00:00.000Z',
-        changed_by: 'user2',
-        changed_values: [{ field_name: 'deskFlyt', old_value: 'GODKJENT', new_value: 'FORSLAG' }],
+        changed_at: baseAuditlogEntry.last_updated.toISOString(),
+        changed_by: baseAuditlogEntry.actor,
+        changed_values: [
+          {
+            field_name: entry.property_name,
+            old_value: entry.old_value,
+            new_value: entry.new_value,
+          },
+        ],
         comment: '',
       })
     })
 
     test('handles new statreg update event', () => {
       const entry = {
-        id: 5,
-        last_updated: new Date(2026, 8, 1),
-        property_name: null,
+        ...baseAuditlogEntry,
         old_value: '{"comment":""}',
         new_value: '{"comment":"Test comment"}',
-        actor: 'user1',
-        uri: null,
-        persisted_object_version: 3,
-        date_created: new Date(2026, 8, 1),
-        class_name: 'Statistic',
         event_name: 'update',
-        persisted_object_id: 1,
       }
 
       const result = auditlogEntryToVersion(entry)
 
       expect(result).toMatchObject({
         change_type: 'update',
-        changed_at: '2026-09-01T00:00:00.000Z',
-        changed_by: 'user1',
+        changed_at: baseAuditlogEntry.last_updated.toISOString(),
+        changed_by: baseAuditlogEntry.actor,
         changed_values: [],
         comment: 'Test comment',
       })
@@ -288,27 +284,21 @@ describe('versionService ', () => {
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
 
       const entry = {
-        id: 6,
-        last_updated: new Date(2026, 8, 1),
-        property_name: null,
+        ...baseAuditlogEntry,
         old_value: 'invalid json {',
         new_value: '{}',
-        actor: 'user1',
-        uri: null,
-        persisted_object_version: 1,
-        date_created: new Date(2026, 8, 1),
-        class_name: 'Statistic',
         event_name: 'update',
-        persisted_object_id: 1,
       }
 
       const result = auditlogEntryToVersion(entry)
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith('Old or new value of auditlog entry with id 6 could not be parsed')
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        `Old or new value of auditlog entry with id ${baseAuditlogEntry.id} could not be parsed`
+      )
       expect(result).toMatchObject({
         change_type: 'update',
-        changed_at: '2026-09-01T00:00:00.000Z',
-        changed_by: 'user1',
+        changed_at: baseAuditlogEntry.last_updated.toISOString(),
+        changed_by: baseAuditlogEntry.actor,
         changed_values: undefined,
         comment: '',
       })
