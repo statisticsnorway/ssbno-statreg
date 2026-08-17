@@ -22,7 +22,7 @@ jobs:
 
       - run: pnpm i
       - run: pnpm run generate
-      - run: pnpm run build --if-present
+      - run: pnpm run build
       - run: pnpm run ci-test
       - run: pnpm run lint
       - run: pnpm run generate:api-types
