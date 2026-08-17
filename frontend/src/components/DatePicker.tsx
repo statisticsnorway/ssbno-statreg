@@ -17,6 +17,7 @@ type DatePickerProps = React.ComponentProps<typeof AkselDatePicker.Standalone> &
   showColorCodingExplanation?: boolean
   calendarDatesEmit?: (data: CalenderDate) => void
   apiErrorEmit?: (message: string) => void
+  onDaySelect?: (date: Date | undefined, status: keyof typeof DayStatus | undefined) => void
 }
 
 const fewStatusBackgroundImage = `url('data:image/svg+xml,${encodeURIComponent(
@@ -78,10 +79,22 @@ export function DatePickerColorLegend({ statusColors }: Readonly<{ statusColors:
   )
 }
 
-export function DatePicker({ showColorCodingExplanation, calendarDatesEmit, apiErrorEmit, ...props }: DatePickerProps) {
+export function DatePicker({
+  showColorCodingExplanation,
+  calendarDatesEmit,
+  apiErrorEmit,
+  onDaySelect,
+  ...props
+}: DatePickerProps) {
   const [calendarDates, setCalendarDates] = useState<CalenderDate>({})
   const displayedMonth = props.month
   const containerRef = useRef<HTMLDivElement>(null)
+
+  function getDayStatus(day: Date | undefined) {
+    if (!day) return undefined
+
+    return calendarDates[getDateOnlyAsString(day)]?.status as keyof typeof DayStatus | undefined
+  }
 
   useEffect(() => {
     async function fetchCalendarDates() {
@@ -162,6 +175,10 @@ export function DatePicker({ showColorCodingExplanation, calendarDatesEmit, apiE
             borderRadius: sharedStyles.borderRadius,
             textDecoration: 'line-through',
           },
+        }}
+        onDayClick={(day, modifiers, e) => {
+          props.onDayClick?.(day, modifiers, e)
+          onDaySelect?.(modifiers.selected ? undefined : day, getDayStatus(day))
         }}
         {...props}
       />

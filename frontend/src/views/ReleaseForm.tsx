@@ -15,7 +15,11 @@ import {
   ErrorSummary,
   Textarea,
 } from '@digdir/designsystemet-react'
-import { DatePicker as AkselDatePicker, useDatepicker as useAkselDatePicker } from '@navikt/ds-react/DatePicker'
+import {
+  DatePicker as AkselDatePicker,
+  type DateValidationT,
+  useDatepicker as useAkselDatePicker,
+} from '@navikt/ds-react/DatePicker'
 import { DatePicker } from '../components/DatePicker'
 import { suggestNextRelease } from '../lib/suggestions'
 import {
@@ -62,12 +66,38 @@ type ReleaseFormTypes = {
   comment?: string
 }
 
+type ReleaseFormField = keyof ReleaseFormTypes
+
 type ReleaseFormErrors = {
   dateType?: string
   publishTime?: string
   periodFrom?: string
   periodTo?: string
   comment?: string
+}
+
+type ReleaseDateField = 'publishTime' | 'periodFrom' | 'periodTo'
+type ReleaseDateValidations = Partial<Record<ReleaseDateField, DateValidationT>>
+
+type SelectedDayStatus = {
+  dateKey: string
+  status?: keyof typeof DayStatus
+}
+
+function isDateField(field: ReleaseFormField): field is ReleaseDateField {
+  return field === 'publishTime' || field === 'periodFrom' || field === 'periodTo'
+}
+
+function getInvalidDateError(field: ReleaseDateField): string {
+  if (field === 'publishTime') {
+    return 'Opprett en gyldig publiseringsdato'
+  }
+
+  if (field === 'periodFrom') {
+    return 'Opprett en gyldig fra-dato'
+  }
+
+  return 'Opprett en gyldig til-dato'
 }
 
 function parseDateFromString(dateString: string | undefined): Date | undefined {
@@ -89,6 +119,22 @@ function getReleaseModalDescription(isEditing: boolean, updatedRelease: ReleaseD
 function getCreatedReleaseModalDescription(createdRelease: ReleaseDetails) {
   const createdReleaseVariant = formatVariant(createdRelease?.variant).toLowerCase()
   return `Datoen ${formatDate(createdRelease?.publish_time)} er nå sendt inn for ${createdReleaseVariant}.`
+}
+
+function getSelectedDateStatus(
+  publishTime: Date | undefined,
+  calendarDates: CalenderDate,
+  selectedDayStatus?: SelectedDayStatus
+) {
+  if (!publishTime) return undefined
+
+  const dateKey = getDateOnlyAsString(publishTime)
+
+  if (selectedDayStatus?.dateKey === dateKey) {
+    return selectedDayStatus.status
+  }
+
+  return calendarDates?.[dateKey]?.status as keyof typeof DayStatus | undefined
 }
 
 function DateReleasesTable({
@@ -193,14 +239,25 @@ function VariantReleasesTable({
 }
 
 function useDatepicker(
-  key: keyof ReleaseFormTypes,
+  key: ReleaseDateField,
+  values: ReleaseFormTypes,
   setValues: React.Dispatch<React.SetStateAction<ReleaseFormTypes>>,
-  setErrors: React.Dispatch<React.SetStateAction<ReleaseFormErrors>>
+  setDateValidations: React.Dispatch<React.SetStateAction<ReleaseDateValidations>>,
+  updateFieldErrors: (fields: ReleaseFormField[], nextValues: ReleaseFormTypes, shouldAddNewErrors?: boolean) => void,
+  relatedFields: ReleaseFormField[] = [key]
 ) {
   return useAkselDatePicker({
     onDateChange: (date) => {
-      setValues((v) => ({ ...v, [key]: date }))
-      setErrors((e) => ({ ...e, [key]: '' }))
+      const nextValues = { ...values, [key]: date }
+
+      setValues(nextValues)
+      updateFieldErrors(relatedFields, nextValues, false)
+    },
+    onValidate: (validation) => {
+      setDateValidations((currentValidations) => ({
+        ...currentValidations,
+        [key]: validation,
+      }))
     },
   })
 }
@@ -218,14 +275,13 @@ export default function ReleaseForm() {
     publishTime: suggestedPublishTime,
   })
   const [errors, setErrors] = useState<ReleaseFormErrors>({})
+  const [dateValidations, setDateValidations] = useState<ReleaseDateValidations>({})
   const [statistic, setStatistic] = useState<Statistic>()
   const [variant, setVariant] = useState<Variant>()
-  const publishTimePicker = useDatepicker('publishTime', setValues, setErrors)
-  const periodFromPicker = useDatepicker('periodFrom', setValues, setErrors)
-  const periodToPicker = useDatepicker('periodTo', setValues, setErrors)
   const [openReleaseModal, setOpenReleaseModal] = useState(false)
   const [newOrUpdatedRelease, setNewOrUpdatedRelease] = useState<ReleaseDetails>({})
   const [calendarDates, setCalendarDates] = useState<CalenderDate>({})
+  const [selectedPublishDayStatus, setSelectedPublishDayStatus] = useState<SelectedDayStatus>()
   const [apiError, setApiError] = useState<string[]>([])
   const [calendarApiError, setCalendarApiError] = useState<string>('')
   const [variantReleasesApiError, setVariantReleasesApiError] = useState<string>('')
@@ -246,10 +302,145 @@ export default function ReleaseForm() {
     }
   }
 
-  const selectedDateStatus =
-    values.publishTime &&
-    calendarDates &&
-    (calendarDates?.[getDateOnlyAsString(values.publishTime)]?.status as keyof typeof DayStatus)
+  const selectedDateStatus = getSelectedDateStatus(values.publishTime, calendarDates, selectedPublishDayStatus)
+
+  function validateField(field: ReleaseFormField, nextValues = values, nextDateValidations = dateValidations): string {
+    const nextSelectedDateStatus = getSelectedDateStatus(
+      nextValues.publishTime,
+      calendarDates,
+      selectedPublishDayStatus
+    )
+
+    if (isDateField(field) && nextDateValidations[field]?.isInvalid) {
+      return getInvalidDateError(field)
+    }
+
+    if (field === 'dateType' && !nextValues.dateType) {
+      return 'Velg en datotype for publisering'
+    }
+
+    if (field === 'publishTime') {
+      if (!nextValues.publishTime) {
+        return 'Opprett en gyldig publiseringsdato'
+      }
+      if (!isAdmin && nextValues.publishTime < inThreeMonths) {
+        return 'Publiseringsdato tidligere enn tre måneder fra dags dato må opprettes av desken'
+      }
+      if (!isAdmin && nextSelectedDateStatus === 'FULL') {
+        return 'Velg en annen dato som ikke er full, eller kontakt desken@ssb.no'
+      }
+      if (!isAdmin && nextSelectedDateStatus === 'BLOCKED') {
+        return 'Velg en annen dato som ikke er sperret, eller kontakt desken@ssb.no'
+      }
+    }
+
+    if (field === 'periodFrom') {
+      if (!nextValues.periodFrom) {
+        return 'Opprett en gyldig fra-dato'
+      }
+      if (nextValues.periodTo && nextValues.periodFrom > nextValues.periodTo) {
+        return 'Fra-dato kan ikke være etter til-dato'
+      }
+    }
+
+    if (field === 'periodTo') {
+      if (!nextValues.periodTo) {
+        return 'Opprett en gyldig til-dato'
+      }
+      if (nextValues.periodFrom && nextValues.periodFrom > nextValues.periodTo) {
+        return 'Til-dato kan ikke være før fra-dato'
+      }
+    }
+
+    if (field === 'comment' && isEditing && !nextValues.comment) {
+      return 'Beskriv endringer som er gjort'
+    }
+
+    return ''
+  }
+
+  function updateFieldErrors(fields: ReleaseFormField[], nextValues: ReleaseFormTypes, shouldAddNewErrors = true) {
+    setErrors((currentErrors) => {
+      const nextErrors = { ...currentErrors }
+
+      for (const field of fields) {
+        const error = validateField(field, nextValues)
+        const isPeriodComparisonError =
+          (field === 'periodFrom' || field === 'periodTo') &&
+          nextValues.periodFrom &&
+          nextValues.periodTo &&
+          nextValues.periodFrom > nextValues.periodTo
+
+        if (error) {
+          if (shouldAddNewErrors || nextErrors[field] || isPeriodComparisonError) {
+            nextErrors[field] = error
+          }
+        } else {
+          delete nextErrors[field]
+        }
+      }
+
+      return nextErrors
+    })
+  }
+
+  function handleValueChange<K extends ReleaseFormField>(
+    field: K,
+    value: ReleaseFormTypes[K],
+    relatedFields: ReleaseFormField[] = [field],
+    shouldAddNewErrors = false
+  ) {
+    const nextValues = { ...values, [field]: value }
+
+    setValues(nextValues)
+    if (field === 'publishTime') {
+      setSelectedPublishDayStatus(undefined)
+    }
+    updateFieldErrors(relatedFields, nextValues, shouldAddNewErrors)
+  }
+
+  function handleOnBlur(field: ReleaseFormField) {
+    setErrors((currentErrors) => {
+      const nextErrors = { ...currentErrors }
+      const error = validateField(field)
+
+      if (error) nextErrors[field] = error
+      else delete nextErrors[field]
+
+      return nextErrors
+    })
+  }
+
+  const periodFields: ReleaseFormField[] = ['periodFrom', 'periodTo']
+  const publishTimePicker = useDatepicker('publishTime', values, setValues, setDateValidations, updateFieldErrors)
+  const periodFromPicker = useDatepicker(
+    'periodFrom',
+    values,
+    setValues,
+    setDateValidations,
+    updateFieldErrors,
+    periodFields
+  )
+  const periodToPicker = useDatepicker(
+    'periodTo',
+    values,
+    setValues,
+    setDateValidations,
+    updateFieldErrors,
+    periodFields
+  )
+
+  function getDisplayedError(field: ReleaseFormField) {
+    return errors[field] ?? ''
+  }
+
+  const displayedErrors: ReleaseFormErrors = {
+    dateType: getDisplayedError('dateType'),
+    publishTime: getDisplayedError('publishTime'),
+    periodFrom: getDisplayedError('periodFrom'),
+    periodTo: getDisplayedError('periodTo'),
+    comment: getDisplayedError('comment'),
+  }
 
   // when id exists in url-path, fetch release and prefill form
   useEffect(() => {
@@ -269,6 +460,8 @@ export default function ReleaseForm() {
       }
 
       setApprovalStatus(response?.approval_status ?? ApprovalStatus.PENDING)
+      setSelectedPublishDayStatus(undefined)
+      setDateValidations({})
       setValues(loaded)
       publishTimePicker.setSelected(loaded.publishTime)
       periodFromPicker.setSelected(loaded.periodFrom)
@@ -314,6 +507,18 @@ export default function ReleaseForm() {
       periodFrom: suggestedRelease.periodFrom,
       periodTo: suggestedRelease.periodTo,
     }))
+    updateFieldErrors(
+      ['publishTime', 'periodFrom', 'periodTo'],
+      {
+        ...values,
+        publishTime: suggestedRelease.publishTime,
+        periodFrom: suggestedRelease.periodFrom,
+        periodTo: suggestedRelease.periodTo,
+      },
+      false
+    )
+    setSelectedPublishDayStatus(undefined)
+    setDateValidations({})
     publishTimePicker.setSelected(suggestedRelease.publishTime)
     periodFromPicker.setSelected(suggestedRelease.periodFrom)
     periodToPicker.setSelected(suggestedRelease.periodTo)
@@ -322,28 +527,16 @@ export default function ReleaseForm() {
   function validateFields(): boolean {
     const nextErrors: ReleaseFormErrors = {}
 
-    if (!values.dateType) nextErrors.dateType = 'Velg en datotype for publisering'
-    if (!values.publishTime) nextErrors.publishTime = 'Opprett en gyldig publiseringsdato'
-    if (!values.periodFrom) nextErrors.periodFrom = 'Opprett en gyldig fra-dato'
-    if (!values.periodTo) nextErrors.periodTo = 'Opprett en gyldig til-dato'
-    if (!isAdmin && values.publishTime && values.publishTime < inThreeMonths) {
-      nextErrors.publishTime = 'Publiseringsdato tidligere enn tre måneder fra dags dato må opprettes av desken'
-    }
-    if (!isAdmin && selectedDateStatus === 'FULL') {
-      nextErrors.publishTime = 'Velg en annen dato som ikke er full, eller kontakt desken@ssb.no'
-    }
-    if (!isAdmin && selectedDateStatus === 'BLOCKED') {
-      nextErrors.publishTime = 'Velg en annen dato som ikke er sperret, eller kontakt desken@ssb.no'
+    const fieldsToValidate: ReleaseFormField[] = ['dateType', 'publishTime', 'periodFrom', 'periodTo']
+    if (isEditing) {
+      fieldsToValidate.push('comment')
     }
 
-    // TODO: MIM-2582: Review comparison logic, error messages, and implement onChange
-    if (values.periodFrom && values.periodTo && values.periodFrom > values.periodTo) {
-      nextErrors.periodFrom = 'Fra-dato kan ikke være etter til-dato'
-      nextErrors.periodTo = 'Til-dato kan ikke være før fra-dato'
-    }
-
-    if (isEditing && !values.comment) {
-      nextErrors.comment = 'Beskriv endringer som er gjort'
+    for (const field of fieldsToValidate) {
+      const error = validateField(field)
+      if (error) {
+        nextErrors[field] = error
+      }
     }
 
     setErrors(nextErrors)
@@ -427,11 +620,9 @@ export default function ReleaseForm() {
           <Select
             id='dateType'
             value={values.dateType ?? ''}
-            onChange={(e) => {
-              setValues((values) => ({ ...values, dateType: e.target.value }))
-              setErrors((errors) => ({ ...errors, dateType: '' }))
-            }}
-            aria-invalid={!!errors.dateType}
+            onChange={(e) => handleValueChange('dateType', e.target.value)}
+            onBlur={() => handleOnBlur('dateType')}
+            aria-invalid={!!displayedErrors.dateType}
           >
             <Select.Option value='' disabled>
               Velg datotype
@@ -442,7 +633,7 @@ export default function ReleaseForm() {
               </Select.Option>
             ))}
           </Select>
-          {errors.dateType && <ValidationMessage>{errors.dateType}</ValidationMessage>}
+          {displayedErrors.dateType && <ValidationMessage>{displayedErrors.dateType}</ValidationMessage>}
         </Field>
 
         <Field>
@@ -451,8 +642,18 @@ export default function ReleaseForm() {
             Nye datoer og endringer må meldes minst 3 måneder i forveien. <br />
             For kortere frister, kontakt mmj@ssb.no.
           </Field.Description>
-          <Input id='publishTime' size={10} {...publishTimePicker.inputProps} aria-invalid={!!errors.publishTime} />
-          {errors.publishTime && <ValidationMessage>{errors.publishTime}</ValidationMessage>}
+          <Input
+            id='publishTime'
+            size={10}
+            {...publishTimePicker.inputProps}
+            onChange={publishTimePicker.inputProps.onChange}
+            onBlur={(e) => {
+              publishTimePicker.inputProps.onBlur?.(e)
+              handleOnBlur('publishTime')
+            }}
+            aria-invalid={!!displayedErrors.publishTime}
+          />
+          {displayedErrors.publishTime && <ValidationMessage>{displayedErrors.publishTime}</ValidationMessage>}
           {showEarlyPublishTimeWarning && (
             <ValidationMessage data-color='warning'>
               Du har valgt en dato tidligere enn tre måneder fra i dag. Du kan fortsatt melde dato som admin.
@@ -473,6 +674,9 @@ export default function ReleaseForm() {
             showColorCodingExplanation
             calendarDatesEmit={setCalendarDates}
             apiErrorEmit={setCalendarApiError}
+            onDaySelect={(date, status) => {
+              setSelectedPublishDayStatus(date ? { dateKey: getDateOnlyAsString(date), status } : undefined)
+            }}
           />
         </Field>
 
@@ -484,11 +688,16 @@ export default function ReleaseForm() {
                 <AkselDatePicker.Input
                   id='periodFrom'
                   {...periodFromPicker.inputProps}
-                  aria-invalid={!!errors.periodFrom}
+                  onChange={periodFromPicker.inputProps.onChange}
+                  onBlur={(e) => {
+                    periodFromPicker.inputProps.onBlur?.(e)
+                    handleOnBlur('periodFrom')
+                  }}
+                  aria-invalid={!!displayedErrors.periodFrom}
                   label
                 />
               </AkselDatePicker>
-              {errors.periodFrom && <ValidationMessage>{errors.periodFrom}</ValidationMessage>}
+              {displayedErrors.periodFrom && <ValidationMessage>{displayedErrors.periodFrom}</ValidationMessage>}
             </Field>
 
             <Field>
@@ -497,11 +706,16 @@ export default function ReleaseForm() {
                 <AkselDatePicker.Input
                   id='periodTo'
                   {...periodToPicker.inputProps}
-                  aria-invalid={!!errors.periodTo}
+                  onChange={periodToPicker.inputProps.onChange}
+                  onBlur={(e) => {
+                    periodToPicker.inputProps.onBlur?.(e)
+                    handleOnBlur('periodTo')
+                  }}
+                  aria-invalid={!!displayedErrors.periodTo}
                   label
                 />
               </AkselDatePicker>
-              {errors.periodTo && <ValidationMessage>{errors.periodTo}</ValidationMessage>}
+              {displayedErrors.periodTo && <ValidationMessage>{displayedErrors.periodTo}</ValidationMessage>}
             </Field>
           </div>
         </Fieldset>
@@ -514,12 +728,10 @@ export default function ReleaseForm() {
               id='comment'
               rows={6}
               value={values.comment}
-              onChange={(e) => {
-                setValues((values) => ({ ...values, comment: e.target.value }))
-                setErrors((errors) => ({ ...errors, comment: '' }))
-              }}
+              onChange={(e) => handleValueChange('comment', e.target.value)}
+              onBlur={() => handleOnBlur('comment')}
             />
-            {errors.comment && <ValidationMessage>{errors.comment}</ValidationMessage>}
+            {displayedErrors.comment && <ValidationMessage>{displayedErrors.comment}</ValidationMessage>}
           </Field>
         )}
 
@@ -535,11 +747,11 @@ export default function ReleaseForm() {
           </Button>
         </div>
 
-        {Object.values(errors).some(Boolean) && (
+        {Object.values(displayedErrors).some(Boolean) && (
           <ErrorSummary>
             <ErrorSummary.Heading>For å gå videre må du rette opp følgende feil:</ErrorSummary.Heading>
             <ErrorSummary.List>
-              {Object.entries(errors).map(([key, message]) => {
+              {Object.entries(displayedErrors).map(([key, message]) => {
                 if (message) {
                   return (
                     <ErrorSummary.Item key={message}>
