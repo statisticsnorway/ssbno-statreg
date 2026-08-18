@@ -8,6 +8,7 @@ import {
   getReleaseById,
   updateRelease,
   createRelease,
+  parseReleaseInput,
   bulkApproveReleases,
   buildReleaseFilter,
   buildVariantReleaseFilter,
@@ -461,7 +462,7 @@ describe('releasesService ', async () => {
         where: { id: 1 },
         data: {
           publish_time: new Date('2024-10-15T08:00:00Z'),
-          period_to: new Date('2024-12-31T00:00:00Z'),
+           period_to: new Date('2024-10-01T00:00:00Z'),
           period_from: new Date('2024-09-01T00:00:00Z'),
           release_date_precision: 'dag',
           desk_appoval_status: ApprovalStatus.PENDING,
@@ -481,7 +482,7 @@ describe('releasesService ', async () => {
         where: { id: 1 },
         data: {
           publish_time: new Date('2024-10-15T08:00:00Z'),
-          period_to: new Date('2024-12-31T00:00:00Z'),
+           period_to: new Date('2024-10-01T00:00:00Z'),
           period_from: new Date('2024-09-01T00:00:00Z'),
           release_date_precision: 'dag',
           desk_appoval_status: ApprovalStatus.ACCEPTED,
@@ -652,7 +653,7 @@ describe('releasesService ', async () => {
       expect(prismaMock.release.create).toHaveBeenCalledExactlyOnceWith({
         data: {
           publish_time: new Date('2024-10-15T08:00:00Z'),
-          period_to: new Date('2024-12-31T00:00:00Z'),
+           period_to: new Date('2024-10-01T00:00:00Z'),
           period_from: new Date('2024-09-01T00:00:00Z'),
           desk_appoval_status: ApprovalStatus.PENDING,
           release_date_precision: 'dag',
@@ -686,7 +687,7 @@ describe('releasesService ', async () => {
       expect(prismaMock.release.create).toHaveBeenCalledExactlyOnceWith({
         data: {
           publish_time: new Date('2024-10-15T08:00:00Z'),
-          period_to: new Date('2024-12-31T00:00:00Z'),
+           period_to: new Date('2024-10-01T00:00:00Z'),
           period_from: new Date('2024-09-01T00:00:00Z'),
           desk_appoval_status: ApprovalStatus.ACCEPTED,
           release_date_precision: 'dag',
@@ -783,6 +784,34 @@ describe('releasesService ', async () => {
       )
 
       expect(prismaMock.release.create).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  describe('parseReleaseInput ', () => {
+    test('rejects when end of measuring period is earlier than start of measuring period', async () => {
+      const input = {
+        publish_time: '2024-10-15T08:00:00Z',
+        period_from: '2024-12-31',
+        period_to: '2024-09-01',
+        release_date_precision: 'dag',
+      }
+
+      await expect(() => parseReleaseInput(prismaMock, input)).rejects.toMatchObject({
+        statregError: 'End of measuring period cannot be earlier than start of measuring period',
+      })
+    })
+
+    test('rejects when publish time is earlier than end of measuring period', async () => {
+      const input = {
+        publish_time: '2024-10-15T08:00:00Z',
+        period_from: '2024-09-01',
+        period_to: '2025-06-01',
+        release_date_precision: 'dag',
+      }
+
+      await expect(() => parseReleaseInput(prismaMock, input)).rejects.toMatchObject({
+        statregError: 'Publish time cannot be earlier than end of measuring period',
+      })
     })
   })
 })
@@ -972,7 +1001,7 @@ const mockedSingleReleaseResult = {
 
 const mockCreateReleaseInput = {
   publish_time: '2024-10-15T08:00:00Z',
-  period_to: '2024-12-31',
+  period_to: '2024-10-01',
   period_from: '2024-09-01',
   release_date_precision: 'dag',
 }
