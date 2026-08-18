@@ -1,5 +1,5 @@
 import { describe, expect, test, vi } from 'vitest'
-import { Contact, StatisticCreate, StatisticListingResponse } from '@ssbno-statreg/shared'
+import { Contact, StatisticCreate, StatisticListingResponse, StatisticUpdate } from '@ssbno-statreg/shared'
 import { createApp } from '@/app'
 import request from 'supertest'
 
@@ -63,7 +63,7 @@ describe('statistics controller', () => {
     const createPayload = {
       status: { code: 'K' },
       division: '101',
-      name: 'Integration Test Created Statistic',
+      name: 'Teststatistikk for opprettelse av kommende statistikk',
       first_released_at: '2024-01-01',
     }
     const response = await request(app)
@@ -73,12 +73,12 @@ describe('statistics controller', () => {
 
     expect(response.status).toBe(200)
     expect(response.body).toMatchObject({
-      shortname: newShortname,
-      name: createPayload.name,
+      shortname: 'upcoming_test',
+      name: 'Teststatistikk for opprettelse av kommende statistikk',
       name_en: '',
       main_language: 'nb',
-      comment: `Create statistic with shortname: ${newShortname}`,
-      division: { code: createPayload.division },
+      comment: 'Create statistic with shortname: upcoming_test',
+      division: { code: '101' },
       yearly_reporting: false,
       status: { code: 'K' },
       first_released_at: '2024-01-01T00:00:00.000Z',
@@ -96,11 +96,11 @@ describe('statistics controller', () => {
     expect(shortnameResponse.status).toBe(201)
 
     // POST /statistics with contacts and variants and assert response
-    const createPayload = {
+    const createPayload: StatisticCreate = {
       status: { code: 'A' },
       division: '101',
-      name: 'Integrationstest for oppretting av statistikk',
-      name_en: 'Integration Test Created Statistic',
+      name: 'Teststatistikk for opprettelse av aktiv statistikk',
+      name_en: 'Test statistic for creation of active statistic',
       main_language: 'nb',
       first_released_at: '2026-08-10',
       contacts: ['bcd@ssb.no'],
@@ -122,39 +122,26 @@ describe('statistics controller', () => {
       .send(createPayload)
 
     expect(response.status).toBe(200)
-
     expect(response.body).toMatchObject({
-      shortname: newShortname,
-      name: createPayload.name,
-      name_en: createPayload.name_en,
+      shortname: 'active_test',
+      name: 'Teststatistikk for opprettelse av aktiv statistikk',
+      name_en: 'Test statistic for creation of active statistic',
       main_language: 'nb',
-      comment: `Create statistic with shortname: ${newShortname}`,
-      division: { code: createPayload.division },
+      comment: 'Create statistic with shortname: active_test',
+      division: { code: '101' },
       yearly_reporting: false,
       status: { code: 'A' },
       first_released_at: '2026-08-10T00:00:00.000Z',
+      contacts: [{ name: 'Bob', principalName: 'bcd@ssb.no' }],
+      variants: [
+        {
+          cancelled: false,
+          revision: { code: 'I' },
+          frequency: { name: 'Uke (U)', code: 'U' },
+          level_of_detail: { name: 'Detaljnivå', name_en: 'Level of detail' },
+        },
+      ],
     })
-
-    expect(response.body.contacts).toStrictEqual([
-      {
-        name: 'Bob',
-        principalName: 'bcd@ssb.no',
-      },
-    ])
-    expect(response.body.variants).toEqual([
-      expect.objectContaining({
-        cancelled: false,
-        revision: { code: 'I' },
-        frequency: {
-          name: 'Uke (U)',
-          code: 'U',
-        },
-        level_of_detail: {
-          name: 'Detaljnivå',
-          name_en: 'Level of detail',
-        },
-      }),
-    ])
   })
 
   test('updates an statistic', async () => {
@@ -168,14 +155,11 @@ describe('statistics controller', () => {
     expect(shortnameResponse.status).toBe(201)
 
     // POST /statistics
-    const createPayload = {
+    const createPayload: StatisticCreate = {
       status: { code: 'K' },
       division: '101',
-      name: 'Integration Test Statistic To Update',
-      name_en: 'Integration Test Statistic To Update EN',
-      first_released_at: '2024-01-01',
-      main_language: 'nb',
-      comment: 'Created for update integration test',
+      name: 'Statistikk for oppdateringstest',
+      statistic_region_levels: [{ code: 'K' }],
     }
 
     const createResponse = await request(app)
@@ -186,18 +170,18 @@ describe('statistics controller', () => {
     expect(createResponse.status).toBe(200)
 
     // PUT /statistics and assert response
-    const updatePayload = {
+    const updatePayload: StatisticUpdate = {
       division: '101',
-      statistic_region_levels: [],
-      status: { code: 'IA' },
-      name: 'Integration Test Statistic Updated',
-      name_en: 'Integration Test Statistic Updated EN',
+      statistic_region_levels: [{ code: 'F' }],
+      status: { code: 'K' },
+      name: 'Oppdatert statistikk',
+      name_en: 'Oppdatert statistikk',
       relation: null,
-      previous_topic_codes: '02.01.01',
+      previous_topic_codes: '',
       yearly_reporting: false,
       first_released_at: '2024-02-01',
       main_language: 'nn',
-      comment: 'Updated by integration test',
+      comment: 'Kommentar',
     }
 
     const updateResponse = await request(app)
@@ -206,17 +190,17 @@ describe('statistics controller', () => {
       .send(updatePayload)
 
     expect(updateResponse.status).toBe(200)
-
     expect(updateResponse.body).toMatchObject({
-      shortname: newShortname,
-      name: updatePayload.name,
-      name_en: updatePayload.name_en,
-      main_language: updatePayload.main_language,
-      comment: updatePayload.comment,
-      division: { code: updatePayload.division },
-      yearly_reporting: updatePayload.yearly_reporting,
-      status: { code: updatePayload.status.code },
+      division: { code: '101' },
+      statistic_region_levels: [{ code: 'F' }],
+      status: { code: 'K' },
+      name: 'Oppdatert statistikk',
+      name_en: 'Oppdatert statistikk',
+      previous_topic_codes: '',
+      yearly_reporting: false,
       first_released_at: '2024-02-01T00:00:00.000Z',
+      main_language: 'nn',
+      comment: 'Kommentar',
     })
   })
 
@@ -247,12 +231,12 @@ describe('statistics controller', () => {
     const response = await request(app)
       .get('/statistikkregisteret/api/statistics')
       .query(`shortname=${shortnameA},${shortnameB}&sort=-shortname`)
-    const statistics = response.body as StatisticListingResponse
 
     expect(response.status).toBe(200)
-    expect(statistics.statistics?.length).toBe(2)
-    expect(statistics.statistics?.[0]?.shortname).toBe(shortnameB)
-    expect(statistics.statistics?.[1]?.shortname).toBe(shortnameA)
+    expect(response.body).toMatchObject({
+      total: 2,
+      statistics: [{ shortname: 'filter_b' }, { shortname: 'filter_a' }],
+    })
   })
 
   test('lists statistics with contact filter', async () => {
@@ -274,10 +258,8 @@ describe('statistics controller', () => {
     const response = await request(app).get('/statistikkregisteret/api/statistics').query(`contact=bcd@ssb.no`)
 
     expect(response.status).toBe(200)
-
-    const statistics = response.body as StatisticListingResponse
-    const shortnames = statistics.statistics?.map((s) => s.shortname)
-    expect(shortnames).toContain(newShortname)
+    const foundShortnames = (response.body as StatisticListingResponse).statistics?.map((s) => s.shortname)
+    expect(foundShortnames).toContain('contact_filter')
 
     // PUT /statistics/:shortname/contacts to remove contact from statistic
     await request(app)
@@ -291,10 +273,10 @@ describe('statistics controller', () => {
       .query(`contact=bcd@ssb.no`)
 
     expect(responseAfterRemoval.status).toBe(200)
-
-    const statisticsAfterRemoval = responseAfterRemoval.body as StatisticListingResponse
-    const shortnamesAfterRemoval = statisticsAfterRemoval.statistics?.map((s) => s.shortname)
-    expect(shortnamesAfterRemoval).not.toContain(newShortname)
+    const foundShortnamesAfterRemoval = (responseAfterRemoval.body as StatisticListingResponse).statistics?.map(
+      (s) => s.shortname
+    )
+    expect(foundShortnamesAfterRemoval).not.toContain('contact_filter')
   })
 
   test('sets new contacts for a statistic', async () => {
@@ -321,7 +303,7 @@ describe('statistics controller', () => {
       .send(createPayload)
     expect(createResponse.status).toBe(200)
 
-    // PUT /statistics/:shortname/contacts
+    // PUT /statistics/:shortname/contacts and assert response
     const contactsPayload = ['bcd@ssb.no']
 
     const contactsResponse = await request(app)
@@ -329,16 +311,12 @@ describe('statistics controller', () => {
       .set('content-type', 'application/json')
       .send(contactsPayload)
 
-    const expectedContacts: Contact[] = [{ name: 'Bob', principalName: 'bcd@ssb.no' }]
-
     expect(contactsResponse.status).toBe(200)
-    expect(contactsResponse.body).toHaveLength(1)
-    expect(contactsResponse.body).toEqual(expect.arrayContaining(expectedContacts))
+    expect(contactsResponse.body).toMatchObject([{ name: 'Bob', principalName: 'bcd@ssb.no' }])
 
     // GET /statistics/:shortname to test persistence of new contacts
     const fetchResponse = await request(app).get(`/statistikkregisteret/api/statistics/${newShortname}`)
     expect(fetchResponse.status).toBe(200)
-    expect(fetchResponse.body.contacts).toHaveLength(1)
-    expect(fetchResponse.body.contacts).toEqual(expect.arrayContaining(expectedContacts))
+    expect(fetchResponse.body).toMatchObject({ contacts: [{ name: 'Bob', principalName: 'bcd@ssb.no' }] })
   })
 })
