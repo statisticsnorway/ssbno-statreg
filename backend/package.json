@@ -19,7 +19,9 @@
     "db:deploy": "prisma migrate deploy",
     "test": "vitest --project backend ",
     "ci-test": "vitest run --project backend",
-    "test:integration": "vitest run --project integration"
+    "test:integration": "vitest run --project integration",
+    "test:integration:local": "npx prisma migrate reset && npm run seed && npm run test:integration",
+    "test:integration:local:force": "npx prisma migrate reset --force && npm run seed && npm run test:integration"
   },
   "dependencies": {
     "@cacheable/node-cache": "3.1.1",

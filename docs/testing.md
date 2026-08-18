@@ -40,13 +40,12 @@ PGURL=postgresql://<USERNAME>@localhost:5432/statreg_db_integration_test?sslmode
 Run the integration tests with the following command:
 
 ```sh
-cd backend
-npx prisma migrate reset && npm run seed && npm run test:integration
+npm run test:integration:local
 ```
 
 This will always prompt you before resetting the database.
-You may remove the prompt by adding a `--force` flag:
+If you want to run it without the prompt:
 
 ```sh
-npx prisma migrate reset --force && npm run seed && npm run test:integration
+npm run test:integration:local:force
 ```
