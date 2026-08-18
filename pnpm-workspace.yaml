@@ -7,3 +7,4 @@ allowBuilds:
   "@scarf/scarf": false
   esbuild: false
   prisma: false
+minimumReleaseAge: 4320 # 3 days
