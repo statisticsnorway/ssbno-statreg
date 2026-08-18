@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest'
 import { createApp } from '@/app'
 import request from 'supertest'
-import { ReleaseListing } from '@ssbno-statreg/shared'
+import { ReleaseDetails, ReleaseListing } from '@ssbno-statreg/shared'
 
 const app = await createApp()
 
@@ -33,10 +33,23 @@ describe('release data is persisted when ', () => {
     // test persistence
     expect(fetched.body.id).toBe(created.body.id)
     assertEqualReleaseData(fetched.body, body)
+
+    // GET versions to check that create event is registered in auditlog
+    const versions = await request(app).get(`/statistikkregisteret/api/releases/${created.body.id}/versions`)
+    expect(versions.status).toBe(200)
+    expect(versions.body).toHaveLength(1)
+    expect(versions.body[0].change_type).toBe('create')
   })
 
   test('client picks release and updates fields', async () => {
-    // GET release listing and pick release
+    // This integration test simulates the following events:
+    // 1. User opens the release listing page
+    // 2. User clicks on a release to open the release details page
+    // 3. User clicks "edit", changes a couple of fields and submits
+    // 4. User opens the release details page to check that values are changed
+    // 5. User opens version history to check that change is registered
+
+    // 1. GET release listing and pick release
     const list = await request(app).get(
       `/statistikkregisteret/api/statistics/${shortname}/variants/${variantId}/releases`
     )
@@ -44,27 +57,53 @@ describe('release data is persisted when ', () => {
     expect(list.body.total).toBeGreaterThan(1)
     const picked = list.body.releases[0]
 
-    // PUT release with updated fields
+    // 2. GET release to see full details of picked release
+    const pickedReleaseResponse = await request(app).get(`/statistikkregisteret/api/releases/${picked.id}`)
+    expect(pickedReleaseResponse.status).toBe(200)
+    const pickedRelease = pickedReleaseResponse.body as ReleaseDetails
+
+    // 3. PUT release with updated fields
     const updateBody = {
-      publish_time: addMonthsToDate(picked.publish_time, 3),
-      period_from: picked.period_from,
-      period_to: picked.period_to,
+      publish_time: addMonthsToDate(pickedRelease.publish_time!, 3),
+      period_from: pickedRelease.period_from,
+      period_to: pickedRelease.period_to,
       release_date_precision: 'month',
       comment: 'Postpone release date.',
     }
-    const updated = await request(app)
+    const putResponse = await request(app)
       .put(`/statistikkregisteret/api/releases/${picked.id}`)
       .set(headers)
       .send(updateBody)
-    expect(updated.status).toBe(200)
+    expect(putResponse.status).toBe(200)
 
-    // GET release
-    const fetched = await request(app).get(`/statistikkregisteret/api/releases/${picked.id}`)
-    expect(fetched.status).toBe(200)
+    // 4. GET release to check persistence of new values
+    const updatedReleaseResponse = await request(app).get(`/statistikkregisteret/api/releases/${picked.id}`)
+    expect(updatedReleaseResponse.status).toBe(200)
+    expect(updatedReleaseResponse.body.id).toBe(picked.id)
+    const updatedRelease = updatedReleaseResponse.body as ReleaseDetails
+    assertEqualReleaseData(updatedRelease, updateBody)
 
-    // test persistence
-    expect(fetched.body.id).toBe(picked.id)
-    assertEqualReleaseData(fetched.body, updateBody)
+    // 5. GET versions to check that change is registered
+    const versions = await request(app).get(`/statistikkregisteret/api/releases/${picked.id}/versions`)
+    expect(versions.status).toBe(200)
+    const lastVersion = versions.body[0]
+    expect(lastVersion.change_type).toBe('update')
+    expect(lastVersion.comment).toBe(updateBody.comment)
+    expect(lastVersion.changed_values).toHaveLength(2)
+    expect(lastVersion.changed_values).toEqual(
+      expect.arrayContaining([
+        {
+          field_name: 'publish_time',
+          old_value: pickedRelease.publish_time,
+          new_value: updatedRelease.publish_time,
+        },
+        {
+          field_name: 'release_date_precision',
+          old_value: pickedRelease.release_date_precision,
+          new_value: updatedRelease.release_date_precision,
+        },
+      ])
+    )
   })
 })
 
