@@ -6,7 +6,7 @@ import type { Version } from '@ssbno-statreg/shared'
 
 export type VersionPrisma = Pick<PrismaClient, 'auditLog' | 'statistic' | 'release'>
 
-function diffObjects(
+export function diffObjects(
   oldObject: Record<string, unknown>,
   newObject: Record<string, unknown>
 ): Version['changed_values'] {
@@ -22,8 +22,8 @@ function diffObjects(
     if (oldValue !== newValue) {
       changes.push({
         field_name: key,
-        old_value: JSON.stringify(oldValue),
-        new_value: JSON.stringify(newValue),
+        old_value: String(oldValue),
+        new_value: String(newValue),
       })
     }
   }
@@ -31,35 +31,34 @@ function diffObjects(
   return changes
 }
 
-function auditlogEntryToVersion(entry: Prisma.AuditLogGetPayload<null>): Version {
-  let changedValues: Version['changed_values']
-  let comment: string = ''
-
-  if (entry.event_name === 'update') {
-    // auditlog entries from old statreg:
-    if (entry.property_name) {
-      changedValues = [
-        {
-          field_name: String(entry.property_name),
-          old_value: String(entry.old_value),
-          new_value: String(entry.new_value),
-        },
-      ]
-      // auditlog entries from new statreg:
-    } else {
-      const oldObject = entry.old_value ? JSON.parse(entry.old_value) : {}
-      const newObject = entry.new_value ? JSON.parse(entry.new_value) : {}
-      changedValues = diffObjects(oldObject, newObject)
-      comment = newObject.comment
-    }
-  }
-
-  return {
+export function auditlogEntryToVersion(entry: Prisma.AuditLogGetPayload<null>): Version {
+  const version = {
     change_type: entry.event_name,
     changed_at: entry.last_updated.toISOString(),
     changed_by: entry.actor,
-    changed_values: changedValues,
-    comment: comment,
+    changed_values: undefined,
+    comment: '',
+  }
+
+  if (entry.event_name === 'create' || entry.event_name === 'delete') {
+    return version
+  }
+
+  try {
+    const oldObject = entry.old_value ? JSON.parse(entry.old_value) : {}
+    const newObject = entry.new_value ? JSON.parse(entry.new_value) : {}
+    return { ...version, changed_values: diffObjects(oldObject, newObject), comment: newObject.comment }
+  } catch {
+    return {
+      ...version,
+      changed_values: [
+        {
+          field_name: entry.property_name ?? entry.class_name,
+          old_value: String(entry.old_value),
+          new_value: String(entry.new_value),
+        },
+      ],
+    }
   }
 }
 
