@@ -218,7 +218,7 @@ describe('suggestNextRelease', () => {
   })
 
   test('rolls a public holiday back over consecutive holidays', () => {
-    const input = release({ frequency: { code: 'M' }, publish_time: '2024-11-25T09:00:00+01:00' })
+    const input = release({ frequency: { code: 'M' }, publish_time: '2024-11-26T09:00:00+01:00' })
     const expected = new Date('2024-12-24T09:00:00+01:00')
 
     expect(suggestNextRelease(input)?.publishTime).toEqual(expected)
