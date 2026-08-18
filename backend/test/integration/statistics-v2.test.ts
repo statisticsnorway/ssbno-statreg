@@ -25,7 +25,7 @@ vi.mock(import('@/lib/cache'), () => ({
 const app = await createApp()
 
 describe('statistics controller', () => {
-  test('can list statistics', async () => {
+  test('lists statistics', async () => {
     // GET /statistics and assert response
     const response = await request(app).get('/statistikkregisteret/api/statistics')
 
@@ -49,7 +49,7 @@ describe('statistics controller', () => {
     expect(Array.isArray(first?.contacts)).toBe(true)
   })
 
-  test('can create a new upcoming statistic', async () => {
+  test('creates a new upcoming statistic', async () => {
     const newShortname = 'upcoming_test'
 
     // POST /shortname
@@ -85,7 +85,7 @@ describe('statistics controller', () => {
     })
   })
 
-  test('can create a new active statistic', async () => {
+  test('creates a new active statistic', async () => {
     const newShortname = 'active_test'
 
     // POST /shortnames
@@ -157,7 +157,7 @@ describe('statistics controller', () => {
     ])
   })
 
-  test('can update an statistic', async () => {
+  test('updates an statistic', async () => {
     const newShortname = 'update_test'
 
     // POST /shortnames
@@ -220,7 +220,7 @@ describe('statistics controller', () => {
     })
   })
 
-  test('can list statistics with shortname filter and sort', async () => {
+  test('lists statistics with shortname filter and sort', async () => {
     // POST /shortnames
     const shortnameA = 'filter_a'
     const shortnameB = 'filter_b'
@@ -255,7 +255,7 @@ describe('statistics controller', () => {
     expect(statistics.statistics?.[1]?.shortname).toBe(shortnameA)
   })
 
-  test('can list statistics with contact filter', async () => {
+  test('lists statistics with contact filter', async () => {
     const newShortname = 'contact_filter'
 
     // POST /shortname
@@ -297,7 +297,7 @@ describe('statistics controller', () => {
     expect(shortnamesAfterRemoval).not.toContain(newShortname)
   })
 
-  test('can set new contacts for a statistic', async () => {
+  test('sets new contacts for a statistic', async () => {
     const newShortname = 'contacts_test'
 
     // POST /shortnames
