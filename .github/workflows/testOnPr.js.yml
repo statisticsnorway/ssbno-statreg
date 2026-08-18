@@ -32,7 +32,7 @@ jobs:
         # that means that there is a mismatch between api-types and openapi spec
         run: |
           if ! git diff --exit-code ./shared/src/api-types.ts; then
-            echo "❌ There's a mismatch between generated api types and openapi spec. Please run 'npm run generate:api-types' to update types, or revert changes to the spec."
+            echo "❌ There's a mismatch between generated api types and openapi spec. Please run 'pnpm run generate:api-types' to update types, or revert changes to the spec."
             exit 1
           fi
 

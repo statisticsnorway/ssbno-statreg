@@ -34,9 +34,9 @@ docker compose down -v
 ```
 
 ### Local Authentication Architecture (Wonderwall + Keycloak PLAY)
-When running `npm run dev` the app serves `src/main.ts` directly, with no OAuth2 flow or Bearer token injection. That means all endpoints that require authorization will fail (unless [overriding auth](../README.md#auth-override)). Overriding auth is fine for developing business logic, unit tests ie, but we also need a way to run the app _with_ authentication simulation as well. 
+When running `pnpm run dev` the app serves `src/main.ts` directly, with no OAuth2 flow or Bearer token injection. That means all endpoints that require authorization will fail (unless [overriding auth](../README.md#auth-override)). Overriding auth is fine for developing business logic, unit tests ie, but we also need a way to run the app _with_ authentication simulation as well. 
 
-The purpose of this setup is to enable production-equivalent local authentication without changing application auth logic, while keeping npm run dev token-free. This solution simulates NAIS test authentication exact, using the same middleware and token validation.
+The purpose of this setup is to enable production-equivalent local authentication without changing application auth logic, while keeping pnpm run dev token-free. This solution simulates NAIS test authentication exact, using the same middleware and token validation.
 And keycloak provides the SSO login page if unauthenticated
 
 #### Runtime Components (docker-compose.yaml)

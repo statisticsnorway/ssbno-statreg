@@ -17,6 +17,9 @@ services:
     volumes:
       - .:/app
       - root_node_modules:/app/node_modules
+      - /app/backend/node_modules
+      - /app/frontend/node_modules
+      - /app/shared/node_modules
     environment:
       NODE_ENV: test
       PGURL: postgresql://test_user:test_pass@db:5432/statreg_db?sslmode=disable
