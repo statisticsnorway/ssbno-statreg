@@ -462,7 +462,7 @@ describe('releasesService ', async () => {
         where: { id: 1 },
         data: {
           publish_time: new Date('2024-10-15T08:00:00Z'),
-           period_to: new Date('2024-10-01T00:00:00Z'),
+          period_to: new Date('2024-10-01T00:00:00Z'),
           period_from: new Date('2024-09-01T00:00:00Z'),
           release_date_precision: 'dag',
           desk_appoval_status: ApprovalStatus.PENDING,
@@ -482,7 +482,7 @@ describe('releasesService ', async () => {
         where: { id: 1 },
         data: {
           publish_time: new Date('2024-10-15T08:00:00Z'),
-           period_to: new Date('2024-10-01T00:00:00Z'),
+          period_to: new Date('2024-10-01T00:00:00Z'),
           period_from: new Date('2024-09-01T00:00:00Z'),
           release_date_precision: 'dag',
           desk_appoval_status: ApprovalStatus.ACCEPTED,
@@ -653,7 +653,7 @@ describe('releasesService ', async () => {
       expect(prismaMock.release.create).toHaveBeenCalledExactlyOnceWith({
         data: {
           publish_time: new Date('2024-10-15T08:00:00Z'),
-           period_to: new Date('2024-10-01T00:00:00Z'),
+          period_to: new Date('2024-10-01T00:00:00Z'),
           period_from: new Date('2024-09-01T00:00:00Z'),
           desk_appoval_status: ApprovalStatus.PENDING,
           release_date_precision: 'dag',
@@ -687,7 +687,7 @@ describe('releasesService ', async () => {
       expect(prismaMock.release.create).toHaveBeenCalledExactlyOnceWith({
         data: {
           publish_time: new Date('2024-10-15T08:00:00Z'),
-           period_to: new Date('2024-10-01T00:00:00Z'),
+          period_to: new Date('2024-10-01T00:00:00Z'),
           period_from: new Date('2024-09-01T00:00:00Z'),
           desk_appoval_status: ApprovalStatus.ACCEPTED,
           release_date_precision: 'dag',
