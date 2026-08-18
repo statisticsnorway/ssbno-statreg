@@ -326,6 +326,9 @@ export default function ReleaseForm() {
     if (!values.publishTime) nextErrors.publishTime = 'Opprett en gyldig publiseringsdato'
     if (!values.periodFrom) nextErrors.periodFrom = 'Opprett en gyldig fra-dato'
     if (!values.periodTo) nextErrors.periodTo = 'Opprett en gyldig til-dato'
+    if (values.periodTo && values.publishTime && values.periodTo > values.publishTime) {
+      nextErrors.publishTime = 'Publiseringsdato må være etter måleperiodeslutt'
+    }
     if (!isAdmin && values.publishTime && values.publishTime < inThreeMonths) {
       nextErrors.publishTime = 'Publiseringsdato tidligere enn tre måneder fra dags dato må opprettes av desken'
     }
