@@ -27,7 +27,7 @@ export function getLastDayOfMonth(date: Date): Date {
   return new Date(date.getFullYear(), date.getMonth() + 1, 0)
 }
 
-function parseDateOnly(value: string): Date {
+export function parseDateOnly(value: string): Date {
   const [year, month, day] = value.split('-').map(Number)
   return new Date(year, month - 1, day)
 }
