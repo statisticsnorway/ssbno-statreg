@@ -10,7 +10,7 @@ const headers = {
 }
 const body = {
   publish_time: '2024-10-15T08:00:00Z',
-  period_to: '2024-12-31',
+  period_to: '2024-10-01',
   period_from: '2024-09-01',
   release_date_precision: 'month',
 }
