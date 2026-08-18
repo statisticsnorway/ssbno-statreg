@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, Link as ReactRouterLink } from 'react-router'
 import { ApprovalStatusTag } from '../components/ApprovalStatus'
 import {
@@ -17,6 +17,7 @@ import {
 } from '@digdir/designsystemet-react'
 import { DatePicker as AkselDatePicker, useDatepicker as useAkselDatePicker } from '@navikt/ds-react/DatePicker'
 import { DatePicker } from '../components/DatePicker'
+import { suggestNextRelease } from '../lib/suggestions'
 import {
   formatDate,
   formatVariant,
@@ -133,10 +134,12 @@ function VariantReleasesTable({
   shortname,
   variantId,
   apiErrorEmit,
+  latestReleaseEmit,
 }: Readonly<{
   shortname: string
   variantId: number
   apiErrorEmit?: (message: string) => void
+  latestReleaseEmit?: (release: ReleaseListing | undefined) => void
 }>) {
   const [count, setCount] = useState(10)
   const [start, setStart] = useState(0)
@@ -155,9 +158,11 @@ function VariantReleasesTable({
       }
       setReleases(data.releases ?? [])
       setTotal(data.total ?? 0)
+      latestReleaseEmit?.(data.releases?.[0] ?? undefined)
     }
+
     fetchVariantReleases()
-  }, [shortname, variantId, count, start, sortBy, apiErrorEmit])
+  }, [shortname, variantId, count, start, sortBy, apiErrorEmit, latestReleaseEmit])
 
   function updateRowCount(newCount: number) {
     setCount(newCount)
@@ -208,8 +213,6 @@ export default function ReleaseForm() {
   const { id: releaseId, shortname, variantId } = useParams()
 
   const isEditing = !!releaseId
-
-  // TODO: MIM-2581: This is a temporary suggested publish time (3 months ahead of date) for create release
   const [suggestedPublishTime] = useState(inThreeMonths)
   const [values, setValues] = useState<ReleaseFormTypes>({
     publishTime: suggestedPublishTime,
@@ -228,6 +231,8 @@ export default function ReleaseForm() {
   const [variantReleasesApiError, setVariantReleasesApiError] = useState<string>('')
   const [sameDateReleasesApiError, setSameDateReleasesApiError] = useState<string>('')
   const [approvalStatus, setApprovalStatus] = useState<string>(ApprovalStatus.PENDING)
+
+  const hasSuggestedReleaseRef = useRef(false)
 
   const { auth } = useAuth()
   const isAdmin = auth?.isAdmin ?? false
@@ -295,6 +300,24 @@ export default function ReleaseForm() {
     }
     fetchVariant()
   }, [shortname, variantId])
+
+  function handleLatestReleaseEmit(latestRelease: ReleaseListing | undefined) {
+    if (isEditing || hasSuggestedReleaseRef.current) return
+    hasSuggestedReleaseRef.current = true
+
+    const suggestedRelease = suggestNextRelease(latestRelease)
+    if (!suggestedRelease) return
+
+    setValues((v) => ({
+      ...v,
+      publishTime: suggestedRelease.publishTime,
+      periodFrom: suggestedRelease.periodFrom,
+      periodTo: suggestedRelease.periodTo,
+    }))
+    publishTimePicker.setSelected(suggestedRelease.publishTime)
+    periodFromPicker.setSelected(suggestedRelease.periodFrom)
+    periodToPicker.setSelected(suggestedRelease.periodTo)
+  }
 
   function validateFields(): boolean {
     const nextErrors: ReleaseFormErrors = {}
@@ -561,6 +584,7 @@ export default function ReleaseForm() {
               shortname={statistic.shortname as string}
               variantId={variant.id as number}
               apiErrorEmit={setVariantReleasesApiError}
+              latestReleaseEmit={handleLatestReleaseEmit}
             />
           )}
         </Tabs.Panel>
