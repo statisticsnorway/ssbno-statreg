@@ -12,7 +12,7 @@ services:
       retries: 30
 
   tests:
-    image: node:24
+    image: ghcr.io/pnpm/pnpm:11
     working_dir: /app
     volumes:
       - .:/app
@@ -26,8 +26,13 @@ services:
       db:
         condition: service_healthy
     command: >
-      sh -c " npm i && npm run generate && npm run build && npm run db:deploy -w
-      backend && npm run seed -w backend && npm run test:integration -w backend "
+      sh -c "pnpm runtime set node 24 -g 
+      && pnpm install 
+      && pnpm run generate 
+      && pnpm run build 
+      && pnpm run --filter "backend" db:deploy 
+      && pnpm run --filter "backend" seed
+      && pnpm run --filter "backend" test:integration"
 
 volumes:
   root_node_modules:
