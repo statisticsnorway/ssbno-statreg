@@ -121,7 +121,7 @@ describe('getNextRelease()', () => {
   describe('parseDateOnly()', () => {
     test('parses period dates as local calendar dates', () => {
       expect(parseDateOnly('2025-03-01')).toEqual(new Date('2025-03-01T00:00:00.000+01:00'))
-      expect(parseDateOnly('2025-03-31')).toEqual(new Date('2025-03-31T00:00:00.000+01:00'))
+      expect(parseDateOnly('2025-03-31')).toEqual(new Date('2025-03-31T00:00:00.000+02:00'))
     })
   })
 
