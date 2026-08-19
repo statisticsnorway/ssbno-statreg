@@ -14,6 +14,7 @@ import {
   ValidationMessage,
   ErrorSummary,
   Textarea,
+  FieldDescription,
 } from '@digdir/designsystemet-react'
 import { DatePicker as AkselDatePicker, useDatepicker as useAkselDatePicker } from '@navikt/ds-react/DatePicker'
 import { DatePicker } from '../components/DatePicker'
@@ -52,7 +53,7 @@ type Statistic = ReleaseByIdResponse['statistic'] & {
 }
 type Variant = ReleaseByIdResponse['variant']
 
-const releaseDatePrecisions = ['Dag', 'Måned', 'År'] as const
+const releaseDatePrecisions = ['Dag', 'Uke', 'Måned', 'År'] as const
 
 type ReleaseFormTypes = {
   dateType?: string
@@ -322,7 +323,6 @@ export default function ReleaseForm() {
   function validateFields(): boolean {
     const nextErrors: ReleaseFormErrors = {}
 
-    if (!values.dateType) nextErrors.dateType = 'Velg en datotype for publisering'
     if (!values.publishTime) nextErrors.publishTime = 'Opprett en gyldig publiseringsdato'
     if (!values.periodFrom) nextErrors.periodFrom = 'Opprett en gyldig fra-dato'
     if (!values.periodTo) nextErrors.periodTo = 'Opprett en gyldig til-dato'
@@ -424,25 +424,23 @@ export default function ReleaseForm() {
         <Field>
           <Paragraph className='release-form-description'>Alle felter må fylles ut</Paragraph>
           <Label>Datotype for publisering</Label>
+          <Field.Description>
+            Velg hvordan datoen skal vises på ssb.no. Bruk uke, måned eller år hvis du ikke har bestemt en nøyaktig dag
+            ennå.
+          </Field.Description>
           <Select
             id='dateType'
-            value={values.dateType ?? ''}
+            value={values.dateType ?? 'Dag'}
             onChange={(e) => {
               setValues((values) => ({ ...values, dateType: e.target.value }))
-              setErrors((errors) => ({ ...errors, dateType: '' }))
             }}
-            aria-invalid={!!errors.dateType}
           >
-            <Select.Option value='' disabled>
-              Velg datotype
-            </Select.Option>
             {releaseDatePrecisions.map((precision) => (
               <Select.Option key={precision} value={precision.toLowerCase()}>
                 {precision}
               </Select.Option>
             ))}
           </Select>
-          {errors.dateType && <ValidationMessage>{errors.dateType}</ValidationMessage>}
         </Field>
 
         <Field>
