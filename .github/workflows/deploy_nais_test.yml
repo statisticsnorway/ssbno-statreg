@@ -32,7 +32,7 @@ jobs:
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
           project_id: ${{ secrets.NAIS_MANAGEMENT_PROJECT_ID }}
       - name: Deploy to Nais
-        uses: nais/deploy/actions/deploy@5fdd91aaf69bb0d6dd5e5118cdacb639f487b93b # v2
+        uses: nais/deploy/actions/deploy@849e900e3cfa7faf7ad1532bb3a3e6499c932199 # v2
         env:
           TEAM: ssbno
           CLUSTER: test
