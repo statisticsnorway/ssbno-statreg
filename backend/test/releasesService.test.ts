@@ -832,6 +832,40 @@ describe('releasesService ', async () => {
         comment: '',
       })
     })
+
+    test('returns parsed input for update when all validations pass', async () => {
+      const input = {
+        publish_time: '2024-10-15T08:00:00Z',
+        period_from: '2024-09-01',
+        period_to: '2024-10-01',
+        release_date_precision: 'dag',
+        comment: 'Test comment',
+      }
+
+      const result = await parseReleaseInput(prismaMock, input, 'update')
+
+      expect(result).toStrictEqual({
+        publishTimeDate: new Date('2024-10-15T08:00:00Z'),
+        periodFromDate: new Date('2024-09-01T00:00:00Z'),
+        periodToDate: new Date('2024-10-01T00:00:00Z'),
+        releaseDatePrecision: 'dag',
+        comment: 'Test comment',
+      })
+    })
+
+    test('throws error when update has empty comment', async () => {
+      const input = {
+        publish_time: '2024-10-15T08:00:00Z',
+        period_from: '2024-09-01',
+        period_to: '2024-10-01',
+        release_date_precision: 'dag',
+        comment: '',
+      }
+
+      await expect(() => parseReleaseInput(prismaMock, input, 'update')).rejects.toMatchObject({
+        statregError: "Field 'comment' must be a non-empty string.",
+      })
+    })
   })
 })
 
