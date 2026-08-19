@@ -6,16 +6,16 @@ We use PostgreSQL, provided by Nais in our live environments. Locally you can se
 
 We use Prisma both as our ORM and as our schema migration tool in this project. We strongly recommend reading [this article](https://www.prisma.io/docs/prisma-orm/quickstart/postgresql) before touching the schema if you have not used Prisma before.
 
-In short though, Prisma handles schema changes with Migrations, which are incremental change sets applied to the database. Applied migrations are recorded in the database. Migrations are generated with the Prisma CLI, checked into the codebase and _never_ changed after merging. After having made changes to your schema, you can push these changes to your local db with `npx prisma db push`. Note that this does not update your migrations, but you can do this as many times as you like until the desired state is achieved. (sidenote: this may cause data loss locally)
+In short though, Prisma handles schema changes with Migrations, which are incremental change sets applied to the database. Applied migrations are recorded in the database. Migrations are generated with the Prisma CLI, checked into the codebase and _never_ changed after merging. After having made changes to your schema, you can push these changes to your local db with `pnpm --filter backend exec prisma db push`. Note that this does not update your migrations, but you can do this as many times as you like until the desired state is achieved. (sidenote: this may cause data loss locally)
 
 ### Migrations
-When you are happy with your updated schema, you can run `npx prisma migrate dev --name name-of-changeset`. This applies previous changes in schema, generates a new migration with the supplied name, applies all unapplied migrations and triggers generation of a new Prisma Client. In rare occations the migration sql have to be updated manually, but this is in _very rare occations_ and be careful if not using the provided code.
+When you are happy with your updated schema, you can run `pnpm --filter backend exec prisma migrate dev --name name-of-changeset`. This applies previous changes in schema, generates a new migration with the supplied name, applies all unapplied migrations and triggers generation of a new Prisma Client. In rare occations the migration sql have to be updated manually, but this is in _very rare occations_ and be careful if not using the provided code.
 
-There are many fun pitfalls and ways of messing up both your local db and production data using prisma, so educate yourself, make sure you know what you are doing, and be ready to roll back changes. Locally you can typically run `npx prisma migrate reset` and then `npm run seed` to bring your local database back to a working state.
+There are many fun pitfalls and ways of messing up both your local db and production data using prisma, so educate yourself, make sure you know what you are doing, and be ready to roll back changes. Locally you can typically run `pnpm --filter backend exec prisma migrate reset` and then `pnpm run seed` to bring your local database back to a working state.
 
 To execute new migrations (locally or in running instances) run:
 ```
-npx prisma migrate
+pnpm --filter backend exec prisma migrate
 ```
 
 ### Local development 

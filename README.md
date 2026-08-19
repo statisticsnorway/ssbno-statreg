@@ -20,29 +20,29 @@ As to where to find the secrets see docs for [Authentication and Authorization](
 ### First run, database baseline setup
 
 ```
-npm install
-npm run generate
-npm run db:deploy
-npm run seed
-npm run dev
+pnpm install
+pnpm run generate
+pnpm run db:deploy
+pnpm run seed
+pnpm run dev
 ```
 
 ### Subsequent application startups
 
-If new migrations: `npm db:deploy`
+If new migrations: `pnpm run db:deploy`
 
 > NB! Until the first data migration to test database is complete, we don't use migrations. If schema have changed the following sequence _should_ fix your database:
 ```
-npm run generate
-npx prisma migrate reset
-npx prisma db push
-npm run seed
+pnpm run generate
+pnpm --filter backend exec prisma migrate reset
+pnpm --filter backend exec prisma db push
+pnpm run seed
 ```
 
 For plain local development run:
 
 ```
-npm run dev
+pnpm run dev
 ```
 
 Or to run with local authentication flow run docker compose:
@@ -66,13 +66,13 @@ Set `AUTH_ENABLED=false` in `.env` to bypass auth for local development
 We use eslint and prettier for type checking and code formatting. To check for linting and formatting errors/warnings run:
 
 ```
-npm run lint
+pnpm run lint
 ```
 
 To automatically fix linting and formatting errors/warnings run:
 
 ```
-npm run lint:fix
+pnpm run lint:fix
 ```
 
 Keep in mind that not all types of linting/formatting errors and warnings can be fixed automatically.

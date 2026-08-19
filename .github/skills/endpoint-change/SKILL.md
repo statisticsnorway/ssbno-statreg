@@ -19,14 +19,14 @@ argument-hint: "Describe endpoint change and affected files"
 4. Keep controller logic thin: map HTTP request/response and delegate to service.
 5. Update API contract in `shared/openapi/openapi.yaml`.
 6. Regenerate shared API types from repo root:
-   - `npm run generate:api-types`
+   - `pnpm run generate:api-types`
 7. Update tests in changed areas:
    - backend unit tests for service/controller behavior
    - additional integration tests only when interaction complexity warrants it
 8. Run required validation from repo root:
-   - `npm run test:backend`
-   - `npm run test:frontend` if frontend or shared API consumption changed
-   - `npm run lint` for cross-cutting refactors
+   - `pnpm run test:backend`
+   - `pnpm run test:frontend` if frontend or shared API consumption changed
+   - `pnpm run lint` for cross-cutting refactors
 
 ## Guardrails
 - Do not move business logic into controllers.
@@ -37,7 +37,7 @@ argument-hint: "Describe endpoint change and affected files"
 - Endpoint behavior implemented in service layer.
 - Controller only maps request/response.
 - OpenAPI updated when contract changed.
-- `npm run generate:api-types` executed when OpenAPI changed.
+- `pnpm run generate:api-types` executed when OpenAPI changed.
 - Relevant tests pass.
 
 ## Cross-Reference
