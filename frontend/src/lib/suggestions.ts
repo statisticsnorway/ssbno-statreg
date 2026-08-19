@@ -1,30 +1,35 @@
 import { type ReleaseListing } from '@ssbno-statreg/shared'
 import { getDateOnlyAsString } from './utils'
 
-function addYears(date: Date, years: number): Date {
+export function addYears(date: Date, years: number): Date {
   const result = new Date(date)
   result.setFullYear(result.getFullYear() + years)
   return result
 }
 
-function addMonths(date: Date, months: number): Date {
+export function addMonths(date: Date, months: number): Date {
   const result = new Date(date)
   result.setMonth(result.getMonth() + months)
   return result
 }
 
-function addDays(date: Date, days: number): Date {
+export function addDays(date: Date, days: number): Date {
   const result = new Date(date)
   result.setDate(result.getDate() + days)
   return result
 }
 
-function getDaysBetween(from: Date, to: Date): number {
+export function getDaysBetween(from: Date, to: Date): number {
   return Math.round((to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24))
 }
 
-function getLastDayOfMonth(date: Date): Date {
+export function getLastDayOfMonth(date: Date): Date {
   return new Date(date.getFullYear(), date.getMonth() + 1, 0)
+}
+
+export function parseDateOnly(value: string): Date {
+  const [year, month, day] = value.split('-').map(Number)
+  return new Date(year, month - 1, day)
 }
 
 export type SuggestedRelease = {
@@ -33,12 +38,12 @@ export type SuggestedRelease = {
   periodTo: Date
 }
 
-function getNextRelease(latestRelease: ReleaseListing): SuggestedRelease | undefined {
+export function getNextRelease(latestRelease: ReleaseListing): SuggestedRelease | undefined {
   if (!latestRelease.publish_time || !latestRelease.period_from || !latestRelease.period_to) return undefined
 
   const publishTime = new Date(latestRelease.publish_time)
-  const periodFrom = new Date(latestRelease.period_from)
-  const periodTo = new Date(latestRelease.period_to)
+  const periodFrom = parseDateOnly(latestRelease.period_from)
+  const periodTo = parseDateOnly(latestRelease.period_to)
   const frequencyCode = latestRelease.frequency?.code?.toUpperCase()
 
   if (frequencyCode === 'Y' || frequencyCode === 'A') {
@@ -85,12 +90,12 @@ function getNextRelease(latestRelease: ReleaseListing): SuggestedRelease | undef
   }
 }
 
-function isWeekend(date: Date): boolean {
+export function isWeekend(date: Date): boolean {
   const day = date.getDay()
   return day === 0 || day === 6
 }
 
-function getEasterSunday(year: number): Date {
+export function getEasterSunday(year: number): Date {
   const a = year % 19
   const b = Math.floor(year / 100)
   const c = year % 100
@@ -108,7 +113,7 @@ function getEasterSunday(year: number): Date {
   return new Date(Date.UTC(year, n - 1, p))
 }
 
-function isPublicHoliday(date: Date): boolean {
+export function isPublicHoliday(date: Date): boolean {
   const year = date.getFullYear()
   const easterSunday = getEasterSunday(year)
   const movableHolidays = [-3, -2, 0, 1, 39, 49, 50].map((offset) => addDays(easterSunday, offset))
@@ -124,7 +129,7 @@ function isPublicHoliday(date: Date): boolean {
   return [...movableHolidays, ...fixedHolidays].some((holiday) => getDateOnlyAsString(holiday) === dateOnlyString)
 }
 
-function rollBackToWorkingDay(date: Date): Date {
+export function rollBackToWorkingDay(date: Date): Date {
   const publishDate = new Date(date)
   while (isWeekend(publishDate) || isPublicHoliday(publishDate)) {
     publishDate.setUTCDate(publishDate.getUTCDate() - 1)
