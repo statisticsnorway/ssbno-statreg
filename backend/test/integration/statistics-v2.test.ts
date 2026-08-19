@@ -162,7 +162,7 @@ describe('statistics controller', () => {
       .send({ shortname: newShortname })
     expect(shortnameResponse.status).toBe(201)
 
-    // POST /statistics with 'K' statistic region level
+    // POST /statistics
     const createResponse = await request(app)
       .post(`/statistikkregisteret/api/statistics/${newShortname}`)
       .set('content-type', 'application/json')
