@@ -1,5 +1,5 @@
 import { describe, expect, test, vi } from 'vitest'
-import { Contact, StatisticCreate, StatisticListingResponse, StatisticUpdate } from '@ssbno-statreg/shared'
+import { StatisticCreate, StatisticListingResponse, StatisticUpdate } from '@ssbno-statreg/shared'
 import { createApp } from '@/app'
 import request from 'supertest'
 
@@ -42,13 +42,13 @@ describe('statistics controller', () => {
       name: 'Teststatistikk for opprettelse av kommende statistikk',
       first_released_at: '2024-01-01',
     }
-    const response = await request(app)
+    const createResponse = await request(app)
       .post(`/statistikkregisteret/api/statistics/${newShortname}`)
       .set('content-type', 'application/json')
       .send(createPayload)
 
-    expect(response.status).toBe(200)
-    expect(response.body).toMatchObject({
+    expect(createResponse.status).toBe(200)
+    expect(createResponse.body).toMatchObject({
       shortname: 'upcoming_test',
       name: 'Teststatistikk for opprettelse av kommende statistikk',
       name_en: '',
@@ -59,6 +59,22 @@ describe('statistics controller', () => {
       status: { code: 'K' },
       first_released_at: '2024-01-01T00:00:00.000Z',
     })
+
+    // GET /statistics with shortname filter to verify persistence
+    const listingResponse = await request(app)
+      .get('/statistikkregisteret/api/statistics')
+      .query(`shortname=${newShortname}`)
+    expect(listingResponse.status).toBe(200)
+    expect(listingResponse.body).toMatchObject({
+      total: 1,
+      statistics: [{ shortname: 'upcoming_test' }],
+    })
+
+    // GET /statistics/:shortname/versions to check that create event is registered in auditlog
+    const versionsResponse = await request(app).get(`/statistikkregisteret/api/statistics/${newShortname}/versions`)
+    expect(versionsResponse.status).toBe(200)
+    expect(versionsResponse.body).toHaveLength(1)
+    expect(versionsResponse.body[0].change_type).toBe('create')
   })
 
   test('creates a new active statistic', async () => {
@@ -92,13 +108,13 @@ describe('statistics controller', () => {
       ],
     }
 
-    const response = await request(app)
+    const createResponse = await request(app)
       .post(`/statistikkregisteret/api/statistics/${newShortname}`)
       .set('content-type', 'application/json')
       .send(createPayload)
 
-    expect(response.status).toBe(200)
-    expect(response.body).toMatchObject({
+    expect(createResponse.status).toBe(200)
+    expect(createResponse.body).toMatchObject({
       shortname: 'active_test',
       name: 'Teststatistikk for opprettelse av aktiv statistikk',
       name_en: 'Test statistic for creation of active statistic',
@@ -118,6 +134,22 @@ describe('statistics controller', () => {
         },
       ],
     })
+
+    // GET /statistics with shortname filter to verify persistence
+    const listingResponse = await request(app)
+      .get('/statistikkregisteret/api/statistics')
+      .query(`shortname=${newShortname}`)
+    expect(listingResponse.status).toBe(200)
+    expect(listingResponse.body).toMatchObject({
+      total: 1,
+      statistics: [{ shortname: 'active_test' }],
+    })
+
+    // GET /statistics/:shortname/versions to check that create event is registered in auditlog
+    const versionsResponse = await request(app).get(`/statistikkregisteret/api/statistics/${newShortname}/versions`)
+    expect(versionsResponse.status).toBe(200)
+    expect(versionsResponse.body).toHaveLength(1)
+    expect(versionsResponse.body[0].change_type).toBe('create')
   })
 
   test('updates a statistic', async () => {
@@ -148,7 +180,7 @@ describe('statistics controller', () => {
       statistic_region_levels: [{ code: 'F' }],
       status: { code: 'K' },
       name: 'Oppdatert statistikk',
-      name_en: 'Oppdatert statistikk',
+      name_en: 'Updated statistic',
       relation: null,
       previous_topic_codes: '',
       yearly_reporting: false,
@@ -168,13 +200,36 @@ describe('statistics controller', () => {
       statistic_region_levels: [{ code: 'F' }],
       status: { code: 'K' },
       name: 'Oppdatert statistikk',
-      name_en: 'Oppdatert statistikk',
+      name_en: 'Updated statistic',
       previous_topic_codes: '',
       yearly_reporting: false,
       first_released_at: '2024-02-01T00:00:00.000Z',
       main_language: 'nn',
       comment: 'Kommentar',
     })
+
+    // GET /statistics with shortname filter to verify persistence
+    const listingResponse = await request(app)
+      .get('/statistikkregisteret/api/statistics')
+      .query(`shortname=${newShortname}`)
+    expect(listingResponse.status).toBe(200)
+    expect(listingResponse.body).toMatchObject({
+      total: 1,
+      statistics: [{ shortname: 'update_test', name: 'Oppdatert statistikk' }],
+    })
+
+    // GET /statistics/:shortname/versions to check that update event is registered in auditlog
+    const versionsResponse = await request(app).get(`/statistikkregisteret/api/statistics/${newShortname}/versions`)
+    expect(versionsResponse.status).toBe(200)
+    expect(versionsResponse.body).toHaveLength(2)
+    expect(versionsResponse.body[0]).toMatchObject({
+      change_type: 'update',
+      comment: 'Kommentar',
+      changed_by: expect.any(String),
+      changed_at: expect.any(String),
+      changed_values: expect.any(Array),
+    })
+    expect(versionsResponse.body[1].change_type).toBe('create')
   })
 
   test('lists statistics with shortname filter and sort', async () => {
@@ -201,11 +256,11 @@ describe('statistics controller', () => {
       .send({ status: { code: 'K' }, division: '101', name: 'Filter test B' })
 
     // GET /statistics with shortname filter and sort, and assert response
-    const response = await request(app)
+    const listingResponse = await request(app)
       .get('/statistikkregisteret/api/statistics')
       .query(`shortname=${shortnameA},${shortnameB}&sort=-shortname`)
-    expect(response.status).toBe(200)
-    expect(response.body).toMatchObject({
+    expect(listingResponse.status).toBe(200)
+    expect(listingResponse.body).toMatchObject({
       total: 2,
       statistics: [{ shortname: 'filter_b' }, { shortname: 'filter_a' }],
     })
@@ -229,12 +284,12 @@ describe('statistics controller', () => {
     expect(createResponse.status).toBe(200)
 
     // PUT /statistics/:shortname/contacts and assert response
-    const contactsResponse = await request(app)
+    const updateContactsResponse = await request(app)
       .put(`/statistikkregisteret/api/statistics/${newShortname}/contacts`)
       .set('content-type', 'application/json')
       .send(['bcd@ssb.no'])
-    expect(contactsResponse.status).toBe(200)
-    expect(contactsResponse.body).toMatchObject([{ name: 'Bob', principalName: 'bcd@ssb.no' }])
+    expect(updateContactsResponse.status).toBe(200)
+    expect(updateContactsResponse.body).toMatchObject([{ name: 'Bob', principalName: 'bcd@ssb.no' }])
 
     // GET /statistics/:shortname to test persistence of new contacts
     const getResponse = await request(app).get(`/statistikkregisteret/api/statistics/${newShortname}`)
