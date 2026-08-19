@@ -10,6 +10,7 @@
     }
   },
   "scripts": {
+    "preinstall": "npx only-allow pnpm",
     "dev": "concurrently \"pnpm --filter 'backend' run dev\" \"pnpm --filter 'frontend' run dev\"",
     "build": "pnpm -r run build && cp -Rf frontend/dist/* backend/dist",
     "start": "pnpm --filter 'backend' run start",
