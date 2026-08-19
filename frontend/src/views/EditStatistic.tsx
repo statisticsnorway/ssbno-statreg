@@ -24,12 +24,43 @@ import client from '../api'
 import './CreateStatistic.css'
 
 import { isCreateStatisticFieldRequired, ApprovalStatus } from '@ssbno-statreg/shared'
-import type { CreatableStatisticStatus, Division, Shortname, StatisticUpdate } from '@ssbno-statreg/shared'
+import type {
+  CreatableStatisticStatus,
+  Division,
+  Shortname,
+  StatisticDetails,
+  StatisticUpdate,
+} from '@ssbno-statreg/shared'
 import ErrorPage, { ErrorType } from './ErrorPage'
 import { ErrorAlert } from '../components/ErrorAlert'
 import type { StatisticFormErrors, StatisticFormField, StatisticFormValues } from './CreateStatistic'
 
-// TODO:
+const defaultValues: StatisticFormValues = {
+  name: '',
+  name_en: '',
+  division: '',
+  main_language: 'nb',
+  first_released_at: '',
+  comment: '',
+}
+
+function getStatisticFormValues(statistic: StatisticDetails | StatisticUpdate): StatisticFormValues {
+  const division = typeof statistic.division === 'string' ? statistic.division : statistic.division?.code
+
+  return {
+    name: statistic.name ?? '',
+    name_en: statistic.name_en ?? '',
+    division: division ?? '',
+    main_language: statistic.main_language ?? 'nb',
+    first_released_at: statistic.first_released_at?.slice(0, 4) ?? '',
+    comment: statistic.comment ?? '',
+  }
+}
+
+function getEditableStatus(statusCode?: string): CreatableStatisticStatus {
+  return statusCode === 'A' ? 'A' : 'K'
+}
+
 type StatisticValidationState = {
   status: CreatableStatisticStatus
   values: StatisticFormValues
@@ -40,7 +71,7 @@ type StatisticValidationState = {
 export default function EditStatistic() {
   const { shortname } = useParams<Shortname['shortname']>()
 
-  const [statistic, setStatistic] = useState<StatisticUpdate>({})
+  const [statistic, setStatistic] = useState<StatisticDetails>({})
   const [divisions, setDivisions] = useState<Division[]>([])
 
   const { getCheckboxProps, value: regionLevelValues } = useCheckboxGroup({
@@ -48,18 +79,9 @@ export default function EditStatistic() {
     value: [],
   })
 
-  const defaultValues: StatisticFormValues = {
-    name: statistic.name ?? '',
-    name_en: statistic.name_en ?? '',
-    division: statistic.division ?? '',
-    main_language: statistic.main_language ?? 'nb',
-    first_released_at: statistic.first_released_at ?? '',
-    comment: statistic.comment ?? '',
-  }
-
   const fieldsToValidate: StatisticFormField[] = [...Object.keys(defaultValues)] as StatisticFormField[]
 
-  const [status, setStatus] = useState<string>(statistic.status?.code ?? '')
+  const [status, setStatus] = useState<CreatableStatisticStatus>('K')
   const [values, setValues] = useState<StatisticFormValues>(defaultValues)
   const [errors, setErrors] = useState<StatisticFormErrors>({})
   const [apiError, setApiError] = useState<string[]>([])
@@ -118,7 +140,12 @@ export default function EditStatistic() {
         return
       }
 
-      setStatistic(data as StatisticUpdate)
+      const nextStatistic = data as StatisticDetails
+
+      setStatistic(nextStatistic)
+      setStatus(getEditableStatus(nextStatistic.status?.code))
+      setValues(getStatisticFormValues(nextStatistic))
+      setErrors({})
 
       await Promise.all([fetchDivisions()])
     }
@@ -409,7 +436,7 @@ export default function EditStatistic() {
               <Input value={values.comment} onChange={(e) => handleValueChange('comment', e.target.value)} />
             </Field>
             <div className='create-statistic-form-buttons'>
-              <Button type='submit'>Opprett</Button>
+              <Button type='submit'>Lagre og godkjenn</Button>
               <Button
                 type='button'
                 variant='tertiary'
