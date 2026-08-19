@@ -5,7 +5,7 @@ import { Pagination } from './Pagination'
 import '../views/ListReleases.css'
 import { Link } from 'react-router'
 import { formatContacts, getSortDirection, toggleSort } from '../lib/utils'
-import { StatisticStatusTag } from './StatisticStatusTag'
+import { StatisticStatusBadge } from './StatisticStatusTag'
 import type { StatisticStatus } from '../../../shared/dist/enums'
 
 const TABLE_HEADER_CELLS = [
@@ -38,7 +38,7 @@ function StatisticRow({ statistic, openInNewTab }: Readonly<StatisticRowProps>) 
       <Table.Cell>{statistic.name}</Table.Cell>
       <Table.Cell>{formatContacts(statistic.contacts).join(', ')}</Table.Cell>
       <Table.Cell className='status-column'>
-        <StatisticStatusTag status={statusCode} />
+        <StatisticStatusBadge status={statusCode} />
       </Table.Cell>
     </Table.Row>
   )
