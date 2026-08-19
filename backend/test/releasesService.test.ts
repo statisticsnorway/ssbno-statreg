@@ -788,7 +788,7 @@ describe('releasesService ', async () => {
   })
 
   describe('parseReleaseInput ', () => {
-    test('rejects when end of measuring period is earlier than start of measuring period', async () => {
+    test('throws error when end of measuring period is earlier than start of measuring period', async () => {
       const input = {
         publish_time: '2024-10-15T08:00:00Z',
         period_from: '2024-12-31',
