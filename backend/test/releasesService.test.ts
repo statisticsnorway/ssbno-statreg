@@ -813,6 +813,25 @@ describe('releasesService ', async () => {
         statregError: 'Publish time cannot be earlier than end of measuring period',
       })
     })
+
+    test('returns parsed input when all validations pass', async () => {
+      const input = {
+        publish_time: '2024-10-15T08:00:00Z',
+        period_from: '2024-09-01',
+        period_to: '2024-10-01',
+        release_date_precision: 'dag',
+      }
+
+      const result = await parseReleaseInput(prismaMock, input)
+
+      expect(result).toStrictEqual({
+        publishTimeDate: new Date('2024-10-15T08:00:00Z'),
+        periodFromDate: new Date('2024-09-01T00:00:00Z'),
+        periodToDate: new Date('2024-10-01T00:00:00Z'),
+        releaseDatePrecision: 'dag',
+        comment: '',
+      })
+    })
   })
 })
 
