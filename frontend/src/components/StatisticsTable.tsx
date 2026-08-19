@@ -1,11 +1,12 @@
 import { Table } from '@digdir/designsystemet-react'
 
 import { type StatisticListing } from '@ssbno-statreg/shared'
-import { ApprovalStatusBadge } from '../components/ApprovalStatus'
 import { Pagination } from './Pagination'
 import '../views/ListReleases.css'
 import { Link } from 'react-router'
 import { formatContacts, getSortDirection, toggleSort } from '../lib/utils'
+import { StatisticStatusTag } from './StatisticStatusTag'
+import type { StatisticStatus } from '../../../shared/dist/enums'
 
 const TABLE_HEADER_CELLS = [
   { label: 'Kortnavn', field: 'shortname', sortable: true },
@@ -21,6 +22,7 @@ type StatisticRowProps = {
 
 function StatisticRow({ statistic, openInNewTab }: Readonly<StatisticRowProps>) {
   const statisticsShortname = statistic.shortname ?? ''
+  const statusCode = (statistic.status?.code as keyof typeof StatisticStatus) ?? 'K'
   return (
     <Table.Row key={`${statistic.shortname}`} className='selectable-row'>
       <Table.Cell>
@@ -36,7 +38,7 @@ function StatisticRow({ statistic, openInNewTab }: Readonly<StatisticRowProps>) 
       <Table.Cell>{statistic.name}</Table.Cell>
       <Table.Cell>{formatContacts(statistic.contacts).join(', ')}</Table.Cell>
       <Table.Cell className='status-column'>
-        <ApprovalStatusBadge status={statistic.approval_status} />
+        <StatisticStatusTag status={statusCode} />
       </Table.Cell>
     </Table.Row>
   )
