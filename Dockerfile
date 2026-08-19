@@ -17,7 +17,7 @@ ENV CI=true
 COPY . .
 
 # Install all dependencies (including devDependencies for the build)
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
 # Set temporary placeholder database URL for building
 ENV PGURL=postgresql://placeholder@localhost:5432/statreg_db
