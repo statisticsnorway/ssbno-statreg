@@ -319,28 +319,35 @@ export default function ReleaseForm() {
     periodToPicker.setSelected(suggestedRelease.periodTo)
   }
 
+  function validatePublishTime(): string | undefined {
+    if (!values.publishTime) return 'Opprett en gyldig publiseringsdato'
+    if (values.periodTo && values.publishTime && values.periodTo > values.publishTime) {
+      return 'Publiseringsdato må være etter måleperiodeslutt'
+    }
+    if (!isAdmin && values.publishTime && values.publishTime < inThreeMonths) {
+      return 'Publiseringsdato tidligere enn tre måneder fra dags dato må opprettes av desken'
+    }
+    if (!isAdmin && selectedDateStatus === 'FULL') {
+      return 'Velg en annen dato som ikke er full, eller kontakt desken@ssb.no'
+    }
+    if (!isAdmin && selectedDateStatus === 'BLOCKED') {
+      return 'Velg en annen dato som ikke er sperret, eller kontakt desken@ssb.no'
+    }
+    return undefined
+  }
+
   function validateFields(): boolean {
     const nextErrors: ReleaseFormErrors = {}
 
     if (!values.dateType) nextErrors.dateType = 'Velg en datotype for publisering'
-    if (!values.publishTime) nextErrors.publishTime = 'Opprett en gyldig publiseringsdato'
     if (!values.periodFrom) nextErrors.periodFrom = 'Opprett en gyldig fra-dato'
     if (!values.periodTo) nextErrors.periodTo = 'Opprett en gyldig til-dato'
-    if (!isAdmin && values.publishTime && values.publishTime < inThreeMonths) {
-      nextErrors.publishTime = 'Publiseringsdato tidligere enn tre måneder fra dags dato må opprettes av desken'
-    }
-    if (!isAdmin && selectedDateStatus === 'FULL') {
-      nextErrors.publishTime = 'Velg en annen dato som ikke er full, eller kontakt desken@ssb.no'
-    }
-    if (!isAdmin && selectedDateStatus === 'BLOCKED') {
-      nextErrors.publishTime = 'Velg en annen dato som ikke er sperret, eller kontakt desken@ssb.no'
-    }
-
-    // TODO: MIM-2582: Review comparison logic, error messages, and implement onChange
     if (values.periodFrom && values.periodTo && values.periodFrom > values.periodTo) {
       nextErrors.periodFrom = 'Fra-dato kan ikke være etter til-dato'
       nextErrors.periodTo = 'Til-dato kan ikke være før fra-dato'
     }
+
+    nextErrors.publishTime = validatePublishTime()
 
     if (isEditing && !values.comment) {
       nextErrors.comment = 'Beskriv endringer som er gjort'
