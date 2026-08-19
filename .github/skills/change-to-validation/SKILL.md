@@ -13,25 +13,25 @@ argument-hint: "List changed paths to compute required checks"
 
 ## Validation Matrix
 - If `backend/**` changed:
-  - Run `npm run test:backend`
+  - Run `pnpm run test:backend`
 - If `frontend/**` changed:
-  - Run `npm run test:frontend`
+  - Run `pnpm run test:frontend`
 - If `shared/**` changed:
-  - Run `npm run test`
+  - Run `pnpm run test`
 - If `shared/openapi/openapi.yaml` changed:
-  - Run `npm run generate:api-types`
+  - Run `pnpm run generate:api-types`
   - Then run relevant tests (at minimum backend/frontend where affected)
 - If `backend/prisma/schema.prisma` changed:
-  - Run `npm run generate`
+  - Run `pnpm run generate`
   - Follow Prisma workflow from docs
-  - Run `npm run test:backend`
+  - Run `pnpm run test:backend`
 - If changes are cross-cutting refactors across multiple packages:
-  - Run `npm run test`
-  - Run `npm run lint`
+  - Run `pnpm run test`
+  - Run `pnpm run lint`
 - If changes are complex, or if libraries are touched
-  - Run `npm run test:integration:docker`
+  - Run `pnpm run test:integration:docker`
   - Or, if Docker is not present, run the application in one process and in a separate process:
-  - Run  `npm run test:integration`
+  - Run  `pnpm run test:integration`
 
 ## Procedure
 1. Enumerate changed file paths.

@@ -391,6 +391,16 @@ export async function parseReleaseInput(
   }
 
   const publishTimeDate = parseDateISO(publish_time, 'publish_time')
+  const periodFromDate = parseDateOnly(period_from, 'period_from')
+  const periodToDate = parseDateOnly(period_to, 'period_to')
+
+  if (periodFromDate > periodToDate) {
+    throw new StatregError('End of measuring period cannot be earlier than start of measuring period')
+  }
+  if (periodToDate > publishTimeDate) {
+    throw new StatregError('Publish time cannot be earlier than end of measuring period')
+  }
+
   const isAdmin = isCurrentUserAdmin()
 
   if (!isAdmin && (await isDateBlocked(getDateOnlyAsString(publishTimeDate), prisma))) {
@@ -403,11 +413,10 @@ export async function parseReleaseInput(
   }
 
   // TODO check that release_data_precision is enum
-  // TODO: Automatic suggestion of period_to and period_from is going to be solved in a seperate task
   return {
     publishTimeDate,
-    periodFromDate: parseDateOnly(period_from, 'period_from'),
-    periodToDate: parseDateOnly(period_to, 'period_to'),
+    periodFromDate: periodFromDate,
+    periodToDate: periodToDate,
     releaseDatePrecision: sanitize(release_date_precision!),
     comment: safeComment,
   }

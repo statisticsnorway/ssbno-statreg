@@ -4,6 +4,7 @@
 **/generated
 
 coverage/
+.pnpm-store/
 
 # Do not commit your .env file, please
 .env

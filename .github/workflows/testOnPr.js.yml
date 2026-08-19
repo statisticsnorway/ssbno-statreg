@@ -14,25 +14,25 @@ jobs:
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+      - name: Install pnpm and Node.js
+        uses: pnpm/setup@c9883cc79df532ad1a7b81bf9ab944ceb090d65c # v2.0.0
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: "npm"
-      - run: npm i
-      - run: npm run generate
-      - run: npm run build --if-present
-      - run: npm run ci-test
-      - run: npm run lint
-      - run: npm run generate:api-types
+          runtime: node@${{ matrix.node-version }}
+          cache: true
+
+      - run: pnpm i
+      - run: pnpm run generate
+      - run: pnpm run build
+      - run: pnpm run ci-test
+      - run: pnpm run lint
+      - run: pnpm run generate:api-types
 
       - name: Check match between generated api types and openapi spec
         # If api-types.ts has uncommited changes after the previous step (generate api-types)
         # that means that there is a mismatch between api-types and openapi spec
         run: |
           if ! git diff --exit-code ./shared/src/api-types.ts; then
-            echo "❌ There's a mismatch between generated api types and openapi spec. Please run 'npm run generate:api-types' to update types, or revert changes to the spec."
+            echo "❌ There's a mismatch between generated api types and openapi spec. Please run 'pnpm run generate:api-types' to update types, or revert changes to the spec."
             exit 1
           fi
 

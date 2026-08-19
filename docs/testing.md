@@ -8,17 +8,17 @@ All buisness shall be covered by unit tests. We are using vitest for unit testin
 
 To run tests:
 ```
-npm run test
+pnpm run test
 ```
 
 ## Integration tests
 
 ### Running locally
 
-Test against running instance (e.g. after running `npm run dev`):
+Test against running instance (e.g. after running `pnpm run dev`):
 
 ```bash
-npm run test:integration
+pnpm run test:integration
 ```
 
 This runs fast, but modifies the local database instance.

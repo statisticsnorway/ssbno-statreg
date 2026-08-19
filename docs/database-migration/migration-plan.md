@@ -28,8 +28,8 @@ Before performing the migration, we need to allow the prisma methods deleteMany 
 
     ```bash
     cd backend
-    npm i JSONStream
-    npm i date-fns-tz
+    pnpm add JSONStream
+    pnpm add date-fns-tz
     ```
 
 **👌Nais preparation (6-10):**
@@ -79,7 +79,7 @@ Before performing the migration, we need to allow the prisma methods deleteMany 
 12. Delete all existing data in the database and load data from JSON files into PostgreSQL:
 
     ```
-    npm exec tsx ./src/scripts/import-data-to-postgres.ts /tmp/STATREG_TABLES_JSON
+    pnpm --filter backend exec tsx ./src/scripts/import-data-to-postgres.ts /tmp/STATREG_TABLES_JSON
     ```
 
     The script also:
@@ -90,7 +90,7 @@ Before performing the migration, we need to allow the prisma methods deleteMany 
 13. Verify each table in PostgreSQL against the JSON validation files:
 
     ```
-    npx tsx ./src/scripts/validate-import.ts /tmp/tableStatsExample.json
+    pnpm --filter backend exec tsx ./src/scripts/validate-import.ts /tmp/tableStatsExample.json
     ```
 
     This checks the number of rows and the highest and lowest IDs.
@@ -98,7 +98,7 @@ Before performing the migration, we need to allow the prisma methods deleteMany 
 14. Fill in missing division codes:
 
     ```
-    npx tsx ./src/scripts/addDivisionCodeToStatistic.ts
+    pnpm --filter backend exec tsx ./src/scripts/addDivisionCodeToStatistic.ts
     ```
 
 15. (Optional) Update the approval status field(s) for Releases and Statistics if new statuses should be applied or we get any new status column. No script generated since current migration supports existing data fields. Double check that this still applies before running migration.
@@ -106,19 +106,19 @@ Before performing the migration, we need to allow the prisma methods deleteMany 
 16. Fill the new ResponsiblePerson table, deriving data from the existing Contact relation:
 
     ```
-    npx tsx ./src/scripts/addResponsiblePersonFromOldContact.ts
+    pnpm --filter backend exec tsx ./src/scripts/addResponsiblePersonFromOldContact.ts
     ```
 
 17. Set consistent class_names in audit_log table:
 
     ```
-    npx tsx ./src/scripts/rewriteAuditLogClassNames.ts
+    pnpm --filter backend exec tsx ./src/scripts/rewriteAuditLogClassNames.ts
     ```
 
 18. Set consistent event_names in audit_log table:
 
     ```
-    npx tsx ./src/scripts/rewriteAuditLogEventNames.ts
+    pnpm --filter backend exec tsx ./src/scripts/rewriteAuditLogEventNames.ts
     ```
 
 19. Drop legacy tables that are no longer needed e.g. Division and Contacts. Drop assosiated columns with dropped tables as well. This can be done in a PR with an adjustment of Prisma schema a while after data migration.

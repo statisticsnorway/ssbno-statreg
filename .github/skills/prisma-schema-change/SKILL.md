@@ -15,17 +15,17 @@ argument-hint: "Describe schema change and target models"
 ## Procedure
 1. Edit schema in `backend/prisma/schema.prisma`.
 2. Regenerate Prisma client from repo root:
-   - `npm run generate`
+   - `pnpm run generate`
 3. Apply migrations in normal flow:
-   - `npm run db:deploy`
+   - `pnpm run db:deploy`
 4. If local setup requires documented recovery workflow, follow repo docs (`README.md` and `docs/database.md`) before continuing.
 5. Update `backend/prisma/seed.ts` if schema fields have changed, if new models are added or if additional examples are necessary. Beware that many integration tests depend on seed data. ALWAYS run integration tests after changing seed data.
 6. Seed local DB when needed:
-   - `npm run seed`
+   - `pnpm run seed`
 7. Run validation for backend-impacting changes:
-   - `npm run test:backend`
+   - `pnpm run test:backend`
 8. If the changes are successful and accepted by the user, a migration can be created like this. Remember to replace "${migration-name} with a unique name describing the migration. 
-   - `npx prisma migrate dev -n ${migration-name}`
+   - `pnpm --filter backend exec prisma migrate dev -n ${migration-name}`
 
 ## Guardrails
 - Never edit existing files inside `backend/prisma/migrations/`.
