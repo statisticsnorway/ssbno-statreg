@@ -14,7 +14,6 @@ import {
   ValidationMessage,
   ErrorSummary,
   Textarea,
-  FieldDescription,
 } from '@digdir/designsystemet-react'
 import { DatePicker as AkselDatePicker, useDatepicker as useAkselDatePicker } from '@navikt/ds-react/DatePicker'
 import { DatePicker } from '../components/DatePicker'
