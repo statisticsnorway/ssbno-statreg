@@ -40,35 +40,35 @@ Use these commands from repo root.
 
 ```bash
 # Start full stack (frontend + api: http://localhost:5173)
-npm run dev
+pnpm run dev
 
 # Start local auth flow (Keycloak + app)
-npm run dev:auth
+pnpm run dev:auth
 
 # Build Prisma client
-npm run generate
+pnpm run generate
 
 # Generate shared API types from OpenAPI
-npm run generate:api-types
+pnpm run generate:api-types
 
 # Apply migrations
-npm run db:deploy
+pnpm run db:deploy
 
 # Seed local database
-npm run seed
+pnpm run seed
 
 # Typecheck the whole codebase
-npm run check
+pnpm run check
 
 # Tests
-npm run test
-npm run test:backend
-npm run test:frontend
-npm run test:integration
+pnpm run test
+pnpm run test:backend
+pnpm run test:frontend
+pnpm run test:integration
 
 # Lint
-npm run lint
-npm run lint:fix
+pnpm run lint
+pnpm run lint:fix
 ```
 
 ## Change-Type Playbook
@@ -77,13 +77,13 @@ Run the minimum required checks for the files you changed.
 
 | If you changed | Required validation before finishing |
 |------|------|
-| Any file | `npm run check` |
-| `backend/**` | `npm run test:backend` |
-| `frontend/**` | `npm run test:frontend` |
-| `shared/**` | `npm run test` |
-| `shared/openapi/openapi.yaml` | `npm run generate:api-types` and then relevant tests |
-| `backend/prisma/schema.prisma` | `npm run generate`, apply Prisma workflow from docs, then backend tests |
-| Cross-cutting refactors | `npm run test` and `npm run lint` |
+| Any file | `pnpm run check` |
+| `backend/**` | `pnpm run test:backend` |
+| `frontend/**` | `pnpm run test:frontend` |
+| `shared/**` | `pnpm run test` |
+| `shared/openapi/openapi.yaml` | `pnpm run generate:api-types` and then relevant tests |
+| `backend/prisma/schema.prisma` | `pnpm run generate`, apply Prisma workflow from docs, then backend tests |
+| Cross-cutting refactors | `pnpm run test` and `pnpm run lint` |
 
 ## Prisma And Database Safety
 
@@ -118,7 +118,7 @@ When adding or changing backend endpoints:
 2. Add or update service logic and validation.
 3. Keep controller focused on request/response mapping.
 4. Update OpenAPI spec in `shared/openapi/openapi.yaml`.
-5. Run `npm run generate:api-types`.
+5. Run `pnpm run generate:api-types`.
 6. Add or update backend tests.
 
 ## Language Conventions

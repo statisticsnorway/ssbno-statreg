@@ -9,7 +9,7 @@ All buisness shall be covered by unit tests. We are using vitest for unit testin
 To run tests:
 
 ```
-npm run test
+pnpm run test
 ```
 
 ## Integration tests
@@ -40,12 +40,12 @@ PGURL=postgresql://<USERNAME>@localhost:5432/statreg_db_integration_test?sslmode
 Run the integration tests with the following command:
 
 ```sh
-npm run test:integration:local
+pnpm run test:integration:local
 ```
 
 This will always prompt you before resetting the database.
 If you want to run it without the prompt:
 
 ```sh
-npm run test:integration:local:force
+pnpm run test:integration:local:force
 ```
