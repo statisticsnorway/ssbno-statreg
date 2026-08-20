@@ -22,7 +22,7 @@ In practice, each test should primarly depend on database resources it creates i
 For instance, if we want to test updating a statistic, we first post a statistic only for that test.
 It is also useful to test that a sequence of API calls work as expected.
 
-## Running locally
+### Running locally
 
 It's recommended to create a dedicated database for integration tests that can safely be reset between runs:
 
