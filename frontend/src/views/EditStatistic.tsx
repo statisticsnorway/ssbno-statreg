@@ -63,8 +63,6 @@ export default function EditStatistic() {
     value: [],
   })
 
-  const fieldsToValidate: StatisticFormField[] = [...Object.keys(defaultValues)] as StatisticFormField[]
-
   const [status, setStatus] = useState<CreatableStatisticStatus>('K')
   const [values, setValues] = useState<StatisticFormValues>(defaultValues)
   const [errors, setErrors] = useState<StatisticFormErrors>({})
@@ -179,6 +177,7 @@ export default function EditStatistic() {
 
   function validateForm(nextValues = values, nextStatus = status): StatisticFormErrors {
     const nextErrors: StatisticFormErrors = {}
+    const fieldsToValidate: StatisticFormField[] = [...Object.keys(defaultValues)] as StatisticFormField[]
 
     for (const field of fieldsToValidate) {
       const error = validateField(field, nextValues, nextStatus)
