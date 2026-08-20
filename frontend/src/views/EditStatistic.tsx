@@ -48,11 +48,6 @@ function getEditableStatus(statusCode?: string): CreatableStatisticStatus {
   return statusCode === 'A' ? 'A' : 'K'
 }
 
-type StatisticValidationState = {
-  status: CreatableStatisticStatus
-  values: StatisticFormValues
-}
-
 export default function EditStatistic() {
   const { shortname } = useParams<Shortname['shortname']>()
 
@@ -149,7 +144,7 @@ export default function EditStatistic() {
       )
       setErrors({})
 
-      await Promise.all([fetchDivisions()])
+      await fetchDivisions()
     }
 
     initializeUpdateStatistic()
@@ -159,71 +154,67 @@ export default function EditStatistic() {
     return isCreateStatisticFieldRequired(status, field) || field === 'comment'
   }
 
-  function getValidationState(nextValues = values, nextStatus = status): StatisticValidationState {
-    return {
-      status: nextStatus,
-      values: nextValues,
-    }
-  }
-
-  function validateField(field: StatisticFormField, validationState: StatisticValidationState): string {
-    if (field === 'comment' && !validationState.values.comment) return 'Fyll inn kommentar'
+  function validateField(field: StatisticFormField, nextValues = values, nextStatus = status): string {
+    if (field === 'comment' && !nextValues.comment) return 'Fyll inn kommentar'
 
     // Optional field validation
     if (
       field === 'first_released_at' &&
-      validationState.values.first_released_at &&
-      !/^\d{4}$/.test(validationState.values.first_released_at)
+      nextValues.first_released_at &&
+      !/^\d{4}$/.test(nextValues.first_released_at)
     ) {
       return 'Statistikkens startår må være et gyldig år med fire siffer'
     }
 
-    if (!isCreateStatisticFieldRequired(validationState.status, field)) {
+    if (!isCreateStatisticFieldRequired(nextStatus, field)) {
       return ''
     }
 
-    if (field === 'name' && !validationState.values.name) return 'Fyll inn norsk statistikknavn'
-    if (field === 'name_en' && !validationState.values.name_en) return 'Fyll inn engelsk statistikknavn'
-    if (field === 'division' && !validationState.values.division) return 'Velg ansvarlig seksjon for statistikken'
+    if (field === 'name' && !nextValues.name) return 'Fyll inn norsk statistikknavn'
+    if (field === 'name_en' && !nextValues.name_en) return 'Fyll inn engelsk statistikknavn'
+    if (field === 'division' && !nextValues.division) return 'Velg ansvarlig seksjon for statistikken'
 
     return ''
   }
 
-  function updateFieldErrors(
-    fields: StatisticFormField[],
-    validationState: StatisticValidationState,
-    shouldAddNewErrors = true
-  ) {
-    setErrors((currentErrors) => {
-      const nextErrors = { ...currentErrors }
+  function validateForm(nextValues = values, nextStatus = status): StatisticFormErrors {
+    const nextErrors: StatisticFormErrors = {}
 
-      for (const field of fields) {
-        const error = validateField(field, validationState)
+    for (const field of fieldsToValidate) {
+      const error = validateField(field, nextValues, nextStatus)
 
-        if (error) {
-          if (shouldAddNewErrors || nextErrors[field]) {
-            nextErrors[field] = error
-          }
-        } else {
-          delete nextErrors[field]
-        }
+      if (error) {
+        nextErrors[field] = error
       }
+    }
 
-      return nextErrors
-    })
+    return nextErrors
   }
 
   function handleValueChange<K extends keyof StatisticFormValues>(field: K, value: StatisticFormValues[K]) {
     const nextValues = { ...values, [field]: value }
-    const nextErrors = { ...errors, [field]: '' }
 
     setValues(nextValues)
-    setErrors(nextErrors)
+    setErrors((currentErrors) => {
+      if (!currentErrors[field]) {
+        return currentErrors
+      }
+
+      const nextErrors = { ...currentErrors }
+      delete nextErrors[field]
+      return nextErrors
+    })
   }
 
   function handleStatusChange(nextStatus: CreatableStatisticStatus) {
     setStatus(nextStatus)
-    updateFieldErrors(fieldsToValidate, getValidationState(values, nextStatus), false)
+    setErrors((currentErrors) => {
+      const nextErrors = validateForm(values, nextStatus)
+
+      return Object.fromEntries(
+        Object.entries(nextErrors).filter(([field]) => currentErrors[field as StatisticFormField])
+      )
+    })
   }
 
   async function updateStatistic() {
@@ -258,13 +249,7 @@ export default function EditStatistic() {
   function handleSubmit(e: React.ChangeEvent<HTMLFormElement>) {
     e.preventDefault()
 
-    const nextErrors: StatisticFormErrors = {}
-    const validationState = getValidationState()
-
-    for (const field of fieldsToValidate) {
-      const error = validateField(field, validationState)
-      if (error) nextErrors[field] = error
-    }
+    const nextErrors = validateForm()
 
     setErrors(nextErrors)
     setApiError([])
