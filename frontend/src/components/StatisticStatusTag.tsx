@@ -1,5 +1,6 @@
 import { Tag } from '@digdir/designsystemet-react'
 import { StatisticStatus } from '@ssbno-statreg/shared'
+import { Badge } from '@digdir/designsystemet-react'
 
 const StatusAttributes = {
   A: {
@@ -7,7 +8,7 @@ const StatusAttributes = {
     text: StatisticStatus.A,
   },
   K: {
-    color: 'neutral',
+    color: 'info',
     text: StatisticStatus.K,
   },
   IA: {
@@ -31,4 +32,13 @@ const StatusAttributes = {
 export function StatisticStatusTag({ status }: { status: keyof typeof StatusAttributes }) {
   const config = StatusAttributes[status]
   return <Tag data-color={config.color}>{config.text}</Tag>
+}
+
+export function StatisticStatusBadge(props: { status?: string | null }) {
+  const config = StatusAttributes[props.status as keyof typeof StatusAttributes]
+  return (
+    <>
+      <Badge data-color={config.color} /> {config.text}
+    </>
+  )
 }
