@@ -19,7 +19,9 @@
     "db:deploy": "pnpm exec prisma migrate deploy",
     "test": "vitest --project backend ",
     "ci-test": "vitest run --project backend",
-    "test:integration": "vitest run --project integration"
+    "test:integration": "vitest run --project integration",
+    "test:integration:local": "pnpm exec prisma migrate reset && pnpm run seed && pnpm run test:integration",
+    "test:integration:local:force": "pnpm exec prisma migrate reset --force && pnpm run seed && pnpm run test:integration"
   },
   "dependencies": {
     "@cacheable/node-cache": "3.1.1",
