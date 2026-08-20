@@ -23,9 +23,9 @@ import client from '../api'
 
 import './CreateStatistic.css'
 
-import { isCreateStatisticFieldRequired, ApprovalStatus, StatisticStatus } from '@ssbno-statreg/shared'
+import { isEditStatisticFieldRequired, ApprovalStatus, StatisticStatus } from '@ssbno-statreg/shared'
 import type {
-  CreatableStatisticStatus,
+  EditableStatisticStatus,
   Division,
   Shortname,
   StatisticDetails,
@@ -59,7 +59,7 @@ export default function EditStatistic() {
     value: [],
   })
 
-  const [status, setStatus] = useState<string>('')
+  const [status, setStatus] = useState<EditableStatisticStatus | ''>('')
   const [values, setValues] = useState<StatisticFormValues>(defaultValues)
   const [errors, setErrors] = useState<StatisticFormErrors>({})
   const [apiError, setApiError] = useState<string[]>([])
@@ -123,7 +123,7 @@ export default function EditStatistic() {
         typeof nextStatistic.division === 'string' ? nextStatistic.division : nextStatistic.division?.code
 
       setStatistic(nextStatistic)
-      setStatus(nextStatistic.status?.code ?? '')
+      setStatus((nextStatistic.status?.code as EditableStatisticStatus) ?? '')
       setValues({
         name: nextStatistic.name ?? '',
         name_en: nextStatistic.name_en ?? '',
@@ -145,8 +145,8 @@ export default function EditStatistic() {
   }, [isAdmin, setRegionLevelValues, shortname])
 
   function isRequired(field: StatisticFormField) {
-    if (!status) return
-    return isCreateStatisticFieldRequired(status, field) || field === 'comment'
+    if (!status) return false
+    return isEditStatisticFieldRequired(status, field) || field === 'comment'
   }
 
   function validateField(field: StatisticFormField, nextValues = values, nextStatus = status): string {
@@ -161,7 +161,7 @@ export default function EditStatistic() {
       return 'Statistikkens startår må være et gyldig år med fire siffer'
     }
 
-    if (!isCreateStatisticFieldRequired(nextStatus, field)) {
+    if (!nextStatus || !isEditStatisticFieldRequired(nextStatus, field)) {
       return ''
     }
 
@@ -202,7 +202,7 @@ export default function EditStatistic() {
     })
   }
 
-  function handleStatusChange(nextStatus: CreatableStatisticStatus) {
+  function handleStatusChange(nextStatus: EditableStatisticStatus) {
     setStatus(nextStatus)
     setErrors((currentErrors) => {
       const nextErrors = validateForm(values, nextStatus)
@@ -310,7 +310,7 @@ export default function EditStatistic() {
           <Select
             width='auto'
             value={status}
-            onChange={(e) => handleStatusChange(e.target.value as CreatableStatisticStatus)}
+            onChange={(e) => handleStatusChange(e.target.value as EditableStatisticStatus)}
           >
             {Object.entries(StatisticStatus).map(([code, name]) => (
               <Select.Option
