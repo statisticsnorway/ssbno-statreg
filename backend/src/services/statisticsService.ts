@@ -421,6 +421,7 @@ export async function updateStatisticContacts(
       responsiblePersons: {
         set: newContacts.map((contact) => ({ id: contact.id })),
       },
+      comment: 'User updated contacts',
     },
     select: { responsiblePersons: { select: { principalName: true } } },
   })
