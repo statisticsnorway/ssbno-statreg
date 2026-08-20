@@ -1,6 +1,6 @@
-import { Tag } from '@digdir/designsystemet-react'
+import { Tag } from '@statisticsnorway/design-react'
 import { StatisticStatus } from '@ssbno-statreg/shared'
-import { Badge } from '@digdir/designsystemet-react'
+import { Badge } from '@statisticsnorway/design-react'
 
 const StatusAttributes = {
   A: {

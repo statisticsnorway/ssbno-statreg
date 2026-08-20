@@ -14,7 +14,7 @@ import {
   useCheckboxGroup,
   Button,
   Alert,
-} from '@digdir/designsystemet-react'
+} from '@statisticsnorway/design-react'
 import { EraserIcon } from '@navikt/aksel-icons'
 
 import client from '../api'
