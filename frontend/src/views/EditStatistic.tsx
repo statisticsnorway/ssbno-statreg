@@ -23,7 +23,7 @@ import client from '../api'
 
 import './CreateStatistic.css'
 
-import { isCreateStatisticFieldRequired, ApprovalStatus } from '@ssbno-statreg/shared'
+import { isCreateStatisticFieldRequired, ApprovalStatus, StatisticStatus } from '@ssbno-statreg/shared'
 import type {
   CreatableStatisticStatus,
   Division,
@@ -44,10 +44,6 @@ const defaultValues: StatisticFormValues = {
   comment: '',
 }
 
-function getEditableStatus(statusCode?: string): CreatableStatisticStatus {
-  return statusCode === 'A' ? 'A' : 'K'
-}
-
 export default function EditStatistic() {
   const { shortname } = useParams<Shortname['shortname']>()
 
@@ -63,7 +59,7 @@ export default function EditStatistic() {
     value: [],
   })
 
-  const [status, setStatus] = useState<CreatableStatisticStatus>('K')
+  const [status, setStatus] = useState<string>('')
   const [values, setValues] = useState<StatisticFormValues>(defaultValues)
   const [errors, setErrors] = useState<StatisticFormErrors>({})
   const [apiError, setApiError] = useState<string[]>([])
@@ -127,7 +123,7 @@ export default function EditStatistic() {
         typeof nextStatistic.division === 'string' ? nextStatistic.division : nextStatistic.division?.code
 
       setStatistic(nextStatistic)
-      setStatus(getEditableStatus(nextStatistic.status?.code))
+      setStatus(nextStatistic.status?.code ?? '')
       setValues({
         name: nextStatistic.name ?? '',
         name_en: nextStatistic.name_en ?? '',
@@ -149,6 +145,7 @@ export default function EditStatistic() {
   }, [isAdmin, setRegionLevelValues, shortname])
 
   function isRequired(field: StatisticFormField) {
+    if (!status) return
     return isCreateStatisticFieldRequired(status, field) || field === 'comment'
   }
 
@@ -315,10 +312,15 @@ export default function EditStatistic() {
             value={status}
             onChange={(e) => handleStatusChange(e.target.value as CreatableStatisticStatus)}
           >
-            <Select.Option value='K' disabled={statistic.status?.code === 'A'}>
-              Kommende
-            </Select.Option>
-            <Select.Option value='A'>Aktiv</Select.Option>
+            {Object.entries(StatisticStatus).map(([code, name]) => (
+              <Select.Option
+                key={`${code}-${name}`}
+                value={code}
+                disabled={statistic.status?.code !== 'K' && code === 'K'}
+              >
+                {name}
+              </Select.Option>
+            ))}
           </Select>
         </Field>
         <Divider />

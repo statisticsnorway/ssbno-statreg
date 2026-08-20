@@ -16,5 +16,5 @@ export function isCreateStatisticFieldRequired(
   status: CreatableStatisticStatus,
   field: RequiredStatisticField
 ): boolean {
-  return requiredStatisticFieldsByStatus[status].includes(field)
+  return requiredStatisticFieldsByStatus[status]?.includes(field)
 }
