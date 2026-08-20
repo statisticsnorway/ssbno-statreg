@@ -407,7 +407,7 @@ export default function CreateStatistic() {
               </div>
               <Field.Description>
                 Statistikker som er nyopprettet får status «Kommende». For å sette den til «Aktiv» må du i tillegg fylle
-                ut: Engelsk navn, varianter og målform.
+                ut: Engelsk navn, varianter og kontakter.
               </Field.Description>
               <Select
                 width='auto'

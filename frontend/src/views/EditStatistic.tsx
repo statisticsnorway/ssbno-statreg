@@ -61,11 +61,13 @@ function getEditableStatus(statusCode?: string): CreatableStatisticStatus {
   return statusCode === 'A' ? 'A' : 'K'
 }
 
+function getRegionLevelCodes(statistic: StatisticDetails): string[] {
+  return statistic.statistic_region_levels?.flatMap((regionLevel) => (regionLevel.code ? [regionLevel.code] : [])) ?? []
+}
+
 type StatisticValidationState = {
   status: CreatableStatisticStatus
   values: StatisticFormValues
-  // selectedContacts: string[]
-  // createdVariants: Variant[]
 }
 
 export default function EditStatistic() {
@@ -74,7 +76,11 @@ export default function EditStatistic() {
   const [statistic, setStatistic] = useState<StatisticDetails>({})
   const [divisions, setDivisions] = useState<Division[]>([])
 
-  const { getCheckboxProps, value: regionLevelValues } = useCheckboxGroup({
+  const {
+    getCheckboxProps,
+    value: regionLevelValues,
+    setValue: setRegionLevelValues,
+  } = useCheckboxGroup({
     name: 'region-level-checkbox',
     value: [],
   })
@@ -145,13 +151,14 @@ export default function EditStatistic() {
       setStatistic(nextStatistic)
       setStatus(getEditableStatus(nextStatistic.status?.code))
       setValues(getStatisticFormValues(nextStatistic))
+      setRegionLevelValues(getRegionLevelCodes(nextStatistic))
       setErrors({})
 
       await Promise.all([fetchDivisions()])
     }
 
     initializeUpdateStatistic()
-  }, [isAdmin, shortname])
+  }, [isAdmin, setRegionLevelValues, shortname])
 
   function isRequired(field: StatisticFormField) {
     return isCreateStatisticFieldRequired(status, field) || field === 'comment'
@@ -236,20 +243,22 @@ export default function EditStatistic() {
   }
 
   async function updateStatistic() {
+    const body: StatisticUpdate = {
+      ...values,
+      status: { code: status },
+      first_released_at: values.first_released_at ? `${values.first_released_at}-12-31` : undefined,
+      statistic_region_levels: regionLevelValues.map((code: string) => ({ code })),
+      approval_status: ApprovalStatus['ACCEPTED'],
+      relation: statistic.relation?.shortname,
+      yearly_reporting: statistic.yearly_reporting,
+      previous_topic_codes: statistic.previous_topic_codes,
+      variants: statistic.variants,
+      contacts: statistic.contacts?.map((contact) => contact.principalName),
+    }
+
     const { data, error } = await client.PUT(`/statistics/{shortname}`, {
       params: { path: { shortname: shortname as string } },
-      body: {
-        ...statistic,
-        ...values,
-        status: { code: status },
-        first_released_at: values.first_released_at ? `${values.first_released_at}-12-31` : '',
-        statistic_region_levels: regionLevelValues.length
-          ? regionLevelValues.map((code: string) => ({
-              code,
-            }))
-          : [],
-        approval_status: ApprovalStatus['ACCEPTED'],
-      },
+      body,
     })
 
     if (error) {
@@ -292,6 +301,8 @@ export default function EditStatistic() {
     return label
   }
 
+  console.log(statistic)
+
   if (!auth?.isAdmin) return <ErrorPage type={ErrorType.NOTAUTH} />
 
   return (
@@ -333,7 +344,7 @@ export default function EditStatistic() {
               </div>
               <Field.Description>
                 Statistikker som er nyopprettet får status «Kommende». For å sette den til «Aktiv» må du i tillegg fylle
-                ut: Engelsk navn, varianter og målform.
+                ut: Engelsk navn, varianter og kontakter.
               </Field.Description>
               <Select
                 width='auto'
