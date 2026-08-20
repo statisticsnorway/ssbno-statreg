@@ -216,6 +216,7 @@ export default function ReleaseForm() {
   const [suggestedPublishTime] = useState(inThreeMonths)
   const [values, setValues] = useState<ReleaseFormTypes>({
     publishTime: suggestedPublishTime,
+    dateType: 'Dag',
   })
   const [errors, setErrors] = useState<ReleaseFormErrors>({})
   const [statistic, setStatistic] = useState<Statistic>()
@@ -429,7 +430,7 @@ export default function ReleaseForm() {
           </Field.Description>
           <Select
             id='dateType'
-            value={values.dateType ?? 'Dag'}
+            value={values.dateType}
             onChange={(e) => {
               setValues((values) => ({ ...values, dateType: e.target.value }))
             }}
