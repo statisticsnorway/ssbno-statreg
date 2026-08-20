@@ -60,6 +60,15 @@ describe('statistics controller', () => {
       first_released_at: '2024-01-01T00:00:00.000Z',
     })
 
+    // GET /shortnames to verify created statistic is included
+    const shortnamesResponse = await request(app).get('/statistikkregisteret/api/shortnames')
+    console.log(shortnamesResponse.body)
+    expect(shortnamesResponse.status).toBe(200)
+    expect(shortnamesResponse.body).toContainEqual({
+      shortname: 'upcoming_test',
+      statistic_name: 'Teststatistikk for opprettelse av kommende statistikk',
+    })
+
     // GET /statistics with shortname filter to verify persistence
     const listingResponse = await request(app)
       .get('/statistikkregisteret/api/statistics')
