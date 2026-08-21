@@ -1,4 +1,4 @@
-import { Alert, Heading, Paragraph } from '@digdir/designsystemet-react'
+import { Alert, Heading, Paragraph } from '@statisticsnorway/design-react'
 
 export function ErrorAlert(props: Readonly<{ message: string[] }>) {
   return (

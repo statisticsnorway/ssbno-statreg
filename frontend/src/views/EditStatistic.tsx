@@ -16,7 +16,7 @@ import {
   ValidationMessage,
   Tag,
   ErrorSummary,
-} from '@digdir/designsystemet-react'
+} from '@statisticsnorway/design-react'
 import { QuestionmarkCircleIcon } from '@navikt/aksel-icons'
 
 import client from '../api'

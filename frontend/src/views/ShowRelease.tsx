@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link as ReactRouterLink } from 'react-router'
-import { Heading, Link, Paragraph, Details, Card, Button, Spinner } from '@digdir/designsystemet-react'
+import { Heading, Link, Paragraph, Details, Card, Button, Spinner } from '@statisticsnorway/design-react'
 import { PencilWritingIcon } from '@navikt/aksel-icons'
 import { ApprovalStatusTag } from '../components/ApprovalStatus'
 import client from '../api'

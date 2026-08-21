@@ -1,4 +1,4 @@
-import { Pagination as DsPagination, usePagination } from '@digdir/designsystemet-react'
+import { Pagination as DsPagination, usePagination } from '@statisticsnorway/design-react'
 
 export type PaginationProps = {
   start: number
