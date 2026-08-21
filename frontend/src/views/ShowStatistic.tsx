@@ -13,7 +13,7 @@ import {
   ValidationMessage,
   ErrorSummary,
   Field,
-} from '@digdir/designsystemet-react'
+} from '@statisticsnorway/design-react'
 import { PencilWritingIcon } from '@navikt/aksel-icons'
 import { StatisticStatusTag } from '../components/StatisticStatusTag'
 import { VariantCard } from '../components/VariantCard'

@@ -7,7 +7,7 @@ import { useState, useEffect, useRef } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { DatePicker as AkselDatePicker } from '@navikt/ds-react/DatePicker'
 import { type CalenderDate, DayStatus } from '@ssbno-statreg/shared'
-import { Paragraph } from '@digdir/designsystemet-react'
+import { Paragraph } from '@statisticsnorway/design-react'
 import { CircleIcon, CircleFillIcon } from '@navikt/aksel-icons'
 
 import client from '../api'
