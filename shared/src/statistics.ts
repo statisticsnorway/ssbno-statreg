@@ -12,14 +12,3 @@ export const RequiredCreateStatisticFieldsByStatus: Record<CreatableStatisticSta
 
 export const RequiredEditStatisticFieldsByStatus: Partial<Record<EditableStatisticStatus, RequiredStatisticField[]>> =
   RequiredCreateStatisticFieldsByStatus
-
-export function isCreateStatisticFieldRequired(
-  status: CreatableStatisticStatus,
-  field: RequiredStatisticField
-): boolean {
-  return RequiredCreateStatisticFieldsByStatus[status].includes(field)
-}
-
-export function isEditStatisticFieldRequired(status: EditableStatisticStatus, field: RequiredStatisticField): boolean {
-  return RequiredEditStatisticFieldsByStatus[status]?.includes(field) ?? false
-}
