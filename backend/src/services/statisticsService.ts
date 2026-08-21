@@ -51,6 +51,8 @@ type ValidatedStatisticInput = {
   main_language: string
   comment: string
   relation?: number | null
+  contacts?: StatisticUpdate['contacts']
+  variants?: StatisticUpdate['variants']
 }
 
 // Statistic listing
@@ -300,7 +302,6 @@ export async function updateStatistic(
     'status',
     'name',
     'name_en',
-    'relation',
     'previous_topic_codes',
     'yearly_reporting',
     'first_released_at',
@@ -311,7 +312,13 @@ export async function updateStatistic(
   const safeShortname = sanitize(shortname)
   const existingStatistic = await prisma.statistic.findFirst({
     where: { shortname: { name: safeShortname } },
-    select: { id: true, statistic_region_levels: { select: { region_level: { select: { code: true, id: true } } } } },
+    select: {
+      id: true,
+      status: true,
+      responsiblePersons: { select: { principalName: true } },
+      variants: { select: { id: true } },
+      statistic_region_levels: { select: { region_level: { select: { code: true, id: true } } } },
+    },
   })
 
   if (!existingStatistic) throw new StatregError(`Shortname ${safeShortname} not found`, 404)
@@ -328,7 +335,47 @@ export async function updateStatistic(
     first_released_at,
     main_language,
     comment,
+    contacts,
+    variants,
   } = parseUpdateStatisticInput(body, requiredFields)
+
+  if (existingStatistic.status === 'A' && status === 'K') {
+    throw new StatregError('An active statistic cannot be set back to upcoming.')
+  }
+
+  let newContacts
+  if (contacts) {
+    newContacts = await upsertContacts(contacts, prisma)
+  }
+
+  const parsedVariants = variants ? await parseVariantsInput(variants, status, prisma) : undefined
+
+  if (parsedVariants) {
+    for (const variant of parsedVariants) {
+      if (
+        variant.id &&
+        !existingStatistic.variants.some((existingVariant) => existingVariant.id === variant.id)
+      ) {
+        throw new StatregError(`Variant with id '${variant.id}' does not belong to statistic '${safeShortname}'.`)
+      }
+    }
+  }
+
+  if (status === 'A') {
+    const contactCount = newContacts ? newContacts.length : existingStatistic.responsiblePersons.length
+    const newVariantCount = parsedVariants?.filter((variant) => !variant.id).length ?? 0
+
+    if (contactCount === 0) {
+      throw new StatregError('An active statistic needs at least one contact.')
+    }
+
+    if (existingStatistic.variants.length + newVariantCount === 0) {
+      throw new StatregError('An active statistic needs at least one variant.')
+    }
+  }
+
+  const existingVariants = parsedVariants?.filter((variant) => variant.id) ?? []
+  const newVariants = parsedVariants?.filter((variant) => !variant.id) ?? []
 
   const regionLevelsToRemove = existingStatistic.statistic_region_levels.filter(
     (existingRegLvl) =>
@@ -361,10 +408,46 @@ export async function updateStatistic(
       status,
       comment,
       language: main_language,
-      related_statistic_id: relation,
+      ...(relation ? { related_statistic_id: relation } : {}),
       legacy_topic_codes: previous_topic_codes,
       yearly_reporting,
       first_release: first_released_at,
+      ...(newContacts && {
+        responsiblePersons: {
+          set: newContacts.map((contact) => ({ id: contact.id })),
+        },
+      }),
+      ...(parsedVariants && {
+        variants: {
+          update: existingVariants.map((variant) => ({
+            where: { id: variant.id! },
+            data: {
+              revision: variant.revision!.code as string,
+              frequency: {
+                connect: {
+                  code: variant.frequency!.code as string,
+                },
+              },
+              level_of_detail: variant.level_of_detail?.name ?? null,
+              level_of_detail_en: variant.level_of_detail?.name_en ?? null,
+              last_updated: new Date(),
+            },
+          })),
+          create: newVariants.map((variant) => ({
+            cancelled: false,
+            date_created: new Date(),
+            last_updated: new Date(),
+            revision: variant.revision!.code as string,
+            frequency: {
+              connect: {
+                code: variant.frequency!.code as string,
+              },
+            },
+            ...(variant.level_of_detail?.name ? { level_of_detail: variant.level_of_detail.name } : {}),
+            ...(variant.level_of_detail?.name_en ? { level_of_detail_en: variant.level_of_detail.name_en } : {}),
+          })),
+        },
+      }),
       statistic_region_levels: {
         create: createRegionLevelStatement,
         delete: deleteRegionLevelStatement,
@@ -556,6 +639,7 @@ export async function parseVariantsInput(
       }
 
       return {
+        ...(variant.id !== undefined ? { id: variant.id } : {}),
         frequency,
         revision,
         level_of_detail: variant.level_of_detail && {
@@ -626,6 +710,8 @@ export function parseUpdateStatisticInput(
     main_language,
     comment,
     relation,
+    contacts,
+    variants,
   } = ensureRequiredFieldsExists(body, requiredFields)
 
   const safeName = sanitize(name)
@@ -663,8 +749,10 @@ export function parseUpdateStatisticInput(
     status: parseStatusCode(status?.code),
     previous_topic_codes: sanitize(previous_topic_codes!),
     yearly_reporting: Boolean(yearly_reporting),
-    relation: parseRelation(relation),
+    ...(relation !== undefined ? { relation: parseRelation(relation) } : {}),
     comment: safeComment,
+    ...(contacts ? { contacts } : {}),
+    ...(variants ? { variants } : {}),
   }
 }
 
