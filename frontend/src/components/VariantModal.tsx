@@ -1,5 +1,5 @@
 import { useState, useEffect, type Dispatch, type SetStateAction } from 'react'
-import { Button, Heading, Dialog, Field, Label, Input, Select, Paragraph } from '@digdir/designsystemet-react'
+import { Button, Heading, Dialog, Field, Label, Input, Select, Paragraph } from '@statisticsnorway/design-react'
 import { TrashIcon } from '@navikt/aksel-icons'
 
 import './VariantModal.css'

@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import './ContactSelection.css'
-import { EXPERIMENTAL_Suggestion as Suggestion, type SuggestionItem, Field } from '@digdir/designsystemet-react'
+import { EXPERIMENTAL_Suggestion as Suggestion, type SuggestionItem, Field } from '@statisticsnorway/design-react'
 import type { Contact } from '@ssbno-statreg/shared'
 import { formatContact } from '../lib/utils'
 

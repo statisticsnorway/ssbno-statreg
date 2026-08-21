@@ -1,4 +1,4 @@
-import { Tag, Badge } from '@digdir/designsystemet-react'
+import { Tag, Badge } from '@statisticsnorway/design-react'
 import { CheckmarkCircleIcon, ExclamationmarkTriangleIcon, ClockDashedIcon } from '@navikt/aksel-icons'
 import { ApprovalStatus } from '@ssbno-statreg/shared'
 
