@@ -737,7 +737,7 @@ export function parseUpdateStatisticInput(
     status: parseStatusCode(status?.code),
     previous_topic_codes: sanitize(previous_topic_codes!),
     yearly_reporting: Boolean(yearly_reporting),
-    ...(relation !== undefined ? { relation: parseRelation(relation) } : {}),
+    ...(relation ? { relation: parseRelation(relation) } : {}),
     comment: safeComment,
     ...(contacts ? { contacts } : {}),
     ...(variants ? { variants } : {}),
