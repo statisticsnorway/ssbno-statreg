@@ -301,5 +301,19 @@ describe('statistics controller', () => {
     expect(filterResponse.status).toBe(200)
     const foundShortnames = (filterResponse.body as StatisticListingResponse).statistics?.map((s) => s.shortname)
     expect(foundShortnames).toContain('contacts_test')
+
+    // GET /statistics/:shortname/versions to check auditlog persistence including contacts change
+    const versionsResponse = await request(app).get(`/statistikkregisteret/api/statistics/${newShortname}/versions`)
+    expect(versionsResponse.status).toBe(200)
+    expect(versionsResponse.body).toHaveLength(2)
+    expect(versionsResponse.body[0].change_type).toBe('update')
+    expect(versionsResponse.body[0].changed_values).toEqual([
+      {
+        field_name: 'responsiblePersons',
+        old_value: expect.not.stringContaining('bcd@ssb.no'),
+        new_value: expect.stringContaining('bcd@ssb.no'),
+      },
+    ])
+    expect(versionsResponse.body[1].change_type).toBe('create')
   })
 })
