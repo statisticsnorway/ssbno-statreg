@@ -1,8 +1,9 @@
-import { type StatisticCreate } from '.'
+import type { components } from './api-types'
 import { StatisticStatus } from './enums.js'
 
 export type CreatableStatisticStatus = 'K' | 'A'
 export type EditableStatisticStatus = keyof typeof StatisticStatus
+type StatisticCreate = components['schemas']['Statistic_create']
 type RequiredStatisticField = keyof StatisticCreate
 
 export const requiredStatisticFieldsByStatus: Record<CreatableStatisticStatus, RequiredStatisticField[]> = {
