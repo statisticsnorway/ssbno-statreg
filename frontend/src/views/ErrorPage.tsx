@@ -1,4 +1,4 @@
-import { Heading, Paragraph } from '@digdir/designsystemet-react'
+import { Heading, Paragraph } from '@statisticsnorway/design-react'
 
 export const ErrorType = {
   NOTAUTH: 'not_authenticated',

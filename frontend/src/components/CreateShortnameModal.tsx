@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router'
-import { Button, Heading, Dialog, Field, Input, ValidationMessage, Paragraph } from '@digdir/designsystemet-react'
+import { Button, Heading, Dialog, Field, Input, ValidationMessage, Paragraph } from '@statisticsnorway/design-react'
 
 import client from '../api'
 import type { ShortnameListing } from '@ssbno-statreg/shared'

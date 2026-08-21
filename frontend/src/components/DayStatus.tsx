@@ -1,4 +1,4 @@
-import { Tag } from '@digdir/designsystemet-react'
+import { Tag } from '@statisticsnorway/design-react'
 import { DayStatus } from '@ssbno-statreg/shared'
 
 const statusConfig = {

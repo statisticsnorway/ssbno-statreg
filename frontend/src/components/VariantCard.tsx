@@ -1,4 +1,4 @@
-import { Card, Heading, Link, Paragraph } from '@digdir/designsystemet-react'
+import { Card, Heading, Link, Paragraph } from '@statisticsnorway/design-react'
 import { type Variant } from '@ssbno-statreg/shared'
 import { formatVariant } from '../lib/utils'
 
