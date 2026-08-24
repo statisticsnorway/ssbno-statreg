@@ -31,6 +31,8 @@ const fetchStatisticSnapshot = async (where: any): Promise<Snapshot | null> => {
         select: {
           revision: true,
           level_of_detail: true,
+          level_of_detail_en: true,
+          cancelled: true,
           frequency: { select: { name: true } },
         },
       },
@@ -45,13 +47,15 @@ const fetchStatisticSnapshot = async (where: any): Promise<Snapshot | null> => {
     .map((principalName) => `${principalName} (${users[principalName]?.displayName})`)
     .join(', ')
 
-  //formatted example: "Uke (W), Ingen; Måned (M), Ingen, Detaljnivå"
+  //formatted example: "Uke (W), Ingen; Måned (M), Ingen, Detaljnivå, Detail level, Kansellert"
   const formattedVariants = statistic.variants
     .map((variant) => {
       const revisionCode = variant.revision as keyof typeof RevisionNames
       const revisionName = RevisionNames[revisionCode] ?? revisionCode
       const variantParts = [variant.frequency.name, revisionName]
       if (variant.level_of_detail) variantParts.push(variant.level_of_detail)
+      if (variant.level_of_detail_en) variantParts.push(variant.level_of_detail_en)
+      if (variant.cancelled) variantParts.push('Kansellert')
       return variantParts.join(', ')
     })
     .join('; ')
