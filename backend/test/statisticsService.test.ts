@@ -491,6 +491,7 @@ describe('statisticService', () => {
             responsiblePersons: {
               set: [{ id: 2 }, { id: 3 }],
             },
+            comment: 'User updated contacts',
           },
         })
       )

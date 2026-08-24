@@ -8,7 +8,8 @@ import {
   StatisticStatus,
   RevisionNames,
   StatisticListingResponse,
-  getRequiredStatisticFields,
+  RequiredCreateStatisticFieldsByStatus,
+  RequiredEditStatisticFieldsByStatus,
   Variant,
 } from '@ssbno-statreg/shared'
 import { dateToISOString, sanitize, parseDateOnly, ensureRequiredFieldsExists, isNumber, parseId } from '@/lib/utils'
@@ -296,19 +297,6 @@ export async function updateStatistic(
   body: StatisticUpdate,
   prisma: StatisticPrisma
 ): Promise<StatisticDetails> {
-  const requiredFields: (keyof StatisticUpdate)[] = [
-    'division',
-    'statistic_region_levels',
-    'status',
-    'name',
-    'name_en',
-    'previous_topic_codes',
-    'yearly_reporting',
-    'first_released_at',
-    'main_language',
-    'comment',
-  ]
-
   const safeShortname = sanitize(shortname)
   const existingStatistic = await prisma.statistic.findFirst({
     where: { shortname: { name: safeShortname } },
@@ -322,6 +310,9 @@ export async function updateStatistic(
   })
 
   if (!existingStatistic) throw new StatregError(`Shortname ${safeShortname} not found`, 404)
+
+  const requiredFields: (keyof StatisticUpdate)[] =
+    RequiredEditStatisticFieldsByStatus[body.status?.code as StatisticStatusCode] ?? []
 
   const {
     division,
@@ -352,10 +343,7 @@ export async function updateStatistic(
 
   if (parsedVariants) {
     for (const variant of parsedVariants) {
-      if (
-        variant.id &&
-        !existingStatistic.variants.some((existingVariant) => existingVariant.id === variant.id)
-      ) {
+      if (variant.id && !existingStatistic.variants.some((existingVariant) => existingVariant.id === variant.id)) {
         throw new StatregError(`Variant with id '${variant.id}' does not belong to statistic '${safeShortname}'.`)
       }
     }
@@ -504,6 +492,7 @@ export async function updateStatisticContacts(
       responsiblePersons: {
         set: newContacts.map((contact) => ({ id: contact.id })),
       },
+      comment: 'User updated contacts',
     },
     select: { responsiblePersons: { select: { principalName: true } } },
   })
@@ -655,7 +644,7 @@ export function parseCreateStatisticInput(
   body: StatisticCreate | undefined,
   status: CreatableStatisticStatus
 ): ValidatedCreateStatisticInput {
-  const requiredFields = getRequiredStatisticFields(status)
+  const requiredFields = RequiredCreateStatisticFieldsByStatus[status]
   const {
     division,
     name,
@@ -749,7 +738,7 @@ export function parseUpdateStatisticInput(
     status: parseStatusCode(status?.code),
     previous_topic_codes: sanitize(previous_topic_codes!),
     yearly_reporting: Boolean(yearly_reporting),
-    ...(relation !== undefined ? { relation: parseRelation(relation) } : {}),
+    ...(relation ? { relation: parseRelation(relation) } : {}),
     comment: safeComment,
     ...(contacts ? { contacts } : {}),
     ...(variants ? { variants } : {}),
