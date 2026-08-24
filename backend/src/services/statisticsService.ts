@@ -48,7 +48,7 @@ type ValidatedStatisticInput = {
   name_en: string
   previous_topic_codes?: string
   yearly_reporting?: boolean
-  first_released_at: Date
+  first_released_at: Date | null
   main_language: string
   comment: string
   relation?: number | null
@@ -719,7 +719,7 @@ export function parseUpdateStatisticInput(
     division: parseDivision(division),
     name: safeName,
     name_en: safeNameEn,
-    first_released_at: parseDateOnly(first_released_at!),
+    first_released_at: first_released_at ? parseDateOnly(first_released_at, 'first_released_at') : null,
     main_language,
     comment: safeComment,
   }

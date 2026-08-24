@@ -16,6 +16,7 @@ import {
   ValidationMessage,
   Tag,
   ErrorSummary,
+  Textarea,
 } from '@statisticsnorway/design-react'
 import { QuestionmarkCircleIcon } from '@navikt/aksel-icons'
 
@@ -33,6 +34,7 @@ import type {
 } from '@ssbno-statreg/shared'
 import ErrorPage, { ErrorType } from './ErrorPage'
 import { ErrorAlert } from '../components/ErrorAlert'
+import { DivisionSelection } from '../components/DivisionSelection'
 import type { StatisticFormErrors, StatisticFormField, StatisticFormValues } from './CreateStatistic'
 
 const defaultValues: StatisticFormValues = {
@@ -293,7 +295,8 @@ export default function EditStatistic() {
                     Statistikker som har blitt opprettet med status «Aktiv», kan ikke bli gjort om til «Kommende» igjen.
                   </li>
                   <li>
-                    For å slette en statistikk som har blitt feilopprettet må du ta kontakt med mailadresse@ssb.no
+                    For å slette en statistikk som har blitt feilopprettet må du ta kontakt med{' '}
+                    <a href='mailto:mailadresse@ssb.no'>mailadresse@ssb.no</a>
                   </li>
                   <li>
                     Velg status «Ikke-aktiv» når statistikken er satt på pause på ubestemt tid, og du vil beholde
@@ -357,19 +360,13 @@ export default function EditStatistic() {
         <Heading level={2}>Detaljer</Heading>
         <Field>
           <Label>{getFieldLabel('Seksjon', 'division')}</Label>
-          <Select
+          <DivisionSelection
             id='division'
-            aria-invalid={!!errors.division}
-            value={values.division}
-            onChange={(e) => handleValueChange('division', e.target.value)}
-          >
-            <Select.Option value='' disabled />
-            {divisions.map(({ code, name }) => (
-              <Select.Option key={`division-${code}`} value={code}>
-                {name} ({code})
-              </Select.Option>
-            ))}
-          </Select>
+            ariaInvalid={!!errors.division}
+            divisions={divisions}
+            selected={values.division}
+            setSelected={(selected) => handleValueChange('division', selected)}
+          />
           {errors.division && <ValidationMessage>{errors.division}</ValidationMessage>}
         </Field>
         <Fieldset>
@@ -410,7 +407,7 @@ export default function EditStatistic() {
         <Field>
           <Label>{getFieldLabel('Kommentar', 'comment')}</Label>
           <Field.Description>Annen relevant informasjon.</Field.Description>
-          <Input value={values.comment} onChange={(e) => handleValueChange('comment', e.target.value)} />
+          <Textarea rows={3} value={values.comment} onChange={(e) => handleValueChange('comment', e.target.value)} />
           {errors.comment && <ValidationMessage>{errors.comment}</ValidationMessage>}
         </Field>
         <div className='create-statistic-form-buttons'>
