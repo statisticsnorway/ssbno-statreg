@@ -201,7 +201,6 @@ describe('statistics controller', () => {
       .set('content-type', 'application/json')
       .send(updatePayload)
 
-    console.log(updateResponse.body)
     expect(updateResponse.status).toBe(200)
     expect(updateResponse.body).toMatchObject({
       division: { code: '101' },
