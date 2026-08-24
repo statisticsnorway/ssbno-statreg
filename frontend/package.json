@@ -25,7 +25,7 @@
   },
   "devDependencies": {
     "@digdir/designsystemet-react": "^1.19.1",
-    "@digdir/designsystemet-types": "1.18.0",
+    "@digdir/designsystemet-types": "1.19.1",
     "@types/react": "19.2.18",
     "@types/react-dom": "19.2.4",
     "eslint-plugin-react-hooks": "7.1.1",
