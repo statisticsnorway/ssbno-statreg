@@ -30,7 +30,7 @@ export async function getReleases(
   {
     start = 0,
     count = 10,
-    where,
+    where: whereFromInput,
     sort,
   }: {
     start?: number
@@ -41,6 +41,8 @@ export async function getReleases(
   prisma: ReleasePrisma
 ): Promise<ReleaseListingResponse> {
   const orderBy = parseReleasesSortQuery(sort)
+
+  const where = { ...whereFromInput, archived: false }
 
   const releases = await prisma.release.findMany({
     skip: start,
@@ -193,7 +195,7 @@ export async function getReleaseById(id: string, prisma: ReleasePrisma): Promise
     include: ReleaseDetailsIncludes,
   })
 
-  if (!release) throw new StatregError(`Release ${idAsNumber} not found`, 404)
+  if (!release || release.archived) throw new StatregError(`Release ${idAsNumber} not found`, 404)
 
   return mapToReleaseDetails(release)
 }

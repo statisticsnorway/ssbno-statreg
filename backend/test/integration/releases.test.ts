@@ -41,6 +41,50 @@ describe('release data is persisted when ', () => {
     expect(versions.body[0].change_type).toBe('create')
   })
 
+  test('admin archives a release', async () => {
+    const newShortname = 'archive_test'
+    await request(app).post('/statistikkregisteret/api/shortnames').set(headers).send({ shortname: newShortname })
+
+    const statistic = await request(app)
+      .post(`/statistikkregisteret/api/statistics/${newShortname}`)
+      .set(headers)
+      .send({
+        status: { code: 'K' },
+        division: '101',
+        name: 'Archive test',
+        variants: [{ frequency: { code: 'U' }, revision: { code: 'I' } }],
+      })
+    expect(statistic.status).toBe(200)
+    const variantId = statistic.body.variants[0].id
+
+    const created = await request(app)
+      .post(`/statistikkregisteret/api/statistics/${newShortname}/variants/${variantId}/releases`)
+      .set(headers)
+      .send(body)
+    expect(created.status).toBe(200)
+
+    const beforeArchive = await request(app).get(
+      `/statistikkregisteret/api/statistics/${newShortname}/variants/${variantId}/releases`
+    )
+    expect(beforeArchive.status).toBe(200)
+    expect(beforeArchive.body).toMatchObject({ total: 1, releases: [{ id: created.body.id }] })
+
+    const archived = await request(app)
+      .put(`/statistikkregisteret/api/releases/${created.body.id}`)
+      .set(headers)
+      .send({ ...body, comment: 'Archive release.', archived: true })
+    expect(archived.status).toBe(200)
+
+    const afterArchive = await request(app).get(
+      `/statistikkregisteret/api/statistics/${newShortname}/variants/${variantId}/releases`
+    )
+    expect(afterArchive.status).toBe(200)
+    expect(afterArchive.body).toStrictEqual({ total: 0, releases: [] })
+
+    const fetched = await request(app).get(`/statistikkregisteret/api/releases/${created.body.id}`)
+    expect(fetched.status).toBe(404)
+  })
+
   test('client picks release and updates fields', async () => {
     // This integration test simulates the following events:
     // 1. User opens the release listing page
