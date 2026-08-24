@@ -23,7 +23,7 @@ import client from '../api'
 
 import './CreateStatistic.css'
 
-import { isEditStatisticFieldRequired, ApprovalStatus, StatisticStatus } from '@ssbno-statreg/shared'
+import { RequiredEditStatisticFieldsByStatus, ApprovalStatus, StatisticStatus } from '@ssbno-statreg/shared'
 import type {
   EditableStatisticStatus,
   Division,
@@ -42,6 +42,10 @@ const defaultValues: StatisticFormValues = {
   main_language: 'nb',
   first_released_at: '',
   comment: '',
+}
+
+function isEditStatisticFieldRequired(status: EditableStatisticStatus, field: StatisticFormField): boolean {
+  return RequiredEditStatisticFieldsByStatus[status]?.includes(field) ?? false
 }
 
 export default function EditStatistic() {
