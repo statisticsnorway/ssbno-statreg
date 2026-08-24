@@ -311,6 +311,10 @@ export async function updateRelease(
 ): Promise<ReleaseDetails> {
   const idAsNumber = parseId(id)
 
+  if (body?.archived === true && !isCurrentUserAdmin()) {
+    throw new StatregError('Only admins can archive releases')
+  }
+
   const validatedInput = await parseReleaseInput(prisma, body, 'update')
 
   const release = await prisma.release.update({
@@ -321,6 +325,7 @@ export async function updateRelease(
       period_from: validatedInput.periodFromDate,
       period_to: validatedInput.periodToDate,
       release_date_precision: validatedInput.releaseDatePrecision,
+      ...(body?.archived !== undefined && { archived: body.archived }),
       desk_appoval_status: isCurrentUserAdmin() ? ApprovalStatus.ACCEPTED : ApprovalStatus.PENDING,
       last_updated: now,
       comment: validatedInput.comment,
@@ -369,6 +374,7 @@ type ValidatedReleaseInput = {
   periodToDate: Date
   releaseDatePrecision: string
   comment: string
+  archived?: boolean
 }
 
 export async function parseReleaseInput(

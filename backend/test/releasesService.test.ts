@@ -472,6 +472,16 @@ describe('releasesService ', async () => {
       })
     })
 
+    test('rejects when a non-admin archives a release', async () => {
+      const archivedReleaseInput = { ...mockUpdateReleaseInput, archived: true }
+
+      await expect(
+        asyncLocalStorage.run({ isAdmin: false }, () => updateRelease(prismaMock, '1', archivedReleaseInput, now))
+      ).rejects.toMatchObject({ statregError: 'Only admins can archive releases' })
+
+      expect(prismaMock.release.update).toHaveBeenCalledTimes(0)
+    })
+
     test('updates release with accepted status when current user is admin', async () => {
       setPrismaResult(mockedSingleReleasePrismaResult)
 
