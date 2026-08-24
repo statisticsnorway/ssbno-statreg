@@ -4,6 +4,7 @@ import process from 'node:process'
 import 'dotenv/config'
 import { asyncLocalStorage } from './context'
 import { getAllUsersFromCache } from './cache'
+import { RevisionNames } from '@ssbno-statreg/shared'
 
 export type Snapshot = Record<string, unknown> & { id?: number; version: number; date_created?: Date }
 
@@ -26,15 +27,36 @@ const fetchStatisticSnapshot = async (where: any): Promise<Snapshot | null> => {
     where,
     include: {
       responsiblePersons: { select: { principalName: true } },
+      variants: {
+        select: {
+          revision: true,
+          level_of_detail: true,
+          frequency: { select: { name: true } },
+        },
+      },
     },
   })
+
   if (!statistic) return null
+
   const users = await getAllUsersFromCache()
   const formattedResponsiblePersons = statistic.responsiblePersons
     .map((person) => person.principalName)
     .map((principalName) => `${principalName} (${users[principalName]?.displayName})`)
     .join(', ')
-  return { ...statistic, responsiblePersons: formattedResponsiblePersons }
+
+  //formatted example: "Uke (W), Ingen; Måned (M), Ingen, Detaljnivå"
+  const formattedVariants = statistic.variants
+    .map((variant) => {
+      const revisionCode = variant.revision as keyof typeof RevisionNames
+      const revisionName = RevisionNames[revisionCode] ?? revisionCode
+      const variantParts = [variant.frequency.name, revisionName]
+      if (variant.level_of_detail) variantParts.push(variant.level_of_detail)
+      return variantParts.join(', ')
+    })
+    .join('; ')
+
+  return { ...statistic, responsiblePersons: formattedResponsiblePersons, variants: formattedVariants }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

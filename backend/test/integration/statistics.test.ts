@@ -244,8 +244,8 @@ describe('statistics controller', () => {
     })
     expect(versionsResponse.body[0].changed_values).toContainEqual({
       field_name: 'variants',
-      old_value: expect.not.stringContaining('Uke, Ingen'),
-      new_value: expect.stringContaining('Uke, Ingen'),
+      old_value: expect.not.stringContaining('Uke (W), Ingen'),
+      new_value: expect.stringContaining('Uke (W), Ingen'),
     })
     expect(versionsResponse.body[1].change_type).toBe('create')
   })
