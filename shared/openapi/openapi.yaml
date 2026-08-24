@@ -203,6 +203,7 @@ components:
           properties:
             comment: { type: string }
             release_date_precision: { type: string }
+            archived: { type: boolean }
 
     Release_get:
       allOf:
