@@ -26,8 +26,15 @@ import client from '../api'
 
 import './CreateStatistic.css'
 
-import { isCreateStatisticFieldRequired, ApprovalStatus, RevisionNames } from '@ssbno-statreg/shared'
-import type { CreatableStatisticStatus, Division, Contact, Variant, Shortname } from '@ssbno-statreg/shared'
+import { RequiredCreateStatisticFieldsByStatus, ApprovalStatus, RevisionNames } from '@ssbno-statreg/shared'
+import type {
+  CreatableStatisticStatus,
+  Division,
+  Contact,
+  Variant,
+  Shortname,
+  StatisticCreate,
+} from '@ssbno-statreg/shared'
 import ErrorPage, { ErrorType } from './ErrorPage'
 import { ErrorAlert } from '../components/ErrorAlert'
 import { CreateShortnameModal } from '../components/CreateShortnameModal'
@@ -50,6 +57,10 @@ type StatisticValidationState = {
   values: StatisticFormValues
   selectedContacts: string[]
   createdVariants: Variant[]
+}
+
+function isCreateStatisticFieldRequired(status: CreatableStatisticStatus, field: keyof StatisticCreate): boolean {
+  return RequiredCreateStatisticFieldsByStatus[status].includes(field)
 }
 
 export default function CreateStatistic() {
@@ -288,8 +299,8 @@ export default function CreateStatistic() {
         first_released_at: values.first_released_at ? `${values.first_released_at}-12-31` : '',
         statistic_region_levels: regionLevelValues.length
           ? regionLevelValues.map((code: string) => ({
-            code,
-          }))
+              code,
+            }))
           : [],
         approval_status: ApprovalStatus['ACCEPTED'],
         contacts: selectedContacts,
