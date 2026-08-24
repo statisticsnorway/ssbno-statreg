@@ -215,6 +215,7 @@ describe('releasesService ', async () => {
       expect(prismaMock.release.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: {
+            archived: false,
             variant: { id: 1 },
           },
         })
