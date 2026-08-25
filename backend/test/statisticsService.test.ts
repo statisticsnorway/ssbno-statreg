@@ -1140,6 +1140,17 @@ describe('statisticService', () => {
         expect(result).toStrictEqual(expectedResult)
       })
 
+      test('returns null first_released_at when the optional field is omitted', () => {
+        input.first_released_at = undefined
+
+        const result = parseUpdateStatisticInput(input, requiredUpdateFields.filter((field) => field !== 'first_released_at'))
+
+        expect(result).toStrictEqual({
+          ...expectedResult,
+          first_released_at: null,
+        })
+      })
+
       test('throws error when comment is an empty string', () => {
         input.comment = ''
 

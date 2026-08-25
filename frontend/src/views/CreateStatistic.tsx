@@ -41,7 +41,7 @@ import { CreateShortnameModal } from '../components/CreateShortnameModal'
 import { ContactSelection } from '../components/ContactSelection'
 import { VariantModal } from '../components/VariantModal'
 
-type StatisticFormValues = {
+export type StatisticFormValues = {
   name: string
   name_en: string
   division: string
@@ -50,8 +50,8 @@ type StatisticFormValues = {
   comment: string
 }
 
-type StatisticFormField = keyof StatisticFormValues | 'variants' | 'contacts'
-type StatisticFormErrors = Partial<Record<StatisticFormField, string>>
+export type StatisticFormField = keyof StatisticFormValues | 'variants' | 'contacts'
+export type StatisticFormErrors = Partial<Record<StatisticFormField, string>>
 type StatisticValidationState = {
   status: CreatableStatisticStatus
   values: StatisticFormValues
@@ -418,7 +418,7 @@ export default function CreateStatistic() {
               </div>
               <Field.Description>
                 Statistikker som er nyopprettet får status «Kommende». For å sette den til «Aktiv» må du i tillegg fylle
-                ut: Engelsk navn, varianter og målform.
+                ut: Engelsk navn, varianter og kontakter.
               </Field.Description>
               <Select
                 width='auto'
