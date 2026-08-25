@@ -17,6 +17,7 @@ import {
   Tag,
   ErrorSummary,
   Textarea,
+  Link,
 } from '@statisticsnorway/design-react'
 import { QuestionmarkCircleIcon } from '@navikt/aksel-icons'
 
@@ -227,7 +228,7 @@ export default function EditStatistic() {
       statistic_region_levels: regionLevelValues.map((code: string) => ({ code })),
       approval_status: ApprovalStatus['ACCEPTED'],
       // Retain fields from the original statistic that are not part of the form
-      relation: statistic.relation?.shortname ?? null,
+      relation_id: statistic.relation?.id ?? null,
       yearly_reporting: statistic.yearly_reporting,
       previous_topic_codes: statistic.previous_topic_codes,
       variants: statistic.variants,
@@ -296,7 +297,7 @@ export default function EditStatistic() {
                   </li>
                   <li>
                     For å slette en statistikk som har blitt feilopprettet må du ta kontakt med{' '}
-                    <a href='mailto:mailadresse@ssb.no'>mailadresse@ssb.no</a>
+                    <Link href='mailto:mailadresse@ssb.no'>mailadresse@ssb.no</Link>
                   </li>
                   <li>
                     Velg status «Ikke-aktiv» når statistikken er satt på pause på ubestemt tid, og du vil beholde

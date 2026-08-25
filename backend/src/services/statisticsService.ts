@@ -51,7 +51,7 @@ type ValidatedStatisticInput = {
   first_released_at: Date | null
   main_language: string
   comment: string
-  relation?: number | null
+  relation_id?: number | null
   contacts?: StatisticUpdate['contacts']
   variants?: StatisticUpdate['variants']
 }
@@ -202,7 +202,9 @@ const VariantSelect = {
 export const StatisticsDetailedIncludes = {
   shortname: { select: { name: true } },
   responsiblePersons: { select: { principalName: true } },
-  related_statistic: { select: { language: true, name: true, name_en: true, shortname: { select: { name: true } } } },
+  related_statistic: {
+    select: { id: true, language: true, name: true, name_en: true, shortname: { select: { name: true } } },
+  },
   statistic_region_levels: {
     select: { region_level: { select: { name: true, code: true } } },
   },
@@ -238,6 +240,7 @@ export async function mapStatisticDetails(statistic: StatisticPrismaResult): Pro
   const division_code = statistic.division_code ?? ''
   const relation = statistic.related_statistic?.shortname
     ? {
+        id: statistic.related_statistic.id,
         shortname: statistic.related_statistic?.shortname?.name,
         name: statistic.related_statistic?.name,
         name_en: statistic.related_statistic?.name_en ?? '',
@@ -320,7 +323,7 @@ export async function updateStatistic(
     status,
     name,
     name_en,
-    relation,
+    relation_id,
     previous_topic_codes,
     yearly_reporting,
     first_released_at,
@@ -396,7 +399,7 @@ export async function updateStatistic(
       status,
       comment,
       language: main_language,
-      ...(relation ? { related_statistic_id: relation } : {}),
+      ...(relation_id ? { related_statistic_id: relation_id } : {}),
       legacy_topic_codes: previous_topic_codes,
       yearly_reporting,
       first_release: first_released_at,
@@ -698,7 +701,7 @@ export function parseUpdateStatisticInput(
     first_released_at,
     main_language,
     comment,
-    relation,
+    relation_id,
     contacts,
     variants,
   } = ensureRequiredFieldsExists(body, requiredFields)
@@ -738,7 +741,7 @@ export function parseUpdateStatisticInput(
     status: parseStatusCode(status?.code),
     previous_topic_codes: sanitize(previous_topic_codes!),
     yearly_reporting: Boolean(yearly_reporting),
-    ...(relation ? { relation: parseRelation(relation) } : {}),
+    ...(relation_id ? { relation_id: parseId(relation_id, 'relation') } : {}),
     comment: safeComment,
     ...(contacts ? { contacts } : {}),
     ...(variants ? { variants } : {}),
@@ -762,11 +765,4 @@ export function parseStatusCode(statusCode?: string): StatisticStatusCode {
     throw new StatregError(`Field 'status' must be one of these: ${Object.keys(StatisticStatus).join(', ')}.`)
   }
   return statusCode as StatisticStatusCode
-}
-
-export function parseRelation(relationId?: string | null): number | null {
-  if (relationId) {
-    return parseId(relationId, 'relation')
-  }
-  return null
 }
