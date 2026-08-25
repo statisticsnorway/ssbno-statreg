@@ -1,4 +1,3 @@
-import { useEffect, useRef } from 'react'
 import { Link as ReactRouterLink } from 'react-router'
 import { Paragraph, Button, Heading, Dialog } from '@statisticsnorway/design-react'
 import { type ReleaseDetails } from '@ssbno-statreg/shared'
@@ -19,15 +18,9 @@ export default function ReleaseFormModal({
   setOpenCreateReleaseModal,
 }: ReleaseFormModalProps) {
   const { id, statistic } = createdRelease ?? {}
-  const okButtonRef = useRef<HTMLAnchorElement>(null)
-
-  useEffect(() => {
-    if (openCreateReleaseModal) okButtonRef.current?.focus()
-  }, [openCreateReleaseModal])
 
   return (
     <Dialog
-      id='release-modal'
       aria-labelledby='release-modal-heading'
       open={openCreateReleaseModal}
       onClose={() => setOpenCreateReleaseModal(false)}
