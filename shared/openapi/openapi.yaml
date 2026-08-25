@@ -234,6 +234,7 @@ components:
                 revision:
                   $ref: '#/components/schemas/Revision'
             cancelled: { type: boolean }
+            archived: { type: boolean }
             release_date_precision: { type: string }
 
     Release_listing:
@@ -402,16 +403,8 @@ components:
               - new_value
             properties:
               field_name: { type: string, description: 'The name of the field that changed.' }
-              old_value:
-                {
-                  type: string,
-                  description: 'Human-readable version of the old value.',
-                }
-              new_value:
-                {
-                  type: string,
-                  description: 'Human-readable version of the new value.',
-                }
+              old_value: { type: string, description: 'Human-readable version of the old value.' }
+              new_value: { type: string, description: 'Human-readable version of the new value.' }
 
     Variant:
       type: object

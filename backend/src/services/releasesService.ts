@@ -316,7 +316,7 @@ export async function updateRelease(
   const idAsNumber = parseId(id)
 
   if (body?.archived === true && !isCurrentUserAdmin()) {
-    throw new StatregError('Only admins can archive releases')
+    throw new StatregError('Only admins can archive releases', 403)
   }
 
   const validatedInput = await parseReleaseInput(prisma, body, 'update')
@@ -487,5 +487,6 @@ export function mapToReleaseDetails(
     period_to: getDateOnlyAsString(prismaRelease.period_to),
     release_date_precision: prismaRelease.release_date_precision,
     cancelled: prismaRelease.cancelled,
+    archived: prismaRelease.archived,
   }
 }

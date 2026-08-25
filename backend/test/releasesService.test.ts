@@ -487,7 +487,7 @@ describe('releasesService ', async () => {
 
       await expect(
         asyncLocalStorage.run({ isAdmin: false }, () => updateRelease(prismaMock, '1', archivedReleaseInput, now))
-      ).rejects.toMatchObject({ statregError: 'Only admins can archive releases' })
+       ).rejects.toMatchObject({ status: 403, statregError: 'Only admins can archive releases' })
 
       expect(prismaMock.release.update).toHaveBeenCalledTimes(0)
     })
@@ -981,6 +981,7 @@ const mockedSingleReleasePrismaResult = {
   period_to: new Date('2024-08-31T00:00:00Z'),
   period_from: new Date('2024-08-01T00:00:00Z'),
   cancelled: false,
+  archived: false,
   release_date_precision: 'dag',
   variant: {
     id: 1,
@@ -1081,6 +1082,7 @@ const mockedSingleReleaseResult = {
   period_to: '2024-08-31',
   release_date_precision: 'dag',
   cancelled: false,
+  archived: false,
 }
 
 const mockCreateReleaseInput = {
