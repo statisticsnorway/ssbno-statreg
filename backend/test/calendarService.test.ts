@@ -139,6 +139,7 @@ describe('calendarService  ', () => {
       expect(prismaMock.release.findMany).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
           where: {
+            archived: false,
             publish_time: { gt: new Date('2024-03-01T00:00:00.000Z'), lte: new Date('2099-12-31T23:59:59.999Z') },
           },
         })
@@ -152,6 +153,7 @@ describe('calendarService  ', () => {
       expect(prismaMock.release.findMany).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
           where: {
+            archived: false,
             publish_time: { gt: new Date('2000-01-01T00:00:00.000Z'), lte: new Date('2024-05-31T23:59:59.999Z') },
           },
         })
