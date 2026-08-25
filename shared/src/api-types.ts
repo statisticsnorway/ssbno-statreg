@@ -1168,7 +1168,8 @@ export interface components {
       }[]
     }
     Variant: {
-      readonly id?: number
+      /** @description On update, provide the id of an existing variant to update it, or omit it to create a new variant. Ignored/read-only when creating a statistic. */
+      id?: number
       version?: number
       /** Format: date-time */
       readonly updated_at?: string
