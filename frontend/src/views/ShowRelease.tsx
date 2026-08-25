@@ -24,16 +24,22 @@ export default function ShowRelease() {
   const [isLoadingVersions, setIsLoadingVersions] = useState(false)
   const [apiError, setApiError] = useState<string[]>([])
   const [isArchived, setIsArchived] = useState(false)
+  const [isNotFound, setIsNotFound] = useState(false)
   const [isDeletePopoverOpen, setIsDeletePopoverOpen] = useState(false)
   const { id } = useParams()
 
   useEffect(() => {
     async function fetchRelease() {
       setIsArchived(false)
-      const { data, error } = await client.GET('/releases/{id}', { params: { path: { id: id as string } } })
+      setIsNotFound(false)
+      const { data, error, response } = await client.GET('/releases/{id}', {
+        params: { path: { id: id as string } },
+      })
 
       if (error) {
-        setIsArchived(true)
+        if (response.status === 410) setIsArchived(true)
+        else if (response.status === 404) setIsNotFound(true)
+        else setApiError((prev) => [...prev, error.message])
         return
       }
 
@@ -92,6 +98,10 @@ export default function ShowRelease() {
   }
 
   if (isArchived) {
+    return <Heading level={1}>Publiseringen er arkivert</Heading>
+  }
+
+  if (isNotFound) {
     return <Heading level={1}>Publiseringen finnes ikke</Heading>
   }
 
