@@ -23,14 +23,16 @@ export default function ShowRelease() {
   const [versions, setVersions] = useState<Version[] | null>(null)
   const [isLoadingVersions, setIsLoadingVersions] = useState(false)
   const [apiError, setApiError] = useState<string[]>([])
+  const [isArchived, setIsArchived] = useState(false)
   const { id } = useParams()
 
   useEffect(() => {
     async function fetchRelease() {
+      setIsArchived(false)
       const { data, error } = await client.GET('/releases/{id}', { params: { path: { id: id as string } } })
 
       if (error) {
-        setApiError((prev) => [...prev, error.message])
+        setIsArchived(true)
         return
       }
 
@@ -63,6 +65,33 @@ export default function ShowRelease() {
 
     setVersions(data ?? [])
     setIsLoadingVersions(false)
+  }
+
+  async function archiveRelease() {
+    if (!id) return
+
+    const { error } = await client.PUT('/releases/{id}', {
+      params: { path: { id } },
+      body: {
+        archived: true,
+        publish_time: release.publish_time,
+        period_from: release.period_from,
+        period_to: release.period_to,
+        release_date_precision: release.release_date_precision,
+        comment: 'Arkivert',
+      },
+    })
+
+    if (error) {
+      setApiError((prev) => [...prev, error.message])
+      return
+    }
+
+    setIsArchived(true)
+  }
+
+  if (isArchived) {
+    return <Heading level={1}>Publiseringen finnes ikke</Heading>
   }
 
   return (
@@ -119,7 +148,9 @@ export default function ShowRelease() {
               du forstatt slette?
             </Paragraph>
             <div style={{ display: 'flex', gap: 'var(--ds-size-2)', marginTop: 'var(--ds-size-2)' }}>
-              <Button data-color='danger'>Ja, slett</Button>
+              <Button data-color='danger' onClick={archiveRelease}>
+                Ja, slett
+              </Button>
               <Button variant='tertiary'>Avbryt</Button>
             </div>
           </Popover>
