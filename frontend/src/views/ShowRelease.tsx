@@ -87,7 +87,7 @@ export default function ShowRelease() {
         period_from: release.period_from,
         period_to: release.period_to,
         release_date_precision: release.release_date_precision,
-        comment: 'Arkivert',
+        comment: 'Archived by admin',
       },
     })
 
