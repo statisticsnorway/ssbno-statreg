@@ -17,6 +17,7 @@ import {
   Tag,
   ErrorSummary,
   Textarea,
+  Link,
 } from '@statisticsnorway/design-react'
 import { QuestionmarkCircleIcon } from '@navikt/aksel-icons'
 
@@ -296,7 +297,7 @@ export default function EditStatistic() {
                   </li>
                   <li>
                     For å slette en statistikk som har blitt feilopprettet må du ta kontakt med{' '}
-                    <a href='mailto:mailadresse@ssb.no'>mailadresse@ssb.no</a>
+                    <Link href='mailto:mailadresse@ssb.no'>mailadresse@ssb.no</Link>
                   </li>
                   <li>
                     Velg status «Ikke-aktiv» når statistikken er satt på pause på ubestemt tid, og du vil beholde
