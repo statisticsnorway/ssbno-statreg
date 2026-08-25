@@ -1,5 +1,5 @@
 import { useState, useEffect, type Dispatch, type SetStateAction } from 'react'
-import { Button, Heading, Dialog, Field, Label, Input, Select, Paragraph } from '@statisticsnorway/design-react'
+import { Button, Heading, Dialog, Field, Label, Input, Select, Paragraph, Popover } from '@statisticsnorway/design-react'
 import { TrashIcon } from '@navikt/aksel-icons'
 
 import './VariantModal.css'
@@ -31,6 +31,7 @@ export function VariantModal({
 }: Readonly<VariantModalProps>) {
   const [frequencies, setFrequencies] = useState<Frequency[]>([])
   const [apiError, setApiError] = useState<string[]>([])
+  const [isDeletePopoverOpen, setIsDeletePopoverOpen] = useState(false)
   const [values, setValues] = useState<CreateVariantFormValues>({
     revision_code: editVariantValues?.revision?.code ?? 'I',
     frequency_code: editVariantValues?.frequency?.code ?? 'U',
@@ -149,9 +150,40 @@ export function VariantModal({
             </Button>
           </div>
           {isEditMode && (
-            <Button variant='tertiary' data-color='danger' onClick={deleteVariant}>
-              <TrashIcon /> Slett
-            </Button>
+            <Popover.TriggerContext>
+              <Popover.Trigger
+                variant='tertiary'
+                data-color='danger'
+                onClick={() => setIsDeletePopoverOpen(!isDeletePopoverOpen)}
+              >
+                <TrashIcon aria-hidden /> Slett
+              </Popover.Trigger>
+              <Popover
+                placement='top-start'
+                autoPlacement={false}
+                open={isDeletePopoverOpen}
+                onClose={() => setIsDeletePopoverOpen(false)}
+                data-color='danger'
+              >
+                <Paragraph>
+                  Denne varianten har ikke publiseringer, og kan slettes. Vil du fortsatt slette varianten?
+                </Paragraph>
+                <div style={{ display: 'flex', gap: 'var(--ds-size-2)', marginTop: 'var(--ds-size-2)' }}>
+                  <Button
+                    data-color='danger'
+                    onClick={() => {
+                      setIsDeletePopoverOpen(false)
+                      deleteVariant()
+                    }}
+                  >
+                    Ja, slett
+                  </Button>
+                  <Button variant='tertiary' onClick={() => setIsDeletePopoverOpen(false)}>
+                    Avbryt
+                  </Button>
+                </div>
+              </Popover>
+            </Popover.TriggerContext>
           )}
         </div>
       </Dialog.Block>
