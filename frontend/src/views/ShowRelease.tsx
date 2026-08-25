@@ -8,6 +8,7 @@ import { type ReleaseDetails, type Version } from '@ssbno-statreg/shared'
 import { formatDateTime, formatDate, formatVariant } from '../lib/utils'
 import { ErrorAlert } from '../components/ErrorAlert'
 import { ChangeLogTable } from '../components/VersionTable'
+import ErrorPage, { ErrorType } from './ErrorPage'
 
 function formatStatisticName(statistic: ReleaseDetails['statistic']): string {
   if (!statistic || !statistic.name || !statistic.shortname) return '-'
@@ -23,23 +24,24 @@ export default function ShowRelease() {
   const [versions, setVersions] = useState<Version[] | null>(null)
   const [isLoadingVersions, setIsLoadingVersions] = useState(false)
   const [apiError, setApiError] = useState<string[]>([])
-  const [isArchived, setIsArchived] = useState(false)
   const [isNotFound, setIsNotFound] = useState(false)
   const [isDeletePopoverOpen, setIsDeletePopoverOpen] = useState(false)
   const { id } = useParams()
 
   useEffect(() => {
     async function fetchRelease() {
-      setIsArchived(false)
+      setApiError([])
       setIsNotFound(false)
       const { data, error, response } = await client.GET('/releases/{id}', {
         params: { path: { id: id as string } },
       })
 
       if (error) {
-        if (response.status === 410) setIsArchived(true)
-        else if (response.status === 404) setIsNotFound(true)
-        else setApiError((prev) => [...prev, error.message])
+        if (response.status === 410 || response.status === 404) {
+          setIsNotFound(true)
+        } else {
+          setApiError([error.message])
+        }
         return
       }
 
@@ -93,16 +95,10 @@ export default function ShowRelease() {
       setApiError((prev) => [...prev, error.message])
       return
     }
-
-    setIsArchived(true)
-  }
-
-  if (isArchived) {
-    return <Heading level={1}>Publiseringen er arkivert</Heading>
   }
 
   if (isNotFound) {
-    return <Heading level={1}>Publiseringen finnes ikke</Heading>
+    return <ErrorPage type={ErrorType.NOTFOUND} />
   }
 
   return (
