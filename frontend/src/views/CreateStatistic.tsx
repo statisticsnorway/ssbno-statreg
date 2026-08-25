@@ -232,63 +232,104 @@ export default function CreateStatistic() {
     return ''
   }
 
-  function updateFieldErrors(
-    fields: StatisticFormField[],
-    validationState: StatisticValidationState,
-    shouldAddNewErrors = true
-  ) {
-    setErrors((currentErrors) => {
-      const nextErrors = { ...currentErrors }
+  function validateForm(validationState = getValidationState()): StatisticFormErrors {
+    const nextErrors: StatisticFormErrors = {}
 
-      for (const field of fields) {
-        const error = validateField(field, validationState)
+    for (const field of fieldsToValidate) {
+      const error = validateField(field, validationState)
 
-        if (error) {
-          if (shouldAddNewErrors || nextErrors[field]) {
-            nextErrors[field] = error
-          }
-        } else {
-          delete nextErrors[field]
-        }
+      if (error) {
+        nextErrors[field] = error
       }
+    }
 
-      return nextErrors
-    })
+    return nextErrors
   }
 
   function handleValueChange<K extends keyof StatisticFormValues>(field: K, value: StatisticFormValues[K]) {
     const nextValues = { ...values, [field]: value }
+    const validationState = getValidationState(nextValues)
 
     setValues(nextValues)
-    updateFieldErrors([field], getValidationState(nextValues), field !== 'first_released_at')
+    setErrors((currentErrors) => {
+      if (!currentErrors[field]) {
+        return currentErrors
+      }
+
+      const error = validateField(field, validationState)
+
+      if (error) {
+        return {
+          ...currentErrors,
+          [field]: error,
+        }
+      }
+
+      const nextErrors = { ...currentErrors }
+      delete nextErrors[field]
+      return nextErrors
+    })
   }
 
   function handleStatusChange(nextStatus: CreatableStatisticStatus) {
+    const validationState = getValidationState(values, nextStatus)
+
     setStatus(nextStatus)
-    updateFieldErrors(fieldsToValidate, getValidationState(values, nextStatus), false)
+    setErrors((currentErrors) => {
+      const nextErrors = validateForm(validationState)
+
+      return Object.fromEntries(
+        Object.entries(nextErrors).filter(([field]) => currentErrors[field as StatisticFormField])
+      )
+    })
   }
 
   function handleContactsChange(nextSelectedContacts: string[]) {
+    const validationState = getValidationState(values, status, nextSelectedContacts)
+
     setSelectedContacts(nextSelectedContacts)
-    updateFieldErrors(['contacts'], getValidationState(values, status, nextSelectedContacts))
+    setErrors((currentErrors) => {
+      if (!currentErrors.contacts) {
+        return currentErrors
+      }
+
+      const error = validateField('contacts', validationState)
+
+      if (error) {
+        return {
+          ...currentErrors,
+          contacts: error,
+        }
+      }
+
+      const nextErrors = { ...currentErrors }
+      delete nextErrors.contacts
+      return nextErrors
+    })
   }
 
   function handleVariantsChange(nextCreatedVariants: SetStateAction<Variant[]>) {
     const resolvedVariants =
       typeof nextCreatedVariants === 'function' ? nextCreatedVariants(createdVariants) : nextCreatedVariants
+    const validationState = getValidationState(values, status, selectedContacts, resolvedVariants)
 
     setCreatedVariants(resolvedVariants)
-    updateFieldErrors(['variants'], getValidationState(values, status, selectedContacts, resolvedVariants))
-  }
-
-  function handleOnBlur(field: StatisticFormField) {
     setErrors((currentErrors) => {
+      if (!currentErrors.variants) {
+        return currentErrors
+      }
+
+      const error = validateField('variants', validationState)
+
+      if (error) {
+        return {
+          ...currentErrors,
+          variants: error,
+        }
+      }
+
       const nextErrors = { ...currentErrors }
-      const error = validateField(field, getValidationState())
-
-      if (error) nextErrors[field] = error
-      else delete nextErrors[field]
-
+      delete nextErrors.variants
       return nextErrors
     })
   }
@@ -323,13 +364,7 @@ export default function CreateStatistic() {
   function handleSubmit(e: React.ChangeEvent<HTMLFormElement>) {
     e.preventDefault()
 
-    const nextErrors: StatisticFormErrors = {}
-    const validationState = getValidationState()
-
-    for (const field of fieldsToValidate) {
-      const error = validateField(field, validationState)
-      if (error) nextErrors[field] = error
-    }
+    const nextErrors = validateForm()
 
     setErrors(nextErrors)
     setApiError([])
@@ -446,7 +481,6 @@ export default function CreateStatistic() {
                 aria-invalid={!!errors.name}
                 value={values.name}
                 onChange={(e) => handleValueChange('name', e.target.value)}
-                onBlur={() => handleOnBlur('name')}
               />
               {errors.name && <ValidationMessage>{errors.name}</ValidationMessage>}
             </Field>
@@ -457,7 +491,6 @@ export default function CreateStatistic() {
                 aria-invalid={!!errors.name_en}
                 value={values.name_en}
                 onChange={(e) => handleValueChange('name_en', e.target.value)}
-                onBlur={() => handleOnBlur('name_en')}
               />
               {errors.name_en && <ValidationMessage>{errors.name_en}</ValidationMessage>}
             </Field>
@@ -506,7 +539,6 @@ export default function CreateStatistic() {
                 variant='secondary'
                 aria-invalid={!!errors.variants}
                 onClick={handleOpenCreateVariantModal}
-                onBlur={() => handleOnBlur('variants')}
               >
                 <PlusCircleIcon /> Legg til variant
               </Button>
@@ -525,7 +557,6 @@ export default function CreateStatistic() {
                   contacts={contacts}
                   selected={selectedContacts}
                   setSelected={handleContactsChange}
-                  onBlur={() => handleOnBlur('contacts')}
                 />
                 {errors.contacts && <ValidationMessage>{errors.contacts}</ValidationMessage>}
               </Field>
@@ -576,7 +607,6 @@ export default function CreateStatistic() {
                 aria-invalid={!!errors.first_released_at}
                 value={values.first_released_at}
                 onChange={(e) => handleValueChange('first_released_at', e.target.value)}
-                onBlur={() => handleOnBlur('first_released_at')}
               />
               {errors.first_released_at && <ValidationMessage>{errors.first_released_at}</ValidationMessage>}
             </Field>
