@@ -564,17 +564,15 @@ export default function CreateStatistic() {
             <Divider />
             <Heading level={2}>Detaljer</Heading>
             <Field>
-              <Field className='division-field'>
-                <Label>{getFieldLabel('Seksjon', 'division')}</Label>
-                <DivisionSelection
-                  id='division'
-                  ariaInvalid={!!errors.division}
-                  divisions={divisions}
-                  selected={values.division}
-                  setSelected={(selected) => handleValueChange('division', selected)}
-                />
-                {errors.division && <ValidationMessage>{errors.division}</ValidationMessage>}
-              </Field>
+              <Label>{getFieldLabel('Seksjon', 'division')}</Label>
+              <DivisionSelection
+                id='division'
+                ariaInvalid={!!errors.division}
+                divisions={divisions}
+                selected={values.division}
+                setSelected={(selected) => handleValueChange('division', selected)}
+              />
+              {errors.division && <ValidationMessage>{errors.division}</ValidationMessage>}
             </Field>
             <Fieldset>
               <Fieldset.Legend>Regionale nivåer</Fieldset.Legend>
