@@ -409,7 +409,9 @@ components:
     Variant:
       type: object
       properties:
-        id: { type: integer, readOnly: true }
+        id:
+          type: integer
+          description: On update, provide the id of an existing variant to update it, or omit it to create a new variant. Ignored/read-only when creating a statistic.
         version: { type: integer }
         updated_at: { type: string, format: date-time, readOnly: true }
         level_of_detail:
