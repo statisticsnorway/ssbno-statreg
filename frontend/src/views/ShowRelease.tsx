@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams, Link as ReactRouterLink } from 'react-router'
+import { useNavigate, useParams, Link as ReactRouterLink } from 'react-router'
 import { Heading, Link, Paragraph, Details, Card, Button, Spinner, Popover } from '@statisticsnorway/design-react'
 import { PencilWritingIcon, TrashIcon } from '@navikt/aksel-icons'
 import { ApprovalStatusTag } from '../components/ApprovalStatus'
@@ -27,6 +27,7 @@ export default function ShowRelease() {
   const [isNotFound, setIsNotFound] = useState(false)
   const [isDeletePopoverOpen, setIsDeletePopoverOpen] = useState(false)
   const { id } = useParams()
+  const navigate = useNavigate()
 
   useEffect(() => {
     async function fetchRelease() {
@@ -95,6 +96,8 @@ export default function ShowRelease() {
       setApiError((prev) => [...prev, error.message])
       return
     }
+
+    navigate(-1)
   }
 
   if (isNotFound) {
