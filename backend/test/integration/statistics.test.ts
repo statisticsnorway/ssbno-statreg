@@ -181,7 +181,7 @@ describe('statistics controller', () => {
       status: { code: 'A' },
       name: 'Oppdatert statistikk',
       name_en: 'Updated statistic',
-      relation: null,
+      relation_id: null,
       previous_topic_codes: '',
       yearly_reporting: false,
       first_released_at: '2024-02-01',

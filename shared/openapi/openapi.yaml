@@ -334,7 +334,7 @@ components:
         - $ref: '#/components/schemas/Statistic_create_base'
       type: object
       properties:
-        relation: { type: string, nullable: true }
+        relation_id: { type: integer, nullable: true }
 
     Statistic_details:
       allOf:
@@ -350,6 +350,7 @@ components:
         relation:
           type: object
           properties:
+            id: { type: integer }
             shortname: { type: string }
             name: { type: string, readOnly: true }
             name_en: { type: string, readOnly: true }
