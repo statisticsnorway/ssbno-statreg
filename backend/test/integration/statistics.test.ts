@@ -178,7 +178,7 @@ describe('statistics controller', () => {
     const updatePayload: StatisticUpdate = {
       division: '101',
       statistic_region_levels: [{ code: 'F' }],
-      status: { code: 'K' },
+      status: { code: 'A' },
       name: 'Oppdatert statistikk',
       name_en: 'Updated statistic',
       relation: null,
@@ -187,6 +187,13 @@ describe('statistics controller', () => {
       first_released_at: '2024-02-01',
       main_language: 'nn',
       comment: 'Kommentar',
+      contacts: ['bcd@ssb.no'],
+      variants: [
+        {
+          frequency: { code: 'W' },
+          revision: { code: 'I' },
+        },
+      ],
     }
 
     const updateResponse = await request(app)
@@ -198,7 +205,7 @@ describe('statistics controller', () => {
     expect(updateResponse.body).toMatchObject({
       division: { code: '101' },
       statistic_region_levels: [{ code: 'F' }],
-      status: { code: 'K' },
+      status: { code: 'A' },
       name: 'Oppdatert statistikk',
       name_en: 'Updated statistic',
       previous_topic_codes: '',
@@ -218,7 +225,7 @@ describe('statistics controller', () => {
       statistics: [{ shortname: 'update_test', name: 'Oppdatert statistikk' }],
     })
 
-    // GET /statistics/:shortname/versions to check that update event is registered in auditlog
+    // GET /statistics/:shortname/versions to check auditlog persistence including contacts and variants change
     const versionsResponse = await request(app).get(`/statistikkregisteret/api/statistics/${newShortname}/versions`)
     expect(versionsResponse.status).toBe(200)
     expect(versionsResponse.body).toHaveLength(2)
@@ -228,6 +235,16 @@ describe('statistics controller', () => {
       changed_by: expect.any(String),
       changed_at: expect.any(String),
       changed_values: expect.any(Array),
+    })
+    expect(versionsResponse.body[0].changed_values).toContainEqual({
+      field_name: 'responsiblePersons',
+      old_value: expect.not.stringContaining('bcd@ssb.no'),
+      new_value: expect.stringContaining('bcd@ssb.no'),
+    })
+    expect(versionsResponse.body[0].changed_values).toContainEqual({
+      field_name: 'variants',
+      old_value: expect.not.stringContaining('Uke (W), Ingen'),
+      new_value: expect.stringContaining('Uke (W), Ingen'),
     })
     expect(versionsResponse.body[1].change_type).toBe('create')
   })
