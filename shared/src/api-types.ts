@@ -1049,6 +1049,7 @@ export interface components {
     Release_update: components['schemas']['Release'] & {
       comment?: string
       release_date_precision?: string
+      archived?: boolean
     }
     Release_get: components['schemas']['Release'] & {
       approval_status?: string | null
@@ -1067,6 +1068,7 @@ export interface components {
         revision?: components['schemas']['Revision']
       }
       cancelled?: boolean
+      archived?: boolean
       release_date_precision?: string
     }
     Release_listing: components['schemas']['Release_get'] & {

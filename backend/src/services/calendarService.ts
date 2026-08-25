@@ -88,7 +88,7 @@ export async function getDateStatusForRange(
   if (to < from) throw new StatregError('todate have to be after fromDate', 400)
 
   const releasesInTimerange = await prisma.release.findMany({
-    where: { publish_time: { gt: from, lte: to } },
+    where: { archived: false, publish_time: { gt: from, lte: to } },
     select: {
       publish_time: true,
     },
