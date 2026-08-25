@@ -19,6 +19,8 @@ import {
   Tag,
   ErrorSummary,
   Card,
+  Textarea,
+  Link,
 } from '@statisticsnorway/design-react'
 import { QuestionmarkCircleIcon, PlusCircleIcon, PencilWritingIcon } from '@navikt/aksel-icons'
 
@@ -40,6 +42,7 @@ import { ErrorAlert } from '../components/ErrorAlert'
 import { CreateShortnameModal } from '../components/CreateShortnameModal'
 import { ContactSelection } from '../components/ContactSelection'
 import { VariantModal } from '../components/VariantModal'
+import { DivisionSelection } from '../components/DivisionSelection'
 
 export type StatisticFormValues = {
   name: string
@@ -410,7 +413,8 @@ export default function CreateStatistic() {
                         igjen.
                       </li>
                       <li>
-                        For å slette en statistikk som har blitt feilopprettet må du ta kontakt med mailadresse@ssb.no
+                        For å slette en statistikk som har blitt feilopprettet må du ta kontakt med{' '}
+                        <Link href='mailto:mailadresse@ssb.no'>mailadresse@ssb.no</Link>
                       </li>
                     </ul>
                   </Popover>
@@ -529,22 +533,17 @@ export default function CreateStatistic() {
             <Divider />
             <Heading level={2}>Detaljer</Heading>
             <Field>
-              <Label>{getFieldLabel('Seksjon', 'division')}</Label>
-              <Select
-                id='division'
-                aria-invalid={!!errors.division}
-                value={values.division}
-                onChange={(e) => handleValueChange('division', e.target.value)}
-                onBlur={() => handleOnBlur('division')}
-              >
-                <Select.Option value='' disabled />
-                {divisions.map(({ code, name }) => (
-                  <Select.Option key={`division-${code}`} value={code}>
-                    {name} ({code})
-                  </Select.Option>
-                ))}
-              </Select>
-              {errors.division && <ValidationMessage>{errors.division}</ValidationMessage>}
+              <Field>
+                <Label>{getFieldLabel('Seksjon', 'division')}</Label>
+                <DivisionSelection
+                  id='division'
+                  ariaInvalid={!!errors.division}
+                  divisions={divisions}
+                  selected={values.division}
+                  setSelected={(selected) => handleValueChange('division', selected)}
+                />
+                {errors.division && <ValidationMessage>{errors.division}</ValidationMessage>}
+              </Field>
             </Field>
             <Fieldset>
               <Fieldset.Legend>Regionale nivåer</Fieldset.Legend>
@@ -585,7 +584,11 @@ export default function CreateStatistic() {
             <Field>
               <Label>Kommentar (Valgfritt)</Label>
               <Field.Description>Annen relevant informasjon.</Field.Description>
-              <Input value={values.comment} onChange={(e) => handleValueChange('comment', e.target.value)} />
+              <Textarea
+                rows={3}
+                value={values.comment}
+                onChange={(e) => handleValueChange('comment', e.target.value)}
+              />
             </Field>
             <div className='create-statistic-form-buttons'>
               <Button type='submit'>Opprett</Button>
