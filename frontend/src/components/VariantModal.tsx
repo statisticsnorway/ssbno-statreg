@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, type Dispatch, type SetStateAction } from 'react'
+import { useState, useEffect, type Dispatch, type SetStateAction } from 'react'
 import { Button, Heading, Dialog, Field, Label, Input, Select, Paragraph } from '@statisticsnorway/design-react'
 import { TrashIcon } from '@navikt/aksel-icons'
 
@@ -39,11 +39,6 @@ export function VariantModal({
   })
 
   const isEditMode = typeof editVariantIndex === 'number'
-  const revisionSelectRef = useRef<HTMLSelectElement>(null)
-
-  useEffect(() => {
-    if (openVariantModal) revisionSelectRef.current?.focus()
-  }, [openVariantModal])
 
   useEffect(() => {
     async function fetchFrequencies() {
@@ -114,9 +109,9 @@ export function VariantModal({
         <Field>
           <Label>Revisjon</Label>
           <Select
-            ref={revisionSelectRef}
+            // @ts-expect-error "autofocus" and it's not part of the React typings for Input
+            autofocus='true'
             aria-describedby='variant-modal-description'
-            aria-label='Revisjon'
             value={values.revision_code}
             onChange={(e) => setValues((prevValues) => ({ ...prevValues, revision_code: e.target.value }))}
           >
