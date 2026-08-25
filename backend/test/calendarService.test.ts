@@ -1,6 +1,7 @@
 import { vi, beforeEach, describe, test, expect, afterEach } from 'vitest'
 import {
   createBlockedReleaseDay,
+  deleteBlockedReleaseDate,
   getDateStatusForRange,
   getReleaseCountByDate,
   getStatus,
@@ -38,6 +39,7 @@ describe('calendarService  ', () => {
       calender_date: {
         create: vi.fn((args) => Promise.resolve({ ...args, id: 0 })),
         findMany: vi.fn(() => Promise.resolve(listReturn)),
+        delete: vi.fn(() => Promise.resolve()),
       },
       release: {
         findMany: vi.fn(() => Promise.resolve([])),
@@ -95,6 +97,25 @@ describe('calendarService  ', () => {
       })
       expect(prismaMock.calender_date.create).toHaveBeenCalledTimes(0)
       expect(prismaMock.calender_date.findMany).toHaveBeenCalledTimes(0)
+    })
+  })
+  describe('deleteBlockedReleaseDate() ', () => {
+    test('deletes a manually blocked date and returns mapped results', async () => {
+      setListReturn(calendar_date_prisma_list)
+
+      const result = await deleteBlockedReleaseDate(prismaMock, '2026-12-24')
+
+      expect(prismaMock.calender_date.delete).toHaveBeenCalledExactlyOnceWith({
+        where: { day: new Date('2026-12-24') },
+      })
+      expect(result).toEqual(expect.arrayContaining(calendar_date_result))
+    })
+
+    test('returns 400 when date is automatically blocked', async () => {
+      await expect(deleteBlockedReleaseDate(prismaMock, '2026-12-25')).rejects.toMatchObject({
+        statregError: 'Automatically blocked dates cannot be deleted',
+      })
+      expect(prismaMock.calender_date.delete).not.toHaveBeenCalled()
     })
   })
   describe('getDateStatusForRange() ', () => {
