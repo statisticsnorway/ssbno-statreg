@@ -487,7 +487,7 @@ describe('releasesService ', async () => {
 
       await expect(
         asyncLocalStorage.run({ isAdmin: false }, () => updateRelease(prismaMock, '1', archivedReleaseInput, now))
-       ).rejects.toMatchObject({ status: 403, statregError: 'Only admins can archive releases' })
+      ).rejects.toMatchObject({ status: 403, statregError: 'Only admins can archive releases' })
 
       expect(prismaMock.release.update).toHaveBeenCalledTimes(0)
     })

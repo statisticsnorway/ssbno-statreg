@@ -94,6 +94,7 @@ describe('release data is persisted when ', () => {
       .set(headers)
       .send({ ...createBody, comment: 'Archive release.', archived: true })
     expect(archived.status).toBe(200)
+    expect(archived.body.archived).toBe(true)
 
     // GET releases endpoints after archive to check that release is gone
     const variantReleasesAfter = await request(app).get(
