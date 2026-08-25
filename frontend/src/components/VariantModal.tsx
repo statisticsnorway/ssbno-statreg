@@ -88,13 +88,7 @@ export function VariantModal({
   }
 
   return (
-    <Dialog
-      id='variant-modal'
-      aria-labelledby='variant-modal-heading'
-      aria-describedby='variant-modal-description'
-      open={openVariantModal}
-      onClose={handleCloseModal}
-    >
+    <Dialog aria-labelledby='variant-modal-heading' open={openVariantModal} onClose={handleCloseModal}>
       <Dialog.Block>
         <Heading id='variant-modal-heading' data-size='xs'>
           {isEditMode ? 'Rediger variant' : 'Legg til variant'}
