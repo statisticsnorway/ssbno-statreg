@@ -12,7 +12,7 @@ services:
       retries: 30
 
   tests:
-    image: ghcr.io/pnpm/pnpm:11
+    image: ghcr.io/pnpm/pnpm:11.22.0
     working_dir: /app
     volumes:
       - .:/app
