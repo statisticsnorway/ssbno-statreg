@@ -12,7 +12,7 @@ services:
       retries: 30
 
   tests:
-    image: ghcr.io/pnpm/pnpm:11.22.0
+    image: ghcr.io/pnpm/pnpm@sha256:eba76954b37ec1ba6187f0adb39caee1e31733194857eedd01319da0af3fa00d #v.11.22
     working_dir: /app
     volumes:
       - .:/app
