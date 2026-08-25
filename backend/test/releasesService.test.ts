@@ -446,6 +446,15 @@ describe('releasesService ', async () => {
         statregError: 'Release 1 not found',
       })
     })
+
+    test('returns 410 if release is archived', async () => {
+      setPrismaResult({ ...mockedSingleReleasePrismaResult, archived: true })
+
+      await expect(() => getReleaseById('1', prismaMock)).rejects.toMatchObject({
+        status: 410,
+        statregError: 'Release 1 is archived',
+      })
+    })
   })
 
   describe('updateRelease ', () => {

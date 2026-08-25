@@ -195,7 +195,9 @@ export async function getReleaseById(id: string, prisma: ReleasePrisma): Promise
     include: ReleaseDetailsIncludes,
   })
 
-  if (!release || release.archived) throw new StatregError(`Release ${idAsNumber} not found`, 404)
+  if (!release) throw new StatregError(`Release ${idAsNumber} not found`, 404)
+
+  if (release.archived) throw new StatregError(`Release ${idAsNumber} is archived`, 410)
 
   return mapToReleaseDetails(release)
 }

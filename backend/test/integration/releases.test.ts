@@ -42,9 +42,9 @@ describe('release data is persisted when ', () => {
   })
 
   test('admin archives a release', async () => {
+    // POST shortname and statistic with variant (to put the release under)
     const newShortname = 'archive_test'
     await request(app).post('/statistikkregisteret/api/shortnames').set(headers).send({ shortname: newShortname })
-
     const statistic = await request(app)
       .post(`/statistikkregisteret/api/statistics/${newShortname}`)
       .set(headers)
@@ -52,37 +52,56 @@ describe('release data is persisted when ', () => {
         status: { code: 'K' },
         division: '101',
         name: 'Archive test',
-        variants: [{ frequency: { code: 'U' }, revision: { code: 'I' } }],
+        variants: [{ frequency: { code: 'W' }, revision: { code: 'I' } }],
       })
     expect(statistic.status).toBe(200)
     const variantId = statistic.body.variants[0].id
 
+    // POST release
     const created = await request(app)
       .post(`/statistikkregisteret/api/statistics/${newShortname}/variants/${variantId}/releases`)
       .set(headers)
       .send(body)
     expect(created.status).toBe(200)
 
-    const beforeArchive = await request(app).get(
+    // GET releases endpoints before archive to check that release is included
+    const variantReleasesBefore = await request(app).get(
       `/statistikkregisteret/api/statistics/${newShortname}/variants/${variantId}/releases`
     )
-    expect(beforeArchive.status).toBe(200)
-    expect(beforeArchive.body).toMatchObject({ total: 1, releases: [{ id: created.body.id }] })
+    expect(variantReleasesBefore.status).toBe(200)
+    expect(variantReleasesBefore.body).toMatchObject({ total: 1, releases: [{ id: created.body.id }] })
 
+    const filteredReleasesBefore = await request(app)
+      .get('/statistikkregisteret/api/releases')
+      .query({ shortname: newShortname })
+    expect(filteredReleasesBefore.status).toBe(200)
+    expect(filteredReleasesBefore.body).toMatchObject({ total: 1, releases: [{ id: created.body.id }] })
+
+    const singleReleaseBefore = await request(app).get(`/statistikkregisteret/api/releases/${created.body.id}`)
+    expect(singleReleaseBefore.status).toBe(200)
+
+    // PUT release to archive it
     const archived = await request(app)
       .put(`/statistikkregisteret/api/releases/${created.body.id}`)
       .set(headers)
       .send({ ...body, comment: 'Archive release.', archived: true })
     expect(archived.status).toBe(200)
 
-    const afterArchive = await request(app).get(
+    // GET releases endpoints after archive to check that release is gone
+    const variantReleasesAfter = await request(app).get(
       `/statistikkregisteret/api/statistics/${newShortname}/variants/${variantId}/releases`
     )
-    expect(afterArchive.status).toBe(200)
-    expect(afterArchive.body).toStrictEqual({ total: 0, releases: [] })
+    expect(variantReleasesAfter.status).toBe(200)
+    expect(variantReleasesAfter.body).toStrictEqual({ total: 0, releases: [] })
 
-    const fetched = await request(app).get(`/statistikkregisteret/api/releases/${created.body.id}`)
-    expect(fetched.status).toBe(404)
+    const filteredReleasesAfter = await request(app)
+      .get('/statistikkregisteret/api/releases')
+      .query({ shortname: newShortname })
+    expect(filteredReleasesAfter.status).toBe(200)
+    expect(filteredReleasesAfter.body).toStrictEqual({ total: 0, releases: [] })
+
+    const singleReleaseAfter = await request(app).get(`/statistikkregisteret/api/releases/${created.body.id}`)
+    expect(singleReleaseAfter.status).toBe(410)
   })
 
   test('client picks release and updates fields', async () => {
