@@ -58,10 +58,11 @@ describe('release data is persisted when ', () => {
     const variantId = statistic.body.variants[0].id
 
     // POST release on a publish date that can be tested in isolation
+    const createBody = { ...body, publish_time: '2099-11-17T08:00:00Z' }
     const created = await request(app)
       .post(`/statistikkregisteret/api/statistics/${newShortname}/variants/${variantId}/releases`)
       .set(headers)
-      .send({ ...body, publish_time: '2099-11-17T08:00:00Z' })
+      .send(createBody)
     expect(created.status).toBe(200)
 
     // GET releases endpoints before archive to check that release is included
@@ -91,7 +92,7 @@ describe('release data is persisted when ', () => {
     const archived = await request(app)
       .put(`/statistikkregisteret/api/releases/${created.body.id}`)
       .set(headers)
-      .send({ ...body, publish_time: '2099-11-17T08:00:00Z', comment: 'Archive release.', archived: true })
+      .send({ ...createBody, comment: 'Archive release.', archived: true })
     expect(archived.status).toBe(200)
 
     // GET releases endpoints after archive to check that release is gone
