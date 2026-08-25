@@ -378,7 +378,6 @@ type ValidatedReleaseInput = {
   periodToDate: Date
   releaseDatePrecision: string
   comment: string
-  archived?: boolean
 }
 
 export async function parseReleaseInput(
