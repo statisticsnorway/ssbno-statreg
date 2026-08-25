@@ -2,7 +2,7 @@
 # depend on having a shell, as well as other OS functions available.
 # We want this because we need to run pnpm commands on startup, inside the container.
 
-FROM ghcr.io/pnpm/pnpm:11
+FROM ghcr.io/pnpm/pnpm:11.22.0
 
 RUN pnpm runtime set node 24 -g
 
