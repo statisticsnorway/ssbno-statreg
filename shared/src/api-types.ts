@@ -1122,7 +1122,7 @@ export interface components {
       | components['schemas']['Statistic_create_upcoming']
       | components['schemas']['Statistic_create_active']
     Statistic_update: {
-      relation?: string | null
+      relation_id?: number | null
     } & components['schemas']['Statistic_create_base']
     Statistic_details: {
       version?: number
@@ -1132,6 +1132,7 @@ export interface components {
       yearly_reporting?: boolean
       previous_topic_codes?: string | null
       relation?: {
+        id?: number
         shortname?: string
         readonly name?: string
         readonly name_en?: string
