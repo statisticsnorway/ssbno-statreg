@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { Link as ReactRouterLink } from 'react-router'
 import { Paragraph, Button, Heading, Dialog } from '@statisticsnorway/design-react'
 import { type ReleaseDetails } from '@ssbno-statreg/shared'
@@ -18,17 +19,34 @@ export default function ReleaseFormModal({
   setOpenCreateReleaseModal,
 }: ReleaseFormModalProps) {
   const { id, statistic } = createdRelease ?? {}
+  const okButtonRef = useRef<HTMLAnchorElement>(null)
+
+  useEffect(() => {
+    if (openCreateReleaseModal) okButtonRef.current?.focus()
+  }, [openCreateReleaseModal])
 
   return (
-    <Dialog id='create-release-modal' open={openCreateReleaseModal} onClose={() => setOpenCreateReleaseModal(false)}>
+    <Dialog
+      id='create-release-modal'
+      aria-labelledby='create-release-modal-heading'
+      open={openCreateReleaseModal}
+      onClose={() => setOpenCreateReleaseModal(false)}
+    >
       <Dialog.Block>
-        <Heading data-size='xs'>{modalHeading}</Heading>
+        <Heading id='create-release-modal-heading' data-size='xs'>
+          {modalHeading}
+        </Heading>
       </Dialog.Block>
       <Dialog.Block>
-        <Paragraph>{modalDescription}</Paragraph>
+        <Paragraph id='create-release-modal-description'>{modalDescription}</Paragraph>
         <div style={{ display: 'flex', gap: 'var(--ds-size-4)', marginTop: ' var(--ds-size-4)' }}>
           <Button variant='primary' asChild>
-            <ReactRouterLink to={`/statistikk/${statistic?.shortname}`} reloadDocument>
+            <ReactRouterLink
+              ref={okButtonRef}
+              aria-describedby='create-release-modal-description'
+              to={`/statistikk/${statistic?.shortname}`}
+              reloadDocument
+            >
               Ok
             </ReactRouterLink>
           </Button>
