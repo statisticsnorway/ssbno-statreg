@@ -532,7 +532,7 @@ export default function CreateStatistic() {
             </div>
             <Divider />
             <Heading level={2}>Detaljer</Heading>
-            <Field className='division-field'>
+            <Field>
               <Label>{getFieldLabel('Seksjon', 'division')}</Label>
               <DivisionSelection
                 id='division'
