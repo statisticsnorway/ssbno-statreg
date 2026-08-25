@@ -492,6 +492,17 @@ describe('releasesService ', async () => {
       expect(prismaMock.release.update).toHaveBeenCalledTimes(0)
     })
 
+    test('allows an admin to archive a release', async () => {
+      setPrismaResult(mockedSingleReleasePrismaResult)
+      const archivedReleaseInput = { ...mockUpdateReleaseInput, archived: true }
+
+      await asyncLocalStorage.run({ isAdmin: true }, () => updateRelease(prismaMock, '1', archivedReleaseInput, now))
+
+      expect(prismaMock.release.update).toHaveBeenCalledWith(
+        expect.objectContaining({ data: expect.objectContaining({ archived: true }) })
+      )
+    })
+
     test('updates release with accepted status when current user is admin', async () => {
       setPrismaResult(mockedSingleReleasePrismaResult)
 
@@ -510,17 +521,6 @@ describe('releasesService ', async () => {
           comment: 'Mock comment.',
         },
       })
-    })
-
-    test('allows an admin to archive a release', async () => {
-      setPrismaResult(mockedSingleReleasePrismaResult)
-      const archivedReleaseInput = { ...mockUpdateReleaseInput, archived: true }
-
-      await asyncLocalStorage.run({ isAdmin: true }, () => updateRelease(prismaMock, '1', archivedReleaseInput, now))
-
-      expect(prismaMock.release.update).toHaveBeenCalledWith(
-        expect.objectContaining({ data: expect.objectContaining({ archived: true }) })
-      )
     })
 
     test('rejects with error message if request body is empty', async () => {
