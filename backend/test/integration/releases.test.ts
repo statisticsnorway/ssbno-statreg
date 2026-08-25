@@ -42,7 +42,7 @@ describe('release data is persisted when ', () => {
   })
 
   test('admin archives a release', async () => {
-    // POST shortname and statistic with variant (to put the release under)
+    // POST shortname and statistic with variant
     const newShortname = 'archive_test'
     await request(app).post('/statistikkregisteret/api/shortnames').set(headers).send({ shortname: newShortname })
     const statistic = await request(app)
