@@ -227,7 +227,7 @@ export default function EditStatistic() {
       statistic_region_levels: regionLevelValues.map((code: string) => ({ code })),
       approval_status: ApprovalStatus['ACCEPTED'],
       // Retain fields from the original statistic that are not part of the form
-      relation: statistic.relation?.shortname ?? null,
+      relation_id: statistic.relation?.id ?? null,
       yearly_reporting: statistic.yearly_reporting,
       previous_topic_codes: statistic.previous_topic_codes,
       variants: statistic.variants,
