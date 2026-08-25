@@ -41,6 +41,85 @@ describe('release data is persisted when ', () => {
     expect(versions.body[0].change_type).toBe('create')
   })
 
+  test('admin archives a release', async () => {
+    // POST shortname and statistic with variant
+    const newShortname = 'archive_test'
+    await request(app).post('/statistikkregisteret/api/shortnames').set(headers).send({ shortname: newShortname })
+    const statistic = await request(app)
+      .post(`/statistikkregisteret/api/statistics/${newShortname}`)
+      .set(headers)
+      .send({
+        status: { code: 'K' },
+        division: '101',
+        name: 'Archive test',
+        variants: [{ frequency: { code: 'W' }, revision: { code: 'I' } }],
+      })
+    expect(statistic.status).toBe(200)
+    const variantId = statistic.body.variants[0].id
+
+    // POST release on a publish date that can be tested in isolation
+    const createBody = { ...body, publish_time: '2099-11-17T08:00:00Z' }
+    const created = await request(app)
+      .post(`/statistikkregisteret/api/statistics/${newShortname}/variants/${variantId}/releases`)
+      .set(headers)
+      .send(createBody)
+    expect(created.status).toBe(200)
+
+    // GET releases endpoints before archive to check that release is included
+    const variantReleasesBefore = await request(app).get(
+      `/statistikkregisteret/api/statistics/${newShortname}/variants/${variantId}/releases`
+    )
+    expect(variantReleasesBefore.status).toBe(200)
+    expect(variantReleasesBefore.body).toMatchObject({ total: 1, releases: [{ id: created.body.id }] })
+
+    const filteredReleasesBefore = await request(app)
+      .get('/statistikkregisteret/api/releases')
+      .query({ shortname: newShortname })
+    expect(filteredReleasesBefore.status).toBe(200)
+    expect(filteredReleasesBefore.body).toMatchObject({ total: 1, releases: [{ id: created.body.id }] })
+
+    const singleReleaseBefore = await request(app).get(`/statistikkregisteret/api/releases/${created.body.id}`)
+    expect(singleReleaseBefore.status).toBe(200)
+
+    // GET calendar before archive to check that release is counted
+    const calendarBefore = await request(app)
+      .get('/statistikkregisteret/api/calendar')
+      .query({ fromDate: '2099-11-17', toDate: '2099-11-17' })
+    expect(calendarBefore.status).toBe(200)
+    expect(calendarBefore.body['2099-11-17']).toStrictEqual({ status: 'FEW' })
+
+    // PUT release to archive it
+    const archived = await request(app)
+      .put(`/statistikkregisteret/api/releases/${created.body.id}`)
+      .set(headers)
+      .send({ ...createBody, comment: 'Archive release.', archived: true })
+    expect(archived.status).toBe(200)
+    expect(archived.body.archived).toBe(true)
+
+    // GET releases endpoints after archive to check that release is gone
+    const variantReleasesAfter = await request(app).get(
+      `/statistikkregisteret/api/statistics/${newShortname}/variants/${variantId}/releases`
+    )
+    expect(variantReleasesAfter.status).toBe(200)
+    expect(variantReleasesAfter.body).toStrictEqual({ total: 0, releases: [] })
+
+    const filteredReleasesAfter = await request(app)
+      .get('/statistikkregisteret/api/releases')
+      .query({ shortname: newShortname })
+    expect(filteredReleasesAfter.status).toBe(200)
+    expect(filteredReleasesAfter.body).toStrictEqual({ total: 0, releases: [] })
+
+    const singleReleaseAfter = await request(app).get(`/statistikkregisteret/api/releases/${created.body.id}`)
+    expect(singleReleaseAfter.status).toBe(410)
+
+    // GET calendar after archive to check that release is not counted
+    const calendarAfter = await request(app)
+      .get('/statistikkregisteret/api/calendar')
+      .query({ fromDate: '2099-11-17', toDate: '2099-11-17' })
+    expect(calendarAfter.status).toBe(200)
+    expect(calendarAfter.body['2099-11-17']).toStrictEqual({ status: 'NONE' })
+  })
+
   test('client picks release and updates fields', async () => {
     // This integration test simulates the following events:
     // 1. User opens the release listing page
