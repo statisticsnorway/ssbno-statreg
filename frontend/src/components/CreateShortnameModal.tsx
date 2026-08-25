@@ -105,7 +105,13 @@ export function CreateShortnameModal({ openCreateShortnameModal }: Readonly<Crea
               ikke endres etter at statistikken har blitt opprettet. Maks 14 tegn, kun små bokstaver og understrek er
               lov.
             </Field.Description>
-            <Input aria-invalid={!!validationError} onChange={handleInputChange} onBlur={validateShortname} />
+            <Input
+              // @ts-expect-error "autofocus" and it's not part of the React typings for Input
+              autofocus='true'
+              aria-invalid={!!validationError}
+              onChange={handleInputChange}
+              onBlur={validateShortname}
+            />
             <Paragraph data-limit='14' data-field='counter' />
             {validationError ? (
               <ValidationMessage>{validationError}</ValidationMessage>

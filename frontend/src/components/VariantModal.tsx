@@ -1,4 +1,4 @@
-import { useState, useEffect, type Dispatch, type SetStateAction } from 'react'
+import { useState, useEffect, useRef, type Dispatch, type SetStateAction } from 'react'
 import { Button, Heading, Dialog, Field, Label, Input, Select, Paragraph } from '@statisticsnorway/design-react'
 import { TrashIcon } from '@navikt/aksel-icons'
 
@@ -39,6 +39,11 @@ export function VariantModal({
   })
 
   const isEditMode = typeof editVariantIndex === 'number'
+  const revisionSelectRef = useRef<HTMLSelectElement>(null)
+
+  useEffect(() => {
+    if (openVariantModal) revisionSelectRef.current?.focus()
+  }, [openVariantModal])
 
   useEffect(() => {
     async function fetchFrequencies() {
@@ -88,19 +93,30 @@ export function VariantModal({
   }
 
   return (
-    <Dialog id='variant-modal' open={openVariantModal} onClose={handleCloseModal}>
+    <Dialog
+      id='variant-modal'
+      aria-labelledby='variant-modal-heading'
+      aria-describedby='variant-modal-description'
+      open={openVariantModal}
+      onClose={handleCloseModal}
+    >
       <Dialog.Block>
-        <Heading data-size='xs'>{isEditMode ? 'Rediger variant' : 'Legg til variant'}</Heading>
+        <Heading id='variant-modal-heading' data-size='xs'>
+          {isEditMode ? 'Rediger variant' : 'Legg til variant'}
+        </Heading>
       </Dialog.Block>
       <Dialog.Block className='variant-modal-form'>
         {apiError.length > 0 && <ErrorAlert message={apiError} />}
-        <Paragraph>
+        <Paragraph id='variant-modal-description'>
           En variant definerer frekvens og detaljnivå for statistikken. Du trenger minst én variant for å kunne melde
           publiseringsdato.
         </Paragraph>
         <Field>
           <Label>Revisjon</Label>
           <Select
+            ref={revisionSelectRef}
+            aria-describedby='variant-modal-description'
+            aria-label='Revisjon'
             value={values.revision_code}
             onChange={(e) => setValues((prevValues) => ({ ...prevValues, revision_code: e.target.value }))}
           >
