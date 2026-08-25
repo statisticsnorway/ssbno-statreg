@@ -27,23 +27,24 @@ export default function ReleaseFormModal({
 
   return (
     <Dialog
-      id='create-release-modal'
-      aria-labelledby='create-release-modal-heading'
+      id='release-modal'
+      aria-labelledby='release-modal-heading'
       open={openCreateReleaseModal}
       onClose={() => setOpenCreateReleaseModal(false)}
     >
       <Dialog.Block>
-        <Heading id='create-release-modal-heading' data-size='xs'>
+        <Heading id='release-modal-heading' data-size='xs'>
           {modalHeading}
         </Heading>
       </Dialog.Block>
       <Dialog.Block>
-        <Paragraph id='create-release-modal-description'>{modalDescription}</Paragraph>
+        <Paragraph id='release-modal-description'>{modalDescription}</Paragraph>
         <div style={{ display: 'flex', gap: 'var(--ds-size-4)', marginTop: ' var(--ds-size-4)' }}>
           <Button variant='primary' asChild>
             <ReactRouterLink
-              ref={okButtonRef}
-              aria-describedby='create-release-modal-description'
+              // @ts-expect-error native "autofocus" is not part of the React types
+              autofocus='true'
+              aria-describedby='release-modal-description'
               to={`/statistikk/${statistic?.shortname}`}
               reloadDocument
             >

@@ -92,9 +92,16 @@ export function CreateShortnameModal({ openCreateShortnameModal }: Readonly<Crea
   }
 
   return (
-    <Dialog id='create-shortname-modal' open={openCreateShortnameModal} onClose={handleCloseModal}>
+    <Dialog
+      id='create-shortname-modal'
+      aria-labelledby='create-shortname-modal-heading'
+      open={openCreateShortnameModal}
+      onClose={handleCloseModal}
+    >
       <Dialog.Block>
-        <Heading data-size='xs'>Opprett kortnavn for statistikken</Heading>
+        <Heading id='create-shortname-modal-heading' data-size='xs'>
+          Opprett kortnavn for statistikken
+        </Heading>
       </Dialog.Block>
       <Dialog.Block>
         {apiError.length > 0 && <ErrorAlert message={apiError} />}
@@ -106,7 +113,7 @@ export function CreateShortnameModal({ openCreateShortnameModal }: Readonly<Crea
               lov.
             </Field.Description>
             <Input
-              // @ts-expect-error "autofocus" and it's not part of the React typings for Input
+              // @ts-expect-error native "autofocus" is not part of the React types
               autofocus='true'
               aria-invalid={!!validationError}
               onChange={handleInputChange}

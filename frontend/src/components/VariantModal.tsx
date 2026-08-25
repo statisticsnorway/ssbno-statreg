@@ -109,7 +109,7 @@ export function VariantModal({
         <Field>
           <Label>Revisjon</Label>
           <Select
-            // @ts-expect-error "autofocus" and it's not part of the React typings for Input
+            // @ts-expect-error native "autofocus" is not part of the React types
             autofocus='true'
             aria-describedby='variant-modal-description'
             value={values.revision_code}
