@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link as ReactRouterLink } from 'react-router'
-import { Heading, Link, Paragraph, Details, Card, Button, Spinner } from '@statisticsnorway/design-react'
-import { PencilWritingIcon } from '@navikt/aksel-icons'
+import { Heading, Link, Paragraph, Details, Card, Button, Spinner, Popover } from '@statisticsnorway/design-react'
+import { PencilWritingIcon, TrashIcon } from '@navikt/aksel-icons'
 import { ApprovalStatusTag } from '../components/ApprovalStatus'
 import client from '../api'
 import { type ReleaseDetails, type Version } from '@ssbno-statreg/shared'
@@ -103,12 +103,27 @@ export default function ShowRelease() {
           </Details>
         </Card>
       </div>
-      <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
         <Button asChild data-size='sm' variant='tertiary'>
           <ReactRouterLink to={`/publisering/${id}/rediger`}>
             <PencilWritingIcon aria-hidden /> Rediger
           </ReactRouterLink>
         </Button>
+        <Popover.TriggerContext>
+          <Popover.Trigger data-size='sm' variant='tertiary' data-color='danger'>
+            <TrashIcon aria-hidden /> Slett
+          </Popover.Trigger>
+          <Popover placement='left' data-color='danger'>
+            <Paragraph>
+              Datoen vil bli fjernet fra den aktive kalenderen, men vil fortsatt være tilgjengelig i systemarkivet. Vil
+              du forstatt slette?
+            </Paragraph>
+            <div style={{ display: 'flex', gap: 'var(--ds-size-2)', marginTop: 'var(--ds-size-2)' }}>
+              <Button data-color='danger'>Ja, slett</Button>
+              <Button variant='tertiary'>Avbryt</Button>
+            </div>
+          </Popover>
+        </Popover.TriggerContext>
       </div>
     </>
   )
