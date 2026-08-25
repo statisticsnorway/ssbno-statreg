@@ -24,6 +24,7 @@ export default function ShowRelease() {
   const [isLoadingVersions, setIsLoadingVersions] = useState(false)
   const [apiError, setApiError] = useState<string[]>([])
   const [isArchived, setIsArchived] = useState(false)
+  const [isDeletePopoverOpen, setIsDeletePopoverOpen] = useState(false)
   const { id } = useParams()
 
   useEffect(() => {
@@ -139,19 +140,37 @@ export default function ShowRelease() {
           </ReactRouterLink>
         </Button>
         <Popover.TriggerContext>
-          <Popover.Trigger data-size='sm' variant='tertiary' data-color='danger'>
+          <Popover.Trigger
+            data-size='sm'
+            variant='tertiary'
+            data-color='danger'
+            onClick={() => setIsDeletePopoverOpen(!isDeletePopoverOpen)}
+          >
             <TrashIcon aria-hidden /> Slett
           </Popover.Trigger>
-          <Popover placement='left' data-color='danger'>
+          <Popover
+            placement='left'
+            open={isDeletePopoverOpen}
+            onClose={() => setIsDeletePopoverOpen(false)}
+            data-color='danger'
+          >
             <Paragraph>
               Datoen vil bli fjernet fra den aktive kalenderen, men vil fortsatt være tilgjengelig i systemarkivet. Vil
               du forstatt slette?
             </Paragraph>
             <div style={{ display: 'flex', gap: 'var(--ds-size-2)', marginTop: 'var(--ds-size-2)' }}>
-              <Button data-color='danger' onClick={archiveRelease}>
+              <Button
+                data-color='danger'
+                onClick={() => {
+                  setIsDeletePopoverOpen(false)
+                  archiveRelease()
+                }}
+              >
                 Ja, slett
               </Button>
-              <Button variant='tertiary'>Avbryt</Button>
+              <Button variant='tertiary' onClick={() => setIsDeletePopoverOpen(false)}>
+                Avbryt
+              </Button>
             </div>
           </Popover>
         </Popover.TriggerContext>
