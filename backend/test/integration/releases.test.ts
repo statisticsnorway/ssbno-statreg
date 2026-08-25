@@ -57,11 +57,11 @@ describe('release data is persisted when ', () => {
     expect(statistic.status).toBe(200)
     const variantId = statistic.body.variants[0].id
 
-    // POST release
+    // POST release on a publish date that can be tested in isolation
     const created = await request(app)
       .post(`/statistikkregisteret/api/statistics/${newShortname}/variants/${variantId}/releases`)
       .set(headers)
-      .send(body)
+      .send({ ...body, publish_time: '2099-11-17T08:00:00Z' })
     expect(created.status).toBe(200)
 
     // GET releases endpoints before archive to check that release is included
@@ -80,11 +80,18 @@ describe('release data is persisted when ', () => {
     const singleReleaseBefore = await request(app).get(`/statistikkregisteret/api/releases/${created.body.id}`)
     expect(singleReleaseBefore.status).toBe(200)
 
+    // GET calendar before archive to check that release is counted
+    const calendarBefore = await request(app)
+      .get('/statistikkregisteret/api/calendar')
+      .query({ fromDate: '2099-11-17', toDate: '2099-11-17' })
+    expect(calendarBefore.status).toBe(200)
+    expect(calendarBefore.body['2099-11-17']).toStrictEqual({ status: 'FEW' })
+
     // PUT release to archive it
     const archived = await request(app)
       .put(`/statistikkregisteret/api/releases/${created.body.id}`)
       .set(headers)
-      .send({ ...body, comment: 'Archive release.', archived: true })
+      .send({ ...body, publish_time: '2099-11-17T08:00:00Z', comment: 'Archive release.', archived: true })
     expect(archived.status).toBe(200)
 
     // GET releases endpoints after archive to check that release is gone
@@ -102,6 +109,13 @@ describe('release data is persisted when ', () => {
 
     const singleReleaseAfter = await request(app).get(`/statistikkregisteret/api/releases/${created.body.id}`)
     expect(singleReleaseAfter.status).toBe(410)
+
+    // GET calendar after archive to check that release is not counted
+    const calendarAfter = await request(app)
+      .get('/statistikkregisteret/api/calendar')
+      .query({ fromDate: '2099-11-17', toDate: '2099-11-17' })
+    expect(calendarAfter.status).toBe(200)
+    expect(calendarAfter.body['2099-11-17']).toStrictEqual({ status: 'NONE' })
   })
 
   test('client picks release and updates fields', async () => {
