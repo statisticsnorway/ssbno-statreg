@@ -13,7 +13,7 @@ import {
   Variant,
 } from '@ssbno-statreg/shared'
 import { dateToISOString, sanitize, parseDateOnly, ensureRequiredFieldsExists, isNumber, parseId } from '@/lib/utils'
-import type { Prisma } from '@/generated/prisma/client'
+import type { Prisma, ResponsiblePerson as ResponsiblePersonPrisma } from '@/generated/prisma/client'
 import { getDivisionFromCode } from '@/services/klassService'
 import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
 import { statisticsAsserts } from '@/lib/asserts'
@@ -351,11 +351,11 @@ export async function updateStatistic(
       }
     }
 
-    const missingExistingVariants = existingStatistic.variants.filter(
+    const missingExistingVariants = existingStatistic.variants?.filter(
       (existingVariant) => !parsedVariants.some((variant) => variant.id === existingVariant.id)
     )
 
-    if (missingExistingVariants.length) {
+    if (missingExistingVariants?.length) {
       throw new StatregError(
         `Deleting variants is currently not supported. Missing existing variant ids: ${missingExistingVariants
           .map((variant) => variant.id)
@@ -462,7 +462,7 @@ export async function updateStatistic(
   return await mapStatisticDetails(updatedStatistic)
 }
 
-async function upsertContacts(principalNames: string[], prisma: StatisticPrisma) {
+async function upsertContacts(principalNames: string[], prisma: StatisticPrisma): Promise<ResponsiblePersonPrisma[]> {
   const users = await getAllUsersFromCache()
 
   const uniquePrincipalNames = [...new Set(principalNames)]
