@@ -213,6 +213,18 @@ describe('statistics controller', () => {
       first_released_at: '2024-02-01T00:00:00.000Z',
       main_language: 'nn',
       comment: 'Kommentar',
+      contacts: [
+        {
+          name: 'Bob',
+          principalName: 'bcd@ssb.no',
+        },
+      ],
+      variants: [
+        {
+          frequency: { code: 'W' },
+          revision: { code: 'I' },
+        },
+      ],
     })
 
     // GET /statistics with shortname filter to verify persistence
