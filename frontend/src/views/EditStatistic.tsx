@@ -36,15 +36,11 @@ import type {
 import ErrorPage, { ErrorType } from './ErrorPage'
 import { ErrorAlert } from '../components/ErrorAlert'
 import { DivisionSelection } from '../components/DivisionSelection'
-import type { StatisticFormErrors, StatisticFormField, StatisticFormValues } from './CreateStatistic'
+import type { StatisticFormErrors, StatisticFormField, StatisticPartialFormValues } from './CreateStatistic'
 
-const defaultValues: StatisticFormValues = {
-  name: '',
-  name_en: '',
-  division: '',
-  main_language: 'nb',
-  first_released_at: '',
-  comment: '',
+type StatisticFormValues = {
+  status: keyof typeof StatisticStatus | ''
+  values: StatisticPartialFormValues
 }
 
 function isEditStatisticFieldRequired(status: EditableStatisticStatus, field: StatisticFormField): boolean {
@@ -66,8 +62,17 @@ export default function EditStatistic() {
     value: [],
   })
 
+  const defaultValues: StatisticPartialFormValues = {
+    name: '',
+    name_en: '',
+    division: '',
+    main_language: 'nb',
+    first_released_at: '',
+    comment: '',
+  }
+
   const [status, setStatus] = useState<EditableStatisticStatus | ''>('')
-  const [values, setValues] = useState<StatisticFormValues>(defaultValues)
+  const [values, setValues] = useState<StatisticPartialFormValues>(defaultValues)
   const [errors, setErrors] = useState<StatisticFormErrors>({})
   const [apiError, setApiError] = useState<string[]>([])
 
@@ -156,35 +161,42 @@ export default function EditStatistic() {
     return isEditStatisticFieldRequired(status, field) || field === 'comment'
   }
 
-  function validateField(field: StatisticFormField, nextValues = values, nextStatus = status): string {
-    if (field === 'comment' && !nextValues.comment) return 'Fyll inn kommentar'
+  function nextInputValues(nextValues = values, nextStatus = status): StatisticFormValues {
+    return {
+      status: nextStatus,
+      values: nextValues,
+    }
+  }
+
+  function validateField(field: StatisticFormField, validatedInput: StatisticFormValues): string {
+    if (field === 'comment' && !validatedInput.values.comment) return 'Fyll inn kommentar'
 
     // Optional field validation
     if (
       field === 'first_released_at' &&
-      nextValues.first_released_at &&
-      !/^\d{4}$/.test(nextValues.first_released_at)
+      validatedInput.values.first_released_at &&
+      !/^\d{4}$/.test(validatedInput.values.first_released_at)
     ) {
       return 'Statistikkens startår må være et gyldig år med fire siffer'
     }
 
-    if (!nextStatus || !isEditStatisticFieldRequired(nextStatus, field)) {
+    if (!validatedInput.status || !isEditStatisticFieldRequired(validatedInput.status, field)) {
       return ''
     }
 
-    if (field === 'name' && !nextValues.name) return 'Fyll inn norsk statistikknavn'
-    if (field === 'name_en' && !nextValues.name_en) return 'Fyll inn engelsk statistikknavn'
-    if (field === 'division' && !nextValues.division) return 'Velg ansvarlig seksjon for statistikken'
+    if (field === 'name' && !validatedInput.values.name) return 'Fyll inn norsk statistikknavn'
+    if (field === 'name_en' && !validatedInput.values.name_en) return 'Fyll inn engelsk statistikknavn'
+    if (field === 'division' && !validatedInput.values.division) return 'Velg ansvarlig seksjon for statistikken'
 
     return ''
   }
 
-  function validateForm(nextValues = values, nextStatus = status): StatisticFormErrors {
+  function validateForm(validateInput = nextInputValues()): StatisticFormErrors {
     const nextErrors: StatisticFormErrors = {}
     const fieldsToValidate: StatisticFormField[] = Object.keys(defaultValues) as StatisticFormField[]
 
     for (const field of fieldsToValidate) {
-      const error = validateField(field, nextValues, nextStatus)
+      const error = validateField(field, validateInput)
 
       if (error) {
         nextErrors[field] = error
@@ -194,7 +206,10 @@ export default function EditStatistic() {
     return nextErrors
   }
 
-  function handleValueChange<K extends keyof StatisticFormValues>(field: K, value: StatisticFormValues[K]) {
+  function handleValueChange<K extends keyof StatisticPartialFormValues>(
+    field: K,
+    value: StatisticPartialFormValues[K]
+  ) {
     const nextValues = { ...values, [field]: value }
 
     setValues(nextValues)
@@ -210,9 +225,11 @@ export default function EditStatistic() {
   }
 
   function handleStatusChange(nextStatus: EditableStatisticStatus) {
+    const validateInput = nextInputValues(values, nextStatus)
+
     setStatus(nextStatus)
     setErrors((currentErrors) => {
-      const nextErrors = validateForm(values, nextStatus)
+      const nextErrors = validateForm(validateInput)
 
       return Object.fromEntries(
         Object.entries(nextErrors).filter(([field]) => currentErrors[field as StatisticFormField])
