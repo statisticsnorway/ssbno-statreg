@@ -88,19 +88,24 @@ export function VariantModal({
   }
 
   return (
-    <Dialog id='variant-modal' open={openVariantModal} onClose={handleCloseModal}>
+    <Dialog aria-labelledby='variant-modal-heading' open={openVariantModal} onClose={handleCloseModal}>
       <Dialog.Block>
-        <Heading data-size='xs'>{isEditMode ? 'Rediger variant' : 'Legg til variant'}</Heading>
+        <Heading id='variant-modal-heading' data-size='xs'>
+          {isEditMode ? 'Rediger variant' : 'Legg til variant'}
+        </Heading>
       </Dialog.Block>
       <Dialog.Block className='variant-modal-form'>
         {apiError.length > 0 && <ErrorAlert message={apiError} />}
-        <Paragraph>
+        <Paragraph id='variant-modal-description'>
           En variant definerer frekvens og detaljnivå for statistikken. Du trenger minst én variant for å kunne melde
           publiseringsdato.
         </Paragraph>
         <Field>
           <Label>Revisjon</Label>
           <Select
+            // @ts-expect-error native "autofocus" is not part of the React types
+            autofocus='true'
+            aria-describedby='variant-modal-description'
             value={values.revision_code}
             onChange={(e) => setValues((prevValues) => ({ ...prevValues, revision_code: e.target.value }))}
           >
