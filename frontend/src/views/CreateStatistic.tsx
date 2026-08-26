@@ -44,7 +44,10 @@ import { ContactSelection } from '../components/ContactSelection'
 import { VariantModal } from '../components/VariantModal'
 import { DivisionSelection } from '../components/DivisionSelection'
 
-export type StatisticFormValues = {
+export type StatisticFormField = keyof StatisticPartialFormValues | 'variants' | 'contacts'
+export type StatisticFormErrors = Partial<Record<StatisticFormField, string>>
+
+export type StatisticPartialFormValues = {
   name: string
   name_en: string
   division: string
@@ -53,11 +56,9 @@ export type StatisticFormValues = {
   comment: string
 }
 
-export type StatisticFormField = keyof StatisticFormValues | 'variants' | 'contacts'
-export type StatisticFormErrors = Partial<Record<StatisticFormField, string>>
-type StatisticValidationState = {
+type StatisticFormValues = {
   status: CreatableStatisticStatus
-  values: StatisticFormValues
+  values: StatisticPartialFormValues
   selectedContacts: string[]
   createdVariants: Variant[]
 }
@@ -86,7 +87,7 @@ export default function CreateStatistic() {
     value: [],
   })
 
-  const defaultValues: StatisticFormValues = {
+  const defaultValues: StatisticPartialFormValues = {
     name: '',
     name_en: '',
     division: '',
@@ -102,7 +103,7 @@ export default function CreateStatistic() {
   ] as StatisticFormField[]
 
   const [status, setStatus] = useState<CreatableStatisticStatus>('K')
-  const [values, setValues] = useState<StatisticFormValues>(defaultValues)
+  const [values, setValues] = useState<StatisticPartialFormValues>(defaultValues)
   const [errors, setErrors] = useState<StatisticFormErrors>({})
   const [apiError, setApiError] = useState<string[]>([])
   const [invalidShortname, setInvalidShortname] = useState(false)
@@ -205,12 +206,12 @@ export default function CreateStatistic() {
     return isCreateStatisticFieldRequired(status, field)
   }
 
-  function getValidationState(
+  function nextInputValues(
     nextValues = values,
     nextStatus = status,
     nextSelectedContacts = selectedContacts,
     nextCreatedVariants = createdVariants
-  ): StatisticValidationState {
+  ): StatisticFormValues {
     return {
       status: nextStatus,
       values: nextValues,
@@ -219,86 +220,130 @@ export default function CreateStatistic() {
     }
   }
 
-  function validateField(field: StatisticFormField, validationState: StatisticValidationState): string {
+  function validateField(field: StatisticFormField, validateInput: StatisticFormValues): string {
     // Optional field validation
     if (
       field === 'first_released_at' &&
-      validationState.values.first_released_at &&
-      !/^\d{4}$/.test(validationState.values.first_released_at)
+      validateInput.values.first_released_at &&
+      !/^\d{4}$/.test(validateInput.values.first_released_at)
     ) {
       return 'Statistikkens startår må være et gyldig år med fire siffer'
     }
 
-    if (!isCreateStatisticFieldRequired(validationState.status, field)) {
+    if (!isCreateStatisticFieldRequired(validateInput.status, field)) {
       return ''
     }
 
-    if (field === 'name' && !validationState.values.name) return 'Fyll inn norsk statistikknavn'
-    if (field === 'name_en' && !validationState.values.name_en) return 'Fyll inn engelsk statistikknavn'
-    if (field === 'division' && !validationState.values.division) return 'Velg ansvarlig seksjon for statistikken'
-    if (field === 'variants' && validationState.createdVariants.length === 0) return 'Legg til minst én variant'
-    if (field === 'contacts' && validationState.selectedContacts.length === 0) return 'Legg til minst én kontakt'
+    if (field === 'name' && !validateInput.values.name) return 'Fyll inn norsk statistikknavn'
+    if (field === 'name_en' && !validateInput.values.name_en) return 'Fyll inn engelsk statistikknavn'
+    if (field === 'division' && !validateInput.values.division) return 'Velg ansvarlig seksjon for statistikken'
+    if (field === 'variants' && validateInput.createdVariants.length === 0) return 'Legg til minst én variant'
+    if (field === 'contacts' && validateInput.selectedContacts.length === 0) return 'Legg til minst én kontakt'
 
     return ''
   }
 
-  function updateFieldErrors(
-    fields: StatisticFormField[],
-    validationState: StatisticValidationState,
-    shouldAddNewErrors = true
+  function validateForm(validateInput = nextInputValues()): StatisticFormErrors {
+    const nextErrors: StatisticFormErrors = {}
+
+    for (const field of fieldsToValidate) {
+      const error = validateField(field, validateInput)
+
+      if (error) {
+        nextErrors[field] = error
+      }
+    }
+
+    return nextErrors
+  }
+
+  function handleValueChange<K extends keyof StatisticPartialFormValues>(
+    field: K,
+    value: StatisticPartialFormValues[K]
   ) {
+    const nextValues = { ...values, [field]: value }
+    const validateInput = nextInputValues(nextValues)
+
+    setValues(nextValues)
     setErrors((currentErrors) => {
-      const nextErrors = { ...currentErrors }
+      if (!currentErrors[field]) {
+        return currentErrors
+      }
 
-      for (const field of fields) {
-        const error = validateField(field, validationState)
+      const error = validateField(field, validateInput)
 
-        if (error) {
-          if (shouldAddNewErrors || nextErrors[field]) {
-            nextErrors[field] = error
-          }
-        } else {
-          delete nextErrors[field]
+      if (error) {
+        return {
+          ...currentErrors,
+          [field]: error,
         }
       }
 
+      const nextErrors = { ...currentErrors }
+      delete nextErrors[field]
       return nextErrors
     })
   }
 
-  function handleValueChange<K extends keyof StatisticFormValues>(field: K, value: StatisticFormValues[K]) {
-    const nextValues = { ...values, [field]: value }
-
-    setValues(nextValues)
-    updateFieldErrors([field], getValidationState(nextValues), field !== 'first_released_at')
-  }
-
   function handleStatusChange(nextStatus: CreatableStatisticStatus) {
+    const validateInput = nextInputValues(values, nextStatus)
+
     setStatus(nextStatus)
-    updateFieldErrors(fieldsToValidate, getValidationState(values, nextStatus), false)
+    setErrors((currentErrors) => {
+      const nextErrors = validateForm(validateInput)
+
+      return Object.fromEntries(
+        Object.entries(nextErrors).filter(([field]) => currentErrors[field as StatisticFormField])
+      )
+    })
   }
 
   function handleContactsChange(nextSelectedContacts: string[]) {
+    const validateInput = nextInputValues(values, status, nextSelectedContacts)
+
     setSelectedContacts(nextSelectedContacts)
-    updateFieldErrors(['contacts'], getValidationState(values, status, nextSelectedContacts))
+    setErrors((currentErrors) => {
+      if (!currentErrors.contacts) {
+        return currentErrors
+      }
+
+      const error = validateField('contacts', validateInput)
+
+      if (error) {
+        return {
+          ...currentErrors,
+          contacts: error,
+        }
+      }
+
+      const nextErrors = { ...currentErrors }
+      delete nextErrors.contacts
+      return nextErrors
+    })
   }
 
   function handleVariantsChange(nextCreatedVariants: SetStateAction<Variant[]>) {
     const resolvedVariants =
       typeof nextCreatedVariants === 'function' ? nextCreatedVariants(createdVariants) : nextCreatedVariants
+    const validateInput = nextInputValues(values, status, selectedContacts, resolvedVariants)
 
     setCreatedVariants(resolvedVariants)
-    updateFieldErrors(['variants'], getValidationState(values, status, selectedContacts, resolvedVariants))
-  }
-
-  function handleOnBlur(field: StatisticFormField) {
     setErrors((currentErrors) => {
+      if (!currentErrors.variants) {
+        return currentErrors
+      }
+
+      const error = validateField('variants', validateInput)
+
+      if (error) {
+        return {
+          ...currentErrors,
+          variants: error,
+        }
+      }
+
       const nextErrors = { ...currentErrors }
-      const error = validateField(field, getValidationState())
-
-      if (error) nextErrors[field] = error
-      else delete nextErrors[field]
-
+      delete nextErrors.variants
       return nextErrors
     })
   }
@@ -333,13 +378,7 @@ export default function CreateStatistic() {
   function handleSubmit(e: React.ChangeEvent<HTMLFormElement>) {
     e.preventDefault()
 
-    const nextErrors: StatisticFormErrors = {}
-    const validationState = getValidationState()
-
-    for (const field of fieldsToValidate) {
-      const error = validateField(field, validationState)
-      if (error) nextErrors[field] = error
-    }
+    const nextErrors = validateForm()
 
     setErrors(nextErrors)
     setApiError([])
@@ -456,7 +495,6 @@ export default function CreateStatistic() {
                 aria-invalid={!!errors.name}
                 value={values.name}
                 onChange={(e) => handleValueChange('name', e.target.value)}
-                onBlur={() => handleOnBlur('name')}
               />
               {errors.name && <ValidationMessage>{errors.name}</ValidationMessage>}
             </Field>
@@ -467,7 +505,6 @@ export default function CreateStatistic() {
                 aria-invalid={!!errors.name_en}
                 value={values.name_en}
                 onChange={(e) => handleValueChange('name_en', e.target.value)}
-                onBlur={() => handleOnBlur('name_en')}
               />
               {errors.name_en && <ValidationMessage>{errors.name_en}</ValidationMessage>}
             </Field>
@@ -521,7 +558,6 @@ export default function CreateStatistic() {
                 command='show-modal'
                 commandfor={variantDialogId}
                 onClick={handleOpenCreateVariantModal}
-                onBlur={() => handleOnBlur('variants')}
               >
                 <PlusCircleIcon /> Legg til variant
               </Button>
@@ -540,7 +576,6 @@ export default function CreateStatistic() {
                   contacts={contacts}
                   selected={selectedContacts}
                   setSelected={handleContactsChange}
-                  onBlur={() => handleOnBlur('contacts')}
                 />
                 {errors.contacts && <ValidationMessage>{errors.contacts}</ValidationMessage>}
               </Field>
@@ -589,7 +624,6 @@ export default function CreateStatistic() {
                 aria-invalid={!!errors.first_released_at}
                 value={values.first_released_at}
                 onChange={(e) => handleValueChange('first_released_at', e.target.value)}
-                onBlur={() => handleOnBlur('first_released_at')}
               />
               {errors.first_released_at && <ValidationMessage>{errors.first_released_at}</ValidationMessage>}
             </Field>
