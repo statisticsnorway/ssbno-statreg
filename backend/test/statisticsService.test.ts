@@ -437,6 +437,30 @@ describe('statisticService', () => {
       })
       expect(prismaMock.statistic.update).toHaveBeenCalledTimes(0)
     })
+
+    test('throws Error when request body omits an existing variant', async () => {
+      setStatisticsResult({
+        id: 5,
+        status: 'K',
+        responsiblePersons: [{ principalName: 'bcd@ssb.no' }],
+        variants: [{ id: 1 }, { id: 2 }],
+        statistic_region_levels: [{ region_level: { code: 'BD', id: 1 } }],
+      })
+
+      input.variants = [
+        {
+          id: 1,
+          frequency: { code: 'M' },
+          revision: { code: 'I' },
+        },
+      ]
+
+      await expect(() => updateStatistic('helse', input, prismaMock)).rejects.toMatchObject({
+        statregError: 'Deleting variants is currently not supported. Missing existing variant ids: 2.',
+      })
+
+      expect(prismaMock.statistic.update).toHaveBeenCalledTimes(0)
+    })
   })
 
   describe('updateContacts ', async () => {
