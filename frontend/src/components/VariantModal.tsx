@@ -1,5 +1,15 @@
-import { useState, useEffect, type Dispatch, type SetStateAction } from 'react'
-import { Button, Heading, Dialog, Field, Label, Input, Select, Paragraph, Popover } from '@statisticsnorway/design-react'
+import { useState, useEffect, useRef, type Dispatch, type SetStateAction } from 'react'
+import {
+  Button,
+  Heading,
+  Dialog,
+  Field,
+  Label,
+  Input,
+  Select,
+  Paragraph,
+  Popover,
+} from '@statisticsnorway/design-react'
 import { TrashIcon } from '@navikt/aksel-icons'
 
 import './VariantModal.css'
@@ -8,11 +18,12 @@ import { RevisionNames, type Frequency, type Variant } from '@ssbno-statreg/shar
 import { ErrorAlert } from './ErrorAlert'
 
 type VariantModalProps = {
-  openVariantModal: boolean
-  setOpenVariantModal: (open: boolean) => void
+  dialogId: string
   setCreatedVariants: Dispatch<SetStateAction<Variant[]>>
   editVariantValues?: Variant
   editVariantIndex?: number | null
+  onActionClose?: () => void
+  onAfterClose?: () => void
 }
 
 type CreateVariantFormValues = {
@@ -23,11 +34,12 @@ type CreateVariantFormValues = {
 }
 
 export function VariantModal({
-  openVariantModal,
-  setOpenVariantModal,
+  dialogId,
   setCreatedVariants,
   editVariantValues,
   editVariantIndex,
+  onActionClose,
+  onAfterClose,
 }: Readonly<VariantModalProps>) {
   const [frequencies, setFrequencies] = useState<Frequency[]>([])
   const [apiError, setApiError] = useState<string[]>([])
@@ -38,8 +50,17 @@ export function VariantModal({
     level_of_detail_name: editVariantValues?.level_of_detail?.name ?? '',
     level_of_detail_name_en: editVariantValues?.level_of_detail?.name_en ?? '',
   })
+  const deleteTriggerRef = useRef<HTMLButtonElement>(null)
+  const returnFocusToDeleteTriggerRef = useRef(false)
 
   const isEditMode = typeof editVariantIndex === 'number'
+
+  useEffect(() => {
+    if (!isDeletePopoverOpen && returnFocusToDeleteTriggerRef.current) {
+      returnFocusToDeleteTriggerRef.current = false
+      deleteTriggerRef.current?.focus()
+    }
+  }, [isDeletePopoverOpen])
 
   useEffect(() => {
     async function fetchFrequencies() {
@@ -74,22 +95,27 @@ export function VariantModal({
 
       return prevVariants.map((variant, index) => (index === editVariantIndex ? nextVariant : variant))
     })
-    handleCloseModal()
   }
 
   function deleteVariant() {
     if (!isEditMode) return
 
     setCreatedVariants((prevVariants: Variant[]) => prevVariants.filter((_, index) => index !== editVariantIndex))
-    handleCloseModal()
   }
 
-  function handleCloseModal() {
-    setOpenVariantModal(false)
+  function handleDialogClose() {
+    setApiError([])
+    setIsDeletePopoverOpen(false)
+    onAfterClose?.()
+  }
+
+  function closeDeletePopoverAndReturnFocus() {
+    returnFocusToDeleteTriggerRef.current = true
+    setIsDeletePopoverOpen(false)
   }
 
   return (
-    <Dialog aria-labelledby='variant-modal-heading' open={openVariantModal} onClose={handleCloseModal}>
+    <Dialog id={dialogId} aria-labelledby='variant-modal-heading' onClose={handleDialogClose} closedby='any'>
       <Dialog.Block>
         <Heading id='variant-modal-heading' data-size='xs'>
           {isEditMode ? 'Rediger variant' : 'Legg til variant'}
@@ -147,16 +173,17 @@ export function VariantModal({
         </Field>
         <div className='variant-modal-form-buttons'>
           <div className='variant-modal-form-buttons-left'>
-            <Button variant='primary' onClick={createVariant}>
-              Legg til
+            <Button variant='primary' command='close' commandfor={dialogId} onClick={createVariant}>
+              {isEditMode ? 'Lagre' : 'Legg til'}
             </Button>
-            <Button variant='tertiary' onClick={handleCloseModal}>
+            <Button variant='tertiary' command='close' commandfor={dialogId}>
               Avbryt
             </Button>
           </div>
           {isEditMode && (
             <Popover.TriggerContext>
               <Popover.Trigger
+                ref={deleteTriggerRef}
                 variant='tertiary'
                 data-color='danger'
                 onClick={() => setIsDeletePopoverOpen(!isDeletePopoverOpen)}
@@ -167,7 +194,7 @@ export function VariantModal({
                 placement='top-start'
                 autoPlacement={false}
                 open={isDeletePopoverOpen}
-                onClose={() => setIsDeletePopoverOpen(false)}
+                onClose={closeDeletePopoverAndReturnFocus}
                 data-color='danger'
               >
                 <Paragraph>
@@ -175,15 +202,18 @@ export function VariantModal({
                 </Paragraph>
                 <div className='variant-modal-delete-popover-buttons'>
                   <Button
+                    command='close'
+                    commandfor={dialogId}
                     data-color='danger'
                     onClick={() => {
+                      onActionClose?.()
                       setIsDeletePopoverOpen(false)
                       deleteVariant()
                     }}
                   >
                     Ja, slett
                   </Button>
-                  <Button variant='tertiary' onClick={() => setIsDeletePopoverOpen(false)}>
+                  <Button variant='tertiary' onClick={closeDeletePopoverAndReturnFocus}>
                     Avbryt
                   </Button>
                 </div>
