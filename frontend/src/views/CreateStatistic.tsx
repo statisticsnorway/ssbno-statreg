@@ -18,17 +18,16 @@ import {
   ValidationMessage,
   Tag,
   ErrorSummary,
-  Card,
   Textarea,
   Link,
 } from '@statisticsnorway/design-react'
-import { QuestionmarkCircleIcon, PlusCircleIcon, PencilWritingIcon } from '@navikt/aksel-icons'
+import { QuestionmarkCircleIcon } from '@navikt/aksel-icons'
 
 import client from '../api'
 
 import './CreateStatistic.css'
 
-import { RequiredCreateStatisticFieldsByStatus, ApprovalStatus, RevisionNames } from '@ssbno-statreg/shared'
+import { RequiredCreateStatisticFieldsByStatus, ApprovalStatus } from '@ssbno-statreg/shared'
 import type {
   CreatableStatisticStatus,
   Division,
@@ -42,6 +41,7 @@ import { ErrorAlert } from '../components/ErrorAlert'
 import { CreateShortnameModal } from '../components/CreateShortnameModal'
 import { ContactSelection } from '../components/ContactSelection'
 import { VariantModal } from '../components/VariantModal'
+import { VariantEditorSection } from '../components/VariantEditorSection'
 import { DivisionSelection } from '../components/DivisionSelection'
 
 export type StatisticFormField = keyof StatisticPartialFormValues | 'variants' | 'contacts'
@@ -509,60 +509,15 @@ export default function CreateStatistic() {
               {errors.name_en && <ValidationMessage>{errors.name_en}</ValidationMessage>}
             </Field>
             <Divider />
-            <div className='created-variants-title-container'>
-              <Label>{getFieldLabel('Variant', 'variants')}</Label>
-              <Paragraph>Legg til variant for å kunne melde publiseringsdato på statistikken</Paragraph>
-            </div>
-            {createdVariants.length > 0 && (
-              <div className='created-variants-container'>
-                {createdVariants.map((variant, index) => (
-                  <Card
-                    key={['created-variant', variant.frequency?.code ?? index, variant.revision?.code ?? index].join(
-                      '-'
-                    )}
-                    variant='tinted'
-                  >
-                    <Card.Block>
-                      <div className='created-variant-heading-container'>
-                        <Heading>
-                          {[
-                            variant.frequency!.name,
-                            RevisionNames[variant.revision!.code as keyof typeof RevisionNames].toLocaleLowerCase(),
-                          ].join(', ')}
-                        </Heading>
-                        <Button
-                          variant='tertiary'
-                          data-color='danger'
-                          command='show-modal'
-                          commandfor={variantDialogId}
-                          onClick={() => handleOpenEditVariantModal(index)}
-                        >
-                          <PencilWritingIcon /> Rediger
-                        </Button>
-                      </div>
-                      <Paragraph>
-                        Detaljnivå: {variant.level_of_detail?.name} <br />
-                        Engelsk detaljnivå: {variant.level_of_detail?.name_en}
-                      </Paragraph>
-                    </Card.Block>
-                  </Card>
-                ))}
-              </div>
-            )}
-            <div className='create-variant-button-container'>
-              <Button
-                id='variants'
-                ref={addVariantButtonRef}
-                variant='secondary'
-                aria-invalid={!!errors.variants}
-                command='show-modal'
-                commandfor={variantDialogId}
-                onClick={handleOpenCreateVariantModal}
-              >
-                <PlusCircleIcon /> Legg til variant
-              </Button>
-              {errors.variants && <ValidationMessage>{errors.variants}</ValidationMessage>}
-            </div>
+            <VariantEditorSection
+              createdVariants={createdVariants}
+              variantDialogId={variantDialogId}
+              addVariantButtonRef={addVariantButtonRef}
+              variantsError={errors.variants}
+              variantLabel={getFieldLabel('Variant', 'variants')}
+              onOpenCreateVariantModal={handleOpenCreateVariantModal}
+              onOpenEditVariantModal={handleOpenEditVariantModal}
+            />
             <Divider />
             <div className='contact-section'>
               <Label>{getFieldLabel('Kontakter', 'contacts')}</Label>
