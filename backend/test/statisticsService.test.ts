@@ -397,6 +397,10 @@ describe('statisticService', () => {
     test('returns mocked data', async () => {
       setStatisticsResult({
         id: 5,
+        division_code: '105',
+        name: 'Helse',
+        status: 'K',
+        main_language: 'nb',
         statistic_region_levels: [
           {
             region_level: {

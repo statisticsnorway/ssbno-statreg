@@ -380,11 +380,11 @@ export async function updateStatistic(
   const existingVariants = parsedVariants?.filter((variant) => variant.id) ?? []
   const newVariants = parsedVariants?.filter((variant) => !variant.id) ?? []
 
-  const regionLevelsToRemove = existingStatistic.statistic_region_levels.filter(
+  const regionLevelsToRemove = existingStatistic.statistic_region_levels?.filter(
     (existingRegLvl) =>
       !statistic_region_levels?.find((incomingRegLvl) => incomingRegLvl === existingRegLvl.region_level.code)
   )
-  const deleteRegionLevelStatement = regionLevelsToRemove.map((regLvl) => {
+  const deleteRegionLevelStatement = regionLevelsToRemove?.map((regLvl) => {
     return {
       statistic_id_region_level_id: { statistic_id: existingStatistic.id, region_level_id: regLvl.region_level.id },
     }
