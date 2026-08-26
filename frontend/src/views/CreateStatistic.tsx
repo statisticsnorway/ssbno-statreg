@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from 'react-router'
 import { useAuth } from '../context/AuthContext'
-import { useState, useEffect, useRef, type SetStateAction } from 'react'
+import { useState, useEffect, type SetStateAction } from 'react'
 import {
   Alert,
   Heading,
@@ -67,6 +67,7 @@ function isCreateStatisticFieldRequired(status: CreatableStatisticStatus, field:
 }
 
 export default function CreateStatistic() {
+  const variantDialogId = 'create-statistic-variant-dialog'
   const { shortname } = useParams<Shortname['shortname']>()
   const createdShortname = shortname ?? ''
 
@@ -74,11 +75,8 @@ export default function CreateStatistic() {
   const [contacts, setContacts] = useState<Contact[]>([])
   const [selectedContacts, setSelectedContacts] = useState<string[]>([])
 
-  const [openVariantModal, setOpenVariantModal] = useState<boolean>(false)
   const [createdVariants, setCreatedVariants] = useState<Variant[]>([])
   const [editVariantIndex, setEditVariantIndex] = useState<number | null>(null)
-  const addVariantButtonRef = useRef<HTMLButtonElement>(null)
-  const returnFocusToAddVariantButtonRef = useRef(false)
 
   const { getCheckboxProps, value: regionLevelValues } = useCheckboxGroup({
     name: 'region-level-checkbox',
@@ -192,13 +190,6 @@ export default function CreateStatistic() {
 
     initializeCreateStatistic()
   }, [createdShortname, isAdmin, navigate])
-
-  useEffect(() => {
-    if (!openVariantModal && returnFocusToAddVariantButtonRef.current) {
-      returnFocusToAddVariantButtonRef.current = false
-      addVariantButtonRef.current?.focus()
-    }
-  }, [openVariantModal])
 
   function isRequired(field: StatisticFormField) {
     return isCreateStatisticFieldRequired(status, field)
@@ -350,23 +341,14 @@ export default function CreateStatistic() {
 
   function handleOpenCreateVariantModal() {
     setEditVariantIndex(null)
-    setOpenVariantModal(true)
   }
 
   function handleOpenEditVariantModal(index: number) {
     setEditVariantIndex(index)
-    setOpenVariantModal(true)
   }
 
-  function handleSetOpenVariantModal(open: boolean, shouldReturnFocus = false) {
-    if (!open && shouldReturnFocus) {
-      returnFocusToAddVariantButtonRef.current = true
-    }
-
-    setOpenVariantModal(open)
-    if (!open) {
-      setEditVariantIndex(null)
-    }
+  function handleVariantModalClose() {
+    setEditVariantIndex(null)
   }
 
   if (!isAdmin) return <ErrorPage type={ErrorType.NOTAUTH} />
@@ -389,15 +371,13 @@ export default function CreateStatistic() {
       {!createdShortname && <CreateShortnameModal openCreateShortnameModal />}
       {createdShortname && (
         <div className='create-statistic-container'>
-          {openVariantModal && (
-            <VariantModal
-              openVariantModal={openVariantModal}
-              setOpenVariantModal={handleSetOpenVariantModal}
-              setCreatedVariants={handleVariantsChange}
-              editVariantIndex={editVariantIndex}
-              editVariantValues={editVariantIndex !== null ? createdVariants[editVariantIndex] : undefined}
-            />
-          )}
+          <VariantModal
+            dialogId={variantDialogId}
+            setCreatedVariants={handleVariantsChange}
+            editVariantIndex={editVariantIndex}
+            editVariantValues={editVariantIndex !== null ? createdVariants[editVariantIndex] : undefined}
+            onAfterClose={handleVariantModalClose}
+          />
           {apiError.length > 0 && <ErrorAlert message={apiError} />}
           <Alert data-color='success'>
             <Heading level={2} data-size='xs'>
@@ -499,6 +479,8 @@ export default function CreateStatistic() {
                         <Button
                           variant='tertiary'
                           data-color='danger'
+                          command='show-modal'
+                          commandfor={variantDialogId}
                           onClick={() => handleOpenEditVariantModal(index)}
                         >
                           <PencilWritingIcon /> Rediger
@@ -516,9 +498,10 @@ export default function CreateStatistic() {
             <div className='create-variant-button-container'>
               <Button
                 id='variants'
-                ref={addVariantButtonRef}
                 variant='secondary'
                 aria-invalid={!!errors.variants}
+                command='show-modal'
+                commandfor={variantDialogId}
                 onClick={handleOpenCreateVariantModal}
                 onBlur={() => handleOnBlur('variants')}
               >

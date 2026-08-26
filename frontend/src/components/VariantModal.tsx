@@ -7,12 +7,21 @@ import client from '../api'
 import { RevisionNames, type Frequency, type Variant } from '@ssbno-statreg/shared'
 import { ErrorAlert } from './ErrorAlert'
 
+function getFormValues(editVariantValues?: Variant): CreateVariantFormValues {
+  return {
+    revision_code: editVariantValues?.revision?.code ?? 'I',
+    frequency_code: editVariantValues?.frequency?.code ?? 'U',
+    level_of_detail_name: editVariantValues?.level_of_detail?.name ?? '',
+    level_of_detail_name_en: editVariantValues?.level_of_detail?.name_en ?? '',
+  }
+}
+
 type VariantModalProps = {
-  openVariantModal: boolean
-  setOpenVariantModal: (open: boolean, shouldReturnFocus?: boolean) => void
+  dialogId: string
   setCreatedVariants: Dispatch<SetStateAction<Variant[]>>
   editVariantValues?: Variant
   editVariantIndex?: number | null
+  onAfterClose?: () => void
 }
 
 type CreateVariantFormValues = {
@@ -23,22 +32,21 @@ type CreateVariantFormValues = {
 }
 
 export function VariantModal({
-  openVariantModal,
-  setOpenVariantModal,
+  dialogId,
   setCreatedVariants,
   editVariantValues,
   editVariantIndex,
+  onAfterClose,
 }: Readonly<VariantModalProps>) {
   const [frequencies, setFrequencies] = useState<Frequency[]>([])
   const [apiError, setApiError] = useState<string[]>([])
-  const [values, setValues] = useState<CreateVariantFormValues>({
-    revision_code: editVariantValues?.revision?.code ?? 'I',
-    frequency_code: editVariantValues?.frequency?.code ?? 'U',
-    level_of_detail_name: editVariantValues?.level_of_detail?.name ?? '',
-    level_of_detail_name_en: editVariantValues?.level_of_detail?.name_en ?? '',
-  })
+  const [values, setValues] = useState<CreateVariantFormValues>(getFormValues(editVariantValues))
 
   const isEditMode = typeof editVariantIndex === 'number'
+
+  useEffect(() => {
+    setValues(getFormValues(editVariantValues))
+  }, [editVariantValues])
 
   useEffect(() => {
     async function fetchFrequencies() {
@@ -73,26 +81,22 @@ export function VariantModal({
 
       return prevVariants.map((variant, index) => (index === editVariantIndex ? nextVariant : variant))
     })
-    handleCloseModal(true)
   }
 
   function deleteVariant() {
     if (!isEditMode) return
 
     setCreatedVariants((prevVariants: Variant[]) => prevVariants.filter((_, index) => index !== editVariantIndex))
-    handleCloseModal(true)
-  }
-
-  function handleCloseModal(shouldReturnFocus = false) {
-    setOpenVariantModal(false, shouldReturnFocus)
   }
 
   function handleDialogClose() {
-    handleCloseModal()
+    setApiError([])
+    setValues(getFormValues())
+    onAfterClose?.()
   }
 
   return (
-    <Dialog aria-labelledby='variant-modal-heading' open={openVariantModal} onClose={handleDialogClose}>
+    <Dialog id={dialogId} aria-labelledby='variant-modal-heading' onClose={handleDialogClose} closedby='any'>
       <Dialog.Block>
         <Heading id='variant-modal-heading' data-size='xs'>
           {isEditMode ? 'Rediger variant' : 'Legg til variant'}
@@ -150,15 +154,21 @@ export function VariantModal({
         </Field>
         <div className='variant-modal-form-buttons'>
           <div className='variant-modal-form-buttons-left'>
-            <Button variant='primary' onClick={createVariant}>
-              Legg til
+            <Button variant='primary' command='close' commandfor={dialogId} onClick={createVariant}>
+              {isEditMode ? 'Lagre' : 'Legg til'}
             </Button>
-            <Button variant='tertiary' onClick={() => handleCloseModal(true)}>
+            <Button variant='tertiary' command='close' commandfor={dialogId}>
               Avbryt
             </Button>
           </div>
           {isEditMode && (
-            <Button variant='tertiary' data-color='danger' onClick={deleteVariant}>
+            <Button
+              variant='tertiary'
+              data-color='danger'
+              command='close'
+              commandfor={dialogId}
+              onClick={deleteVariant}
+            >
               <TrashIcon /> Slett
             </Button>
           )}
