@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from 'react-router'
 import { useAuth } from '../context/AuthContext'
-import { useState, useEffect, type SetStateAction } from 'react'
+import { useState, useEffect, useRef, type SetStateAction } from 'react'
 import {
   Alert,
   Heading,
@@ -77,6 +77,8 @@ export default function CreateStatistic() {
   const [openVariantModal, setOpenVariantModal] = useState<boolean>(false)
   const [createdVariants, setCreatedVariants] = useState<Variant[]>([])
   const [editVariantIndex, setEditVariantIndex] = useState<number | null>(null)
+  const addVariantButtonRef = useRef<HTMLButtonElement>(null)
+  const returnFocusToAddVariantButtonRef = useRef(false)
 
   const { getCheckboxProps, value: regionLevelValues } = useCheckboxGroup({
     name: 'region-level-checkbox',
@@ -190,6 +192,13 @@ export default function CreateStatistic() {
 
     initializeCreateStatistic()
   }, [createdShortname, isAdmin, navigate])
+
+  useEffect(() => {
+    if (!openVariantModal && returnFocusToAddVariantButtonRef.current) {
+      returnFocusToAddVariantButtonRef.current = false
+      addVariantButtonRef.current?.focus()
+    }
+  }, [openVariantModal])
 
   function isRequired(field: StatisticFormField) {
     return isCreateStatisticFieldRequired(status, field)
@@ -349,7 +358,11 @@ export default function CreateStatistic() {
     setOpenVariantModal(true)
   }
 
-  function handleSetOpenVariantModal(open: boolean) {
+  function handleSetOpenVariantModal(open: boolean, shouldReturnFocus = false) {
+    if (!open && shouldReturnFocus) {
+      returnFocusToAddVariantButtonRef.current = true
+    }
+
     setOpenVariantModal(open)
     if (!open) {
       setEditVariantIndex(null)
@@ -503,6 +516,7 @@ export default function CreateStatistic() {
             <div className='create-variant-button-container'>
               <Button
                 id='variants'
+                ref={addVariantButtonRef}
                 variant='secondary'
                 aria-invalid={!!errors.variants}
                 onClick={handleOpenCreateVariantModal}

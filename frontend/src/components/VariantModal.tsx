@@ -9,7 +9,7 @@ import { ErrorAlert } from './ErrorAlert'
 
 type VariantModalProps = {
   openVariantModal: boolean
-  setOpenVariantModal: (open: boolean) => void
+  setOpenVariantModal: (open: boolean, shouldReturnFocus?: boolean) => void
   setCreatedVariants: Dispatch<SetStateAction<Variant[]>>
   editVariantValues?: Variant
   editVariantIndex?: number | null
@@ -73,22 +73,26 @@ export function VariantModal({
 
       return prevVariants.map((variant, index) => (index === editVariantIndex ? nextVariant : variant))
     })
-    handleCloseModal()
+    handleCloseModal(true)
   }
 
   function deleteVariant() {
     if (!isEditMode) return
 
     setCreatedVariants((prevVariants: Variant[]) => prevVariants.filter((_, index) => index !== editVariantIndex))
+    handleCloseModal(true)
+  }
+
+  function handleCloseModal(shouldReturnFocus = false) {
+    setOpenVariantModal(false, shouldReturnFocus)
+  }
+
+  function handleDialogClose() {
     handleCloseModal()
   }
 
-  function handleCloseModal() {
-    setOpenVariantModal(false)
-  }
-
   return (
-    <Dialog aria-labelledby='variant-modal-heading' open={openVariantModal} onClose={handleCloseModal}>
+    <Dialog aria-labelledby='variant-modal-heading' open={openVariantModal} onClose={handleDialogClose}>
       <Dialog.Block>
         <Heading id='variant-modal-heading' data-size='xs'>
           {isEditMode ? 'Rediger variant' : 'Legg til variant'}
@@ -149,7 +153,7 @@ export function VariantModal({
             <Button variant='primary' onClick={createVariant}>
               Legg til
             </Button>
-            <Button variant='tertiary' onClick={handleCloseModal}>
+            <Button variant='tertiary' onClick={() => handleCloseModal(true)}>
               Avbryt
             </Button>
           </div>
