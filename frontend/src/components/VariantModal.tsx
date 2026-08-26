@@ -1,5 +1,15 @@
 import { useState, useEffect, type Dispatch, type SetStateAction } from 'react'
-import { Button, Heading, Dialog, Field, Label, Input, Select, Paragraph, Popover } from '@statisticsnorway/design-react'
+import {
+  Button,
+  Heading,
+  Dialog,
+  Field,
+  Label,
+  Input,
+  Select,
+  Paragraph,
+  Popover,
+} from '@statisticsnorway/design-react'
 import { TrashIcon } from '@navikt/aksel-icons'
 
 import './VariantModal.css'
@@ -168,7 +178,7 @@ export function VariantModal({
                 <Paragraph>
                   Denne varianten har ikke publiseringer, og kan slettes. Vil du fortsatt slette varianten?
                 </Paragraph>
-                <div style={{ display: 'flex', gap: 'var(--ds-size-2)', marginTop: 'var(--ds-size-2)' }}>
+                <div className='variant-modal-delete-popover-buttons'>
                   <Button
                     data-color='danger'
                     onClick={() => {
