@@ -1,4 +1,4 @@
-import { useState, useEffect, type Dispatch, type SetStateAction } from 'react'
+import { useState, useEffect, useRef, type Dispatch, type SetStateAction } from 'react'
 import {
   Button,
   Heading,
@@ -17,20 +17,12 @@ import client from '../api'
 import { RevisionNames, type Frequency, type Variant } from '@ssbno-statreg/shared'
 import { ErrorAlert } from './ErrorAlert'
 
-function getFormValues(editVariantValues?: Variant): CreateVariantFormValues {
-  return {
-    revision_code: editVariantValues?.revision?.code ?? 'I',
-    frequency_code: editVariantValues?.frequency?.code ?? 'U',
-    level_of_detail_name: editVariantValues?.level_of_detail?.name ?? '',
-    level_of_detail_name_en: editVariantValues?.level_of_detail?.name_en ?? '',
-  }
-}
-
 type VariantModalProps = {
   dialogId: string
   setCreatedVariants: Dispatch<SetStateAction<Variant[]>>
   editVariantValues?: Variant
   editVariantIndex?: number | null
+  onActionClose?: () => void
   onAfterClose?: () => void
 }
 
@@ -46,18 +38,29 @@ export function VariantModal({
   setCreatedVariants,
   editVariantValues,
   editVariantIndex,
+  onActionClose,
   onAfterClose,
 }: Readonly<VariantModalProps>) {
   const [frequencies, setFrequencies] = useState<Frequency[]>([])
   const [apiError, setApiError] = useState<string[]>([])
   const [isDeletePopoverOpen, setIsDeletePopoverOpen] = useState(false)
-  const [values, setValues] = useState<CreateVariantFormValues>(getFormValues(editVariantValues))
+  const [values, setValues] = useState<CreateVariantFormValues>({
+    revision_code: editVariantValues?.revision?.code ?? 'I',
+    frequency_code: editVariantValues?.frequency?.code ?? 'U',
+    level_of_detail_name: editVariantValues?.level_of_detail?.name ?? '',
+    level_of_detail_name_en: editVariantValues?.level_of_detail?.name_en ?? '',
+  })
+  const deleteTriggerRef = useRef<HTMLButtonElement>(null)
+  const returnFocusToDeleteTriggerRef = useRef(false)
 
   const isEditMode = typeof editVariantIndex === 'number'
 
   useEffect(() => {
-    setValues(getFormValues(editVariantValues))
-  }, [editVariantValues])
+    if (!isDeletePopoverOpen && returnFocusToDeleteTriggerRef.current) {
+      returnFocusToDeleteTriggerRef.current = false
+      deleteTriggerRef.current?.focus()
+    }
+  }, [isDeletePopoverOpen])
 
   useEffect(() => {
     async function fetchFrequencies() {
@@ -102,8 +105,13 @@ export function VariantModal({
 
   function handleDialogClose() {
     setApiError([])
-    setValues(getFormValues())
+    setIsDeletePopoverOpen(false)
     onAfterClose?.()
+  }
+
+  function closeDeletePopoverAndReturnFocus() {
+    returnFocusToDeleteTriggerRef.current = true
+    setIsDeletePopoverOpen(false)
   }
 
   return (
@@ -175,6 +183,7 @@ export function VariantModal({
           {isEditMode && (
             <Popover.TriggerContext>
               <Popover.Trigger
+                ref={deleteTriggerRef}
                 variant='tertiary'
                 data-color='danger'
                 onClick={() => setIsDeletePopoverOpen(!isDeletePopoverOpen)}
@@ -185,7 +194,7 @@ export function VariantModal({
                 placement='top-start'
                 autoPlacement={false}
                 open={isDeletePopoverOpen}
-                onClose={() => setIsDeletePopoverOpen(false)}
+                onClose={closeDeletePopoverAndReturnFocus}
                 data-color='danger'
               >
                 <Paragraph>
@@ -197,13 +206,14 @@ export function VariantModal({
                     commandfor={dialogId}
                     data-color='danger'
                     onClick={() => {
+                      onActionClose?.()
                       setIsDeletePopoverOpen(false)
                       deleteVariant()
                     }}
                   >
                     Ja, slett
                   </Button>
-                  <Button variant='tertiary' onClick={() => setIsDeletePopoverOpen(false)}>
+                  <Button variant='tertiary' onClick={closeDeletePopoverAndReturnFocus}>
                     Avbryt
                   </Button>
                 </div>

@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from 'react-router'
 import { useAuth } from '../context/AuthContext'
-import { useState, useEffect, type SetStateAction } from 'react'
+import { useState, useEffect, useRef, type SetStateAction } from 'react'
 import {
   Alert,
   Heading,
@@ -77,6 +77,9 @@ export default function CreateStatistic() {
 
   const [createdVariants, setCreatedVariants] = useState<Variant[]>([])
   const [editVariantIndex, setEditVariantIndex] = useState<number | null>(null)
+  const addVariantButtonRef = useRef<HTMLButtonElement>(null)
+  const returnFocusToAddVariantButtonRef = useRef(false)
+  const [variantModalCloseCount, setVariantModalCloseCount] = useState(0)
 
   const { getCheckboxProps, value: regionLevelValues } = useCheckboxGroup({
     name: 'region-level-checkbox',
@@ -190,6 +193,13 @@ export default function CreateStatistic() {
 
     initializeCreateStatistic()
   }, [createdShortname, isAdmin, navigate])
+
+  useEffect(() => {
+    if (!returnFocusToAddVariantButtonRef.current) return
+
+    returnFocusToAddVariantButtonRef.current = false
+    addVariantButtonRef.current?.focus()
+  }, [variantModalCloseCount])
 
   function isRequired(field: StatisticFormField) {
     return isCreateStatisticFieldRequired(status, field)
@@ -347,8 +357,13 @@ export default function CreateStatistic() {
     setEditVariantIndex(index)
   }
 
+  function handleVariantModalActionClose() {
+    returnFocusToAddVariantButtonRef.current = true
+  }
+
   function handleVariantModalClose() {
     setEditVariantIndex(null)
+    setVariantModalCloseCount((count) => count + 1)
   }
 
   if (!isAdmin) return <ErrorPage type={ErrorType.NOTAUTH} />
@@ -372,10 +387,12 @@ export default function CreateStatistic() {
       {createdShortname && (
         <div className='create-statistic-container'>
           <VariantModal
+            key={[variantModalCloseCount, editVariantIndex ?? 'create'].join('-')}
             dialogId={variantDialogId}
             setCreatedVariants={handleVariantsChange}
             editVariantIndex={editVariantIndex}
             editVariantValues={editVariantIndex !== null ? createdVariants[editVariantIndex] : undefined}
+            onActionClose={handleVariantModalActionClose}
             onAfterClose={handleVariantModalClose}
           />
           {apiError.length > 0 && <ErrorAlert message={apiError} />}
@@ -498,6 +515,7 @@ export default function CreateStatistic() {
             <div className='create-variant-button-container'>
               <Button
                 id='variants'
+                ref={addVariantButtonRef}
                 variant='secondary'
                 aria-invalid={!!errors.variants}
                 command='show-modal'
