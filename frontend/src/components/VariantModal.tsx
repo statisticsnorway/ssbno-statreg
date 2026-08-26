@@ -78,7 +78,7 @@ export function VariantModal({
     const selectedFrequency = frequencies.find(({ code }) => code === values.frequency_code)
 
     setCreatedVariants((prevVariants: Variant[]) => {
-      const nextVariant: Variant = {
+      const nextVariantBase: Variant = {
         revision: {
           code: values.revision_code,
         },
@@ -90,10 +90,18 @@ export function VariantModal({
       }
 
       if (!isEditMode) {
-        return [...prevVariants, nextVariant]
+        return [...prevVariants, nextVariantBase]
       }
 
-      return prevVariants.map((variant, index) => (index === editVariantIndex ? nextVariant : variant))
+      return prevVariants.map((variant, index) => {
+        if (index !== editVariantIndex) return variant
+
+        // Preserve identity fields so editing updates the same DB variant.
+        return {
+          ...variant,
+          ...nextVariantBase,
+        }
+      })
     })
   }
 

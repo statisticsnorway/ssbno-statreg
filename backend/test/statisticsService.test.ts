@@ -438,14 +438,19 @@ describe('statisticService', () => {
       expect(prismaMock.statistic.update).toHaveBeenCalledTimes(0)
     })
 
-    test('throws Error when request body omits an existing variant', async () => {
+    test('archives existing variant when request body omits it', async () => {
       setStatisticsResult({
         id: 5,
         status: 'K',
         responsiblePersons: [{ principalName: 'bcd@ssb.no' }],
-        variants: [{ id: 1 }, { id: 2 }],
+        variants: [
+          { id: 1, cancelled: false },
+          { id: 2, cancelled: false },
+        ],
         statistic_region_levels: [{ region_level: { code: 'BD', id: 1 } }],
       })
+
+      setUpdateStatisticsResult(mockStatisticsDetailedPrismaResult)
 
       input.variants = [
         {
@@ -455,10 +460,67 @@ describe('statisticService', () => {
         },
       ]
 
-      await expect(() => updateStatistic('helse', input, prismaMock)).rejects.toMatchObject({
-        statregError: 'Deleting variants is currently not supported. Missing existing variant ids: 2.',
+      await updateStatistic('helse', input, prismaMock)
+
+      expect(prismaMock.statistic.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            variants: expect.objectContaining({
+              updateMany: {
+                where: { id: { in: [2] } },
+                data: expect.objectContaining({ cancelled: true }),
+              },
+            }),
+          }),
+        })
+      )
+    })
+
+    test('archives all existing variants when variants is explicitly an empty array', async () => {
+      setStatisticsResult({
+        id: 5,
+        status: 'K',
+        responsiblePersons: [{ principalName: 'bcd@ssb.no' }],
+        variants: [{ id: 11, cancelled: false }],
+        statistic_region_levels: [{ region_level: { code: 'BD', id: 1 } }],
       })
 
+      setUpdateStatisticsResult(mockStatisticsDetailedPrismaResult)
+
+      input.variants = []
+
+      await updateStatistic('helse', input, prismaMock)
+
+      expect(prismaMock.statistic.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            variants: expect.objectContaining({
+              updateMany: {
+                where: { id: { in: [11] } },
+                data: expect.objectContaining({ cancelled: true }),
+              },
+            }),
+          }),
+        })
+      )
+    })
+
+    test('throws when active statistic is updated with an explicit empty variants array', async () => {
+      setStatisticsResult({
+        id: 5,
+        status: 'A',
+        responsiblePersons: [{ principalName: 'bcd@ssb.no' }],
+        variants: [{ id: 11, cancelled: false }],
+        statistic_region_levels: [{ region_level: { code: 'BD', id: 1 } }],
+      })
+
+      input.status = { code: 'A' }
+      input.contacts = ['bcd@ssb.no']
+      input.variants = []
+
+      await expect(() => updateStatistic('helse', input, prismaMock)).rejects.toMatchObject({
+        statregError: 'An active statistic needs at least one variant.',
+      })
       expect(prismaMock.statistic.update).toHaveBeenCalledTimes(0)
     })
   })

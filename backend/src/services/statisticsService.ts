@@ -307,7 +307,7 @@ export async function updateStatistic(
       id: true,
       status: true,
       responsiblePersons: { select: { principalName: true } },
-      variants: { select: { id: true } },
+      variants: { select: { id: true, cancelled: true } },
       statistic_region_levels: { select: { region_level: { select: { code: true, id: true } } } },
     },
   })
@@ -342,7 +342,9 @@ export async function updateStatistic(
     newContacts = await upsertContacts(contacts, prisma)
   }
 
-  const parsedVariants = variants ? await parseVariantsInput(variants, status, prisma) : undefined
+  const hasVariantUpdate = variants !== undefined
+  const parsedVariantsResult = hasVariantUpdate ? await parseVariantsInput(variants, status, prisma) : undefined
+  const parsedVariants = hasVariantUpdate ? (parsedVariantsResult ?? []) : undefined
 
   if (parsedVariants) {
     for (const variant of parsedVariants) {
@@ -350,35 +352,32 @@ export async function updateStatistic(
         throw new StatregError(`Variant with id '${variant.id}' does not belong to statistic '${safeShortname}'.`)
       }
     }
-
-    const missingExistingVariants = existingStatistic.variants.filter(
-      (existingVariant) => !parsedVariants.some((variant) => variant.id === existingVariant.id)
-    )
-
-    if (missingExistingVariants.length) {
-      throw new StatregError(
-        `Deleting variants is currently not supported. Missing existing variant ids: ${missingExistingVariants
-          .map((variant) => variant.id)
-          .join(', ')}.`
-      )
-    }
   }
 
   if (status === 'A') {
     const contactCount = newContacts ? newContacts.length : existingStatistic.responsiblePersons.length
-    const newVariantCount = parsedVariants?.filter((variant) => !variant.id).length ?? 0
+    const existingActiveVariantCount = existingStatistic.variants.filter((variant) => !variant.cancelled).length
+    const resultingVariantCount = hasVariantUpdate
+      ? (parsedVariants?.length ?? 0)
+      : existingActiveVariantCount
 
     if (contactCount === 0) {
       throw new StatregError('An active statistic needs at least one contact.')
     }
 
-    if (existingStatistic.variants.length + newVariantCount === 0) {
+    if (resultingVariantCount === 0) {
       throw new StatregError('An active statistic needs at least one variant.')
     }
   }
 
   const existingVariants = parsedVariants?.filter((variant) => variant.id) ?? []
   const newVariants = parsedVariants?.filter((variant) => !variant.id) ?? []
+  const keptVariantIds = new Set(existingVariants.map((variant) => variant.id!))
+  const variantIdsToArchive = hasVariantUpdate
+    ? existingStatistic.variants
+        .filter((variant) => !variant.cancelled && !keptVariantIds.has(variant.id))
+        .map((variant) => variant.id)
+    : []
 
   const regionLevelsToRemove = existingStatistic.statistic_region_levels.filter(
     (existingRegLvl) =>
@@ -436,6 +435,14 @@ export async function updateStatistic(
               last_updated: new Date(),
             },
           })),
+          ...(variantIdsToArchive.length
+            ? {
+                updateMany: {
+                  where: { id: { in: variantIdsToArchive } },
+                  data: { cancelled: true, last_updated: new Date() },
+                },
+              }
+            : {}),
           create: newVariants.map((variant) => ({
             cancelled: false,
             date_created: new Date(),
