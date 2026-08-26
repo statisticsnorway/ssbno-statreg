@@ -325,17 +325,19 @@ export default function Tasks() {
               sortBy={pendingSortBy}
               setSortBy={setPendingSortBy}
             />
-            {selectedPendingReleaseIds.length > 0 && (
-              <div className='pending-releases-buttons-wrapper'>
-                <Button variant='primary' type='submit'>
-                  Godkjenn ({selectedPendingReleaseIds.length} valgte)
-                </Button>
-                <Button variant='tertiary' onClick={() => setSelectedPendingReleaseIds([])}>
-                  <EraserIcon />
-                  Nullstill valg
-                </Button>
-              </div>
-            )}
+            <div className='pending-releases-buttons-wrapper'>
+              {selectedPendingReleaseIds.length > 0 && (
+                <>
+                  <Button variant='primary' type='submit'>
+                    Godkjenn ({selectedPendingReleaseIds.length} valgte)
+                  </Button>
+                  <Button variant='tertiary' onClick={() => setSelectedPendingReleaseIds([])}>
+                    <EraserIcon />
+                    Nullstill valg
+                  </Button>
+                </>
+              )}
+            </div>
           </form>
         </Tabs.Panel>
       </Tabs>
