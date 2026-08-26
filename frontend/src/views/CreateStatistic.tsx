@@ -44,7 +44,10 @@ import { ContactSelection } from '../components/ContactSelection'
 import { VariantModal } from '../components/VariantModal'
 import { DivisionSelection } from '../components/DivisionSelection'
 
-export type StatisticFormValues = {
+export type StatisticFormField = keyof StatisticPartialFormValues | 'variants' | 'contacts'
+export type StatisticFormErrors = Partial<Record<StatisticFormField, string>>
+
+export type StatisticPartialFormValues = {
   name: string
   name_en: string
   division: string
@@ -53,11 +56,9 @@ export type StatisticFormValues = {
   comment: string
 }
 
-export type StatisticFormField = keyof StatisticFormValues | 'variants' | 'contacts'
-export type StatisticFormErrors = Partial<Record<StatisticFormField, string>>
-type StatisticValidationState = {
+type StatisticFormValues = {
   status: CreatableStatisticStatus
-  values: StatisticFormValues
+  values: StatisticPartialFormValues
   selectedContacts: string[]
   createdVariants: Variant[]
 }
@@ -83,7 +84,7 @@ export default function CreateStatistic() {
     value: [],
   })
 
-  const defaultValues: StatisticFormValues = {
+  const defaultValues: StatisticPartialFormValues = {
     name: '',
     name_en: '',
     division: '',
@@ -99,7 +100,7 @@ export default function CreateStatistic() {
   ] as StatisticFormField[]
 
   const [status, setStatus] = useState<CreatableStatisticStatus>('K')
-  const [values, setValues] = useState<StatisticFormValues>(defaultValues)
+  const [values, setValues] = useState<StatisticPartialFormValues>(defaultValues)
   const [errors, setErrors] = useState<StatisticFormErrors>({})
   const [apiError, setApiError] = useState<string[]>([])
   const [invalidShortname, setInvalidShortname] = useState(false)
@@ -195,12 +196,12 @@ export default function CreateStatistic() {
     return isCreateStatisticFieldRequired(status, field)
   }
 
-  function getValidationState(
+  function nextInputValues(
     nextValues = values,
     nextStatus = status,
     nextSelectedContacts = selectedContacts,
     nextCreatedVariants = createdVariants
-  ): StatisticValidationState {
+  ): StatisticFormValues {
     return {
       status: nextStatus,
       values: nextValues,
@@ -209,34 +210,34 @@ export default function CreateStatistic() {
     }
   }
 
-  function validateField(field: StatisticFormField, validationState: StatisticValidationState): string {
+  function validateField(field: StatisticFormField, validateInput: StatisticFormValues): string {
     // Optional field validation
     if (
       field === 'first_released_at' &&
-      validationState.values.first_released_at &&
-      !/^\d{4}$/.test(validationState.values.first_released_at)
+      validateInput.values.first_released_at &&
+      !/^\d{4}$/.test(validateInput.values.first_released_at)
     ) {
       return 'Statistikkens startår må være et gyldig år med fire siffer'
     }
 
-    if (!isCreateStatisticFieldRequired(validationState.status, field)) {
+    if (!isCreateStatisticFieldRequired(validateInput.status, field)) {
       return ''
     }
 
-    if (field === 'name' && !validationState.values.name) return 'Fyll inn norsk statistikknavn'
-    if (field === 'name_en' && !validationState.values.name_en) return 'Fyll inn engelsk statistikknavn'
-    if (field === 'division' && !validationState.values.division) return 'Velg ansvarlig seksjon for statistikken'
-    if (field === 'variants' && validationState.createdVariants.length === 0) return 'Legg til minst én variant'
-    if (field === 'contacts' && validationState.selectedContacts.length === 0) return 'Legg til minst én kontakt'
+    if (field === 'name' && !validateInput.values.name) return 'Fyll inn norsk statistikknavn'
+    if (field === 'name_en' && !validateInput.values.name_en) return 'Fyll inn engelsk statistikknavn'
+    if (field === 'division' && !validateInput.values.division) return 'Velg ansvarlig seksjon for statistikken'
+    if (field === 'variants' && validateInput.createdVariants.length === 0) return 'Legg til minst én variant'
+    if (field === 'contacts' && validateInput.selectedContacts.length === 0) return 'Legg til minst én kontakt'
 
     return ''
   }
 
-  function validateForm(validationState = getValidationState()): StatisticFormErrors {
+  function validateForm(validateInput = nextInputValues()): StatisticFormErrors {
     const nextErrors: StatisticFormErrors = {}
 
     for (const field of fieldsToValidate) {
-      const error = validateField(field, validationState)
+      const error = validateField(field, validateInput)
 
       if (error) {
         nextErrors[field] = error
@@ -246,9 +247,12 @@ export default function CreateStatistic() {
     return nextErrors
   }
 
-  function handleValueChange<K extends keyof StatisticFormValues>(field: K, value: StatisticFormValues[K]) {
+  function handleValueChange<K extends keyof StatisticPartialFormValues>(
+    field: K,
+    value: StatisticPartialFormValues[K]
+  ) {
     const nextValues = { ...values, [field]: value }
-    const validationState = getValidationState(nextValues)
+    const validateInput = nextInputValues(nextValues)
 
     setValues(nextValues)
     setErrors((currentErrors) => {
@@ -256,7 +260,7 @@ export default function CreateStatistic() {
         return currentErrors
       }
 
-      const error = validateField(field, validationState)
+      const error = validateField(field, validateInput)
 
       if (error) {
         return {
@@ -272,11 +276,11 @@ export default function CreateStatistic() {
   }
 
   function handleStatusChange(nextStatus: CreatableStatisticStatus) {
-    const validationState = getValidationState(values, nextStatus)
+    const validateInput = nextInputValues(values, nextStatus)
 
     setStatus(nextStatus)
     setErrors((currentErrors) => {
-      const nextErrors = validateForm(validationState)
+      const nextErrors = validateForm(validateInput)
 
       return Object.fromEntries(
         Object.entries(nextErrors).filter(([field]) => currentErrors[field as StatisticFormField])
@@ -285,7 +289,7 @@ export default function CreateStatistic() {
   }
 
   function handleContactsChange(nextSelectedContacts: string[]) {
-    const validationState = getValidationState(values, status, nextSelectedContacts)
+    const validateInput = nextInputValues(values, status, nextSelectedContacts)
 
     setSelectedContacts(nextSelectedContacts)
     setErrors((currentErrors) => {
@@ -293,7 +297,7 @@ export default function CreateStatistic() {
         return currentErrors
       }
 
-      const error = validateField('contacts', validationState)
+      const error = validateField('contacts', validateInput)
 
       if (error) {
         return {
@@ -311,7 +315,7 @@ export default function CreateStatistic() {
   function handleVariantsChange(nextCreatedVariants: SetStateAction<Variant[]>) {
     const resolvedVariants =
       typeof nextCreatedVariants === 'function' ? nextCreatedVariants(createdVariants) : nextCreatedVariants
-    const validationState = getValidationState(values, status, selectedContacts, resolvedVariants)
+    const validateInput = nextInputValues(values, status, selectedContacts, resolvedVariants)
 
     setCreatedVariants(resolvedVariants)
     setErrors((currentErrors) => {
@@ -319,7 +323,7 @@ export default function CreateStatistic() {
         return currentErrors
       }
 
-      const error = validateField('variants', validationState)
+      const error = validateField('variants', validateInput)
 
       if (error) {
         return {
