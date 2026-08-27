@@ -428,7 +428,7 @@ export default function EditStatistic() {
               <Select.Option
                 key={`${code}-${name}`}
                 value={code}
-                disabled={statistic.status?.code !== 'K' && code === 'K'}
+                disabled={statistic.status?.code !== code && code !== 'A'}
               >
                 {name}
               </Select.Option>
