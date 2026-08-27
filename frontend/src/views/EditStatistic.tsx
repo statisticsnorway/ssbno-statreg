@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import {
   Heading,
   Popover,
+  Paragraph,
   Divider,
   Field,
   Fieldset,
@@ -28,6 +29,7 @@ import './CreateStatistic.css'
 import { RequiredEditStatisticFieldsByStatus, ApprovalStatus, StatisticStatus } from '@ssbno-statreg/shared'
 import type {
   EditableStatisticStatus,
+  Contact,
   Division,
   Shortname,
   StatisticDetails,
@@ -36,11 +38,13 @@ import type {
 import ErrorPage, { ErrorType } from './ErrorPage'
 import { ErrorAlert } from '../components/ErrorAlert'
 import { DivisionSelection } from '../components/DivisionSelection'
+import { ContactSelection } from '../components/ContactSelection'
 import type { StatisticFormErrors, StatisticFormField, StatisticPartialFormValues } from './CreateStatistic'
 
 type StatisticFormValues = {
   status: keyof typeof StatisticStatus | ''
   values: StatisticPartialFormValues
+  selectedContacts: string[]
 }
 
 function isEditStatisticFieldRequired(status: EditableStatisticStatus, field: StatisticFormField): boolean {
@@ -52,6 +56,8 @@ export default function EditStatistic() {
 
   const [statistic, setStatistic] = useState<StatisticDetails>({})
   const [divisions, setDivisions] = useState<Division[]>([])
+  const [contacts, setContacts] = useState<Contact[]>([])
+  const [selectedContacts, setSelectedContacts] = useState<string[]>([])
 
   const {
     getCheckboxProps,
@@ -115,6 +121,17 @@ export default function EditStatistic() {
     setDivisions((Object.values(data) as Division[]) ?? [])
   }
 
+  async function fetchContacts() {
+    const { data, error } = await client.GET('/contacts')
+
+    if (error) {
+      setApiError((prev) => [...prev, error.message])
+      return
+    }
+
+    setContacts(data ?? [])
+  }
+
   useEffect(() => {
     if (!shortname || !isAdmin) return
 
@@ -135,6 +152,7 @@ export default function EditStatistic() {
         typeof nextStatistic.division === 'string' ? nextStatistic.division : nextStatistic.division?.code
 
       setStatistic(nextStatistic)
+      setSelectedContacts(nextStatistic.contacts?.map((contact) => contact.principalName) ?? [])
       setStatus((nextStatistic.status?.code as EditableStatisticStatus) ?? '')
       setValues({
         name: nextStatistic.name ?? '',
@@ -150,7 +168,7 @@ export default function EditStatistic() {
       )
       setErrors({})
 
-      await fetchDivisions()
+      await Promise.all([fetchDivisions(), fetchContacts()])
     }
 
     initializeUpdateStatistic()
@@ -165,6 +183,7 @@ export default function EditStatistic() {
     return {
       status: nextStatus,
       values: nextValues,
+      selectedContacts,
     }
   }
 
@@ -187,14 +206,14 @@ export default function EditStatistic() {
     if (field === 'name' && !validatedInput.values.name) return 'Fyll inn norsk statistikknavn'
     if (field === 'name_en' && !validatedInput.values.name_en) return 'Fyll inn engelsk statistikknavn'
     if (field === 'division' && !validatedInput.values.division) return 'Velg ansvarlig seksjon for statistikken'
+    if (field === 'contacts' && validatedInput.selectedContacts.length === 0) return 'Legg til minst én kontakt'
 
     return ''
   }
 
   function validateForm(validateInput = nextInputValues()): StatisticFormErrors {
     const nextErrors: StatisticFormErrors = {}
-    const fieldsToValidate: StatisticFormField[] = Object.keys(defaultValues) as StatisticFormField[]
-
+    const fieldsToValidate: StatisticFormField[] = [...Object.keys(defaultValues), 'contacts'] as StatisticFormField[]
     for (const field of fieldsToValidate) {
       const error = validateField(field, validateInput)
 
@@ -237,6 +256,22 @@ export default function EditStatistic() {
     })
   }
 
+  function handleContactsChange(nextSelectedContacts: string[]) {
+    const validateInput = { ...nextInputValues(), selectedContacts: nextSelectedContacts }
+
+    setSelectedContacts(nextSelectedContacts)
+    setErrors((currentErrors) => {
+      if (!currentErrors.contacts) return currentErrors
+
+      const error = validateField('contacts', validateInput)
+      if (error) return { ...currentErrors, contacts: error }
+
+      const nextErrors = { ...currentErrors }
+      delete nextErrors.contacts
+      return nextErrors
+    })
+  }
+
   async function updateStatistic() {
     const body: StatisticUpdate = {
       ...values,
@@ -249,7 +284,7 @@ export default function EditStatistic() {
       yearly_reporting: statistic.yearly_reporting,
       previous_topic_codes: statistic.previous_topic_codes,
       variants: statistic.variants,
-      contacts: statistic.contacts?.map((contact) => contact.principalName),
+      contacts: selectedContacts,
     }
 
     const { data, error } = await client.PUT(`/statistics/{shortname}`, {
@@ -374,6 +409,23 @@ export default function EditStatistic() {
           />
           {errors.name_en && <ValidationMessage>{errors.name_en}</ValidationMessage>}
         </Field>
+        <Divider />
+        <div className='contact-section'>
+          <Label>{getFieldLabel('Kontakter', 'contacts')}</Label>
+          <Paragraph className='contact-section-description'>
+            Søk og legg til kontakt. Navn vises under overskriften 'Kontakt' på statistikksiden på ssb.no
+          </Paragraph>
+          <Field className='contact-field'>
+            <ContactSelection
+              id='contacts'
+              ariaInvalid={!!errors.contacts}
+              contacts={contacts}
+              selected={selectedContacts}
+              setSelected={handleContactsChange}
+            />
+            {errors.contacts && <ValidationMessage>{errors.contacts}</ValidationMessage>}
+          </Field>
+        </div>
         <Divider />
         <Heading level={2}>Detaljer</Heading>
         <Field>
