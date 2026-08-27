@@ -539,6 +539,16 @@ describe('statisticService', () => {
 
       expect(prismaMock.statistic.update).toHaveBeenCalledTimes(0)
     })
+
+    test('throws error when an active statistic is set back to upcoming', async () => {
+      setStatisticsResult({ status: 'A', responsiblePersons: [], variants: [], statistic_region_levels: [] })
+      input.status = { code: 'K' }
+
+      await expect(() => updateStatistic('helse', input, prismaMock)).rejects.toMatchObject({
+        statregError: 'An active statistic cannot be set back to upcoming.',
+      })
+      expect(prismaMock.statistic.update).toHaveBeenCalledTimes(0)
+    })
   })
 
   describe('updateContacts ', async () => {
