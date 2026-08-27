@@ -10,3 +10,6 @@ coverage/
 .env
 */.env
 .DS_Store
+
+# Docker override when dev:auth needs adjustments to work (e.g. on WSL)
+docker-compose.override.yaml

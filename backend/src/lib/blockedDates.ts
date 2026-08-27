@@ -36,7 +36,7 @@ export async function getBlockedDatesInPeriod(from: Date, to: Date, prisma: Cale
   const manuallyBlockedDates = await prisma.calender_date.findMany({
     where: {
       day: {
-        gt: from,
+        gte: from,
         lte: to,
       },
     },
