@@ -40,10 +40,9 @@ import ErrorPage, { ErrorType } from './ErrorPage'
 import { ErrorAlert } from '../components/ErrorAlert'
 import { CreateShortnameModal } from '../components/CreateShortnameModal'
 import { ContactEditorSection } from '../components/ContactEditorSection'
-import { VariantModal } from '../components/VariantModal'
+import { VariantModal, useVariantModal } from '../components/VariantModal'
 import { VariantEditorSection } from '../components/VariantEditorSection'
 import { DivisionSelection } from '../components/DivisionSelection'
-import { useVariantModal } from '../hooks/useVariantModal'
 
 export type StatisticFormField = keyof StatisticPartialFormValues | 'variants' | 'contacts'
 export type StatisticFormErrors = Partial<Record<StatisticFormField, string>>

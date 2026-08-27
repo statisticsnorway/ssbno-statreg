@@ -38,10 +38,9 @@ import type {
 import ErrorPage, { ErrorType } from './ErrorPage'
 import { ErrorAlert } from '../components/ErrorAlert'
 import { DivisionSelection } from '../components/DivisionSelection'
-import { VariantModal } from '../components/VariantModal'
+import { VariantModal, useVariantModal } from '../components/VariantModal'
 import { VariantEditorSection } from '../components/VariantEditorSection'
 import { ContactEditorSection } from '../components/ContactEditorSection'
-import { useVariantModal } from '../hooks/useVariantModal'
 import type { StatisticFormErrors, StatisticFormField, StatisticPartialFormValues } from './CreateStatistic'
 
 type StatisticFormValues = {
