@@ -189,9 +189,6 @@ export default function EditStatistic() {
 
   function validateField(field: StatisticFormField, validatedInput: StatisticFormValues): string {
     if (field === 'comment' && !validatedInput.values.comment) return 'Fyll inn kommentar'
-    if (field === 'contacts' && validatedInput.status === 'A' && validatedInput.selectedContacts.length === 0) {
-      return 'Legg til minst én kontakt'
-    }
 
     // Optional field validation
     if (
@@ -209,6 +206,7 @@ export default function EditStatistic() {
     if (field === 'name' && !validatedInput.values.name) return 'Fyll inn norsk statistikknavn'
     if (field === 'name_en' && !validatedInput.values.name_en) return 'Fyll inn engelsk statistikknavn'
     if (field === 'division' && !validatedInput.values.division) return 'Velg ansvarlig seksjon for statistikken'
+    if (field === 'contacts' && validatedInput.selectedContacts.length === 0) return 'Legg til minst én kontakt'
 
     return ''
   }
