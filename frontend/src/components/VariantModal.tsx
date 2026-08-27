@@ -79,6 +79,7 @@ export function VariantModal({
 
     setCreatedVariants((prevVariants: Variant[]) => {
       const nextVariant: Variant = {
+        ...(isEditMode && editVariantValues?.id ? { id: editVariantValues.id } : {}),
         revision: {
           code: values.revision_code,
         },
@@ -113,6 +114,8 @@ export function VariantModal({
     returnFocusToDeleteTriggerRef.current = true
     setIsDeletePopoverOpen(false)
   }
+
+  const canDeleteVariant = isEditMode && !editVariantValues?.id
 
   return (
     <Dialog id={dialogId} aria-labelledby='variant-modal-heading' onClose={handleDialogClose} closedby='any'>
@@ -180,7 +183,7 @@ export function VariantModal({
               Avbryt
             </Button>
           </div>
-          {isEditMode && (
+          {canDeleteVariant && (
             <Popover.TriggerContext>
               <Popover.Trigger
                 ref={deleteTriggerRef}

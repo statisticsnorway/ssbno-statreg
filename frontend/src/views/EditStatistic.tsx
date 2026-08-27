@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from 'react-router'
 import { useAuth } from '../context/AuthContext'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, type SetStateAction } from 'react'
 import {
   Heading,
   Popover,
@@ -29,6 +29,7 @@ import { RequiredEditStatisticFieldsByStatus, ApprovalStatus, StatisticStatus } 
 import type {
   EditableStatisticStatus,
   Division,
+  Variant,
   Shortname,
   StatisticDetails,
   StatisticUpdate,
@@ -36,6 +37,8 @@ import type {
 import ErrorPage, { ErrorType } from './ErrorPage'
 import { ErrorAlert } from '../components/ErrorAlert'
 import { DivisionSelection } from '../components/DivisionSelection'
+import { VariantModal } from '../components/VariantModal'
+import { VariantEditorSection } from '../components/VariantEditorSection'
 import type { StatisticFormErrors, StatisticFormField, StatisticPartialFormValues } from './CreateStatistic'
 
 type StatisticFormValues = {
@@ -48,10 +51,16 @@ function isEditStatisticFieldRequired(status: EditableStatisticStatus, field: St
 }
 
 export default function EditStatistic() {
+  const variantDialogId = 'edit-statistic-variant-dialog'
   const { shortname } = useParams<Shortname['shortname']>()
 
   const [statistic, setStatistic] = useState<StatisticDetails>({})
   const [divisions, setDivisions] = useState<Division[]>([])
+  const [createdVariants, setCreatedVariants] = useState<Variant[]>([])
+  const [editVariantIndex, setEditVariantIndex] = useState<number | null>(null)
+  const addVariantButtonRef = useRef<HTMLButtonElement>(null)
+  const returnFocusToAddVariantButtonRef = useRef(false)
+  const [variantModalCloseCount, setVariantModalCloseCount] = useState(0)
 
   const {
     getCheckboxProps,
@@ -75,6 +84,7 @@ export default function EditStatistic() {
   const [values, setValues] = useState<StatisticPartialFormValues>(defaultValues)
   const [errors, setErrors] = useState<StatisticFormErrors>({})
   const [apiError, setApiError] = useState<string[]>([])
+  const fieldsToValidate: StatisticFormField[] = [...Object.keys(defaultValues), 'variants'] as StatisticFormField[]
 
   const regionLevelCheckboxData = [
     {
@@ -144,6 +154,7 @@ export default function EditStatistic() {
         first_released_at: nextStatistic.first_released_at?.slice(0, 4) ?? '',
         comment: nextStatistic.comment ?? '',
       })
+      setCreatedVariants((nextStatistic.variants ?? []).filter((variant) => !variant.cancelled))
       setRegionLevelValues(
         nextStatistic.statistic_region_levels?.flatMap((regionLevel) => (regionLevel.code ? [regionLevel.code] : [])) ??
           []
@@ -155,6 +166,13 @@ export default function EditStatistic() {
 
     initializeUpdateStatistic()
   }, [isAdmin, setRegionLevelValues, shortname])
+
+  useEffect(() => {
+    if (!returnFocusToAddVariantButtonRef.current) return
+
+    returnFocusToAddVariantButtonRef.current = false
+    addVariantButtonRef.current?.focus()
+  }, [variantModalCloseCount])
 
   function isRequired(field: StatisticFormField) {
     if (!status) return false
@@ -187,13 +205,13 @@ export default function EditStatistic() {
     if (field === 'name' && !validatedInput.values.name) return 'Fyll inn norsk statistikknavn'
     if (field === 'name_en' && !validatedInput.values.name_en) return 'Fyll inn engelsk statistikknavn'
     if (field === 'division' && !validatedInput.values.division) return 'Velg ansvarlig seksjon for statistikken'
+    if (field === 'variants' && createdVariants.length === 0) return 'Legg til minst én variant'
 
     return ''
   }
 
   function validateForm(validateInput = nextInputValues()): StatisticFormErrors {
     const nextErrors: StatisticFormErrors = {}
-    const fieldsToValidate: StatisticFormField[] = Object.keys(defaultValues) as StatisticFormField[]
 
     for (const field of fieldsToValidate) {
       const error = validateField(field, validateInput)
@@ -237,6 +255,43 @@ export default function EditStatistic() {
     })
   }
 
+  function handleVariantsChange(nextCreatedVariants: SetStateAction<Variant[]>) {
+    const resolvedVariants =
+      typeof nextCreatedVariants === 'function' ? nextCreatedVariants(createdVariants) : nextCreatedVariants
+
+    setCreatedVariants(resolvedVariants)
+    setErrors((currentErrors) => {
+      if (!currentErrors.variants || resolvedVariants.length > 0) {
+        if (!currentErrors.variants) {
+          return currentErrors
+        }
+
+        const nextErrors = { ...currentErrors }
+        delete nextErrors.variants
+        return nextErrors
+      }
+
+      return currentErrors
+    })
+  }
+
+  function handleOpenCreateVariantModal() {
+    setEditVariantIndex(null)
+  }
+
+  function handleOpenEditVariantModal(index: number) {
+    setEditVariantIndex(index)
+  }
+
+  function handleVariantModalActionClose() {
+    returnFocusToAddVariantButtonRef.current = true
+  }
+
+  function handleVariantModalClose() {
+    setEditVariantIndex(null)
+    setVariantModalCloseCount((count) => count + 1)
+  }
+
   async function updateStatistic() {
     const body: StatisticUpdate = {
       ...values,
@@ -248,7 +303,7 @@ export default function EditStatistic() {
       relation_id: statistic.relation?.id ?? null,
       yearly_reporting: statistic.yearly_reporting,
       previous_topic_codes: statistic.previous_topic_codes,
-      variants: statistic.variants,
+      variants: createdVariants,
       contacts: statistic.contacts?.map((contact) => contact.principalName),
     }
 
@@ -295,6 +350,15 @@ export default function EditStatistic() {
 
   return (
     <div className='create-statistic-container'>
+      <VariantModal
+        key={[variantModalCloseCount, editVariantIndex ?? 'create'].join('-')}
+        dialogId={variantDialogId}
+        setCreatedVariants={handleVariantsChange}
+        editVariantIndex={editVariantIndex}
+        editVariantValues={editVariantIndex !== null ? createdVariants[editVariantIndex] : undefined}
+        onActionClose={handleVariantModalActionClose}
+        onAfterClose={handleVariantModalClose}
+      />
       {apiError.length > 0 && <ErrorAlert message={apiError} />}
       <Heading level={1} data-size='md' className='create-statistic-heading'>
         Rediger statistikk
@@ -374,6 +438,16 @@ export default function EditStatistic() {
           />
           {errors.name_en && <ValidationMessage>{errors.name_en}</ValidationMessage>}
         </Field>
+        <Divider />
+        <VariantEditorSection
+          createdVariants={createdVariants}
+          variantDialogId={variantDialogId}
+          addVariantButtonRef={addVariantButtonRef}
+          variantsError={errors.variants}
+          variantLabel={getFieldLabel('Variant', 'variants')}
+          onOpenCreateVariantModal={handleOpenCreateVariantModal}
+          onOpenEditVariantModal={handleOpenEditVariantModal}
+        />
         <Divider />
         <Heading level={2}>Detaljer</Heading>
         <Field>
