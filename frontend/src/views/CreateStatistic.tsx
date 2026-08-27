@@ -39,7 +39,7 @@ import type {
 import ErrorPage, { ErrorType } from './ErrorPage'
 import { ErrorAlert } from '../components/ErrorAlert'
 import { CreateShortnameModal } from '../components/CreateShortnameModal'
-import { ContactSelection } from '../components/ContactSelection'
+import { ContactEditorSection } from '../components/ContactEditorSection'
 import { VariantModal } from '../components/VariantModal'
 import { VariantEditorSection } from '../components/VariantEditorSection'
 import { DivisionSelection } from '../components/DivisionSelection'
@@ -519,22 +519,13 @@ export default function CreateStatistic() {
               onOpenEditVariantModal={handleOpenEditVariantModal}
             />
             <Divider />
-            <div className='contact-section'>
-              <Label>{getFieldLabel('Kontakter', 'contacts')}</Label>
-              <Paragraph className='contact-section-description'>
-                Søk og legg til kontakt. Navn vises under overskriften 'Kontakt' på statistikksiden på ssb.no
-              </Paragraph>
-              <Field className='contact-field'>
-                <ContactSelection
-                  id='contacts'
-                  ariaInvalid={!!errors.contacts}
-                  contacts={contacts}
-                  selected={selectedContacts}
-                  setSelected={handleContactsChange}
-                />
-                {errors.contacts && <ValidationMessage>{errors.contacts}</ValidationMessage>}
-              </Field>
-            </div>
+            <ContactEditorSection
+              contacts={contacts}
+              selectedContacts={selectedContacts}
+              contactsError={errors.contacts}
+              contactLabel={getFieldLabel('Kontakter', 'contacts')}
+              onContactsChange={handleContactsChange}
+            />
             <Divider />
             <Heading level={2}>Detaljer</Heading>
             <Field>
