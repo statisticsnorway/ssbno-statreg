@@ -33,8 +33,7 @@ export default function ListStatistics() {
   const [optionsStatus, setOptionsStatus] = useState<'idle' | 'loading' | 'loaded'>('idle')
   const { auth } = useAuth()
 
-  // Defer building the (potentially large) option lists so the initial render of the
-  // statistics table paints first and stays responsive while the options fill in.
+  // Defer building the (potentially large) option lists until the user opens it.
   const deferredShortnames = useDeferredValue(shortnames, [])
   const deferredContacts = useDeferredValue(contacts, [])
 
