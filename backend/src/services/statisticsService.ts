@@ -350,6 +350,18 @@ export async function updateStatistic(
         throw new StatregError(`Variant with id '${variant.id}' does not belong to statistic '${safeShortname}'.`)
       }
     }
+
+    const missingExistingVariants = existingStatistic.variants.filter(
+      (existingVariant) => !parsedVariants.some((variant) => variant.id === existingVariant.id)
+    )
+
+    if (missingExistingVariants.length) {
+      throw new StatregError(
+        `Deleting variants is currently not supported. Missing existing variant ids: ${missingExistingVariants
+          .map((variant) => variant.id)
+          .join(', ')}.`
+      )
+    }
   }
 
   if (status === 'A') {
