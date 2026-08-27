@@ -37,7 +37,7 @@ describe('calendarController ', () => {
     })
   })
 
-  test('creates and deletes a blocked date', async () => {
+  test('deletes a blocked date', async () => {
     const date = '2099-11-18'
 
     const created = await request(app)
