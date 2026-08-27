@@ -1,5 +1,5 @@
 import './ListStatistics.css'
-import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
+import { useDeferredValue, useEffect, useMemo, useState } from 'react'
 import client from '../api'
 import type { Contact, ShortnameListing, StatisticListing } from '@ssbno-statreg/shared'
 import { PaginatedStatisticsTable } from '../components/StatisticsTable'
@@ -30,9 +30,7 @@ export default function ListStatistics() {
   const [shortnames, setShortnames] = useState<ShortnameListing[]>([])
   const [contacts, setContacts] = useState<Contact[]>([])
   const [apiError, setApiError] = useState<string[]>([])
-  const [hasTriggeredLoad, setHasTriggeredLoad] = useState(false)
-  const [optionsLoaded, setOptionsLoaded] = useState(false)
-  const optionsFetchStartedRef = useRef(false)
+  const [optionsStatus, setOptionsStatus] = useState<'idle' | 'loading' | 'loaded'>('idle')
   const { auth } = useAuth()
 
   // Defer building the (potentially large) option lists so the initial render of the
@@ -115,28 +113,33 @@ export default function ListStatistics() {
   }
 
   useEffect(() => {
-    if (!hasTriggeredLoad || optionsFetchStartedRef.current) return
-    optionsFetchStartedRef.current = true
+    if (optionsStatus !== 'loading') return
+    // cancelled ensures this is only ran once, and not on React's dev mode pre-render
+    let cancelled = false
+
     async function fetchFilterOptions() {
       const { data: shortnamesData, error: shortnamesError } = await client.GET('/shortnames')
       if (shortnamesError) {
         setApiError((prev) => [...prev, shortnamesError.message])
-      } else {
+      } else if (!cancelled) {
         setShortnames(shortnamesData ?? [])
       }
 
       const { data: contactsData, error: contactsError } = await client.GET('/contacts')
       if (contactsError) {
         setApiError((prev) => [...prev, contactsError.message])
-      } else {
+      } else if (!cancelled) {
         setContacts(contactsData ?? [])
       }
 
-      setOptionsLoaded(true)
+      if (!cancelled) setOptionsStatus('loaded')
     }
 
     fetchFilterOptions()
-  }, [hasTriggeredLoad])
+    return () => {
+      cancelled = true
+    }
+  }, [optionsStatus])
 
   function updateRowCount(newCount: number) {
     setCount(newCount)
@@ -195,10 +198,10 @@ export default function ListStatistics() {
         <Field>
           <Label>Filtrer på kortnavn eller kontakt</Label>
           <Suggestion onSelectedChange={(selected) => onFilterChange(selected)} selected={selectedFilter}>
-            <Suggestion.Input onFocus={() => setHasTriggeredLoad(true)} />
+            <Suggestion.Input onFocus={() => setOptionsStatus((status) => (status === 'idle' ? 'loading' : status))} />
             <Suggestion.Clear onClick={() => onFilterChange(null)} />
             <Suggestion.List className='suggestion-list'>
-              {!hasTriggeredLoad || !optionsLoaded ? (
+              {optionsStatus !== 'loaded' ? (
                 <li className='suggestion-item' aria-live='polite'>
                   <Spinner aria-label='Laster' data-size='sm' /> Laster...
                 </li>
