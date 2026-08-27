@@ -4,6 +4,7 @@ import { useState, useEffect, type SetStateAction } from 'react'
 import {
   Heading,
   Popover,
+  Paragraph,
   Divider,
   Field,
   Fieldset,
@@ -40,7 +41,7 @@ import { ErrorAlert } from '../components/ErrorAlert'
 import { DivisionSelection } from '../components/DivisionSelection'
 import { VariantModal, useVariantModal } from '../components/VariantModal'
 import { VariantEditorSection } from '../components/VariantEditorSection'
-import { ContactEditorSection } from '../components/ContactEditorSection'
+import { ContactSelection } from '../components/ContactSelection'
 import type { StatisticFormErrors, StatisticFormField, StatisticPartialFormValues } from './CreateStatistic'
 
 type StatisticFormValues = {
@@ -464,13 +465,22 @@ export default function EditStatistic() {
           onOpenEditVariantModal={handleOpenEditVariantModal}
         />
         <Divider />
-        <ContactEditorSection
-          contacts={contacts}
-          selectedContacts={selectedContacts}
-          contactsError={errors.contacts}
-          contactLabel={getFieldLabel('Kontakter', 'contacts')}
-          onContactsChange={handleContactsChange}
-        />
+        <div className='contact-section'>
+          <Label>{getFieldLabel('Kontakter', 'contacts')}</Label>
+          <Paragraph className='contact-section-description'>
+            Søk og legg til kontakt. Navn vises under overskriften 'Kontakt' på statistikksiden på ssb.no
+          </Paragraph>
+          <Field className='contact-field'>
+            <ContactSelection
+              id='contacts'
+              ariaInvalid={!!errors.contacts}
+              contacts={contacts}
+              selected={selectedContacts}
+              setSelected={handleContactsChange}
+            />
+            {errors.contacts && <ValidationMessage>{errors.contacts}</ValidationMessage>}
+          </Field>
+        </div>
         <Divider />
         <Heading level={2}>Detaljer</Heading>
         <Field>
