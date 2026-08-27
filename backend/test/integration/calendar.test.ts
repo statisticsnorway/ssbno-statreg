@@ -40,33 +40,39 @@ describe('calendarController ', () => {
   test('deletes a blocked date', async () => {
     const date = '2099-11-18'
 
+    // POST blocked date
     const created = await request(app)
       .post(`/statistikkregisteret/api/calendar/blocked-release-days/${date}`)
       .set(headers)
       .send({ blocked_comment: 'Integration test' })
     expect(created.status).toBe(200)
 
+    // GET calendar before delete to check that date is blocked
     const calendarBefore = await request(app)
       .get('/statistikkregisteret/api/calendar')
       .query({ fromDate: date, toDate: date })
     expect(calendarBefore.status).toBe(200)
     expect(calendarBefore.body[date]).toStrictEqual({ status: 'BLOCKED' })
 
+    // GET blocked dates before delete to check that date is included
     const blockedBefore = await request(app).get('/statistikkregisteret/api/calendar/blocked-release-days')
     expect(blockedBefore.status).toBe(200)
     expect(blockedBefore.body).toContainEqual(expect.objectContaining({ date }))
 
+    // DELETE blocked date
     const deleted = await request(app)
       .delete(`/statistikkregisteret/api/calendar/blocked-release-days/${date}`)
       .set(headers)
     expect(deleted.status).toBe(200)
 
+    // GET calendar after delete to check that date is not blocked
     const calendarAfter = await request(app)
       .get('/statistikkregisteret/api/calendar')
       .query({ fromDate: date, toDate: date })
     expect(calendarAfter.status).toBe(200)
     expect(calendarAfter.body[date]).toStrictEqual({ status: 'NONE' })
 
+    // GET blocked dates after delete to check that date is not included
     const blockedAfter = await request(app).get('/statistikkregisteret/api/calendar/blocked-release-days')
     expect(blockedAfter.status).toBe(200)
     expect(blockedAfter.body).not.toContainEqual(expect.objectContaining({ date }))
