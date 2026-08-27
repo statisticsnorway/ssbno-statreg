@@ -17,6 +17,47 @@ import client from '../api'
 import { RevisionNames, type Frequency, type Variant } from '@ssbno-statreg/shared'
 import { ErrorAlert } from './ErrorAlert'
 
+export function useVariantModal() {
+  const [editVariantIndex, setEditVariantIndex] = useState<number | null>(null)
+  const addVariantButtonRef = useRef<HTMLButtonElement>(null)
+  const returnFocusToAddVariantButtonRef = useRef(false)
+  const [variantModalCloseCount, setVariantModalCloseCount] = useState(0)
+
+  useEffect(() => {
+    if (!returnFocusToAddVariantButtonRef.current) return
+
+    returnFocusToAddVariantButtonRef.current = false
+    addVariantButtonRef.current?.focus()
+  }, [variantModalCloseCount])
+
+  function handleOpenCreateVariantModal() {
+    setEditVariantIndex(null)
+  }
+
+  function handleOpenEditVariantModal(index: number) {
+    setEditVariantIndex(index)
+  }
+
+  function handleVariantModalActionClose() {
+    returnFocusToAddVariantButtonRef.current = true
+  }
+
+  function handleVariantModalClose() {
+    setEditVariantIndex(null)
+    setVariantModalCloseCount((count) => count + 1)
+  }
+
+  return {
+    editVariantIndex,
+    addVariantButtonRef,
+    variantModalCloseCount,
+    handleOpenCreateVariantModal,
+    handleOpenEditVariantModal,
+    handleVariantModalActionClose,
+    handleVariantModalClose,
+  }
+}
+
 type VariantModalProps = {
   dialogId: string
   setCreatedVariants: Dispatch<SetStateAction<Variant[]>>
@@ -79,6 +120,7 @@ export function VariantModal({
 
     setCreatedVariants((prevVariants: Variant[]) => {
       const nextVariant: Variant = {
+        ...(isEditMode && editVariantValues?.id ? { id: editVariantValues.id } : {}),
         revision: {
           code: values.revision_code,
         },
@@ -113,6 +155,8 @@ export function VariantModal({
     returnFocusToDeleteTriggerRef.current = true
     setIsDeletePopoverOpen(false)
   }
+
+  const canDeleteVariant = isEditMode && !editVariantValues?.id
 
   return (
     <Dialog id={dialogId} aria-labelledby='variant-modal-heading' onClose={handleDialogClose} closedby='any'>
@@ -180,7 +224,7 @@ export function VariantModal({
               Avbryt
             </Button>
           </div>
-          {isEditMode && (
+          {canDeleteVariant && (
             <Popover.TriggerContext>
               <Popover.Trigger
                 ref={deleteTriggerRef}
