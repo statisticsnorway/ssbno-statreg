@@ -471,22 +471,24 @@ export default function ReleaseForm() {
             For kortere frister, kontakt mmj@ssb.no.
           </Field.Description>
           <Input id='publishTime' size={10} {...publishTimePicker.inputProps} aria-invalid={!!errors.publishTime} />
-          {errors.publishTime && <ValidationMessage>{errors.publishTime}</ValidationMessage>}
-          {showEarlyPublishTimeWarning && (
-            <ValidationMessage data-color='warning'>
-              Du har valgt en dato tidligere enn tre måneder fra i dag. Du kan fortsatt melde dato som admin.
-            </ValidationMessage>
-          )}
-          {showFullPublishDateWarning && (
-            <ValidationMessage data-color='warning'>
-              Denne dagen er allerede full. Du kan fortsatt melde dato som admin.
-            </ValidationMessage>
-          )}
-          {showBlockedPublishDateWarning && (
-            <ValidationMessage data-color='warning'>
-              Denne dagen er sperret. Du kan fortsatt melde dato som admin.
-            </ValidationMessage>
-          )}
+          <div aria-live='polite' role='status'>
+            {errors.publishTime && <ValidationMessage>{errors.publishTime}</ValidationMessage>}
+            {showEarlyPublishTimeWarning && (
+              <ValidationMessage data-color='warning'>
+                Du har valgt en dato tidligere enn tre måneder fra i dag. Du kan fortsatt melde dato som admin.
+              </ValidationMessage>
+            )}
+            {showFullPublishDateWarning && (
+              <ValidationMessage data-color='warning'>
+                Denne dagen er allerede full. Du kan fortsatt melde dato som admin.
+              </ValidationMessage>
+            )}
+            {showBlockedPublishDateWarning && (
+              <ValidationMessage data-color='warning'>
+                Denne dagen er sperret. Du kan fortsatt melde dato som admin.
+              </ValidationMessage>
+            )}
+          </div>
           <DatePicker
             {...publishTimePicker.datepickerProps}
             showColorCodingExplanation
