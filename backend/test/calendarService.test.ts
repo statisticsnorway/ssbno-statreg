@@ -39,6 +39,7 @@ describe('calendarService  ', () => {
       calender_date: {
         create: vi.fn((args) => Promise.resolve({ ...args, id: 0 })),
         findMany: vi.fn(() => Promise.resolve(listReturn)),
+        findUnique: vi.fn(() => Promise.resolve({ day: new Date('2026-12-24') })),
         delete: vi.fn(() => Promise.resolve()),
       },
       release: {
@@ -114,6 +115,16 @@ describe('calendarService  ', () => {
     test('returns 400 when date is automatically blocked', async () => {
       await expect(deleteBlockedReleaseDate(prismaMock, '2026-12-25')).rejects.toMatchObject({
         statregError: 'Automatically blocked dates cannot be deleted',
+      })
+      expect(prismaMock.calender_date.delete).not.toHaveBeenCalled()
+    })
+
+    test('returns 404 when date is not blocked', async () => {
+      prismaMock.calender_date.findUnique.mockResolvedValueOnce(null)
+
+      await expect(deleteBlockedReleaseDate(prismaMock, '2026-12-24')).rejects.toMatchObject({
+        statregError: 'The date 2026-12-24 is not a blocked release date',
+        status: 404,
       })
       expect(prismaMock.calender_date.delete).not.toHaveBeenCalled()
     })

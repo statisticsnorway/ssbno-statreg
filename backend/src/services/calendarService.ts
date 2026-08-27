@@ -70,6 +70,11 @@ export async function deleteBlockedReleaseDate(
     throw new StatregError('Automatically blocked dates cannot be deleted')
   }
 
+  const blockedDate = await prisma.calender_date.findUnique({ where: { day: date } })
+  if (!blockedDate) {
+    throw new StatregError(`The date ${dateString} is not a blocked release date`, 404)
+  }
+
   await prisma.calender_date.delete({ where: { day: date } })
   return getFutureBlockedReleaseDates(prisma)
 }

@@ -21,6 +21,41 @@ describe('calendarController ', () => {
     })
   })
 
+  test('creates and deletes a blocked date', async () => {
+    const date = '2099-11-18'
+
+    const created = await request(app)
+      .post(`/statistikkregisteret/api/calendar/blocked-release-days/${date}`)
+      .set(headers)
+      .send({ blocked_comment: 'Integration test' })
+    expect(created.status).toBe(200)
+
+    const calendarBefore = await request(app)
+      .get('/statistikkregisteret/api/calendar')
+      .query({ fromDate: date, toDate: date })
+    expect(calendarBefore.status).toBe(200)
+    expect(calendarBefore.body[date]).toStrictEqual({ status: 'BLOCKED' })
+
+    const blockedBefore = await request(app).get('/statistikkregisteret/api/calendar/blocked-release-days')
+    expect(blockedBefore.status).toBe(200)
+    expect(blockedBefore.body).toContainEqual(expect.objectContaining({ date }))
+
+    const deleted = await request(app)
+      .delete(`/statistikkregisteret/api/calendar/blocked-release-days/${date}`)
+      .set(headers)
+    expect(deleted.status).toBe(200)
+
+    const calendarAfter = await request(app)
+      .get('/statistikkregisteret/api/calendar')
+      .query({ fromDate: date, toDate: date })
+    expect(calendarAfter.status).toBe(200)
+    expect(calendarAfter.body[date]).toStrictEqual({ status: 'NONE' })
+
+    const blockedAfter = await request(app).get('/statistikkregisteret/api/calendar/blocked-release-days')
+    expect(blockedAfter.status).toBe(200)
+    expect(blockedAfter.body).not.toContainEqual(expect.objectContaining({ date }))
+  })
+
   test('retrieves date status for days in range', async () => {
     const response = await request(app)
       .get('/statistikkregisteret/api/calendar')
