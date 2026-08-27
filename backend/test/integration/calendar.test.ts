@@ -21,6 +21,22 @@ describe('calendarController ', () => {
     })
   })
 
+  test('retrieves date status for days in range', async () => {
+    const response = await request(app)
+      .get('/statistikkregisteret/api/calendar')
+      .query({ fromDate: '2026-05-25', toDate: '2026-05-31' })
+    expect(response.status).toBe(200)
+    expect(response.body).toStrictEqual({
+      '2026-05-25': { status: 'BLOCKED' },
+      '2026-05-26': { status: 'FEW' },
+      '2026-05-27': { status: 'NONE' },
+      '2026-05-28': { status: 'NONE' },
+      '2026-05-29': { status: 'NONE' },
+      '2026-05-30': { status: 'BLOCKED' },
+      '2026-05-31': { status: 'BLOCKED' },
+    })
+  })
+
   test('creates and deletes a blocked date', async () => {
     const date = '2099-11-18'
 
@@ -54,21 +70,5 @@ describe('calendarController ', () => {
     const blockedAfter = await request(app).get('/statistikkregisteret/api/calendar/blocked-release-days')
     expect(blockedAfter.status).toBe(200)
     expect(blockedAfter.body).not.toContainEqual(expect.objectContaining({ date }))
-  })
-
-  test('retrieves date status for days in range', async () => {
-    const response = await request(app)
-      .get('/statistikkregisteret/api/calendar')
-      .query({ fromDate: '2026-05-25', toDate: '2026-05-31' })
-    expect(response.status).toBe(200)
-    expect(response.body).toStrictEqual({
-      '2026-05-25': { status: 'BLOCKED' },
-      '2026-05-26': { status: 'FEW' },
-      '2026-05-27': { status: 'NONE' },
-      '2026-05-28': { status: 'NONE' },
-      '2026-05-29': { status: 'NONE' },
-      '2026-05-30': { status: 'BLOCKED' },
-      '2026-05-31': { status: 'BLOCKED' },
-    })
   })
 })
