@@ -1,4 +1,4 @@
-import { useEffect, useState, type Dispatch, type SetStateAction } from 'react'
+import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
 import { useSearchParams } from 'react-router'
 import {
   Heading,
@@ -38,6 +38,7 @@ type PendingReleaseRowProps = {
 type PendingReleaseTableProps = {
   pendingReleases: ReleaseListing[]
   getCheckboxProps: ReturnType<typeof useCheckboxGroup>['getCheckboxProps']
+  headerRowRef: React.RefObject<HTMLTableRowElement | null>
   sortBy?: string
   setSortBy?: (sortBy: string) => void
 }
@@ -79,13 +80,14 @@ function PendingReleaseRow({ pendingRelease, getCheckboxProps }: Readonly<Pendin
 function PendingReleasesTable({
   pendingReleases,
   getCheckboxProps,
+  headerRowRef,
   sortBy,
   setSortBy,
 }: Readonly<PendingReleaseTableProps>) {
   return (
     <Table>
       <Table.Head>
-        <Table.Row>
+        <Table.Row ref={headerRowRef} tabIndex={-1}>
           {TABLE_HEADER_CELLS.map(({ label, field, sortable }) => (
             <Table.HeaderCell
               key={label}
@@ -229,6 +231,7 @@ export default function Tasks() {
   const [pendingSortBy, setPendingSortBy] = useState<string>('-publish_time')
   const [approvedReleasesCount, setApprovedReleasesCount] = useState(0)
   const [apiError, setApiError] = useState<string[]>([])
+  const pendingReleasesHeaderRowRef = useRef<HTMLTableRowElement>(null)
 
   const { auth } = useAuth()
   const isAdmin = auth?.isAdmin
@@ -292,6 +295,11 @@ export default function Tasks() {
     batchApproveReleases()
   }
 
+  function clearPendingReleaseSelection() {
+    pendingReleasesHeaderRowRef.current?.focus()
+    setSelectedPendingReleaseIds([])
+  }
+
   if (!isAdmin) return <ErrorPage type={ErrorType.NOTAUTH} />
 
   const publishedReleasesAmountText =
@@ -323,6 +331,7 @@ export default function Tasks() {
               <PendingReleasesTable
                 pendingReleases={pendingReleases}
                 getCheckboxProps={getCheckboxProps}
+                headerRowRef={pendingReleasesHeaderRowRef}
                 sortBy={pendingSortBy}
                 setSortBy={setPendingSortBy}
               />
@@ -331,7 +340,7 @@ export default function Tasks() {
                   <Button variant='primary' type='submit'>
                     Godkjenn ({selectedPendingReleaseIds.length} valgte)
                   </Button>
-                  <Button variant='tertiary' onClick={() => setSelectedPendingReleaseIds([])}>
+                  <Button variant='tertiary' type='button' onClick={clearPendingReleaseSelection}>
                     <EraserIcon />
                     Nullstill valg
                   </Button>
