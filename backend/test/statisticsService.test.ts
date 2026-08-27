@@ -368,6 +368,8 @@ describe('statisticService', () => {
     let input: any
 
     beforeEach(() => {
+      prismaMock.responsiblePerson.upsert.mockResolvedValue({ id: 2, principalName: 'bcd@ssb.no' })
+
       input = {
         division: '105',
         status: { code: 'SP' },
@@ -381,12 +383,24 @@ describe('statisticService', () => {
         main_language: 'nn',
         comment: 'Beskrivelse av endring',
         statistic_region_levels: [{ code: 'L' }],
+        variants: [
+          {
+            revision: { code: 'I' },
+            frequency: { code: 'M' },
+            level_of_detail: { name: 'Detaljnivå', name_en: 'Level of detail' },
+          },
+        ],
+        contacts: ['bcd@ssb.no'],
       }
     })
 
     test('returns mocked data', async () => {
       setStatisticsResult({
         id: 5,
+        division_code: '105',
+        name: 'Helse',
+        status: 'K',
+        main_language: 'nb',
         statistic_region_levels: [
           {
             region_level: {
@@ -418,12 +432,38 @@ describe('statisticService', () => {
             name: 'befolk',
           },
         },
+        variants: input.variants,
+        contacts: input.contacts,
       })
 
       await updateStatistic('helse', input, prismaMock)
 
       expect(prismaMock.statistic.update).toHaveBeenCalledExactlyOnceWith({
         ...mockUpdateStatisticPrismaUpdateData,
+        data: {
+          ...mockUpdateStatisticPrismaUpdateData.data,
+          responsiblePersons: {
+            set: [{ id: 2 }],
+          },
+          variants: {
+            update: [],
+            create: [
+              {
+                cancelled: false,
+                date_created: expect.any(Date),
+                last_updated: expect.any(Date),
+                revision: 'I',
+                frequency: {
+                  connect: {
+                    code: 'M',
+                  },
+                },
+                level_of_detail: 'Detaljnivå',
+                level_of_detail_en: 'Level of detail',
+              },
+            ],
+          },
+        },
         include: StatisticsDetailedIncludes,
       })
     })
@@ -459,6 +499,54 @@ describe('statisticService', () => {
         statregError: 'Deleting variants is currently not supported. Missing existing variant ids: 2.',
       })
 
+      expect(prismaMock.statistic.update).toHaveBeenCalledTimes(0)
+    })
+
+    test('throws error when contacts is missing for active statistic update with no existing contacts', async () => {
+      setStatisticsResult({
+        id: 5,
+        status: 'K',
+        responsiblePersons: [],
+        variants: [],
+        statistic_region_levels: [{ region_level: { code: 'BD', id: 1 } }],
+      })
+
+      input.status = { code: 'A' }
+      input.contacts = undefined
+
+      await expect(() => updateStatistic('helse', input, prismaMock)).rejects.toMatchObject({
+        statregError: 'An active statistic needs at least one contact.',
+      })
+
+      expect(prismaMock.statistic.update).toHaveBeenCalledTimes(0)
+    })
+
+    test('throws error when variants is missing for active statistic update with no existing variants', async () => {
+      setStatisticsResult({
+        id: 5,
+        status: 'K',
+        responsiblePersons: [{ principalName: 'bcd@ssb.no' }],
+        variants: [],
+        statistic_region_levels: [{ region_level: { code: 'BD', id: 1 } }],
+      })
+
+      input.status = { code: 'A' }
+      input.variants = undefined
+
+      await expect(() => updateStatistic('helse', input, prismaMock)).rejects.toMatchObject({
+        statregError: 'An active statistic needs at least one variant.',
+      })
+
+      expect(prismaMock.statistic.update).toHaveBeenCalledTimes(0)
+    })
+
+    test('throws error when an active statistic is set back to upcoming', async () => {
+      setStatisticsResult({ status: 'A', responsiblePersons: [], variants: [], statistic_region_levels: [] })
+      input.status = { code: 'K' }
+
+      await expect(() => updateStatistic('helse', input, prismaMock)).rejects.toMatchObject({
+        statregError: 'An active statistic cannot be set back to upcoming.',
+      })
       expect(prismaMock.statistic.update).toHaveBeenCalledTimes(0)
     })
   })
@@ -1126,6 +1214,8 @@ describe('statisticService', () => {
         'first_released_at',
         'main_language',
         'comment',
+        'contacts',
+        'variants',
       ] as (keyof StatisticUpdate)[]
 
       beforeEach(() => {
@@ -1136,11 +1226,13 @@ describe('statisticService', () => {
           first_released_at: '2024-04-01',
           main_language: 'nn',
           comment: 'Kommentar om statistikken',
-          status: { code: 'SA' },
+          status: { code: 'A' },
           relation_id: 2,
           previous_topic_codes: '05.01.02',
           yearly_reporting: false,
           statistic_region_levels: [],
+          contacts: ['bcd@ssb.no'],
+          variants: [{ frequency: { code: 'M' }, revision: { code: 'I' } }],
         }
 
         expectedResult = {
@@ -1150,11 +1242,13 @@ describe('statisticService', () => {
           first_released_at: new Date('2024-04-01T00:00:00.000Z'),
           main_language: 'nn',
           comment: 'Kommentar om statistikken',
-          status: 'SA',
+          status: 'A',
           relation_id: 2,
           previous_topic_codes: '05.01.02',
           yearly_reporting: false,
           statistic_region_levels: [],
+          contacts: ['bcd@ssb.no'],
+          variants: [{ frequency: { code: 'M' }, revision: { code: 'I' } }],
         }
       })
 
@@ -1214,6 +1308,16 @@ describe('statisticService', () => {
         expect(() => parseUpdateStatisticInput(input, requiredUpdateFields)).toThrow(
           expect.objectContaining({
             statregError: "Field 'status' must be one of these: K, A, IA, UT, SA, SP.",
+          })
+        )
+      })
+
+      test('throws error when comment is missing for active statistic', () => {
+        input.comment = undefined
+
+        expect(() => parseUpdateStatisticInput(input, requiredUpdateFields)).toThrow(
+          expect.objectContaining({
+            statregError: "Field 'comment' must be a non-empty string.",
           })
         )
       })

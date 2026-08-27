@@ -10,9 +10,16 @@
       display: flex;
     }
 
+    .pending-releases-wrapper {
+      position: relative;
+      padding-bottom: var(--ds-size-18);
+    }
+
     .pending-releases-buttons-wrapper {
+      position: absolute;
+      bottom: 0;
       display: flex;
-      margin-top: var(--ds-size-6);
+      gap: var(--ds-size-2);
     }
   }
 }
