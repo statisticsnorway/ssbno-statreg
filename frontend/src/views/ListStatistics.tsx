@@ -113,31 +113,26 @@ export default function ListStatistics() {
 
   useEffect(() => {
     if (optionsStatus !== 'loading') return
-    // cancelled ensures this is only ran once, and not on React's dev mode pre-render
-    let cancelled = false
 
     async function fetchFilterOptions() {
       const { data: shortnamesData, error: shortnamesError } = await client.GET('/shortnames')
       if (shortnamesError) {
         setApiError((prev) => [...prev, shortnamesError.message])
-      } else if (!cancelled) {
+      } else {
         setShortnames(shortnamesData ?? [])
       }
 
       const { data: contactsData, error: contactsError } = await client.GET('/contacts')
       if (contactsError) {
         setApiError((prev) => [...prev, contactsError.message])
-      } else if (!cancelled) {
+      } else {
         setContacts(contactsData ?? [])
       }
 
-      if (!cancelled) setOptionsStatus('loaded')
+      setOptionsStatus('loaded')
     }
 
     fetchFilterOptions()
-    return () => {
-      cancelled = true
-    }
   }, [optionsStatus])
 
   function updateRowCount(newCount: number) {
