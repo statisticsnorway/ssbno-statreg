@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from 'react-router'
 import { useAuth } from '../context/AuthContext'
-import { useState, useEffect, useRef, type SetStateAction } from 'react'
+import { useState, useEffect, type SetStateAction } from 'react'
 import {
   Alert,
   Heading,
@@ -43,6 +43,7 @@ import { ContactEditorSection } from '../components/ContactEditorSection'
 import { VariantModal } from '../components/VariantModal'
 import { VariantEditorSection } from '../components/VariantEditorSection'
 import { DivisionSelection } from '../components/DivisionSelection'
+import { useVariantModal } from '../hooks/useVariantModal'
 
 export type StatisticFormField = keyof StatisticPartialFormValues | 'variants' | 'contacts'
 export type StatisticFormErrors = Partial<Record<StatisticFormField, string>>
@@ -77,10 +78,15 @@ export default function CreateStatistic() {
   const [selectedContacts, setSelectedContacts] = useState<string[]>([])
 
   const [createdVariants, setCreatedVariants] = useState<Variant[]>([])
-  const [editVariantIndex, setEditVariantIndex] = useState<number | null>(null)
-  const addVariantButtonRef = useRef<HTMLButtonElement>(null)
-  const returnFocusToAddVariantButtonRef = useRef(false)
-  const [variantModalCloseCount, setVariantModalCloseCount] = useState(0)
+  const {
+    editVariantIndex,
+    addVariantButtonRef,
+    variantModalCloseCount,
+    handleOpenCreateVariantModal,
+    handleOpenEditVariantModal,
+    handleVariantModalActionClose,
+    handleVariantModalClose,
+  } = useVariantModal()
 
   const { getCheckboxProps, value: regionLevelValues } = useCheckboxGroup({
     name: 'region-level-checkbox',
@@ -194,13 +200,6 @@ export default function CreateStatistic() {
 
     initializeCreateStatistic()
   }, [createdShortname, isAdmin, navigate])
-
-  useEffect(() => {
-    if (!returnFocusToAddVariantButtonRef.current) return
-
-    returnFocusToAddVariantButtonRef.current = false
-    addVariantButtonRef.current?.focus()
-  }, [variantModalCloseCount])
 
   function isRequired(field: StatisticFormField) {
     return isCreateStatisticFieldRequired(status, field)
@@ -386,23 +385,6 @@ export default function CreateStatistic() {
     if (Object.keys(nextErrors).length) return
 
     createStatistic()
-  }
-
-  function handleOpenCreateVariantModal() {
-    setEditVariantIndex(null)
-  }
-
-  function handleOpenEditVariantModal(index: number) {
-    setEditVariantIndex(index)
-  }
-
-  function handleVariantModalActionClose() {
-    returnFocusToAddVariantButtonRef.current = true
-  }
-
-  function handleVariantModalClose() {
-    setEditVariantIndex(null)
-    setVariantModalCloseCount((count) => count + 1)
   }
 
   if (!isAdmin) return <ErrorPage type={ErrorType.NOTAUTH} />

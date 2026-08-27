@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from 'react-router'
 import { useAuth } from '../context/AuthContext'
-import { useState, useEffect, useRef, type SetStateAction } from 'react'
+import { useState, useEffect, type SetStateAction } from 'react'
 import {
   Heading,
   Popover,
@@ -41,6 +41,7 @@ import { DivisionSelection } from '../components/DivisionSelection'
 import { VariantModal } from '../components/VariantModal'
 import { VariantEditorSection } from '../components/VariantEditorSection'
 import { ContactEditorSection } from '../components/ContactEditorSection'
+import { useVariantModal } from '../hooks/useVariantModal'
 import type { StatisticFormErrors, StatisticFormField, StatisticPartialFormValues } from './CreateStatistic'
 
 type StatisticFormValues = {
@@ -60,10 +61,15 @@ export default function EditStatistic() {
   const [statistic, setStatistic] = useState<StatisticDetails>({})
   const [divisions, setDivisions] = useState<Division[]>([])
   const [createdVariants, setCreatedVariants] = useState<Variant[]>([])
-  const [editVariantIndex, setEditVariantIndex] = useState<number | null>(null)
-  const addVariantButtonRef = useRef<HTMLButtonElement>(null)
-  const returnFocusToAddVariantButtonRef = useRef(false)
-  const [variantModalCloseCount, setVariantModalCloseCount] = useState(0)
+  const {
+    editVariantIndex,
+    addVariantButtonRef,
+    variantModalCloseCount,
+    handleOpenCreateVariantModal,
+    handleOpenEditVariantModal,
+    handleVariantModalActionClose,
+    handleVariantModalClose,
+  } = useVariantModal()
   const [contacts, setContacts] = useState<Contact[]>([])
   const [selectedContacts, setSelectedContacts] = useState<string[]>([])
 
@@ -184,13 +190,6 @@ export default function EditStatistic() {
     initializeUpdateStatistic()
   }, [isAdmin, setRegionLevelValues, shortname])
 
-  useEffect(() => {
-    if (!returnFocusToAddVariantButtonRef.current) return
-
-    returnFocusToAddVariantButtonRef.current = false
-    addVariantButtonRef.current?.focus()
-  }, [variantModalCloseCount])
-
   function isRequired(field: StatisticFormField) {
     if (!status) return false
     return isEditStatisticFieldRequired(status, field) || field === 'comment'
@@ -291,23 +290,6 @@ export default function EditStatistic() {
 
       return currentErrors
     })
-  }
-
-  function handleOpenCreateVariantModal() {
-    setEditVariantIndex(null)
-  }
-
-  function handleOpenEditVariantModal(index: number) {
-    setEditVariantIndex(index)
-  }
-
-  function handleVariantModalActionClose() {
-    returnFocusToAddVariantButtonRef.current = true
-  }
-
-  function handleVariantModalClose() {
-    setEditVariantIndex(null)
-    setVariantModalCloseCount((count) => count + 1)
   }
 
   function handleContactsChange(nextSelectedContacts: string[]) {
