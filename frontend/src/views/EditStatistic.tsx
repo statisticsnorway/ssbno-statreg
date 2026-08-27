@@ -48,6 +48,7 @@ type StatisticFormValues = {
   status: keyof typeof StatisticStatus | ''
   values: StatisticPartialFormValues
   selectedContacts: string[]
+  createdVariants: Variant[]
 }
 
 function isEditStatisticFieldRequired(status: EditableStatisticStatus, field: StatisticFormField): boolean {
@@ -195,11 +196,17 @@ export default function EditStatistic() {
     return isEditStatisticFieldRequired(status, field) || field === 'comment'
   }
 
-  function nextInputValues(nextValues = values, nextStatus = status): StatisticFormValues {
+  function nextInputValues(
+    nextValues = values,
+    nextStatus = status,
+    nextSelectedContacts = selectedContacts,
+    nextCreatedVariants = createdVariants
+  ): StatisticFormValues {
     return {
       status: nextStatus,
       values: nextValues,
-      selectedContacts,
+      selectedContacts: nextSelectedContacts,
+      createdVariants: nextCreatedVariants,
     }
   }
 
@@ -222,7 +229,7 @@ export default function EditStatistic() {
     if (field === 'name' && !validatedInput.values.name) return 'Fyll inn norsk statistikknavn'
     if (field === 'name_en' && !validatedInput.values.name_en) return 'Fyll inn engelsk statistikknavn'
     if (field === 'division' && !validatedInput.values.division) return 'Velg ansvarlig seksjon for statistikken'
-    if (field === 'variants' && createdVariants.length === 0) return 'Legg til minst én variant'
+    if (field === 'variants' && validatedInput.createdVariants.length === 0) return 'Legg til minst én variant'
     if (field === 'contacts' && validatedInput.selectedContacts.length === 0) return 'Legg til minst én kontakt'
 
     return ''
@@ -275,25 +282,25 @@ export default function EditStatistic() {
   function handleVariantsChange(nextCreatedVariants: SetStateAction<Variant[]>) {
     const resolvedVariants =
       typeof nextCreatedVariants === 'function' ? nextCreatedVariants(createdVariants) : nextCreatedVariants
+    const validateInput = nextInputValues(values, status, selectedContacts, resolvedVariants)
 
     setCreatedVariants(resolvedVariants)
     setErrors((currentErrors) => {
-      if (!currentErrors.variants || resolvedVariants.length > 0) {
-        if (!currentErrors.variants) {
-          return currentErrors
-        }
-
-        const nextErrors = { ...currentErrors }
-        delete nextErrors.variants
-        return nextErrors
+      if (!currentErrors.variants) {
+        return currentErrors
       }
 
-      return currentErrors
+      const error = validateField('variants', validateInput)
+      if (error) return { ...currentErrors, variants: error }
+
+      const nextErrors = { ...currentErrors }
+      delete nextErrors.variants
+      return nextErrors
     })
   }
 
   function handleContactsChange(nextSelectedContacts: string[]) {
-    const validateInput = { ...nextInputValues(), selectedContacts: nextSelectedContacts }
+    const validateInput = nextInputValues(values, status, nextSelectedContacts)
 
     setSelectedContacts(nextSelectedContacts)
     setErrors((currentErrors) => {
