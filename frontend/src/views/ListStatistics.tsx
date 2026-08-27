@@ -1,5 +1,5 @@
 import './ListStatistics.css'
-import { useDeferredValue, useEffect, useMemo, useState } from 'react'
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
 import client from '../api'
 import type { Contact, ShortnameListing, StatisticListing } from '@ssbno-statreg/shared'
 import { PaginatedStatisticsTable } from '../components/StatisticsTable'
@@ -10,6 +10,7 @@ import {
   Field,
   Heading,
   Label,
+  Spinner,
 } from '@statisticsnorway/design-react'
 import { Link as ReactRouterLink, useSearchParams } from 'react-router'
 import { PlusCircleIcon } from '@navikt/aksel-icons'
@@ -29,7 +30,9 @@ export default function ListStatistics() {
   const [shortnames, setShortnames] = useState<ShortnameListing[]>([])
   const [contacts, setContacts] = useState<Contact[]>([])
   const [apiError, setApiError] = useState<string[]>([])
-  const [isLoadingOptions, setIsLoadingOptions] = useState(true)
+  const [hasTriggeredLoad, setHasTriggeredLoad] = useState(false)
+  const [optionsLoaded, setOptionsLoaded] = useState(false)
+  const optionsFetchStartedRef = useRef(false)
   const { auth } = useAuth()
 
   // Defer building the (potentially large) option lists so the initial render of the
@@ -112,6 +115,8 @@ export default function ListStatistics() {
   }
 
   useEffect(() => {
+    if (!hasTriggeredLoad || optionsFetchStartedRef.current) return
+    optionsFetchStartedRef.current = true
     async function fetchFilterOptions() {
       const { data: shortnamesData, error: shortnamesError } = await client.GET('/shortnames')
       if (shortnamesError) {
@@ -127,11 +132,11 @@ export default function ListStatistics() {
         setContacts(contactsData ?? [])
       }
 
-      setIsLoadingOptions(false)
+      setOptionsLoaded(true)
     }
 
     fetchFilterOptions()
-  }, [])
+  }, [hasTriggeredLoad])
 
   function updateRowCount(newCount: number) {
     setCount(newCount)
@@ -190,11 +195,13 @@ export default function ListStatistics() {
         <Field>
           <Label>Filtrer på kortnavn eller kontakt</Label>
           <Suggestion onSelectedChange={(selected) => onFilterChange(selected)} selected={selectedFilter}>
-            <Suggestion.Input />
+            <Suggestion.Input onFocus={() => setHasTriggeredLoad(true)} />
             <Suggestion.Clear onClick={() => onFilterChange(null)} />
             <Suggestion.List className='suggestion-list'>
-              {isLoadingOptions ? (
-                2
+              {!hasTriggeredLoad || !optionsLoaded ? (
+                <li className='suggestion-item' aria-live='polite'>
+                  <Spinner aria-label='Laster' data-size='sm' /> Laster...
+                </li>
               ) : (
                 <>
                   <Suggestion.Empty>Ingen treff</Suggestion.Empty>
