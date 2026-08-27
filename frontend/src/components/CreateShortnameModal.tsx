@@ -36,25 +36,25 @@ export function CreateShortnameModal({ openCreateShortnameModal }: Readonly<Crea
     fetchShortnames()
   }, [isAdmin])
 
-  function validateShortname() {
-    if (!shortnameInput) {
+  function validateShortname(value: string) {
+    if (!value) {
       setValidationError('Fyll ut et kortnavn')
       return false
     }
 
-    const invalidShortnameCharacters = shortnameInput.match(/[^a-z_]/g)
+    const invalidShortnameCharacters = value.match(/[^a-z_]/g)
     if (invalidShortnameCharacters) {
       const invalidChars = [...new Set(invalidShortnameCharacters)]
       setValidationError(`Kortnavnet inneholder ugyldige tegn: ${invalidChars.join(', ')}`)
       return false
     }
 
-    if (shortnameInput.length > 14) {
+    if (value.length > 14) {
       setValidationError('Kortnavnet kan ikke være lengre enn 14 tegn')
       return false
     }
 
-    if (shortnames.includes(shortnameInput)) {
+    if (shortnames.includes(value)) {
       setValidationError('Dette kortnavnet er ikke ledig')
       return false
     }
@@ -64,7 +64,9 @@ export function CreateShortnameModal({ openCreateShortnameModal }: Readonly<Crea
   }
 
   function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setShortnameInput(e.target.value)
+    const value = e.target.value
+    setShortnameInput(value)
+    validateShortname(value)
   }
 
   async function createShortname() {
@@ -83,7 +85,7 @@ export function CreateShortnameModal({ openCreateShortnameModal }: Readonly<Crea
   function handleOnSubmit(e: React.ChangeEvent<HTMLFormElement>) {
     e.preventDefault()
 
-    if (!validateShortname()) return
+    if (!validateShortname(shortnameInput)) return
     createShortname()
   }
 
@@ -117,7 +119,8 @@ export function CreateShortnameModal({ openCreateShortnameModal }: Readonly<Crea
               autofocus='true'
               aria-invalid={!!validationError}
               onChange={handleInputChange}
-              onBlur={validateShortname}
+              onBlur={() => validateShortname(shortnameInput)}
+              maxLength={14}
             />
             <Paragraph data-limit='14' data-field='counter' />
             {validationError ? (
@@ -126,7 +129,7 @@ export function CreateShortnameModal({ openCreateShortnameModal }: Readonly<Crea
               shortnameInput && <ValidationMessage data-color='success'>Kortnavn er ledig</ValidationMessage>
             )}
           </Field>
-          <div style={{ display: 'flex', marginTop: 'var(--ds-size-3)' }}>
+          <div style={{ display: 'flex', gap: 'var(--ds-size-2)', marginTop: 'var(--ds-size-3)' }}>
             <Button variant='primary' type='submit'>
               Opprett kortnavn
             </Button>
