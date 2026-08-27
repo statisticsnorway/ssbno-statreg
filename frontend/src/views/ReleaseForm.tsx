@@ -46,6 +46,7 @@ import client from '../api'
 import './ReleaseForm.css'
 import { useAuth } from '../context/AuthContext'
 import { ErrorAlert } from '../components/ErrorAlert'
+import ErrorPage, { ErrorType } from './ErrorPage'
 
 type Statistic = ReleaseByIdResponse['statistic'] & {
   approval_status?: ReleaseByIdResponse['approval_status']
@@ -228,6 +229,7 @@ export default function ReleaseForm() {
   const [newOrUpdatedRelease, setNewOrUpdatedRelease] = useState<ReleaseDetails>({})
   const [calendarDates, setCalendarDates] = useState<CalenderDate>({})
   const [apiError, setApiError] = useState<string[]>([])
+  const [isNotFound, setIsNotFound] = useState(false)
   const [calendarApiError, setCalendarApiError] = useState<string>('')
   const [variantReleasesApiError, setVariantReleasesApiError] = useState<string>('')
   const [sameDateReleasesApiError, setSameDateReleasesApiError] = useState<string>('')
@@ -257,25 +259,33 @@ export default function ReleaseForm() {
     async function setPrefilledValues() {
       if (!releaseId) return
 
-      const { data: response } = await client.GET('/releases/{id}', {
+      setApiError([])
+      setIsNotFound(false)
+      const { data, error, response } = await client.GET('/releases/{id}', {
         params: { path: { id: releaseId!.toString() } },
       })
 
+      if (error) {
+        if (response.status === 410 || response.status === 404) setIsNotFound(true)
+        else setApiError([error.message])
+        return
+      }
+
       const loaded = {
-        dateType: response?.release_date_precision,
-        publishTime: parseDateFromString(response?.publish_time),
-        periodFrom: parseDateFromString(response?.period_from),
-        periodTo: parseDateFromString(response?.period_to),
+        dateType: data?.release_date_precision,
+        publishTime: parseDateFromString(data?.publish_time),
+        periodFrom: parseDateFromString(data?.period_from),
+        periodTo: parseDateFromString(data?.period_to),
         comment: '',
       }
 
-      setApprovalStatus(response?.approval_status ?? ApprovalStatus.PENDING)
+      setApprovalStatus(data?.approval_status ?? ApprovalStatus.PENDING)
       setValues(loaded)
       publishTimePicker.setSelected(loaded.publishTime)
       periodFromPicker.setSelected(loaded.periodFrom)
       periodToPicker.setSelected(loaded.periodTo)
-      setStatistic(response?.statistic)
-      setVariant(response?.variant)
+      setStatistic(data?.statistic)
+      setVariant(data?.variant)
     }
 
     setPrefilledValues()
@@ -413,6 +423,10 @@ export default function ReleaseForm() {
   const showEarlyPublishTimeWarning = isAdmin && values.publishTime && values.publishTime < inThreeMonths
   const showFullPublishDateWarning = isAdmin && selectedDateStatus === 'FULL'
   const showBlockedPublishDateWarning = isAdmin && selectedDateStatus === 'BLOCKED'
+
+  if (isNotFound) {
+    return <ErrorPage type={ErrorType.NOTFOUND} />
+  }
 
   return (
     <>

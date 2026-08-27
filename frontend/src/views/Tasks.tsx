@@ -319,23 +319,25 @@ export default function Tasks() {
                 >{`${publishedReleasesAmountText} har blitt godkjent`}</Alert>
               )}
             </div>
-            <PendingReleasesTable
-              pendingReleases={pendingReleases}
-              getCheckboxProps={getCheckboxProps}
-              sortBy={pendingSortBy}
-              setSortBy={setPendingSortBy}
-            />
-            {selectedPendingReleaseIds.length > 0 && (
-              <div className='pending-releases-buttons-wrapper'>
-                <Button variant='primary' type='submit'>
-                  Godkjenn ({selectedPendingReleaseIds.length} valgte)
-                </Button>
-                <Button variant='tertiary' onClick={() => setSelectedPendingReleaseIds([])}>
-                  <EraserIcon />
-                  Nullstill valg
-                </Button>
-              </div>
-            )}
+            <div className='pending-releases-wrapper'>
+              <PendingReleasesTable
+                pendingReleases={pendingReleases}
+                getCheckboxProps={getCheckboxProps}
+                sortBy={pendingSortBy}
+                setSortBy={setPendingSortBy}
+              />
+              {selectedPendingReleaseIds.length > 0 && (
+                <div className='pending-releases-buttons-wrapper'>
+                  <Button variant='primary' type='submit'>
+                    Godkjenn ({selectedPendingReleaseIds.length} valgte)
+                  </Button>
+                  <Button variant='tertiary' onClick={() => setSelectedPendingReleaseIds([])}>
+                    <EraserIcon />
+                    Nullstill valg
+                  </Button>
+                </div>
+              )}
+            </div>
           </form>
         </Tabs.Panel>
       </Tabs>
