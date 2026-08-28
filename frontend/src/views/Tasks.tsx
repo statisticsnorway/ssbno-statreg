@@ -38,7 +38,7 @@ type PendingReleaseRowProps = {
 type PendingReleaseTableProps = {
   pendingReleases: ReleaseListing[]
   getCheckboxProps: ReturnType<typeof useCheckboxGroup>['getCheckboxProps']
-  headerRowRef: React.RefObject<HTMLTableSectionElement | null>
+  tableHeaderRef: React.RefObject<HTMLTableSectionElement | null>
   sortBy?: string
   setSortBy?: (sortBy: string) => void
 }
@@ -85,13 +85,13 @@ function PendingReleaseRow({ pendingRelease, getCheckboxProps }: Readonly<Pendin
 function PendingReleasesTable({
   pendingReleases,
   getCheckboxProps,
-  headerRowRef,
+  tableHeaderRef,
   sortBy,
   setSortBy,
 }: Readonly<PendingReleaseTableProps>) {
   return (
     <Table aria-description='Tabell med publiseringer som har status forslag'>
-      <Table.Head ref={headerRowRef} tabIndex={-1}>
+      <Table.Head ref={tableHeaderRef} tabIndex={-1}>
         <Table.Row>
           {TABLE_HEADER_CELLS.map(({ label, field, sortable, caption }) => (
             <Table.HeaderCell
@@ -237,7 +237,7 @@ export default function Tasks() {
   const [pendingSortBy, setPendingSortBy] = useState<string>('-publish_time')
   const [approvedReleasesCount, setApprovedReleasesCount] = useState(0)
   const [apiError, setApiError] = useState<string[]>([])
-  const pendingReleasesHeaderRowRef = useRef<HTMLTableSectionElement>(null)
+  const pendingTableHeaderRef = useRef<HTMLTableSectionElement>(null)
 
   const { auth } = useAuth()
   const isAdmin = auth?.isAdmin
@@ -290,7 +290,7 @@ export default function Tasks() {
     }
 
     setApprovedReleasesCount(data.releases?.filter(({ status }) => status === 200)?.length ?? 0)
-    pendingReleasesHeaderRowRef.current?.focus()
+    pendingTableHeaderRef.current?.focus()
     setSelectedPendingReleaseIds([])
   }
 
@@ -303,7 +303,7 @@ export default function Tasks() {
   }
 
   function clearPendingReleaseSelection() {
-    pendingReleasesHeaderRowRef.current?.focus()
+    pendingTableHeaderRef.current?.focus()
     setSelectedPendingReleaseIds([])
   }
 
@@ -338,7 +338,7 @@ export default function Tasks() {
               <PendingReleasesTable
                 pendingReleases={pendingReleases}
                 getCheckboxProps={getCheckboxProps}
-                headerRowRef={pendingReleasesHeaderRowRef}
+                tableHeaderRef={pendingTableHeaderRef}
                 sortBy={pendingSortBy}
                 setSortBy={setPendingSortBy}
               />
