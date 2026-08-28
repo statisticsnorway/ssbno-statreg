@@ -34,7 +34,6 @@ export function VariantEditorSection({
         <div className='created-variants-container'>
           {createdVariants.map((variant, index) => {
             if (variant.cancelled) return null
-
             return (
               <Card
                 key={['created-variant', variant.frequency?.code ?? index, variant.revision?.code ?? index].join('-')}
