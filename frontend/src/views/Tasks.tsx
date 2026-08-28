@@ -284,6 +284,7 @@ export default function Tasks() {
     }
 
     setApprovedReleasesCount(data.releases?.filter(({ status }) => status === 200)?.length ?? 0)
+    pendingReleasesHeaderRowRef.current?.focus()
     setSelectedPendingReleaseIds([])
   }
 
@@ -319,7 +320,7 @@ export default function Tasks() {
         </Tabs.List>
         <Tabs.Panel value='pending-releases' className='pending-releases-tab-panel'>
           <form onSubmit={handleOnSubmit}>
-            <div className='approved-releases-alert-wrapper'>
+            <div className='approved-releases-alert-wrapper' aria-live='polite' role='status'>
               {approvedReleasesCount > 0 && (
                 <Alert
                   data-color='success'
