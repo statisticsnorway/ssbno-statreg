@@ -1,4 +1,4 @@
-import { getBlockedDatesInPeriod, isDateBlocked, getHolidays } from '@/lib/blockedDates'
+import { getBlockedDatesInPeriod, isDateBlocked, isDateAutoBlocked, getHolidays } from '@/lib/blockedDates'
 import type { ExtendedPrismaClient } from '@/lib/prisma'
 import { StatregError } from '@/lib/statregError'
 import { sanitize, parseDateOnly, ensureRequiredFieldsExists, getDateOnlyAsString } from '@/lib/utils'
@@ -58,6 +58,24 @@ export async function createBlockedReleaseDay(
     },
   })
 
+  return getFutureBlockedReleaseDates(prisma)
+}
+
+export async function deleteBlockedReleaseDate(
+  prisma: CalendarDatePrisma,
+  dateString?: string | string[]
+): Promise<BlockedReleaseDate[]> {
+  const date = parseDateOnly(dateString)
+  if (isDateAutoBlocked(dateString as string)) {
+    throw new StatregError('Automatically blocked dates cannot be deleted')
+  }
+
+  const blockedDate = await prisma.calender_date.findUnique({ where: { day: date } })
+  if (!blockedDate) {
+    throw new StatregError(`The date ${dateString} is not a blocked release date`, 404)
+  }
+
+  await prisma.calender_date.delete({ where: { day: date } })
   return getFutureBlockedReleaseDates(prisma)
 }
 
