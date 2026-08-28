@@ -10,6 +10,7 @@ import {
   Field,
   Heading,
   Label,
+  Spinner,
 } from '@statisticsnorway/design-react'
 import { Link as ReactRouterLink, useSearchParams } from 'react-router'
 import { PlusCircleIcon } from '@navikt/aksel-icons'
@@ -29,11 +30,10 @@ export default function ListStatistics() {
   const [shortnames, setShortnames] = useState<ShortnameListing[]>([])
   const [contacts, setContacts] = useState<Contact[]>([])
   const [apiError, setApiError] = useState<string[]>([])
-  const [isLoadingOptions, setIsLoadingOptions] = useState(true)
+  const [optionsStatus, setOptionsStatus] = useState<'idle' | 'loading' | 'loaded'>('idle')
   const { auth } = useAuth()
 
-  // Defer building the (potentially large) option lists so the initial render of the
-  // statistics table paints first and stays responsive while the options fill in.
+  // Defer building the (potentially large) option lists until the user opens it.
   const deferredShortnames = useDeferredValue(shortnames, [])
   const deferredContacts = useDeferredValue(contacts, [])
 
@@ -112,6 +112,8 @@ export default function ListStatistics() {
   }
 
   useEffect(() => {
+    if (optionsStatus !== 'loading') return
+
     async function fetchFilterOptions() {
       const { data: shortnamesData, error: shortnamesError } = await client.GET('/shortnames')
       if (shortnamesError) {
@@ -127,11 +129,11 @@ export default function ListStatistics() {
         setContacts(contactsData ?? [])
       }
 
-      setIsLoadingOptions(false)
+      setOptionsStatus('loaded')
     }
 
     fetchFilterOptions()
-  }, [])
+  }, [optionsStatus])
 
   function updateRowCount(newCount: number) {
     setCount(newCount)
@@ -190,11 +192,13 @@ export default function ListStatistics() {
         <Field>
           <Label>Filtrer på kortnavn eller kontakt</Label>
           <Suggestion onSelectedChange={(selected) => onFilterChange(selected)} selected={selectedFilter}>
-            <Suggestion.Input />
+            <Suggestion.Input onFocus={() => setOptionsStatus((status) => (status === 'idle' ? 'loading' : status))} />
             <Suggestion.Clear onClick={() => onFilterChange(null)} />
             <Suggestion.List className='suggestion-list'>
-              {isLoadingOptions ? (
-                2
+              {optionsStatus !== 'loaded' ? (
+                <li className='suggestion-item' aria-live='polite'>
+                  <Spinner aria-label='Laster' data-size='sm' /> Laster...
+                </li>
               ) : (
                 <>
                   <Suggestion.Empty>Ingen treff</Suggestion.Empty>
