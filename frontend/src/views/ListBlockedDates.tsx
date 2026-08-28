@@ -9,13 +9,15 @@ import { ErrorAlert } from '../components/ErrorAlert'
 
 type BlockedDateRowProps = {
   readonly day: BlockedReleaseDate
+  readonly onDelete: (date: string | undefined) => void
 }
 
 type BlockedDatesTableProps = {
   readonly days: readonly BlockedReleaseDate[]
+  readonly onDelete: (date: string | undefined) => void
 }
 
-function BlockedDateRow({ day }: BlockedDateRowProps) {
+function BlockedDateRow({ day, onDelete }: BlockedDateRowProps) {
   return (
     <Table.Row>
       <Table.Cell>{day.date}</Table.Cell>
@@ -26,7 +28,7 @@ function BlockedDateRow({ day }: BlockedDateRowProps) {
             variant='tertiary'
             data-color='danger'
             aria-label={`Slett sperret dato: ${day.date}`}
-            onClick={() => alert('Kommer senere')}
+            onClick={() => onDelete(day.date)}
           >
             <TrashIcon />
           </Button>
@@ -36,7 +38,7 @@ function BlockedDateRow({ day }: BlockedDateRowProps) {
   )
 }
 
-function BlockedDatesTable({ days }: BlockedDatesTableProps) {
+function BlockedDatesTable({ days, onDelete }: BlockedDatesTableProps) {
   return (
     <Table className='blocked-days-table'>
       <Table.Head>
@@ -50,7 +52,7 @@ function BlockedDatesTable({ days }: BlockedDatesTableProps) {
       </Table.Head>
       <Table.Body>
         {days.map((day) => (
-          <BlockedDateRow key={day.date} day={day} />
+          <BlockedDateRow key={day.date} day={day} onDelete={onDelete} />
         ))}
       </Table.Body>
     </Table>
@@ -75,6 +77,21 @@ export default function ListBlockedDates() {
     fetchBlockedDates()
   }, [])
 
+  async function deleteBlockedDate(date: string | undefined) {
+    if (!date) return
+
+    const { data, error } = await client.DELETE('/calendar/blocked-release-days/{date}', {
+      params: { path: { date } },
+    })
+
+    if (error) {
+      setApiError((prev) => [...prev, error.message])
+      return
+    }
+
+    setBlockedDates(data ?? [])
+  }
+
   return (
     <>
       {apiError.length > 0 && <ErrorAlert message={apiError} />}
@@ -89,7 +106,7 @@ export default function ListBlockedDates() {
         </Heading>
         <Paragraph>Datoer som er automatisk lagt inn kan ikke redigeres eller slettes</Paragraph>
       </div>
-      <BlockedDatesTable days={blockedDates} />
+      <BlockedDatesTable days={blockedDates} onDelete={deleteBlockedDate} />
       <Button
         variant='tertiary'
         data-color='neutral'
