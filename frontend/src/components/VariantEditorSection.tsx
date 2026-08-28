@@ -22,44 +22,50 @@ export function VariantEditorSection({
   onOpenCreateVariantModal,
   onOpenEditVariantModal,
 }: Readonly<VariantEditorSectionProps>) {
+  const cancelledVariants = createdVariants.some((variant) => !variant.cancelled)
+
   return (
     <>
       <div className='created-variants-title-container'>
         <Label>{variantLabel}</Label>
         <Paragraph>Legg til variant for å kunne melde publiseringsdato på statistikken</Paragraph>
       </div>
-      {createdVariants.length > 0 && (
+      {cancelledVariants && (
         <div className='created-variants-container'>
-          {createdVariants.map((variant, index) => (
-            <Card
-              key={['created-variant', variant.frequency?.code ?? index, variant.revision?.code ?? index].join('-')}
-              variant='tinted'
-            >
-              <Card.Block>
-                <div className='created-variant-heading-container'>
-                  <Heading>
-                    {[
-                      variant.frequency!.name,
-                      RevisionNames[variant.revision!.code as keyof typeof RevisionNames].toLocaleLowerCase(),
-                    ].join(', ')}
-                  </Heading>
-                  <Button
-                    variant='tertiary'
-                    data-color='danger'
-                    command='show-modal'
-                    commandfor={variantDialogId}
-                    onClick={() => onOpenEditVariantModal(index)}
-                  >
-                    <PencilWritingIcon /> Rediger
-                  </Button>
-                </div>
-                <Paragraph>
-                  Detaljnivå: {variant.level_of_detail?.name} <br />
-                  Engelsk detaljnivå: {variant.level_of_detail?.name_en}
-                </Paragraph>
-              </Card.Block>
-            </Card>
-          ))}
+          {createdVariants.map((variant, index) => {
+            if (variant.cancelled) return null
+
+            return (
+              <Card
+                key={['created-variant', variant.frequency?.code ?? index, variant.revision?.code ?? index].join('-')}
+                variant='tinted'
+              >
+                <Card.Block>
+                  <div className='created-variant-heading-container'>
+                    <Heading>
+                      {[
+                        variant.frequency!.name,
+                        RevisionNames[variant.revision!.code as keyof typeof RevisionNames].toLocaleLowerCase(),
+                      ].join(', ')}
+                    </Heading>
+                    <Button
+                      variant='tertiary'
+                      data-color='danger'
+                      command='show-modal'
+                      commandfor={variantDialogId}
+                      onClick={() => onOpenEditVariantModal(index)}
+                    >
+                      <PencilWritingIcon /> Rediger
+                    </Button>
+                  </div>
+                  <Paragraph>
+                    Detaljnivå: {variant.level_of_detail?.name} <br />
+                    Engelsk detaljnivå: {variant.level_of_detail?.name_en}
+                  </Paragraph>
+                </Card.Block>
+              </Card>
+            )
+          })}
         </div>
       )}
       <div className='create-variant-button-container'>
