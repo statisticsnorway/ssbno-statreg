@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma'
 import { handleErrors } from '@/lib/prismaErrors'
 import {
   createBlockedReleaseDay,
+  deleteBlockedReleaseDate,
   getFutureBlockedReleaseDates,
   getDateStatusForRange,
 } from '@/services/calendarService'
@@ -21,6 +22,15 @@ export default function calendarController(router: Router) {
   router.post('/calendar/blocked-release-days/:date', requireAdminAuthorization(), async (req, res) => {
     try {
       const result = await createBlockedReleaseDay(prisma, req.params.date, req.body)
+      res.json(result)
+    } catch (error) {
+      handleErrors(error, res)
+    }
+  })
+
+  router.delete('/calendar/blocked-release-days/:date', requireAdminAuthorization(), async (req, res) => {
+    try {
+      const result = await deleteBlockedReleaseDate(prisma, req.params.date)
       res.json(result)
     } catch (error) {
       handleErrors(error, res)
