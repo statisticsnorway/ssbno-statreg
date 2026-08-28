@@ -1018,6 +1018,30 @@ describe('statisticService', () => {
       expect(result).toStrictEqual(expectedResult)
     })
 
+    test('maps incoming statistic relations', async () => {
+      input.incoming_statistic_relations = [
+        {
+          id: 8,
+          language: 'nb',
+          name: 'Befolkning',
+          name_en: 'Population',
+          shortname: { name: 'befolk' },
+        },
+      ]
+      expectedResult.incoming_relations = [
+        {
+          id: 8,
+          shortname: 'befolk',
+          name: 'Befolkning',
+          name_en: 'Population',
+        },
+      ]
+
+      const result = await mapStatisticDetails(input)
+
+      expect(result).toStrictEqual(expectedResult)
+    })
+
     test('falls back to pending approval status when desk approval status is missing', async () => {
       input.desk_appoval_status = null
       expectedResult.approval_status = ApprovalStatus.PENDING
@@ -1450,6 +1474,7 @@ const mockStatisticsDetailedPrismaResult = {
       name: 'kpi',
     },
   },
+  incoming_statistic_relations: [],
   statistic_region_levels: [
     {
       region_level: {
@@ -1539,6 +1564,7 @@ const mockedStatisticDetailedResult = {
     name: 'Utenrikshandel og varestrøm',
     name_en: 'Foreign trade and goods flow',
   },
+  incoming_relations: [],
   name: 'Helse og helsetjenester',
   name_en: 'Health and health services',
   updated_at: '2021-09-01T08:30:00.000Z',
