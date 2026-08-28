@@ -1049,6 +1049,7 @@ export interface components {
     Release_update: components['schemas']['Release'] & {
       comment?: string
       release_date_precision?: string
+      archived?: boolean
     }
     Release_get: components['schemas']['Release'] & {
       approval_status?: string | null
@@ -1067,6 +1068,7 @@ export interface components {
         revision?: components['schemas']['Revision']
       }
       cancelled?: boolean
+      archived?: boolean
       release_date_precision?: string
     }
     Release_listing: components['schemas']['Release_get'] & {
@@ -1120,7 +1122,7 @@ export interface components {
       | components['schemas']['Statistic_create_upcoming']
       | components['schemas']['Statistic_create_active']
     Statistic_update: {
-      relation?: string | null
+      relation_id?: number | null
     } & components['schemas']['Statistic_create_base']
     Statistic_details: {
       version?: number
@@ -1130,6 +1132,7 @@ export interface components {
       yearly_reporting?: boolean
       previous_topic_codes?: string | null
       relation?: {
+        id?: number
         shortname?: string
         readonly name?: string
         readonly name_en?: string
@@ -1166,7 +1169,8 @@ export interface components {
       }[]
     }
     Variant: {
-      readonly id?: number
+      /** @description On update, provide the id of an existing variant to update it, or omit it to create a new variant. Ignored/read-only when creating a statistic. */
+      id?: number
       version?: number
       /** Format: date-time */
       readonly updated_at?: string

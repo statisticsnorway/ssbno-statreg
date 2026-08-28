@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router'
-import { Heading, Link, Paragraph } from '@digdir/designsystemet-react'
+import { Heading, Link, Paragraph } from '@statisticsnorway/design-react'
 import type { Version } from '@ssbno-statreg/shared'
 import client from '../api'
 import { ErrorAlert } from '../components/ErrorAlert'

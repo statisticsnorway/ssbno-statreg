@@ -215,6 +215,7 @@ describe('releasesService ', async () => {
       expect(prismaMock.release.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: {
+            archived: false,
             variant: { id: 1 },
           },
         })
@@ -445,6 +446,15 @@ describe('releasesService ', async () => {
         statregError: 'Release 1 not found',
       })
     })
+
+    test('returns 410 if release is archived', async () => {
+      setPrismaResult({ ...mockedSingleReleasePrismaResult, archived: true })
+
+      await expect(() => getReleaseById('1', prismaMock)).rejects.toMatchObject({
+        status: 410,
+        statregError: 'Release 1 is archived',
+      })
+    })
   })
 
   describe('updateRelease ', () => {
@@ -470,6 +480,27 @@ describe('releasesService ', async () => {
           comment: 'Mock comment.',
         },
       })
+    })
+
+    test('rejects when a non-admin archives a release', async () => {
+      const archivedReleaseInput = { ...mockUpdateReleaseInput, archived: true }
+
+      await expect(
+        asyncLocalStorage.run({ isAdmin: false }, () => updateRelease(prismaMock, '1', archivedReleaseInput, now))
+      ).rejects.toMatchObject({ status: 403, statregError: 'Only admins can archive releases' })
+
+      expect(prismaMock.release.update).toHaveBeenCalledTimes(0)
+    })
+
+    test('allows an admin to archive a release', async () => {
+      setPrismaResult(mockedSingleReleasePrismaResult)
+      const archivedReleaseInput = { ...mockUpdateReleaseInput, archived: true }
+
+      await asyncLocalStorage.run({ isAdmin: true }, () => updateRelease(prismaMock, '1', archivedReleaseInput, now))
+
+      expect(prismaMock.release.update).toHaveBeenCalledWith(
+        expect.objectContaining({ data: expect.objectContaining({ archived: true }) })
+      )
     })
 
     test('updates release with accepted status when current user is admin', async () => {
@@ -950,6 +981,7 @@ const mockedSingleReleasePrismaResult = {
   period_to: new Date('2024-08-31T00:00:00Z'),
   period_from: new Date('2024-08-01T00:00:00Z'),
   cancelled: false,
+  archived: false,
   release_date_precision: 'dag',
   variant: {
     id: 1,
@@ -1050,6 +1082,7 @@ const mockedSingleReleaseResult = {
   period_to: '2024-08-31',
   release_date_precision: 'dag',
   cancelled: false,
+  archived: false,
 }
 
 const mockCreateReleaseInput = {

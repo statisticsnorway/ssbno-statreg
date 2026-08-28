@@ -1,5 +1,15 @@
-import { useState, useEffect, type Dispatch, type SetStateAction } from 'react'
-import { Button, Heading, Dialog, Field, Label, Input, Select, Paragraph } from '@digdir/designsystemet-react'
+import { useState, useEffect, useRef, type Dispatch, type SetStateAction } from 'react'
+import {
+  Button,
+  Heading,
+  Dialog,
+  Field,
+  Label,
+  Input,
+  Select,
+  Paragraph,
+  Popover,
+} from '@statisticsnorway/design-react'
 import { TrashIcon } from '@navikt/aksel-icons'
 
 import './VariantModal.css'
@@ -7,12 +17,54 @@ import client from '../api'
 import { RevisionNames, type Frequency, type Variant } from '@ssbno-statreg/shared'
 import { ErrorAlert } from './ErrorAlert'
 
+export function useVariantModal() {
+  const [editVariantIndex, setEditVariantIndex] = useState<number | null>(null)
+  const addVariantButtonRef = useRef<HTMLButtonElement>(null)
+  const returnFocusToAddVariantButtonRef = useRef(false)
+  const [variantModalCloseCount, setVariantModalCloseCount] = useState(0)
+
+  useEffect(() => {
+    if (!returnFocusToAddVariantButtonRef.current) return
+
+    returnFocusToAddVariantButtonRef.current = false
+    addVariantButtonRef.current?.focus()
+  }, [variantModalCloseCount])
+
+  function handleOpenCreateVariantModal() {
+    setEditVariantIndex(null)
+  }
+
+  function handleOpenEditVariantModal(index: number) {
+    setEditVariantIndex(index)
+  }
+
+  function handleVariantModalActionClose() {
+    returnFocusToAddVariantButtonRef.current = true
+  }
+
+  function handleVariantModalClose() {
+    setEditVariantIndex(null)
+    setVariantModalCloseCount((count) => count + 1)
+  }
+
+  return {
+    editVariantIndex,
+    addVariantButtonRef,
+    variantModalCloseCount,
+    handleOpenCreateVariantModal,
+    handleOpenEditVariantModal,
+    handleVariantModalActionClose,
+    handleVariantModalClose,
+  }
+}
+
 type VariantModalProps = {
-  openVariantModal: boolean
-  setOpenVariantModal: (open: boolean) => void
+  dialogId: string
   setCreatedVariants: Dispatch<SetStateAction<Variant[]>>
   editVariantValues?: Variant
   editVariantIndex?: number | null
+  onActionClose?: () => void
+  onAfterClose?: () => void
 }
 
 type CreateVariantFormValues = {
@@ -23,22 +75,33 @@ type CreateVariantFormValues = {
 }
 
 export function VariantModal({
-  openVariantModal,
-  setOpenVariantModal,
+  dialogId,
   setCreatedVariants,
   editVariantValues,
   editVariantIndex,
+  onActionClose,
+  onAfterClose,
 }: Readonly<VariantModalProps>) {
   const [frequencies, setFrequencies] = useState<Frequency[]>([])
   const [apiError, setApiError] = useState<string[]>([])
+  const [isDeletePopoverOpen, setIsDeletePopoverOpen] = useState(false)
   const [values, setValues] = useState<CreateVariantFormValues>({
     revision_code: editVariantValues?.revision?.code ?? 'I',
     frequency_code: editVariantValues?.frequency?.code ?? 'U',
     level_of_detail_name: editVariantValues?.level_of_detail?.name ?? '',
     level_of_detail_name_en: editVariantValues?.level_of_detail?.name_en ?? '',
   })
+  const deleteTriggerRef = useRef<HTMLButtonElement>(null)
+  const returnFocusToDeleteTriggerRef = useRef(false)
 
   const isEditMode = typeof editVariantIndex === 'number'
+
+  useEffect(() => {
+    if (!isDeletePopoverOpen && returnFocusToDeleteTriggerRef.current) {
+      returnFocusToDeleteTriggerRef.current = false
+      deleteTriggerRef.current?.focus()
+    }
+  }, [isDeletePopoverOpen])
 
   useEffect(() => {
     async function fetchFrequencies() {
@@ -57,6 +120,7 @@ export function VariantModal({
 
     setCreatedVariants((prevVariants: Variant[]) => {
       const nextVariant: Variant = {
+        ...(isEditMode && editVariantValues?.id ? { id: editVariantValues.id } : {}),
         revision: {
           code: values.revision_code,
         },
@@ -73,34 +137,46 @@ export function VariantModal({
 
       return prevVariants.map((variant, index) => (index === editVariantIndex ? nextVariant : variant))
     })
-    handleCloseModal()
   }
 
   function deleteVariant() {
     if (!isEditMode) return
 
     setCreatedVariants((prevVariants: Variant[]) => prevVariants.filter((_, index) => index !== editVariantIndex))
-    handleCloseModal()
   }
 
-  function handleCloseModal() {
-    setOpenVariantModal(false)
+  function handleDialogClose() {
+    setApiError([])
+    setIsDeletePopoverOpen(false)
+    onAfterClose?.()
   }
+
+  function closeDeletePopoverAndReturnFocus() {
+    returnFocusToDeleteTriggerRef.current = true
+    setIsDeletePopoverOpen(false)
+  }
+
+  const canDeleteVariant = isEditMode && !editVariantValues?.id
 
   return (
-    <Dialog id='variant-modal' open={openVariantModal} onClose={handleCloseModal}>
+    <Dialog id={dialogId} aria-labelledby='variant-modal-heading' onClose={handleDialogClose} closedby='any'>
       <Dialog.Block>
-        <Heading data-size='xs'>{isEditMode ? 'Rediger variant' : 'Legg til variant'}</Heading>
+        <Heading id='variant-modal-heading' data-size='xs'>
+          {isEditMode ? 'Rediger variant' : 'Legg til variant'}
+        </Heading>
       </Dialog.Block>
       <Dialog.Block className='variant-modal-form'>
         {apiError.length > 0 && <ErrorAlert message={apiError} />}
-        <Paragraph>
+        <Paragraph id='variant-modal-description'>
           En variant definerer frekvens og detaljnivå for statistikken. Du trenger minst én variant for å kunne melde
           publiseringsdato.
         </Paragraph>
         <Field>
           <Label>Revisjon</Label>
           <Select
+            // @ts-expect-error native "autofocus" is not part of the React types
+            autofocus='true'
+            aria-describedby='variant-modal-description'
             value={values.revision_code}
             onChange={(e) => setValues((prevValues) => ({ ...prevValues, revision_code: e.target.value }))}
           >
@@ -141,17 +217,52 @@ export function VariantModal({
         </Field>
         <div className='variant-modal-form-buttons'>
           <div className='variant-modal-form-buttons-left'>
-            <Button variant='primary' onClick={createVariant}>
-              Legg til
+            <Button variant='primary' command='close' commandfor={dialogId} onClick={createVariant}>
+              {isEditMode ? 'Lagre' : 'Legg til'}
             </Button>
-            <Button variant='tertiary' onClick={handleCloseModal}>
+            <Button variant='tertiary' command='close' commandfor={dialogId}>
               Avbryt
             </Button>
           </div>
-          {isEditMode && (
-            <Button variant='tertiary' data-color='danger' onClick={deleteVariant}>
-              <TrashIcon /> Slett
-            </Button>
+          {canDeleteVariant && (
+            <Popover.TriggerContext>
+              <Popover.Trigger
+                ref={deleteTriggerRef}
+                variant='tertiary'
+                data-color='danger'
+                onClick={() => setIsDeletePopoverOpen(!isDeletePopoverOpen)}
+              >
+                <TrashIcon aria-hidden /> Slett
+              </Popover.Trigger>
+              <Popover
+                placement='top-start'
+                autoPlacement={false}
+                open={isDeletePopoverOpen}
+                onClose={closeDeletePopoverAndReturnFocus}
+                data-color='danger'
+              >
+                <Paragraph>
+                  Denne varianten har ikke publiseringer, og kan slettes. Vil du fortsatt slette varianten?
+                </Paragraph>
+                <div className='variant-modal-delete-popover-buttons'>
+                  <Button
+                    command='close'
+                    commandfor={dialogId}
+                    data-color='danger'
+                    onClick={() => {
+                      onActionClose?.()
+                      setIsDeletePopoverOpen(false)
+                      deleteVariant()
+                    }}
+                  >
+                    Ja, slett
+                  </Button>
+                  <Button variant='tertiary' onClick={closeDeletePopoverAndReturnFocus}>
+                    Avbryt
+                  </Button>
+                </div>
+              </Popover>
+            </Popover.TriggerContext>
           )}
         </div>
       </Dialog.Block>

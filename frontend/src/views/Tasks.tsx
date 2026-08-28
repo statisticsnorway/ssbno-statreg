@@ -14,7 +14,7 @@ import {
   useCheckboxGroup,
   Button,
   Alert,
-} from '@digdir/designsystemet-react'
+} from '@statisticsnorway/design-react'
 import { EraserIcon } from '@navikt/aksel-icons'
 
 import client from '../api'
@@ -50,7 +50,11 @@ type ListReleasesTableProps = {
 }
 
 const TABLE_HEADER_CELLS = [
-  { label: 'Velg', field: 'choose_release' },
+  {
+    label: 'Velg',
+    field: 'choose_release',
+    caption: 'Sjekkboks for å velge en eller flere publiseringer for godkjenning',
+  },
   { label: 'Kortnavn', field: 'statistic.shortname' },
   { label: 'Statistikknavn', field: 'statistic.name' },
   { label: 'Variant', field: 'frequency.name' },
@@ -61,10 +65,11 @@ const TABLE_HEADER_CELLS = [
 
 function PendingReleaseRow({ pendingRelease, getCheckboxProps }: Readonly<PendingReleaseRowProps>) {
   const statisticsShortname = pendingRelease.statistic?.shortname ?? ''
+  const selectLabel = `Velg publisering for godkjenning: ${pendingRelease.statistic?.name ?? ''}, publiseres ${formatDateTime(pendingRelease.publish_time)}`
   return (
     <Table.Row key={`${pendingRelease.publish_time}-${pendingRelease.id}`} className='selectable-row'>
       <Table.Cell>
-        <Checkbox aria-label='choose_releases' {...getCheckboxProps(pendingRelease.id?.toString())} />
+        <Checkbox aria-label={selectLabel} {...getCheckboxProps(pendingRelease.id?.toString())} />
       </Table.Cell>
       <Table.Cell>{statisticsShortname}</Table.Cell>
       <TruncatedTableCell value={pendingRelease.statistic?.name} />
@@ -83,14 +88,15 @@ function PendingReleasesTable({
   setSortBy,
 }: Readonly<PendingReleaseTableProps>) {
   return (
-    <Table>
+    <Table aria-description='Tabell med publiseringer som har status forslag'>
       <Table.Head>
         <Table.Row>
-          {TABLE_HEADER_CELLS.map(({ label, field, sortable }) => (
+          {TABLE_HEADER_CELLS.map(({ label, field, sortable, caption }) => (
             <Table.HeaderCell
               key={label}
               onClick={sortable && setSortBy ? () => setSortBy(toggleSort(field, sortBy || '')) : undefined}
               sort={sortable ? getSortDirection(field, sortBy || '') : undefined}
+              aria-description={caption}
             >
               {label}
             </Table.HeaderCell>
@@ -319,23 +325,25 @@ export default function Tasks() {
                 >{`${publishedReleasesAmountText} har blitt godkjent`}</Alert>
               )}
             </div>
-            <PendingReleasesTable
-              pendingReleases={pendingReleases}
-              getCheckboxProps={getCheckboxProps}
-              sortBy={pendingSortBy}
-              setSortBy={setPendingSortBy}
-            />
-            {selectedPendingReleaseIds.length > 0 && (
-              <div className='pending-releases-buttons-wrapper'>
-                <Button variant='primary' type='submit'>
-                  Godkjenn ({selectedPendingReleaseIds.length} valgte)
-                </Button>
-                <Button variant='tertiary' onClick={() => setSelectedPendingReleaseIds([])}>
-                  <EraserIcon />
-                  Nullstill valg
-                </Button>
-              </div>
-            )}
+            <div className='pending-releases-wrapper'>
+              <PendingReleasesTable
+                pendingReleases={pendingReleases}
+                getCheckboxProps={getCheckboxProps}
+                sortBy={pendingSortBy}
+                setSortBy={setPendingSortBy}
+              />
+              {selectedPendingReleaseIds.length > 0 && (
+                <div className='pending-releases-buttons-wrapper'>
+                  <Button variant='primary' type='submit'>
+                    Godkjenn ({selectedPendingReleaseIds.length} valgte)
+                  </Button>
+                  <Button variant='tertiary' onClick={() => setSelectedPendingReleaseIds([])}>
+                    <EraserIcon />
+                    Nullstill valg
+                  </Button>
+                </div>
+              )}
+            </div>
           </form>
         </Tabs.Panel>
       </Tabs>

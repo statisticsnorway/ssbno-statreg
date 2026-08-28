@@ -1,4 +1,4 @@
-import { Field, Label, Select } from '@digdir/designsystemet-react'
+import { Field, Label, Select } from '@statisticsnorway/design-react'
 
 const ROW_COUNT_OPTIONS = [10, 20, 50, 100]
 

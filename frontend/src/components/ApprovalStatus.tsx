@@ -1,4 +1,4 @@
-import { Tag, Badge } from '@digdir/designsystemet-react'
+import { Tag, Badge } from '@statisticsnorway/design-react'
 import { CheckmarkCircleIcon, ExclamationmarkTriangleIcon, ClockDashedIcon } from '@navikt/aksel-icons'
 import { ApprovalStatus } from '@ssbno-statreg/shared'
 
@@ -38,7 +38,7 @@ export function ApprovalStatusTag(props: { status?: string | null }) {
   const config = statusConfig[parsedStatus]
   const Icon = config.icon
   return (
-    <Tag data-color={config.color} style={{ paddingInlineStart: 'var(--ds-size-1)' }}>
+    <Tag aria-label={`Status`} data-color={config.color} style={{ paddingInlineStart: 'var(--ds-size-1)' }}>
       <Icon aria-hidden style={{ marginInlineEnd: 'var(--ds-size-1)' }} />
       {config.text}
     </Tag>
@@ -48,9 +48,10 @@ export function ApprovalStatusTag(props: { status?: string | null }) {
 export function ApprovalStatusBadge(props: { status?: string | null }) {
   const parsedStatus = parseApprovalStatus(props.status)
   const config = statusConfig[parsedStatus]
+  const statusText = config.text.split(' ')[0]
   return (
-    <>
-      <Badge data-color={config.color} /> {config.text.split(' ')[0]}
-    </>
+    <span aria-label={`Status`}>
+      <Badge aria-hidden data-color={config.color} /> {statusText}
+    </span>
   )
 }

@@ -31,27 +31,18 @@ pnpm run dev
 
 If new migrations: `pnpm run db:deploy`
 
-> NB! Until the first data migration to test database is complete, we don't use migrations. If schema have changed the following sequence _should_ fix your database:
-```
-pnpm run generate
-pnpm --filter backend exec prisma migrate reset
-pnpm --filter backend exec prisma db push
-pnpm run seed
-```
+For plain local development run: `pnpm run dev`
 
-For plain local development run:
-
-```
-pnpm run dev
-```
+The app is now served on http://localhost:5173/statistikkregisteret
+Backend is now served on http://localhost:8080/statistikkregisteret
 
 Or to run with local authentication flow run docker compose:
 ```
 colima start
-docker compose --env-file ./backend/.env up
+pnpm run dev:auth
 ```
 
-The app is now served on http://localhost:8080
+The app is now served on http://localhost:8080/statistikkregisteret
 
 ### Local authentication
 We are using keycloak for authentication. We have a docker compose setup to simulate production auth flow. 

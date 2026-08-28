@@ -76,6 +76,7 @@ model Release {
   variant_id             Int
   period_from            DateTime @db.Timestamp(6)
   cancelled              Boolean  @default(false)
+  archived               Boolean  @default(false)
   date_created           DateTime @db.Timestamp(6)
   release_date_precision String
   import_flag            Boolean?

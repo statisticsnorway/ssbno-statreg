@@ -1,4 +1,4 @@
-import { Tag } from '@digdir/designsystemet-react'
+import { Tag } from '@statisticsnorway/design-react'
 import { DayStatus } from '@ssbno-statreg/shared'
 
 const statusConfig = {
@@ -23,5 +23,9 @@ const statusConfig = {
 export function DayStatusTag(props: { status: keyof typeof DayStatus }) {
   if (props.status == 'NONE') return null
   const config = statusConfig[props.status]
-  return <Tag data-color={config.color}>{config.text}</Tag>
+  return (
+    <Tag aria-label={`Status publiseringer denne dagen`} data-color={config.color}>
+      {config.text}
+    </Tag>
+  )
 }

@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react'
-import { useParams, Link as ReactRouterLink } from 'react-router'
-import { Heading, Link, Paragraph, Details, Card, Button, Spinner } from '@digdir/designsystemet-react'
-import { PencilWritingIcon } from '@navikt/aksel-icons'
+import { useNavigate, useParams, Link as ReactRouterLink } from 'react-router'
+import { Heading, Link, Paragraph, Details, Card, Button, Spinner, Popover } from '@statisticsnorway/design-react'
+import { PencilWritingIcon, TrashIcon } from '@navikt/aksel-icons'
 import { ApprovalStatusTag } from '../components/ApprovalStatus'
 import client from '../api'
 import { type ReleaseDetails, type Version } from '@ssbno-statreg/shared'
 import { formatDateTime, formatDate, formatVariant } from '../lib/utils'
 import { ErrorAlert } from '../components/ErrorAlert'
 import { ChangeLogTable } from '../components/VersionTable'
+import ErrorPage, { ErrorType } from './ErrorPage'
 
 function formatStatisticName(statistic: ReleaseDetails['statistic']): string {
   if (!statistic || !statistic.name || !statistic.shortname) return '-'
@@ -23,14 +24,25 @@ export default function ShowRelease() {
   const [versions, setVersions] = useState<Version[] | null>(null)
   const [isLoadingVersions, setIsLoadingVersions] = useState(false)
   const [apiError, setApiError] = useState<string[]>([])
+  const [isNotFound, setIsNotFound] = useState(false)
+  const [isDeletePopoverOpen, setIsDeletePopoverOpen] = useState(false)
   const { id } = useParams()
+  const navigate = useNavigate()
 
   useEffect(() => {
     async function fetchRelease() {
-      const { data, error } = await client.GET('/releases/{id}', { params: { path: { id: id as string } } })
+      setApiError([])
+      setIsNotFound(false)
+      const { data, error, response } = await client.GET('/releases/{id}', {
+        params: { path: { id: id as string } },
+      })
 
       if (error) {
-        setApiError((prev) => [...prev, error.message])
+        if (response.status === 410 || response.status === 404) {
+          setIsNotFound(true)
+        } else {
+          setApiError([error.message])
+        }
         return
       }
 
@@ -63,6 +75,33 @@ export default function ShowRelease() {
 
     setVersions(data ?? [])
     setIsLoadingVersions(false)
+  }
+
+  async function archiveRelease() {
+    if (!id) return
+
+    const { error } = await client.PUT('/releases/{id}', {
+      params: { path: { id } },
+      body: {
+        archived: true,
+        publish_time: release.publish_time,
+        period_from: release.period_from,
+        period_to: release.period_to,
+        release_date_precision: release.release_date_precision,
+        comment: 'Archived by admin',
+      },
+    })
+
+    if (error) {
+      setApiError((prev) => [...prev, error.message])
+      return
+    }
+
+    navigate(-1)
+  }
+
+  if (isNotFound) {
+    return <ErrorPage type={ErrorType.NOTFOUND} />
   }
 
   return (
@@ -103,12 +142,47 @@ export default function ShowRelease() {
           </Details>
         </Card>
       </div>
-      <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
         <Button asChild data-size='sm' variant='tertiary'>
           <ReactRouterLink to={`/publisering/${id}/rediger`}>
             <PencilWritingIcon aria-hidden /> Rediger
           </ReactRouterLink>
         </Button>
+        <Popover.TriggerContext>
+          <Popover.Trigger
+            data-size='sm'
+            variant='tertiary'
+            data-color='danger'
+            onClick={() => setIsDeletePopoverOpen(!isDeletePopoverOpen)}
+          >
+            <TrashIcon aria-hidden /> Slett
+          </Popover.Trigger>
+          <Popover
+            placement='left'
+            open={isDeletePopoverOpen}
+            onClose={() => setIsDeletePopoverOpen(false)}
+            data-color='danger'
+          >
+            <Paragraph>
+              Datoen vil bli fjernet fra den aktive kalenderen, men vil fortsatt være tilgjengelig i systemarkivet. Vil
+              du forstatt slette?
+            </Paragraph>
+            <div style={{ display: 'flex', gap: 'var(--ds-size-2)', marginTop: 'var(--ds-size-2)' }}>
+              <Button
+                data-color='danger'
+                onClick={() => {
+                  setIsDeletePopoverOpen(false)
+                  archiveRelease()
+                }}
+              >
+                Ja, slett
+              </Button>
+              <Button variant='tertiary' onClick={() => setIsDeletePopoverOpen(false)}>
+                Avbryt
+              </Button>
+            </div>
+          </Popover>
+        </Popover.TriggerContext>
       </div>
     </>
   )
