@@ -151,6 +151,7 @@ const extendedPrisma = prisma.$extends({
       async delete({ model, args, query }) {
         if (['Variant', 'Statistic', 'Release', 'Frequency', 'Calender_date'].includes(model)) {
           const start = new Date()
+          const oldSnapshot = await fetchCurrentSnapshot(args, model)
           const incoming = await query(args)
           const store = asyncLocalStorage.getStore()
           const actor = store?.auth?.username || 'unknown'
@@ -160,9 +161,9 @@ const extendedPrisma = prisma.$extends({
               class_name: model,
               old_value: JSON.stringify(incoming),
               new_value: null,
-              date_created: (incoming as { date_created?: Date }).date_created ?? '',
-              persisted_object_id: (incoming as { id?: number }).id || 0,
-              persisted_object_version: (incoming as { version?: number }).version || 1,
+              date_created: oldSnapshot?.date_created ?? start,
+              persisted_object_id: oldSnapshot?.id || 0,
+              persisted_object_version: oldSnapshot?.version || 1,
               event_name: 'delete',
               last_updated: start,
             },
