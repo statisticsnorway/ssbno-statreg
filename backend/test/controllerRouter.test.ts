@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { describe, test, expect, beforeEach } from 'vitest'
-import express, { Router, type RequestHandler } from 'express'
+import { describe, test, expect, beforeEach, vi } from 'vitest'
+import express, { Router, type RequestHandler, type Response } from 'express'
+import httpMocks from 'node-mocks-http'
+import { EventEmitter } from 'node:events'
 import controllerRouter from '@/api/core/controllerRouter'
 import { invoke, makeSkipAuthMarker } from './helpers'
 import { MockResponse } from 'node-mocks-http'
@@ -138,6 +140,40 @@ describe('controllerRouter', () => {
     expect(res.statusCode).toBe(200)
     expect(res._getJSONData().normalMiddlewareExecuted).toBe(true)
     expect(requireAuthCalls).toHaveLength(0)
+  })
+
+  test('serves frontend index for mounted base path with and without trailing slash', async () => {
+    const app = express()
+      .disable('x-powered-by')
+      .use('/statistikkregisteret', controllerRouter(requireAuth, [fakeController]))
+
+    const invokeMountedBase = async (url: string) => {
+      const req = httpMocks.createRequest({ method: 'GET', url })
+      const res = httpMocks.createResponse({ eventEmitter: EventEmitter }) as MockResponse<Response>
+      const sendFile = vi.fn((filePath: string) => {
+        res.statusCode = 200
+        res.end(filePath)
+      })
+
+      res.sendFile = sendFile as Response['sendFile']
+
+      await new Promise<void>((resolve) => {
+        const done = () => resolve()
+        res.once('end', done)
+        res.once('finish', done)
+
+        app(req, res, done)
+      })
+
+      return sendFile
+    }
+
+    const withoutSlash = await invokeMountedBase('/statistikkregisteret')
+    const withSlash = await invokeMountedBase('/statistikkregisteret/')
+
+    expect(withoutSlash).toHaveBeenCalledOnce()
+    expect(withSlash).toHaveBeenCalledOnce()
+    expect(requireAuthCalls).toHaveLength(2)
   })
 
   // For now frontend serves startpage for all unknown paths
