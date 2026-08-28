@@ -15,11 +15,11 @@ export function makeSkipAuthMarker(): RequestHandler & { __skipAuth?: boolean } 
   return marker
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function invoke(
   app: Express,
   method: string,
   url: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   body?: any,
   res: MockResponse<Response> = createMockResponse()
 ): Promise<MockResponse<Response>> {
