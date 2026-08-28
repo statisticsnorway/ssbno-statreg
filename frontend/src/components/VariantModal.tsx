@@ -383,15 +383,17 @@ export function VariantModal({
               closeDeletePopoverAndReturnFocus={closeDeletePopoverAndReturnFocus}
             />
           ) : (
-            <SetVariantCancelledPopover
-              variantCancelledTriggerRef={variantCancelledTriggerRef}
-              isVariantCancelledPopoverOpen={isVariantCancelledPopoverOpen}
-              setIsVariantCancelledPopoverOpen={setIsVariantCancelledPopoverOpen}
-              dialogId={dialogId}
-              onActionClose={onActionClose}
-              setVariantCancelled={setVariantCancelled}
-              closeVariantCancelledAndReturnFocus={closeVariantCancelledAndReturnFocus}
-            />
+            editVariantValues?.id && (
+              <SetVariantCancelledPopover
+                variantCancelledTriggerRef={variantCancelledTriggerRef}
+                isVariantCancelledPopoverOpen={isVariantCancelledPopoverOpen}
+                setIsVariantCancelledPopoverOpen={setIsVariantCancelledPopoverOpen}
+                dialogId={dialogId}
+                onActionClose={onActionClose}
+                setVariantCancelled={setVariantCancelled}
+                closeVariantCancelledAndReturnFocus={closeVariantCancelledAndReturnFocus}
+              />
+            )
           )}
         </div>
       </Dialog.Block>
