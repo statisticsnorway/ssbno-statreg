@@ -38,7 +38,7 @@ type PendingReleaseRowProps = {
 type PendingReleaseTableProps = {
   pendingReleases: ReleaseListing[]
   getCheckboxProps: ReturnType<typeof useCheckboxGroup>['getCheckboxProps']
-  headerRowRef: React.RefObject<HTMLTableRowElement | null>
+  headerRowRef: React.RefObject<HTMLTableSectionElement | null>
   sortBy?: string
   setSortBy?: (sortBy: string) => void
 }
@@ -91,8 +91,8 @@ function PendingReleasesTable({
 }: Readonly<PendingReleaseTableProps>) {
   return (
     <Table aria-description='Tabell med publiseringer som har status forslag'>
-      <Table.Head>
-        <Table.Row ref={headerRowRef} tabIndex={-1}>
+      <Table.Head ref={headerRowRef} tabIndex={-1}>
+        <Table.Row>
           {TABLE_HEADER_CELLS.map(({ label, field, sortable, caption }) => (
             <Table.HeaderCell
               key={label}
@@ -237,7 +237,7 @@ export default function Tasks() {
   const [pendingSortBy, setPendingSortBy] = useState<string>('-publish_time')
   const [approvedReleasesCount, setApprovedReleasesCount] = useState(0)
   const [apiError, setApiError] = useState<string[]>([])
-  const pendingReleasesHeaderRowRef = useRef<HTMLTableRowElement>(null)
+  const pendingReleasesHeaderRowRef = useRef<HTMLTableSectionElement>(null)
 
   const { auth } = useAuth()
   const isAdmin = auth?.isAdmin
