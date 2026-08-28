@@ -1119,8 +1119,7 @@ export interface components {
       }
     }
     Statistic_create:
-      | components['schemas']['Statistic_create_upcoming']
-      | components['schemas']['Statistic_create_active']
+      components['schemas']['Statistic_create_upcoming'] | components['schemas']['Statistic_create_active']
     Statistic_update: {
       relation_id?: number | null
     } & components['schemas']['Statistic_create_base']
