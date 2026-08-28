@@ -21,7 +21,7 @@ KEYCLOAK_CLIENT_SECRET= (this password is only for devs and stored in gcp secret
 KEYCLOAK_WELL_KNOWN_URL=https://auth-play.test.ssb.no/realms/ssb/.well-known/openid-configuration
 ```
 
-Password stored in secret manager in GCP: https://console.cloud.google.com/security/secret-manager (remember that test secret is in test project, and prod secret in prod project)
+Password stored in secret manager in GCP: https://console.cloud.google.com/security/secret-manager (remember that test secret is in test project, and prod secret in prod project). New secrets can be generated with the following steps: https://github.com/statisticsnorway/keycloak-iac#client-credentials
 
 To run local client:
 ```

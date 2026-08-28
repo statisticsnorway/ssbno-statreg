@@ -30,7 +30,7 @@ export async function getReleases(
   {
     start = 0,
     count = 10,
-    where,
+    where: whereFromInput,
     sort,
   }: {
     start?: number
@@ -41,6 +41,8 @@ export async function getReleases(
   prisma: ReleasePrisma
 ): Promise<ReleaseListingResponse> {
   const orderBy = parseReleasesSortQuery(sort)
+
+  const where = { ...whereFromInput, archived: false }
 
   const releases = await prisma.release.findMany({
     skip: start,
@@ -195,6 +197,8 @@ export async function getReleaseById(id: string, prisma: ReleasePrisma): Promise
 
   if (!release) throw new StatregError(`Release ${idAsNumber} not found`, 404)
 
+  if (release.archived) throw new StatregError(`Release ${idAsNumber} is archived`, 410)
+
   return mapToReleaseDetails(release)
 }
 
@@ -311,6 +315,10 @@ export async function updateRelease(
 ): Promise<ReleaseDetails> {
   const idAsNumber = parseId(id)
 
+  if (body?.archived === true && !isCurrentUserAdmin()) {
+    throw new StatregError('Only admins can archive releases', 403)
+  }
+
   const validatedInput = await parseReleaseInput(prisma, body, 'update')
 
   const release = await prisma.release.update({
@@ -321,6 +329,7 @@ export async function updateRelease(
       period_from: validatedInput.periodFromDate,
       period_to: validatedInput.periodToDate,
       release_date_precision: validatedInput.releaseDatePrecision,
+      ...(body?.archived !== undefined && { archived: body.archived }),
       desk_appoval_status: isCurrentUserAdmin() ? ApprovalStatus.ACCEPTED : ApprovalStatus.PENDING,
       last_updated: now,
       comment: validatedInput.comment,
@@ -478,5 +487,6 @@ export function mapToReleaseDetails(
     period_to: getDateOnlyAsString(prismaRelease.period_to),
     release_date_precision: prismaRelease.release_date_precision,
     cancelled: prismaRelease.cancelled,
+    archived: prismaRelease.archived,
   }
 }

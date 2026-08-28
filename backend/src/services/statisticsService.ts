@@ -8,11 +8,12 @@ import {
   StatisticStatus,
   RevisionNames,
   StatisticListingResponse,
-  getRequiredStatisticFields,
+  RequiredCreateStatisticFieldsByStatus,
+  RequiredEditStatisticFieldsByStatus,
   Variant,
 } from '@ssbno-statreg/shared'
 import { dateToISOString, sanitize, parseDateOnly, ensureRequiredFieldsExists, isNumber, parseId } from '@/lib/utils'
-import type { Prisma } from '@/generated/prisma/client'
+import type { Prisma, ResponsiblePerson as ResponsiblePersonPrisma } from '@/generated/prisma/client'
 import { getDivisionFromCode } from '@/services/klassService'
 import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
 import { statisticsAsserts } from '@/lib/asserts'
@@ -47,10 +48,12 @@ type ValidatedStatisticInput = {
   name_en: string
   previous_topic_codes?: string
   yearly_reporting?: boolean
-  first_released_at: Date
+  first_released_at: Date | null
   main_language: string
   comment: string
-  relation?: number | null
+  relation_id?: number | null
+  contacts?: StatisticUpdate['contacts']
+  variants?: StatisticUpdate['variants']
 }
 
 // Statistic listing
@@ -199,7 +202,9 @@ const VariantSelect = {
 export const StatisticsDetailedIncludes = {
   shortname: { select: { name: true } },
   responsiblePersons: { select: { principalName: true } },
-  related_statistic: { select: { language: true, name: true, name_en: true, shortname: { select: { name: true } } } },
+  related_statistic: {
+    select: { id: true, language: true, name: true, name_en: true, shortname: { select: { name: true } } },
+  },
   statistic_region_levels: {
     select: { region_level: { select: { name: true, code: true } } },
   },
@@ -235,6 +240,7 @@ export async function mapStatisticDetails(statistic: StatisticPrismaResult): Pro
   const division_code = statistic.division_code ?? ''
   const relation = statistic.related_statistic?.shortname
     ? {
+        id: statistic.related_statistic.id,
         shortname: statistic.related_statistic?.shortname?.name,
         name: statistic.related_statistic?.name,
         name_en: statistic.related_statistic?.name_en ?? '',
@@ -294,27 +300,22 @@ export async function updateStatistic(
   body: StatisticUpdate,
   prisma: StatisticPrisma
 ): Promise<StatisticDetails> {
-  const requiredFields: (keyof StatisticUpdate)[] = [
-    'division',
-    'statistic_region_levels',
-    'status',
-    'name',
-    'name_en',
-    'relation',
-    'previous_topic_codes',
-    'yearly_reporting',
-    'first_released_at',
-    'main_language',
-    'comment',
-  ]
-
   const safeShortname = sanitize(shortname)
   const existingStatistic = await prisma.statistic.findFirst({
     where: { shortname: { name: safeShortname } },
-    select: { id: true, statistic_region_levels: { select: { region_level: { select: { code: true, id: true } } } } },
+    select: {
+      id: true,
+      status: true,
+      responsiblePersons: { select: { principalName: true } },
+      variants: { select: { id: true } },
+      statistic_region_levels: { select: { region_level: { select: { code: true, id: true } } } },
+    },
   })
 
   if (!existingStatistic) throw new StatregError(`Shortname ${safeShortname} not found`, 404)
+
+  const requiredFields: (keyof StatisticUpdate)[] =
+    RequiredEditStatisticFieldsByStatus[body.status?.code as StatisticStatusCode] ?? []
 
   const {
     division,
@@ -322,19 +323,68 @@ export async function updateStatistic(
     status,
     name,
     name_en,
-    relation,
+    relation_id,
     previous_topic_codes,
     yearly_reporting,
     first_released_at,
     main_language,
     comment,
+    contacts,
+    variants,
   } = parseUpdateStatisticInput(body, requiredFields)
 
-  const regionLevelsToRemove = existingStatistic.statistic_region_levels.filter(
+  if (existingStatistic.status === 'A' && status === 'K') {
+    throw new StatregError('An active statistic cannot be set back to upcoming.')
+  }
+
+  let newContacts
+  if (contacts) {
+    newContacts = await upsertContacts(contacts, prisma)
+  }
+
+  const parsedVariants = variants ? await parseVariantsInput(variants, status, prisma) : undefined
+
+  if (parsedVariants) {
+    for (const variant of parsedVariants) {
+      if (variant.id && !existingStatistic.variants.some((existingVariant) => existingVariant.id === variant.id)) {
+        throw new StatregError(`Variant with id '${variant.id}' does not belong to statistic '${safeShortname}'.`)
+      }
+    }
+
+    const missingExistingVariants = existingStatistic.variants?.filter(
+      (existingVariant) => !parsedVariants.some((variant) => variant.id === existingVariant.id)
+    )
+
+    if (missingExistingVariants?.length) {
+      throw new StatregError(
+        `Deleting variants is currently not supported. Missing existing variant ids: ${missingExistingVariants
+          .map((variant) => variant.id)
+          .join(', ')}.`
+      )
+    }
+  }
+
+  if (status === 'A') {
+    const contactCount = newContacts ? newContacts.length : existingStatistic.responsiblePersons.length
+    const newVariantCount = parsedVariants?.filter((variant) => !variant.id).length ?? 0
+
+    if (contactCount === 0) {
+      throw new StatregError('An active statistic needs at least one contact.')
+    }
+
+    if (existingStatistic.variants.length + newVariantCount === 0) {
+      throw new StatregError('An active statistic needs at least one variant.')
+    }
+  }
+
+  const existingVariants = parsedVariants?.filter((variant) => variant.id) ?? []
+  const newVariants = parsedVariants?.filter((variant) => !variant.id) ?? []
+
+  const regionLevelsToRemove = existingStatistic.statistic_region_levels?.filter(
     (existingRegLvl) =>
       !statistic_region_levels?.find((incomingRegLvl) => incomingRegLvl === existingRegLvl.region_level.code)
   )
-  const deleteRegionLevelStatement = regionLevelsToRemove.map((regLvl) => {
+  const deleteRegionLevelStatement = regionLevelsToRemove?.map((regLvl) => {
     return {
       statistic_id_region_level_id: { statistic_id: existingStatistic.id, region_level_id: regLvl.region_level.id },
     }
@@ -361,10 +411,46 @@ export async function updateStatistic(
       status,
       comment,
       language: main_language,
-      related_statistic_id: relation,
+      ...(relation_id ? { related_statistic_id: relation_id } : {}),
       legacy_topic_codes: previous_topic_codes,
       yearly_reporting,
       first_release: first_released_at,
+      ...(newContacts && {
+        responsiblePersons: {
+          set: newContacts.map((contact) => ({ id: contact.id })),
+        },
+      }),
+      ...(parsedVariants && {
+        variants: {
+          update: existingVariants.map((variant) => ({
+            where: { id: variant.id! },
+            data: {
+              revision: variant.revision!.code as string,
+              frequency: {
+                connect: {
+                  code: variant.frequency!.code as string,
+                },
+              },
+              level_of_detail: variant.level_of_detail?.name ?? null,
+              level_of_detail_en: variant.level_of_detail?.name_en ?? null,
+              last_updated: new Date(),
+            },
+          })),
+          create: newVariants.map((variant) => ({
+            cancelled: false,
+            date_created: new Date(),
+            last_updated: new Date(),
+            revision: variant.revision!.code as string,
+            frequency: {
+              connect: {
+                code: variant.frequency!.code as string,
+              },
+            },
+            ...(variant.level_of_detail?.name ? { level_of_detail: variant.level_of_detail.name } : {}),
+            ...(variant.level_of_detail?.name_en ? { level_of_detail_en: variant.level_of_detail.name_en } : {}),
+          })),
+        },
+      }),
       statistic_region_levels: {
         create: createRegionLevelStatement,
         delete: deleteRegionLevelStatement,
@@ -376,7 +462,7 @@ export async function updateStatistic(
   return await mapStatisticDetails(updatedStatistic)
 }
 
-async function upsertContacts(principalNames: string[], prisma: StatisticPrisma) {
+async function upsertContacts(principalNames: string[], prisma: StatisticPrisma): Promise<ResponsiblePersonPrisma[]> {
   const users = await getAllUsersFromCache()
 
   const uniquePrincipalNames = [...new Set(principalNames)]
@@ -421,6 +507,7 @@ export async function updateStatisticContacts(
       responsiblePersons: {
         set: newContacts.map((contact) => ({ id: contact.id })),
       },
+      comment: 'User updated contacts',
     },
     select: { responsiblePersons: { select: { principalName: true } } },
   })
@@ -556,6 +643,7 @@ export async function parseVariantsInput(
       }
 
       return {
+        ...(variant.id !== undefined ? { id: variant.id } : {}),
         frequency,
         revision,
         level_of_detail: variant.level_of_detail && {
@@ -571,7 +659,7 @@ export function parseCreateStatisticInput(
   body: StatisticCreate | undefined,
   status: CreatableStatisticStatus
 ): ValidatedCreateStatisticInput {
-  const requiredFields = getRequiredStatisticFields(status)
+  const requiredFields = RequiredCreateStatisticFieldsByStatus[status]
   const {
     division,
     name,
@@ -625,7 +713,9 @@ export function parseUpdateStatisticInput(
     first_released_at,
     main_language,
     comment,
-    relation,
+    relation_id,
+    contacts,
+    variants,
   } = ensureRequiredFieldsExists(body, requiredFields)
 
   const safeName = sanitize(name)
@@ -644,7 +734,7 @@ export function parseUpdateStatisticInput(
     division: parseDivision(division),
     name: safeName,
     name_en: safeNameEn,
-    first_released_at: parseDateOnly(first_released_at!),
+    first_released_at: first_released_at ? parseDateOnly(first_released_at, 'first_released_at') : null,
     main_language,
     comment: safeComment,
   }
@@ -663,8 +753,10 @@ export function parseUpdateStatisticInput(
     status: parseStatusCode(status?.code),
     previous_topic_codes: sanitize(previous_topic_codes!),
     yearly_reporting: Boolean(yearly_reporting),
-    relation: parseRelation(relation),
+    ...(relation_id ? { relation_id: parseId(relation_id, 'relation') } : {}),
     comment: safeComment,
+    ...(contacts ? { contacts } : {}),
+    ...(variants ? { variants } : {}),
   }
 }
 
@@ -685,11 +777,4 @@ export function parseStatusCode(statusCode?: string): StatisticStatusCode {
     throw new StatregError(`Field 'status' must be one of these: ${Object.keys(StatisticStatus).join(', ')}.`)
   }
   return statusCode as StatisticStatusCode
-}
-
-export function parseRelation(relationId?: string | null): number | null {
-  if (relationId) {
-    return parseId(relationId, 'relation')
-  }
-  return null
 }

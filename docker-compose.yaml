@@ -5,7 +5,7 @@ services:
       - "6379:6379"
 
   app:
-    image: ghcr.io/pnpm/pnpm:11
+    image: ghcr.io/pnpm/pnpm@sha256:eba76954b37ec1ba6187f0adb39caee1e31733194857eedd01319da0af3fa00d #v.11.22
     working_dir: /app
     volumes:
       - .:/app
@@ -13,7 +13,7 @@ services:
       - /app/backend/node_modules
       - /app/frontend/node_modules
       - /app/shared/node_modules
-    command: sh -c "pnpm runtime set node 24 -g && pnpm install --frozen-lockfile && pnpm run generate && pnpm run build && pnpm run start"
+    command: sh -c "pnpm runtime set node 24 -g && pnpm install --frozen-lockfile && pnpm run generate && pnpm run db:deploy && pnpm run build && pnpm run start"
     expose:
       - "8080"
     env_file: "./backend/.env"

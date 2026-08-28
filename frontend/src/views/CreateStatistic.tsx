@@ -18,23 +18,36 @@ import {
   ValidationMessage,
   Tag,
   ErrorSummary,
-  Card,
-} from '@digdir/designsystemet-react'
-import { QuestionmarkCircleIcon, PlusCircleIcon, PencilWritingIcon } from '@navikt/aksel-icons'
+  Textarea,
+  Link,
+} from '@statisticsnorway/design-react'
+import { QuestionmarkCircleIcon } from '@navikt/aksel-icons'
 
 import client from '../api'
 
 import './CreateStatistic.css'
 
-import { isCreateStatisticFieldRequired, ApprovalStatus, RevisionNames } from '@ssbno-statreg/shared'
-import type { CreatableStatisticStatus, Division, Contact, Variant, Shortname } from '@ssbno-statreg/shared'
+import { RequiredCreateStatisticFieldsByStatus, ApprovalStatus } from '@ssbno-statreg/shared'
+import type {
+  CreatableStatisticStatus,
+  Division,
+  Contact,
+  Variant,
+  Shortname,
+  StatisticCreate,
+} from '@ssbno-statreg/shared'
 import ErrorPage, { ErrorType } from './ErrorPage'
 import { ErrorAlert } from '../components/ErrorAlert'
 import { CreateShortnameModal } from '../components/CreateShortnameModal'
 import { ContactSelection } from '../components/ContactSelection'
-import { VariantModal } from '../components/VariantModal'
+import { VariantModal, useVariantModal } from '../components/VariantModal'
+import { VariantEditorSection } from '../components/VariantEditorSection'
+import { DivisionSelection } from '../components/DivisionSelection'
 
-type StatisticFormValues = {
+export type StatisticFormField = keyof StatisticPartialFormValues | 'variants' | 'contacts'
+export type StatisticFormErrors = Partial<Record<StatisticFormField, string>>
+
+export type StatisticPartialFormValues = {
   name: string
   name_en: string
   division: string
@@ -43,16 +56,19 @@ type StatisticFormValues = {
   comment: string
 }
 
-type StatisticFormField = keyof StatisticFormValues | 'variants' | 'contacts'
-type StatisticFormErrors = Partial<Record<StatisticFormField, string>>
-type StatisticValidationState = {
+type StatisticFormValues = {
   status: CreatableStatisticStatus
-  values: StatisticFormValues
+  values: StatisticPartialFormValues
   selectedContacts: string[]
   createdVariants: Variant[]
 }
 
+function isCreateStatisticFieldRequired(status: CreatableStatisticStatus, field: keyof StatisticCreate): boolean {
+  return RequiredCreateStatisticFieldsByStatus[status].includes(field)
+}
+
 export default function CreateStatistic() {
+  const variantDialogId = 'create-statistic-variant-dialog'
   const { shortname } = useParams<Shortname['shortname']>()
   const createdShortname = shortname ?? ''
 
@@ -60,16 +76,23 @@ export default function CreateStatistic() {
   const [contacts, setContacts] = useState<Contact[]>([])
   const [selectedContacts, setSelectedContacts] = useState<string[]>([])
 
-  const [openVariantModal, setOpenVariantModal] = useState<boolean>(false)
   const [createdVariants, setCreatedVariants] = useState<Variant[]>([])
-  const [editVariantIndex, setEditVariantIndex] = useState<number | null>(null)
+  const {
+    editVariantIndex,
+    addVariantButtonRef,
+    variantModalCloseCount,
+    handleOpenCreateVariantModal,
+    handleOpenEditVariantModal,
+    handleVariantModalActionClose,
+    handleVariantModalClose,
+  } = useVariantModal()
 
   const { getCheckboxProps, value: regionLevelValues } = useCheckboxGroup({
     name: 'region-level-checkbox',
     value: [],
   })
 
-  const defaultValues: StatisticFormValues = {
+  const defaultValues: StatisticPartialFormValues = {
     name: '',
     name_en: '',
     division: '',
@@ -85,7 +108,7 @@ export default function CreateStatistic() {
   ] as StatisticFormField[]
 
   const [status, setStatus] = useState<CreatableStatisticStatus>('K')
-  const [values, setValues] = useState<StatisticFormValues>(defaultValues)
+  const [values, setValues] = useState<StatisticPartialFormValues>(defaultValues)
   const [errors, setErrors] = useState<StatisticFormErrors>({})
   const [apiError, setApiError] = useState<string[]>([])
   const [invalidShortname, setInvalidShortname] = useState(false)
@@ -181,12 +204,12 @@ export default function CreateStatistic() {
     return isCreateStatisticFieldRequired(status, field)
   }
 
-  function getValidationState(
+  function nextInputValues(
     nextValues = values,
     nextStatus = status,
     nextSelectedContacts = selectedContacts,
     nextCreatedVariants = createdVariants
-  ): StatisticValidationState {
+  ): StatisticFormValues {
     return {
       status: nextStatus,
       values: nextValues,
@@ -195,86 +218,130 @@ export default function CreateStatistic() {
     }
   }
 
-  function validateField(field: StatisticFormField, validationState: StatisticValidationState): string {
+  function validateField(field: StatisticFormField, validateInput: StatisticFormValues): string {
     // Optional field validation
     if (
       field === 'first_released_at' &&
-      validationState.values.first_released_at &&
-      !/^\d{4}$/.test(validationState.values.first_released_at)
+      validateInput.values.first_released_at &&
+      !/^\d{4}$/.test(validateInput.values.first_released_at)
     ) {
       return 'Statistikkens startår må være et gyldig år med fire siffer'
     }
 
-    if (!isCreateStatisticFieldRequired(validationState.status, field)) {
+    if (!isCreateStatisticFieldRequired(validateInput.status, field)) {
       return ''
     }
 
-    if (field === 'name' && !validationState.values.name) return 'Fyll inn norsk statistikknavn'
-    if (field === 'name_en' && !validationState.values.name_en) return 'Fyll inn engelsk statistikknavn'
-    if (field === 'division' && !validationState.values.division) return 'Velg ansvarlig seksjon for statistikken'
-    if (field === 'variants' && validationState.createdVariants.length === 0) return 'Legg til minst én variant'
-    if (field === 'contacts' && validationState.selectedContacts.length === 0) return 'Legg til minst én kontakt'
+    if (field === 'name' && !validateInput.values.name) return 'Fyll inn norsk statistikknavn'
+    if (field === 'name_en' && !validateInput.values.name_en) return 'Fyll inn engelsk statistikknavn'
+    if (field === 'division' && !validateInput.values.division) return 'Velg ansvarlig seksjon for statistikken'
+    if (field === 'variants' && validateInput.createdVariants.length === 0) return 'Legg til minst én variant'
+    if (field === 'contacts' && validateInput.selectedContacts.length === 0) return 'Legg til minst én kontakt'
 
     return ''
   }
 
-  function updateFieldErrors(
-    fields: StatisticFormField[],
-    validationState: StatisticValidationState,
-    shouldAddNewErrors = true
+  function validateForm(validateInput = nextInputValues()): StatisticFormErrors {
+    const nextErrors: StatisticFormErrors = {}
+
+    for (const field of fieldsToValidate) {
+      const error = validateField(field, validateInput)
+
+      if (error) {
+        nextErrors[field] = error
+      }
+    }
+
+    return nextErrors
+  }
+
+  function handleValueChange<K extends keyof StatisticPartialFormValues>(
+    field: K,
+    value: StatisticPartialFormValues[K]
   ) {
+    const nextValues = { ...values, [field]: value }
+    const validateInput = nextInputValues(nextValues)
+
+    setValues(nextValues)
     setErrors((currentErrors) => {
-      const nextErrors = { ...currentErrors }
+      if (!currentErrors[field]) {
+        return currentErrors
+      }
 
-      for (const field of fields) {
-        const error = validateField(field, validationState)
+      const error = validateField(field, validateInput)
 
-        if (error) {
-          if (shouldAddNewErrors || nextErrors[field]) {
-            nextErrors[field] = error
-          }
-        } else {
-          delete nextErrors[field]
+      if (error) {
+        return {
+          ...currentErrors,
+          [field]: error,
         }
       }
 
+      const nextErrors = { ...currentErrors }
+      delete nextErrors[field]
       return nextErrors
     })
   }
 
-  function handleValueChange<K extends keyof StatisticFormValues>(field: K, value: StatisticFormValues[K]) {
-    const nextValues = { ...values, [field]: value }
-
-    setValues(nextValues)
-    updateFieldErrors([field], getValidationState(nextValues), field !== 'first_released_at')
-  }
-
   function handleStatusChange(nextStatus: CreatableStatisticStatus) {
+    const validateInput = nextInputValues(values, nextStatus)
+
     setStatus(nextStatus)
-    updateFieldErrors(fieldsToValidate, getValidationState(values, nextStatus), false)
+    setErrors((currentErrors) => {
+      const nextErrors = validateForm(validateInput)
+
+      return Object.fromEntries(
+        Object.entries(nextErrors).filter(([field]) => currentErrors[field as StatisticFormField])
+      )
+    })
   }
 
   function handleContactsChange(nextSelectedContacts: string[]) {
+    const validateInput = nextInputValues(values, status, nextSelectedContacts)
+
     setSelectedContacts(nextSelectedContacts)
-    updateFieldErrors(['contacts'], getValidationState(values, status, nextSelectedContacts))
+    setErrors((currentErrors) => {
+      if (!currentErrors.contacts) {
+        return currentErrors
+      }
+
+      const error = validateField('contacts', validateInput)
+
+      if (error) {
+        return {
+          ...currentErrors,
+          contacts: error,
+        }
+      }
+
+      const nextErrors = { ...currentErrors }
+      delete nextErrors.contacts
+      return nextErrors
+    })
   }
 
   function handleVariantsChange(nextCreatedVariants: SetStateAction<Variant[]>) {
     const resolvedVariants =
       typeof nextCreatedVariants === 'function' ? nextCreatedVariants(createdVariants) : nextCreatedVariants
+    const validateInput = nextInputValues(values, status, selectedContacts, resolvedVariants)
 
     setCreatedVariants(resolvedVariants)
-    updateFieldErrors(['variants'], getValidationState(values, status, selectedContacts, resolvedVariants))
-  }
-
-  function handleOnBlur(field: StatisticFormField) {
     setErrors((currentErrors) => {
+      if (!currentErrors.variants) {
+        return currentErrors
+      }
+
+      const error = validateField('variants', validateInput)
+
+      if (error) {
+        return {
+          ...currentErrors,
+          variants: error,
+        }
+      }
+
       const nextErrors = { ...currentErrors }
-      const error = validateField(field, getValidationState())
-
-      if (error) nextErrors[field] = error
-      else delete nextErrors[field]
-
+      delete nextErrors.variants
       return nextErrors
     })
   }
@@ -309,13 +376,7 @@ export default function CreateStatistic() {
   function handleSubmit(e: React.ChangeEvent<HTMLFormElement>) {
     e.preventDefault()
 
-    const nextErrors: StatisticFormErrors = {}
-    const validationState = getValidationState()
-
-    for (const field of fieldsToValidate) {
-      const error = validateField(field, validationState)
-      if (error) nextErrors[field] = error
-    }
+    const nextErrors = validateForm()
 
     setErrors(nextErrors)
     setApiError([])
@@ -323,23 +384,6 @@ export default function CreateStatistic() {
     if (Object.keys(nextErrors).length) return
 
     createStatistic()
-  }
-
-  function handleOpenCreateVariantModal() {
-    setEditVariantIndex(null)
-    setOpenVariantModal(true)
-  }
-
-  function handleOpenEditVariantModal(index: number) {
-    setEditVariantIndex(index)
-    setOpenVariantModal(true)
-  }
-
-  function handleSetOpenVariantModal(open: boolean) {
-    setOpenVariantModal(open)
-    if (!open) {
-      setEditVariantIndex(null)
-    }
   }
 
   if (!isAdmin) return <ErrorPage type={ErrorType.NOTAUTH} />
@@ -362,15 +406,15 @@ export default function CreateStatistic() {
       {!createdShortname && <CreateShortnameModal openCreateShortnameModal />}
       {createdShortname && (
         <div className='create-statistic-container'>
-          {openVariantModal && (
-            <VariantModal
-              openVariantModal={openVariantModal}
-              setOpenVariantModal={handleSetOpenVariantModal}
-              setCreatedVariants={handleVariantsChange}
-              editVariantIndex={editVariantIndex}
-              editVariantValues={editVariantIndex !== null ? createdVariants[editVariantIndex] : undefined}
-            />
-          )}
+          <VariantModal
+            key={[variantModalCloseCount, editVariantIndex ?? 'create'].join('-')}
+            dialogId={variantDialogId}
+            setCreatedVariants={handleVariantsChange}
+            editVariantIndex={editVariantIndex}
+            editVariantValues={editVariantIndex !== null ? createdVariants[editVariantIndex] : undefined}
+            onActionClose={handleVariantModalActionClose}
+            onAfterClose={handleVariantModalClose}
+          />
           {apiError.length > 0 && <ErrorAlert message={apiError} />}
           <Alert data-color='success'>
             <Heading level={2} data-size='xs'>
@@ -399,7 +443,8 @@ export default function CreateStatistic() {
                         igjen.
                       </li>
                       <li>
-                        For å slette en statistikk som har blitt feilopprettet må du ta kontakt med mailadresse@ssb.no
+                        For å slette en statistikk som har blitt feilopprettet må du ta kontakt med{' '}
+                        <Link href='mailto:mailadresse@ssb.no'>mailadresse@ssb.no</Link>
                       </li>
                     </ul>
                   </Popover>
@@ -407,7 +452,7 @@ export default function CreateStatistic() {
               </div>
               <Field.Description>
                 Statistikker som er nyopprettet får status «Kommende». For å sette den til «Aktiv» må du i tillegg fylle
-                ut: Engelsk navn, varianter og målform.
+                ut: Engelsk navn, varianter og kontakter.
               </Field.Description>
               <Select
                 width='auto'
@@ -431,7 +476,6 @@ export default function CreateStatistic() {
                 aria-invalid={!!errors.name}
                 value={values.name}
                 onChange={(e) => handleValueChange('name', e.target.value)}
-                onBlur={() => handleOnBlur('name')}
               />
               {errors.name && <ValidationMessage>{errors.name}</ValidationMessage>}
             </Field>
@@ -442,61 +486,19 @@ export default function CreateStatistic() {
                 aria-invalid={!!errors.name_en}
                 value={values.name_en}
                 onChange={(e) => handleValueChange('name_en', e.target.value)}
-                onBlur={() => handleOnBlur('name_en')}
               />
               {errors.name_en && <ValidationMessage>{errors.name_en}</ValidationMessage>}
             </Field>
             <Divider />
-            <div className='created-variants-title-container'>
-              <Label>{getFieldLabel('Variant', 'variants')}</Label>
-              <Paragraph>Legg til variant for å kunne melde publiseringsdato på statistikken</Paragraph>
-            </div>
-            {createdVariants.length > 0 && (
-              <div className='created-variants-container'>
-                {createdVariants.map((variant, index) => (
-                  <Card
-                    key={['created-variant', variant.frequency?.code ?? index, variant.revision?.code ?? index].join(
-                      '-'
-                    )}
-                    variant='tinted'
-                  >
-                    <Card.Block>
-                      <div className='created-variant-heading-container'>
-                        <Heading>
-                          {[
-                            variant.frequency!.name,
-                            RevisionNames[variant.revision!.code as keyof typeof RevisionNames].toLocaleLowerCase(),
-                          ].join(', ')}
-                        </Heading>
-                        <Button
-                          variant='tertiary'
-                          data-color='danger'
-                          onClick={() => handleOpenEditVariantModal(index)}
-                        >
-                          <PencilWritingIcon /> Rediger
-                        </Button>
-                      </div>
-                      <Paragraph>
-                        Detaljnivå: {variant.level_of_detail?.name} <br />
-                        Engelsk detaljnivå: {variant.level_of_detail?.name_en}
-                      </Paragraph>
-                    </Card.Block>
-                  </Card>
-                ))}
-              </div>
-            )}
-            <div className='create-variant-button-container'>
-              <Button
-                id='variants'
-                variant='secondary'
-                aria-invalid={!!errors.variants}
-                onClick={handleOpenCreateVariantModal}
-                onBlur={() => handleOnBlur('variants')}
-              >
-                <PlusCircleIcon /> Legg til variant
-              </Button>
-              {errors.variants && <ValidationMessage>{errors.variants}</ValidationMessage>}
-            </div>
+            <VariantEditorSection
+              createdVariants={createdVariants}
+              variantDialogId={variantDialogId}
+              addVariantButtonRef={addVariantButtonRef}
+              variantsError={errors.variants}
+              variantLabel={getFieldLabel('Variant', 'variants')}
+              onOpenCreateVariantModal={handleOpenCreateVariantModal}
+              onOpenEditVariantModal={handleOpenEditVariantModal}
+            />
             <Divider />
             <div className='contact-section'>
               <Label>{getFieldLabel('Kontakter', 'contacts')}</Label>
@@ -510,7 +512,6 @@ export default function CreateStatistic() {
                   contacts={contacts}
                   selected={selectedContacts}
                   setSelected={handleContactsChange}
-                  onBlur={() => handleOnBlur('contacts')}
                 />
                 {errors.contacts && <ValidationMessage>{errors.contacts}</ValidationMessage>}
               </Field>
@@ -519,20 +520,13 @@ export default function CreateStatistic() {
             <Heading level={2}>Detaljer</Heading>
             <Field>
               <Label>{getFieldLabel('Seksjon', 'division')}</Label>
-              <Select
+              <DivisionSelection
                 id='division'
-                aria-invalid={!!errors.division}
-                value={values.division}
-                onChange={(e) => handleValueChange('division', e.target.value)}
-                onBlur={() => handleOnBlur('division')}
-              >
-                <Select.Option value='' disabled />
-                {divisions.map(({ code, name }) => (
-                  <Select.Option key={`division-${code}`} value={code}>
-                    {name} ({code})
-                  </Select.Option>
-                ))}
-              </Select>
+                ariaInvalid={!!errors.division}
+                divisions={divisions}
+                selected={values.division}
+                setSelected={(selected) => handleValueChange('division', selected)}
+              />
               {errors.division && <ValidationMessage>{errors.division}</ValidationMessage>}
             </Field>
             <Fieldset>
@@ -566,7 +560,6 @@ export default function CreateStatistic() {
                 aria-invalid={!!errors.first_released_at}
                 value={values.first_released_at}
                 onChange={(e) => handleValueChange('first_released_at', e.target.value)}
-                onBlur={() => handleOnBlur('first_released_at')}
               />
               {errors.first_released_at && <ValidationMessage>{errors.first_released_at}</ValidationMessage>}
             </Field>
@@ -574,7 +567,11 @@ export default function CreateStatistic() {
             <Field>
               <Label>Kommentar (Valgfritt)</Label>
               <Field.Description>Annen relevant informasjon.</Field.Description>
-              <Input value={values.comment} onChange={(e) => handleValueChange('comment', e.target.value)} />
+              <Textarea
+                rows={3}
+                value={values.comment}
+                onChange={(e) => handleValueChange('comment', e.target.value)}
+              />
             </Field>
             <div className='create-statistic-form-buttons'>
               <Button type='submit'>Opprett</Button>

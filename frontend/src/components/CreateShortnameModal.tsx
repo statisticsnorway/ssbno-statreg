@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router'
-import { Button, Heading, Dialog, Field, Input, ValidationMessage, Paragraph } from '@digdir/designsystemet-react'
+import { Button, Heading, Dialog, Field, Input, ValidationMessage, Paragraph } from '@statisticsnorway/design-react'
 
 import client from '../api'
 import type { ShortnameListing } from '@ssbno-statreg/shared'
@@ -36,25 +36,25 @@ export function CreateShortnameModal({ openCreateShortnameModal }: Readonly<Crea
     fetchShortnames()
   }, [isAdmin])
 
-  function validateShortname() {
-    if (!shortnameInput) {
+  function validateShortname(value: string) {
+    if (!value) {
       setValidationError('Fyll ut et kortnavn')
       return false
     }
 
-    const invalidShortnameCharacters = shortnameInput.match(/[^a-z_]/g)
+    const invalidShortnameCharacters = value.match(/[^a-z_]/g)
     if (invalidShortnameCharacters) {
       const invalidChars = [...new Set(invalidShortnameCharacters)]
       setValidationError(`Kortnavnet inneholder ugyldige tegn: ${invalidChars.join(', ')}`)
       return false
     }
 
-    if (shortnameInput.length > 14) {
+    if (value.length > 14) {
       setValidationError('Kortnavnet kan ikke være lengre enn 14 tegn')
       return false
     }
 
-    if (shortnames.includes(shortnameInput)) {
+    if (shortnames.includes(value)) {
       setValidationError('Dette kortnavnet er ikke ledig')
       return false
     }
@@ -64,7 +64,9 @@ export function CreateShortnameModal({ openCreateShortnameModal }: Readonly<Crea
   }
 
   function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setShortnameInput(e.target.value)
+    const value = e.target.value
+    setShortnameInput(value)
+    validateShortname(value)
   }
 
   async function createShortname() {
@@ -83,7 +85,7 @@ export function CreateShortnameModal({ openCreateShortnameModal }: Readonly<Crea
   function handleOnSubmit(e: React.ChangeEvent<HTMLFormElement>) {
     e.preventDefault()
 
-    if (!validateShortname()) return
+    if (!validateShortname(shortnameInput)) return
     createShortname()
   }
 
@@ -92,9 +94,16 @@ export function CreateShortnameModal({ openCreateShortnameModal }: Readonly<Crea
   }
 
   return (
-    <Dialog id='create-shortname-modal' open={openCreateShortnameModal} onClose={handleCloseModal}>
+    <Dialog
+      id='create-shortname-modal'
+      aria-labelledby='create-shortname-modal-heading'
+      open={openCreateShortnameModal}
+      onClose={handleCloseModal}
+    >
       <Dialog.Block>
-        <Heading data-size='xs'>Opprett kortnavn for statistikken</Heading>
+        <Heading id='create-shortname-modal-heading' data-size='xs'>
+          Opprett kortnavn for statistikken
+        </Heading>
       </Dialog.Block>
       <Dialog.Block>
         {apiError.length > 0 && <ErrorAlert message={apiError} />}
@@ -105,7 +114,14 @@ export function CreateShortnameModal({ openCreateShortnameModal }: Readonly<Crea
               ikke endres etter at statistikken har blitt opprettet. Maks 14 tegn, kun små bokstaver og understrek er
               lov.
             </Field.Description>
-            <Input aria-invalid={!!validationError} onChange={handleInputChange} onBlur={validateShortname} />
+            <Input
+              // @ts-expect-error native "autofocus" is not part of the React types
+              autofocus='true'
+              aria-invalid={!!validationError}
+              onChange={handleInputChange}
+              onBlur={() => validateShortname(shortnameInput)}
+              maxLength={14}
+            />
             <Paragraph data-limit='14' data-field='counter' />
             {validationError ? (
               <ValidationMessage>{validationError}</ValidationMessage>
@@ -113,7 +129,7 @@ export function CreateShortnameModal({ openCreateShortnameModal }: Readonly<Crea
               shortnameInput && <ValidationMessage data-color='success'>Kortnavn er ledig</ValidationMessage>
             )}
           </Field>
-          <div style={{ display: 'flex', marginTop: 'var(--ds-size-3)' }}>
+          <div style={{ display: 'flex', gap: 'var(--ds-size-2)', marginTop: 'var(--ds-size-3)' }}>
             <Button variant='primary' type='submit'>
               Opprett kortnavn
             </Button>

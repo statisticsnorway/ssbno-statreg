@@ -1,6 +1,7 @@
 import { vi, beforeEach, describe, test, expect, afterEach } from 'vitest'
 import {
   createBlockedReleaseDay,
+  deleteBlockedReleaseDate,
   getDateStatusForRange,
   getReleaseCountByDate,
   getStatus,
@@ -38,6 +39,8 @@ describe('calendarService  ', () => {
       calender_date: {
         create: vi.fn((args) => Promise.resolve({ ...args, id: 0 })),
         findMany: vi.fn(() => Promise.resolve(listReturn)),
+        findUnique: vi.fn(() => Promise.resolve({ day: new Date('2026-12-24') })),
+        delete: vi.fn(() => Promise.resolve()),
       },
       release: {
         findMany: vi.fn(() => Promise.resolve([])),
@@ -97,6 +100,35 @@ describe('calendarService  ', () => {
       expect(prismaMock.calender_date.findMany).toHaveBeenCalledTimes(0)
     })
   })
+  describe('deleteBlockedReleaseDate() ', () => {
+    test('deletes a manually blocked date and returns mapped results', async () => {
+      setListReturn(calendar_date_prisma_list)
+
+      const result = await deleteBlockedReleaseDate(prismaMock, '2026-12-24')
+
+      expect(prismaMock.calender_date.delete).toHaveBeenCalledExactlyOnceWith({
+        where: { day: new Date('2026-12-24') },
+      })
+      expect(result).toEqual(expect.arrayContaining(calendar_date_result))
+    })
+
+    test('returns 400 when date is automatically blocked', async () => {
+      await expect(deleteBlockedReleaseDate(prismaMock, '2026-12-25')).rejects.toMatchObject({
+        statregError: 'Automatically blocked dates cannot be deleted',
+      })
+      expect(prismaMock.calender_date.delete).not.toHaveBeenCalled()
+    })
+
+    test('returns 404 when date is not blocked', async () => {
+      prismaMock.calender_date.findUnique.mockResolvedValueOnce(null)
+
+      await expect(deleteBlockedReleaseDate(prismaMock, '2026-12-24')).rejects.toMatchObject({
+        statregError: 'The date 2026-12-24 is not a blocked release date',
+        status: 404,
+      })
+      expect(prismaMock.calender_date.delete).not.toHaveBeenCalled()
+    })
+  })
   describe('getDateStatusForRange() ', () => {
     test('works for a single-day range', async () => {
       const result = await getDateStatusForRange(prismaMock, '2024-06-15', '2024-06-15')
@@ -139,6 +171,7 @@ describe('calendarService  ', () => {
       expect(prismaMock.release.findMany).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
           where: {
+            archived: false,
             publish_time: { gt: new Date('2024-03-01T00:00:00.000Z'), lte: new Date('2099-12-31T23:59:59.999Z') },
           },
         })
@@ -152,6 +185,7 @@ describe('calendarService  ', () => {
       expect(prismaMock.release.findMany).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
           where: {
+            archived: false,
             publish_time: { gt: new Date('2000-01-01T00:00:00.000Z'), lte: new Date('2024-05-31T23:59:59.999Z') },
           },
         })

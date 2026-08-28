@@ -203,6 +203,7 @@ components:
           properties:
             comment: { type: string }
             release_date_precision: { type: string }
+            archived: { type: boolean }
 
     Release_get:
       allOf:
@@ -233,6 +234,7 @@ components:
                 revision:
                   $ref: '#/components/schemas/Revision'
             cancelled: { type: boolean }
+            archived: { type: boolean }
             release_date_precision: { type: string }
 
     Release_listing:
@@ -332,7 +334,7 @@ components:
         - $ref: '#/components/schemas/Statistic_create_base'
       type: object
       properties:
-        relation: { type: string, nullable: true }
+        relation_id: { type: integer, nullable: true }
 
     Statistic_details:
       allOf:
@@ -348,6 +350,7 @@ components:
         relation:
           type: object
           properties:
+            id: { type: integer }
             shortname: { type: string }
             name: { type: string, readOnly: true }
             name_en: { type: string, readOnly: true }
@@ -401,21 +404,15 @@ components:
               - new_value
             properties:
               field_name: { type: string, description: 'The name of the field that changed.' }
-              old_value:
-                {
-                  type: string,
-                  description: 'Human-readable version of the old value.',
-                }
-              new_value:
-                {
-                  type: string,
-                  description: 'Human-readable version of the new value.',
-                }
+              old_value: { type: string, description: 'Human-readable version of the old value.' }
+              new_value: { type: string, description: 'Human-readable version of the new value.' }
 
     Variant:
       type: object
       properties:
-        id: { type: integer, readOnly: true }
+        id:
+          type: integer
+          description: On update, provide the id of an existing variant to update it, or omit it to create a new variant. Ignored/read-only when creating a statistic.
         version: { type: integer }
         updated_at: { type: string, format: date-time, readOnly: true }
         level_of_detail:

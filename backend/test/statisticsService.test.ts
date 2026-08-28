@@ -17,7 +17,6 @@ import {
   StatisticsDetailedIncludes,
   parseDivision,
   parseStatusCode,
-  parseRelation,
   buildStatisticFilter,
 } from '@/services/statisticsService'
 
@@ -369,25 +368,39 @@ describe('statisticService', () => {
     let input: any
 
     beforeEach(() => {
+      prismaMock.responsiblePerson.upsert.mockResolvedValue({ id: 2, principalName: 'bcd@ssb.no' })
+
       input = {
         division: '105',
         status: { code: 'SP' },
         name: 'Helse',
         name_en: 'Health',
         approval_status: 'FORSLAG',
-        relation: '2',
+        relation_id: '2',
         previous_topic_codes: '05.01.02',
         yearly_reporting: false,
         first_released_at: '2026-03-25',
         main_language: 'nn',
         comment: 'Beskrivelse av endring',
         statistic_region_levels: [{ code: 'L' }],
+        variants: [
+          {
+            revision: { code: 'I' },
+            frequency: { code: 'M' },
+            level_of_detail: { name: 'Detaljnivå', name_en: 'Level of detail' },
+          },
+        ],
+        contacts: ['bcd@ssb.no'],
       }
     })
 
     test('returns mocked data', async () => {
       setStatisticsResult({
         id: 5,
+        division_code: '105',
+        name: 'Helse',
+        status: 'K',
+        main_language: 'nb',
         statistic_region_levels: [
           {
             region_level: {
@@ -411,6 +424,7 @@ describe('statisticService', () => {
         first_released_at: input.first_released_at,
         comment: input.comment,
         related_statistic: {
+          id: 3,
           language: 'nb',
           name: 'Befolkning og demografi',
           name_en: 'Foreign trade and goods flow',
@@ -418,12 +432,38 @@ describe('statisticService', () => {
             name: 'befolk',
           },
         },
+        variants: input.variants,
+        contacts: input.contacts,
       })
 
       await updateStatistic('helse', input, prismaMock)
 
       expect(prismaMock.statistic.update).toHaveBeenCalledExactlyOnceWith({
         ...mockUpdateStatisticPrismaUpdateData,
+        data: {
+          ...mockUpdateStatisticPrismaUpdateData.data,
+          responsiblePersons: {
+            set: [{ id: 2 }],
+          },
+          variants: {
+            update: [],
+            create: [
+              {
+                cancelled: false,
+                date_created: expect.any(Date),
+                last_updated: expect.any(Date),
+                revision: 'I',
+                frequency: {
+                  connect: {
+                    code: 'M',
+                  },
+                },
+                level_of_detail: 'Detaljnivå',
+                level_of_detail_en: 'Level of detail',
+              },
+            ],
+          },
+        },
         include: StatisticsDetailedIncludes,
       })
     })
@@ -434,6 +474,78 @@ describe('statisticService', () => {
       await expect(() => updateStatistic('test', input, prismaMock)).rejects.toMatchObject({
         status: 404,
         statregError: 'Shortname test not found',
+      })
+      expect(prismaMock.statistic.update).toHaveBeenCalledTimes(0)
+    })
+
+    test('throws Error when request body omits an existing variant', async () => {
+      setStatisticsResult({
+        id: 5,
+        status: 'K',
+        responsiblePersons: [{ principalName: 'bcd@ssb.no' }],
+        variants: [{ id: 1 }, { id: 2 }],
+        statistic_region_levels: [{ region_level: { code: 'BD', id: 1 } }],
+      })
+
+      input.variants = [
+        {
+          id: 1,
+          frequency: { code: 'M' },
+          revision: { code: 'I' },
+        },
+      ]
+
+      await expect(() => updateStatistic('helse', input, prismaMock)).rejects.toMatchObject({
+        statregError: 'Deleting variants is currently not supported. Missing existing variant ids: 2.',
+      })
+
+      expect(prismaMock.statistic.update).toHaveBeenCalledTimes(0)
+    })
+
+    test('throws error when contacts is missing for active statistic update with no existing contacts', async () => {
+      setStatisticsResult({
+        id: 5,
+        status: 'K',
+        responsiblePersons: [],
+        variants: [],
+        statistic_region_levels: [{ region_level: { code: 'BD', id: 1 } }],
+      })
+
+      input.status = { code: 'A' }
+      input.contacts = undefined
+
+      await expect(() => updateStatistic('helse', input, prismaMock)).rejects.toMatchObject({
+        statregError: 'An active statistic needs at least one contact.',
+      })
+
+      expect(prismaMock.statistic.update).toHaveBeenCalledTimes(0)
+    })
+
+    test('throws error when variants is missing for active statistic update with no existing variants', async () => {
+      setStatisticsResult({
+        id: 5,
+        status: 'K',
+        responsiblePersons: [{ principalName: 'bcd@ssb.no' }],
+        variants: [],
+        statistic_region_levels: [{ region_level: { code: 'BD', id: 1 } }],
+      })
+
+      input.status = { code: 'A' }
+      input.variants = undefined
+
+      await expect(() => updateStatistic('helse', input, prismaMock)).rejects.toMatchObject({
+        statregError: 'An active statistic needs at least one variant.',
+      })
+
+      expect(prismaMock.statistic.update).toHaveBeenCalledTimes(0)
+    })
+
+    test('throws error when an active statistic is set back to upcoming', async () => {
+      setStatisticsResult({ status: 'A', responsiblePersons: [], variants: [], statistic_region_levels: [] })
+      input.status = { code: 'K' }
+
+      await expect(() => updateStatistic('helse', input, prismaMock)).rejects.toMatchObject({
+        statregError: 'An active statistic cannot be set back to upcoming.',
       })
       expect(prismaMock.statistic.update).toHaveBeenCalledTimes(0)
     })
@@ -491,6 +603,7 @@ describe('statisticService', () => {
             responsiblePersons: {
               set: [{ id: 2 }, { id: 3 }],
             },
+            comment: 'User updated contacts',
           },
         })
       )
@@ -1095,12 +1208,14 @@ describe('statisticService', () => {
         'status',
         'name',
         'name_en',
-        'relation',
+        'relation_id',
         'previous_topic_codes',
         'yearly_reporting',
         'first_released_at',
         'main_language',
         'comment',
+        'contacts',
+        'variants',
       ] as (keyof StatisticUpdate)[]
 
       beforeEach(() => {
@@ -1111,11 +1226,13 @@ describe('statisticService', () => {
           first_released_at: '2024-04-01',
           main_language: 'nn',
           comment: 'Kommentar om statistikken',
-          status: { code: 'SA' },
-          relation: 2,
+          status: { code: 'A' },
+          relation_id: 2,
           previous_topic_codes: '05.01.02',
           yearly_reporting: false,
           statistic_region_levels: [],
+          contacts: ['bcd@ssb.no'],
+          variants: [{ frequency: { code: 'M' }, revision: { code: 'I' } }],
         }
 
         expectedResult = {
@@ -1125,11 +1242,13 @@ describe('statisticService', () => {
           first_released_at: new Date('2024-04-01T00:00:00.000Z'),
           main_language: 'nn',
           comment: 'Kommentar om statistikken',
-          status: 'SA',
-          relation: 2,
+          status: 'A',
+          relation_id: 2,
           previous_topic_codes: '05.01.02',
           yearly_reporting: false,
           statistic_region_levels: [],
+          contacts: ['bcd@ssb.no'],
+          variants: [{ frequency: { code: 'M' }, revision: { code: 'I' } }],
         }
       })
 
@@ -1137,6 +1256,20 @@ describe('statisticService', () => {
         const result = parseUpdateStatisticInput(input, requiredUpdateFields)
 
         expect(result).toStrictEqual(expectedResult)
+      })
+
+      test('returns null first_released_at when the optional field is omitted', () => {
+        input.first_released_at = undefined
+
+        const result = parseUpdateStatisticInput(
+          input,
+          requiredUpdateFields.filter((field) => field !== 'first_released_at')
+        )
+
+        expect(result).toStrictEqual({
+          ...expectedResult,
+          first_released_at: null,
+        })
       })
 
       test('throws error when comment is an empty string', () => {
@@ -1160,7 +1293,7 @@ describe('statisticService', () => {
       })
 
       test('throws error when relation id is an invalid format', () => {
-        input.relation = 'abc'
+        input.relation_id = 'abc'
 
         expect(() => parseUpdateStatisticInput(input, requiredUpdateFields)).toThrow(
           expect.objectContaining({
@@ -1175,6 +1308,16 @@ describe('statisticService', () => {
         expect(() => parseUpdateStatisticInput(input, requiredUpdateFields)).toThrow(
           expect.objectContaining({
             statregError: "Field 'status' must be one of these: K, A, IA, UT, SA, SP.",
+          })
+        )
+      })
+
+      test('throws error when comment is missing for active statistic', () => {
+        input.comment = undefined
+
+        expect(() => parseUpdateStatisticInput(input, requiredUpdateFields)).toThrow(
+          expect.objectContaining({
+            statregError: "Field 'comment' must be a non-empty string.",
           })
         )
       })
@@ -1234,30 +1377,6 @@ describe('statisticService', () => {
 
     test('is case-sensitive', () => {
       expect(() => parseStatusCode('k')).toThrow(expect.objectContaining({ statregError: expectedError }))
-    })
-  })
-
-  describe('parseRelation', () => {
-    test('returns null when relationId is undefined', () => {
-      expect(parseRelation(undefined)).toBeNull()
-    })
-
-    test('returns null when relationId is null', () => {
-      expect(parseRelation(null)).toBeNull()
-    })
-
-    test('returns null when relationId is empty string', () => {
-      expect(parseRelation('')).toBeNull()
-    })
-
-    test('returns parsed number when relationId is valid', () => {
-      expect(parseRelation('42')).toBe(42)
-    })
-
-    test('throws when relationId is not a valid id', () => {
-      expect(() => parseRelation('abc')).toThrow(
-        expect.objectContaining({ statregError: 'Invalid relation id format' })
-      )
     })
   })
 })
@@ -1323,6 +1442,7 @@ const mockStatisticsDetailedPrismaResult = {
     },
   ],
   related_statistic: {
+    id: 3,
     language: 'nb',
     name: 'Utenrikshandel og varestrøm',
     name_en: 'Foreign trade and goods flow',
@@ -1414,6 +1534,7 @@ const mockedStatisticDetailedResult = {
   status: { code: 'SA' },
   previous_topic_codes: '05.01.01',
   relation: {
+    id: 3,
     shortname: 'kpi',
     name: 'Utenrikshandel og varestrøm',
     name_en: 'Foreign trade and goods flow',
@@ -1507,7 +1628,7 @@ const mockedStatisticCreatedPrismaResult = {
   first_release: new Date('1970-01-01T00:00:00.000Z'),
   yearly_reporting: false,
   status: 'K',
-  related_statistic_id: undefined,
+  related_statistic_id: 3,
   name: 'Konsumprisindeksen',
   last_updated: new Date('2026-03-23T08:00:00Z'),
   comment: '',

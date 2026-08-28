@@ -1,5 +1,5 @@
-import '@digdir/designsystemet-css'
-import '@digdir/designsystemet-css/theme'
+import '@statisticsnorway/design-css'
+import '@statisticsnorway/design-css/theme'
 
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
