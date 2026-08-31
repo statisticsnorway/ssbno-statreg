@@ -210,7 +210,6 @@ export default function ShowStatistic() {
   const mainLanguage = formatMainLanguage(statistic.main_language)
   const startYear = formatStartYear(statistic.first_released_at)
   const continuedBy = statistic.relation?.shortname ? statistic.relation : undefined
-  const relationHeading = statusCode === 'A' ? 'Viderefører' : 'Videreføres av'
   const continues = statistic.incoming_relations ?? []
   const variants = statistic.variants ?? []
   const cancelledVariants = formatCancelledVariants(variants)
