@@ -354,6 +354,16 @@ components:
             shortname: { type: string }
             name: { type: string, readOnly: true }
             name_en: { type: string, readOnly: true }
+        incoming_relations:
+          type: array
+          description: Statistics that reference this statistic as their continuation.
+          items:
+            type: object
+            properties:
+              id: { type: integer }
+              shortname: { type: string }
+              name: { type: string, readOnly: true }
+              name_en: { type: string, readOnly: true }
         updated_at: { type: string, format: date-time, readOnly: true }
         comment: { type: string }
         created_at: { type: string, format: date-time, readOnly: true }
