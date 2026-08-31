@@ -354,7 +354,7 @@ export default function ShowStatistic() {
 
       {continuedBy && (
         <div>
-          <Heading data-size='xs'>{relationHeading}</Heading>
+          <Heading data-size='xs'>Videreføres av</Heading>
           <Paragraph>
             <Link asChild>
               <ReactRouterLink to={`/statistikk/${continuedBy.shortname}`}>{continuedBy.name}</ReactRouterLink>
@@ -365,7 +365,7 @@ export default function ShowStatistic() {
 
       {!!continues.length && (
         <div>
-          <Heading data-size='xs'>{relationHeading}</Heading>
+          <Heading data-size='xs'>Viderefører</Heading>
           {continues.map((continuedStatistic) => (
             <Paragraph key={continuedStatistic.id}>
               <Link asChild>
