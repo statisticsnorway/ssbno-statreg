@@ -241,8 +241,12 @@ export default function EditStatistic() {
     if (field === 'name' && !validatedInput.values.name) return 'Fyll inn norsk statistikknavn'
     if (field === 'name_en' && !validatedInput.values.name_en) return 'Fyll inn engelsk statistikknavn'
     if (field === 'division' && !validatedInput.values.division) return 'Velg ansvarlig seksjon for statistikken'
-    if (field === 'variants' && validatedInput.createdVariants.length === 0) return 'Legg til minst én variant'
     if (field === 'contacts' && validatedInput.selectedContacts.length === 0) return 'Legg til minst én kontakt'
+
+    const activeVariants = validatedInput.createdVariants.filter((variant) => !variant.cancelled).length
+    if (field === 'variants' && activeVariants === 0) {
+      return 'Legg til minst én variant'
+    }
 
     return ''
   }
