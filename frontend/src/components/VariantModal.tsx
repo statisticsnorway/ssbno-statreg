@@ -219,7 +219,7 @@ export function VariantModal({
   const variantCancelledTriggerRef = useRef<HTMLButtonElement>(null)
   const returnFocusToVariantCancelledTriggerRef = useRef(false)
 
-  const isEditMode = typeof editVariantIndex === 'number'
+  const isExistingVariant = typeof editVariantIndex === 'number'
 
   useEffect(() => {
     if (!isDeletePopoverOpen && returnFocusToDeleteTriggerRef.current) {
@@ -252,7 +252,7 @@ export function VariantModal({
 
     setCreatedVariants((prevVariants: Variant[]) => {
       const nextVariant: Variant = {
-        ...(isEditMode && editVariantValues?.id ? { id: editVariantValues.id } : {}),
+        ...(isExistingVariant && editVariantValues?.id ? { id: editVariantValues.id } : {}),
         revision: {
           code: values.revision_code,
         },
@@ -264,7 +264,7 @@ export function VariantModal({
         cancelled: values.cancelled,
       }
 
-      if (!isEditMode) {
+      if (!isExistingVariant) {
         return [...prevVariants, nextVariant]
       }
 
@@ -273,7 +273,7 @@ export function VariantModal({
   }
 
   function deleteVariant() {
-    if (!isEditMode) return
+    if (!isExistingVariant) return
 
     setCreatedVariants((prevVariants: Variant[]) => prevVariants.filter((_, index) => index !== editVariantIndex))
   }
@@ -296,7 +296,7 @@ export function VariantModal({
   }
 
   function setVariantCancelled() {
-    if (!isEditMode) return
+    if (!isExistingVariant) return
 
     setValues((prevValues) => ({ ...prevValues, cancelled: true }))
     setCreatedVariants((prevVariants: Variant[]) =>
@@ -304,13 +304,13 @@ export function VariantModal({
     )
   }
 
-  const canDeleteVariant = isEditMode && !editVariantValues?.id
+  const canDeleteVariant = isExistingVariant && !editVariantValues?.id
 
   return (
     <Dialog id={dialogId} aria-labelledby='variant-modal-heading' onClose={handleDialogClose} closedby='any'>
       <Dialog.Block>
         <Heading id='variant-modal-heading' data-size='xs'>
-          {isEditMode ? 'Rediger variant' : 'Legg til variant'}
+          {isExistingVariant ? 'Rediger variant' : 'Legg til variant'}
         </Heading>
       </Dialog.Block>
       <Dialog.Block className='variant-modal-form'>
@@ -366,7 +366,7 @@ export function VariantModal({
         <div className='variant-modal-form-buttons'>
           <div className='variant-modal-form-buttons-left'>
             <Button variant='primary' command='close' commandfor={dialogId} onClick={createVariant}>
-              {isEditMode ? 'Lagre' : 'Legg til'}
+              {isExistingVariant ? 'Lagre' : 'Legg til'}
             </Button>
             <Button variant='tertiary' command='close' commandfor={dialogId}>
               Avbryt
