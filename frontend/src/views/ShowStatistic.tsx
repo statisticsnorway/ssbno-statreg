@@ -64,9 +64,11 @@ function formatCancelledVariants(variants: Variant[]): string[] {
   return variants
     .filter((variant: Variant) => variant.cancelled)
     .map((variant) => {
-      const levelOfDetail = !variant.level_of_detail?.name?.trim() ? '-' : variant.level_of_detail.name
-      const levelOfDetailEnglish = !variant.level_of_detail?.name_en?.trim() ? '-' : variant.level_of_detail.name_en
-      return [levelOfDetail, formatVariant(variant), levelOfDetailEnglish].join(', ')
+      const levelOfDetail = variant.level_of_detail?.name
+      const levelOfDetailEnglish = variant.level_of_detail?.name_en
+      return [levelOfDetail, formatVariant(variant), levelOfDetailEnglish]
+        .filter((variant) => variant !== '')
+        .join(', ')
     })
 }
 
