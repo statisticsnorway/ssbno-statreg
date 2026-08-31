@@ -87,8 +87,6 @@ export default function CreateStatistic() {
     handleVariantModalClose,
   } = useVariantModal()
 
-  const cancelledVariants = createdVariants.some((variant) => !variant.cancelled)
-
   const { getCheckboxProps, value: regionLevelValues } = useCheckboxGroup({
     name: 'region-level-checkbox',
     value: [],
@@ -496,45 +494,42 @@ export default function CreateStatistic() {
               <Label>{getFieldLabel('Variant', 'variants')}</Label>
               <Paragraph>Legg til variant for å kunne melde publiseringsdato på statistikken</Paragraph>
             </div>
-            {cancelledVariants && (
-              <div className='created-variants-container'>
-                {createdVariants.map((variant, index) => {
-                  if (variant.cancelled) return null
-                  return (
-                    <Card
-                      key={['created-variant', variant.frequency?.code ?? index, variant.revision?.code ?? index].join(
-                        '-'
-                      )}
-                      variant='tinted'
-                    >
-                      <Card.Block>
-                        <div className='created-variant-heading-container'>
-                          <Heading>
-                            {[
-                              variant.frequency!.name,
-                              RevisionNames[variant.revision!.code as keyof typeof RevisionNames].toLocaleLowerCase(),
-                            ].join(', ')}
-                          </Heading>
-                          <Button
-                            variant='tertiary'
-                            data-color='danger'
-                            command='show-modal'
-                            commandfor={variantDialogId}
-                            onClick={() => handleOpenEditVariantModal(index)}
-                          >
-                            <PencilWritingIcon /> Rediger
-                          </Button>
-                        </div>
-                        <Paragraph>
-                          Detaljnivå: {variant.level_of_detail?.name} <br />
-                          Engelsk detaljnivå: {variant.level_of_detail?.name_en}
-                        </Paragraph>
-                      </Card.Block>
-                    </Card>
-                  )
-                })}
-              </div>
-            )}
+            <div className='created-variants-container'>
+              {createdVariants.map((variant, index) => {
+                return (
+                  <Card
+                    key={['created-variant', variant.frequency?.code ?? index, variant.revision?.code ?? index].join(
+                      '-'
+                    )}
+                    variant='tinted'
+                  >
+                    <Card.Block>
+                      <div className='created-variant-heading-container'>
+                        <Heading>
+                          {[
+                            variant.frequency!.name,
+                            RevisionNames[variant.revision!.code as keyof typeof RevisionNames].toLocaleLowerCase(),
+                          ].join(', ')}
+                        </Heading>
+                        <Button
+                          variant='tertiary'
+                          data-color='danger'
+                          command='show-modal'
+                          commandfor={variantDialogId}
+                          onClick={() => handleOpenEditVariantModal(index)}
+                        >
+                          <PencilWritingIcon /> Rediger
+                        </Button>
+                      </div>
+                      <Paragraph>
+                        Detaljnivå: {variant.level_of_detail?.name} <br />
+                        Engelsk detaljnivå: {variant.level_of_detail?.name_en}
+                      </Paragraph>
+                    </Card.Block>
+                  </Card>
+                )
+              })}
+            </div>
             <div className='create-variant-button-container'>
               <Button
                 id='variants'
