@@ -87,8 +87,8 @@ type DeleteVariantPopoverProps = {
 
 type SetVariantCancelledPopoverProps = {
   variantCancelledTriggerRef: RefObject<HTMLButtonElement | null>
-  isVariantCancelledPopoverOpen: boolean
-  setIsVariantCancelledPopoverOpen: Dispatch<SetStateAction<boolean>>
+  isSetVariantCancelledPopoverOpen: boolean
+  setIsSetVariantCancelledPopoverOpen: Dispatch<SetStateAction<boolean>>
   dialogId: string
   onActionClose?: () => void
   setVariantCancelled: () => void
@@ -146,8 +146,8 @@ function DeleteVariantPopover({
 
 function SetVariantCancelledPopover({
   variantCancelledTriggerRef,
-  isVariantCancelledPopoverOpen,
-  setIsVariantCancelledPopoverOpen,
+  isSetVariantCancelledPopoverOpen,
+  setIsSetVariantCancelledPopoverOpen,
   dialogId,
   onActionClose,
   setVariantCancelled,
@@ -159,14 +159,14 @@ function SetVariantCancelledPopover({
         ref={variantCancelledTriggerRef}
         variant='tertiary'
         data-color='danger'
-        onClick={() => setIsVariantCancelledPopoverOpen(!isVariantCancelledPopoverOpen)}
+        onClick={() => setIsSetVariantCancelledPopoverOpen(!isSetVariantCancelledPopoverOpen)}
       >
         <ArchiveIcon aria-hidden /> Sett som opphørt
       </Popover.Trigger>
       <Popover
         placement='top-start'
         autoPlacement={false}
-        open={isVariantCancelledPopoverOpen}
+        open={isSetVariantCancelledPopoverOpen}
         onClose={closeVariantCancelledAndReturnFocus}
         data-color='danger'
       >
@@ -180,7 +180,7 @@ function SetVariantCancelledPopover({
             data-color='danger'
             onClick={() => {
               onActionClose?.()
-              setIsVariantCancelledPopoverOpen(false)
+              setIsSetVariantCancelledPopoverOpen(false)
               setVariantCancelled()
             }}
           >
@@ -205,8 +205,6 @@ export function VariantModal({
 }: Readonly<VariantModalProps>) {
   const [frequencies, setFrequencies] = useState<Frequency[]>([])
   const [apiError, setApiError] = useState<string[]>([])
-  const [isDeletePopoverOpen, setIsDeletePopoverOpen] = useState(false)
-  const [isVariantCancelledPopoverOpen, setIsVariantCancelledPopoverOpen] = useState(false)
   const [values, setValues] = useState<CreateVariantFormValues>({
     revision_code: editVariantValues?.revision?.code ?? 'I',
     frequency_code: editVariantValues?.frequency?.code ?? 'U',
@@ -214,8 +212,13 @@ export function VariantModal({
     level_of_detail_name_en: editVariantValues?.level_of_detail?.name_en ?? '',
     cancelled: editVariantValues?.cancelled ?? false,
   })
+
+  const [isDeletePopoverOpen, setIsDeletePopoverOpen] = useState(false)
+  const [isSetVariantCancelledPopoverOpen, setIsSetVariantCancelledPopoverOpen] = useState(false)
+
   const deleteTriggerRef = useRef<HTMLButtonElement>(null)
   const returnFocusToDeleteTriggerRef = useRef(false)
+
   const variantCancelledTriggerRef = useRef<HTMLButtonElement>(null)
   const returnFocusToVariantCancelledTriggerRef = useRef(false)
 
@@ -229,11 +232,11 @@ export function VariantModal({
   }, [isDeletePopoverOpen])
 
   useEffect(() => {
-    if (!isVariantCancelledPopoverOpen && returnFocusToVariantCancelledTriggerRef.current) {
+    if (!isSetVariantCancelledPopoverOpen && returnFocusToVariantCancelledTriggerRef.current) {
       returnFocusToVariantCancelledTriggerRef.current = false
       variantCancelledTriggerRef.current?.focus()
     }
-  }, [isVariantCancelledPopoverOpen])
+  }, [isSetVariantCancelledPopoverOpen])
 
   useEffect(() => {
     async function fetchFrequencies() {
@@ -281,7 +284,7 @@ export function VariantModal({
   function handleDialogClose() {
     setApiError([])
     setIsDeletePopoverOpen(false)
-    setIsVariantCancelledPopoverOpen(false)
+    setIsSetVariantCancelledPopoverOpen(false)
     onAfterClose?.()
   }
 
@@ -292,7 +295,7 @@ export function VariantModal({
 
   function closeVariantCancelledAndReturnFocus() {
     returnFocusToVariantCancelledTriggerRef.current = true
-    setIsVariantCancelledPopoverOpen(false)
+    setIsSetVariantCancelledPopoverOpen(false)
   }
 
   function setVariantCancelled() {
@@ -304,7 +307,7 @@ export function VariantModal({
     )
   }
 
-  const canDeleteVariant = isExistingVariant && !editVariantValues?.id
+  const isNewVariant = isExistingVariant && !editVariantValues?.id
 
   return (
     <Dialog id={dialogId} aria-labelledby='variant-modal-heading' onClose={handleDialogClose} closedby='any'>
@@ -372,7 +375,7 @@ export function VariantModal({
               Avbryt
             </Button>
           </div>
-          {canDeleteVariant ? (
+          {isNewVariant ? (
             <DeleteVariantPopover
               deleteTriggerRef={deleteTriggerRef}
               isDeletePopoverOpen={isDeletePopoverOpen}
@@ -383,11 +386,11 @@ export function VariantModal({
               closeDeletePopoverAndReturnFocus={closeDeletePopoverAndReturnFocus}
             />
           ) : (
-            editVariantValues?.id && (
+            isExistingVariant && (
               <SetVariantCancelledPopover
                 variantCancelledTriggerRef={variantCancelledTriggerRef}
-                isVariantCancelledPopoverOpen={isVariantCancelledPopoverOpen}
-                setIsVariantCancelledPopoverOpen={setIsVariantCancelledPopoverOpen}
+                isSetVariantCancelledPopoverOpen={isSetVariantCancelledPopoverOpen}
+                setIsSetVariantCancelledPopoverOpen={setIsSetVariantCancelledPopoverOpen}
                 dialogId={dialogId}
                 onActionClose={onActionClose}
                 setVariantCancelled={setVariantCancelled}
