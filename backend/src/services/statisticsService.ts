@@ -200,7 +200,7 @@ const VariantSelect = {
 }
 
 const StatisticRelationSelect = {
-  select: { id: true, language: true, name: true, name_en: true, shortname: { select: { name: true } } },
+  select: { id: true, name: true, name_en: true, shortname: { select: { name: true } } },
 }
 
 export const StatisticsDetailedIncludes = {

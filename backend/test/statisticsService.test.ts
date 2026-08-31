@@ -425,7 +425,6 @@ describe('statisticService', () => {
         comment: input.comment,
         related_statistic: {
           id: 3,
-          language: 'nb',
           name: 'Befolkning og demografi',
           name_en: 'Foreign trade and goods flow',
           shortname: {
@@ -1018,11 +1017,10 @@ describe('statisticService', () => {
       expect(result).toStrictEqual(expectedResult)
     })
 
-    test('maps incoming statistic relations', async () => {
+    test('returns incoming statistic relations', async () => {
       input.incoming_statistic_relations = [
         {
           id: 8,
-          language: 'nb',
           name: 'Befolkning',
           name_en: 'Population',
           shortname: { name: 'befolk' },
@@ -1467,7 +1465,6 @@ const mockStatisticsDetailedPrismaResult = {
   ],
   related_statistic: {
     id: 3,
-    language: 'nb',
     name: 'Utenrikshandel og varestrøm',
     name_en: 'Foreign trade and goods flow',
     shortname: {
