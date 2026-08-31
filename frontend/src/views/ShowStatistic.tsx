@@ -212,7 +212,8 @@ export default function ShowStatistic() {
   const regionLevels = statistic.statistic_region_levels ?? []
   const mainLanguage = formatMainLanguage(statistic.main_language)
   const startYear = formatStartYear(statistic.first_released_at)
-  const mockContinuedBy = ['putegjeld', 'k2', 'k3']
+  const continuedBy = statistic.relation?.shortname ? statistic.relation : undefined
+  const continues = statistic.incoming_relations ?? []
   const variants = statistic.variants ?? []
   const cancelledVariants = formatCancelledVariants(variants)
   const activeVariants = variants.filter((v) => !v.cancelled)
@@ -353,14 +354,31 @@ export default function ShowStatistic() {
         </div>
       </div>
 
-      <div>
-        <Heading data-size='xs'>Videreføres av</Heading>
-        {mockContinuedBy.map((shortname) => (
-          <Paragraph key={shortname}>
-            <Link href='#'>{shortname}</Link>
+      {continuedBy && (
+        <div>
+          <Heading data-size='xs'>Videreføres av</Heading>
+          <Paragraph>
+            <Link asChild>
+              <ReactRouterLink to={`/statistikk/${continuedBy.shortname}`}>{continuedBy.name}</ReactRouterLink>
+            </Link>
           </Paragraph>
-        ))}
-      </div>
+        </div>
+      )}
+
+      {!!continues.length && (
+        <div>
+          <Heading data-size='xs'>Viderefører</Heading>
+          {continues.map((continuedStatistic) => (
+            <Paragraph key={continuedStatistic.id}>
+              <Link asChild>
+                <ReactRouterLink to={`/statistikk/${continuedStatistic.shortname}`}>
+                  {continuedStatistic.name}
+                </ReactRouterLink>
+              </Link>
+            </Paragraph>
+          ))}
+        </div>
+      )}
 
       <div>
         <Heading data-size='xs'>Regionale nivåer</Heading>
