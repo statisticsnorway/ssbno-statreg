@@ -190,7 +190,7 @@ export default function EditStatistic() {
         first_released_at: nextStatistic.first_released_at?.slice(0, 4) ?? '',
         comment: nextStatistic.comment ?? '',
       })
-      setCreatedVariants((nextStatistic.variants ?? []).filter((variant) => !variant.cancelled))
+      setCreatedVariants(nextStatistic.variants ?? [])
       setRegionLevelValues(
         nextStatistic.statistic_region_levels?.flatMap((regionLevel) => (regionLevel.code ? [regionLevel.code] : [])) ??
           []
