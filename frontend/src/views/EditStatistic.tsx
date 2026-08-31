@@ -80,8 +80,6 @@ export default function EditStatistic() {
     handleVariantModalClose,
   } = useVariantModal()
 
-  const cancelledVariants = createdVariants.some((variant) => !variant.cancelled)
-
   const {
     getCheckboxProps,
     value: regionLevelValues,
@@ -482,7 +480,7 @@ export default function EditStatistic() {
           <Label>{getFieldLabel('Variant', 'variants')}</Label>
           <Paragraph>Legg til variant for å kunne melde publiseringsdato på statistikken</Paragraph>
         </div>
-        {cancelledVariants && (
+        {createdVariants.length > 0 && (
           <div className='created-variants-container'>
             {createdVariants.map((variant, index) => {
               if (variant.cancelled) return null
