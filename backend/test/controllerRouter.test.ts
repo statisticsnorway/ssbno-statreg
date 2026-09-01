@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { describe, test, expect, beforeEach } from 'vitest'
-import express, { Router, type RequestHandler } from 'express'
+import { describe, test, expect, beforeEach, vi } from 'vitest'
+import express, { Router, type RequestHandler, type Response } from 'express'
 import controllerRouter from '@/api/core/controllerRouter'
-import { invoke, makeSkipAuthMarker } from './helpers'
+import { createMockResponse, invoke, makeSkipAuthMarker } from './helpers'
 import { MockResponse } from 'node-mocks-http'
 
 describe('controllerRouter', () => {
@@ -38,10 +38,10 @@ describe('controllerRouter', () => {
     )
   }
 
-  const makeApp = () =>
+  const makeApp = (mountPath = '/') =>
     express()
       .disable('x-powered-by')
-      .use(controllerRouter(requireAuth, [fakeController]))
+      .use(mountPath, controllerRouter(requireAuth, [fakeController]))
 
   beforeEach(() => {
     requireAuthCalls = []
@@ -138,6 +138,43 @@ describe('controllerRouter', () => {
     expect(res.statusCode).toBe(200)
     expect(res._getJSONData().normalMiddlewareExecuted).toBe(true)
     expect(requireAuthCalls).toHaveLength(0)
+  })
+
+  describe('mounted base path', () => {
+    let app: ReturnType<typeof makeApp>
+    let res: MockResponse<Response>
+    let sendFile: ReturnType<typeof vi.fn>
+
+    beforeEach(() => {
+      app = makeApp('/statistikkregisteret')
+      res = createMockResponse()
+      sendFile = vi.fn((filePath: string) => {
+        res.statusCode = 200
+        res.end(filePath)
+      })
+
+      res.sendFile = sendFile as Response['sendFile']
+    })
+
+    test('serves frontend index for mounted base path without trailing slash', async () => {
+      await invoke(app, 'GET', '/statistikkregisteret', undefined, res)
+
+      expect(res.statusCode).toBe(200)
+      expect(sendFile).toHaveBeenCalledOnce()
+      expect(sendFile).toHaveBeenCalledWith(expect.stringMatching(/index\.html$/))
+      expect(requireAuthCalls).toHaveLength(1)
+      expect(requireAuthCalls[0]).toBe('GET /')
+    })
+
+    test('serves frontend index for mounted base path with trailing slash', async () => {
+      await invoke(app, 'GET', '/statistikkregisteret/', undefined, res)
+
+      expect(res.statusCode).toBe(200)
+      expect(sendFile).toHaveBeenCalledOnce()
+      expect(sendFile).toHaveBeenCalledWith(expect.stringMatching(/index\.html$/))
+      expect(requireAuthCalls).toHaveLength(1)
+      expect(requireAuthCalls[0]).toBe('GET /')
+    })
   })
 
   // For now frontend serves startpage for all unknown paths
