@@ -192,6 +192,7 @@ describe('statistics controller', () => {
         {
           frequency: { code: 'W' },
           revision: { code: 'I' },
+          cancelled: false,
         },
       ],
     }
@@ -223,6 +224,7 @@ describe('statistics controller', () => {
         {
           frequency: { code: 'W' },
           revision: { code: 'I' },
+          cancelled: false,
         },
       ],
     })
