@@ -1,4 +1,4 @@
-import { useEffect, useState, type Dispatch, type SetStateAction } from 'react'
+import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
 import { useSearchParams } from 'react-router'
 import {
   Heading,
@@ -38,6 +38,7 @@ type PendingReleaseRowProps = {
 type PendingReleaseTableProps = {
   pendingReleases: ReleaseListing[]
   getCheckboxProps: ReturnType<typeof useCheckboxGroup>['getCheckboxProps']
+  tableHeaderRef: React.RefObject<HTMLTableSectionElement | null>
   sortBy?: string
   setSortBy?: (sortBy: string) => void
 }
@@ -84,12 +85,13 @@ function PendingReleaseRow({ pendingRelease, getCheckboxProps }: Readonly<Pendin
 function PendingReleasesTable({
   pendingReleases,
   getCheckboxProps,
+  tableHeaderRef,
   sortBy,
   setSortBy,
 }: Readonly<PendingReleaseTableProps>) {
   return (
     <Table aria-description='Tabell med publiseringer som har status forslag'>
-      <Table.Head>
+      <Table.Head ref={tableHeaderRef} tabIndex={-1}>
         <Table.Row>
           {TABLE_HEADER_CELLS.map(({ label, field, sortable, caption }) => (
             <Table.HeaderCell
@@ -235,6 +237,7 @@ export default function Tasks() {
   const [pendingSortBy, setPendingSortBy] = useState<string>('-publish_time')
   const [approvedReleasesCount, setApprovedReleasesCount] = useState(0)
   const [apiError, setApiError] = useState<string[]>([])
+  const pendingTableHeaderRef = useRef<HTMLTableSectionElement>(null)
 
   const { auth } = useAuth()
   const isAdmin = auth?.isAdmin
@@ -287,6 +290,7 @@ export default function Tasks() {
     }
 
     setApprovedReleasesCount(data.releases?.filter(({ status }) => status === 200)?.length ?? 0)
+    pendingTableHeaderRef.current?.focus()
     setSelectedPendingReleaseIds([])
   }
 
@@ -296,6 +300,11 @@ export default function Tasks() {
     if (!selectedPendingReleaseIds.length) return
 
     batchApproveReleases()
+  }
+
+  function clearPendingReleaseSelection() {
+    pendingTableHeaderRef.current?.focus()
+    setSelectedPendingReleaseIds([])
   }
 
   if (!isAdmin) return <ErrorPage type={ErrorType.NOTAUTH} />
@@ -317,7 +326,7 @@ export default function Tasks() {
         </Tabs.List>
         <Tabs.Panel value='pending-releases' className='pending-releases-tab-panel'>
           <form onSubmit={handleOnSubmit}>
-            <div className='approved-releases-alert-wrapper'>
+            <div className='approved-releases-alert-wrapper' aria-live='polite' role='status'>
               {approvedReleasesCount > 0 && (
                 <Alert
                   data-color='success'
@@ -329,6 +338,7 @@ export default function Tasks() {
               <PendingReleasesTable
                 pendingReleases={pendingReleases}
                 getCheckboxProps={getCheckboxProps}
+                tableHeaderRef={pendingTableHeaderRef}
                 sortBy={pendingSortBy}
                 setSortBy={setPendingSortBy}
               />
@@ -337,7 +347,7 @@ export default function Tasks() {
                   <Button variant='primary' type='submit'>
                     Godkjenn ({selectedPendingReleaseIds.length} valgte)
                   </Button>
-                  <Button variant='tertiary' onClick={() => setSelectedPendingReleaseIds([])}>
+                  <Button variant='tertiary' type='button' onClick={clearPendingReleaseSelection}>
                     <EraserIcon />
                     Nullstill valg
                   </Button>

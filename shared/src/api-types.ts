@@ -1119,8 +1119,7 @@ export interface components {
       }
     }
     Statistic_create:
-      | components['schemas']['Statistic_create_upcoming']
-      | components['schemas']['Statistic_create_active']
+      components['schemas']['Statistic_create_upcoming'] | components['schemas']['Statistic_create_active']
     Statistic_update: {
       relation_id?: number | null
     } & components['schemas']['Statistic_create_base']
@@ -1137,6 +1136,13 @@ export interface components {
         readonly name?: string
         readonly name_en?: string
       }
+      /** @description Statistics that reference this statistic as their continuation. */
+      incoming_relations?: {
+        id?: number
+        shortname?: string
+        readonly name?: string
+        readonly name_en?: string
+      }[]
       /** Format: date-time */
       readonly updated_at?: string
       comment?: string
