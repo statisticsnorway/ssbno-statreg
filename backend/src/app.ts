@@ -16,6 +16,16 @@ dotenv.config()
 const APP_BASE_PATH = '/statistikkregisteret'
 const DOCS_PATH = '/docs'
 
+function normalizeSwaggerAssetPaths(html: string, docsPath: string): string {
+  return html
+    .replaceAll('./swagger-ui.css', `${docsPath}/swagger-ui.css`)
+    .replaceAll('./swagger-ui-bundle.js', `${docsPath}/swagger-ui-bundle.js`)
+    .replaceAll('./swagger-ui-standalone-preset.js', `${docsPath}/swagger-ui-standalone-preset.js`)
+    .replaceAll('./swagger-ui-init.js', `${docsPath}/swagger-ui-init.js`)
+    .replaceAll('./favicon-32x32.png', `${docsPath}/favicon-32x32.png`)
+    .replaceAll('./favicon-16x16.png', `${docsPath}/favicon-16x16.png`)
+}
+
 export async function createApp() {
   const auth = requireAuthorization()
   const app = express()
@@ -23,8 +33,11 @@ export async function createApp() {
   app.use(promBundleMetrics)
   app.use(express.json())
   const swaggerDocument = YAML.parse(fs.readFileSync('../shared/openapi/openapi.yaml', 'utf8'))
+  const docsPath = `${APP_BASE_PATH}${DOCS_PATH}`
+  const docsHtml = normalizeSwaggerAssetPaths(swaggerUi.generateHTML(swaggerDocument), docsPath)
 
-  app.use(`${APP_BASE_PATH}${DOCS_PATH}`, swaggerUi.serve, swaggerUi.setup(swaggerDocument))
+  app.get([docsPath, `${docsPath}/`], (_req, res) => res.send(docsHtml))
+  app.use(docsPath, swaggerUi.serveFiles(swaggerDocument))
 
   app.use(APP_BASE_PATH, createAuthRouter(auth))
 

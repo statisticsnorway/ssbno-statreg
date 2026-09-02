@@ -1136,6 +1136,13 @@ export interface components {
         readonly name?: string
         readonly name_en?: string
       }
+      /** @description Statistics that reference this statistic as their continuation. */
+      incoming_relations?: {
+        id?: number
+        shortname?: string
+        readonly name?: string
+        readonly name_en?: string
+      }[]
       /** Format: date-time */
       readonly updated_at?: string
       comment?: string

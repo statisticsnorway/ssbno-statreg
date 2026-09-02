@@ -142,13 +142,16 @@ export default function controllerRouter(
   }
 
   const router = Router()
+  const frontendDistPath = path.resolve(__dirname)
+  const sendFrontendIndex: RequestHandler = (_req, res) => {
+    res.sendFile(path.resolve(frontendDistPath, 'index.html'))
+  }
 
   router.use(createAuthGate(requireAuth, metadata.publicRoutes))
   router.use(API_PREFIX, apiRouter)
-  router.use(staticExpress(path.resolve(__dirname))) // Resolves assets and favicon
-  router.get('/*splat', (_req, res) => {
-    res.sendFile(path.resolve(__dirname, 'index.html')) // Delivers packaged React payload from Express
-  })
+  router.get('/', sendFrontendIndex)
+  router.use(staticExpress(frontendDistPath, { index: false, redirect: false })) // Resolves assets and favicon
+  router.get('/*splat', sendFrontendIndex) // Delivers packaged React payload from Express
   router.use(createMethodGuard(metadata.knownPaths))
 
   return router

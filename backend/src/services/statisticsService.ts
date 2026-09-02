@@ -199,12 +199,15 @@ const VariantSelect = {
   },
 }
 
+const StatisticRelationSelect = {
+  select: { id: true, name: true, name_en: true, shortname: { select: { name: true } } },
+}
+
 export const StatisticsDetailedIncludes = {
   shortname: { select: { name: true } },
   responsiblePersons: { select: { principalName: true } },
-  related_statistic: {
-    select: { id: true, language: true, name: true, name_en: true, shortname: { select: { name: true } } },
-  },
+  related_statistic: StatisticRelationSelect,
+  incoming_statistic_relations: StatisticRelationSelect,
   statistic_region_levels: {
     select: { region_level: { select: { name: true, code: true } } },
   },
@@ -246,6 +249,12 @@ export async function mapStatisticDetails(statistic: StatisticPrismaResult): Pro
         name_en: statistic.related_statistic?.name_en ?? '',
       }
     : {}
+  const incoming_relations = (statistic.incoming_statistic_relations ?? []).map((incomingRelation) => ({
+    id: incomingRelation.id,
+    shortname: incomingRelation.shortname.name,
+    name: incomingRelation.name,
+    name_en: incomingRelation.name_en ?? '',
+  }))
   const users = await getAllUsersFromCache()
 
   return {
@@ -264,6 +273,7 @@ export async function mapStatisticDetails(statistic: StatisticPrismaResult): Pro
     },
     previous_topic_codes: statistic.legacy_topic_codes,
     relation,
+    incoming_relations,
     name: statistic.name,
     name_en: statistic.name_en ?? '',
     updated_at: dateToISOString(statistic.last_updated),
@@ -425,6 +435,7 @@ export async function updateStatistic(
           update: existingVariants.map((variant) => ({
             where: { id: variant.id! },
             data: {
+              cancelled: variant.cancelled ?? false,
               revision: variant.revision!.code as string,
               frequency: {
                 connect: {
@@ -650,6 +661,7 @@ export async function parseVariantsInput(
           name: sanitize(variant.level_of_detail.name),
           name_en: sanitize(variant.level_of_detail.name_en),
         },
+        cancelled: variant.cancelled ?? false,
       }
     })
   )
