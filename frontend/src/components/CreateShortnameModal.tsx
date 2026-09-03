@@ -90,7 +90,7 @@ export function CreateShortnameModal({ openCreateShortnameModal }: Readonly<Crea
   }
 
   function handleCloseModal() {
-    navigate('/statistikk')
+    navigate('/statistikk', { state: { returnFocusToCreateStatisticButton: true } })
   }
 
   return (
@@ -124,9 +124,13 @@ export function CreateShortnameModal({ openCreateShortnameModal }: Readonly<Crea
             />
             <Paragraph data-limit='14' data-field='counter' />
             {validationError ? (
-              <ValidationMessage>{validationError}</ValidationMessage>
+              <ValidationMessage data-field='validation'>{validationError}</ValidationMessage>
             ) : (
-              shortnameInput && <ValidationMessage data-color='success'>Kortnavn er ledig</ValidationMessage>
+              shortnameInput && (
+                <ValidationMessage data-field='validation' data-color='success'>
+                  Kortnavn er ledig
+                </ValidationMessage>
+              )
             )}
           </Field>
           <div style={{ display: 'flex', gap: 'var(--ds-size-2)', marginTop: 'var(--ds-size-3)' }}>

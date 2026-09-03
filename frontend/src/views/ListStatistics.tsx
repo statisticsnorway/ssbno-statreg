@@ -1,5 +1,5 @@
 import './ListStatistics.css'
-import { useDeferredValue, useEffect, useMemo, useState } from 'react'
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
 import client from '../api'
 import type { Contact, ShortnameListing, StatisticListing } from '@ssbno-statreg/shared'
 import { PaginatedStatisticsTable } from '../components/StatisticsTable'
@@ -12,13 +12,15 @@ import {
   Label,
   Spinner,
 } from '@statisticsnorway/design-react'
-import { Link as ReactRouterLink, useSearchParams } from 'react-router'
+import { Link as ReactRouterLink, useLocation, useNavigate, useSearchParams } from 'react-router'
 import { PlusCircleIcon } from '@navikt/aksel-icons'
 import { useAuth } from '../context/AuthContext'
 import { RowCountSelect } from '../components/RowCountSelect'
 import { ErrorAlert } from '../components/ErrorAlert'
 
 export default function ListStatistics() {
+  const location = useLocation()
+  const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const shortnameQuery = searchParams.get('shortname')
   const contactQuery = searchParams.get('contact')
@@ -32,6 +34,7 @@ export default function ListStatistics() {
   const [apiError, setApiError] = useState<string[]>([])
   const [optionsStatus, setOptionsStatus] = useState<'idle' | 'loading' | 'loaded'>('idle')
   const { auth } = useAuth()
+  const createStatisticButtonRef = useRef<HTMLAnchorElement>(null)
 
   // Defer building the (potentially large) option lists until the user opens it.
   const deferredShortnames = useDeferredValue(shortnames, [])
@@ -75,6 +78,13 @@ export default function ListStatistics() {
   useEffect(() => {
     fetchStatistics(start, count, shortnameQuery, contactQuery, sortQuery)
   }, [start, count, shortnameQuery, contactQuery, sortQuery])
+
+  useEffect(() => {
+    if (!location.state?.returnFocusToCreateStatisticButton) return
+
+    createStatisticButtonRef.current?.focus()
+    navigate(location.pathname + location.search, { replace: true, state: null })
+  }, [location.pathname, location.search, location.state, navigate])
 
   const fetchStatistics = async (
     start: number,
@@ -182,7 +192,7 @@ export default function ListStatistics() {
         </Heading>
         {auth?.isAdmin && (
           <Button datas-size='md' asChild>
-            <ReactRouterLink to='/statistikk/opprett' reloadDocument>
+            <ReactRouterLink ref={createStatisticButtonRef} to='/statistikk/opprett' reloadDocument>
               Opprett ny statistikk <PlusCircleIcon />
             </ReactRouterLink>
           </Button>
