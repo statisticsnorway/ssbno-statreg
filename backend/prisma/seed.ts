@@ -140,44 +140,6 @@ async function main() {
 
   console.log('Created responsiblePerson3: \n' + JSON.stringify(responsiblePerson3, null, 2))
 
-  const stat1 = await prisma.statistic.upsert({
-    where: { shortname_id: shortname1.id },
-    update: {},
-    create: {
-      version: 18,
-      shortname: {
-        connect: {
-          name: shortname1.name,
-        },
-      },
-      responsiblePersons: {
-        connect: {
-          principalName: responsiblePerson1.principalName,
-        },
-      },
-      dir_appoval_status: 'GODKJENT',
-      search_phrases:
-        'energi, energiproduksjon, energibruk, energibruk etter næring, energiforbruk i husholdninger, energivarer (for eksempel råolje, bensin, naturgass), import, eksport, strømpriser, energipriser',
-      priority: 0,
-      desk_appoval_status: 'GODKJENT',
-      language: 'nb',
-      search_phrases_en:
-        'energy production, energy consumption, energy consumption by industry, energy consumption in households, energy goods (for example crude oil, petrol, natural gas), import, export, electricity prices, energy prices',
-      division_code: '425',
-      first_release: '1976-01-01T00:00:00.000Z',
-      yearly_reporting: false,
-      status: 'SA',
-      legacy_topic_codes: '01.03.10',
-      name: 'Energiregnskap og energibalanse',
-      last_updated: '2020-06-12T09:24:15.569Z',
-      comment: 'videreføres av energibalanse',
-      name_en: 'Energy account and energy balance',
-      date_created: '2010-11-05T09:02:23.626Z',
-    },
-  })
-
-  console.log('Created stat from seed: \n' + JSON.stringify(stat1, null, 2))
-
   const stat2 = await prisma.statistic.upsert({
     where: { shortname_id: shortname2.id },
     update: {},
@@ -212,11 +174,51 @@ async function main() {
 
   console.log('Created stat from seed: \n' + JSON.stringify(stat2, null, 2))
 
-  // Statistics with status SA (Sammenslått) must store the relation id themselves.
-  await prisma.statistic.update({
-    where: { id: stat1.id },
-    data: { related_statistic: { connect: { id: stat2.id } } },
+  // Statistics with status SA (Sammenslått) must store the relation id themselves, set on create to satisfy the DB check constraint.
+  const stat1 = await prisma.statistic.upsert({
+    where: { shortname_id: shortname1.id },
+    update: {
+      related_statistic: {
+        connect: { id: stat2.id },
+      },
+    },
+    create: {
+      version: 18,
+      shortname: {
+        connect: {
+          name: shortname1.name,
+        },
+      },
+      responsiblePersons: {
+        connect: {
+          principalName: responsiblePerson1.principalName,
+        },
+      },
+      dir_appoval_status: 'GODKJENT',
+      search_phrases:
+        'energi, energiproduksjon, energibruk, energibruk etter næring, energiforbruk i husholdninger, energivarer (for eksempel råolje, bensin, naturgass), import, eksport, strømpriser, energipriser',
+      priority: 0,
+      desk_appoval_status: 'GODKJENT',
+      language: 'nb',
+      search_phrases_en:
+        'energy production, energy consumption, energy consumption by industry, energy consumption in households, energy goods (for example crude oil, petrol, natural gas), import, export, electricity prices, energy prices',
+      division_code: '425',
+      first_release: '1976-01-01T00:00:00.000Z',
+      yearly_reporting: false,
+      status: 'SA',
+      legacy_topic_codes: '01.03.10',
+      name: 'Energiregnskap og energibalanse',
+      last_updated: '2020-06-12T09:24:15.569Z',
+      comment: 'videreføres av energibalanse',
+      name_en: 'Energy account and energy balance',
+      date_created: '2010-11-05T09:02:23.626Z',
+      related_statistic: {
+        connect: { id: stat2.id },
+      },
+    },
   })
+
+  console.log('Created stat from seed: \n' + JSON.stringify(stat1, null, 2))
 
   const stat3 = await prisma.statistic.upsert({
     where: { shortname_id: shortname3.id },
