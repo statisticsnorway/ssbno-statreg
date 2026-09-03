@@ -6,6 +6,7 @@ import { Link as ReactRouterLink } from 'react-router'
 import { type BlockedReleaseDate } from '@ssbno-statreg/shared'
 import client from '../api'
 import { ErrorAlert } from '../components/ErrorAlert'
+import { BlockedDateModal } from '../components/BlockedDateModal'
 
 type BlockedDateRowProps = {
   readonly day: BlockedReleaseDate
@@ -62,6 +63,7 @@ function BlockedDatesTable({ days, onDelete }: BlockedDatesTableProps) {
 export default function ListBlockedDates() {
   const [blockedDates, setBlockedDates] = useState<BlockedReleaseDate[]>([])
   const [apiError, setApiError] = useState<string[]>([])
+  const [showCreateModel, setShowCreateModal] = useState(false)
 
   useEffect(() => {
     async function fetchBlockedDates() {
@@ -111,10 +113,13 @@ export default function ListBlockedDates() {
         variant='tertiary'
         data-color='neutral'
         aria-label='Legg til ny sperret dato'
-        onClick={() => alert('Kommer senere')}
+        onClick={() => setShowCreateModal(true)}
       >
         <PlusCircleIcon aria-hidden /> Legg til ny sperret dato
       </Button>
+      {showCreateModel && (
+        <BlockedDateModal setOpenCreateReleaseModal={setShowCreateModal} openCreateReleaseModal={showCreateModel} />
+      )}
     </>
   )
 }
