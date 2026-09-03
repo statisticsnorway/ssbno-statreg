@@ -435,6 +435,7 @@ export async function updateStatistic(
           update: existingVariants.map((variant) => ({
             where: { id: variant.id! },
             data: {
+              cancelled: variant.cancelled ?? false,
               revision: variant.revision!.code as string,
               frequency: {
                 connect: {
@@ -660,6 +661,7 @@ export async function parseVariantsInput(
           name: sanitize(variant.level_of_detail.name),
           name_en: sanitize(variant.level_of_detail.name_en),
         },
+        cancelled: variant.cancelled ?? false,
       }
     })
   )

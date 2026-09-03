@@ -60,12 +60,15 @@ function formatStartYear(dateString: string | null | undefined): string {
 
 function formatCancelledVariants(variants: Variant[]): string[] {
   if (!variants) return []
-  return variants.filter((variant: Variant) => variant.cancelled).map(formatVariantDetails)
-}
 
-function formatVariantDetails(variant: Variant): string {
-  const detail = variant.level_of_detail?.name ?? '-'
-  return `${detail}, ${formatVariant(variant)}`
+  return variants
+    .filter((variant: Variant) => variant.cancelled)
+    .map((variant) => {
+      const cancelledVariant = [variant.level_of_detail?.name, formatVariant(variant), variant.level_of_detail?.name_en]
+        .filter((value) => value !== '')
+        .map((value, index) => (index === 0 ? value : value?.toLowerCase()))
+      return cancelledVariant.join(', ')
+    })
 }
 
 function SimpleReleasesTable({ releases }: { releases: ReleaseListing[] }) {

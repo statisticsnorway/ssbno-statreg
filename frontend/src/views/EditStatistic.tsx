@@ -19,14 +19,20 @@ import {
   ErrorSummary,
   Textarea,
   Link,
+  Card,
 } from '@statisticsnorway/design-react'
-import { QuestionmarkCircleIcon } from '@navikt/aksel-icons'
+import { QuestionmarkCircleIcon, PlusCircleIcon, PencilWritingIcon } from '@navikt/aksel-icons'
 
 import client from '../api'
 
 import './CreateStatistic.css'
 
-import { RequiredEditStatisticFieldsByStatus, ApprovalStatus, StatisticStatus } from '@ssbno-statreg/shared'
+import {
+  RequiredEditStatisticFieldsByStatus,
+  ApprovalStatus,
+  StatisticStatus,
+  RevisionNames,
+} from '@ssbno-statreg/shared'
 import type {
   EditableStatisticStatus,
   Contact,
@@ -40,7 +46,6 @@ import ErrorPage, { ErrorType } from './ErrorPage'
 import { ErrorAlert } from '../components/ErrorAlert'
 import { DivisionSelection } from '../components/DivisionSelection'
 import { VariantModal, useVariantModal } from '../components/VariantModal'
-import { VariantEditorSection } from '../components/VariantEditorSection'
 import { ContactSelection } from '../components/ContactSelection'
 import type { StatisticFormErrors, StatisticFormField, StatisticPartialFormValues } from './CreateStatistic'
 
@@ -61,6 +66,9 @@ export default function EditStatistic() {
 
   const [statistic, setStatistic] = useState<StatisticDetails>({})
   const [divisions, setDivisions] = useState<Division[]>([])
+  const [contacts, setContacts] = useState<Contact[]>([])
+  const [selectedContacts, setSelectedContacts] = useState<string[]>([])
+
   const [createdVariants, setCreatedVariants] = useState<Variant[]>([])
   const {
     editVariantIndex,
@@ -71,8 +79,6 @@ export default function EditStatistic() {
     handleVariantModalActionClose,
     handleVariantModalClose,
   } = useVariantModal()
-  const [contacts, setContacts] = useState<Contact[]>([])
-  const [selectedContacts, setSelectedContacts] = useState<string[]>([])
 
   const {
     getCheckboxProps,
@@ -96,7 +102,11 @@ export default function EditStatistic() {
   const [values, setValues] = useState<StatisticPartialFormValues>(defaultValues)
   const [errors, setErrors] = useState<StatisticFormErrors>({})
   const [apiError, setApiError] = useState<string[]>([])
-  const fieldsToValidate: StatisticFormField[] = [...Object.keys(defaultValues), 'variants', 'contacts'] as StatisticFormField[]
+  const fieldsToValidate: StatisticFormField[] = [
+    ...Object.keys(defaultValues),
+    'variants',
+    'contacts',
+  ] as StatisticFormField[]
 
   const regionLevelCheckboxData = [
     {
@@ -178,7 +188,7 @@ export default function EditStatistic() {
         first_released_at: nextStatistic.first_released_at?.slice(0, 4) ?? '',
         comment: nextStatistic.comment ?? '',
       })
-      setCreatedVariants((nextStatistic.variants ?? []).filter((variant) => !variant.cancelled))
+      setCreatedVariants(nextStatistic.variants ?? [])
       setRegionLevelValues(
         nextStatistic.statistic_region_levels?.flatMap((regionLevel) => (regionLevel.code ? [regionLevel.code] : [])) ??
           []
@@ -229,8 +239,12 @@ export default function EditStatistic() {
     if (field === 'name' && !validatedInput.values.name) return 'Fyll inn norsk statistikknavn'
     if (field === 'name_en' && !validatedInput.values.name_en) return 'Fyll inn engelsk statistikknavn'
     if (field === 'division' && !validatedInput.values.division) return 'Velg ansvarlig seksjon for statistikken'
-    if (field === 'variants' && validatedInput.createdVariants.length === 0) return 'Legg til minst én variant'
     if (field === 'contacts' && validatedInput.selectedContacts.length === 0) return 'Legg til minst én kontakt'
+
+    const activeVariants = validatedInput.createdVariants.filter((variant) => !variant.cancelled).length
+    if (field === 'variants' && activeVariants === 0) {
+      return 'Legg til minst én variant'
+    }
 
     return ''
   }
@@ -462,15 +476,61 @@ export default function EditStatistic() {
           {errors.name_en && <ValidationMessage>{errors.name_en}</ValidationMessage>}
         </Field>
         <Divider />
-        <VariantEditorSection
-          createdVariants={createdVariants}
-          variantDialogId={variantDialogId}
-          addVariantButtonRef={addVariantButtonRef}
-          variantsError={errors.variants}
-          variantLabel={getFieldLabel('Variant', 'variants')}
-          onOpenCreateVariantModal={handleOpenCreateVariantModal}
-          onOpenEditVariantModal={handleOpenEditVariantModal}
-        />
+        <div className='created-variants-title-container'>
+          <Label>{getFieldLabel('Variant', 'variants')}</Label>
+          <Paragraph>Legg til variant for å kunne melde publiseringsdato på statistikken</Paragraph>
+        </div>
+        {createdVariants.length > 0 && (
+          <div className='created-variants-container'>
+            {createdVariants.map((variant, index) => {
+              if (variant.cancelled) return null
+              return (
+                <Card
+                  key={['created-variant', variant.frequency?.code ?? index, variant.revision?.code ?? index].join('-')}
+                  variant='tinted'
+                >
+                  <Card.Block>
+                    <div className='created-variant-heading-container'>
+                      <Heading>
+                        {[
+                          variant.frequency!.name,
+                          RevisionNames[variant.revision!.code as keyof typeof RevisionNames].toLocaleLowerCase(),
+                        ].join(', ')}
+                      </Heading>
+                      <Button
+                        variant='tertiary'
+                        data-color='danger'
+                        command='show-modal'
+                        commandfor={variantDialogId}
+                        onClick={() => handleOpenEditVariantModal(index)}
+                      >
+                        <PencilWritingIcon /> Rediger
+                      </Button>
+                    </div>
+                    <Paragraph>
+                      Detaljnivå: {variant.level_of_detail?.name} <br />
+                      Engelsk detaljnivå: {variant.level_of_detail?.name_en}
+                    </Paragraph>
+                  </Card.Block>
+                </Card>
+              )
+            })}
+          </div>
+        )}
+        <div className='create-variant-button-container'>
+          <Button
+            id='variants'
+            ref={addVariantButtonRef}
+            variant='secondary'
+            aria-invalid={!!errors.variants}
+            command='show-modal'
+            commandfor={variantDialogId}
+            onClick={handleOpenCreateVariantModal}
+          >
+            <PlusCircleIcon /> Legg til variant
+          </Button>
+          {errors.variants && <ValidationMessage>{errors.variants}</ValidationMessage>}
+        </div>
         <Divider />
         <div className='contact-section'>
           <Label>{getFieldLabel('Kontakter', 'contacts')}</Label>

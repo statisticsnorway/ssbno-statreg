@@ -835,6 +835,7 @@ describe('statisticService', () => {
               name: 'Kommentar',
               name_en: 'Comment',
             },
+            cancelled: false,
           },
         ],
         'A',
@@ -858,6 +859,7 @@ describe('statisticService', () => {
             name: 'Kommentar',
             name_en: 'Comment',
           },
+          cancelled: false,
         },
       ])
     })

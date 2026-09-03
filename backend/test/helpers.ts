@@ -4,6 +4,10 @@ import { EventEmitter } from 'node:events'
 import type { MockResponse } from 'node-mocks-http'
 import type { RequestHandler, Response } from 'express'
 
+export function createMockResponse(): MockResponse<Response> {
+  return httpMocks.createResponse({ eventEmitter: EventEmitter }) as MockResponse<Response>
+}
+
 export function makeSkipAuthMarker(): RequestHandler & { __skipAuth?: boolean } {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const marker: any = (_req: any, _res: any, next: any) => next()
@@ -11,11 +15,16 @@ export function makeSkipAuthMarker(): RequestHandler & { __skipAuth?: boolean } 
   return marker
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function invoke(app: Express, method: string, url: string, body?: any): Promise<MockResponse<Response>> {
+export async function invoke(
+  app: Express,
+  method: string,
+  url: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  body?: any,
+  res: MockResponse<Response> = createMockResponse()
+): Promise<MockResponse<Response>> {
   const req = httpMocks.createRequest({ url, body })
   req._setMethod(method)
-  const res = httpMocks.createResponse({ eventEmitter: EventEmitter }) as MockResponse<Response>
 
   await new Promise<void>((resolve) => {
     const done = () => resolve()
