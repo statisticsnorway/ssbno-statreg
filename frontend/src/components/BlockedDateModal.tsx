@@ -60,7 +60,7 @@ export function BlockedDateModal({ openCreateReleaseModal, setOpenCreateReleaseM
           apiErrorEmit={setDatePickerError}
         />
         <div style={{ display: 'flex', gap: 'var(--ds-size-4)', marginTop: ' var(--ds-size-4)' }}>
-          <Button variant='primary' onClick={() => createBlockedDate(selectedDate, 'her lager vi en fin dato')} asChild>
+          <Button variant='primary' onClick={() => createBlockedDate(selectedDate, 'her lager vi en fin dato')}>
             Legg til
           </Button>
         </div>
