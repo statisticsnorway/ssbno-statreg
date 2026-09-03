@@ -180,11 +180,7 @@ async function main() {
 
   const stat2 = await prisma.statistic.upsert({
     where: { shortname_id: shortname2.id },
-    update: {
-      related_statistic: {
-        connect: { id: stat1.id },
-      },
-    },
+    update: {},
     create: {
       version: 1,
       shortname: {
@@ -211,13 +207,16 @@ async function main() {
       comment: 'omfatter befolkningsstørrelse og sammensetning',
       name_en: 'Population and demography',
       date_created: '2015-01-01T00:00:00.000Z',
-      related_statistic: {
-        connect: { id: stat1.id },
-      },
     },
   })
 
   console.log('Created stat from seed: \n' + JSON.stringify(stat2, null, 2))
+
+  // Statistics with status SA (Sammenslått) must store the relation id themselves.
+  await prisma.statistic.update({
+    where: { id: stat1.id },
+    data: { related_statistic: { connect: { id: stat2.id } } },
+  })
 
   const stat3 = await prisma.statistic.upsert({
     where: { shortname_id: shortname3.id },

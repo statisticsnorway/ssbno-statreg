@@ -548,6 +548,55 @@ describe('statisticService', () => {
       })
       expect(prismaMock.statistic.update).toHaveBeenCalledTimes(0)
     })
+
+    test('throws error when status is set to Sammenslått without a relation id', async () => {
+      setStatisticsResult({
+        status: 'A',
+        related_statistic_id: null,
+        responsiblePersons: [{ principalName: 'bcd@ssb.no' }],
+        variants: [{ id: 1 }],
+        statistic_region_levels: [],
+      })
+      input.status = { code: 'SA' }
+      input.relation_id = undefined
+
+      await expect(() => updateStatistic('helse', input, prismaMock)).rejects.toMatchObject({
+        statregError: "A statistic can only be set to status 'Sammenslått' if it has a relation id.",
+      })
+      expect(prismaMock.statistic.update).toHaveBeenCalledTimes(0)
+    })
+
+    test('allows status Sammenslått when a relation id is provided in the request', async () => {
+      setStatisticsResult({
+        status: 'A',
+        related_statistic_id: null,
+        responsiblePersons: [{ principalName: 'bcd@ssb.no' }],
+        variants: [],
+        statistic_region_levels: [],
+      })
+      setUpdateStatisticsResult({ ...mockStatisticsDetailedPrismaResult, status: 'SA' })
+
+      input.status = { code: 'SA' }
+      input.relation_id = '3'
+
+      await expect(updateStatistic('helse', input, prismaMock)).resolves.toBeDefined()
+    })
+
+    test('allows status Sammenslått when a relation id already exists on the statistic', async () => {
+      setStatisticsResult({
+        status: 'A',
+        related_statistic_id: 3,
+        responsiblePersons: [{ principalName: 'bcd@ssb.no' }],
+        variants: [],
+        statistic_region_levels: [],
+      })
+      setUpdateStatisticsResult({ ...mockStatisticsDetailedPrismaResult, status: 'SA' })
+
+      input.status = { code: 'SA' }
+      input.relation_id = undefined
+
+      await expect(updateStatistic('helse', input, prismaMock)).resolves.toBeDefined()
+    })
   })
 
   describe('updateContacts ', async () => {

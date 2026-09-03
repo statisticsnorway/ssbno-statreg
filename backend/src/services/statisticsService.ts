@@ -316,6 +316,7 @@ export async function updateStatistic(
     select: {
       id: true,
       status: true,
+      related_statistic_id: true,
       responsiblePersons: { select: { principalName: true } },
       variants: { select: { id: true } },
       statistic_region_levels: { select: { region_level: { select: { code: true, id: true } } } },
@@ -345,6 +346,10 @@ export async function updateStatistic(
 
   if (existingStatistic.status === 'A' && status === 'K') {
     throw new StatregError('An active statistic cannot be set back to upcoming.')
+  }
+
+  if (status === 'SA' && !relation_id && !existingStatistic.related_statistic_id) {
+    throw new StatregError("A statistic can only be set to status 'Sammenslått' if it has a relation id.")
   }
 
   let newContacts
