@@ -87,9 +87,17 @@ export function CreateShortnameModal({ openCreateShortnameModal }: Readonly<Crea
   }
 
   return (
-    <Dialog id='create-shortname-modal' open={openCreateShortnameModal} onClose={handleCloseModal} closedby='any'>
+    <Dialog
+      id='create-shortname-modal'
+      aria-labelledby='create-shortname-modal-heading'
+      open={openCreateShortnameModal}
+      onClose={handleCloseModal}
+      closedby='any'
+    >
       <Dialog.Block>
-        <Heading data-size='xs'>Opprett kortnavn for statistikken</Heading>
+        <Heading id='create-shortname-modal-heading' data-size='xs'>
+          Opprett kortnavn for statistikken
+        </Heading>
       </Dialog.Block>
       <Dialog.Block>
         {apiError.length > 0 && <ErrorAlert message={apiError} />}
