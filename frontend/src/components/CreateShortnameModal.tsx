@@ -49,11 +49,6 @@ export function CreateShortnameModal({ openCreateShortnameModal }: Readonly<Crea
       return false
     }
 
-    if (value.length > 14) {
-      setValidationError('Kortnavnet kan ikke være lengre enn 14 tegn')
-      return false
-    }
-
     if (shortnames.includes(value)) {
       setValidationError('Dette kortnavnet er ikke ledig')
       return false
