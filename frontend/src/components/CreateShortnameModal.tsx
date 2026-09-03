@@ -119,7 +119,6 @@ export function CreateShortnameModal({ openCreateShortnameModal }: Readonly<Crea
               autofocus='true'
               aria-invalid={!!validationError}
               onChange={handleInputChange}
-              onBlur={() => validateShortname(shortnameInput)}
               maxLength={14}
             />
             <Paragraph data-limit='14' data-field='counter' />
