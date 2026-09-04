@@ -14,6 +14,7 @@ import {
   ValidationMessage,
   ErrorSummary,
   Textarea,
+  Link,
 } from '@statisticsnorway/design-react'
 import { DatePicker as AkselDatePicker, useDatepicker as useAkselDatePicker } from '@navikt/ds-react/DatePicker'
 import { DatePicker } from '../components/DatePicker'
@@ -468,7 +469,7 @@ export default function ReleaseForm() {
           <Label>Publiseringsdato</Label>
           <Field.Description>
             Nye datoer og endringer må meldes minst 3 måneder i forveien. <br />
-            For kortere frister, kontakt mmj@ssb.no.
+            For kortere frister, kontakt <Link href='mailto:desken@ssb.no'>desken</Link>.
           </Field.Description>
           <Input id='publishTime' size={10} {...publishTimePicker.inputProps} aria-invalid={!!errors.publishTime} />
           <div aria-live='polite' role='status'>
