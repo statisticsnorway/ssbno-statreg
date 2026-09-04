@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router'
-import { Button, Heading, Dialog, Textfield, ValidationMessage } from '@statisticsnorway/design-react'
+import { Button, Heading, Dialog, Field, Input, Paragraph, ValidationMessage } from '@statisticsnorway/design-react'
 
 import client from '../api'
 import type { ShortnameListing } from '@ssbno-statreg/shared'
@@ -77,7 +77,9 @@ export function CreateShortnameModal({ openCreateShortnameModal }: Readonly<Crea
     navigate(`/statistikk/${data.shortname}/opprett`)
   }
 
-  function handleOnSubmit() {
+  function handleOnSubmit(e: React.ChangeEvent<HTMLFormElement>) {
+    e.preventDefault()
+
     if (!validateShortname(shortnameInput)) return
     createShortname()
   }
@@ -101,30 +103,40 @@ export function CreateShortnameModal({ openCreateShortnameModal }: Readonly<Crea
       </Dialog.Block>
       <Dialog.Block>
         {apiError.length > 0 && <ErrorAlert message={apiError} />}
-        <Textfield
-          label=''
-          description='Du må registrere et kortnavn før du kan fylle ut resten av informasjonen om statistikken. Kortnavnet kan ikke endres etter at statistikken har blitt opprettet. Maks 14 tegn, kun små bokstaver og understrek er lov.'
-          onChange={handleInputChange}
-          maxLength={14}
-          counter={14}
-          error={validationError}
-          value={shortnameInput}
-          // @ts-expect-error native "autofocus" is not part of the React types
-          autofocus='true'
-        />
-        {!validationError && shortnameInput && (
-          <ValidationMessage data-color='success' data-field='validation'>
-            Kortnavn er ledig
-          </ValidationMessage>
-        )}
-        <div style={{ display: 'flex', gap: 'var(--ds-size-2)', marginTop: 'var(--ds-size-3)' }}>
-          <Button variant='primary' onClick={handleOnSubmit}>
-            Opprett kortnavn
-          </Button>
-          <Button variant='tertiary' onClick={handleCloseModal}>
-            Avbryt
-          </Button>
-        </div>
+        <form onSubmit={handleOnSubmit}>
+          <Field>
+            <Field.Description>
+              Du må registrere et kortnavn før du kan fylle ut resten av informasjonen om statistikken. Kortnavnet kan
+              ikke endres etter at statistikken har blitt opprettet. Maks 14 tegn, kun små bokstaver og understrek er
+              lov.
+            </Field.Description>
+            <Input
+              // @ts-expect-error native "autofocus" is not part of the React types
+              autofocus='true'
+              aria-invalid={!!validationError}
+              onChange={handleInputChange}
+              maxLength={14}
+            />
+            <Paragraph data-limit='14' data-field='counter' />
+            {validationError ? (
+              <ValidationMessage data-field='validation'>{validationError}</ValidationMessage>
+            ) : (
+              shortnameInput && (
+                <ValidationMessage data-field='validation' data-color='success'>
+                  Kortnavn er ledig
+                </ValidationMessage>
+              )
+            )}
+          </Field>
+          <div style={{ display: 'flex', gap: 'var(--ds-size-2)', marginTop: 'var(--ds-size-3)' }}>
+            <Button variant='primary' type='submit'>
+              Opprett kortnavn
+            </Button>
+            <Button variant='tertiary' onClick={handleCloseModal}>
+              Avbryt
+            </Button>
+          </div>
+        </form>
       </Dialog.Block>
     </Dialog>
   )

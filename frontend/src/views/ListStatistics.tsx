@@ -191,7 +191,7 @@ export default function ListStatistics() {
           Statistikkoversikt
         </Heading>
         {auth?.isAdmin && (
-          <Button datas-size='md' asChild>
+          <Button datas-size='md' aria-haspopup='dialog' asChild>
             <ReactRouterLink ref={createStatisticButtonRef} to='/statistikk/opprett' reloadDocument>
               Opprett ny statistikk <PlusCircleIcon />
             </ReactRouterLink>
