@@ -1,8 +1,19 @@
-import { Button, Heading, Dialog, Input, Field, Label, ValidationMessage } from '@statisticsnorway/design-react'
+import {
+  Button,
+  Heading,
+  Dialog,
+  Input,
+  Field,
+  Label,
+  ValidationMessage,
+  Paragraph,
+  Tag,
+} from '@statisticsnorway/design-react'
 import client from '../api'
 import { DatePicker } from './DatePicker'
 import { getDateOnlyAsString, getFirstDayOfNthMonth } from '../lib/utils'
 import { useState } from 'react'
+import { ErrorAlert } from './ErrorAlert'
 
 type BlockedDateProps = {
   openCreateReleaseModal: boolean
@@ -61,8 +72,17 @@ export function BlockedDateModal({
         </Heading>
       </Dialog.Block>
       <Dialog.Block>
+        <Paragraph data-size={'sm'}>
+          Dato <Tag data-color='warning'>Må fylles ut</Tag>
+        </Paragraph>
+        <Input
+          id='publishTime'
+          value={getDateOnlyAsString(selectedDate)}
+          onChange={(e) => setSelectedDate(new Date(e.target.value))}
+          size={10}
+          style={{ marginBottom: '0.5rem' }}
+        />
         <DatePicker
-          dropdownCaption
           fromDate={now}
           toDate={new Date(`31 Dec ${now.getFullYear() + 5}`)}
           month={calendarMonth}
@@ -72,14 +92,16 @@ export function BlockedDateModal({
           apiErrorEmit={setDatePickerError}
         />
         <Field>
-          <Label>Kommentar</Label>
+          <Label>
+            Kommentar <Tag data-color='warning'>Må fylles ut</Tag>
+          </Label>
           <Field.Description>
-            Skriv hvorfor må denne datoen sperres. F.eks. Helligdag eller planlagt vedlikehold.
+            Skriv hvorfor må denne datoen sperres.
+            <br />
+            F.eks. Helligdag eller planlagt vedlikehold.
           </Field.Description>
-          <Input id='publishComment' onChange={(e) => setComment(e.target.value)} />
-          {(apiError || datePickerError) ?? (
-            <ValidationMessage data-color='danger'>{[...apiError, datePickerError]}</ValidationMessage>
-          )}
+          <Input id='publishComment' onChange={(e) => setComment(e.target.value)} size={45} />
+          {(apiError || datePickerError) ?? <ErrorAlert message={[...apiError, datePickerError]} />}
         </Field>
         <Button
           variant='primary'
