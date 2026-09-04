@@ -61,7 +61,7 @@ function ReleaseRow({ release, openInNewTab }: Readonly<ReleaseRowProps>) {
       </Table.Cell>
       <TruncatedTableCell value={release.statistic?.name} />
       <Table.Cell>{release.frequency?.name ?? ''}</Table.Cell>
-      <Table.Cell>{release.measuring_period_title ?? ''}</Table.Cell>
+      <Table.Cell>{release.measuring_period?.title ?? ''}</Table.Cell>
       <Table.Cell>{formatDate(release.period_from)}</Table.Cell>
       <Table.Cell>{formatDate(release.period_to)}</Table.Cell>
       <Table.Cell>{formatDateTime(release.publish_time)}</Table.Cell>
