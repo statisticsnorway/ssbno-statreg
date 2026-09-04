@@ -205,7 +205,11 @@ const StatisticRelationSelect = {
     name: true,
     name_en: true,
     status: true,
+    related_statistic_id: true,
     shortname: { select: { name: true } },
+    incoming_statistic_relations: {
+      select: { id: true, status: true },
+    },
   },
 }
 
@@ -276,17 +280,44 @@ export async function mapStatisticDetails(statistic: StatisticPrismaResult): Pro
       }
     : {}
 
-  // "Viderefører": any statistic whose own relation points at this one and is itself SA, regardless
-  // of this statistic's current status. This is what makes a chain (SA1 -> SA2 -> A1) visible one
-  // link at a time on every statistic involved, without needing to resolve the whole chain at once.
-  const incoming_relations = incomingCandidates
-    .filter((incomingRelation) => incomingRelation.status === 'SA')
-    .map((incomingRelation) => ({
-      id: incomingRelation.id,
-      shortname: incomingRelation.shortname.name,
-      name: incomingRelation.name,
-      name_en: incomingRelation.name_en ?? '',
-    }))
+  // "Viderefører": canonical relations are incoming SA rows, regardless of this statistic's
+  // current status. Also preserve the old reverse-only A -> SA representation on the Active page:
+  // if this Active row points to an SA that has no canonical outgoing relation and this row is that
+  // SA's single Active reverse candidate, expose the logical SA -> A edge in the same direction as
+  // canonical data. Ambiguous or conflicting legacy data is never guessed.
+  const canonicalIncomingSaRelations = incomingCandidates.filter((incomingRelation) => incomingRelation.status === 'SA')
+  const legacyDirectSaRelation = statistic.status === 'A' && directRelation?.status === 'SA' ? directRelation : null
+  const legacySaRelatedStatisticId = legacyDirectSaRelation?.related_statistic_id
+  const legacySaHasNoCanonicalRelation =
+    legacyDirectSaRelation !== null &&
+    (legacySaRelatedStatisticId === null ||
+      legacySaRelatedStatisticId === undefined ||
+      legacySaRelatedStatisticId === legacyDirectSaRelation.id)
+  const legacySaActiveReverseCandidates =
+    legacyDirectSaRelation?.incoming_statistic_relations.filter(
+      (incomingRelation) => incomingRelation.status === 'A' && incomingRelation.id !== legacyDirectSaRelation.id
+    ) ?? []
+  const inferredLegacyIncomingSaRelation =
+    legacyDirectSaRelation &&
+    legacySaHasNoCanonicalRelation &&
+    legacySaActiveReverseCandidates.length === 1 &&
+    legacySaActiveReverseCandidates[0]?.id === statistic.id
+      ? legacyDirectSaRelation
+      : null
+
+  const incomingSaRelations = [
+    ...canonicalIncomingSaRelations,
+    ...(inferredLegacyIncomingSaRelation ? [inferredLegacyIncomingSaRelation] : []),
+  ]
+  const uniqueIncomingSaRelations = [
+    ...new Map(incomingSaRelations.map((incomingRelation) => [incomingRelation.id, incomingRelation])).values(),
+  ]
+  const incoming_relations = uniqueIncomingSaRelations.map((incomingRelation) => ({
+    id: incomingRelation.id,
+    shortname: incomingRelation.shortname.name,
+    name: incomingRelation.name,
+    name_en: incomingRelation.name_en ?? '',
+  }))
   const users = await getAllUsersFromCache()
 
   return {
