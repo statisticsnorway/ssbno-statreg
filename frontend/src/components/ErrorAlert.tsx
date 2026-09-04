@@ -1,4 +1,4 @@
-import { Alert, Heading, Paragraph } from '@statisticsnorway/design-react'
+import { Alert, Heading, Link, Paragraph } from '@statisticsnorway/design-react'
 
 export function ErrorAlert(props: Readonly<{ message: string[] }>) {
   return (
@@ -13,7 +13,8 @@ export function ErrorAlert(props: Readonly<{ message: string[] }>) {
         {'En feil har oppstått'}
       </Heading>
       <Paragraph>
-        Noe gikk galt. Vennligst prøv på nytt, eller kontakt produkteier (mmj@ssb.no) dersom problemet vedvarer.
+        Noe gikk galt. Vennligst prøv på nytt, eller kontakt <Link href='mailto:desken@ssb.no'>desken</Link> dersom
+        problemet vedvarer.
       </Paragraph>
       {props.message.length > 0 && (
         <Paragraph>
