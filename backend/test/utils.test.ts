@@ -417,7 +417,8 @@ describe('utils', () => {
       frequencyCode: string
       periodFrom: string
       periodTo: string
-      expected: string
+      expectedNb: string
+      expectedEn: string
     }
 
     const scenarios: MeasuringPeriodScenario[] = [
@@ -426,190 +427,233 @@ describe('utils', () => {
         frequencyCode: 'W',
         periodFrom: '05.12.2011',
         periodTo: '11.12.2011',
-        expected: 'Uke 49 2011',
+        expectedNb: 'Uke 49 2011',
+        expectedEn: 'Week 49 2011',
       },
       {
         scenarioDescription: 'wrong week period tuesday to monday',
         frequencyCode: 'W',
         periodFrom: '06.12.2011',
         periodTo: '12.12.2011',
-        expected: '6. desember 2011-12. desember 2011',
+        expectedNb: '6. desember 2011-12. desember 2011',
+        expectedEn: '6 December 2011-12 December 2011',
       },
       {
         scenarioDescription: 'wrong week period monday to friday',
         frequencyCode: 'W',
         periodFrom: '05.12.2011',
         periodTo: '09.12.2011',
-        expected: '5. desember 2011-9. desember 2011',
+        expectedNb: '5. desember 2011-9. desember 2011',
+        expectedEn: '5 December 2011-9 December 2011',
       },
       {
         scenarioDescription: 'month period full month',
         frequencyCode: 'M',
         periodFrom: '01.12.2011',
         periodTo: '31.12.2011',
-        expected: 'Desember 2011',
+        expectedNb: 'Desember 2011',
+        expectedEn: 'December 2011',
       },
       {
         scenarioDescription: 'month period not full month',
         frequencyCode: 'M',
         periodFrom: '01.12.2011',
         periodTo: '30.12.2011',
-        expected: '1. desember 2011-30. desember 2011',
+        expectedNb: '1. desember 2011-30. desember 2011',
+        expectedEn: '1 December 2011-30 December 2011',
       },
       {
         scenarioDescription: 'month measuring point',
         frequencyCode: 'M',
         periodFrom: '15.12.2011',
         periodTo: '15.12.2011',
-        expected: '15. desember 2011',
+        expectedNb: '15. desember 2011',
+        expectedEn: '15 December 2011',
       },
       {
         scenarioDescription: 'term period over two months',
         frequencyCode: 'T',
         periodFrom: '01.11.2011',
         periodTo: '31.12.2011',
-        expected: '6. termin 2011',
+        expectedNb: '6. termin 2011',
+        expectedEn: '6. termin 2011',
       },
       {
         scenarioDescription: 'term period not over two months',
         frequencyCode: 'T',
         periodFrom: '01.11.2011',
         periodTo: '30.11.2011',
-        expected: '1. november 2011-30. november 2011',
+        expectedNb: '1. november 2011-30. november 2011',
+        expectedEn: '1 November 2011-30 November 2011',
       },
       {
         scenarioDescription: '1st quarter period',
         frequencyCode: 'K',
         periodFrom: '01.01.2011',
         periodTo: '31.03.2011',
-        expected: '1. kvartal 2011',
+        expectedNb: '1. kvartal 2011',
+        expectedEn: '1st quarter 2011',
       },
       {
         scenarioDescription: 'quarter period not spanning full quarter',
         frequencyCode: 'K',
         periodFrom: '01.01.2011',
         periodTo: '28.02.2011',
-        expected: '1. januar 2011-28. februar 2011',
+        expectedNb: '1. januar 2011-28. februar 2011',
+        expectedEn: '1 January 2011-28 February 2011',
       },
       {
         scenarioDescription: '2nd quarter period',
         frequencyCode: 'K',
         periodFrom: '01.04.2011',
         periodTo: '30.06.2011',
-        expected: '2. kvartal 2011',
+        expectedNb: '2. kvartal 2011',
+        expectedEn: '2nd quarter 2011',
       },
       {
         scenarioDescription: '3rd quarter period',
         frequencyCode: 'K',
         periodFrom: '01.07.2011',
         periodTo: '30.09.2011',
-        expected: '3. kvartal 2011',
+        expectedNb: '3. kvartal 2011',
+        expectedEn: '3rd quarter 2011',
       },
       {
         scenarioDescription: '4th quarter period',
         frequencyCode: 'K',
         periodFrom: '01.10.2011',
         periodTo: '31.12.2011',
-        expected: '4. kvartal 2011',
+        expectedNb: '4. kvartal 2011',
+        expectedEn: '4th quarter 2011',
       },
       {
         scenarioDescription: 'quarter measuring point',
         frequencyCode: 'K',
         periodFrom: '01.04.2011',
         periodTo: '01.04.2011',
-        expected: '1. april 2011',
+        expectedNb: '1. april 2011',
+        expectedEn: '1 April 2011',
       },
       {
         scenarioDescription: 'half-year first half',
         frequencyCode: 'H',
         periodFrom: '01.01.2011',
         periodTo: '30.06.2011',
-        expected: '1. halvår 2011',
+        expectedNb: '1. halvår 2011',
+        expectedEn: '1. half of 2011',
       },
       {
         scenarioDescription: 'half-year not starting on 1st of january',
         frequencyCode: 'H',
         periodFrom: '01.02.2011',
         periodTo: '30.07.2011',
-        expected: '1. februar 2011-30. juli 2011',
+        expectedNb: '1. februar 2011-30. juli 2011',
+        expectedEn: '1 February 2011-30 July 2011',
       },
       {
         scenarioDescription: 'half-year second half',
         frequencyCode: 'H',
         periodFrom: '01.07.2011',
         periodTo: '31.12.2011',
-        expected: '2. halvår 2011',
+        expectedNb: '2. halvår 2011',
+        expectedEn: '2. half of 2011',
       },
       {
         scenarioDescription: 'calendar year',
         frequencyCode: 'Y',
         periodFrom: '01.01.2011',
         periodTo: '31.12.2011',
-        expected: '2011',
+        expectedNb: '2011',
+        expectedEn: '2011',
       },
       {
         scenarioDescription: 'Two dates within the same calendar year',
         frequencyCode: 'Y',
         periodFrom: '01.03.2011',
         periodTo: '31.10.2011',
-        expected: '2011',
+        expectedNb: '2011',
+        expectedEn: '2011',
       },
       {
         scenarioDescription: 'calendar year school year/hunting year',
         frequencyCode: 'Y',
         periodFrom: '01.09.2010',
         periodTo: '31.03.2011',
-        expected: '2010/2011',
+        expectedNb: '2010/2011',
+        expectedEn: '2010/2011',
       },
       {
         scenarioDescription: 'every 2nd year',
         frequencyCode: '2Y',
         periodFrom: '01.01.2010',
         periodTo: '31.12.2011',
-        expected: '2010-2011',
+        expectedNb: '2010-2011',
+        expectedEn: '2010-2011',
       },
       {
         scenarioDescription: 'every 2nd year with period not starting on 1st of january',
         frequencyCode: '2Y',
         periodFrom: '01.02.2010',
         periodTo: '31.01.2012',
-        expected: '1. februar 2010-31. januar 2012',
+        expectedNb: '1. februar 2010-31. januar 2012',
+        expectedEn: '1 February 2010-31 January 2012',
       },
       {
         scenarioDescription: 'every 3rd year',
         frequencyCode: '3Y',
         periodFrom: '01.01.2010',
         periodTo: '31.12.2012',
-        expected: '2010-2012',
+        expectedNb: '2010-2012',
+        expectedEn: '2010-2012',
       },
       {
         scenarioDescription: 'every 4th year',
         frequencyCode: '4Y',
         periodFrom: '01.01.2010',
         periodTo: '31.12.2013',
-        expected: '2010-2013',
+        expectedNb: '2010-2013',
+        expectedEn: '2010-2013',
       },
       {
         scenarioDescription: 'every 5th year',
         frequencyCode: '5Y',
         periodFrom: '01.01.2010',
         periodTo: '31.12.2014',
-        expected: '2010-2014',
+        expectedNb: '2010-2014',
+        expectedEn: '2010-2014',
       },
       {
         scenarioDescription: 'year measuring point with month label',
         frequencyCode: 'Y',
         periodFrom: '01.10.2011',
         periodTo: '01.10.2011',
-        expected: '1. oktober 2011',
+        expectedNb: '1. oktober 2011',
+        expectedEn: '1 October 2011',
+      },
+      {
+        scenarioDescription: 'year measuring point as of first day of year',
+        frequencyCode: 'Y',
+        periodFrom: '01.01.2011',
+        periodTo: '01.01.2011',
+        expectedNb: 'Per 1. januar 2011',
+        expectedEn: 'As of 1 January 2011',
       },
     ]
 
     test.each(scenarios)(
-      'returns correct for: $scenarioDescription',
-      ({ frequencyCode, periodFrom, periodTo, expected }: MeasuringPeriodScenario) => {
-        expect(parseHumanReadableMeasuringPeriod(frequencyCode, toUtcDate(periodFrom), toUtcDate(periodTo))).toBe(
-          expected
+      'returns correct Norwegian text for: $scenarioDescription',
+      ({ frequencyCode, periodFrom, periodTo, expectedNb }: MeasuringPeriodScenario) => {
+        expect(parseHumanReadableMeasuringPeriod(frequencyCode, toUtcDate(periodFrom), toUtcDate(periodTo), 'nb')).toBe(
+          expectedNb
+        )
+      }
+    )
+
+    test.each(scenarios)(
+      'returns correct English text for: $scenarioDescription',
+      ({ frequencyCode, periodFrom, periodTo, expectedEn }: MeasuringPeriodScenario) => {
+        expect(parseHumanReadableMeasuringPeriod(frequencyCode, toUtcDate(periodFrom), toUtcDate(periodTo), 'en')).toBe(
+          expectedEn
         )
       }
     )
