@@ -206,8 +206,6 @@ const StatisticRelationSelect = {
     name_en: true,
     status: true,
     shortname: { select: { name: true } },
-    related_statistic: { select: { id: true, status: true } },
-    incoming_statistic_relations: { select: { id: true, status: true } },
   },
 }
 
@@ -250,26 +248,24 @@ export async function mapStatisticDetails(statistic: StatisticPrismaResult): Pro
   const main_language = statistic.language
   const division_code = statistic.division_code ?? ''
 
-  // New data (see updateStatistic) is strict: the only relation that can ever be created is
-  // Aktiv (A) <-> Sammenslått (SA), and the id is always stored on the SA row. Old data is not
-  // migrated and can be messy: self-links, A<->A junk, or the id stored the other way around.
-  // The API only ever shows a genuine A <-> SA pair, inferred from whichever side stores it, and
-  // hides everything else (self-links, A<->A, SA<->SA, SA<->IA, etc.).
+  // A statistic can be merged into another statistic that later also becomes SA, forming a chain
+  // (SA1 -> SA2 -> A1). Each statistic only ever exposes its own immediate relation - the full
+  // chain becomes visible one step at a time by following it through the UI. Self-links are noise
+  // from old data and are never a meaningful relation.
   const directRelation =
     statistic.related_statistic && statistic.related_statistic.id !== statistic.id ? statistic.related_statistic : null
   const incomingCandidates = (statistic.incoming_statistic_relations ?? []).filter(
     (incomingRelation) => incomingRelation.id !== statistic.id
   )
 
-  // "Videreføres av": only for an SA statistic, and only pointing at a real Aktiv statistic.
-  // Prefer its own id (new data). Otherwise, if exactly one Aktiv statistic points at it (old
-  // data, stored the other way around), infer that one. If more than one points at it, we can't
-  // tell which is correct, so we show nothing rather than guessing.
-  const directActiveRelation = directRelation?.status === 'A' ? directRelation : null
+  // "Videreføres av": only for an SA statistic. Once a relation is established it survives later
+  // status changes on the target (it may become SA, IA, etc. - see business rules), so the target's
+  // current status is never checked here. Old data with no direct id is inferred from a single
+  // Active statistic pointing at it the other way around (legacy bug: the id lived on the wrong row).
   const incomingActiveRelations = incomingCandidates.filter((incomingRelation) => incomingRelation.status === 'A')
   const relationTarget =
     statistic.status === 'SA'
-      ? (directActiveRelation ?? (incomingActiveRelations.length === 1 ? incomingActiveRelations[0] : null))
+      ? (directRelation ?? (incomingActiveRelations.length === 1 ? incomingActiveRelations[0] : null))
       : null
   const relation = relationTarget
     ? {
@@ -280,45 +276,17 @@ export async function mapStatisticDetails(statistic: StatisticPrismaResult): Pro
       }
     : {}
 
-  // "Viderefører": only for an Aktiv statistic. A direct SA -> A relation is canonical and
-  // always wins. An old reversed A -> SA relation is only inferred when that SA has no conflicting
-  // canonical Active relation and exactly one Active statistic points at it. This keeps old data
-  // untouched while preventing stale or ambiguous legacy links from leaking into the API.
-  const canonicalSaRelations =
-    statistic.status === 'A' ? incomingCandidates.filter((incomingRelation) => incomingRelation.status === 'SA') : []
-  const legacyDirectSaRelation = statistic.status === 'A' && directRelation?.status === 'SA' ? directRelation : null
-  let inferredLegacyDirectSaRelation: typeof legacyDirectSaRelation = null
-
-  if (legacyDirectSaRelation) {
-    const canonicalActiveTarget =
-      legacyDirectSaRelation.related_statistic?.status === 'A' ? legacyDirectSaRelation.related_statistic : null
-
-    if (canonicalActiveTarget) {
-      if (canonicalActiveTarget.id === statistic.id) {
-        inferredLegacyDirectSaRelation = legacyDirectSaRelation
-      }
-    } else {
-      const activeIncomingRelations = (legacyDirectSaRelation.incoming_statistic_relations ?? []).filter(
-        (incomingRelation) => incomingRelation.status === 'A'
-      )
-
-      if (activeIncomingRelations.length === 1 && activeIncomingRelations[0]?.id === statistic.id) {
-        inferredLegacyDirectSaRelation = legacyDirectSaRelation
-      }
-    }
-  }
-
-  const saRelations =
-    statistic.status === 'A'
-      ? [...canonicalSaRelations, ...(inferredLegacyDirectSaRelation ? [inferredLegacyDirectSaRelation] : [])]
-      : []
-  const uniqueSaRelations = [...new Map(saRelations.map((saRelation) => [saRelation.id, saRelation])).values()]
-  const incoming_relations = uniqueSaRelations.map((incomingRelation) => ({
-    id: incomingRelation.id,
-    shortname: incomingRelation.shortname.name,
-    name: incomingRelation.name,
-    name_en: incomingRelation.name_en ?? '',
-  }))
+  // "Viderefører": any statistic whose own relation points at this one and is itself SA, regardless
+  // of this statistic's current status. This is what makes a chain (SA1 -> SA2 -> A1) visible one
+  // link at a time on every statistic involved, without needing to resolve the whole chain at once.
+  const incoming_relations = incomingCandidates
+    .filter((incomingRelation) => incomingRelation.status === 'SA')
+    .map((incomingRelation) => ({
+      id: incomingRelation.id,
+      shortname: incomingRelation.shortname.name,
+      name: incomingRelation.name,
+      name_en: incomingRelation.name_en ?? '',
+    }))
   const users = await getAllUsersFromCache()
 
   return {
@@ -413,13 +381,18 @@ export async function updateStatistic(
     throw new StatregError('An active statistic cannot be set back to upcoming.')
   }
 
-  // Strict rule for new writes: an SA (Sammenslått) statistic must have exactly one Aktiv (A)
-  // relation, and every newly selected relation id is stored only on the SA row being edited.
-  // Existing legacy rows are never repaired, reversed or cleared as a side effect of another save.
+  // "Target must be Active" only applies when a new SA relation is established or an existing
+  // SA deliberately changes target. Existing SA relations survive later target status changes.
   let relationIdToWrite: number | undefined
   if (status === 'SA') {
+    const existingDirectRelationId =
+      existingStatistic.related_statistic && existingStatistic.related_statistic.id !== existingStatistic.id
+        ? existingStatistic.related_statistic.id
+        : undefined
+
     if (existingStatistic.status !== 'SA') {
-      // A statistic newly being set to SA must explicitly provide a real, active relation (not itself).
+      // Any transition into SA establishes SA semantics now, so the selected target must be Active
+      // even if this row already happened to contain the same related_statistic_id in legacy data.
       if (!relation_id) {
         throw new StatregError("A statistic can only be set to status 'Sammenslått' if it has a relation id.")
       }
@@ -427,15 +400,9 @@ export async function updateStatistic(
       await statisticsAsserts.assertRelationTargetIsActive(relation_id, existingStatistic.id, prisma)
       relationIdToWrite = relation_id
     } else {
-      // Existing SA data may have the relation on this row or on the old, reversed Active row.
-      // Work out the genuine existing relation so a normal edit can round-trip without rewriting
-      // legacy storage even when the UI sends the inferred relation id back in the request.
-      const existingDirectActiveRelationId =
-        existingStatistic.related_statistic?.status === 'A' &&
-        existingStatistic.related_statistic.id !== existingStatistic.id
-          ? existingStatistic.related_statistic.id
-          : undefined
-      const legacyRelations = !existingDirectActiveRelationId
+      // Existing SA data may also use the old reversed representation where one Active statistic
+      // points to this SA. Preserve that representation when the relation is unchanged.
+      const legacyRelations = !existingDirectRelationId
         ? await prisma.statistic.findMany({
             where: { status: 'A', related_statistic_id: existingStatistic.id },
             select: { id: true },
@@ -444,15 +411,14 @@ export async function updateStatistic(
       const existingLegacyRelationId = legacyRelations.length === 1 ? legacyRelations[0]!.id : undefined
 
       if (relation_id) {
-        await statisticsAsserts.assertRelationTargetIsActive(relation_id, existingStatistic.id, prisma)
-
         const relationIsUnchanged =
-          relation_id === existingDirectActiveRelationId || relation_id === existingLegacyRelationId
+          relation_id === existingDirectRelationId || relation_id === existingLegacyRelationId
 
         if (!relationIsUnchanged) {
+          await statisticsAsserts.assertRelationTargetIsActive(relation_id, existingStatistic.id, prisma)
           relationIdToWrite = relation_id
         }
-      } else if (!existingDirectActiveRelationId && !existingLegacyRelationId) {
+      } else if (!existingDirectRelationId && !existingLegacyRelationId) {
         throw new StatregError("A statistic can only be set to status 'Sammenslått' if it has a relation id.")
       }
     }
