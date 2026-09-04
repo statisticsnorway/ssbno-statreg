@@ -89,7 +89,13 @@ export function CreateShortnameModal({ openCreateShortnameModal }: Readonly<Crea
   }
 
   return (
-    <Dialog id='create-shortname-modal' open={openCreateShortnameModal} onClose={handleCloseModal} closedby='any'>
+    <Dialog
+      id='create-shortname-modal'
+      aria-labelledby='create-shortname-modal-heading'
+      open={openCreateShortnameModal}
+      onClose={handleCloseModal}
+      closedby='any'
+    >
       <Dialog.Block>
         <Heading id='create-shortname-modal-heading' data-size='xs'>
           Opprett kortnavn for statistikken
@@ -105,7 +111,6 @@ export function CreateShortnameModal({ openCreateShortnameModal }: Readonly<Crea
               lov.
             </Field.Description>
             <Input
-              aria-labelledby='create-shortname-modal-heading'
               aria-invalid={!!validationError}
               onChange={handleInputChange}
               maxLength={14}
@@ -113,15 +118,17 @@ export function CreateShortnameModal({ openCreateShortnameModal }: Readonly<Crea
               autofocus='true'
             />
             <Paragraph data-limit='14' data-field='counter' />
-            {validationError ? (
-              <ValidationMessage data-field='validation'>{validationError}</ValidationMessage>
-            ) : (
-              shortnameInput && (
-                <ValidationMessage data-field='validation' data-color='success'>
-                  Kortnavn er ledig
-                </ValidationMessage>
-              )
-            )}
+            <div aria-live='polite' role='status'>
+              {validationError ? (
+                <ValidationMessage data-field='validation'>{validationError}</ValidationMessage>
+              ) : (
+                shortnameInput && (
+                  <ValidationMessage data-field='validation' data-color='success'>
+                    Kortnavn er ledig
+                  </ValidationMessage>
+                )
+              )}
+            </div>
           </Field>
           <div style={{ display: 'flex', gap: 'var(--ds-size-2)', marginTop: 'var(--ds-size-3)' }}>
             <Button variant='primary' type='submit'>
