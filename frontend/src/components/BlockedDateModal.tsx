@@ -1,9 +1,8 @@
-import { Button, Heading, Dialog, Input } from '@statisticsnorway/design-react'
+import { Button, Heading, Dialog, Input, Field, Label, ValidationMessage } from '@statisticsnorway/design-react'
 import client from '../api'
 import { DatePicker } from './DatePicker'
 import { getDateOnlyAsString, getFirstDayOfNthMonth } from '../lib/utils'
 import { useState } from 'react'
-import { ErrorAlert } from './ErrorAlert'
 
 type BlockedDateProps = {
   openCreateReleaseModal: boolean
@@ -26,11 +25,12 @@ export function BlockedDateModal({
 
   function selectDate(selected: Date | undefined) {
     if (!selected) return
+    setApiError([])
     setSelectedDate(selected)
   }
 
   async function createBlockedDate(date: Date, message: string) {
-    const { data, error } = await client.POST('/calendar/blocked-release-days/{date}', {
+    const { error } = await client.POST('/calendar/blocked-release-days/{date}', {
       params: {
         path: {
           date: getDateOnlyAsString(date),
@@ -62,7 +62,6 @@ export function BlockedDateModal({
       </Dialog.Block>
       <Dialog.Block>
         <DatePicker
-          showColorCodingExplanation
           dropdownCaption
           fromDate={now}
           toDate={new Date(`31 Dec ${now.getFullYear() + 5}`)}
@@ -72,18 +71,23 @@ export function BlockedDateModal({
           onSelect={selectDate}
           apiErrorEmit={setDatePickerError}
         />
-        <Heading id='comment-heading' data-size='xs'>
-          Kommentar
-        </Heading>
-        <p>Skriv hvorfor må denne datoen sperres? (F.eks. Helligdag eller planlagt vedlikehold)</p>
-        <Input id='publishComment' onChange={(e) => setComment(e.target.value)} size={50} />
-
-        <div style={{ display: 'flex', gap: 'var(--ds-size-4)', marginTop: ' var(--ds-size-4)' }}>
-          {(apiError || datePickerError) ?? <ErrorAlert message={[...apiError, datePickerError]} />}
-          <Button variant='primary' onClick={() => createBlockedDate(selectedDate, comment)}>
-            Legg til
-          </Button>
-        </div>
+        <Field>
+          <Label>Kommentar</Label>
+          <Field.Description>
+            Skriv hvorfor må denne datoen sperres. F.eks. Helligdag eller planlagt vedlikehold.
+          </Field.Description>
+          <Input id='publishComment' onChange={(e) => setComment(e.target.value)} />
+          {(apiError || datePickerError) ?? (
+            <ValidationMessage data-color='danger'>{[...apiError, datePickerError]}</ValidationMessage>
+          )}
+        </Field>
+        <Button
+          variant='primary'
+          onClick={() => createBlockedDate(selectedDate, comment)}
+          style={{ marginTop: '0.5rem' }}
+        >
+          Legg til
+        </Button>
       </Dialog.Block>
     </Dialog>
   )
