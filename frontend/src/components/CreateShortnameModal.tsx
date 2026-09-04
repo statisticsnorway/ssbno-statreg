@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router'
-import { Button, Heading, Dialog, Field, Input, ValidationMessage, Paragraph } from '@statisticsnorway/design-react'
+import { Button, Heading, Dialog, Field, Input, Paragraph, ValidationMessage } from '@statisticsnorway/design-react'
 
 import client from '../api'
 import type { ShortnameListing } from '@ssbno-statreg/shared'
@@ -49,11 +49,6 @@ export function CreateShortnameModal({ openCreateShortnameModal }: Readonly<Crea
       return false
     }
 
-    if (value.length > 14) {
-      setValidationError('Kortnavnet kan ikke være lengre enn 14 tegn')
-      return false
-    }
-
     if (shortnames.includes(value)) {
       setValidationError('Dette kortnavnet er ikke ledig')
       return false
@@ -90,7 +85,7 @@ export function CreateShortnameModal({ openCreateShortnameModal }: Readonly<Crea
   }
 
   function handleCloseModal() {
-    navigate('/statistikk')
+    navigate('/statistikk', { state: { returnFocusToCreateStatisticButton: true } })
   }
 
   return (
@@ -99,6 +94,7 @@ export function CreateShortnameModal({ openCreateShortnameModal }: Readonly<Crea
       aria-labelledby='create-shortname-modal-heading'
       open={openCreateShortnameModal}
       onClose={handleCloseModal}
+      closedby='any'
     >
       <Dialog.Block>
         <Heading id='create-shortname-modal-heading' data-size='xs'>
@@ -115,18 +111,21 @@ export function CreateShortnameModal({ openCreateShortnameModal }: Readonly<Crea
               lov.
             </Field.Description>
             <Input
-              // @ts-expect-error native "autofocus" is not part of the React types
-              autofocus='true'
               aria-invalid={!!validationError}
               onChange={handleInputChange}
-              onBlur={() => validateShortname(shortnameInput)}
               maxLength={14}
+              // @ts-expect-error native "autofocus" is not part of the React types
+              autofocus='true'
             />
             <Paragraph data-limit='14' data-field='counter' />
             {validationError ? (
-              <ValidationMessage>{validationError}</ValidationMessage>
+              <ValidationMessage data-field='validation'>{validationError}</ValidationMessage>
             ) : (
-              shortnameInput && <ValidationMessage data-color='success'>Kortnavn er ledig</ValidationMessage>
+              shortnameInput && (
+                <ValidationMessage data-field='validation' data-color='success'>
+                  Kortnavn er ledig
+                </ValidationMessage>
+              )
             )}
           </Field>
           <div style={{ display: 'flex', gap: 'var(--ds-size-2)', marginTop: 'var(--ds-size-3)' }}>
