@@ -425,8 +425,45 @@ export async function updateStatistic(
   }
 
   // Once the edited statistic stops being SA, clear only its own stored SA relation.
-  // Any legacy relationship ids stored on other rows are deliberately left untouched.
   const clearRelationOnStatusChange = existingStatistic.status === 'SA' && status !== 'SA'
+
+  // Old data can store a merge backwards as A -> SA while the logical/UI relation is SA -> A.
+  // If that Active row leaves A, its FK may be reused or cleared and the historical edge would be
+  // lost. Detect only the same single, unambiguous reverse-only shape that the read fallback trusts.
+  let legacyReverseSourceIdToPreserve: number | undefined
+  if (
+    existingStatistic.status === 'A' &&
+    status !== 'A' &&
+    existingStatistic.related_statistic?.status === 'SA' &&
+    existingStatistic.related_statistic.id !== existingStatistic.id
+  ) {
+    const legacyReverseSourceId = existingStatistic.related_statistic.id
+    const legacyReverseSource = await prisma.statistic.findFirst({
+      where: { id: legacyReverseSourceId },
+      select: {
+        related_statistic_id: true,
+        incoming_statistic_relations: {
+          where: { status: 'A' },
+          select: { id: true },
+        },
+      },
+    })
+
+    const sourceRelatedStatisticId = legacyReverseSource?.related_statistic_id
+    const sourceHasNoCanonicalRelation =
+      sourceRelatedStatisticId === null ||
+      sourceRelatedStatisticId === undefined ||
+      sourceRelatedStatisticId === legacyReverseSourceId
+    const activeReverseCandidates = legacyReverseSource?.incoming_statistic_relations ?? []
+
+    if (
+      sourceHasNoCanonicalRelation &&
+      activeReverseCandidates.length === 1 &&
+      activeReverseCandidates[0]!.id === existingStatistic.id
+    ) {
+      legacyReverseSourceIdToPreserve = legacyReverseSourceId
+    }
+  }
 
   let newContacts
   if (contacts) {
@@ -492,7 +529,7 @@ export async function updateStatistic(
     return { region_level: { connect: { code: regLvl.code } } }
   })
 
-  const updatedStatistic = await prisma.statistic.update({
+  const statisticUpdateArgs = {
     where: { id: existingStatistic.id },
     data: {
       name,
@@ -502,11 +539,12 @@ export async function updateStatistic(
       status,
       comment,
       language: main_language,
-      // A newly selected relation is stored only on this SA row. Existing legacy storage is left
-      // untouched unless this exact statistic is given a different relation or leaves SA.
+      // New relations are canonical SA -> target writes. If this row owned the only legacy reverse
+      // representation of an older SA -> this relation, that old pointer is cleared after the edge
+      // is preserved canonically on the historical SA row below.
       ...(relationIdToWrite
         ? { related_statistic_id: relationIdToWrite }
-        : clearRelationOnStatusChange
+        : clearRelationOnStatusChange || legacyReverseSourceIdToPreserve
           ? { related_statistic_id: null }
           : {}),
       legacy_topic_codes: previous_topic_codes,
@@ -555,7 +593,20 @@ export async function updateStatistic(
       },
     },
     include: StatisticsDetailedIncludes,
-  })
+  } satisfies Prisma.StatisticUpdateArgs
+
+  const updatedStatistic = legacyReverseSourceIdToPreserve
+    ? await (prisma as StatisticPrisma & Pick<PrismaClient, '$transaction'>).$transaction(async (tx) => {
+        // Convert only the endangered legacy reverse edge. Both writes are atomic: either the old
+        // history becomes canonical and this edit succeeds, or neither change is committed.
+        await tx.statistic.update({
+          where: { id: legacyReverseSourceIdToPreserve },
+          data: { related_statistic_id: existingStatistic.id },
+        })
+
+        return tx.statistic.update(statisticUpdateArgs)
+      })
+    : await prisma.statistic.update(statisticUpdateArgs)
 
   return await mapStatisticDetails(updatedStatistic)
 }
