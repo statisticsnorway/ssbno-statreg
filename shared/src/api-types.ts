@@ -1058,7 +1058,10 @@ export interface components {
         readonly name?: string
         readonly name_en?: string
       }
-      readonly measuring_period_title?: string
+      measuring_period?: {
+        readonly title?: string
+        readonly title_en?: string
+      }
     }
     Release_details: components['schemas']['Release_get'] & {
       has_versions?: boolean
