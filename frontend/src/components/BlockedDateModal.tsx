@@ -19,6 +19,7 @@ export function BlockedDateModal({
   onCreated,
 }: Readonly<BlockedDateProps>) {
   const [selectedDate, setSelectedDate] = useState(now)
+  const [calendarMonth, setCalendarMonth] = useState(getFirstDayOfNthMonth(0))
   const [comment, setComment] = useState('')
   const [apiError, setApiError] = useState<string[]>([])
   const [datePickerError, setDatePickerError] = useState('')
@@ -56,13 +57,17 @@ export function BlockedDateModal({
     >
       <Dialog.Block>
         <Heading id='release-modal-heading' data-size='xs'>
-          'Legg til ny sperredato'
+          Legg til ny sperredato
         </Heading>
       </Dialog.Block>
       <Dialog.Block>
         <DatePicker
           showColorCodingExplanation
-          month={getFirstDayOfNthMonth(0)}
+          dropdownCaption
+          fromDate={now}
+          toDate={new Date(`31 Dec ${now.getFullYear() + 5}`)}
+          month={calendarMonth}
+          onMonthChange={setCalendarMonth}
           selected={selectedDate}
           onSelect={selectDate}
           apiErrorEmit={setDatePickerError}
@@ -71,7 +76,7 @@ export function BlockedDateModal({
           Kommentar
         </Heading>
         <p>Skriv hvorfor må denne datoen sperres? (F.eks. Helligdag eller planlagt vedlikehold)</p>
-        <Input id='publishTime' onChange={(e) => setComment(e.target.value)} size={50} />
+        <Input id='publishComment' onChange={(e) => setComment(e.target.value)} size={50} />
 
         <div style={{ display: 'flex', gap: 'var(--ds-size-4)', marginTop: ' var(--ds-size-4)' }}>
           {(apiError || datePickerError) ?? <ErrorAlert message={[...apiError, datePickerError]} />}

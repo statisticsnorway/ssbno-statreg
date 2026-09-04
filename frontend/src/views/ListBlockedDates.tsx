@@ -63,7 +63,7 @@ function BlockedDatesTable({ days, onDelete }: BlockedDatesTableProps) {
 export default function ListBlockedDates() {
   const [blockedDates, setBlockedDates] = useState<BlockedReleaseDate[]>([])
   const [apiError, setApiError] = useState<string[]>([])
-  const [showCreateModel, setShowCreateModal] = useState(false)
+  const [showCreateModal, setShowCreateModal] = useState(false)
 
   async function fetchBlockedDates() {
     const { data, error } = await client.GET('/calendar/blocked-release-days')
@@ -118,10 +118,10 @@ export default function ListBlockedDates() {
       >
         <PlusCircleIcon aria-hidden /> Legg til ny sperret dato
       </Button>
-      {showCreateModel && (
+      {showCreateModal && (
         <BlockedDateModal
           setOpenCreateReleaseModal={setShowCreateModal}
-          openCreateReleaseModal={showCreateModel}
+          openCreateReleaseModal={showCreateModal}
           onCreated={fetchBlockedDates}
         />
       )}
