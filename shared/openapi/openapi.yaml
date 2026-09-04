@@ -217,7 +217,11 @@ components:
                 shortname: { type: string, readOnly: true }
                 name: { type: string, readOnly: true }
                 name_en: { type: string, readOnly: true }
-            measuring_period_title: { type: string, readOnly: true }
+            measuring_period: 
+              type: object
+              properties: 
+                title: { type: string, readOnly: true }
+                title_en: { type: string, readOnly: true }
 
     Release_details:
       allOf:
