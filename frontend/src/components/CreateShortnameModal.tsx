@@ -118,17 +118,15 @@ export function CreateShortnameModal({ openCreateShortnameModal }: Readonly<Crea
               autofocus='true'
             />
             <Paragraph data-limit='14' data-field='counter' />
-            <div aria-live='polite' role='status'>
-              {validationError ? (
-                <ValidationMessage data-field='validation'>{validationError}</ValidationMessage>
-              ) : (
-                shortnameInput && (
-                  <ValidationMessage data-field='validation' data-color='success'>
-                    Kortnavn er ledig
-                  </ValidationMessage>
-                )
-              )}
-            </div>
+            {validationError ? (
+              <ValidationMessage data-field='validation'>{validationError}</ValidationMessage>
+            ) : (
+              shortnameInput && (
+                <ValidationMessage data-field='validation' data-color='success'>
+                  Kortnavn er ledig
+                </ValidationMessage>
+              )
+            )}
           </Field>
           <div style={{ display: 'flex', gap: 'var(--ds-size-2)', marginTop: 'var(--ds-size-3)' }}>
             <Button variant='primary' type='submit'>
