@@ -65,17 +65,18 @@ export default function ListBlockedDates() {
   const [apiError, setApiError] = useState<string[]>([])
   const [showCreateModel, setShowCreateModal] = useState(false)
 
-  useEffect(() => {
-    async function fetchBlockedDates() {
-      const { data, error } = await client.GET('/calendar/blocked-release-days')
+  async function fetchBlockedDates() {
+    const { data, error } = await client.GET('/calendar/blocked-release-days')
 
-      if (error) {
-        setApiError((prev) => [...prev, error.message])
-        return
-      }
-
-      setBlockedDates(data ?? [])
+    if (error) {
+      setApiError((prev) => [...prev, error.message])
+      return
     }
+
+    setBlockedDates(data ?? [])
+  }
+
+  useEffect(() => {
     fetchBlockedDates()
   }, [])
 
@@ -118,7 +119,11 @@ export default function ListBlockedDates() {
         <PlusCircleIcon aria-hidden /> Legg til ny sperret dato
       </Button>
       {showCreateModel && (
-        <BlockedDateModal setOpenCreateReleaseModal={setShowCreateModal} openCreateReleaseModal={showCreateModel} />
+        <BlockedDateModal
+          setOpenCreateReleaseModal={setShowCreateModal}
+          openCreateReleaseModal={showCreateModel}
+          onCreated={fetchBlockedDates}
+        />
       )}
     </>
   )

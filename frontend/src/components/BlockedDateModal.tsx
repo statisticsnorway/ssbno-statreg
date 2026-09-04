@@ -7,11 +7,16 @@ import { useState } from 'react'
 type BlockedDateProps = {
   openCreateReleaseModal: boolean
   setOpenCreateReleaseModal: React.Dispatch<React.SetStateAction<boolean>>
+  onCreated: () => void
 }
 
-export function BlockedDateModal({ openCreateReleaseModal, setOpenCreateReleaseModal }: BlockedDateProps) {
+export function BlockedDateModal({
+  openCreateReleaseModal,
+  setOpenCreateReleaseModal,
+  onCreated,
+}: Readonly<BlockedDateProps>) {
   const now = new Date()
-  const [calendarMonth, setCalendarMonth] = useState(0) // TODO How is initial month set hmm?
+  const [calendarMonth, setCalendarMonth] = useState(0)
   const [selectedDate, setSelectedDate] = useState(now)
   const [apiError, setApiError] = useState<string[]>([])
   const [datePickerError, setDatePickerError] = useState('')
@@ -34,7 +39,9 @@ export function BlockedDateModal({ openCreateReleaseModal, setOpenCreateReleaseM
     })
     if (error) {
       setApiError((prev) => [...prev, error.message])
+      return
     }
+    onCreated()
     setOpenCreateReleaseModal(false)
   }
 
