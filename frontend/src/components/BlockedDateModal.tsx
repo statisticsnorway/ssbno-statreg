@@ -35,8 +35,7 @@ export function BlockedDateModal({ openCreateReleaseModal, setOpenCreateReleaseM
     if (error) {
       setApiError((prev) => [...prev, error.message])
     }
-    console.log(JSON.stringify(data))
-    // TODO Maybe we should do something here, like set a success state or smth?
+    setOpenCreateReleaseModal(false)
   }
 
   return (
