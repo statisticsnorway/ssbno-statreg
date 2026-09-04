@@ -200,7 +200,7 @@ const VariantSelect = {
 }
 
 const StatisticRelationSelect = {
-  select: { id: true, name: true, name_en: true, shortname: { select: { name: true } } },
+  select: { id: true, name: true, name_en: true, status: true, shortname: { select: { name: true } } },
 }
 
 export const StatisticsDetailedIncludes = {
@@ -241,15 +241,42 @@ export function parseStatisticVariants(
 export async function mapStatisticDetails(statistic: StatisticPrismaResult): Promise<StatisticDetails> {
   const main_language = statistic.language
   const division_code = statistic.division_code ?? ''
-  const relation = statistic.related_statistic?.shortname
+
+  // New data (see updateStatistic) is strict: `related_statistic_id` always lives on the SA
+  // statistic. Old data is not migrated and can be messy, so the API is lenient when reading it:
+  // - A statistic linking to itself is noise. Hide only that link, keep showing any other, real
+  //   relation the statistic may also have (e.g. an SA statistic pointing at it from the other side).
+  // - Two Active statistics linking to each other is noise. Hide it.
+  // - The only relation we ever show is a real Active <-> SA pair, no matter which of the two
+  //   rows happens to physically store the id.
+  const directRelation =
+    statistic.related_statistic && statistic.related_statistic.id !== statistic.id ? statistic.related_statistic : null
+  const incomingCandidates = (statistic.incoming_statistic_relations ?? []).filter(
+    (incomingRelation) => incomingRelation.id !== statistic.id
+  )
+
+  // "Videreføres av" only applies to an SA statistic. New data always has its id here
+  // (directRelation). Old data may instead have the Active statistic pointing at this SA
+  // statistic, so we fall back to that (incomingCandidates) when this row has no id of its own.
+  const relationTarget = statistic.status === 'SA' ? (directRelation ?? incomingCandidates[0] ?? null) : null
+  const relation = relationTarget
     ? {
-        id: statistic.related_statistic.id,
-        shortname: statistic.related_statistic?.shortname?.name,
-        name: statistic.related_statistic?.name,
-        name_en: statistic.related_statistic?.name_en ?? '',
+        id: relationTarget.id,
+        shortname: relationTarget.shortname.name,
+        name: relationTarget.name,
+        name_en: relationTarget.name_en ?? '',
       }
     : {}
-  const incoming_relations = (statistic.incoming_statistic_relations ?? []).map((incomingRelation) => ({
+
+  // "Viderefører" only applies to an Active statistic being continued by an SA statistic.
+  // New data has the SA statistic pointing at this one (found in incomingCandidates).
+  // Old data may instead have this row pointing at the SA statistic (directRelation), which we
+  // only use here, and only when this row is not itself SA.
+  const inferredDirectSaRelation = statistic.status !== 'SA' && directRelation?.status === 'SA' ? [directRelation] : []
+  const incoming_relations = [
+    ...incomingCandidates.filter((incomingRelation) => incomingRelation.status === 'SA'),
+    ...inferredDirectSaRelation,
+  ].map((incomingRelation) => ({
     id: incomingRelation.id,
     shortname: incomingRelation.shortname.name,
     name: incomingRelation.name,
@@ -348,8 +375,16 @@ export async function updateStatistic(
     throw new StatregError('An active statistic cannot be set back to upcoming.')
   }
 
-  if (status === 'SA' && !relation_id && !existingStatistic.related_statistic_id) {
-    throw new StatregError("A statistic can only be set to status 'Sammenslått' if it has a relation id.")
+  // Strict rule for new changes: when a statistic is set to Sammenslått (SA) here, the relation
+  // id is always saved on this SA statistic's own row (never on the other, active statistic).
+  // A freshly supplied relation id must point to a real statistic with status Aktiv, not itself.
+  // If the statistic is already SA and no new relation id is sent, we keep whatever it already has.
+  if (status === 'SA') {
+    if (relation_id) {
+      await statisticsAsserts.assertRelationTargetIsActive(relation_id, existingStatistic.id, prisma)
+    } else if (!existingStatistic.related_statistic_id) {
+      throw new StatregError("A statistic can only be set to status 'Sammenslått' if it has a relation id.")
+    }
   }
 
   let newContacts
@@ -426,6 +461,7 @@ export async function updateStatistic(
       status,
       comment,
       language: main_language,
+      // Always saved on this row, per the strict rule above: the SA statistic holds the relation id.
       ...(relation_id ? { related_statistic_id: relation_id } : {}),
       legacy_topic_codes: previous_topic_codes,
       yearly_reporting,

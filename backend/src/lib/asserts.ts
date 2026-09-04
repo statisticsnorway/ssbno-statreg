@@ -133,6 +133,32 @@ export async function assertFrequencyExists(frequencyCode: string, prisma: Frequ
   return true
 }
 
+// New Sammenslått (SA) relations must always point to a real, active statistic (never itself).
+export async function assertRelationTargetIsActive(
+  relationId: number,
+  currentStatisticId: number,
+  prisma: StatisticPrisma
+): Promise<boolean> {
+  if (relationId === currentStatisticId) {
+    throw new StatregError('A statistic cannot have a relation to itself.')
+  }
+
+  const relationTarget = await prisma.statistic.findUnique({
+    where: { id: relationId },
+    select: { status: true },
+  })
+
+  if (!relationTarget) {
+    throw new StatregError(`Related statistic with id '${relationId}' not found`, 404)
+  }
+
+  if (relationTarget.status !== 'A') {
+    throw new StatregError("The statistic being related to must have status 'Aktiv'.")
+  }
+
+  return true
+}
+
 export const releaseAsserts = {
   assertFilteredShortnamesExist,
   assertStatisticExists,
@@ -146,4 +172,5 @@ export const statisticsAsserts = {
   assertShortnameExistsAndIsAvailable,
   assertFilteredShortnamesExist,
   assertFrequencyExists,
+  assertRelationTargetIsActive,
 }
