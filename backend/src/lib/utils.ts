@@ -131,9 +131,55 @@ export function validatePeriodDaysSpanningSeveralYears(
   )
 }
 
-// Eks. "Januar 2026"
-export const formatMonthYear = (date: Date): string => {
-  const monthYear = new Intl.DateTimeFormat('nb-NO', {
+export type MeasuringPeriodLocale = 'nb' | 'en'
+
+type MeasuringPeriodCopy = {
+  intlLocale: string
+  week: string
+  term: string
+  quarter: string
+  halfYear: string
+  asOf: string
+}
+
+const MEASURING_PERIOD_COPY: Record<MeasuringPeriodLocale, MeasuringPeriodCopy> = {
+  nb: {
+    intlLocale: 'nb-NO',
+    week: 'Uke',
+    term: 'termin',
+    quarter: 'kvartal',
+    halfYear: 'halvår',
+    asOf: 'Per',
+  },
+  en: {
+    intlLocale: 'en-GB',
+    week: 'Week',
+    term: 'termin',
+    quarter: 'quarter',
+    halfYear: 'half of',
+    asOf: 'As of',
+  },
+}
+
+function getMeasuringPeriodCopy(locale: MeasuringPeriodLocale): MeasuringPeriodCopy {
+  return MEASURING_PERIOD_COPY[locale]
+}
+
+function formatQuarter(quarterNumber: number, year: number, locale: MeasuringPeriodLocale): string {
+  const { quarter } = getMeasuringPeriodCopy(locale)
+
+  if (locale === 'en') {
+    const ordinalQuarter = [`1st`, `2nd`, `3rd`, `4th`][quarterNumber - 1] ?? `${quarterNumber}th`
+    return `${ordinalQuarter} ${quarter} ${year}`
+  }
+
+  return `${quarterNumber}. ${quarter} ${year}`
+}
+
+// e.g. "Januar 2026" or "January 2026"
+export const formatMonthYear = (date: Date, locale: MeasuringPeriodLocale = 'nb'): string => {
+  const { intlLocale } = getMeasuringPeriodCopy(locale)
+  const monthYear = new Intl.DateTimeFormat(intlLocale, {
     month: 'long',
     year: 'numeric',
     timeZone: 'UTC',
@@ -142,8 +188,9 @@ export const formatMonthYear = (date: Date): string => {
 }
 
 // Eks. "1. januar 2026"
-export const formatDayMonthYear = (date: Date): string => {
-  return new Intl.DateTimeFormat('nb-NO', {
+export const formatDayMonthYear = (date: Date, locale: MeasuringPeriodLocale = 'nb'): string => {
+  const { intlLocale } = getMeasuringPeriodCopy(locale)
+  return new Intl.DateTimeFormat(intlLocale, {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
@@ -151,12 +198,18 @@ export const formatDayMonthYear = (date: Date): string => {
   }).format(date)
 }
 
-export function formatYear(isSameDay: boolean, period_from: Date, period_to: Date): string {
+export function formatYear(
+  isSameDay: boolean,
+  period_from: Date,
+  period_to: Date,
+  locale: MeasuringPeriodLocale = 'nb'
+): string {
+  const { asOf } = getMeasuringPeriodCopy(locale)
   if (isSameDay && period_from.getDate() === 1 && period_from.getMonth() === 0) {
-    return `Per ${formatDayMonthYear(period_to)}`
+    return `${asOf} ${formatDayMonthYear(period_to, locale)}`
   }
   if (isSameDay) {
-    return formatDayMonthYear(period_to)
+    return formatDayMonthYear(period_to, locale)
   }
   if (period_from.getUTCFullYear() === period_to.getUTCFullYear()) {
     return `${period_to.getUTCFullYear()}`
@@ -182,9 +235,15 @@ export const getIsoWeekInfo = (date: Date): { week: number; year: number } => {
   }
 }
 
-export function parseHumanReadableMeasuringPeriod(frequencyCode: string, period_from: Date, period_to: Date): string {
+export function parseHumanReadableMeasuringPeriod(
+  frequencyCode: string,
+  period_from: Date,
+  period_to: Date,
+  locale: MeasuringPeriodLocale = 'nb'
+): string {
   const code = frequencyCode.toUpperCase()
   const MULTI_YEAR_FREQUENCY_CODES = new Set(['2Y', '3Y', '4Y', '5Y'])
+  const { week: weekLabel, term, halfYear } = getMeasuringPeriodCopy(locale)
   const isSameDay =
     period_from.getUTCFullYear() === period_to.getUTCFullYear() &&
     period_from.getUTCMonth() === period_to.getUTCMonth() &&
@@ -192,40 +251,40 @@ export function parseHumanReadableMeasuringPeriod(frequencyCode: string, period_
 
   if ((code === 'W' || code === 'U') && validatePeriodWeeks(period_from, period_to)) {
     const { week, year } = getIsoWeekInfo(period_to)
-    return `Uke ${week} ${year}`
+    return `${weekLabel} ${week} ${year}`
   }
 
   if (code === 'M') {
     if (isSameDay) {
-      return formatDayMonthYear(period_to)
+      return formatDayMonthYear(period_to, locale)
     }
     if (validatePeriodDaysWithinSameYear(period_from, period_to, 'M')) {
-      return formatMonthYear(period_to)
+      return formatMonthYear(period_to, locale)
     }
   }
 
   if (code === 'T' && validatePeriodDaysWithinSameYear(period_from, period_to, 'T')) {
-    const term = Math.floor(period_to.getUTCMonth() / 2) + 1
-    return `${term}. termin ${period_to.getUTCFullYear()}`
+    const termNumber = Math.floor(period_to.getUTCMonth() / 2) + 1
+    return `${termNumber}. ${term} ${period_to.getUTCFullYear()}`
   }
 
   if (code === 'K') {
     if (isSameDay) {
-      return formatDayMonthYear(period_to)
+      return formatDayMonthYear(period_to, locale)
     }
     if (validatePeriodDaysWithinSameYear(period_from, period_to, 'Q')) {
-      const quarter = Math.floor(period_to.getUTCMonth() / 3) + 1
-      return `${quarter}. kvartal ${period_to.getUTCFullYear()}`
+      const quarterNumber = Math.floor(period_to.getUTCMonth() / 3) + 1
+      return formatQuarter(quarterNumber, period_to.getUTCFullYear(), locale)
     }
   }
 
   if (code === 'H' && validatePeriodDaysWithinSameYear(period_from, period_to, 'H')) {
     const half = Math.floor(period_to.getUTCMonth() / 6) + 1
-    return `${half}. halvår ${period_to.getUTCFullYear()}`
+    return `${half}. ${halfYear} ${period_to.getUTCFullYear()}`
   }
 
   if (code === 'Y' || code === 'A') {
-    return formatYear(isSameDay, period_from, period_to)
+    return formatYear(isSameDay, period_from, period_to, locale)
   }
 
   if (
@@ -235,7 +294,7 @@ export function parseHumanReadableMeasuringPeriod(frequencyCode: string, period_
     return `${period_from.getUTCFullYear()}-${period_to.getUTCFullYear()}`
   }
 
-  return `${formatDayMonthYear(period_from)}-${formatDayMonthYear(period_to)}`
+  return `${formatDayMonthYear(period_from, locale)}-${formatDayMonthYear(period_to, locale)}`
 }
 
 export function parseAdminGroupsFromEnv(): string[] {
