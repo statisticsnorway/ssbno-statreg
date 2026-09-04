@@ -89,13 +89,7 @@ export function CreateShortnameModal({ openCreateShortnameModal }: Readonly<Crea
   }
 
   return (
-    <Dialog
-      id='create-shortname-modal'
-      aria-labelledby='create-shortname-modal-heading'
-      open={openCreateShortnameModal}
-      onClose={handleCloseModal}
-      closedby='any'
-    >
+    <Dialog id='create-shortname-modal' open={openCreateShortnameModal} onClose={handleCloseModal} closedby='any'>
       <Dialog.Block>
         <Heading id='create-shortname-modal-heading' data-size='xs'>
           Opprett kortnavn for statistikken
@@ -111,11 +105,12 @@ export function CreateShortnameModal({ openCreateShortnameModal }: Readonly<Crea
               lov.
             </Field.Description>
             <Input
-              // @ts-expect-error native "autofocus" is not part of the React types
-              autofocus='true'
+              aria-labelledby='create-shortname-modal-heading'
               aria-invalid={!!validationError}
               onChange={handleInputChange}
               maxLength={14}
+              // @ts-expect-error native "autofocus" is not part of the React types
+              autofocus='true'
             />
             <Paragraph data-limit='14' data-field='counter' />
             {validationError ? (
