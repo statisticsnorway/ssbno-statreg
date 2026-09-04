@@ -1,4 +1,4 @@
-import { Button, Heading, Dialog } from '@statisticsnorway/design-react'
+import { Button, Heading, Dialog, Input } from '@statisticsnorway/design-react'
 import client from '../api'
 import { DatePicker } from './DatePicker'
 import { getDateOnlyAsString, getFirstDayOfNthMonth } from '../lib/utils'
@@ -19,6 +19,7 @@ export function BlockedDateModal({
   onCreated,
 }: Readonly<BlockedDateProps>) {
   const [selectedDate, setSelectedDate] = useState(now)
+  const [comment, setComment] = useState('')
   const [apiError, setApiError] = useState<string[]>([])
   const [datePickerError, setDatePickerError] = useState('')
 
@@ -60,14 +61,21 @@ export function BlockedDateModal({
       </Dialog.Block>
       <Dialog.Block>
         <DatePicker
+          showColorCodingExplanation
           month={getFirstDayOfNthMonth(0)}
           selected={selectedDate}
           onSelect={selectDate}
           apiErrorEmit={setDatePickerError}
         />
+        <Heading id='comment-heading' data-size='xs'>
+          Kommentar
+        </Heading>
+        <p>Skriv hvorfor må denne datoen sperres? (F.eks. Helligdag eller planlagt vedlikehold)</p>
+        <Input id='publishTime' onChange={(e) => setComment(e.target.value)} size={50} />
+
         <div style={{ display: 'flex', gap: 'var(--ds-size-4)', marginTop: ' var(--ds-size-4)' }}>
           {(apiError || datePickerError) ?? <ErrorAlert message={[...apiError, datePickerError]} />}
-          <Button variant='primary' onClick={() => createBlockedDate(selectedDate, 'her lager vi en fin dato')}>
+          <Button variant='primary' onClick={() => createBlockedDate(selectedDate, comment)}>
             Legg til
           </Button>
         </div>
