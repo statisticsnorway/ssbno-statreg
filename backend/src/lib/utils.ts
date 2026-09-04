@@ -131,9 +131,8 @@ export function validatePeriodDaysSpanningSeveralYears(
   )
 }
 
-export type MeasuringPeriodLocale = 'nb' | 'en'
-
-type MeasuringPeriodCopy = {
+type MeasuringPeriodLocale = 'nb' | 'en'
+type MeasuringPeriodTitleProperties = {
   intlLocale: string
   week: string
   term: string
@@ -142,7 +141,7 @@ type MeasuringPeriodCopy = {
   asOf: string
 }
 
-const MEASURING_PERIOD_COPY: Record<MeasuringPeriodLocale, MeasuringPeriodCopy> = {
+const MeasuringPeriodTitleLocalized: Record<MeasuringPeriodLocale, MeasuringPeriodTitleProperties> = {
   nb: {
     intlLocale: 'nb-NO',
     week: 'Uke',
@@ -161,24 +160,24 @@ const MEASURING_PERIOD_COPY: Record<MeasuringPeriodLocale, MeasuringPeriodCopy> 
   },
 }
 
-function getMeasuringPeriodCopy(locale: MeasuringPeriodLocale): MeasuringPeriodCopy {
-  return MEASURING_PERIOD_COPY[locale]
+function getMeasuringPeriodTitle(locale: MeasuringPeriodLocale): MeasuringPeriodTitleProperties {
+  return MeasuringPeriodTitleLocalized[locale]
 }
 
 function formatQuarter(quarterNumber: number, year: number, locale: MeasuringPeriodLocale): string {
-  const { quarter } = getMeasuringPeriodCopy(locale)
+  const { quarter } = getMeasuringPeriodTitle(locale)
 
   if (locale === 'en') {
-    const ordinalQuarter = [`1st`, `2nd`, `3rd`, `4th`][quarterNumber - 1] ?? `${quarterNumber}th`
+    const quarterNumberIndex = quarterNumber - 1
+    const ordinalQuarter = ['1st', '2nd', '3rd', '4th'][quarterNumberIndex] ?? `${quarterNumber}th`
     return `${ordinalQuarter} ${quarter} ${year}`
   }
 
   return `${quarterNumber}. ${quarter} ${year}`
 }
 
-// e.g. "Januar 2026" or "January 2026"
 export const formatMonthYear = (date: Date, locale: MeasuringPeriodLocale = 'nb'): string => {
-  const { intlLocale } = getMeasuringPeriodCopy(locale)
+  const { intlLocale } = getMeasuringPeriodTitle(locale)
   const monthYear = new Intl.DateTimeFormat(intlLocale, {
     month: 'long',
     year: 'numeric',
@@ -187,9 +186,8 @@ export const formatMonthYear = (date: Date, locale: MeasuringPeriodLocale = 'nb'
   return monthYear.charAt(0).toUpperCase() + monthYear.slice(1)
 }
 
-// Eks. "1. januar 2026"
 export const formatDayMonthYear = (date: Date, locale: MeasuringPeriodLocale = 'nb'): string => {
-  const { intlLocale } = getMeasuringPeriodCopy(locale)
+  const { intlLocale } = getMeasuringPeriodTitle(locale)
   return new Intl.DateTimeFormat(intlLocale, {
     day: 'numeric',
     month: 'long',
@@ -204,7 +202,7 @@ export function formatYear(
   period_to: Date,
   locale: MeasuringPeriodLocale = 'nb'
 ): string {
-  const { asOf } = getMeasuringPeriodCopy(locale)
+  const { asOf } = getMeasuringPeriodTitle(locale)
   if (isSameDay && period_from.getDate() === 1 && period_from.getMonth() === 0) {
     return `${asOf} ${formatDayMonthYear(period_to, locale)}`
   }
@@ -243,7 +241,7 @@ export function parseHumanReadableMeasuringPeriod(
 ): string {
   const code = frequencyCode.toUpperCase()
   const MULTI_YEAR_FREQUENCY_CODES = new Set(['2Y', '3Y', '4Y', '5Y'])
-  const { week: weekLabel, term, halfYear } = getMeasuringPeriodCopy(locale)
+  const { week: weekLabel, term, halfYear } = getMeasuringPeriodTitle(locale)
   const isSameDay =
     period_from.getUTCFullYear() === period_to.getUTCFullYear() &&
     period_from.getUTCMonth() === period_to.getUTCMonth() &&
