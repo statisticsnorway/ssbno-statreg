@@ -3,6 +3,7 @@ import client from '../api'
 import { DatePicker } from './DatePicker'
 import { getDateOnlyAsString, getFirstDayOfNthMonth } from '../lib/utils'
 import { useState } from 'react'
+import { ErrorAlert } from './ErrorAlert'
 
 type BlockedDateProps = {
   openCreateReleaseModal: boolean
@@ -10,13 +11,13 @@ type BlockedDateProps = {
   onCreated: () => void
 }
 
+const now = new Date()
+
 export function BlockedDateModal({
   openCreateReleaseModal,
   setOpenCreateReleaseModal,
   onCreated,
 }: Readonly<BlockedDateProps>) {
-  const now = new Date()
-  const [calendarMonth, setCalendarMonth] = useState(0)
   const [selectedDate, setSelectedDate] = useState(now)
   const [apiError, setApiError] = useState<string[]>([])
   const [datePickerError, setDatePickerError] = useState('')
@@ -59,13 +60,13 @@ export function BlockedDateModal({
       </Dialog.Block>
       <Dialog.Block>
         <DatePicker
-          key={calendarMonth}
-          month={getFirstDayOfNthMonth(calendarMonth)}
+          month={getFirstDayOfNthMonth(0)}
           selected={selectedDate}
           onSelect={selectDate}
           apiErrorEmit={setDatePickerError}
         />
         <div style={{ display: 'flex', gap: 'var(--ds-size-4)', marginTop: ' var(--ds-size-4)' }}>
+          {(apiError || datePickerError) ?? <ErrorAlert message={[...apiError, datePickerError]} />}
           <Button variant='primary' onClick={() => createBlockedDate(selectedDate, 'her lager vi en fin dato')}>
             Legg til
           </Button>
