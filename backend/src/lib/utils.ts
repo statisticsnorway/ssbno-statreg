@@ -174,12 +174,6 @@ function formatOrdinalPeriod(periodNumber: number, label: string, year: number, 
   return `${periodNumber}. ${label} ${year}`
 }
 
-function formatQuarter(quarterNumber: number, year: number, locale: MeasuringPeriodLocale): string {
-  const { quarter } = getMeasuringPeriodTitle(locale)
-
-  return formatOrdinalPeriod(quarterNumber, quarter, year, locale)
-}
-
 export const formatMonthYear = (date: Date, locale: MeasuringPeriodLocale = 'nb'): string => {
   const { intlLocale } = getMeasuringPeriodTitle(locale)
   const monthYear = new Intl.DateTimeFormat(intlLocale, {
@@ -276,7 +270,9 @@ export function parseHumanReadableMeasuringPeriod(
     }
     if (validatePeriodDaysWithinSameYear(period_from, period_to, 'Q')) {
       const quarterNumber = Math.floor(period_to.getUTCMonth() / 3) + 1
-      return formatQuarter(quarterNumber, period_to.getUTCFullYear(), locale)
+      const { quarter } = getMeasuringPeriodTitle(locale)
+
+      return formatOrdinalPeriod(quarterNumber, quarter, period_to.getUTCFullYear(), locale)
     }
   }
 
