@@ -476,7 +476,7 @@ describe('utils', () => {
         periodFrom: '01.11.2011',
         periodTo: '31.12.2011',
         expectedNb: '6. termin 2011',
-        expectedEn: '6. termin 2011',
+        expectedEn: '6th term 2011',
       },
       {
         scenarioDescription: 'term period not over two months',
@@ -540,7 +540,7 @@ describe('utils', () => {
         periodFrom: '01.01.2011',
         periodTo: '30.06.2011',
         expectedNb: '1. halvår 2011',
-        expectedEn: '1. half of 2011',
+        expectedEn: '1st half of 2011',
       },
       {
         scenarioDescription: 'half-year not starting on 1st of january',
@@ -556,7 +556,7 @@ describe('utils', () => {
         periodFrom: '01.07.2011',
         periodTo: '31.12.2011',
         expectedNb: '2. halvår 2011',
-        expectedEn: '2. half of 2011',
+        expectedEn: '2nd half of 2011',
       },
       {
         scenarioDescription: 'calendar year',

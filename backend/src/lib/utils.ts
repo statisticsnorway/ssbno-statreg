@@ -153,7 +153,7 @@ const MeasuringPeriodTitleLocalized: Record<MeasuringPeriodLocale, MeasuringPeri
   en: {
     intlLocale: 'en-GB',
     week: 'Week',
-    term: 'termin',
+    term: 'term',
     quarter: 'quarter',
     halfYear: 'half of',
     asOf: 'As of',
@@ -164,16 +164,20 @@ function getMeasuringPeriodTitle(locale: MeasuringPeriodLocale): MeasuringPeriod
   return MeasuringPeriodTitleLocalized[locale]
 }
 
+function formatOrdinalPeriod(periodNumber: number, label: string, year: number, locale: MeasuringPeriodLocale): string {
+  if (locale === 'en') {
+    const periodNumberIndex = periodNumber - 1
+    const ordinalPeriod = ['1st', '2nd', '3rd', '4th', '5th', '6th'][periodNumberIndex] ?? `${periodNumber}th`
+    return `${ordinalPeriod} ${label} ${year}`
+  }
+
+  return `${periodNumber}. ${label} ${year}`
+}
+
 function formatQuarter(quarterNumber: number, year: number, locale: MeasuringPeriodLocale): string {
   const { quarter } = getMeasuringPeriodTitle(locale)
 
-  if (locale === 'en') {
-    const quarterNumberIndex = quarterNumber - 1
-    const ordinalQuarter = ['1st', '2nd', '3rd', '4th'][quarterNumberIndex] ?? `${quarterNumber}th`
-    return `${ordinalQuarter} ${quarter} ${year}`
-  }
-
-  return `${quarterNumber}. ${quarter} ${year}`
+  return formatOrdinalPeriod(quarterNumber, quarter, year, locale)
 }
 
 export const formatMonthYear = (date: Date, locale: MeasuringPeriodLocale = 'nb'): string => {
@@ -263,7 +267,7 @@ export function parseHumanReadableMeasuringPeriod(
 
   if (code === 'T' && validatePeriodDaysWithinSameYear(period_from, period_to, 'T')) {
     const termNumber = Math.floor(period_to.getUTCMonth() / 2) + 1
-    return `${termNumber}. ${term} ${period_to.getUTCFullYear()}`
+    return formatOrdinalPeriod(termNumber, term, period_to.getUTCFullYear(), locale)
   }
 
   if (code === 'K') {
@@ -278,7 +282,7 @@ export function parseHumanReadableMeasuringPeriod(
 
   if (code === 'H' && validatePeriodDaysWithinSameYear(period_from, period_to, 'H')) {
     const half = Math.floor(period_to.getUTCMonth() / 6) + 1
-    return `${half}. ${halfYear} ${period_to.getUTCFullYear()}`
+    return formatOrdinalPeriod(half, halfYear, period_to.getUTCFullYear(), locale)
   }
 
   if (code === 'Y' || code === 'A') {

@@ -1044,7 +1044,7 @@ const mockedReleasesResult = [
     approval_status: 'FORSLAG',
     period_to: '2026-06-30',
     period_from: '2026-01-01',
-    measuring_period: { title: '1. halvår 2026', title_en: '1. half of 2026' },
+    measuring_period: { title: '1. halvår 2026', title_en: '1st half of 2026' },
     frequency: {
       name: 'Halvår',
       code: 'H',
