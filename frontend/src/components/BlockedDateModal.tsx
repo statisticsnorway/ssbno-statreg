@@ -106,12 +106,12 @@ export function BlockedDateModal({
         </div>
         <Input id='publishTime' {...inputProps} size={10} className='padded' />
         {errors.date && <ValidationMessage>{errors.date}</ValidationMessage>}
-        {calendarDates[getDateOnlyAsString(selectedDay)].status.match('FULL|MANY|FEW') && (
+        {calendarDates[getDateOnlyAsString(selectedDay)]?.status.match('FULL|MANY|FEW') && (
           <Alert data-color='warning' className='padded'>
             Denne datoen har meldte publiseringer. Du kan fortsatt sperre datoen.
           </Alert>
         )}
-        {calendarDates[getDateOnlyAsString(selectedDay)].status == 'BLOCKED' && (
+        {calendarDates[getDateOnlyAsString(selectedDay)]?.status == 'BLOCKED' && (
           <Alert data-color='danger' className='padded'>
             Denne datoen er allerede sperret.
           </Alert>
