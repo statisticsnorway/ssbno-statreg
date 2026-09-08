@@ -269,16 +269,6 @@ export default function Tasks() {
     fetchPendingReleases(pendingSortBy)
   }, [isAdmin, pendingSortBy, approvedReleasesCount])
 
-  useEffect(() => {
-    if (approvedReleasesCount === 0) return
-
-    const timer = setTimeout(() => {
-      setApprovedReleasesCount(0)
-    }, 5250)
-
-    return () => clearTimeout(timer)
-  }, [approvedReleasesCount])
-
   async function batchApproveReleases() {
     const { data, error } = await client.POST('/releases/bulk-approve', {
       body: { ids: selectedPendingReleaseIds.map(Number) },
