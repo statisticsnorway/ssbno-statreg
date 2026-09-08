@@ -8,6 +8,7 @@ import {
   Tag,
   Textarea,
   ValidationMessage,
+  Alert,
 } from '@statisticsnorway/design-react'
 import { useDatepicker } from '@navikt/ds-react/DatePicker'
 import client from '../api'
@@ -16,6 +17,7 @@ import { getDateOnlyAsString } from '../lib/utils'
 import { useState } from 'react'
 import { ErrorAlert } from './ErrorAlert'
 import './BlockedDateModal.css'
+import type { CalenderDate } from '@ssbno-statreg/shared'
 
 type BlockedDateProps = {
   openCreateReleaseModal: boolean
@@ -39,6 +41,7 @@ export function BlockedDateModal({
   const [apiError, setApiError] = useState<string[]>([])
   const [datePickerError, setDatePickerError] = useState('')
   const [errors, setErrors] = useState<BlockedDateErrors>({})
+  const [calendarDates, setCalendarDates] = useState<CalenderDate>({})
 
   const { inputProps, selectedDay, setSelected, datepickerProps } = useDatepicker({
     defaultSelected: now,
@@ -103,6 +106,16 @@ export function BlockedDateModal({
         </div>
         <Input id='publishTime' {...inputProps} size={10} className='padded' />
         {errors.date && <ValidationMessage>{errors.date}</ValidationMessage>}
+        {calendarDates[getDateOnlyAsString(selectedDay)].status.match('FULL|MANY|FEW') && (
+          <Alert data-color='warning' className='padded'>
+            Denne datoen har meldte publiseringer. Du kan fortsatt sperre datoen.
+          </Alert>
+        )}
+        {calendarDates[getDateOnlyAsString(selectedDay)].status == 'BLOCKED' && (
+          <Alert data-color='danger' className='padded'>
+            Denne datoen er allerede sperret.
+          </Alert>
+        )}
         <DatePicker
           showColorCodingExplanation
           month={datepickerProps.month}
@@ -110,6 +123,7 @@ export function BlockedDateModal({
           selected={selectedDay}
           onSelect={setSelected}
           apiErrorEmit={setDatePickerError}
+          calendarDatesEmit={setCalendarDates}
         />
         <Field>
           <div className='padded'>
