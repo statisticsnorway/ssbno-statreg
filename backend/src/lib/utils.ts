@@ -165,11 +165,13 @@ function getMeasuringPeriodTitle(locale: MeasuringPeriodLocale): MeasuringPeriod
 }
 
 function formatEnglishPeriodNumber(periodNumber: number, format: 'ordinal' | 'word' = 'ordinal'): string {
+  const periodNumberIndex = periodNumber - 1
+
   if (format === 'word') {
-    return ['first', 'second'][periodNumber - 1] ?? `${periodNumber}`
+    return ['first', 'second'][periodNumberIndex] ?? `${periodNumber}`
   }
 
-  return ['1st', '2nd', '3rd', '4th', '5th', '6th'][periodNumber - 1] ?? `${periodNumber}th`
+  return ['1st', '2nd', '3rd', '4th', '5th', '6th'][periodNumberIndex] ?? `${periodNumber}th`
 }
 
 function formatOrdinalPeriod(
