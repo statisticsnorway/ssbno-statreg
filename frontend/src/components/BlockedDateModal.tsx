@@ -98,26 +98,26 @@ export function BlockedDateModal({
       </Dialog.Block>
       <Dialog.Block>
         <form onSubmit={submitBlockedDate}>
-          <Label data-size={'md'} className='labelWithTag'>
-            Dato <Tag data-color='warning'>Må fylles ut</Tag>
-          </Label>
-          <div>
-            <Label data-color='neutral' className='subtle'>
-              dd.mm.åååå
+          <Field>
+            <Label data-size={'md'} className='labelWithTag'>
+              Dato <Tag data-color='warning'>Må fylles ut</Tag>
             </Label>
-          </div>
-          <Input id='publishTime' {...inputProps} size={10} className='padded' />
-          {errors.date && <ValidationMessage>{errors.date}</ValidationMessage>}
-          {calendarDates[getDateOnlyAsString(selectedDay)]?.status.match('FULL|MANY|FEW') && (
-            <Alert data-color='warning' className='padded'>
-              Denne datoen har meldte publiseringer. Du kan fortsatt sperre datoen.
-            </Alert>
-          )}
-          {calendarDates[getDateOnlyAsString(selectedDay)]?.status == 'BLOCKED' && (
-            <Alert data-color='danger' className='padded'>
-              Denne datoen er allerede sperret.
-            </Alert>
-          )}
+            <div>
+              <Field.Description>dd.mm.åååå</Field.Description>
+            </div>
+            <Input id='publishTime' {...inputProps} size={10} className='padded' />
+            {errors.date && <ValidationMessage>{errors.date}</ValidationMessage>}
+            {calendarDates[getDateOnlyAsString(selectedDay)]?.status.match('FULL|MANY|FEW') && (
+              <Alert data-color='warning' className='padded'>
+                Denne datoen har meldte publiseringer. Du kan fortsatt sperre datoen.
+              </Alert>
+            )}
+            {calendarDates[getDateOnlyAsString(selectedDay)]?.status == 'BLOCKED' && (
+              <Alert data-color='danger' className='padded'>
+                Denne datoen er allerede sperret.
+              </Alert>
+            )}
+          </Field>
           <DatePicker
             showColorCodingExplanation
             month={datepickerProps.month}
