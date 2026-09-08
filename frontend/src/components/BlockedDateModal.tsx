@@ -84,26 +84,26 @@ export function BlockedDateModal({
 
   return (
     <Dialog
-      // TODO fix ARIA label?!
       aria-labelledby='release-modal-heading'
       open={openCreateReleaseModal}
       onClose={() => setOpenCreateReleaseModal(false)}
     >
       <Dialog.Block>
-        <Heading id='release-modal-heading' data-size='s'>
+        <Heading id='release-modal-heading' level={2}>
           Legg til ny sperredato
         </Heading>
       </Dialog.Block>
       <Dialog.Block>
-        <Paragraph data-size={'lg'} className='labelWithTag'>
+        <Label data-size={'md'} className='labelWithTag'>
           Dato <Tag data-color='warning'>Må fylles ut</Tag>
-        </Paragraph>
+        </Label>
         <div>
           <Label data-color='neutral' className='subtle'>
             dd.mm.åååå
           </Label>
         </div>
         <Input id='publishTime' {...inputProps} size={10} className='padded' />
+        {errors.date && <ValidationMessage>{errors.date}</ValidationMessage>}
         <DatePicker
           showColorCodingExplanation
           month={datepickerProps.month}
@@ -112,10 +112,9 @@ export function BlockedDateModal({
           onSelect={setSelected}
           apiErrorEmit={setDatePickerError}
         />
-        {errors.date && <ValidationMessage>{errors.date}</ValidationMessage>}
         <Field>
           <div className='padded'>
-            <Label className='labelWithTag'>
+            <Label data-size={'md'} className='labelWithTag'>
               Kommentar
               <Tag data-color='warning'>Må fylles ut</Tag>
             </Label>
