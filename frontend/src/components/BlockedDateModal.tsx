@@ -99,7 +99,7 @@ export function BlockedDateModal({
       <Dialog.Block>
         <form onSubmit={submitBlockedDate}>
           <Field>
-            <Label data-size={'md'} className='labelWithTag'>
+            <Label data-size='md' className='labelWithTag'>
               Dato <Tag data-color='warning'>Må fylles ut</Tag>
             </Label>
             <div>
