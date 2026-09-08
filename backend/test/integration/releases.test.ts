@@ -19,7 +19,7 @@ const variantId = 1
 
 describe('release data is persisted when ', () => {
   test('client creates a new release', async () => {
-    const newShortname = 'release_create_test'
+    const newShortname = 'release_test'
     await request(app).post('/statistikkregisteret/api/shortnames').set(headers).send({ shortname: newShortname })
     const statistic = await request(app)
       .post(`/statistikkregisteret/api/statistics/${newShortname}`)
@@ -211,7 +211,7 @@ describe('release listing can be filtered by approval status', () => {
 
 describe('/releases/bulk-approve', () => {
   test('can approve two newly created releases', async () => {
-    const newShortname = 'bulk_approve_test'
+    const newShortname = 'bulk_test'
     await request(app).post('/statistikkregisteret/api/shortnames').set(headers).send({ shortname: newShortname })
     const statistic = await request(app)
       .post(`/statistikkregisteret/api/statistics/${newShortname}`)
