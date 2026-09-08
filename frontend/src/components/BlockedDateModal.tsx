@@ -60,7 +60,8 @@ export function BlockedDateModal({
     return !Object.values(nextErrors).some(Boolean)
   }
 
-  function submitBlockedDate() {
+  function submitBlockedDate(e: React.ChangeEvent<HTMLFormElement>) {
+    e.preventDefault()
     if (!validateFields() || !selectedDay) return
     createBlockedDate(selectedDay, comment)
   }
@@ -96,58 +97,60 @@ export function BlockedDateModal({
         </Heading>
       </Dialog.Block>
       <Dialog.Block>
-        <Label data-size={'md'} className='labelWithTag'>
-          Dato <Tag data-color='warning'>Må fylles ut</Tag>
-        </Label>
-        <div>
-          <Label data-color='neutral' className='subtle'>
-            dd.mm.åååå
+        <form onSubmit={submitBlockedDate}>
+          <Label data-size={'md'} className='labelWithTag'>
+            Dato <Tag data-color='warning'>Må fylles ut</Tag>
           </Label>
-        </div>
-        <Input id='publishTime' {...inputProps} size={10} className='padded' />
-        {errors.date && <ValidationMessage>{errors.date}</ValidationMessage>}
-        {calendarDates[getDateOnlyAsString(selectedDay)]?.status.match('FULL|MANY|FEW') && (
-          <Alert data-color='warning' className='padded'>
-            Denne datoen har meldte publiseringer. Du kan fortsatt sperre datoen.
-          </Alert>
-        )}
-        {calendarDates[getDateOnlyAsString(selectedDay)]?.status == 'BLOCKED' && (
-          <Alert data-color='danger' className='padded'>
-            Denne datoen er allerede sperret.
-          </Alert>
-        )}
-        <DatePicker
-          showColorCodingExplanation
-          month={datepickerProps.month}
-          onMonthChange={datepickerProps.onMonthChange}
-          selected={selectedDay}
-          onSelect={setSelected}
-          apiErrorEmit={setDatePickerError}
-          calendarDatesEmit={setCalendarDates}
-        />
-        <Field>
-          <div className='padded'>
-            <Label data-size={'md'} className='labelWithTag'>
-              Kommentar
-              <Tag data-color='warning'>Må fylles ut</Tag>
+          <div>
+            <Label data-color='neutral' className='subtle'>
+              dd.mm.åååå
             </Label>
           </div>
-          <Field.Description>
-            Skriv hvorfor må denne datoen sperres. F.eks. Helligdag eller planlagt vedlikehold.
-          </Field.Description>
-          <Textarea
-            id='publishComment'
-            onChange={(e) => {
-              setComment(e.target.value)
-              setErrors((err) => ({ ...err, comment: '' }))
-            }}
+          <Input id='publishTime' {...inputProps} size={10} className='padded' />
+          {errors.date && <ValidationMessage>{errors.date}</ValidationMessage>}
+          {calendarDates[getDateOnlyAsString(selectedDay)]?.status.match('FULL|MANY|FEW') && (
+            <Alert data-color='warning' className='padded'>
+              Denne datoen har meldte publiseringer. Du kan fortsatt sperre datoen.
+            </Alert>
+          )}
+          {calendarDates[getDateOnlyAsString(selectedDay)]?.status == 'BLOCKED' && (
+            <Alert data-color='danger' className='padded'>
+              Denne datoen er allerede sperret.
+            </Alert>
+          )}
+          <DatePicker
+            showColorCodingExplanation
+            month={datepickerProps.month}
+            onMonthChange={datepickerProps.onMonthChange}
+            selected={selectedDay}
+            onSelect={setSelected}
+            apiErrorEmit={setDatePickerError}
+            calendarDatesEmit={setCalendarDates}
           />
-          {errors.comment && <ValidationMessage>{errors.comment}</ValidationMessage>}
-          {apiError.length > 0 && <ErrorAlert message={[...apiError, datePickerError]} />}
-        </Field>
-        <Button variant='primary' onClick={submitBlockedDate} className='padded'>
-          Legg til
-        </Button>
+          <Field>
+            <div className='padded'>
+              <Label data-size={'md'} className='labelWithTag'>
+                Kommentar
+                <Tag data-color='warning'>Må fylles ut</Tag>
+              </Label>
+            </div>
+            <Field.Description>
+              Skriv hvorfor må denne datoen sperres. F.eks. Helligdag eller planlagt vedlikehold.
+            </Field.Description>
+            <Textarea
+              id='publishComment'
+              onChange={(e) => {
+                setComment(e.target.value)
+                setErrors((err) => ({ ...err, comment: '' }))
+              }}
+            />
+            {errors.comment && <ValidationMessage>{errors.comment}</ValidationMessage>}
+            {apiError.length > 0 && <ErrorAlert message={[...apiError, datePickerError]} />}
+          </Field>
+          <Button type='submit' variant='primary' className='padded'>
+            Legg til
+          </Button>
+        </form>
       </Dialog.Block>
     </Dialog>
   )
