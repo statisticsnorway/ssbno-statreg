@@ -86,7 +86,7 @@ export function BlockedDateModal({
             F.eks. Helligdag eller planlagt vedlikehold.
           </Field.Description>
           <Textarea id='publishComment' onChange={(e) => setComment(e.target.value)} />
-          {(apiError || datePickerError) ?? <ErrorAlert message={[...apiError, datePickerError]} />}
+          {apiError.length > 0 && <ErrorAlert message={[...apiError, datePickerError]} />}
         </Field>
         <Button
           variant='primary'
