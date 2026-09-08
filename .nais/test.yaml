@@ -64,7 +64,6 @@ spec:
       excludePaths:
         - /statistikkregisteret/docs
         - /statistikkregisteret/docs/**
-        - /statistikkregisteret/api
         - /statistikkregisteret/api/**
 
   postgres:
