@@ -1,4 +1,4 @@
-import { Button, Heading, Dialog, Input, Field, Label, Paragraph, Tag } from '@statisticsnorway/design-react'
+import { Button, Heading, Dialog, Input, Field, Label, Paragraph, Tag, Textarea } from '@statisticsnorway/design-react'
 import { useDatepicker } from '@navikt/ds-react/DatePicker'
 import client from '../api'
 import { DatePicker } from './DatePicker'
@@ -81,7 +81,7 @@ export function BlockedDateModal({
             <br />
             F.eks. Helligdag eller planlagt vedlikehold.
           </Field.Description>
-          <Input id='publishComment' onChange={(e) => setComment(e.target.value)} size={45} />
+          <Textarea id='publishComment' onChange={(e) => setComment(e.target.value)} />
           {(apiError || datePickerError) ?? <ErrorAlert message={[...apiError, datePickerError]} />}
         </Field>
         <Button
