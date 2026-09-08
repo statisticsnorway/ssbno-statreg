@@ -5,7 +5,6 @@ import {
   Input,
   Field,
   Label,
-  Paragraph,
   Tag,
   Textarea,
   ValidationMessage,
