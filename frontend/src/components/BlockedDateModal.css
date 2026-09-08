@@ -1,0 +1,10 @@
+ .labelWithTag {
+   display: flex;
+   justify-content: flex-start;
+   gap: 20px;
+   align-items: center;
+ }
+
+ .padded {
+   margin: 0.5rem 0
+ }

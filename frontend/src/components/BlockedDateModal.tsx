@@ -5,6 +5,7 @@ import { DatePicker } from './DatePicker'
 import { getDateOnlyAsString } from '../lib/utils'
 import { useState } from 'react'
 import { ErrorAlert } from './ErrorAlert'
+import './BlockedDateModal.css'
 
 type BlockedDateProps = {
   openCreateReleaseModal: boolean
@@ -60,10 +61,10 @@ export function BlockedDateModal({
         </Heading>
       </Dialog.Block>
       <Dialog.Block>
-        <Paragraph data-size={'sm'}>
+        <Paragraph data-size={'sm'} className='labelWithTag'>
           Dato <Tag data-color='warning'>Må fylles ut</Tag>
         </Paragraph>
-        <Input id='publishTime' {...inputProps} size={10} style={{ margin: '0.5rem' }} />
+        <Input id='publishTime' {...inputProps} size={10} className='padded' />
         <DatePicker
           showColorCodingExplanation
           month={datepickerProps.month}
@@ -73,9 +74,12 @@ export function BlockedDateModal({
           apiErrorEmit={setDatePickerError}
         />
         <Field>
-          <Label>
-            Kommentar <Tag data-color='warning'>Må fylles ut</Tag>
-          </Label>
+          <div className='padded'>
+            <Label className='labelWithTag'>
+              Kommentar
+              <Tag data-color='warning'>Må fylles ut</Tag>
+            </Label>
+          </div>
           <Field.Description>
             Skriv hvorfor må denne datoen sperres.
             <br />
@@ -87,7 +91,7 @@ export function BlockedDateModal({
         <Button
           variant='primary'
           onClick={() => selectedDay && createBlockedDate(selectedDay, comment)}
-          style={{ marginTop: '0.5rem' }}
+          className='padded'
         >
           Legg til
         </Button>
