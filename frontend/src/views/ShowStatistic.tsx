@@ -247,7 +247,7 @@ export default function ShowStatistic() {
                 <>
                   <SimpleReleasesTable releases={releases} />
                   <p>
-                    <Link href={`/statistikkregisteret/?shortname=${shortname}`}>
+                    <Link href={`/statistikkregisteret?shortname=${shortname}`}>
                       Se alle publiseringsdatoene for denne statistikken
                     </Link>
                   </p>

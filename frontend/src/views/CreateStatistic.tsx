@@ -355,8 +355,8 @@ export default function CreateStatistic() {
         first_released_at: values.first_released_at ? `${values.first_released_at}-12-31` : '',
         statistic_region_levels: regionLevelValues.length
           ? regionLevelValues.map((code: string) => ({
-              code,
-            }))
+            code,
+          }))
           : [],
         approval_status: ApprovalStatus['ACCEPTED'],
         contacts: selectedContacts,
@@ -444,7 +444,7 @@ export default function CreateStatistic() {
                       </li>
                       <li>
                         For å slette en statistikk som har blitt feilopprettet må du ta kontakt med{' '}
-                        <Link href='mailto:mailadresse@ssb.no'>mailadresse@ssb.no</Link>
+                        <Link href='mailto:desken@ssb.no'>desken@ssb.no</Link>
                       </li>
                     </ul>
                   </Popover>

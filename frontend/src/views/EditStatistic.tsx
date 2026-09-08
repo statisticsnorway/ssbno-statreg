@@ -191,7 +191,7 @@ export default function EditStatistic() {
       setCreatedVariants(nextStatistic.variants ?? [])
       setRegionLevelValues(
         nextStatistic.statistic_region_levels?.flatMap((regionLevel) => (regionLevel.code ? [regionLevel.code] : [])) ??
-          []
+        []
       )
       setErrors({})
 
@@ -415,7 +415,7 @@ export default function EditStatistic() {
                   </li>
                   <li>
                     For å slette en statistikk som har blitt feilopprettet må du ta kontakt med{' '}
-                    <Link href='mailto:mailadresse@ssb.no'>mailadresse@ssb.no</Link>
+                    <Link href='mailto:desken@ssb.no'>desken@ssb.no</Link>
                   </li>
                   <li>
                     Velg status «Ikke-aktiv» når statistikken er satt på pause på ubestemt tid, og du vil beholde

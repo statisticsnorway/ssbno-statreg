@@ -18,7 +18,7 @@ const Header = () => {
       <div className='header-content' data-color='brand1' data-size='sm'>
         <img src={ssbLogo} className='logo' alt='SSB logo' />
         <div className='header-links'>
-          <Link href='/statistikkregisteret/'>Publisering</Link>
+          <Link href='/statistikkregisteret'>Publisering</Link>
           <Link href='/statistikkregisteret/statistikk'>Statistikker</Link>
           {auth?.isAdmin ? (
             <Button variant='tertiary' asChild>

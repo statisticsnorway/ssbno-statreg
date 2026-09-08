@@ -93,11 +93,10 @@ export async function getReleases(
         approval_status: release.desk_appoval_status,
         period_to: getDateOnlyAsString(release.period_to),
         period_from: getDateOnlyAsString(release.period_from),
-        measuring_period_title: parseHumanReadableMeasuringPeriod(
-          frequency.code,
-          release.period_from,
-          release.period_to
-        ),
+        measuring_period: {
+          title: parseHumanReadableMeasuringPeriod(frequency.code, release.period_from, release.period_to, 'nb'),
+          title_en: parseHumanReadableMeasuringPeriod(frequency.code, release.period_from, release.period_to, 'en'),
+        },
         statistic: {
           shortname: statistic.shortname.name,
           name: statistic.name,
