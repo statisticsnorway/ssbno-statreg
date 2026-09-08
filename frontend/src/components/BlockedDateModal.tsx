@@ -129,7 +129,7 @@ export function BlockedDateModal({
           />
           <Field>
             <div className='padded'>
-              <Label data-size={'md'} className='labelWithTag'>
+              <Label data-size='md' className='labelWithTag'>
                 Kommentar
                 <Tag data-color='warning'>Må fylles ut</Tag>
               </Label>
