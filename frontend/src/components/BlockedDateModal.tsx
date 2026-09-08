@@ -1,17 +1,8 @@
-import {
-  Button,
-  Heading,
-  Dialog,
-  Input,
-  Field,
-  Label,
-  ValidationMessage,
-  Paragraph,
-  Tag,
-} from '@statisticsnorway/design-react'
+import { Button, Heading, Dialog, Input, Field, Label, Paragraph, Tag } from '@statisticsnorway/design-react'
+import { useDatepicker } from '@navikt/ds-react/DatePicker'
 import client from '../api'
 import { DatePicker } from './DatePicker'
-import { getDateOnlyAsString, getFirstDayOfNthMonth } from '../lib/utils'
+import { getDateOnlyAsString } from '../lib/utils'
 import { useState } from 'react'
 import { ErrorAlert } from './ErrorAlert'
 
@@ -28,17 +19,14 @@ export function BlockedDateModal({
   setOpenCreateReleaseModal,
   onCreated,
 }: Readonly<BlockedDateProps>) {
-  const [selectedDate, setSelectedDate] = useState(now)
-  const [calendarMonth, setCalendarMonth] = useState(getFirstDayOfNthMonth(0))
   const [comment, setComment] = useState('')
   const [apiError, setApiError] = useState<string[]>([])
   const [datePickerError, setDatePickerError] = useState('')
 
-  function selectDate(selected: Date | undefined) {
-    if (!selected) return
-    setApiError([])
-    setSelectedDate(selected)
-  }
+  const { inputProps, selectedDay, setSelected, datepickerProps } = useDatepicker({
+    defaultSelected: now,
+    onDateChange: () => setApiError([]),
+  })
 
   async function createBlockedDate(date: Date, message: string) {
     const { error } = await client.POST('/calendar/blocked-release-days/{date}', {
@@ -75,20 +63,13 @@ export function BlockedDateModal({
         <Paragraph data-size={'sm'}>
           Dato <Tag data-color='warning'>Må fylles ut</Tag>
         </Paragraph>
-        <Input
-          id='publishTime'
-          value={getDateOnlyAsString(selectedDate)}
-          onChange={(e) => setSelectedDate(new Date(e.target.value))}
-          size={10}
-          style={{ marginBottom: '0.5rem' }}
-        />
+        <Input id='publishTime' {...inputProps} size={10} style={{ margin: '0.5rem' }} />
         <DatePicker
-          fromDate={now}
-          toDate={new Date(`31 Dec ${now.getFullYear() + 5}`)}
-          month={calendarMonth}
-          onMonthChange={setCalendarMonth}
-          selected={selectedDate}
-          onSelect={selectDate}
+          showColorCodingExplanation
+          month={datepickerProps.month}
+          onMonthChange={datepickerProps.onMonthChange}
+          selected={selectedDay}
+          onSelect={setSelected}
           apiErrorEmit={setDatePickerError}
         />
         <Field>
@@ -105,7 +86,7 @@ export function BlockedDateModal({
         </Field>
         <Button
           variant='primary'
-          onClick={() => createBlockedDate(selectedDate, comment)}
+          onClick={() => selectedDay && createBlockedDate(selectedDay, comment)}
           style={{ marginTop: '0.5rem' }}
         >
           Legg til
