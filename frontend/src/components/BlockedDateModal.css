@@ -1,10 +1,14 @@
  .labelWithTag {
    display: flex;
    justify-content: flex-start;
-   gap: 20px;
+   gap: 60px;
    align-items: center;
  }
 
  .padded {
    margin: 0.5rem 0
+ }
+
+ .subtle {
+   color: var(--ds-color-text-subtle);
  }

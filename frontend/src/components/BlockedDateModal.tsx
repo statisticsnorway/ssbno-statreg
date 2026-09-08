@@ -90,14 +90,19 @@ export function BlockedDateModal({
       onClose={() => setOpenCreateReleaseModal(false)}
     >
       <Dialog.Block>
-        <Heading id='release-modal-heading' data-size='xs'>
+        <Heading id='release-modal-heading' data-size='s'>
           Legg til ny sperredato
         </Heading>
       </Dialog.Block>
       <Dialog.Block>
-        <Paragraph data-size={'sm'} className='labelWithTag'>
+        <Paragraph data-size={'lg'} className='labelWithTag'>
           Dato <Tag data-color='warning'>Må fylles ut</Tag>
         </Paragraph>
+        <div>
+          <Label data-color='neutral' className='subtle'>
+            dd.mm.åååå
+          </Label>
+        </div>
         <Input id='publishTime' {...inputProps} size={10} className='padded' />
         <DatePicker
           showColorCodingExplanation
@@ -116,9 +121,7 @@ export function BlockedDateModal({
             </Label>
           </div>
           <Field.Description>
-            Skriv hvorfor må denne datoen sperres.
-            <br />
-            F.eks. Helligdag eller planlagt vedlikehold.
+            Skriv hvorfor må denne datoen sperres. F.eks. Helligdag eller planlagt vedlikehold.
           </Field.Description>
           <Textarea
             id='publishComment'
