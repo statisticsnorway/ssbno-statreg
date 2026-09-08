@@ -1083,6 +1083,7 @@ export interface components {
       code?: string
     }
     Statistic: {
+      readonly id?: number
       readonly shortname?: string
       /** @description Main language will be either 'nn' or 'nb' for statistics */
       main_language?: string

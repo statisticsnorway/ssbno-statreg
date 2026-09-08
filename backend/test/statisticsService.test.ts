@@ -75,11 +75,14 @@ function setUpdateStatisticsResult(next: object | null) {
 
 describe('statisticService', () => {
   beforeEach(() => {
+    statisticsResult = null
+    updateStatisticsResult = null
+
     prismaMock = {
       statistic: {
         findMany: vi.fn(() => Promise.resolve(statisticsResult)),
         findFirst: vi.fn(() => Promise.resolve(statisticsResult)),
-        findUnique: vi.fn(() => Promise.resolve({ status: 'A' })),
+        findUnique: vi.fn(() => Promise.resolve({ id: 3, status: 'A' })),
         update: vi.fn(() => Promise.resolve(updateStatisticsResult)),
         updateMany: vi.fn(() => Promise.resolve({ count: 0 })),
         create: vi.fn(() => Promise.resolve(statisticsResult)),
@@ -107,6 +110,9 @@ describe('statisticService', () => {
 
       expect(result).toStrictEqual(mockedStatisticsResult)
       expect(prismaMock.statistic.findMany).toHaveBeenCalledWith(expect.objectContaining({ skip: 1, take: 2 }))
+      expect(prismaMock.statistic.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ select: expect.objectContaining({ id: true }) })
+      )
     })
 
     test('uses default start and count if not provided', async () => {
@@ -379,7 +385,7 @@ describe('statisticService', () => {
         name: 'Helse',
         name_en: 'Health',
         approval_status: 'FORSLAG',
-        relation_id: '2',
+        relation_id: 2,
         previous_topic_codes: '05.01.02',
         yearly_reporting: false,
         first_released_at: '2026-03-25',
@@ -554,8 +560,10 @@ describe('statisticService', () => {
 
     test('throws error when status is set to Sammenslått without a relation id', async () => {
       setStatisticsResult({
+        id: 5,
         status: 'A',
         related_statistic_id: null,
+        related_statistic: null,
         responsiblePersons: [{ principalName: 'bcd@ssb.no' }],
         variants: [{ id: 1 }],
         statistic_region_levels: [],
@@ -581,13 +589,46 @@ describe('statisticService', () => {
       setUpdateStatisticsResult({ ...mockStatisticsDetailedPrismaResult, status: 'SA' })
 
       input.status = { code: 'SA' }
-      input.relation_id = '3'
+      input.relation_id = 3
+      input.variants = undefined
 
       await expect(updateStatistic('helse', input, prismaMock)).resolves.toBeDefined()
 
+      expect(prismaMock.statistic.findUnique).toHaveBeenCalledExactlyOnceWith({
+        where: { id: 3 },
+        select: { id: true, status: true },
+      })
       expect(prismaMock.statistic.update).toHaveBeenCalledWith(
         expect.objectContaining({ data: expect.objectContaining({ related_statistic_id: 3 }) })
       )
+    })
+
+    test('rejects creating a new variant when a statistic is set to Sammenslått', async () => {
+      setStatisticsResult({
+        id: 5,
+        status: 'A',
+        related_statistic_id: null,
+        related_statistic: null,
+        responsiblePersons: [{ principalName: 'bcd@ssb.no' }],
+        variants: [],
+        statistic_region_levels: [],
+      })
+
+      input.status = { code: 'SA' }
+      input.relation_id = 3
+      input.variants = [
+        {
+          revision: { code: 'I' },
+          frequency: { code: 'M' },
+          level_of_detail: { name: 'Detaljnivå', name_en: 'Level of detail' },
+        },
+      ]
+
+      await expect(() => updateStatistic('helse', input, prismaMock)).rejects.toMatchObject({
+        statregError: "A statistic with status 'Sammenslått' cannot have new variants.",
+      })
+
+      expect(prismaMock.statistic.update).toHaveBeenCalledTimes(0)
     })
 
     test('allows status Sammenslått when a relation id already exists on the statistic', async () => {
@@ -604,77 +645,10 @@ describe('statisticService', () => {
 
       input.status = { code: 'SA' }
       input.relation_id = undefined
+      input.variants = undefined
 
       await expect(updateStatistic('helse', input, prismaMock)).resolves.toBeDefined()
 
-      expect(prismaMock.statistic.update).toHaveBeenCalledWith(
-        expect.objectContaining({ data: expect.not.objectContaining({ related_statistic_id: expect.anything() }) })
-      )
-    })
-
-    test('leaves the relation unchanged when the target has since become inactive', async () => {
-      setStatisticsResult({
-        id: 5,
-        status: 'SA',
-        related_statistic_id: 3,
-        related_statistic: { id: 3, status: 'IA' },
-        responsiblePersons: [{ principalName: 'bcd@ssb.no' }],
-        variants: [],
-        statistic_region_levels: [],
-      })
-      setUpdateStatisticsResult({ ...mockStatisticsDetailedPrismaResult, status: 'SA' })
-
-      input.status = { code: 'SA' }
-      input.relation_id = '3'
-
-      await expect(updateStatistic('helse', input, prismaMock)).resolves.toBeDefined()
-
-      expect(prismaMock.statistic.update).toHaveBeenCalledWith(
-        expect.objectContaining({ data: expect.not.objectContaining({ related_statistic_id: expect.anything() }) })
-      )
-    })
-
-    test('keeps a historical non-active target when relation_id is omitted', async () => {
-      setStatisticsResult({
-        id: 5,
-        status: 'SA',
-        related_statistic_id: 3,
-        related_statistic: { id: 3, status: 'IA' },
-        responsiblePersons: [{ principalName: 'bcd@ssb.no' }],
-        variants: [],
-        statistic_region_levels: [],
-      })
-      setUpdateStatisticsResult({ ...mockStatisticsDetailedPrismaResult, status: 'SA' })
-
-      input.status = { code: 'SA' }
-      input.relation_id = undefined
-
-      await expect(updateStatistic('helse', input, prismaMock)).resolves.toBeDefined()
-
-      expect(prismaMock.statistic.findUnique).not.toHaveBeenCalled()
-      expect(prismaMock.statistic.update).toHaveBeenCalledWith(
-        expect.objectContaining({ data: expect.not.objectContaining({ related_statistic_id: expect.anything() }) })
-      )
-    })
-
-    test('leaves an existing SA to SA relation unchanged without validating the target again', async () => {
-      setStatisticsResult({
-        id: 5,
-        status: 'SA',
-        related_statistic_id: 3,
-        related_statistic: { id: 3, status: 'SA' },
-        responsiblePersons: [{ principalName: 'bcd@ssb.no' }],
-        variants: [],
-        statistic_region_levels: [],
-      })
-      setUpdateStatisticsResult({ ...mockStatisticsDetailedPrismaResult, status: 'SA' })
-
-      input.status = { code: 'SA' }
-      input.relation_id = '3'
-
-      await expect(updateStatistic('helse', input, prismaMock)).resolves.toBeDefined()
-
-      expect(prismaMock.statistic.findUnique).not.toHaveBeenCalled()
       expect(prismaMock.statistic.update).toHaveBeenCalledWith(
         expect.objectContaining({ data: expect.not.objectContaining({ related_statistic_id: expect.anything() }) })
       )
@@ -716,6 +690,7 @@ describe('statisticService', () => {
 
       input.status = { code: 'SA' }
       input.relation_id = undefined
+      input.variants = undefined
 
       await expect(updateStatistic('helse', input, prismaMock)).resolves.toBeDefined()
 
@@ -739,7 +714,8 @@ describe('statisticService', () => {
       setUpdateStatisticsResult({ ...mockStatisticsDetailedPrismaResult, status: 'SA' })
 
       input.status = { code: 'SA' }
-      input.relation_id = '3'
+      input.relation_id = 3
+      input.variants = undefined
 
       await expect(updateStatistic('helse', input, prismaMock)).resolves.toBeDefined()
 
@@ -749,7 +725,7 @@ describe('statisticService', () => {
       )
     })
 
-    test('requires the new target to be active when deliberately changing an existing SA relation', async () => {
+    test('allows deliberately changing an existing SA relation to an active statistic', async () => {
       setStatisticsResult({
         id: 5,
         status: 'SA',
@@ -759,21 +735,38 @@ describe('statisticService', () => {
         variants: [],
         statistic_region_levels: [],
       })
-      prismaMock.statistic.findUnique.mockResolvedValueOnce({ status: 'IA' })
+      prismaMock.statistic.findUnique.mockResolvedValueOnce({ id: 9, status: 'A' })
+      setUpdateStatisticsResult({
+        ...mockStatisticsDetailedPrismaResult,
+        status: 'SA',
+        related_statistic_id: 9,
+        related_statistic: {
+          ...mockStatisticsDetailedPrismaResult.related_statistic,
+          id: 9,
+        },
+      })
 
       input.status = { code: 'SA' }
-      input.relation_id = '9'
+      input.relation_id = 9
+      input.variants = undefined
 
-      await expect(() => updateStatistic('helse', input, prismaMock)).rejects.toMatchObject({
-        statregError: "The statistic being related to must have status 'Aktiv'.",
+      await expect(updateStatistic('helse', input, prismaMock)).resolves.toBeDefined()
+
+      expect(prismaMock.statistic.findUnique).toHaveBeenCalledExactlyOnceWith({
+        where: { id: 9 },
+        select: { id: true, status: true },
       })
-      expect(prismaMock.statistic.update).toHaveBeenCalledTimes(0)
+      expect(prismaMock.statistic.update).toHaveBeenCalledWith(
+        expect.objectContaining({ data: expect.objectContaining({ related_statistic_id: 9 }) })
+      )
     })
 
     test('clears the relation when a statistic changes away from Sammenslått', async () => {
       setStatisticsResult({
+        id: 5,
         status: 'SA',
         related_statistic_id: 3,
+        related_statistic: { id: 3, status: 'A' },
         responsiblePersons: [{ principalName: 'bcd@ssb.no' }],
         variants: [],
         statistic_region_levels: [],
@@ -803,10 +796,12 @@ describe('statisticService', () => {
         related_statistic_id: null,
         incoming_statistic_relations: [{ id: 5 }],
       })
+      prismaMock.statistic.findUnique.mockResolvedValueOnce({ id: 9, status: 'A' })
       setUpdateStatisticsResult({ ...mockStatisticsDetailedPrismaResult, status: 'SA' })
 
       input.status = { code: 'SA' }
-      input.relation_id = '9'
+      input.relation_id = 9
+      input.variants = undefined
 
       await expect(updateStatistic('helse', input, prismaMock)).resolves.toBeDefined()
 
@@ -853,29 +848,6 @@ describe('statisticService', () => {
       )
     })
 
-    test('does not rewrite a legacy reverse relation while its holder remains active', async () => {
-      setStatisticsResult({
-        id: 5,
-        status: 'A',
-        related_statistic_id: 3,
-        related_statistic: { id: 3, status: 'SA' },
-        responsiblePersons: [{ principalName: 'bcd@ssb.no' }],
-        variants: [],
-        statistic_region_levels: [],
-      })
-      setUpdateStatisticsResult({ ...mockStatisticsDetailedPrismaResult, status: 'A' })
-
-      input.status = { code: 'A' }
-      input.relation_id = undefined
-
-      await expect(updateStatistic('helse', input, prismaMock)).resolves.toBeDefined()
-
-      expect(prismaMock.$transaction).not.toHaveBeenCalled()
-      expect(prismaMock.statistic.update).toHaveBeenCalledExactlyOnceWith(
-        expect.not.objectContaining({ where: { id: 3 } })
-      )
-    })
-
     test('does not rewrite an SA statistic that already has a canonical relation', async () => {
       const activeStatistic = {
         id: 5,
@@ -903,33 +875,12 @@ describe('statisticService', () => {
       )
     })
 
-    test('does not preserve a legacy reverse relation if the new SA target is inactive', async () => {
-      const activeStatistic = {
-        id: 5,
-        status: 'A',
-        related_statistic_id: 3,
-        related_statistic: { id: 3, status: 'SA' },
-        responsiblePersons: [{ principalName: 'bcd@ssb.no' }],
-        variants: [],
-        statistic_region_levels: [],
-      }
-      prismaMock.statistic.findFirst.mockResolvedValueOnce(activeStatistic)
-      prismaMock.statistic.findUnique.mockResolvedValueOnce({ status: 'IA' })
-
-      input.status = { code: 'SA' }
-      input.relation_id = '9'
-
-      await expect(() => updateStatistic('helse', input, prismaMock)).rejects.toMatchObject({
-        statregError: "The statistic being related to must have status 'Aktiv'.",
-      })
-      expect(prismaMock.$transaction).not.toHaveBeenCalled()
-      expect(prismaMock.statistic.update).not.toHaveBeenCalled()
-    })
-
     test('throws error when the relation id points to a statistic that does not exist', async () => {
       setStatisticsResult({
+        id: 5,
         status: 'A',
         related_statistic_id: null,
+        related_statistic: null,
         responsiblePersons: [{ principalName: 'bcd@ssb.no' }],
         variants: [],
         statistic_region_levels: [],
@@ -937,7 +888,7 @@ describe('statisticService', () => {
       prismaMock.statistic.findUnique.mockResolvedValueOnce(null)
 
       input.status = { code: 'SA' }
-      input.relation_id = '999'
+      input.relation_id = 999
 
       await expect(() => updateStatistic('helse', input, prismaMock)).rejects.toMatchObject({
         status: 404,
@@ -946,44 +897,58 @@ describe('statisticService', () => {
       expect(prismaMock.statistic.update).toHaveBeenCalledTimes(0)
     })
 
-    test('throws error when the relation id points to a statistic that is not active', async () => {
+    test('rejects a new SA relation when the target is not active', async () => {
       setStatisticsResult({
+        id: 5,
         status: 'A',
         related_statistic_id: null,
+        related_statistic: null,
         responsiblePersons: [{ principalName: 'bcd@ssb.no' }],
         variants: [],
         statistic_region_levels: [],
       })
-      prismaMock.statistic.findUnique.mockResolvedValueOnce({ status: 'IA' })
+      prismaMock.statistic.findUnique.mockResolvedValueOnce({ id: 3, status: 'SA' })
 
       input.status = { code: 'SA' }
-      input.relation_id = '3'
+      input.relation_id = 3
 
       await expect(() => updateStatistic('helse', input, prismaMock)).rejects.toMatchObject({
-        statregError: "The statistic being related to must have status 'Aktiv'.",
+        statregError: "A statistic with status 'Sammenslått' can only be related to an active statistic.",
+      })
+
+      expect(prismaMock.statistic.findUnique).toHaveBeenCalledExactlyOnceWith({
+        where: { id: 3 },
+        select: { id: true, status: true },
       })
       expect(prismaMock.statistic.update).toHaveBeenCalledTimes(0)
     })
 
-    test('validates a new SA relation even when an old FK already contains the same target id', async () => {
+    test('validates and canonicalizes a new SA relation even when an old FK already contains the same target id', async () => {
       setStatisticsResult({
         id: 5,
         status: 'A',
         related_statistic_id: 3,
-        related_statistic: { id: 3, status: 'IA' },
+        related_statistic: { id: 3, status: 'A' },
         responsiblePersons: [{ principalName: 'bcd@ssb.no' }],
         variants: [],
         statistic_region_levels: [],
       })
-      prismaMock.statistic.findUnique.mockResolvedValueOnce({ status: 'IA' })
+      prismaMock.statistic.findUnique.mockResolvedValueOnce({ id: 3, status: 'A' })
+      setUpdateStatisticsResult({ ...mockStatisticsDetailedPrismaResult, status: 'SA' })
 
       input.status = { code: 'SA' }
-      input.relation_id = '3'
+      input.relation_id = 3
+      input.variants = undefined
 
-      await expect(() => updateStatistic('helse', input, prismaMock)).rejects.toMatchObject({
-        statregError: "The statistic being related to must have status 'Aktiv'.",
+      await expect(updateStatistic('helse', input, prismaMock)).resolves.toBeDefined()
+
+      expect(prismaMock.statistic.findUnique).toHaveBeenCalledExactlyOnceWith({
+        where: { id: 3 },
+        select: { id: true, status: true },
       })
-      expect(prismaMock.statistic.update).not.toHaveBeenCalled()
+      expect(prismaMock.statistic.update).toHaveBeenCalledWith(
+        expect.objectContaining({ data: expect.objectContaining({ status: 'SA', related_statistic_id: 3 }) })
+      )
     })
 
     test('throws error when the relation id points to the statistic itself', async () => {
@@ -997,10 +962,134 @@ describe('statisticService', () => {
       })
 
       input.status = { code: 'SA' }
-      input.relation_id = '5'
+      input.relation_id = 5
 
       await expect(() => updateStatistic('helse', input, prismaMock)).rejects.toMatchObject({
         statregError: 'A statistic cannot have a relation to itself.',
+      })
+      expect(prismaMock.statistic.update).toHaveBeenCalledTimes(0)
+    })
+
+    test('throws error when an existing SA has ambiguous legacy reverse relations and no relation id is supplied', async () => {
+      setStatisticsResult({
+        id: 5,
+        status: 'SA',
+        related_statistic_id: null,
+        related_statistic: null,
+        responsiblePersons: [{ principalName: 'bcd@ssb.no' }],
+        variants: [],
+        statistic_region_levels: [],
+      })
+      prismaMock.statistic.findMany.mockResolvedValueOnce([{ id: 3 }, { id: 4 }])
+
+      input.status = { code: 'SA' }
+      input.relation_id = undefined
+
+      await expect(() => updateStatistic('helse', input, prismaMock)).rejects.toMatchObject({
+        statregError: "A statistic can only be set to status 'Sammenslått' if it has a relation id.",
+      })
+      expect(prismaMock.statistic.update).toHaveBeenCalledTimes(0)
+    })
+
+    test('does not preserve a legacy reverse relation when reverse candidates are ambiguous', async () => {
+      const activeStatistic = {
+        id: 5,
+        status: 'A',
+        related_statistic_id: 3,
+        related_statistic: { id: 3, status: 'SA' },
+        responsiblePersons: [{ principalName: 'bcd@ssb.no' }],
+        variants: [],
+        statistic_region_levels: [],
+      }
+
+      prismaMock.statistic.findFirst.mockResolvedValueOnce(activeStatistic).mockResolvedValueOnce({
+        related_statistic_id: null,
+        incoming_statistic_relations: [{ id: 5 }, { id: 6 }],
+      })
+      setUpdateStatisticsResult({ ...mockStatisticsDetailedPrismaResult, status: 'IA' })
+
+      input.status = { code: 'IA' }
+      input.relation_id = undefined
+
+      await expect(updateStatistic('helse', input, prismaMock)).resolves.toBeDefined()
+
+      expect(prismaMock.$transaction).not.toHaveBeenCalled()
+      expect(prismaMock.statistic.update).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({
+          where: { id: 5 },
+          data: expect.not.objectContaining({ related_statistic_id: null }),
+        })
+      )
+    })
+
+    test('does not preserve a legacy reverse relation when there are no reverse candidates', async () => {
+      const activeStatistic = {
+        id: 5,
+        status: 'A',
+        related_statistic_id: 3,
+        related_statistic: { id: 3, status: 'SA' },
+        responsiblePersons: [{ principalName: 'bcd@ssb.no' }],
+        variants: [],
+        statistic_region_levels: [],
+      }
+
+      prismaMock.statistic.findFirst.mockResolvedValueOnce(activeStatistic).mockResolvedValueOnce({
+        related_statistic_id: null,
+        incoming_statistic_relations: [],
+      })
+      setUpdateStatisticsResult({ ...mockStatisticsDetailedPrismaResult, status: 'IA' })
+
+      input.status = { code: 'IA' }
+      input.relation_id = undefined
+
+      await expect(updateStatistic('helse', input, prismaMock)).resolves.toBeDefined()
+
+      expect(prismaMock.$transaction).not.toHaveBeenCalled()
+      expect(prismaMock.statistic.update).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({
+          where: { id: 5 },
+          data: expect.not.objectContaining({ related_statistic_id: null }),
+        })
+      )
+    })
+
+    test('rejects changing an existing SA relation to itself', async () => {
+      setStatisticsResult({
+        id: 5,
+        status: 'SA',
+        related_statistic_id: 3,
+        related_statistic: { id: 3, status: 'A' },
+        responsiblePersons: [{ principalName: 'bcd@ssb.no' }],
+        variants: [],
+        statistic_region_levels: [],
+      })
+
+      input.status = { code: 'SA' }
+      input.relation_id = 5
+
+      await expect(() => updateStatistic('helse', input, prismaMock)).rejects.toMatchObject({
+        statregError: 'A statistic cannot have a relation to itself.',
+      })
+      expect(prismaMock.statistic.update).toHaveBeenCalledTimes(0)
+    })
+
+    test('treats an existing SA self-link as invalid direct relation when no replacement is supplied', async () => {
+      setStatisticsResult({
+        id: 5,
+        status: 'SA',
+        related_statistic_id: 5,
+        related_statistic: { id: 5, status: 'SA' },
+        responsiblePersons: [{ principalName: 'bcd@ssb.no' }],
+        variants: [],
+        statistic_region_levels: [],
+      })
+      prismaMock.statistic.findMany.mockResolvedValueOnce([])
+
+      input.status = { code: 'SA' }
+      input.relation_id = undefined
+
+      await expect(() => updateStatistic('helse', input, prismaMock)).rejects.toMatchObject({
+        statregError: "A statistic can only be set to status 'Sammenslått' if it has a relation id.",
       })
       expect(prismaMock.statistic.update).toHaveBeenCalledTimes(0)
     })
@@ -1103,6 +1192,8 @@ describe('statisticService', () => {
         version: 1,
         desk_appoval_status: ApprovalStatus.PENDING,
         status: 'K',
+        related_statistic: null,
+        incoming_statistic_relations: [],
         statistic_region_levels: [],
       })
 
@@ -1181,6 +1272,8 @@ describe('statisticService', () => {
         version: 1,
         desk_appoval_status: ApprovalStatus.PENDING,
         status: 'A',
+        related_statistic: null,
+        incoming_statistic_relations: [],
         statistic_region_levels: [],
       })
       prismaMock.responsiblePerson.upsert.mockResolvedValueOnce({ id: 2 })
@@ -1460,7 +1553,7 @@ describe('statisticService', () => {
       expectedResult.contacts = [{ principalName: 'bcd@ssb.no', name: 'Bob' }]
     })
 
-    test('returns valid statisticDetails when all conditionals succeed', async () => {
+    test('returns valid statisticDetails', async () => {
       const result = await mapStatisticDetails(input)
 
       expect(result).toStrictEqual(expectedResult)
@@ -1475,161 +1568,28 @@ describe('statisticService', () => {
       expect(result).toStrictEqual(expectedResult)
     })
 
-    test('returns incoming statistic relations when this statistic is Aktiv and the incoming statistic has status SA', async () => {
-      input.status = 'A'
-      input.related_statistic = null
-      input.incoming_statistic_relations = [
-        {
-          id: 8,
-          name: 'Befolkning',
-          name_en: 'Population',
-          status: 'SA',
-          shortname: { name: 'befolk' },
-        },
-      ]
-      expectedResult.status = { code: 'A' }
-      expectedResult.relation = {}
-      expectedResult.incoming_relations = [
-        {
-          id: 8,
-          shortname: 'befolk',
-          name: 'Befolkning',
-          name_en: 'Population',
-        },
-      ]
-
-      const result = await mapStatisticDetails(input)
-
-      expect(result).toStrictEqual(expectedResult)
-    })
-
-    test('returns incoming statistic relations even when this statistic itself is SA (chain)', async () => {
-      input.incoming_statistic_relations = [
-        {
-          id: 8,
-          name: 'Befolkning',
-          name_en: 'Population',
-          status: 'SA',
-          shortname: { name: 'befolk' },
-        },
-      ]
-      expectedResult.incoming_relations = [
-        {
-          id: 8,
-          shortname: 'befolk',
-          name: 'Befolkning',
-          name_en: 'Population',
-        },
-      ]
-
-      const result = await mapStatisticDetails(input)
-
-      expect(result).toStrictEqual(expectedResult)
-    })
-
-    test('excludes incoming statistic relations when the incoming statistic does not have status SA', async () => {
-      input.status = 'A'
-      input.related_statistic = null
-      input.incoming_statistic_relations = [
-        {
-          id: 8,
-          name: 'Befolkning',
-          name_en: 'Population',
-          status: 'A',
-          shortname: { name: 'befolk' },
-        },
-      ]
-      expectedResult.status = { code: 'A' }
-      expectedResult.relation = {}
-
-      const result = await mapStatisticDetails(input)
-
-      expect(result).toStrictEqual(expectedResult)
-    })
-
-    test('excludes incoming statistic relations that point back to the same statistic', async () => {
-      input.status = 'A'
-      input.related_statistic = null
-      input.incoming_statistic_relations = [
-        {
-          id: input.id,
-          name: 'Helse og helsetjenester',
-          name_en: 'Health and health services',
-          status: 'SA',
-          shortname: { name: 'helse' },
-        },
-      ]
-      expectedResult.status = { code: 'A' }
-      expectedResult.relation = {}
-
-      const result = await mapStatisticDetails(input)
-
-      expect(result).toStrictEqual(expectedResult)
-    })
-
-    test('ignores a self-link but still shows a genuine incoming SA relation on the same statistic', async () => {
-      input.status = 'A'
-      input.related_statistic = { id: input.id, name: 'Helse og helsetjenester', name_en: '', status: 'A' }
-      input.incoming_statistic_relations = [
-        {
-          id: 8,
-          name: 'Befolkning',
-          name_en: 'Population',
-          status: 'SA',
-          shortname: { name: 'befolk' },
-        },
-      ]
-      expectedResult.status = { code: 'A' }
-      expectedResult.relation = {}
-      expectedResult.incoming_relations = [
-        {
-          id: 8,
-          shortname: 'befolk',
-          name: 'Befolkning',
-          name_en: 'Population',
-        },
-      ]
-
-      const result = await mapStatisticDetails(input)
-
-      expect(result).toStrictEqual(expectedResult)
-    })
-
-    test('excludes the direct relation when the statistic itself does not have status SA', async () => {
+    test('exposes a direct relation regardless of the statistic status', async () => {
       input.status = 'A'
       expectedResult.status = { code: 'A' }
-      expectedResult.relation = {}
 
       const result = await mapStatisticDetails(input)
 
       expect(result).toStrictEqual(expectedResult)
     })
 
-    test('excludes the direct relation when it points back to the same statistic', async () => {
-      input.related_statistic = { ...input.related_statistic, id: input.id }
-      expectedResult.relation = {}
-
-      const result = await mapStatisticDetails(input)
-
-      expect(result).toStrictEqual(expectedResult)
-    })
-
-    test('infers the relation from an incoming legacy pointer when the SA statistic holds no direct FK', async () => {
-      input.related_statistic = null
-      input.incoming_statistic_relations = [
-        {
-          id: 8,
-          name: 'Befolkning',
-          name_en: 'Population',
-          status: 'A',
-          shortname: { name: 'befolk' },
-        },
-      ]
+    test('exposes a direct self-relation from legacy data', async () => {
+      input.related_statistic = {
+        ...input.related_statistic,
+        id: input.id,
+        shortname: { name: input.shortname.name },
+        name: input.name,
+        name_en: input.name_en,
+      }
       expectedResult.relation = {
-        id: 8,
-        shortname: 'befolk',
-        name: 'Befolkning',
-        name_en: 'Population',
+        id: input.id,
+        shortname: input.shortname.name,
+        name: input.name,
+        name_en: input.name_en ?? '',
       }
 
       const result = await mapStatisticDetails(input)
@@ -1637,95 +1597,13 @@ describe('statisticService', () => {
       expect(result).toStrictEqual(expectedResult)
     })
 
-    test('shows the inverse relation on an Active statistic for an unambiguous legacy A to SA pointer', async () => {
-      input.status = 'A'
-      input.related_statistic = {
-        id: 8,
-        name: 'Befolkning',
-        name_en: 'Population',
-        status: 'SA',
-        related_statistic_id: null,
-        shortname: { name: 'befolk' },
-        incoming_statistic_relations: [{ id: input.id, status: 'A' }],
-      }
-      expectedResult.status = { code: 'A' }
-      expectedResult.relation = {}
-      expectedResult.incoming_relations = [
-        {
-          id: 8,
-          shortname: 'befolk',
-          name: 'Befolkning',
-          name_en: 'Population',
-        },
-      ]
-
-      const result = await mapStatisticDetails(input)
-
-      expect(result).toStrictEqual(expectedResult)
-    })
-
-    test('hides the inverse relation on an Active statistic when legacy reverse candidates are ambiguous', async () => {
-      input.status = 'A'
-      input.related_statistic = {
-        id: 8,
-        name: 'Befolkning',
-        name_en: 'Population',
-        status: 'SA',
-        related_statistic_id: null,
-        shortname: { name: 'befolk' },
-        incoming_statistic_relations: [
-          { id: input.id, status: 'A' },
-          { id: 9, status: 'A' },
-        ],
-      }
-      expectedResult.status = { code: 'A' }
-      expectedResult.relation = {}
-
-      const result = await mapStatisticDetails(input)
-
-      expect(result).toStrictEqual(expectedResult)
-    })
-
-    test("prefers an SA statistic's direct relation over old reverse-link noise", async () => {
+    test('exposes all incoming relations without filtering by status', async () => {
       input.incoming_statistic_relations = [
         {
           id: 8,
           name: 'Befolkning',
           name_en: 'Population',
-          status: 'A',
-          shortname: { name: 'befolk' },
-        },
-      ]
-
-      const result = await mapStatisticDetails(input)
-
-      expect(result).toStrictEqual(expectedResult)
-    })
-
-    test('shows the relation when the SA statistic points directly at a non-Aktiv statistic (established relation survives target status changes)', async () => {
-      input.related_statistic = { ...input.related_statistic, status: 'IA' }
-
-      const result = await mapStatisticDetails(input)
-
-      expect(result).toStrictEqual(expectedResult)
-    })
-
-    test('shows the relation when the SA statistic points directly at another SA statistic (chain)', async () => {
-      input.related_statistic = { ...input.related_statistic, status: 'SA' }
-
-      const result = await mapStatisticDetails(input)
-
-      expect(result).toStrictEqual(expectedResult)
-    })
-
-    test('hides the relation when more than one Aktiv statistic points at the SA statistic (ambiguous)', async () => {
-      input.related_statistic = null
-      input.incoming_statistic_relations = [
-        {
-          id: 8,
-          name: 'Befolkning',
-          name_en: 'Population',
-          status: 'A',
+          status: 'SA',
           shortname: { name: 'befolk' },
         },
         {
@@ -1736,7 +1614,63 @@ describe('statisticService', () => {
           shortname: { name: 'syssel' },
         },
       ]
+      expectedResult.incoming_relations = [
+        {
+          id: 8,
+          shortname: 'befolk',
+          name: 'Befolkning',
+          name_en: 'Population',
+        },
+        {
+          id: 9,
+          shortname: 'syssel',
+          name: 'Sysselsetting',
+          name_en: 'Employment',
+        },
+      ]
+
+      const result = await mapStatisticDetails(input)
+
+      expect(result).toStrictEqual(expectedResult)
+    })
+
+    test('excludes a self-relation from incoming relations', async () => {
+      input.incoming_statistic_relations = [
+        {
+          id: input.id,
+          name: input.name,
+          name_en: input.name_en,
+          status: input.status,
+          shortname: { name: input.shortname.name },
+        },
+      ]
+      expectedResult.incoming_relations = []
+
+      const result = await mapStatisticDetails(input)
+
+      expect(result).toStrictEqual(expectedResult)
+    })
+
+    test('does not infer a direct relation from incoming legacy relations', async () => {
+      input.related_statistic = null
+      input.incoming_statistic_relations = [
+        {
+          id: 8,
+          name: 'Befolkning',
+          name_en: 'Population',
+          status: 'A',
+          shortname: { name: 'befolk' },
+        },
+      ]
       expectedResult.relation = {}
+      expectedResult.incoming_relations = [
+        {
+          id: 8,
+          shortname: 'befolk',
+          name: 'Befolkning',
+          name_en: 'Population',
+        },
+      ]
 
       const result = await mapStatisticDetails(input)
 
@@ -2109,6 +2043,7 @@ describe('statisticService', () => {
 ////////////// MOCK DATA ////////////////////////////////
 const mockStatisticsPrismaResult = [
   {
+    id: 1,
     language: 'nb',
     status: 'SA',
     name: 'Energiregnskap og energibalanse',
@@ -2122,6 +2057,7 @@ const mockStatisticsPrismaResult = [
     ],
   },
   {
+    id: 2,
     language: 'nb',
     status: 'SA',
     name: 'Befolkning og demografi',
@@ -2219,6 +2155,7 @@ const mockStatisticsDetailedPrismaResult = {
 const mockedStatisticsResult = {
   statistics: [
     {
+      id: 1,
       shortname: 'energ',
       main_language: 'nb',
       status: { code: 'SA' },
@@ -2231,6 +2168,7 @@ const mockedStatisticsResult = {
       contacts: [{ principalName: 'abc@ssb.no', name: '' }],
     },
     {
+      id: 2,
       shortname: 'befolk',
       main_language: 'nb',
       status: { code: 'SA' },
@@ -2247,6 +2185,7 @@ const mockedStatisticsResult = {
 }
 
 const mockedStatisticDetailedResult = {
+  id: 5,
   version: 1,
   shortname: 'helse',
   approval_status: 'GODKJENT',
