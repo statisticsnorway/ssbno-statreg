@@ -1,4 +1,15 @@
-import { Button, Heading, Dialog, Input, Field, Label, Paragraph, Tag, Textarea } from '@statisticsnorway/design-react'
+import {
+  Button,
+  Heading,
+  Dialog,
+  Input,
+  Field,
+  Label,
+  Paragraph,
+  Tag,
+  Textarea,
+  ValidationMessage,
+} from '@statisticsnorway/design-react'
 import { useDatepicker } from '@navikt/ds-react/DatePicker'
 import client from '../api'
 import { DatePicker } from './DatePicker'
@@ -13,6 +24,11 @@ type BlockedDateProps = {
   onCreated: () => void
 }
 
+type BlockedDateErrors = {
+  date?: string
+  comment?: string
+}
+
 const now = new Date()
 
 export function BlockedDateModal({
@@ -23,11 +39,29 @@ export function BlockedDateModal({
   const [comment, setComment] = useState('')
   const [apiError, setApiError] = useState<string[]>([])
   const [datePickerError, setDatePickerError] = useState('')
+  const [errors, setErrors] = useState<BlockedDateErrors>({})
 
   const { inputProps, selectedDay, setSelected, datepickerProps } = useDatepicker({
     defaultSelected: now,
-    onDateChange: () => setApiError([]),
+    onDateChange: () => {
+      setApiError([])
+      setErrors((e) => ({ ...e, date: '' }))
+    },
   })
+
+  function validateFields(): boolean {
+    const nextErrors: BlockedDateErrors = {}
+    if (!selectedDay) nextErrors.date = 'Velg en gyldig dato'
+    if (!comment.trim()) nextErrors.comment = 'Skriv en kommentar'
+
+    setErrors(nextErrors)
+    return !Object.values(nextErrors).some(Boolean)
+  }
+
+  function submitBlockedDate() {
+    if (!validateFields() || !selectedDay) return
+    createBlockedDate(selectedDay, comment)
+  }
 
   async function createBlockedDate(date: Date, message: string) {
     const { error } = await client.POST('/calendar/blocked-release-days/{date}', {
@@ -73,6 +107,7 @@ export function BlockedDateModal({
           onSelect={setSelected}
           apiErrorEmit={setDatePickerError}
         />
+        {errors.date && <ValidationMessage>{errors.date}</ValidationMessage>}
         <Field>
           <div className='padded'>
             <Label className='labelWithTag'>
@@ -85,14 +120,17 @@ export function BlockedDateModal({
             <br />
             F.eks. Helligdag eller planlagt vedlikehold.
           </Field.Description>
-          <Textarea id='publishComment' onChange={(e) => setComment(e.target.value)} />
+          <Textarea
+            id='publishComment'
+            onChange={(e) => {
+              setComment(e.target.value)
+              setErrors((err) => ({ ...err, comment: '' }))
+            }}
+          />
+          {errors.comment && <ValidationMessage>{errors.comment}</ValidationMessage>}
           {apiError.length > 0 && <ErrorAlert message={[...apiError, datePickerError]} />}
         </Field>
-        <Button
-          variant='primary'
-          onClick={() => selectedDay && createBlockedDate(selectedDay, comment)}
-          className='padded'
-        >
+        <Button variant='primary' onClick={submitBlockedDate} className='padded'>
           Legg til
         </Button>
       </Dialog.Block>
