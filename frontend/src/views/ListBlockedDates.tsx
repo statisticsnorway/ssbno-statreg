@@ -52,8 +52,8 @@ function BlockedDatesTable({ days, onDelete }: BlockedDatesTableProps) {
         </Table.Row>
       </Table.Head>
       <Table.Body>
-        {days.map((day) => (
-          <BlockedDateRow key={day.date} day={day} onDelete={onDelete} />
+        {days.map((day, i) => (
+          <BlockedDateRow key={`${day.date}${i}`} day={day} onDelete={onDelete} />
         ))}
       </Table.Body>
     </Table>
