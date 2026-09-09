@@ -6,6 +6,7 @@ import { Link as ReactRouterLink } from 'react-router'
 import { type BlockedReleaseDate } from '@ssbno-statreg/shared'
 import client from '../api'
 import { ErrorAlert } from '../components/ErrorAlert'
+import { BlockedDateModal } from '../components/BlockedDateModal'
 
 type BlockedDateRowProps = {
   readonly day: BlockedReleaseDate
@@ -51,8 +52,8 @@ function BlockedDatesTable({ days, onDelete }: BlockedDatesTableProps) {
         </Table.Row>
       </Table.Head>
       <Table.Body>
-        {days.map((day) => (
-          <BlockedDateRow key={day.date} day={day} onDelete={onDelete} />
+        {days.map((day, i) => (
+          <BlockedDateRow key={`${day.date}${i}`} day={day} onDelete={onDelete} />
         ))}
       </Table.Body>
     </Table>
@@ -62,18 +63,20 @@ function BlockedDatesTable({ days, onDelete }: BlockedDatesTableProps) {
 export default function ListBlockedDates() {
   const [blockedDates, setBlockedDates] = useState<BlockedReleaseDate[]>([])
   const [apiError, setApiError] = useState<string[]>([])
+  const [showCreateModal, setShowCreateModal] = useState(false)
+
+  async function fetchBlockedDates() {
+    const { data, error } = await client.GET('/calendar/blocked-release-days')
+
+    if (error) {
+      setApiError((prev) => [...prev, error.message])
+      return
+    }
+
+    setBlockedDates(data ?? [])
+  }
 
   useEffect(() => {
-    async function fetchBlockedDates() {
-      const { data, error } = await client.GET('/calendar/blocked-release-days')
-
-      if (error) {
-        setApiError((prev) => [...prev, error.message])
-        return
-      }
-
-      setBlockedDates(data ?? [])
-    }
     fetchBlockedDates()
   }, [])
 
@@ -111,10 +114,17 @@ export default function ListBlockedDates() {
         variant='tertiary'
         data-color='neutral'
         aria-label='Legg til ny sperret dato'
-        onClick={() => alert('Kommer senere')}
+        onClick={() => setShowCreateModal(true)}
       >
         <PlusCircleIcon aria-hidden /> Legg til ny sperret dato
       </Button>
+      {showCreateModal && (
+        <BlockedDateModal
+          setOpenCreateReleaseModal={setShowCreateModal}
+          openCreateReleaseModal={showCreateModal}
+          onCreated={fetchBlockedDates}
+        />
+      )}
     </>
   )
 }

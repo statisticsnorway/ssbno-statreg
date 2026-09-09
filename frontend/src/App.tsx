@@ -9,7 +9,6 @@ import ListReleases from './views/ListReleases'
 import CreateStatistic from './views/CreateStatistic'
 import EditStatistic from './views/EditStatistic'
 import ListBlockedDates from './views/ListBlockedDates'
-import CreateBlockedDate from './views/CreateBlockedDate'
 import Tasks from './views/Tasks'
 import StatisticVersions from './views/StatisticVersions'
 
@@ -36,7 +35,6 @@ function App() {
 
         <Route path='sperredato'>
           <Route index element={<ListBlockedDates />} />
-          <Route path='opprett' element={<CreateBlockedDate />} />
         </Route>
 
         <Route path='oppgaver' element={<Tasks />} />
