@@ -338,12 +338,12 @@ describe('utils', () => {
   describe('formatMonthYear', () => {
     test('returns capitalized month and year in Norwegian', () => {
       const result = formatMonthYear(new Date(Date.UTC(2026, 0, 15)))
-      expect(result).toBe('Januar 2026')
+      expect(result).toBe('januar 2026')
     })
 
     test('returns correct month for mid-year date', () => {
       const result = formatMonthYear(new Date(Date.UTC(2023, 5, 30)))
-      expect(result).toBe('Juni 2023')
+      expect(result).toBe('juni 2023')
     })
   })
 
@@ -381,7 +381,7 @@ describe('utils', () => {
       const periodFrom = new Date(Date.UTC(2011, 0, 1))
       const periodTo = new Date(Date.UTC(2011, 0, 1))
 
-      expect(formatYear(true, periodFrom, periodTo)).toBe('Per 1. januar 2011')
+      expect(formatYear(true, periodFrom, periodTo)).toBe('per 1. januar 2011')
     })
 
     test('returns day-month-year for same-day non-january measuring point', () => {
@@ -427,8 +427,8 @@ describe('utils', () => {
         frequencyCode: 'W',
         periodFrom: '05.12.2011',
         periodTo: '11.12.2011',
-        expectedNb: 'Uke 49 2011',
-        expectedEn: 'Week 49 2011',
+        expectedNb: 'uke 49 2011',
+        expectedEn: 'week 49 2011',
       },
       {
         scenarioDescription: 'wrong week period tuesday to monday',
@@ -451,7 +451,7 @@ describe('utils', () => {
         frequencyCode: 'M',
         periodFrom: '01.12.2011',
         periodTo: '31.12.2011',
-        expectedNb: 'Desember 2011',
+        expectedNb: 'desember 2011',
         expectedEn: 'December 2011',
       },
       {
@@ -540,7 +540,7 @@ describe('utils', () => {
         periodFrom: '01.01.2011',
         periodTo: '30.06.2011',
         expectedNb: '1. halvår 2011',
-        expectedEn: '1st half of 2011',
+        expectedEn: 'first half of 2011',
       },
       {
         scenarioDescription: 'half-year not starting on 1st of january',
@@ -556,7 +556,7 @@ describe('utils', () => {
         periodFrom: '01.07.2011',
         periodTo: '31.12.2011',
         expectedNb: '2. halvår 2011',
-        expectedEn: '2nd half of 2011',
+        expectedEn: 'second half of 2011',
       },
       {
         scenarioDescription: 'calendar year',
@@ -635,8 +635,8 @@ describe('utils', () => {
         frequencyCode: 'Y',
         periodFrom: '01.01.2011',
         periodTo: '01.01.2011',
-        expectedNb: 'Per 1. januar 2011',
-        expectedEn: 'As of 1 January 2011',
+        expectedNb: 'per 1. januar 2011',
+        expectedEn: 'as of 1 January 2011',
       },
     ]
 
