@@ -1,0 +1,14 @@
+ .labelWithTag {
+   display: flex;
+   max-width: 15rem;
+   justify-content: space-between;
+   align-items: center;
+ }
+
+ .padded {
+   margin: 0.7rem 0
+ }
+
+ .subtle {
+   color: var(--ds-color-text-subtle);
+ }
