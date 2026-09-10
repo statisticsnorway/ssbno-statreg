@@ -347,6 +347,10 @@ export async function updateStatistic(
     throw new StatregError('An active statistic cannot be set back to upcoming.')
   }
 
+  if (status === 'SA' && !relation_id) {
+    throw new StatregError("A statistic with status 'Sammenslått' must have a relation id.")
+  }
+
   let newContacts
   if (contacts) {
     newContacts = await upsertContacts(contacts, prisma)
