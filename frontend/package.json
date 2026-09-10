@@ -12,26 +12,26 @@
     "ci-test": "vitest run --project frontend"
   },
   "dependencies": {
-    "@navikt/aksel-icons": "8.16.1",
-    "@navikt/ds-css": "8.16.1",
-    "@navikt/ds-react": "8.16.1",
+    "@navikt/aksel-icons": "8.16.2",
+    "@navikt/ds-css": "8.16.2",
+    "@navikt/ds-react": "8.16.2",
     "@ssbno-statreg/shared": "workspace:*",
-    "@statisticsnorway/design-css": "^0.2.1",
-    "@statisticsnorway/design-react": "^0.2.1",
+    "@statisticsnorway/design-css": "^0.2.2",
+    "@statisticsnorway/design-react": "^0.2.2",
     "openapi-fetch": "0.17.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "react-router": "8.3.0"
+    "react-router": "8.3.1"
   },
   "devDependencies": {
     "@digdir/designsystemet-react": "^1.20.0",
     "@digdir/designsystemet-types": "1.20.0",
     "@types/react": "19.2.18",
-    "@types/react-dom": "19.2.4",
+    "@types/react-dom": "19.2.7",
     "eslint-plugin-react-hooks": "7.1.1",
-    "eslint-plugin-react-refresh": "0.5.4",
+    "eslint-plugin-react-refresh": "0.5.6",
     "globals": "17.11.0",
     "lightningcss": "1.33.0",
-    "vite": "8.2.1"
+    "vite": "8.2.2"
   }
 }
