@@ -30,7 +30,7 @@ function BlockedDateRow({ day, onDelete }: BlockedDateRowProps) {
               <TrashIcon />
             </Popover.Trigger>
             <Popover data-color='danger'>
-              <Paragraph>Er du sikker på at du vil slette raden? Handlingen kan ikke angres.</Paragraph>
+              <Paragraph>Er du sikker på at du vil slette sperredatoen?</Paragraph>
               <div
                 style={{
                   display: 'flex',
@@ -44,9 +44,6 @@ function BlockedDateRow({ day, onDelete }: BlockedDateRowProps) {
                   onClick={() => onDelete(day.date)}
                 >
                   Ja, slett den
-                </Button>
-                <Button data-size='sm' variant='tertiary'>
-                  Avbryt
                 </Button>
               </div>
             </Popover>
