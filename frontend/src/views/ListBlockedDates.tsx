@@ -31,12 +31,17 @@ function BlockedDateRow({ day, onDelete }: BlockedDateRowProps) {
               variant='tertiary'
               data-color='danger'
               aria-label='Slett sperredato'
-              popoverTarget='delete-popover'
+              popoverTarget={`delete-popover${day.date}${day.blocked_comment?.replace(' ', '')}}`}
               onClick={() => setOpen(true)}
             >
               <TrashIcon />
             </Button>
-            <Popover data-color='danger' id='delete-popover' open={open} onClose={() => setOpen(false)}>
+            <Popover
+              data-color='danger'
+              id={`delete-popover${day.date}${day.blocked_comment?.replace(' ', '')}}`}
+              open={open}
+              onClose={() => setOpen(false)}
+            >
               <Paragraph>Er du sikker på at du vil slette sperredatoen?</Paragraph>
               <div
                 style={{
@@ -77,8 +82,8 @@ function BlockedDatesTable({ days, onDelete }: BlockedDatesTableProps) {
         </Table.Row>
       </Table.Head>
       <Table.Body>
-        {days.map((day, i) => (
-          <BlockedDateRow key={`${day.date}${i}`} day={day} onDelete={onDelete} />
+        {days.map((day) => (
+          <BlockedDateRow key={`${day.date}${day.blocked_comment}`} day={day} onDelete={onDelete} />
         ))}
       </Table.Body>
     </Table>
