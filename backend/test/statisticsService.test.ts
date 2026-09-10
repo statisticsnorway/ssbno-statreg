@@ -1478,6 +1478,7 @@ describe('statisticService', () => {
 ////////////// MOCK DATA ////////////////////////////////
 const mockStatisticsPrismaResult = [
   {
+    id: 1,
     language: 'nb',
     status: 'SA',
     name: 'Energiregnskap og energibalanse',
@@ -1491,6 +1492,7 @@ const mockStatisticsPrismaResult = [
     ],
   },
   {
+    id: 2,
     language: 'nb',
     status: 'SA',
     name: 'Befolkning og demografi',
@@ -1587,6 +1589,7 @@ const mockStatisticsDetailedPrismaResult = {
 const mockedStatisticsResult = {
   statistics: [
     {
+      id: 1,
       shortname: 'energ',
       main_language: 'nb',
       status: { code: 'SA' },
@@ -1599,6 +1602,7 @@ const mockedStatisticsResult = {
       contacts: [{ principalName: 'abc@ssb.no', name: '' }],
     },
     {
+      id: 2,
       shortname: 'befolk',
       main_language: 'nb',
       status: { code: 'SA' },

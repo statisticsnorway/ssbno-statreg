@@ -145,6 +145,7 @@ export async function getStatistics(
     where,
     orderBy,
     select: {
+      id: true,
       language: true,
       status: true,
       name: true,
@@ -171,6 +172,7 @@ export async function getStatistics(
       })
 
       return {
+        id: statistic.id,
         shortname: statistic.shortname.name,
         main_language,
         status: {
