@@ -58,8 +58,10 @@ export default function ListStatistics() {
     () =>
       deferredContacts.map((contact) => {
         const value = `contact:${contact.principalName}`
+        const label = `${contact.name} ${contact.principalName}`.trim()
+
         return (
-          <Suggestion.Option className='suggestion-item' key={value} label={contact.principalName} value={value}>
+          <Suggestion.Option className='suggestion-item' key={value} label={label} value={value}>
             {contact.name} ({contact.principalName})<div className='category-label'>Kontakt</div>
           </Suggestion.Option>
         )
