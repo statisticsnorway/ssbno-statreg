@@ -144,19 +144,19 @@ type MeasuringPeriodTitleProperties = {
 const MeasuringPeriodTitleLocalized: Record<MeasuringPeriodLocale, MeasuringPeriodTitleProperties> = {
   nb: {
     intlLocale: 'nb-NO',
-    week: 'Uke',
+    week: 'uke',
     term: 'termin',
     quarter: 'kvartal',
     halfYear: 'halvår',
-    asOf: 'Per',
+    asOf: 'per',
   },
   en: {
     intlLocale: 'en-GB',
-    week: 'Week',
+    week: 'week',
     term: 'term',
     quarter: 'quarter',
     halfYear: 'half of',
-    asOf: 'As of',
+    asOf: 'as of',
   },
 }
 
@@ -164,11 +164,25 @@ function getMeasuringPeriodTitle(locale: MeasuringPeriodLocale): MeasuringPeriod
   return MeasuringPeriodTitleLocalized[locale]
 }
 
-function formatOrdinalPeriod(periodNumber: number, label: string, year: number, locale: MeasuringPeriodLocale): string {
+function formatEnglishPeriodNumber(periodNumber: number, format: 'ordinal' | 'word' = 'ordinal'): string {
+  const periodNumberIndex = periodNumber - 1
+
+  if (format === 'word') {
+    return ['first', 'second'][periodNumberIndex] ?? `${periodNumber}`
+  }
+
+  return ['1st', '2nd', '3rd', '4th', '5th', '6th'][periodNumberIndex] ?? `${periodNumber}th`
+}
+
+function formatOrdinalPeriod(
+  periodNumber: number,
+  label: string,
+  year: number,
+  locale: MeasuringPeriodLocale,
+  englishNumberFormat: 'ordinal' | 'word' = 'ordinal'
+): string {
   if (locale === 'en') {
-    const periodNumberIndex = periodNumber - 1
-    const ordinalPeriod = ['1st', '2nd', '3rd', '4th', '5th', '6th'][periodNumberIndex] ?? `${periodNumber}th`
-    return `${ordinalPeriod} ${label} ${year}`
+    return `${formatEnglishPeriodNumber(periodNumber, englishNumberFormat)} ${label} ${year}`
   }
 
   return `${periodNumber}. ${label} ${year}`
@@ -181,7 +195,7 @@ export const formatMonthYear = (date: Date, locale: MeasuringPeriodLocale = 'nb'
     year: 'numeric',
     timeZone: 'UTC',
   }).format(date)
-  return monthYear.charAt(0).toUpperCase() + monthYear.slice(1)
+  return monthYear
 }
 
 export const formatDayMonthYear = (date: Date, locale: MeasuringPeriodLocale = 'nb'): string => {
@@ -278,7 +292,7 @@ export function parseHumanReadableMeasuringPeriod(
 
   if (code === 'H' && validatePeriodDaysWithinSameYear(period_from, period_to, 'H')) {
     const half = Math.floor(period_to.getUTCMonth() / 6) + 1
-    return formatOrdinalPeriod(half, halfYear, period_to.getUTCFullYear(), locale)
+    return formatOrdinalPeriod(half, halfYear, period_to.getUTCFullYear(), locale, 'word')
   }
 
   if (code === 'Y' || code === 'A') {

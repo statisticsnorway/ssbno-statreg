@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
 import './ListBlockedDates.css'
-import { Button, Heading, Link, Paragraph, Table } from '@statisticsnorway/design-react'
+import { Button, Heading, Link, Paragraph, Popover, Table } from '@statisticsnorway/design-react'
 import { ArrowLeftIcon, PlusCircleIcon, TrashIcon } from '@navikt/aksel-icons'
 import { Link as ReactRouterLink } from 'react-router'
 import { type BlockedReleaseDate } from '@ssbno-statreg/shared'
 import client from '../api'
 import { ErrorAlert } from '../components/ErrorAlert'
+import { BlockedDateModal } from '../components/BlockedDateModal'
 
 type BlockedDateRowProps = {
   readonly day: BlockedReleaseDate
@@ -18,20 +19,50 @@ type BlockedDatesTableProps = {
 }
 
 function BlockedDateRow({ day, onDelete }: BlockedDateRowProps) {
+  const [open, setOpen] = useState(false)
   return (
     <Table.Row>
       <Table.Cell>{day.date}</Table.Cell>
       <Table.Cell>{day.blocked_comment}</Table.Cell>
       <Table.Cell className='delete-column'>
         {!day.automatically_blocked && (
-          <Button
-            variant='tertiary'
-            data-color='danger'
-            aria-label={`Slett sperret dato: ${day.date}`}
-            onClick={() => onDelete(day.date)}
-          >
-            <TrashIcon />
-          </Button>
+          <>
+            <Button
+              variant='tertiary'
+              data-color='danger'
+              aria-label='Slett sperredato'
+              popoverTarget={`delete-popover${day.date}${day.blocked_comment?.replace(' ', '')}}`}
+              onClick={() => setOpen(true)}
+            >
+              <TrashIcon />
+            </Button>
+            <Popover
+              data-color='danger'
+              id={`delete-popover${day.date}${day.blocked_comment?.replace(' ', '')}}`}
+              open={open}
+              onClose={() => setOpen(false)}
+            >
+              <Paragraph>Er du sikker på at du vil slette sperredatoen?</Paragraph>
+              <div
+                style={{
+                  display: 'flex',
+                  gap: 'var(--ds-size-2)',
+                  marginTop: 'var(--ds-size-2)',
+                }}
+              >
+                <Button
+                  data-size='sm'
+                  aria-label={`Slett sperret dato: ${day.date}`}
+                  onClick={() => onDelete(day.date)}
+                >
+                  Slett
+                </Button>
+                <Button data-variant='tertiary' onClick={() => setOpen(false)} data-size='sm'>
+                  Avbryt
+                </Button>
+              </div>
+            </Popover>
+          </>
         )}
       </Table.Cell>
     </Table.Row>
@@ -52,7 +83,7 @@ function BlockedDatesTable({ days, onDelete }: BlockedDatesTableProps) {
       </Table.Head>
       <Table.Body>
         {days.map((day) => (
-          <BlockedDateRow key={day.date} day={day} onDelete={onDelete} />
+          <BlockedDateRow key={`${day.date}${day.blocked_comment}`} day={day} onDelete={onDelete} />
         ))}
       </Table.Body>
     </Table>
@@ -62,18 +93,20 @@ function BlockedDatesTable({ days, onDelete }: BlockedDatesTableProps) {
 export default function ListBlockedDates() {
   const [blockedDates, setBlockedDates] = useState<BlockedReleaseDate[]>([])
   const [apiError, setApiError] = useState<string[]>([])
+  const [showCreateModal, setShowCreateModal] = useState(false)
+
+  async function fetchBlockedDates() {
+    const { data, error } = await client.GET('/calendar/blocked-release-days')
+
+    if (error) {
+      setApiError((prev) => [...prev, error.message])
+      return
+    }
+
+    setBlockedDates(data ?? [])
+  }
 
   useEffect(() => {
-    async function fetchBlockedDates() {
-      const { data, error } = await client.GET('/calendar/blocked-release-days')
-
-      if (error) {
-        setApiError((prev) => [...prev, error.message])
-        return
-      }
-
-      setBlockedDates(data ?? [])
-    }
     fetchBlockedDates()
   }, [])
 
@@ -111,10 +144,17 @@ export default function ListBlockedDates() {
         variant='tertiary'
         data-color='neutral'
         aria-label='Legg til ny sperret dato'
-        onClick={() => alert('Kommer senere')}
+        onClick={() => setShowCreateModal(true)}
       >
         <PlusCircleIcon aria-hidden /> Legg til ny sperret dato
       </Button>
+      {showCreateModal && (
+        <BlockedDateModal
+          setOpenCreateReleaseModal={setShowCreateModal}
+          openCreateReleaseModal={showCreateModal}
+          onCreated={fetchBlockedDates}
+        />
+      )}
     </>
   )
 }
