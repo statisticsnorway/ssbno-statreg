@@ -4,1242 +4,1243 @@
  */
 
 export interface paths {
-    "/contacts": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List of all contacts */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description List of contacts */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Contact"][];
-                    };
-                };
-                default: components["responses"]["Error"];
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/shortnames": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List of all existing shortnames */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description List of shortnames */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Shortname_listing"][];
-                    };
-                };
-                default: components["responses"]["Error"];
-            };
-        };
-        put?: never;
-        /** Create a new shortname */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": {
-                        /** @description Only small letters (a-z) and underscore (_) are allowed. Maximum 14 characters. */
-                        shortname: string;
-                    };
-                };
-            };
-            responses: {
-                /** @description The shortname that was created */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Shortname"];
-                    };
-                };
-                default: components["responses"]["Error"];
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/shortnames/{shortname}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get shortname detail by shortname */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    shortname: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Shortname detail with statistic name */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Shortname_listing"];
-                    };
-                };
-                default: components["responses"]["Error"];
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/divisions": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List of all divisions in our organization. */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description List of divisions */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Division"];
-                    };
-                };
-                default: components["responses"]["Error"];
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/statistics": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List of all statistics */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Number of items skipped before starting the results list */
-                    start?: components["parameters"]["Pagination_start"];
-                    /** @description Maximum number of items returned */
-                    count?: components["parameters"]["Pagination_count"];
-                    /**
-                     * @description Filter by shortname(s) separated by comma.
-                     * @example ferie,reise
-                     */
-                    shortname?: components["parameters"]["Shortname_filter"];
-                    /**
-                     * @description Filter by contact initial(s) separated by comma.
-                     * @example abc,xyz
-                     */
-                    contact?: components["parameters"]["Contact_filter"];
-                    /**
-                     * @description Sorting fields separated by comma. Default order is Ascending (ASC), minus(-) should be used in front of field name for Descending (DESC) order.
-                     * @example -publish_time
-                     */
-                    sort?: components["parameters"]["Sort"];
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description List of statistics */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            total?: number;
-                            statistics?: components["schemas"]["Statistic_listing"][];
-                        };
-                    };
-                };
-                default: components["responses"]["Error"];
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/statistics/{shortname}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get a statistic by its shortname */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    shortname: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Statistic details with all its variants */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Statistic_details"];
-                    };
-                };
-                default: components["responses"]["Error"];
-            };
-        };
-        /** Update a statistic */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    shortname: string;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["Statistic_update"];
-                };
-            };
-            responses: {
-                /** @description Updated statistic details with all its variants */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Statistic_details"];
-                    };
-                };
-                default: components["responses"]["Error"];
-            };
-        };
-        /** Create a new statistic */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    shortname: string;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["Statistic_create"];
-                };
-            };
-            responses: {
-                /** @description Statistic details */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Statistic_details"];
-                    };
-                };
-                default: components["responses"]["Error"];
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/statistics/{shortname}/variants/{id}/releases": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List all releases for one variant */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Number of items skipped before starting the results list */
-                    start?: components["parameters"]["Pagination_start"];
-                    /** @description Maximum number of items returned */
-                    count?: components["parameters"]["Pagination_count"];
-                };
-                header?: never;
-                path: {
-                    shortname: string;
-                    id: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description List of releases based on variant */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            total?: number;
-                            releases?: components["schemas"]["Release_listing"][];
-                        };
-                    };
-                };
-                default: components["responses"]["Error"];
-            };
-        };
-        put?: never;
-        /** Create a new release */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    shortname: string;
-                    id: number;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["Release_create"];
-                };
-            };
-            responses: {
-                /** @description Release details */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Release_details"];
-                    };
-                };
-                default: components["responses"]["Error"];
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/statistics/{shortname}/versions": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List all versions with changes and comment for a statistic */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    shortname: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description List of versions for the statistic */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Version"][];
-                    };
-                };
-                default: components["responses"]["Error"];
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/statistics/{shortname}/contacts": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /**
-         * Set contacts for a statistic
-         * @description Replaces the entire contact list for the statistic with the supplied principal names.
-         */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    shortname: string;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": string[];
-                };
-            };
-            responses: {
-                /** @description The updated list of contacts for the statistic. */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Contact"][];
-                    };
-                };
-                default: components["responses"]["Error"];
-            };
-        };
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/releases": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List all releases. Filter and sorting can be specified using query params */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Number of items skipped before starting the results list */
-                    start?: components["parameters"]["Pagination_start"];
-                    /** @description Maximum number of items returned */
-                    count?: components["parameters"]["Pagination_count"];
-                    /**
-                     * @description Sorting fields separated by comma. Default order is Ascending (ASC), minus(-) should be used in front of field name for Descending (DESC) order.
-                     * @example -publish_time
-                     */
-                    sort?: components["parameters"]["Sort"];
-                    /**
-                     * @description Filter by shortname(s) separated by comma.
-                     * @example ferie,reise
-                     */
-                    shortname?: components["parameters"]["Shortname_filter"];
-                    /**
-                     * @description Filter by approval status. Valid values are "GODKJENT", "FORSLAG" and "AVVIST".
-                     * @example FORSLAG
-                     */
-                    approval_status?: components["parameters"]["Approval_status_filter"];
-                    /**
-                     * @description Filter releases with publish_time after the specified time given in ISO format.
-                     * @example 2026-05-06T06:00:00Z
-                     */
-                    publish_time_after?: string;
-                    /**
-                     * @description Filter releases with publish_time before the specified timestamp in ISO format.
-                     * @example 2026-05-06T06:00:00Z
-                     */
-                    publish_time_before?: string;
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description List of releases */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            total?: number;
-                            releases?: components["schemas"]["Release_listing"][];
-                        };
-                    };
-                };
-                default: components["responses"]["Error"];
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/releases/bulk-approve": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Bulk approve releases */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    /**
-                     * @example {
-                     *       "ids": [
-                     *         1,
-                     *         2,
-                     *         3
-                     *       ]
-                     *     }
-                     */
-                    "application/json": {
-                        /** @description The identifiers of the releases to approve. */
-                        ids: number[];
-                    };
-                };
-            };
-            responses: {
-                /** @description List of status codes for each processed release. */
-                207: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        /**
-                         * @example {
-                         *       "releases": [
-                         *         {
-                         *           "id": 1,
-                         *           "status": 200
-                         *         },
-                         *         {
-                         *           "id": 2,
-                         *           "status": 404
-                         *         },
-                         *         {
-                         *           "id": 3,
-                         *           "status": 500
-                         *         }
-                         *       ]
-                         *     }
-                         */
-                        "application/json": {
-                            releases: {
-                                /** @description The identifier of the release to approve. */
-                                id: number;
-                                /** @description HTTP status code for the approval request of a release. */
-                                status: number;
-                                /** @description Error message if the approval request failed. */
-                                message?: unknown;
-                            }[];
-                        };
-                    };
-                };
-                default: components["responses"]["Error"];
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/releases/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get release by id */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Release details */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Release_details"];
-                    };
-                };
-                default: components["responses"]["Error"];
-            };
-        };
-        /** Update a release */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["Release_update"];
-                };
-            };
-            responses: {
-                /** @description Updated release details */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Release_details"];
-                    };
-                };
-                default: components["responses"]["Error"];
-            };
-        };
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/releases/{id}/versions": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List all versions on a release with changes and comment */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description List of versions for the release */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Version"][];
-                    };
-                };
-                default: components["responses"]["Error"];
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/frequencies": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List all frequencies */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description List of frequencies */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Frequency"][];
-                    };
-                };
-                default: components["responses"]["Error"];
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/calendar": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get status for all days in a period */
-        get: {
-            parameters: {
-                query?: {
-                    fromDate?: string;
-                    toDate?: string;
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Object with days in range and their status */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Calender_date"];
-                    };
-                };
-                default: components["responses"]["Error"];
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/calendar/blocked-release-days": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get list of future blocked release days */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                200: components["responses"]["FutureBlockedReleaseDays"];
-                default: components["responses"]["Error"];
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/calendar/blocked-release-days/{date}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Manually block a day */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    date: string;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": {
-                        blocked_comment?: string;
-                    };
-                };
-            };
-            responses: {
-                200: components["responses"]["FutureBlockedReleaseDays"];
-                default: components["responses"]["Error"];
-            };
-        };
-        /** Delete a manually blocked day */
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    date: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Updated list */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Blocked_release_date"][];
-                    };
-                };
-                default: components["responses"]["Error"];
-            };
-        };
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/authenticate": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Check authentication status and information for current user. Used for controlling front-end behaviour, not security. */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Object with admin-status, user info */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @example true */
-                            isAdmin?: boolean;
-                            /** @example alice@example.com */
-                            email?: string;
-                            /** @example Alice Examplesdottir */
-                            fullName?: string;
-                        };
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-}
-export type webhooks = Record<string, never>;
-export interface components {
-    schemas: {
-        Error: {
-            /** @description Error message */
-            message: string;
-        };
-        /**
-         * @example {
-         *       "date": "2026-12-24",
-         *       "automatically_blocked": false,
-         *       "blocked_comment": "Christmas eve"
-         *     }
-         */
-        Blocked_release_date: {
-            /** Format: date */
-            date?: string;
-            automatically_blocked?: boolean;
-            blocked_comment?: string;
-        };
-        /**
-         * @description Map of ISO date (YYYY-MM-DD) to day information, ie status
-         * @example {
-         *       "2026-05-03": {
-         *         "status": "blocked"
-         *       },
-         *       "2026-05-04": {
-         *         "status": "none"
-         *       },
-         *       "2026-05-05": {
-         *         "status": "few"
-         *       }
-         *     }
-         */
-        Calender_date: {
-            [key: string]: {
-                /** @description Can be one of "blocked", "none", "few", "many", "full" */
-                status: string;
-            };
-        };
-        Contact: {
-            readonly name?: string;
-            readonly principalName: string;
-        };
-        Division: {
-            code?: string;
-            readonly name?: string;
-            note?: string | null;
-        };
-        Frequency: {
-            name?: string;
-            code?: string;
-        };
-        /** @description Text field to specify variant beyond frequency and revision */
-        Level_of_detail: {
-            name?: string | null;
-            name_en?: string | null;
-        };
-        /** @description Valid region levels are (name in parethesis): L (Land), LD (Landsdel), F (Fylke), K (Kommune), BD (Bydel og krets) */
-        Region_level: {
-            code?: string;
-            name?: string;
-        };
-        /** @description A shortname with its identifier */
-        Shortname: {
-            readonly id: number;
-            shortname: string;
-        };
-        /** @description Shortnames with its corresponding statistic name */
-        Shortname_listing: {
-            shortname?: string;
-            statistic_name?: string;
-        };
-        Release: {
-            readonly id?: number;
-            /** Format: date-time */
-            publish_time?: string;
-            /** Format: date */
-            period_to?: string;
-            /** Format: date */
-            period_from?: string;
-        };
-        Release_create: components["schemas"]["Release"] & {
-            release_date_precision?: string;
-        };
-        Release_update: components["schemas"]["Release"] & {
-            comment?: string;
-            release_date_precision?: string;
-            archived?: boolean;
-        };
-        Release_get: components["schemas"]["Release"] & {
-            approval_status?: string | null;
-            statistic?: {
-                readonly shortname?: string;
-                readonly name?: string;
-                readonly name_en?: string;
-            };
-            measuring_period?: {
-                readonly title?: string;
-                readonly title_en?: string;
-            };
-        };
-        Release_details: components["schemas"]["Release_get"] & {
-            has_versions?: boolean;
-            variant?: {
-                readonly id?: number;
-                frequency?: components["schemas"]["Frequency"];
-                revision?: components["schemas"]["Revision"];
-            };
-            cancelled?: boolean;
-            archived?: boolean;
-            release_date_precision?: string;
-        };
-        Release_listing: components["schemas"]["Release_get"] & {
-            frequency?: components["schemas"]["Frequency"];
-            revision?: components["schemas"]["Revision"];
-        };
-        /** @description Valid revision codes are:	I (Ingen), B (Beregnede), E (Endelige), F (Foreløpige), R (Reviderte), IG (Integrert) */
-        Revision: {
-            code?: string;
-        };
-        Statistic: {
-            readonly shortname?: string;
-            /** @description Main language will be either 'nn' or 'nb' for statistics */
-            main_language?: string;
-            status?: {
-                /** @description Is one of K (Kommende), A (Aktiv), IA (Ikke-aktiv), UT (Opphørt), SA (Sammenslått) or SP (Splittet) */
-                code?: string;
-            };
-            name?: string;
-            name_en?: string;
-            /** @description Is one of 'GODKJENT', 'AVVIST' or 'FORSLAG' */
-            approval_status?: string;
-        };
-        Statistic_create_base: {
-            division?: string | null;
-            /** Format: date */
-            first_released_at?: string | null;
-            yearly_reporting?: boolean;
-            statistic_region_levels?: {
-                code?: string;
-            }[];
-            previous_topic_codes?: string | null;
-            comment?: string;
-            variants?: components["schemas"]["Variant"][];
-            /** @description List of principal names to set as contacts for the statistic. */
-            contacts?: string[];
-        } & components["schemas"]["Statistic"];
-        Statistic_create_upcoming: components["schemas"]["Statistic_create_base"] & {
-            status?: {
-                /** @description Must be "K" for creation of upcoming statistics */
-                code: string;
-            };
-        };
-        Statistic_create_active: components["schemas"]["Statistic_create_base"] & {
-            status: {
-                /** @description Must be "A" for creation of active statistics */
-                code: string;
-            };
-        };
-        Statistic_create: components["schemas"]["Statistic_create_upcoming"] | components["schemas"]["Statistic_create_active"];
-        Statistic_update: {
-            relation_id?: number | null;
-        } & components["schemas"]["Statistic_create_base"];
-        Statistic_details: {
-            version?: number;
-            division?: components["schemas"]["Division"];
-            /** Format: date */
-            first_released_at?: string | null;
-            yearly_reporting?: boolean;
-            previous_topic_codes?: string | null;
-            relation?: {
-                id?: number;
-                shortname?: string;
-                readonly name?: string;
-                readonly name_en?: string;
-            };
-            /** @description Statistics that reference this statistic as their continuation. */
-            incoming_relations?: {
-                id?: number;
-                shortname?: string;
-                readonly name?: string;
-                readonly name_en?: string;
-            }[];
-            /** Format: date-time */
-            readonly updated_at?: string;
-            comment?: string;
-            /** Format: date-time */
-            readonly created_at?: string;
-            variants?: components["schemas"]["Variant"][];
-            contacts?: components["schemas"]["Contact"][];
-            statistic_region_levels?: components["schemas"]["Region_level"][];
-        } & components["schemas"]["Statistic"];
-        Statistic_listing: {
-            readonly id?: number;
-            division?: components["schemas"]["Division"];
-            contacts?: components["schemas"]["Contact"][];
-        } & components["schemas"]["Statistic"];
-        Version: {
-            /** @description One of "create", "update" or "delete". */
-            change_type: string;
-            /** Format: date-time */
-            changed_at: string;
-            /** @description The principal name of the user who made the change. */
-            changed_by: string;
-            comment?: string;
-            /** @description Only present when change_type is "update". */
-            changed_values?: {
-                /** @description The name of the field that changed. */
-                field_name: string;
-                /** @description Human-readable version of the old value. */
-                old_value: string;
-                /** @description Human-readable version of the new value. */
-                new_value: string;
-            }[];
-        };
-        Variant: {
-            /** @description On update, provide the id of an existing variant to update it, or omit it to create a new variant. Ignored/read-only when creating a statistic. */
-            id?: number;
-            version?: number;
-            /** Format: date-time */
-            readonly updated_at?: string;
-            level_of_detail?: components["schemas"]["Level_of_detail"];
-            /** Format: date-time */
-            readonly created_at?: string;
-            cancelled?: boolean;
-            frequency?: components["schemas"]["Frequency"];
-            revision?: components["schemas"]["Revision"];
-        };
-    };
-    responses: {
-        /** @description Error response */
-        Error: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/json": components["schemas"]["Error"];
-            };
-        };
-        /** @description List of future blocked release days. Includes all manually blocked days, but only automatically blocked days for the next three calendar years. Sorted from earliest to latest date. */
-        FutureBlockedReleaseDays: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/json": components["schemas"]["Blocked_release_date"][];
-            };
-        };
-    };
+  '/contacts': {
     parameters: {
-        /** @description Number of items skipped before starting the results list */
-        Pagination_start: number;
-        /** @description Maximum number of items returned */
-        Pagination_count: number;
-        /**
-         * @description Sorting fields separated by comma. Default order is Ascending (ASC), minus(-) should be used in front of field name for Descending (DESC) order.
-         * @example -publish_time
-         */
-        Sort: string;
-        /**
-         * @description Filter by shortname(s) separated by comma.
-         * @example ferie,reise
-         */
-        Shortname_filter: string;
-        /**
-         * @description Filter by approval status. Valid values are "GODKJENT", "FORSLAG" and "AVVIST".
-         * @example FORSLAG
-         */
-        Approval_status_filter: string;
-        /**
-         * @description Filter by contact initial(s) separated by comma.
-         * @example abc,xyz
-         */
-        Contact_filter: string;
-    };
-    requestBodies: never;
-    headers: never;
-    pathItems: never;
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** List of all contacts */
+    get: {
+      parameters: {
+        query?: never
+        header?: never
+        path?: never
+        cookie?: never
+      }
+      requestBody?: never
+      responses: {
+        /** @description List of contacts */
+        200: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            'application/json': components['schemas']['Contact'][]
+          }
+        }
+        default: components['responses']['Error']
+      }
+    }
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/shortnames': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** List of all existing shortnames */
+    get: {
+      parameters: {
+        query?: never
+        header?: never
+        path?: never
+        cookie?: never
+      }
+      requestBody?: never
+      responses: {
+        /** @description List of shortnames */
+        200: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            'application/json': components['schemas']['Shortname_listing'][]
+          }
+        }
+        default: components['responses']['Error']
+      }
+    }
+    put?: never
+    /** Create a new shortname */
+    post: {
+      parameters: {
+        query?: never
+        header?: never
+        path?: never
+        cookie?: never
+      }
+      requestBody: {
+        content: {
+          'application/json': {
+            /** @description Only small letters (a-z) and underscore (_) are allowed. Maximum 14 characters. */
+            shortname: string
+          }
+        }
+      }
+      responses: {
+        /** @description The shortname that was created */
+        201: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            'application/json': components['schemas']['Shortname']
+          }
+        }
+        default: components['responses']['Error']
+      }
+    }
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/shortnames/{shortname}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get shortname detail by shortname */
+    get: {
+      parameters: {
+        query?: never
+        header?: never
+        path: {
+          shortname: string
+        }
+        cookie?: never
+      }
+      requestBody?: never
+      responses: {
+        /** @description Shortname detail with statistic name */
+        200: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            'application/json': components['schemas']['Shortname_listing']
+          }
+        }
+        default: components['responses']['Error']
+      }
+    }
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/divisions': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** List of all divisions in our organization. */
+    get: {
+      parameters: {
+        query?: never
+        header?: never
+        path?: never
+        cookie?: never
+      }
+      requestBody?: never
+      responses: {
+        /** @description List of divisions */
+        200: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            'application/json': components['schemas']['Division']
+          }
+        }
+        default: components['responses']['Error']
+      }
+    }
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/statistics': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** List of all statistics */
+    get: {
+      parameters: {
+        query?: {
+          /** @description Number of items skipped before starting the results list */
+          start?: components['parameters']['Pagination_start']
+          /** @description Maximum number of items returned */
+          count?: components['parameters']['Pagination_count']
+          /**
+           * @description Filter by shortname(s) separated by comma.
+           * @example ferie,reise
+           */
+          shortname?: components['parameters']['Shortname_filter']
+          /**
+           * @description Filter by contact initial(s) separated by comma.
+           * @example abc,xyz
+           */
+          contact?: components['parameters']['Contact_filter']
+          /**
+           * @description Sorting fields separated by comma. Default order is Ascending (ASC), minus(-) should be used in front of field name for Descending (DESC) order.
+           * @example -publish_time
+           */
+          sort?: components['parameters']['Sort']
+        }
+        header?: never
+        path?: never
+        cookie?: never
+      }
+      requestBody?: never
+      responses: {
+        /** @description List of statistics */
+        200: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            'application/json': {
+              total?: number
+              statistics?: components['schemas']['Statistic_listing'][]
+            }
+          }
+        }
+        default: components['responses']['Error']
+      }
+    }
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/statistics/{shortname}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get a statistic by its shortname */
+    get: {
+      parameters: {
+        query?: never
+        header?: never
+        path: {
+          shortname: string
+        }
+        cookie?: never
+      }
+      requestBody?: never
+      responses: {
+        /** @description Statistic details with all its variants */
+        200: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            'application/json': components['schemas']['Statistic_details']
+          }
+        }
+        default: components['responses']['Error']
+      }
+    }
+    /** Update a statistic */
+    put: {
+      parameters: {
+        query?: never
+        header?: never
+        path: {
+          shortname: string
+        }
+        cookie?: never
+      }
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['Statistic_update']
+        }
+      }
+      responses: {
+        /** @description Updated statistic details with all its variants */
+        200: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            'application/json': components['schemas']['Statistic_details']
+          }
+        }
+        default: components['responses']['Error']
+      }
+    }
+    /** Create a new statistic */
+    post: {
+      parameters: {
+        query?: never
+        header?: never
+        path: {
+          shortname: string
+        }
+        cookie?: never
+      }
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['Statistic_create']
+        }
+      }
+      responses: {
+        /** @description Statistic details */
+        201: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            'application/json': components['schemas']['Statistic_details']
+          }
+        }
+        default: components['responses']['Error']
+      }
+    }
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/statistics/{shortname}/variants/{id}/releases': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** List all releases for one variant */
+    get: {
+      parameters: {
+        query?: {
+          /** @description Number of items skipped before starting the results list */
+          start?: components['parameters']['Pagination_start']
+          /** @description Maximum number of items returned */
+          count?: components['parameters']['Pagination_count']
+        }
+        header?: never
+        path: {
+          shortname: string
+          id: number
+        }
+        cookie?: never
+      }
+      requestBody?: never
+      responses: {
+        /** @description List of releases based on variant */
+        200: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            'application/json': {
+              total?: number
+              releases?: components['schemas']['Release_listing'][]
+            }
+          }
+        }
+        default: components['responses']['Error']
+      }
+    }
+    put?: never
+    /** Create a new release */
+    post: {
+      parameters: {
+        query?: never
+        header?: never
+        path: {
+          shortname: string
+          id: number
+        }
+        cookie?: never
+      }
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['Release_create']
+        }
+      }
+      responses: {
+        /** @description Release details */
+        201: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            'application/json': components['schemas']['Release_details']
+          }
+        }
+        default: components['responses']['Error']
+      }
+    }
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/statistics/{shortname}/versions': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** List all versions with changes and comment for a statistic */
+    get: {
+      parameters: {
+        query?: never
+        header?: never
+        path: {
+          shortname: string
+        }
+        cookie?: never
+      }
+      requestBody?: never
+      responses: {
+        /** @description List of versions for the statistic */
+        200: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            'application/json': components['schemas']['Version'][]
+          }
+        }
+        default: components['responses']['Error']
+      }
+    }
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/statistics/{shortname}/contacts': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /**
+     * Set contacts for a statistic
+     * @description Replaces the entire contact list for the statistic with the supplied principal names.
+     */
+    put: {
+      parameters: {
+        query?: never
+        header?: never
+        path: {
+          shortname: string
+        }
+        cookie?: never
+      }
+      requestBody: {
+        content: {
+          'application/json': string[]
+        }
+      }
+      responses: {
+        /** @description The updated list of contacts for the statistic. */
+        200: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            'application/json': components['schemas']['Contact'][]
+          }
+        }
+        default: components['responses']['Error']
+      }
+    }
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/releases': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** List all releases. Filter and sorting can be specified using query params */
+    get: {
+      parameters: {
+        query?: {
+          /** @description Number of items skipped before starting the results list */
+          start?: components['parameters']['Pagination_start']
+          /** @description Maximum number of items returned */
+          count?: components['parameters']['Pagination_count']
+          /**
+           * @description Sorting fields separated by comma. Default order is Ascending (ASC), minus(-) should be used in front of field name for Descending (DESC) order.
+           * @example -publish_time
+           */
+          sort?: components['parameters']['Sort']
+          /**
+           * @description Filter by shortname(s) separated by comma.
+           * @example ferie,reise
+           */
+          shortname?: components['parameters']['Shortname_filter']
+          /**
+           * @description Filter by approval status. Valid values are "GODKJENT", "FORSLAG" and "AVVIST".
+           * @example FORSLAG
+           */
+          approval_status?: components['parameters']['Approval_status_filter']
+          /**
+           * @description Filter releases with publish_time after the specified time given in ISO format.
+           * @example 2026-05-06T06:00:00Z
+           */
+          publish_time_after?: string
+          /**
+           * @description Filter releases with publish_time before the specified timestamp in ISO format.
+           * @example 2026-05-06T06:00:00Z
+           */
+          publish_time_before?: string
+        }
+        header?: never
+        path?: never
+        cookie?: never
+      }
+      requestBody?: never
+      responses: {
+        /** @description List of releases */
+        200: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            'application/json': {
+              total?: number
+              releases?: components['schemas']['Release_listing'][]
+            }
+          }
+        }
+        default: components['responses']['Error']
+      }
+    }
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/releases/bulk-approve': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Bulk approve releases */
+    post: {
+      parameters: {
+        query?: never
+        header?: never
+        path?: never
+        cookie?: never
+      }
+      requestBody: {
+        content: {
+          /**
+           * @example {
+           *       "ids": [
+           *         1,
+           *         2,
+           *         3
+           *       ]
+           *     }
+           */
+          'application/json': {
+            /** @description The identifiers of the releases to approve. */
+            ids: number[]
+          }
+        }
+      }
+      responses: {
+        /** @description List of status codes for each processed release. */
+        207: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            /**
+             * @example {
+             *       "releases": [
+             *         {
+             *           "id": 1,
+             *           "status": 200
+             *         },
+             *         {
+             *           "id": 2,
+             *           "status": 404
+             *         },
+             *         {
+             *           "id": 3,
+             *           "status": 500
+             *         }
+             *       ]
+             *     }
+             */
+            'application/json': {
+              releases: {
+                /** @description The identifier of the release to approve. */
+                id: number
+                /** @description HTTP status code for the approval request of a release. */
+                status: number
+                /** @description Error message if the approval request failed. */
+                message?: unknown
+              }[]
+            }
+          }
+        }
+        default: components['responses']['Error']
+      }
+    }
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/releases/{id}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get release by id */
+    get: {
+      parameters: {
+        query?: never
+        header?: never
+        path: {
+          id: string
+        }
+        cookie?: never
+      }
+      requestBody?: never
+      responses: {
+        /** @description Release details */
+        200: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            'application/json': components['schemas']['Release_details']
+          }
+        }
+        default: components['responses']['Error']
+      }
+    }
+    /** Update a release */
+    put: {
+      parameters: {
+        query?: never
+        header?: never
+        path: {
+          id: string
+        }
+        cookie?: never
+      }
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['Release_update']
+        }
+      }
+      responses: {
+        /** @description Updated release details */
+        200: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            'application/json': components['schemas']['Release_details']
+          }
+        }
+        default: components['responses']['Error']
+      }
+    }
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/releases/{id}/versions': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** List all versions on a release with changes and comment */
+    get: {
+      parameters: {
+        query?: never
+        header?: never
+        path: {
+          id: number
+        }
+        cookie?: never
+      }
+      requestBody?: never
+      responses: {
+        /** @description List of versions for the release */
+        200: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            'application/json': components['schemas']['Version'][]
+          }
+        }
+        default: components['responses']['Error']
+      }
+    }
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/frequencies': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** List all frequencies */
+    get: {
+      parameters: {
+        query?: never
+        header?: never
+        path?: never
+        cookie?: never
+      }
+      requestBody?: never
+      responses: {
+        /** @description List of frequencies */
+        200: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            'application/json': components['schemas']['Frequency'][]
+          }
+        }
+        default: components['responses']['Error']
+      }
+    }
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/calendar': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get status for all days in a period */
+    get: {
+      parameters: {
+        query?: {
+          fromDate?: string
+          toDate?: string
+        }
+        header?: never
+        path?: never
+        cookie?: never
+      }
+      requestBody?: never
+      responses: {
+        /** @description Object with days in range and their status */
+        200: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            'application/json': components['schemas']['Calender_date']
+          }
+        }
+        default: components['responses']['Error']
+      }
+    }
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/calendar/blocked-release-days': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get list of future blocked release days */
+    get: {
+      parameters: {
+        query?: never
+        header?: never
+        path?: never
+        cookie?: never
+      }
+      requestBody?: never
+      responses: {
+        200: components['responses']['FutureBlockedReleaseDays']
+        default: components['responses']['Error']
+      }
+    }
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/calendar/blocked-release-days/{date}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Manually block a day */
+    post: {
+      parameters: {
+        query?: never
+        header?: never
+        path: {
+          date: string
+        }
+        cookie?: never
+      }
+      requestBody: {
+        content: {
+          'application/json': {
+            blocked_comment?: string
+          }
+        }
+      }
+      responses: {
+        200: components['responses']['FutureBlockedReleaseDays']
+        default: components['responses']['Error']
+      }
+    }
+    /** Delete a manually blocked day */
+    delete: {
+      parameters: {
+        query?: never
+        header?: never
+        path: {
+          date: string
+        }
+        cookie?: never
+      }
+      requestBody?: never
+      responses: {
+        /** @description Updated list */
+        200: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            'application/json': components['schemas']['Blocked_release_date'][]
+          }
+        }
+        default: components['responses']['Error']
+      }
+    }
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/auth/authenticate': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Check authentication status and information for current user. Used for controlling front-end behaviour, not security. */
+    get: {
+      parameters: {
+        query?: never
+        header?: never
+        path?: never
+        cookie?: never
+      }
+      requestBody?: never
+      responses: {
+        /** @description Object with admin-status, user info */
+        200: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            'application/json': {
+              /** @example true */
+              isAdmin?: boolean
+              /** @example alice@example.com */
+              email?: string
+              /** @example Alice Examplesdottir */
+              fullName?: string
+            }
+          }
+        }
+      }
+    }
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
 }
-export type $defs = Record<string, never>;
-export type operations = Record<string, never>;
+export type webhooks = Record<string, never>
+export interface components {
+  schemas: {
+    Error: {
+      /** @description Error message */
+      message: string
+    }
+    /**
+     * @example {
+     *       "date": "2026-12-24",
+     *       "automatically_blocked": false,
+     *       "blocked_comment": "Christmas eve"
+     *     }
+     */
+    Blocked_release_date: {
+      /** Format: date */
+      date?: string
+      automatically_blocked?: boolean
+      blocked_comment?: string
+    }
+    /**
+     * @description Map of ISO date (YYYY-MM-DD) to day information, ie status
+     * @example {
+     *       "2026-05-03": {
+     *         "status": "blocked"
+     *       },
+     *       "2026-05-04": {
+     *         "status": "none"
+     *       },
+     *       "2026-05-05": {
+     *         "status": "few"
+     *       }
+     *     }
+     */
+    Calender_date: {
+      [key: string]: {
+        /** @description Can be one of "blocked", "none", "few", "many", "full" */
+        status: string
+      }
+    }
+    Contact: {
+      readonly name?: string
+      readonly principalName: string
+    }
+    Division: {
+      code?: string
+      readonly name?: string
+      note?: string | null
+    }
+    Frequency: {
+      name?: string
+      code?: string
+    }
+    /** @description Text field to specify variant beyond frequency and revision */
+    Level_of_detail: {
+      name?: string | null
+      name_en?: string | null
+    }
+    /** @description Valid region levels are (name in parethesis): L (Land), LD (Landsdel), F (Fylke), K (Kommune), BD (Bydel og krets) */
+    Region_level: {
+      code?: string
+      name?: string
+    }
+    /** @description A shortname with its identifier */
+    Shortname: {
+      readonly id: number
+      shortname: string
+    }
+    /** @description Shortnames with its corresponding statistic name */
+    Shortname_listing: {
+      shortname?: string
+      statistic_name?: string
+    }
+    Release: {
+      readonly id?: number
+      /** Format: date-time */
+      publish_time?: string
+      /** Format: date */
+      period_to?: string
+      /** Format: date */
+      period_from?: string
+    }
+    Release_create: components['schemas']['Release'] & {
+      release_date_precision?: string
+    }
+    Release_update: components['schemas']['Release'] & {
+      comment?: string
+      release_date_precision?: string
+      archived?: boolean
+    }
+    Release_get: components['schemas']['Release'] & {
+      approval_status?: string | null
+      statistic?: {
+        readonly shortname?: string
+        readonly name?: string
+        readonly name_en?: string
+      }
+      measuring_period?: {
+        readonly title?: string
+        readonly title_en?: string
+      }
+    }
+    Release_details: components['schemas']['Release_get'] & {
+      has_versions?: boolean
+      variant?: {
+        readonly id?: number
+        frequency?: components['schemas']['Frequency']
+        revision?: components['schemas']['Revision']
+      }
+      cancelled?: boolean
+      archived?: boolean
+      release_date_precision?: string
+    }
+    Release_listing: components['schemas']['Release_get'] & {
+      frequency?: components['schemas']['Frequency']
+      revision?: components['schemas']['Revision']
+    }
+    /** @description Valid revision codes are:	I (Ingen), B (Beregnede), E (Endelige), F (Foreløpige), R (Reviderte), IG (Integrert) */
+    Revision: {
+      code?: string
+    }
+    Statistic: {
+      readonly shortname?: string
+      /** @description Main language will be either 'nn' or 'nb' for statistics */
+      main_language?: string
+      status?: {
+        /** @description Is one of K (Kommende), A (Aktiv), IA (Ikke-aktiv), UT (Opphørt), SA (Sammenslått) or SP (Splittet) */
+        code?: string
+      }
+      name?: string
+      name_en?: string
+      /** @description Is one of 'GODKJENT', 'AVVIST' or 'FORSLAG' */
+      approval_status?: string
+    }
+    Statistic_create_base: {
+      division?: string | null
+      /** Format: date */
+      first_released_at?: string | null
+      yearly_reporting?: boolean
+      statistic_region_levels?: {
+        code?: string
+      }[]
+      previous_topic_codes?: string | null
+      comment?: string
+      variants?: components['schemas']['Variant'][]
+      /** @description List of principal names to set as contacts for the statistic. */
+      contacts?: string[]
+    } & components['schemas']['Statistic']
+    Statistic_create_upcoming: components['schemas']['Statistic_create_base'] & {
+      status?: {
+        /** @description Must be "K" for creation of upcoming statistics */
+        code: string
+      }
+    }
+    Statistic_create_active: components['schemas']['Statistic_create_base'] & {
+      status: {
+        /** @description Must be "A" for creation of active statistics */
+        code: string
+      }
+    }
+    Statistic_create:
+      components['schemas']['Statistic_create_upcoming'] | components['schemas']['Statistic_create_active']
+    Statistic_update: {
+      relation_id?: number | null
+    } & components['schemas']['Statistic_create_base']
+    Statistic_details: {
+      version?: number
+      division?: components['schemas']['Division']
+      /** Format: date */
+      first_released_at?: string | null
+      yearly_reporting?: boolean
+      previous_topic_codes?: string | null
+      relation?: {
+        id?: number
+        shortname?: string
+        readonly name?: string
+        readonly name_en?: string
+      }
+      /** @description Statistics that reference this statistic as their continuation. */
+      incoming_relations?: {
+        id?: number
+        shortname?: string
+        readonly name?: string
+        readonly name_en?: string
+      }[]
+      /** Format: date-time */
+      readonly updated_at?: string
+      comment?: string
+      /** Format: date-time */
+      readonly created_at?: string
+      variants?: components['schemas']['Variant'][]
+      contacts?: components['schemas']['Contact'][]
+      statistic_region_levels?: components['schemas']['Region_level'][]
+    } & components['schemas']['Statistic']
+    Statistic_listing: {
+      readonly id?: number
+      division?: components['schemas']['Division']
+      contacts?: components['schemas']['Contact'][]
+    } & components['schemas']['Statistic']
+    Version: {
+      /** @description One of "create", "update" or "delete". */
+      change_type: string
+      /** Format: date-time */
+      changed_at: string
+      /** @description The principal name of the user who made the change. */
+      changed_by: string
+      comment?: string
+      /** @description Only present when change_type is "update". */
+      changed_values?: {
+        /** @description The name of the field that changed. */
+        field_name: string
+        /** @description Human-readable version of the old value. */
+        old_value: string
+        /** @description Human-readable version of the new value. */
+        new_value: string
+      }[]
+    }
+    Variant: {
+      /** @description On update, provide the id of an existing variant to update it, or omit it to create a new variant. Ignored/read-only when creating a statistic. */
+      id?: number
+      version?: number
+      /** Format: date-time */
+      readonly updated_at?: string
+      level_of_detail?: components['schemas']['Level_of_detail']
+      /** Format: date-time */
+      readonly created_at?: string
+      cancelled?: boolean
+      frequency?: components['schemas']['Frequency']
+      revision?: components['schemas']['Revision']
+    }
+  }
+  responses: {
+    /** @description Error response */
+    Error: {
+      headers: {
+        [name: string]: unknown
+      }
+      content: {
+        'application/json': components['schemas']['Error']
+      }
+    }
+    /** @description List of future blocked release days. Includes all manually blocked days, but only automatically blocked days for the next three calendar years. Sorted from earliest to latest date. */
+    FutureBlockedReleaseDays: {
+      headers: {
+        [name: string]: unknown
+      }
+      content: {
+        'application/json': components['schemas']['Blocked_release_date'][]
+      }
+    }
+  }
+  parameters: {
+    /** @description Number of items skipped before starting the results list */
+    Pagination_start: number
+    /** @description Maximum number of items returned */
+    Pagination_count: number
+    /**
+     * @description Sorting fields separated by comma. Default order is Ascending (ASC), minus(-) should be used in front of field name for Descending (DESC) order.
+     * @example -publish_time
+     */
+    Sort: string
+    /**
+     * @description Filter by shortname(s) separated by comma.
+     * @example ferie,reise
+     */
+    Shortname_filter: string
+    /**
+     * @description Filter by approval status. Valid values are "GODKJENT", "FORSLAG" and "AVVIST".
+     * @example FORSLAG
+     */
+    Approval_status_filter: string
+    /**
+     * @description Filter by contact initial(s) separated by comma.
+     * @example abc,xyz
+     */
+    Contact_filter: string
+  }
+  requestBodies: never
+  headers: never
+  pathItems: never
+}
+export type $defs = Record<string, never>
+export type operations = Record<string, never>
