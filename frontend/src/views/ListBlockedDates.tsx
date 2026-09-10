@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import './ListBlockedDates.css'
-import { Button, Heading, Link, Paragraph, Table } from '@statisticsnorway/design-react'
+import { Button, Heading, Link, Paragraph, Popover, Table } from '@statisticsnorway/design-react'
 import { ArrowLeftIcon, PlusCircleIcon, TrashIcon } from '@navikt/aksel-icons'
 import { Link as ReactRouterLink } from 'react-router'
 import { type BlockedReleaseDate } from '@ssbno-statreg/shared'
@@ -25,14 +25,32 @@ function BlockedDateRow({ day, onDelete }: BlockedDateRowProps) {
       <Table.Cell>{day.blocked_comment}</Table.Cell>
       <Table.Cell className='delete-column'>
         {!day.automatically_blocked && (
-          <Button
-            variant='tertiary'
-            data-color='danger'
-            aria-label={`Slett sperret dato: ${day.date}`}
-            onClick={() => onDelete(day.date)}
-          >
-            <TrashIcon />
-          </Button>
+          <Popover.TriggerContext>
+            <Popover.Trigger variant='tertiary' data-color='danger' aria-label='Slett sperredato'>
+              <TrashIcon />
+            </Popover.Trigger>
+            <Popover data-color='danger'>
+              <Paragraph>Er du sikker på at du vil slette raden? Handlingen kan ikke angres.</Paragraph>
+              <div
+                style={{
+                  display: 'flex',
+                  gap: 'var(--ds-size-2)',
+                  marginTop: 'var(--ds-size-2)',
+                }}
+              >
+                <Button
+                  data-size='sm'
+                  aria-label={`Slett sperret dato: ${day.date}`}
+                  onClick={() => onDelete(day.date)}
+                >
+                  Ja, slett den
+                </Button>
+                <Button data-size='sm' variant='tertiary'>
+                  Avbryt
+                </Button>
+              </div>
+            </Popover>
+          </Popover.TriggerContext>
         )}
       </Table.Cell>
     </Table.Row>

@@ -44,7 +44,7 @@ export function BlockedDateModal({
   const [calendarDates, setCalendarDates] = useState<CalenderDate>({})
 
   const { inputProps, selectedDay, setSelected, datepickerProps } = useDatepicker({
-    defaultSelected: now,
+    defaultSelected: undefined,
     onDateChange: () => {
       setApiError([])
       setErrors((e) => ({ ...e, date: '' }))
@@ -99,7 +99,12 @@ export function BlockedDateModal({
       <Dialog.Block>
         <form onSubmit={submitBlockedDate}>
           <Field>
-            <Label data-size='md' className='labelWithTag'>
+            <Label
+              data-size='md'
+              className='labelWithTag'
+              // @ts-expect-error We want the native "autofocus" and Reacts onMount smartness (see https://react.dev/reference/react-dom/components/input#input)
+              autofocus='true'
+            >
               Dato <Tag data-color='warning'>Må fylles ut</Tag>
             </Label>
             <div>
