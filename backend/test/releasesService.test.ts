@@ -43,7 +43,7 @@ describe('releasesService ', async () => {
         update: vi.fn(() => Promise.resolve({ ...releasesResult })),
         count: vi.fn(() => Promise.resolve(releasesResult ? (releasesResult as any).length : 0)),
       },
-      statistic: { findFirst: vi.fn(() => Promise.resolve({ id: 1, status: 'A' })) },
+      statistic: { findFirst: vi.fn(() => Promise.resolve({ id: 1 })) },
       shortname: { findMany: vi.fn(() => Promise.resolve([{ name: 'laks' }, { name: 'KPI' }])) },
       variant: {
         findUnique: vi.fn(() => Promise.resolve({ id: 1 })),
@@ -669,18 +669,6 @@ describe('releasesService ', async () => {
   describe('createRelease ', () => {
     beforeEach(() => {
       now = new Date('2026-03-23T08:00:00Z')
-    })
-
-    test('rejects creating a release for a Sammenslått statistic', async () => {
-      prismaMock.statistic.findFirst.mockResolvedValueOnce({ id: 1, status: 'SA' })
-
-      await expect(() => createRelease(prismaMock, 'kpi', '1', mockCreateReleaseInput, now)).rejects.toMatchObject({
-        statregError: "A statistic with status 'Sammenslått' cannot have new releases.",
-      })
-
-      expect(prismaMock.release.create).toHaveBeenCalledTimes(0)
-      expect(releaseAsserts.assertVariantExists).not.toHaveBeenCalled()
-      expect(releaseAsserts.assertVariantMatchesShortname).not.toHaveBeenCalled()
     })
 
     test('creates a new release when input data is correct', async () => {

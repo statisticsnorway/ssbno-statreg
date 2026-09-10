@@ -260,7 +260,6 @@ components:
     Statistic:
       type: object
       properties:
-        id: { type: integer, readOnly: true }
         shortname: { type: string, readOnly: true }
         main_language: { type: string, description: "Main language will be either 'nn' or 'nb' for statistics" }
         status:
