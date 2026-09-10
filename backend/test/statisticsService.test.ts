@@ -593,6 +593,31 @@ describe('statisticService', () => {
         })
       )
     })
+
+    test('rejects creating a new variant for a Sammenslått statistic', async () => {
+      setStatisticsResult({
+        id: 5,
+        status: 'A',
+        responsiblePersons: [{ principalName: 'bcd@ssb.no' }],
+        variants: [],
+        statistic_region_levels: [],
+      })
+
+      input.status = { code: 'SA' }
+      input.relation_id = 3
+      input.variants = [
+        {
+          revision: { code: 'I' },
+          frequency: { code: 'M' },
+          level_of_detail: { name: 'Detaljnivå', name_en: 'Level of detail' },
+        },
+      ]
+
+      await expect(() => updateStatistic('helse', input, prismaMock)).rejects.toMatchObject({
+        statregError: "A statistic with status 'Sammenslått' cannot have new variants.",
+      })
+      expect(prismaMock.statistic.update).toHaveBeenCalledTimes(0)
+    })
   })
 
   describe('updateContacts ', async () => {

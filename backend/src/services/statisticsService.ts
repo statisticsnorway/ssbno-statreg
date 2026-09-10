@@ -358,6 +358,10 @@ export async function updateStatistic(
 
   const parsedVariants = variants ? await parseVariantsInput(variants, status, prisma) : undefined
 
+  if (status === 'SA' && parsedVariants?.some((variant) => !variant.id)) {
+    throw new StatregError("A statistic with status 'Sammenslått' cannot have new variants.")
+  }
+
   if (parsedVariants) {
     for (const variant of parsedVariants) {
       if (variant.id && !existingStatistic.variants.some((existingVariant) => existingVariant.id === variant.id)) {
