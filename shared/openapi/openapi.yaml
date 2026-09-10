@@ -389,6 +389,9 @@ components:
         - $ref: '#/components/schemas/Statistic'
       type: object
       properties:
+        id:
+          type: integer
+          readOnly: true
         division:
           $ref: '#/components/schemas/Division'
         contacts:
