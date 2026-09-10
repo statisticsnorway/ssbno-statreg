@@ -30,8 +30,6 @@ type BlockedDateErrors = {
   comment?: string
 }
 
-const now = new Date()
-
 export function BlockedDateModal({
   openCreateReleaseModal,
   setOpenCreateReleaseModal,
