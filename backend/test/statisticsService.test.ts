@@ -548,6 +548,51 @@ describe('statisticService', () => {
       })
       expect(prismaMock.statistic.update).toHaveBeenCalledTimes(0)
     })
+
+    test('throws error when Sammenslått has no relation id', async () => {
+      setStatisticsResult({
+        id: 5,
+        status: 'A',
+        responsiblePersons: [{ principalName: 'bcd@ssb.no' }],
+        variants: [],
+        statistic_region_levels: [],
+      })
+
+      input.status = { code: 'SA' }
+      input.relation_id = undefined
+      input.variants = undefined
+
+      await expect(() => updateStatistic('helse', input, prismaMock)).rejects.toMatchObject({
+        statregError: "A statistic with status 'Sammenslått' must have a relation id.",
+      })
+      expect(prismaMock.statistic.update).toHaveBeenCalledTimes(0)
+    })
+
+    test('stores relation id when statistic is set to Sammenslått', async () => {
+      setStatisticsResult({
+        id: 5,
+        status: 'A',
+        responsiblePersons: [{ principalName: 'bcd@ssb.no' }],
+        variants: [],
+        statistic_region_levels: [],
+      })
+      setUpdateStatisticsResult({ ...mockStatisticsDetailedPrismaResult, status: 'SA' })
+
+      input.status = { code: 'SA' }
+      input.relation_id = 3
+      input.variants = undefined
+
+      await expect(updateStatistic('helse', input, prismaMock)).resolves.toBeDefined()
+
+      expect(prismaMock.statistic.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            status: 'SA',
+            related_statistic_id: 3,
+          }),
+        })
+      )
+    })
   })
 
   describe('updateContacts ', async () => {
