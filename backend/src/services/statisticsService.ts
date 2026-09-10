@@ -145,7 +145,6 @@ export async function getStatistics(
     where,
     orderBy,
     select: {
-      id: true,
       language: true,
       status: true,
       name: true,
@@ -172,7 +171,6 @@ export async function getStatistics(
       })
 
       return {
-        id: statistic.id,
         shortname: statistic.shortname.name,
         main_language,
         status: {
@@ -260,7 +258,6 @@ export async function mapStatisticDetails(statistic: StatisticPrismaResult): Pro
   const users = await getAllUsersFromCache()
 
   return {
-    id: statistic.id,
     version: statistic.version,
     shortname: statistic.shortname.name,
     approval_status: statistic.desk_appoval_status ?? ApprovalStatus.PENDING,

@@ -1087,37 +1087,6 @@ describe('statisticService', () => {
       expect(result).toStrictEqual(expectedResult)
     })
 
-    test('returns relation for an active statistic', async () => {
-      input.status = 'A'
-      expectedResult.status = { code: 'A' }
-
-      const result = await mapStatisticDetails(input)
-
-      expect(result).toStrictEqual(expectedResult)
-    })
-
-    test('returns legacy self relations without filtering', async () => {
-      input.related_statistic = {
-        id: input.id,
-        name: input.name,
-        name_en: input.name_en,
-        shortname: { name: input.shortname.name },
-      }
-      input.incoming_statistic_relations = [input.related_statistic]
-
-      expectedResult.relation = {
-        id: input.id,
-        shortname: input.shortname.name,
-        name: input.name,
-        name_en: input.name_en,
-      }
-      expectedResult.incoming_relations = [expectedResult.relation]
-
-      const result = await mapStatisticDetails(input)
-
-      expect(result).toStrictEqual(expectedResult)
-    })
-
     test('falls back to pending approval status when desk approval status is missing', async () => {
       input.desk_appoval_status = null
       expectedResult.approval_status = ApprovalStatus.PENDING
@@ -1484,7 +1453,6 @@ describe('statisticService', () => {
 ////////////// MOCK DATA ////////////////////////////////
 const mockStatisticsPrismaResult = [
   {
-    id: 1,
     language: 'nb',
     status: 'SA',
     name: 'Energiregnskap og energibalanse',
@@ -1498,7 +1466,6 @@ const mockStatisticsPrismaResult = [
     ],
   },
   {
-    id: 2,
     language: 'nb',
     status: 'SA',
     name: 'Befolkning og demografi',
@@ -1595,7 +1562,6 @@ const mockStatisticsDetailedPrismaResult = {
 const mockedStatisticsResult = {
   statistics: [
     {
-      id: 1,
       shortname: 'energ',
       main_language: 'nb',
       status: { code: 'SA' },
@@ -1608,7 +1574,6 @@ const mockedStatisticsResult = {
       contacts: [{ principalName: 'abc@ssb.no', name: '' }],
     },
     {
-      id: 2,
       shortname: 'befolk',
       main_language: 'nb',
       status: { code: 'SA' },
@@ -1625,7 +1590,6 @@ const mockedStatisticsResult = {
 }
 
 const mockedStatisticDetailedResult = {
-  id: 5,
   version: 1,
   shortname: 'helse',
   approval_status: 'GODKJENT',
