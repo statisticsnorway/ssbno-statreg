@@ -19,17 +19,24 @@ type BlockedDatesTableProps = {
 }
 
 function BlockedDateRow({ day, onDelete }: BlockedDateRowProps) {
+  const [open, setOpen] = useState(false)
   return (
     <Table.Row>
       <Table.Cell>{day.date}</Table.Cell>
       <Table.Cell>{day.blocked_comment}</Table.Cell>
       <Table.Cell className='delete-column'>
         {!day.automatically_blocked && (
-          <Popover.TriggerContext>
-            <Popover.Trigger variant='tertiary' data-color='danger' aria-label='Slett sperredato'>
+          <>
+            <Button
+              variant='tertiary'
+              data-color='danger'
+              aria-label='Slett sperredato'
+              popoverTarget='delete-popover'
+              onClick={() => setOpen(true)}
+            >
               <TrashIcon />
-            </Popover.Trigger>
-            <Popover data-color='danger'>
+            </Button>
+            <Popover data-color='danger' id='delete-popover' open={open} onClose={() => setOpen(false)}>
               <Paragraph>Er du sikker på at du vil slette sperredatoen?</Paragraph>
               <div
                 style={{
@@ -43,11 +50,14 @@ function BlockedDateRow({ day, onDelete }: BlockedDateRowProps) {
                   aria-label={`Slett sperret dato: ${day.date}`}
                   onClick={() => onDelete(day.date)}
                 >
-                  Ja, slett den
+                  Slett
+                </Button>
+                <Button data-variant='tertiary' onClick={() => setOpen(false)} data-size='sm'>
+                  Avbryt
                 </Button>
               </div>
             </Popover>
-          </Popover.TriggerContext>
+          </>
         )}
       </Table.Cell>
     </Table.Row>
