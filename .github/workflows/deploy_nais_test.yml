@@ -23,7 +23,7 @@ jobs:
           output: "dependency-results.sbom.json"
           scan-ref: "."
       - name: Build and push image and SBOM to OCI registry
-        uses: nais/docker-build-push@8e41f1f58749b9248e376c25d33bfbdd2b1163c0 # v0
+        uses: nais/docker-build-push@0e73849f69ff260ee27597553c0a7848ca4e9795 # v0
         id: docker-build-push
         with:
           team: ssbno
