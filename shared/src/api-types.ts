@@ -1156,6 +1156,7 @@ export interface components {
       statistic_region_levels?: components['schemas']['Region_level'][]
     } & components['schemas']['Statistic']
     Statistic_listing: {
+      readonly id?: number
       division?: components['schemas']['Division']
       contacts?: components['schemas']['Contact'][]
     } & components['schemas']['Statistic']
