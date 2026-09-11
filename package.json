@@ -28,7 +28,7 @@
     "lint:fix": "eslint --fix",
     "seed": "pnpm --filter 'backend' run seed",
     "generate": "pnpm --filter 'backend' run generate",
-    "generate:api-types": "openapi-typescript ./shared/openapi/openapi.yaml -o ./shared/src/api-types.ts && prettier --write ./shared/src/api-types.ts"
+    "generate:api-types": "openapi-typescript ./api-types/openapi/openapi.yaml -o ./api-types/src/api-types.ts && prettier --write ./api-types/src/api-types.ts"
   },
   "devDependencies": {
     "@eslint-react/eslint-plugin": "5.18.6",

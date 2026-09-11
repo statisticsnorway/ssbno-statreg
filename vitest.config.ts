@@ -9,6 +9,7 @@ export default defineProject({
           alias: {
             '@': path.resolve(__dirname, 'backend/src'),
             '@ssbno-statreg/shared': path.resolve(__dirname, 'shared/src'),
+            '@ssbno-statreg/api-types': path.resolve(__dirname, 'api-types/src'),
           },
         },
         test: {
@@ -26,6 +27,7 @@ export default defineProject({
             '@': path.resolve(__dirname, 'backend/src'),
             plugins: path.resolve(__dirname, 'backend/plugins'),
             '@ssbno-statreg/shared': path.resolve(__dirname, 'shared/src'),
+            '@ssbno-statreg/api-types': path.resolve(__dirname, 'api-types/src'),
           },
         },
         test: {
@@ -41,6 +43,7 @@ export default defineProject({
           alias: {
             '@': path.resolve(__dirname, 'frontend/src'),
             '@ssbno-statreg/shared': path.resolve(__dirname, 'shared/src'),
+            '@ssbno-statreg/api-types': path.resolve(__dirname, 'api-types/src'),
           },
         },
         test: {

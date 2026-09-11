@@ -32,7 +32,7 @@ export async function createApp() {
   app.use(helmet())
   app.use(promBundleMetrics)
   app.use(express.json())
-  const swaggerDocument = YAML.parse(fs.readFileSync('../shared/openapi/openapi.yaml', 'utf8'))
+  const swaggerDocument = YAML.parse(fs.readFileSync('../api-types/openapi/openapi.yaml', 'utf8'))
   const docsPath = `${APP_BASE_PATH}${DOCS_PATH}`
   const docsHtml = normalizeSwaggerAssetPaths(swaggerUi.generateHTML(swaggerDocument), docsPath)
 

@@ -44,6 +44,10 @@ pnpm run dev:auth
 
 The app is now served on http://localhost:8080/statistikkregisteret
 
+### Typing, API-spec and publishing
+
+The API-spec and the types generated from them are in a separate workspace under `./api-types`. We import them in the other workspaces, and we publish the api-types as a package on the npmjs.com package registry.
+
 ### Local authentication
 We are using keycloak for authentication. We have a docker compose setup to simulate production auth flow. 
 
