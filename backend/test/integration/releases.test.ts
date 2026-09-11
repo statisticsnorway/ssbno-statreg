@@ -37,7 +37,7 @@ async function createStatisticWithVariant(shortname: string) {
 
 describe('release data is persisted when ', () => {
   test('client creates a new release', async () => {
-    const testShortname = 'release_create_test'
+    const testShortname = 'release_test'
     const testVariantId = await createStatisticWithVariant(testShortname)
 
     // POST release
@@ -218,7 +218,7 @@ describe('release listing can be filtered by approval status', () => {
 
 describe('/releases/bulk-approve', () => {
   test('can approve two newly created releases', async () => {
-    const testShortname = 'bulk_approve_test'
+    const testShortname = 'bulk_test'
     const testVariantId = await createStatisticWithVariant(testShortname)
 
     // POST two identical releases and check that both have approval status FORSLAG
