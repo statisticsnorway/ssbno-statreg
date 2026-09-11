@@ -2,6 +2,9 @@
   "name": "@statisticsnorway/statreg-api-types",
   "version": "0.0.0",
   "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
   "exports": {
     ".": "./dist/index.js",
     "./openapi": "./openapi/openapi.yaml"
