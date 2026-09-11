@@ -2,6 +2,7 @@ packages:
   - "backend"
   - "frontend"
   - "shared"
+  - "api-types"
 allowBuilds:
   "@prisma/engines": false
   "@scarf/scarf": false
