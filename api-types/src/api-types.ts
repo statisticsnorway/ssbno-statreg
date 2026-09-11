@@ -1054,6 +1054,7 @@ export interface components {
     Release_get: components['schemas']['Release'] & {
       approval_status?: string | null
       statistic?: {
+        readonly id?: number
         readonly shortname?: string
         readonly name?: string
         readonly name_en?: string
