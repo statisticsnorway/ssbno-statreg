@@ -89,8 +89,6 @@ export function CreateShortnameModal({ openCreateShortnameModal }: Readonly<Crea
     latestInputRef.current = value
     const formatError = validateShortnameFormat(value)
     setValidationError(formatError)
-    setLastCheckedShortname(null)
-    setIsAvailable(false)
   }
 
   async function createShortname() {
@@ -157,15 +155,11 @@ export function CreateShortnameModal({ openCreateShortnameModal }: Readonly<Crea
               autofocus='true'
             />
             <Paragraph data-limit='14' data-field='counter' />
-            {validationError ? (
-              <ValidationMessage data-field='validation'>{validationError}</ValidationMessage>
-            ) : (
-              lastCheckedShortname === shortnameInput &&
-              isAvailable && (
-                <ValidationMessage data-field='validation' data-color='success'>
-                  Kortnavn er ledig
-                </ValidationMessage>
-              )
+            {validationError && <ValidationMessage data-field='validation'>{validationError}</ValidationMessage>}
+            {lastCheckedShortname === shortnameInput && isAvailable && (
+              <ValidationMessage data-field='validation' data-color='success'>
+                Kortnavn er ledig
+              </ValidationMessage>
             )}
           </Field>
           <div style={{ display: 'flex', gap: 'var(--ds-size-2)', marginTop: 'var(--ds-size-3)' }}>
