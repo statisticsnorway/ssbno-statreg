@@ -1,0 +1,45 @@
+services:
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+  app:
+    image: ghcr.io/pnpm/pnpm@sha256:eba76954b37ec1ba6187f0adb39caee1e31733194857eedd01319da0af3fa00d #v.11.22
+    working_dir: /app
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/backend/node_modules
+      - /app/frontend/node_modules
+      - /app/shared/node_modules
+    command: sh -c "pnpm runtime set node 24 -g && pnpm install --frozen-lockfile && pnpm run generate && pnpm run db:deploy && pnpm run build && pnpm run start"
+    expose:
+      - "8080"
+    env_file: "./backend/.env"
+    environment:
+      NODE_ENV: development
+      PGURL: ${PGURL_DOCKER}
+
+  wonderwall:
+    image: europe-north1-docker.pkg.dev/nais-io/nais/images/wonderwall:latest
+    depends_on:
+      - redis
+      - app
+    ports:
+      - "8080:8080"
+    command: >
+      --openid.client-id=${KEYCLOAK_CLIENT_ID}
+      --openid.client-secret=${KEYCLOAK_CLIENT_SECRET}
+      --openid.well-known-url=${KEYCLOAK_WELL_KNOWN_URL}
+      --ingress=http://localhost:8080
+      --bind-address=0.0.0.0:8080
+      --upstream-host=app:8080
+      --upstream-include-id-token
+      --redis.uri=redis://redis:6379
+      --cookie.secure=false
+      --auto-login
+      --log-level=debug
+    restart: on-failure
+    extra_hosts:
+      - localhost:host-gateway

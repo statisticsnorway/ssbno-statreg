@@ -1,0 +1,661 @@
+import {
+  dateToISOString,
+  sanitize,
+  parseDateOnly,
+  parseDateISO,
+  ensureString,
+  ensureStringArray,
+  parseId,
+  ensureRequiredFieldsExists,
+  isNumber,
+  getDateOnlyAsString,
+  validatePeriodWeeks,
+  validatePeriodDaysWithinSameYear,
+  validatePeriodDaysSpanningSeveralYears,
+  parseHumanReadableMeasuringPeriod,
+  formatMonthYear,
+  formatDayMonthYear,
+  formatYear,
+  getIsoWeekInfo,
+} from '@/lib/utils'
+import { describe, test, expect } from 'vitest'
+
+describe('utils', () => {
+  describe('dateToISOString ', () => {
+    test('returns ISO string for valid date', () => {
+      const date = new Date('2020-01-01T12:00:00Z')
+      const result = dateToISOString(date)
+      expect(result).toBe('2020-01-01T12:00:00.000Z')
+    })
+
+    test('returns undefined when date is null', () => {
+      const result = dateToISOString(null)
+      expect(result).toBeUndefined()
+    })
+  })
+
+  describe('sanitize', () => {
+    test('handles empty string', async () => {
+      const result = sanitize('')
+      expect(result).toBe('')
+    })
+    test('handles input that is not string', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = sanitize(Number(8) as any)
+      expect(result).toBe('')
+    })
+    test('returning same string if all characters are legal', async () => {
+      const input = 'Alt her er lovlige bokstaver inkl. ÆæÅ!/'
+      const result = sanitize(input)
+      expect(result).toBe(input)
+    })
+    test('removes illigal characters', async () => {
+      const input = `Fjerner alle ulovlige tegn: é\\<>{}`
+      const result = sanitize(input)
+      expect(result).toBe('Fjerner alle ulovlige tegn: ')
+    })
+  })
+
+  describe('parseDateOnly', () => {
+    test('accepts and returns valid Date', () => {
+      const result = parseDateOnly('2026-12-24')
+      expect(result.toISOString()).toBe('2026-12-24T00:00:00.000Z')
+    })
+
+    test('returns 400 for date ISO format', async () => {
+      await expect(() => parseDateOnly('2026-03-25T12:30:00Z')).toThrow(
+        expect.objectContaining({ statregError: 'Invalid date format: 2026-03-25T12:30:00Z' })
+      )
+    })
+
+    test('returns 400 for invalid date string format', async () => {
+      expect(() => parseDateOnly('24. des')).toThrow(
+        expect.objectContaining({ statregError: 'Invalid date format: 24. des' })
+      )
+    })
+
+    test('returns 400 if date parsing fails', async () => {
+      expect(() => parseDateOnly('9999-11-00')).toThrow(
+        expect.objectContaining({ statregError: 'Invalid date format: 9999-11-00' })
+      )
+    })
+  })
+
+  describe('parseDateISO ', () => {
+    test('accepts and returns valid date ISO format with Z', () => {
+      const result = parseDateISO('2026-03-25T12:30:00Z')
+      expect(result.toISOString()).toBe('2026-03-25T12:30:00.000Z')
+    })
+
+    test('accepts and returns valid date ISO format with offset', () => {
+      const result = parseDateISO('2026-03-25T12:30:00+01:00')
+      expect(result.toISOString()).toBe('2026-03-25T11:30:00.000Z')
+    })
+
+    test('accepts and returns valid date ISO format with milliseconds', () => {
+      const result = parseDateISO('2026-03-25T12:30:00.123Z')
+      expect(result.toISOString()).toBe('2026-03-25T12:30:00.123Z')
+    })
+
+    test('returns 400 for missing date', () => {
+      expect(() => parseDateISO(undefined)).toThrow(expect.objectContaining({ statregError: 'Invalid date format:' }))
+    })
+
+    test('returns 400 for invalid date only format', () => {
+      expect(() => parseDateISO('2026-03-25', 'publish_time')).toThrow(
+        expect.objectContaining({ statregError: 'Invalid publish_time date format: 2026-03-25' })
+      )
+    })
+
+    test('returns 400 for invalid date with missing timezone', () => {
+      expect(() => parseDateISO('2026-03-25T12:30:00')).toThrow(
+        expect.objectContaining({ statregError: 'Invalid date format: 2026-03-25T12:30:00' })
+      )
+    })
+
+    test('returns 400 for invalid date with space instead of T', () => {
+      expect(() => parseDateISO('2026-03-25 12:30:00Z')).toThrow(
+        expect.objectContaining({ statregError: 'Invalid date format: 2026-03-25 12:30:00Z' })
+      )
+    })
+
+    test('returns 400 for invalid date if not colon in offset', () => {
+      expect(() => parseDateISO('2026-03-25T12:30:00+0100')).toThrow(
+        expect.objectContaining({ statregError: 'Invalid date format: 2026-03-25T12:30:00+0100' })
+      )
+    })
+  })
+
+  describe('ensureString', () => {
+    test('returns passed string', () => {
+      const result = ensureString('value')
+      expect(result).toBe('value')
+    })
+
+    test('returns first element if passed value is an array of string', () => {
+      const result = ensureString(['value1', 'value2'])
+      expect(result).toBe('value1')
+    })
+
+    test('returns empty string if string is undefined', () => {
+      const result = ensureString(undefined)
+      expect(result).toBe('')
+    })
+  })
+
+  describe('ensureStringArray', () => {
+    test('returns array of strings when passed a comma-separated string', () => {
+      const result = ensureStringArray('value1,value2,value3')
+      expect(result).toEqual(['value1', 'value2', 'value3'])
+    })
+
+    test('returns array of string when passed string', () => {
+      const result = ensureStringArray('value1')
+      expect(result).toEqual(['value1'])
+    })
+
+    test('returns empty array when passed a non-string value', () => {
+      // @ts-expect-error testing non-string input
+      const result = ensureStringArray([123])
+      expect(result).toEqual([])
+    })
+  })
+
+  describe('ensureIdIsNumber', () => {
+    test('returns parsed number for valid string id', () => {
+      const result = parseId('123')
+      expect(result).toBe(123)
+    })
+
+    test('returns parsed number for valid number id', () => {
+      const result = parseId(123)
+      expect(result).toBe(123)
+    })
+
+    test('throws error for invalid numeric format', () => {
+      expect(() => parseId('abc')).toThrow(expect.objectContaining({ statregError: 'Invalid id format' }))
+    })
+
+    test('throws error for negative number', () => {
+      expect(() => parseId('-1', 'variant')).toThrow(
+        expect.objectContaining({ statregError: 'Invalid variant id format' })
+      )
+    })
+  })
+
+  describe('ensureRequiredFieldsExists', () => {
+    test('return body when all the required fields exists', () => {
+      const requiredFields: (keyof { field_1: 'test'; field_2: null })[] = ['field_1', 'field_2']
+      const body = {
+        field_1: 'test',
+        field_2: null,
+      }
+      expect(body).toBe(ensureRequiredFieldsExists(body, requiredFields))
+    })
+
+    test('return 400 when body is undefined', () => {
+      const requiredFields = ['field_1', 'field_2']
+      expect(() => ensureRequiredFieldsExists(undefined, requiredFields)).toThrow(
+        expect.objectContaining({ statregError: 'Missing required field(s): field_1, field_2' })
+      )
+    })
+
+    test('return 400 when body object is empty', () => {
+      const requiredFields = ['field_1', 'field_2']
+      expect(() => ensureRequiredFieldsExists({}, requiredFields as never[])).toThrow(
+        expect.objectContaining({ statregError: 'Missing required field(s): field_1, field_2' })
+      )
+    })
+  })
+
+  describe('isNumber', () => {
+    test('a number is a number', () => {
+      expect(true).toBe(isNumber(42))
+    })
+    test('a string with a number is castable as number', () => {
+      expect(true).toBe(isNumber('9000'))
+    })
+    test('a string of text is not a number', () => {
+      expect(false).toBe(isNumber('text in a string'))
+    })
+  })
+
+  describe('getDateOnlyAsString', () => {
+    test('gets the correct datestring from date', () => {
+      const dateString = getDateOnlyAsString(new Date('2026-05-05T00:00Z'))
+      expect(dateString).toBe('2026-05-05')
+    })
+    test('returns iso date if given local date with offset', () => {
+      const dateString = getDateOnlyAsString(new Date('2026-05-05T00:00+01:00'))
+      expect(dateString).toBe('2026-05-04')
+    })
+  })
+
+  describe('validatePeriodWeeks', () => {
+    test('returns true for a full ISO week from monday to sunday', () => {
+      const periodFrom = new Date(Date.UTC(2026, 0, 5))
+      const periodTo = new Date(Date.UTC(2026, 0, 11))
+
+      expect(validatePeriodWeeks(periodFrom, periodTo)).toBe(true)
+    })
+
+    test('returns false when period does not start on monday', () => {
+      const periodFrom = new Date(Date.UTC(2026, 0, 6))
+      const periodTo = new Date(Date.UTC(2026, 0, 12))
+
+      expect(validatePeriodWeeks(periodFrom, periodTo)).toBe(false)
+    })
+
+    test('returns false when period does not end on sunday', () => {
+      const periodFrom = new Date(Date.UTC(2026, 0, 5))
+      const periodTo = new Date(Date.UTC(2026, 0, 10))
+
+      expect(validatePeriodWeeks(periodFrom, periodTo)).toBe(false)
+    })
+
+    test('returns false when period end is not exactly six days after period start', () => {
+      const periodFrom = new Date(Date.UTC(2026, 0, 5))
+      const periodTo = new Date(Date.UTC(2026, 0, 18))
+
+      expect(validatePeriodWeeks(periodFrom, periodTo)).toBe(false)
+    })
+  })
+
+  describe('validatePeriodDaysWithinSameYear', () => {
+    test('returns true for a full month period', () => {
+      const periodFrom = new Date(Date.UTC(2026, 4, 1))
+      const periodTo = new Date(Date.UTC(2026, 4, 31))
+
+      expect(validatePeriodDaysWithinSameYear(periodFrom, periodTo, 'M')).toBe(true)
+    })
+
+    test('returns true for a full two-month term period', () => {
+      const periodFrom = new Date(Date.UTC(2026, 2, 1))
+      const periodTo = new Date(Date.UTC(2026, 3, 30))
+
+      expect(validatePeriodDaysWithinSameYear(periodFrom, periodTo, 'T')).toBe(true)
+    })
+
+    test('returns true for a full quarter period', () => {
+      const periodFrom = new Date(Date.UTC(2026, 9, 1))
+      const periodTo = new Date(Date.UTC(2026, 11, 31))
+
+      expect(validatePeriodDaysWithinSameYear(periodFrom, periodTo, 'Q')).toBe(true)
+    })
+
+    test('returns true for a full half-year period', () => {
+      const periodFrom = new Date(Date.UTC(2026, 6, 1))
+      const periodTo = new Date(Date.UTC(2026, 11, 31))
+
+      expect(validatePeriodDaysWithinSameYear(periodFrom, periodTo, 'H')).toBe(true)
+    })
+
+    test('returns false when period does not start on first day of expected month', () => {
+      const periodFrom = new Date(Date.UTC(2026, 0, 2))
+      const periodTo = new Date(Date.UTC(2026, 0, 31))
+
+      expect(validatePeriodDaysWithinSameYear(periodFrom, periodTo, 'M')).toBe(false)
+    })
+
+    test('returns false when period spans across years', () => {
+      const periodFrom = new Date(Date.UTC(2025, 11, 1))
+      const periodTo = new Date(Date.UTC(2026, 0, 31))
+
+      expect(validatePeriodDaysWithinSameYear(periodFrom, periodTo, 'T')).toBe(false)
+    })
+  })
+
+  describe('validatePeriodDaysSpanningSeveralYears', () => {
+    test('returns true for a valid 2-year period', () => {
+      const periodFrom = new Date(Date.UTC(2020, 0, 1))
+      const periodTo = new Date(Date.UTC(2021, 11, 31))
+
+      expect(validatePeriodDaysSpanningSeveralYears(periodFrom, periodTo, '2Y')).toBe(true)
+    })
+
+    test('returns true for a valid 5-year period', () => {
+      const periodFrom = new Date(Date.UTC(2018, 0, 1))
+      const periodTo = new Date(Date.UTC(2022, 11, 31))
+
+      expect(validatePeriodDaysSpanningSeveralYears(periodFrom, periodTo, '5Y')).toBe(true)
+    })
+
+    test('returns false when period does not start on first of january', () => {
+      const periodFrom = new Date(Date.UTC(2020, 0, 2))
+      const periodTo = new Date(Date.UTC(2021, 11, 31))
+
+      expect(validatePeriodDaysSpanningSeveralYears(periodFrom, periodTo, '2Y')).toBe(false)
+    })
+
+    test('returns false when period does not end on 31st of december', () => {
+      const periodFrom = new Date(Date.UTC(2020, 0, 1))
+      const periodTo = new Date(Date.UTC(2021, 11, 30))
+
+      expect(validatePeriodDaysSpanningSeveralYears(periodFrom, periodTo, '2Y')).toBe(false)
+    })
+  })
+
+  describe('formatMonthYear', () => {
+    test('returns capitalized month and year in Norwegian', () => {
+      const result = formatMonthYear(new Date(Date.UTC(2026, 0, 15)))
+      expect(result).toBe('januar 2026')
+    })
+
+    test('returns correct month for mid-year date', () => {
+      const result = formatMonthYear(new Date(Date.UTC(2023, 5, 30)))
+      expect(result).toBe('juni 2023')
+    })
+  })
+
+  describe('formatDayMonthYear', () => {
+    test('returns day, month and year in Norwegian', () => {
+      const result = formatDayMonthYear(new Date(Date.UTC(2026, 0, 1)))
+      expect(result).toBe('1. januar 2026')
+    })
+
+    test('returns correct format for end of year', () => {
+      const result = formatDayMonthYear(new Date(Date.UTC(2024, 11, 25)))
+      expect(result).toBe('25. desember 2024')
+    })
+  })
+
+  describe('getIsoWeekInfo', () => {
+    test('returns week and year for a regular week', () => {
+      const result = getIsoWeekInfo(new Date(Date.UTC(2011, 11, 11)))
+      expect(result).toEqual({ week: 49, year: 2011 })
+    })
+
+    test('returns ISO week-year for week 1 spanning year boundary', () => {
+      const result = getIsoWeekInfo(new Date(Date.UTC(2025, 11, 29)))
+      expect(result).toEqual({ week: 1, year: 2026 })
+    })
+
+    test('returns previous ISO year for 1st of january in week 52', () => {
+      const result = getIsoWeekInfo(new Date(Date.UTC(2022, 11, 26)))
+      expect(result).toEqual({ week: 52, year: 2022 })
+    })
+  })
+
+  describe('formatYear', () => {
+    test('returns "Per" for yearly counting point on 1st of january', () => {
+      const periodFrom = new Date(Date.UTC(2011, 0, 1))
+      const periodTo = new Date(Date.UTC(2011, 0, 1))
+
+      expect(formatYear(true, periodFrom, periodTo)).toBe('per 1. januar 2011')
+    })
+
+    test('returns day-month-year for same-day non-january measuring point', () => {
+      const periodFrom = new Date(Date.UTC(2011, 9, 1))
+      const periodTo = new Date(Date.UTC(2011, 9, 1))
+
+      expect(formatYear(true, periodFrom, periodTo)).toBe('1. oktober 2011')
+    })
+
+    test('returns single year when period is from 1st of January to 31st of December', () => {
+      const periodFrom = new Date(Date.UTC(2011, 0, 1))
+      const periodTo = new Date(Date.UTC(2011, 11, 31))
+
+      expect(formatYear(false, periodFrom, periodTo)).toBe('2011')
+    })
+
+    test('returns year range when period spans multiple years', () => {
+      const periodFrom = new Date(Date.UTC(2010, 8, 1))
+      const periodTo = new Date(Date.UTC(2011, 2, 31))
+
+      expect(formatYear(false, periodFrom, periodTo)).toBe('2010/2011')
+    })
+  })
+
+  describe('parseHumanReadableMeasuringPeriod', () => {
+    function toUtcDate(dateString: string): Date {
+      const [day, month, year] = dateString.split('.')
+      return new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)))
+    }
+
+    type MeasuringPeriodScenario = {
+      scenarioDescription: string
+      frequencyCode: string
+      periodFrom: string
+      periodTo: string
+      expectedNb: string
+      expectedEn: string
+    }
+
+    const scenarios: MeasuringPeriodScenario[] = [
+      {
+        scenarioDescription: 'week period monday to sunday',
+        frequencyCode: 'W',
+        periodFrom: '05.12.2011',
+        periodTo: '11.12.2011',
+        expectedNb: 'uke 49 2011',
+        expectedEn: 'week 49 2011',
+      },
+      {
+        scenarioDescription: 'wrong week period tuesday to monday',
+        frequencyCode: 'W',
+        periodFrom: '06.12.2011',
+        periodTo: '12.12.2011',
+        expectedNb: '6. desember 2011-12. desember 2011',
+        expectedEn: '6 December 2011-12 December 2011',
+      },
+      {
+        scenarioDescription: 'wrong week period monday to friday',
+        frequencyCode: 'W',
+        periodFrom: '05.12.2011',
+        periodTo: '09.12.2011',
+        expectedNb: '5. desember 2011-9. desember 2011',
+        expectedEn: '5 December 2011-9 December 2011',
+      },
+      {
+        scenarioDescription: 'month period full month',
+        frequencyCode: 'M',
+        periodFrom: '01.12.2011',
+        periodTo: '31.12.2011',
+        expectedNb: 'desember 2011',
+        expectedEn: 'December 2011',
+      },
+      {
+        scenarioDescription: 'month period not full month',
+        frequencyCode: 'M',
+        periodFrom: '01.12.2011',
+        periodTo: '30.12.2011',
+        expectedNb: '1. desember 2011-30. desember 2011',
+        expectedEn: '1 December 2011-30 December 2011',
+      },
+      {
+        scenarioDescription: 'month measuring point',
+        frequencyCode: 'M',
+        periodFrom: '15.12.2011',
+        periodTo: '15.12.2011',
+        expectedNb: '15. desember 2011',
+        expectedEn: '15 December 2011',
+      },
+      {
+        scenarioDescription: 'term period over two months',
+        frequencyCode: 'T',
+        periodFrom: '01.11.2011',
+        periodTo: '31.12.2011',
+        expectedNb: '6. termin 2011',
+        expectedEn: '6th term 2011',
+      },
+      {
+        scenarioDescription: 'term period not over two months',
+        frequencyCode: 'T',
+        periodFrom: '01.11.2011',
+        periodTo: '30.11.2011',
+        expectedNb: '1. november 2011-30. november 2011',
+        expectedEn: '1 November 2011-30 November 2011',
+      },
+      {
+        scenarioDescription: '1st quarter period',
+        frequencyCode: 'K',
+        periodFrom: '01.01.2011',
+        periodTo: '31.03.2011',
+        expectedNb: '1. kvartal 2011',
+        expectedEn: '1st quarter 2011',
+      },
+      {
+        scenarioDescription: 'quarter period not spanning full quarter',
+        frequencyCode: 'K',
+        periodFrom: '01.01.2011',
+        periodTo: '28.02.2011',
+        expectedNb: '1. januar 2011-28. februar 2011',
+        expectedEn: '1 January 2011-28 February 2011',
+      },
+      {
+        scenarioDescription: '2nd quarter period',
+        frequencyCode: 'K',
+        periodFrom: '01.04.2011',
+        periodTo: '30.06.2011',
+        expectedNb: '2. kvartal 2011',
+        expectedEn: '2nd quarter 2011',
+      },
+      {
+        scenarioDescription: '3rd quarter period',
+        frequencyCode: 'K',
+        periodFrom: '01.07.2011',
+        periodTo: '30.09.2011',
+        expectedNb: '3. kvartal 2011',
+        expectedEn: '3rd quarter 2011',
+      },
+      {
+        scenarioDescription: '4th quarter period',
+        frequencyCode: 'K',
+        periodFrom: '01.10.2011',
+        periodTo: '31.12.2011',
+        expectedNb: '4. kvartal 2011',
+        expectedEn: '4th quarter 2011',
+      },
+      {
+        scenarioDescription: 'quarter measuring point',
+        frequencyCode: 'K',
+        periodFrom: '01.04.2011',
+        periodTo: '01.04.2011',
+        expectedNb: '1. april 2011',
+        expectedEn: '1 April 2011',
+      },
+      {
+        scenarioDescription: 'half-year first half',
+        frequencyCode: 'H',
+        periodFrom: '01.01.2011',
+        periodTo: '30.06.2011',
+        expectedNb: '1. halvår 2011',
+        expectedEn: 'first half of 2011',
+      },
+      {
+        scenarioDescription: 'half-year not starting on 1st of january',
+        frequencyCode: 'H',
+        periodFrom: '01.02.2011',
+        periodTo: '30.07.2011',
+        expectedNb: '1. februar 2011-30. juli 2011',
+        expectedEn: '1 February 2011-30 July 2011',
+      },
+      {
+        scenarioDescription: 'half-year second half',
+        frequencyCode: 'H',
+        periodFrom: '01.07.2011',
+        periodTo: '31.12.2011',
+        expectedNb: '2. halvår 2011',
+        expectedEn: 'second half of 2011',
+      },
+      {
+        scenarioDescription: 'calendar year',
+        frequencyCode: 'Y',
+        periodFrom: '01.01.2011',
+        periodTo: '31.12.2011',
+        expectedNb: '2011',
+        expectedEn: '2011',
+      },
+      {
+        scenarioDescription: 'Two dates within the same calendar year',
+        frequencyCode: 'Y',
+        periodFrom: '01.03.2011',
+        periodTo: '31.10.2011',
+        expectedNb: '2011',
+        expectedEn: '2011',
+      },
+      {
+        scenarioDescription: 'calendar year school year/hunting year',
+        frequencyCode: 'Y',
+        periodFrom: '01.09.2010',
+        periodTo: '31.03.2011',
+        expectedNb: '2010/2011',
+        expectedEn: '2010/2011',
+      },
+      {
+        scenarioDescription: 'every 2nd year',
+        frequencyCode: '2Y',
+        periodFrom: '01.01.2010',
+        periodTo: '31.12.2011',
+        expectedNb: '2010-2011',
+        expectedEn: '2010-2011',
+      },
+      {
+        scenarioDescription: 'every 2nd year with period not starting on 1st of january',
+        frequencyCode: '2Y',
+        periodFrom: '01.02.2010',
+        periodTo: '31.01.2012',
+        expectedNb: '1. februar 2010-31. januar 2012',
+        expectedEn: '1 February 2010-31 January 2012',
+      },
+      {
+        scenarioDescription: 'every 3rd year',
+        frequencyCode: '3Y',
+        periodFrom: '01.01.2010',
+        periodTo: '31.12.2012',
+        expectedNb: '2010-2012',
+        expectedEn: '2010-2012',
+      },
+      {
+        scenarioDescription: 'every 4th year',
+        frequencyCode: '4Y',
+        periodFrom: '01.01.2010',
+        periodTo: '31.12.2013',
+        expectedNb: '2010-2013',
+        expectedEn: '2010-2013',
+      },
+      {
+        scenarioDescription: 'every 5th year',
+        frequencyCode: '5Y',
+        periodFrom: '01.01.2010',
+        periodTo: '31.12.2014',
+        expectedNb: '2010-2014',
+        expectedEn: '2010-2014',
+      },
+      {
+        scenarioDescription: 'year measuring point with month label',
+        frequencyCode: 'Y',
+        periodFrom: '01.10.2011',
+        periodTo: '01.10.2011',
+        expectedNb: '1. oktober 2011',
+        expectedEn: '1 October 2011',
+      },
+      {
+        scenarioDescription: 'year measuring point as of first day of year',
+        frequencyCode: 'Y',
+        periodFrom: '01.01.2011',
+        periodTo: '01.01.2011',
+        expectedNb: 'per 1. januar 2011',
+        expectedEn: 'as of 1 January 2011',
+      },
+    ]
+
+    test.each(scenarios)(
+      'returns correct Norwegian text for: $scenarioDescription',
+      ({ frequencyCode, periodFrom, periodTo, expectedNb }: MeasuringPeriodScenario) => {
+        expect(parseHumanReadableMeasuringPeriod(frequencyCode, toUtcDate(periodFrom), toUtcDate(periodTo), 'nb')).toBe(
+          expectedNb
+        )
+      }
+    )
+
+    test.each(scenarios)(
+      'returns correct English text for: $scenarioDescription',
+      ({ frequencyCode, periodFrom, periodTo, expectedEn }: MeasuringPeriodScenario) => {
+        expect(parseHumanReadableMeasuringPeriod(frequencyCode, toUtcDate(periodFrom), toUtcDate(periodTo), 'en')).toBe(
+          expectedEn
+        )
+      }
+    )
+  })
+})

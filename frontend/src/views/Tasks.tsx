@@ -1,0 +1,354 @@
+import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
+import { useSearchParams } from 'react-router'
+import {
+  Heading,
+  Divider,
+  Field,
+  Label,
+  Checkbox,
+  Badge,
+  Tabs,
+  Table,
+  EXPERIMENTAL_Suggestion as Suggestion,
+  type SuggestionItem,
+  useCheckboxGroup,
+  Button,
+  Alert,
+} from '@statisticsnorway/design-react'
+import { EraserIcon } from '@navikt/aksel-icons'
+
+import client from '../api'
+
+import './Tasks.css'
+
+import { formatDateTime, formatDate, toggleSort, getSortDirection } from '../lib/utils'
+import { useAuth } from '../context/AuthContext'
+import { RowCountSelect } from '../components/RowCountSelect'
+import { PaginatedReleasesTable, TruncatedTableCell } from '../components/ReleasesTable'
+import { ErrorAlert } from '../components/ErrorAlert'
+import ErrorPage, { ErrorType } from './ErrorPage'
+
+import { ApprovalStatus, type ReleaseListing, type ShortnameListing } from '@ssbno-statreg/shared'
+
+type PendingReleaseRowProps = {
+  pendingRelease: ReleaseListing
+  getCheckboxProps: ReturnType<typeof useCheckboxGroup>['getCheckboxProps']
+}
+
+type PendingReleaseTableProps = {
+  pendingReleases: ReleaseListing[]
+  getCheckboxProps: ReturnType<typeof useCheckboxGroup>['getCheckboxProps']
+  tableHeaderRef: React.RefObject<HTMLTableSectionElement | null>
+  sortBy?: string
+  setSortBy?: (sortBy: string) => void
+}
+
+type ListReleasesTableProps = {
+  isAdmin: boolean
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  setApiError: Dispatch<SetStateAction<any[]>>
+  approvedReleasesCount: number
+}
+
+const TABLE_HEADER_CELLS = [
+  {
+    label: 'Velg',
+    field: 'choose_release',
+    caption: 'Sjekkboks for å velge en eller flere publiseringer for godkjenning',
+  },
+  { label: 'Kortnavn', field: 'statistic.shortname' },
+  { label: 'Statistikknavn', field: 'statistic.name' },
+  { label: 'Variant', field: 'frequency.name' },
+  { label: 'Målperiode fra', field: 'period_from' },
+  { label: 'Måleperiode til', field: 'period_to' },
+  { label: 'Publiseringsdato', sortable: true, field: 'publish_time' },
+]
+
+function PendingReleaseRow({ pendingRelease, getCheckboxProps }: Readonly<PendingReleaseRowProps>) {
+  const statisticsShortname = pendingRelease.statistic?.shortname ?? ''
+  const selectLabel = `Velg publisering for godkjenning: ${pendingRelease.statistic?.name ?? ''}, publiseres ${formatDateTime(pendingRelease.publish_time)}`
+  return (
+    <Table.Row key={`${pendingRelease.publish_time}-${pendingRelease.id}`} className='selectable-row'>
+      <Table.Cell>
+        <Checkbox aria-label={selectLabel} {...getCheckboxProps(pendingRelease.id?.toString())} />
+      </Table.Cell>
+      <Table.Cell>{statisticsShortname}</Table.Cell>
+      <TruncatedTableCell value={pendingRelease.statistic?.name} />
+      <Table.Cell>{pendingRelease.frequency?.name ?? ''}</Table.Cell>
+      <Table.Cell>{formatDate(pendingRelease.period_from)}</Table.Cell>
+      <Table.Cell>{formatDate(pendingRelease.period_to)}</Table.Cell>
+      <Table.Cell>{formatDateTime(pendingRelease.publish_time)}</Table.Cell>
+    </Table.Row>
+  )
+}
+
+function PendingReleasesTable({
+  pendingReleases,
+  getCheckboxProps,
+  tableHeaderRef,
+  sortBy,
+  setSortBy,
+}: Readonly<PendingReleaseTableProps>) {
+  return (
+    <Table aria-description='Tabell med publiseringer som har status forslag'>
+      <Table.Head ref={tableHeaderRef} tabIndex={-1}>
+        <Table.Row>
+          {TABLE_HEADER_CELLS.map(({ label, field, sortable, caption }) => (
+            <Table.HeaderCell
+              key={label}
+              onClick={sortable && setSortBy ? () => setSortBy(toggleSort(field, sortBy || '')) : undefined}
+              sort={sortable ? getSortDirection(field, sortBy || '') : undefined}
+              aria-description={caption}
+            >
+              {label}
+            </Table.HeaderCell>
+          ))}
+        </Table.Row>
+      </Table.Head>
+      <Table.Body>
+        {pendingReleases?.map((release) => (
+          <PendingReleaseRow
+            key={`${release.publish_time}-${release.id}`}
+            pendingRelease={release}
+            getCheckboxProps={getCheckboxProps}
+          />
+        ))}
+      </Table.Body>
+    </Table>
+  )
+}
+
+function ListReleasesTable({ isAdmin, setApiError, approvedReleasesCount }: ListReleasesTableProps) {
+  const [searchParams] = useSearchParams()
+  const shortnamesQuery = searchParams.get('shortname')
+  const [rowCount, setRowCount] = useState(10)
+  const [start, setStart] = useState(0)
+  const [releases, setReleases] = useState<ReleaseListing[]>([])
+  const [total, setTotal] = useState(0)
+  const [shortnames, setShortnames] = useState<ShortnameListing[]>([])
+  const [sortBy, setSortBy] = useState<string>('-publish_time')
+  const [selectedShortnames, setSelectedShortnames] = useState<SuggestionItem[]>([])
+
+  function updateRowCount(newCount: number) {
+    setRowCount(newCount)
+    setStart(0)
+  }
+
+  function setCurrentPage(currentPage: number) {
+    setStart((currentPage - 1) * rowCount)
+  }
+
+  function filterChanged(selected: SuggestionItem[]) {
+    setSelectedShortnames(selected)
+  }
+
+  useEffect(() => {
+    if (!isAdmin) return
+    async function fetchReleases(start: number, count: number, selectedShortnames: SuggestionItem[], sortBy: string) {
+      const filter = {
+        ...(selectedShortnames.length && {
+          shortname: selectedShortnames.map((item) => item.value).join(','),
+        }),
+      }
+
+      const sort = sortBy
+      const { data, error } = await client.GET('/releases', {
+        params: { query: { start, count, ...filter, sort } },
+      })
+
+      if (error) {
+        setApiError((prev) => [...prev, error.message])
+        return
+      }
+
+      setReleases(data.releases ?? [])
+      setTotal(data.total ?? 0)
+    }
+    fetchReleases(start, rowCount, selectedShortnames, sortBy)
+  }, [isAdmin, start, rowCount, selectedShortnames, sortBy, setApiError, approvedReleasesCount])
+
+  useEffect(() => {
+    if (!isAdmin) return
+    async function fetchShortnames() {
+      const { data, error } = await client.GET('/shortnames')
+
+      if (error) {
+        setApiError((prev) => [...prev, error.message])
+        return
+      }
+
+      setShortnames(data ?? [])
+    }
+    fetchShortnames()
+  }, [isAdmin, setApiError])
+
+  useEffect(() => {
+    async function setSelectedShortnamesFromQuery() {
+      if (!isAdmin || !shortnamesQuery) return
+
+      const newSelectedShortnames = shortnamesQuery.split(',').map((shortname) => ({
+        label: shortname,
+        value: shortname,
+      }))
+      setSelectedShortnames(newSelectedShortnames)
+    }
+    setSelectedShortnamesFromQuery()
+  }, [isAdmin, shortnamesQuery])
+
+  return (
+    <>
+      <Heading level={3} data-size='xs'>
+        Publiseringsoversikt
+      </Heading>
+      <div className='list-releases-filter-container'>
+        <Field>
+          <Label>Søk og filtrer</Label>
+          <Suggestion multiple onSelectedChange={(selected) => filterChanged(selected)} selected={selectedShortnames}>
+            <Suggestion.Input />
+            <Suggestion.Clear />
+            <Suggestion.List>
+              <Suggestion.Empty>Ingen treff</Suggestion.Empty>
+              {shortnames.map((shortname) => (
+                <Suggestion.Option key={shortname.shortname} label={shortname.shortname} value={shortname.shortname}>
+                  {shortname.shortname}, {shortname.statistic_name}
+                </Suggestion.Option>
+              ))}
+            </Suggestion.List>
+          </Suggestion>
+        </Field>
+        <RowCountSelect selectedRowCount={rowCount} updateRowCount={updateRowCount} />
+      </div>
+      <PaginatedReleasesTable
+        start={start}
+        count={rowCount}
+        total={total}
+        releases={releases}
+        setCurrentPage={setCurrentPage}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
+      />
+    </>
+  )
+}
+
+export default function Tasks() {
+  const [pendingReleases, setPendingReleases] = useState<ReleaseListing[]>([])
+  const [pendingTotal, setPendingTotal] = useState(0)
+  const [pendingSortBy, setPendingSortBy] = useState<string>('-publish_time')
+  const [approvedReleasesCount, setApprovedReleasesCount] = useState(0)
+  const [apiError, setApiError] = useState<string[]>([])
+  const pendingTableHeaderRef = useRef<HTMLTableSectionElement>(null)
+
+  const { auth } = useAuth()
+  const isAdmin = auth?.isAdmin
+
+  const {
+    value: selectedPendingReleaseIds,
+    setValue: setSelectedPendingReleaseIds,
+    getCheckboxProps,
+  } = useCheckboxGroup({
+    name: 'pending-releases-table',
+    value: [],
+  })
+
+  useEffect(() => {
+    if (!isAdmin) return
+    async function fetchPendingReleases(sortBy: string) {
+      const { data, error } = await client.GET('/releases', {
+        params: { query: { start: 0, count: 999, approval_status: ApprovalStatus.PENDING, sort: sortBy } },
+      })
+
+      if (error) {
+        setApiError((prev) => [...prev, error.message])
+        return
+      }
+
+      setPendingReleases(data.releases ?? [])
+      setPendingTotal(data.total ?? 0)
+    }
+    fetchPendingReleases(pendingSortBy)
+  }, [isAdmin, pendingSortBy, approvedReleasesCount])
+
+  async function batchApproveReleases() {
+    const { data, error } = await client.POST('/releases/bulk-approve', {
+      body: { ids: selectedPendingReleaseIds.map(Number) },
+    })
+
+    if (error) {
+      setApiError((prev) => [...prev, error.message])
+      return
+    }
+
+    setApprovedReleasesCount(data.releases?.filter(({ status }) => status === 200)?.length ?? 0)
+    pendingTableHeaderRef.current?.focus()
+    setSelectedPendingReleaseIds([])
+  }
+
+  function handleOnSubmit(e: React.SubmitEvent<HTMLFormElement>) {
+    e.preventDefault()
+
+    if (!selectedPendingReleaseIds.length) return
+
+    batchApproveReleases()
+  }
+
+  function clearPendingReleaseSelection() {
+    pendingTableHeaderRef.current?.focus()
+    setSelectedPendingReleaseIds([])
+  }
+
+  if (!isAdmin) return <ErrorPage type={ErrorType.NOTAUTH} />
+
+  const publishedReleasesAmountText =
+    approvedReleasesCount === 1 ? `${approvedReleasesCount} publisering` : `${approvedReleasesCount} publiseringer`
+  return (
+    <>
+      {apiError.length > 0 && <ErrorAlert message={apiError} />}
+      <Heading level={2} data-size='md'>
+        Oppgaver
+      </Heading>
+
+      <Tabs defaultValue='pending-releases' className='pending-releases-tab'>
+        <Tabs.List>
+          <Tabs.Tab value='pending-releases'>
+            Publiseringsdatoer <Badge data-color='danger' count={pendingTotal} />
+          </Tabs.Tab>
+        </Tabs.List>
+        <Tabs.Panel value='pending-releases' className='pending-releases-tab-panel'>
+          <form onSubmit={handleOnSubmit}>
+            <div className='approved-releases-alert-wrapper' aria-live='polite' role='status'>
+              {approvedReleasesCount > 0 && (
+                <Alert
+                  data-color='success'
+                  className='approved-releases-alert'
+                >{`${publishedReleasesAmountText} har blitt godkjent`}</Alert>
+              )}
+            </div>
+            <div className='pending-releases-wrapper'>
+              <PendingReleasesTable
+                pendingReleases={pendingReleases}
+                getCheckboxProps={getCheckboxProps}
+                tableHeaderRef={pendingTableHeaderRef}
+                sortBy={pendingSortBy}
+                setSortBy={setPendingSortBy}
+              />
+              {selectedPendingReleaseIds.length > 0 && (
+                <div className='pending-releases-buttons-wrapper'>
+                  <Button variant='primary' type='submit'>
+                    Godkjenn ({selectedPendingReleaseIds.length} valgte)
+                  </Button>
+                  <Button variant='tertiary' type='button' onClick={clearPendingReleaseSelection}>
+                    <EraserIcon />
+                    Nullstill valg
+                  </Button>
+                </div>
+              )}
+            </div>
+          </form>
+        </Tabs.Panel>
+      </Tabs>
+      <Divider />
+      <ListReleasesTable isAdmin={isAdmin} setApiError={setApiError} approvedReleasesCount={approvedReleasesCount} />
+    </>
+  )
+}

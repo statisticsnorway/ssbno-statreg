@@ -1,0 +1,51 @@
+/* TODO: Consider using scss mixins for flex styling */
+#header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid var(--ds-color-neutral-border-subtle);
+
+  .header-content {
+    width: 80%;
+    padding: 26px 0;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+
+    .logo {
+      width: 262px;
+    }
+
+    .header-links {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      column-gap: var(--ds-size-5);
+    }
+
+    .header-user-info {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      column-gap: var(--ds-size-3);
+    }
+  }
+}
+
+#page-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: var(--ds-size-13) 0;
+  
+  .content {
+    width: 80%;
+    display: flex;
+    flex-direction: column;
+    row-gap: var(--ds-size-12);
+    align-items: start;
+  }
+}

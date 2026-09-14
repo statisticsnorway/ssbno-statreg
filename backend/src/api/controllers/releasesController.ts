@@ -1,0 +1,113 @@
+import type { Router } from 'express'
+import {
+  getVariantReleases,
+  getFilteredReleases,
+  getReleaseById,
+  createRelease,
+  updateRelease,
+  bulkApproveReleases,
+} from '@/services/releasesService'
+import { getReleaseVersions } from '@/services/versionService'
+import { requireAdminAuthorization, skipAuth } from '@/../plugins/authMiddleware'
+import { handleErrors } from '@/lib/prismaErrors'
+import { prisma } from '@/lib/prisma'
+import { isNumber, ensureString, ensureStringArray, ensureRequiredFieldsExists, parseId } from '@/lib/utils'
+import { StatregError } from '@/lib/statregError'
+
+export default function releasesController(router: Router) {
+  router.get('/releases/:id', skipAuth, async (req, res) => {
+    try {
+      // If id is undefined, controller will evaluate '/releases' instead
+      const id = ensureString(req.params.id)
+      const data = await getReleaseById(id!, prisma)
+      res.json(data)
+    } catch (error) {
+      return handleErrors(error, res)
+    }
+  })
+
+  router.get('/releases', skipAuth, async (req, res) => {
+    try {
+      const start = req.query?.start ? Number(req.query.start) : undefined
+      const count = req.query?.count ? Number(req.query.count) : undefined
+      const publishTimeAfter = req.query?.publish_time_after?.toString()
+      const publishTimeBefore = req.query?.publish_time_before?.toString()
+      const sort = typeof req.query?.sort == 'string' ? req?.query?.sort : undefined
+      const filterByShortnames = ensureStringArray(req.query.shortname as string)
+      const approvalStatus = ensureString(req.query.approval_status as string)
+
+      const data = await getFilteredReleases(
+        { start, count, filterByShortnames, publishTimeAfter, publishTimeBefore, sort, approvalStatus },
+        prisma
+      )
+      res.json(data)
+    } catch (error) {
+      return handleErrors(error, res)
+    }
+  })
+
+  router.post('/releases/bulk-approve', requireAdminAuthorization(), async (req, res) => {
+    try {
+      const body = ensureRequiredFieldsExists(req.body, ['ids'])
+      const input = body.ids
+      if (!Array.isArray(input) || input.some((item) => !isNumber(item))) {
+        throw new StatregError(`Invalid format for field 'ids'. Expected an array of integers.`, 400)
+      }
+      const ids = input.map(Number)
+      const result = await bulkApproveReleases(prisma, ids)
+      res.status(207).json(result)
+    } catch (error) {
+      return handleErrors(error, res)
+    }
+  })
+
+  router.put('/releases/:id', async (req, res) => {
+    try {
+      const id = ensureString(req.params.id)
+      const result = await updateRelease(prisma, id!, req.body)
+      res.json(result)
+    } catch (error) {
+      return handleErrors(error, res)
+    }
+  })
+
+  router.get('/statistics/:shortname/variants/:id/releases', skipAuth, async (req, res) => {
+    try {
+      const shortname = ensureString(req.params.shortname)
+      const variantId = Number(ensureString(req.params.id))
+
+      const start = req.query?.start ? Number(req.query.start) : undefined
+      const count = req.query?.count ? Number(req.query.count) : undefined
+      const sort = typeof req.query?.sort == 'string' ? req?.query?.sort : undefined
+
+      const data = await getVariantReleases({ start, count, shortname, variantId, sort }, prisma)
+      res.json(data)
+    } catch (error) {
+      return handleErrors(error, res)
+    }
+  })
+
+  router.post('/statistics/:shortname/variants/:id/releases', async (req, res) => {
+    try {
+      const result = await createRelease(
+        prisma,
+        ensureString(req.params.shortname),
+        ensureString(req.params.id),
+        req.body
+      )
+      res.json(result)
+    } catch (error) {
+      return handleErrors(error, res)
+    }
+  })
+
+  router.get('/releases/:id/versions', async (req, res) => {
+    try {
+      const id = parseId(req.params.id)
+      const data = await getReleaseVersions(id, prisma)
+      res.json(data)
+    } catch (error) {
+      return handleErrors(error, res)
+    }
+  })
+}

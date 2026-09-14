@@ -1,0 +1,19 @@
+{
+  "name": "@ssbno-statreg/shared",
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@statisticsnorway/statreg-api-types": "workspace:*"
+  },
+  "scripts": {
+    "build": "tsc"
+  }
+}

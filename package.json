@@ -1,28 +1,49 @@
 {
-  "name": "ssbno-statreg-api",
+  "name": "ssbno-statreg",
   "private": true,
-  "version": "0.0.0",
+  "packageManager": "pnpm@11.22.0",
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "11.22.0",
+      "onFail": "download"
+    }
+  },
   "scripts": {
-    "dev": "nodemon -w src/server -x tsx src/main.mts",
-    "start": "NODE_ENV=production tsx src/main.mts",
-    "build": "vite build",
-    "lint": "eslint '**/*.{js,mjs,cjs,ts}'",
-    "lint:fix": "eslint --fix '**/*.{js,mjs,cjs,ts}'"
+    "preinstall": "npx only-allow pnpm",
+    "dev": "concurrently \"pnpm --filter 'backend' run dev\" \"pnpm --filter 'frontend' run dev\"",
+    "build": "pnpm -r run build && cp -Rf frontend/dist/* backend/dist",
+    "start": "pnpm --filter 'backend' run start",
+    "db:deploy": "pnpm --filter 'backend' run db:deploy",
+    "check": "tsc --noEmit -p backend && tsc -b frontend",
+    "test": "vitest --exclude '**/integration/**'",
+    "ci-test": "vitest run  --exclude '**/integration/**'",
+    "test:backend": "vitest --project backend",
+    "test:frontend": "vitest --project frontend",
+    "test:integration:local": "pnpm --filter 'backend' run test:integration:local",
+    "test:integration:local:force": "pnpm --filter 'backend' run test:integration:local:force",
+    "test:integration:docker": "docker-compose -f docker-compose-test.yaml down --remove-orphans --volumes && docker-compose -f docker-compose-test.yaml up --build --abort-on-container-exit --exit-code-from tests --remove-orphans ; docker-compose -f docker-compose-test.yaml down --remove-orphans --volumes",
+    "dev:auth": "docker-compose --env-file ./backend/.env up --build",
+    "lint": "eslint",
+    "lint:fix": "eslint --fix",
+    "seed": "pnpm --filter 'backend' run seed",
+    "generate": "pnpm --filter 'backend' run generate",
+    "generate:api-types": "openapi-typescript ./api-types/openapi/openapi.yaml -o ./api-types/src/api-types.ts && prettier --write ./api-types/src/api-types.ts"
   },
   "devDependencies": {
-    "@eslint/js": "^9.16.0",
-    "@types/express": "^5.0.1",
-    "@types/node": "^22.15.2",
-    "eslint": "^9.16.0",
-    "eslint-plugin-prettier": "^5.2.1",
-    "nodemon": "^3.1.10",
-    "vite": "^6.3.3",
-    "typescript-eslint": "^8.17.0"
-  },
-  "dependencies": {
-    "express": "^5.1.0",
-    "tsx": "^4.19.3",
-    "typescript": "^5.8.3",
-    "vite-express": "*"
+    "@eslint-react/eslint-plugin": "5.19.0",
+    "@eslint/js": "10.0.1",
+    "@types/node": "24.13.3",
+    "@typescript-eslint/parser": "^8.69.0",
+    "@vitejs/plugin-react": "6.1.1",
+    "concurrently": "10.0.5",
+    "eslint": "10.10.0",
+    "eslint-plugin-prettier": "5.5.6",
+    "globals": "17.12.0",
+    "openapi-typescript": "7.13.0",
+    "prettier": "3.9.6",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.69.0",
+    "vitest": "4.1.10"
   }
 }

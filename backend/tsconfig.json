@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ES2022",
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "moduleResolution": "bundler",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@ssbno-statreg/shared": ["../shared/src/index.ts"],
+      "@statisticsnorway/statreg-api-types": ["../api-types/src/index.ts"]
+    },
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noUncheckedIndexedAccess": true,
+    "noFallthroughCasesInSwitch": true,
+    "isolatedModules": true,
+    "outDir": "dist",
+    "noEmit": false,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["src", "test", "plugins"],
+  "exclude": ["src/scripts"]
+}

@@ -1,0 +1,1017 @@
+openapi: 3.1.0
+# yaml-language-server: $schema=https://spec.openapis.org/oas/3.1/schema/2022-10-07
+info:
+  title: Statreg API
+  version: 0.1.0
+  description: API for managing publications, statistics and metadata for Statistics Norway. This API is under development, and there will be breaking changes.
+servers:
+  - url: https://ssbno-statreg.intern.test.ssb.no/statistikkregisteret/api
+  - url: http://localhost:8080/statistikkregisteret/api
+
+tags:
+  - name: calendar
+    description: Helpers for calendar view and days that are blocked
+  - name: contacts
+    description: Contact persons for statistics
+  - name: frequencies
+    description: Frequencies for releases, ie. copled to variants of a statistic
+  - name: releases
+    description: Releases endpoints
+  - name: statistics
+    description: Statistics information and manipulation
+  - name: shortnames
+    description: Shortname for a statistic
+
+security:
+  - keykloak_token: []
+
+components:
+  securitySchemes:
+    keykloak_token:
+      type: http
+      scheme: bearer
+      description: A token granted by Statistics Norway's Keycloak instance for ssbno-statreg.
+
+  parameters:
+    Pagination_start:
+      in: query
+      name: start
+      schema:
+        type: integer
+        default: 0
+      description: Number of items skipped before starting the results list
+    Pagination_count:
+      in: query
+      name: count
+      schema:
+        type: integer
+        default: 10
+      description: Maximum number of items returned
+    Sort:
+      in: query
+      name: sort
+      description: 'Sorting fields separated by comma. Default order is Ascending (ASC), minus(-) should be used in front of field name for Descending (DESC) order.'
+      example: '-publish_time'
+      schema:
+        type: string
+    Shortname_filter:
+      in: query
+      name: shortname
+      description: Filter by shortname(s) separated by comma.
+      example: 'ferie,reise'
+      schema:
+        type: string
+    Approval_status_filter:
+      in: query
+      name: approval_status
+      description: Filter by approval status. Valid values are "GODKJENT", "FORSLAG" and "AVVIST".
+      example: 'FORSLAG'
+      schema:
+        type: string
+    Contact_filter:
+      in: query
+      name: contact
+      description: Filter by contact initial(s) separated by comma.
+      example: 'abc,xyz'
+      schema:
+        type: string
+
+  responses:
+    Error:
+      description: Error response
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+
+    FutureBlockedReleaseDays:
+      description: List of future blocked release days. Includes all manually blocked days, but only automatically blocked days for the next three calendar years. Sorted from earliest to latest date.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Blocked_release_date'
+
+  schemas:
+    Error:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: Error message
+
+    Blocked_release_date:
+      type: object
+      example: { date: '2026-12-24', automatically_blocked: false, blocked_comment: 'Christmas eve' }
+      properties:
+        date: { type: string, format: date }
+        automatically_blocked: { type: boolean }
+        blocked_comment: { type: string }
+
+    Calender_date:
+      type: object
+      description: Map of ISO date (YYYY-MM-DD) to day information, ie status
+      example:
+        '2026-05-03':
+          status: 'blocked'
+        '2026-05-04':
+          status: 'none'
+        '2026-05-05':
+          status: 'few'
+      patternProperties:
+        '^\d{4}-\d{2}-\d{2}$':
+          type: object
+          properties:
+            status:
+              type: string
+              description: Can be one of "blocked", "none", "few", "many", "full"
+          required:
+            - status
+      additionalProperties: false
+
+    Contact:
+      type: object
+      required:
+        - principalName
+      properties:
+        name: { type: string, readOnly: true }
+        principalName: { type: string, readOnly: true }
+    Division:
+      type: object
+      properties:
+        code: { type: string, nullable: false }
+        name: { type: string, nullable: false, readOnly: true }
+        note: { type: string, nullable: true }
+    Frequency:
+      type: object
+      properties:
+        name: { type: string }
+        code: { type: string }
+
+    Level_of_detail:
+      description: 'Text field to specify variant beyond frequency and revision'
+      type: object
+      properties:
+        name: { type: string, nullable: true }
+        name_en: { type: string, nullable: true }
+
+    Region_level:
+      description: 'Valid region levels are (name in parethesis): L (Land), LD (Landsdel), F (Fylke), K (Kommune), BD (Bydel og krets)'
+      type: object
+      properties:
+        code: { type: string }
+        name: { type: string }
+
+    Shortname:
+      description: 'A shortname with its identifier'
+      type: object
+      required:
+        - id
+        - shortname
+      properties:
+        id: { type: integer, readOnly: true }
+        shortname: { type: string }
+
+    Shortname_listing:
+      description: 'Shortnames with its corresponding statistic name'
+      type: object
+      properties:
+        shortname: { type: string }
+        statistic_name: { type: string }
+
+    Release:
+      type: object
+      properties:
+        id: { type: integer, readOnly: true }
+        publish_time: { type: string, format: date-time }
+        period_to: { type: string, format: date }
+        period_from: { type: string, format: date }
+
+    Release_create:
+      allOf:
+        - $ref: '#/components/schemas/Release'
+        - type: object
+          properties:
+            release_date_precision: { type: string }
+
+    Release_update:
+      allOf:
+        - $ref: '#/components/schemas/Release'
+        - type: object
+          properties:
+            comment: { type: string }
+            release_date_precision: { type: string }
+            archived: { type: boolean }
+
+    Release_get:
+      allOf:
+        - $ref: '#/components/schemas/Release'
+        - type: object
+          properties:
+            approval_status: { type: [string, 'null'] }
+            statistic:
+              type: object
+              properties:
+                id: { type: integer, readOnly: true }
+                shortname: { type: string, readOnly: true }
+                name: { type: string, readOnly: true }
+                name_en: { type: string, readOnly: true }
+            measuring_period: 
+              type: object
+              properties: 
+                title: { type: string, readOnly: true }
+                title_en: { type: string, readOnly: true }
+
+    Release_details:
+      allOf:
+        - $ref: '#/components/schemas/Release_get'
+        - type: object
+          properties:
+            has_versions: { type: boolean }
+            variant:
+              type: object
+              properties:
+                id: { type: integer, readOnly: true }
+                frequency:
+                  $ref: '#/components/schemas/Frequency'
+                revision:
+                  $ref: '#/components/schemas/Revision'
+            cancelled: { type: boolean }
+            archived: { type: boolean }
+            release_date_precision: { type: string }
+
+    Release_listing:
+      allOf:
+        - $ref: '#/components/schemas/Release_get'
+        - type: object
+          properties:
+            frequency:
+              $ref: '#/components/schemas/Frequency'
+            revision:
+              $ref: '#/components/schemas/Revision'
+
+    Revision:
+      description: 'Valid revision codes are:	I (Ingen), B (Beregnede), E (Endelige), F (Foreløpige), R (Reviderte), IG (Integrert)'
+      type: object
+      properties:
+        code: { type: string }
+
+    Statistic:
+      type: object
+      properties:
+        shortname: { type: string, readOnly: true }
+        main_language: { type: string, description: "Main language will be either 'nn' or 'nb' for statistics" }
+        status:
+          type: object
+          properties:
+            code:
+              {
+                type: string,
+                description: 'Is one of K (Kommende), A (Aktiv), IA (Ikke-aktiv), UT (Opphørt), SA (Sammenslått) or SP (Splittet)',
+              }
+        name: { type: string }
+        name_en: { type: string }
+        approval_status: { type: string, description: " Is one of 'GODKJENT', 'AVVIST' or 'FORSLAG'" }
+
+    Statistic_create_base:
+      allOf:
+        - $ref: '#/components/schemas/Statistic'
+      type: object
+      properties:
+        division: { type: string, nullable: true }
+        first_released_at: { type: string, format: date, nullable: true }
+        yearly_reporting: { type: boolean }
+        statistic_region_levels:
+          type: array
+          items:
+            type: object
+            properties:
+              code: { type: string }
+        previous_topic_codes: { type: string, nullable: true }
+        comment: { type: string }
+        variants:
+          type: array
+          items:
+            $ref: '#/components/schemas/Variant'
+        contacts:
+          type: array
+          description: List of principal names to set as contacts for the statistic.
+          items:
+            type: string
+
+    Statistic_create_upcoming:
+      allOf:
+        - $ref: '#/components/schemas/Statistic_create_base'
+        - type: object
+          required: [division, name]
+          properties:
+            status:
+              type: object
+              required: [code]
+              properties:
+                code:
+                  description: 'Must be "K" for creation of upcoming statistics'
+                  type: string
+
+    Statistic_create_active:
+      allOf:
+        - $ref: '#/components/schemas/Statistic_create_base'
+        - type: object
+          required: [division, name, name_en, main_language, contacts, variants, status]
+          properties:
+            status:
+              type: object
+              required: [code]
+              properties:
+                code:
+                  description: 'Must be "A" for creation of active statistics'
+                  type: string
+
+    Statistic_create:
+      oneOf:
+        - $ref: '#/components/schemas/Statistic_create_upcoming'
+        - $ref: '#/components/schemas/Statistic_create_active'
+
+    Statistic_update:
+      allOf:
+        - $ref: '#/components/schemas/Statistic_create_base'
+      type: object
+      properties:
+        relation_id: { type: integer, nullable: true }
+
+    Statistic_details:
+      allOf:
+        - $ref: '#/components/schemas/Statistic'
+      type: object
+      properties:
+        version: { type: integer }
+        division:
+          $ref: '#/components/schemas/Division'
+        first_released_at: { type: string, format: date, nullable: true }
+        yearly_reporting: { type: boolean }
+        previous_topic_codes: { type: string, nullable: true }
+        relation:
+          type: object
+          properties:
+            id: { type: integer }
+            shortname: { type: string }
+            name: { type: string, readOnly: true }
+            name_en: { type: string, readOnly: true }
+        incoming_relations:
+          type: array
+          description: Statistics that reference this statistic as their continuation.
+          items:
+            type: object
+            properties:
+              id: { type: integer }
+              shortname: { type: string }
+              name: { type: string, readOnly: true }
+              name_en: { type: string, readOnly: true }
+        updated_at: { type: string, format: date-time, readOnly: true }
+        comment: { type: string }
+        created_at: { type: string, format: date-time, readOnly: true }
+        variants:
+          type: array
+          items:
+            $ref: '#/components/schemas/Variant'
+        contacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Contact'
+        statistic_region_levels:
+          type: array
+          items:
+            $ref: '#/components/schemas/Region_level'
+
+    Statistic_listing:
+      allOf:
+        - $ref: '#/components/schemas/Statistic'
+      type: object
+      properties:
+        division:
+          $ref: '#/components/schemas/Division'
+        contacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Contact'
+
+    Version:
+      type: object
+      required:
+        - change_type
+        - changed_at
+        - changed_by
+      properties:
+        change_type: { type: string, description: 'One of "create", "update" or "delete".' }
+        changed_at: { type: string, format: date-time }
+        changed_by: { type: string, description: 'The principal name of the user who made the change.' }
+        comment: { type: string }
+        changed_values:
+          type: array
+          description: 'Only present when change_type is "update".'
+          items:
+            type: object
+            required:
+              - field_name
+              - old_value
+              - new_value
+            properties:
+              field_name: { type: string, description: 'The name of the field that changed.' }
+              old_value: { type: string, description: 'Human-readable version of the old value.' }
+              new_value: { type: string, description: 'Human-readable version of the new value.' }
+
+    Variant:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: On update, provide the id of an existing variant to update it, or omit it to create a new variant. Ignored/read-only when creating a statistic.
+        version: { type: integer }
+        updated_at: { type: string, format: date-time, readOnly: true }
+        level_of_detail:
+          $ref: '#/components/schemas/Level_of_detail'
+        created_at: { type: string, format: date-time, readOnly: true }
+        cancelled: { type: boolean }
+        frequency:
+          $ref: '#/components/schemas/Frequency'
+        revision:
+          $ref: '#/components/schemas/Revision'
+
+paths:
+  /contacts:
+    get:
+      summary: List of all contacts
+      security: []
+      tags: [contacts]
+      responses:
+        '200':
+          description: List of contacts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Contact'
+        default:
+          $ref: '#/components/responses/Error'
+  /shortnames:
+    get:
+      summary: List of all existing shortnames
+      security: []
+      tags: [shortnames]
+      responses:
+        '200':
+          description: List of shortnames
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Shortname_listing'
+        default:
+          $ref: '#/components/responses/Error'
+    post:
+      summary: Create a new shortname
+      tags: [shortnames]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                shortname:
+                  type: string
+                  description: 'Only small letters (a-z) and underscore (_) are allowed. Maximum 14 characters.'
+                  maxLength: 14
+              required:
+                - shortname
+      responses:
+        '201':
+          description: The shortname that was created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Shortname' }
+        default:
+          $ref: '#/components/responses/Error'
+  /shortnames/{shortname}:
+    get:
+      summary: Get shortname detail by shortname
+      security: []
+      tags: [shortnames]
+      parameters:
+        - name: shortname
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Shortname detail with statistic name
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Shortname_listing' }
+        default:
+          $ref: '#/components/responses/Error'
+  /divisions:
+    get:
+      summary: List of all divisions in our organization.
+      security: []
+      responses:
+        '200':
+          description: List of divisions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Division'
+        default:
+          $ref: '#/components/responses/Error'
+  /statistics:
+    get:
+      summary: List of all statistics
+      security: []
+      tags: [statistics]
+      parameters:
+        - $ref: '#/components/parameters/Pagination_start'
+        - $ref: '#/components/parameters/Pagination_count'
+        - $ref: '#/components/parameters/Shortname_filter'
+        - $ref: '#/components/parameters/Contact_filter'
+        - $ref: '#/components/parameters/Sort'
+      responses:
+        '200':
+          description: List of statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                  statistics:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Statistic_listing'
+        default:
+          $ref: '#/components/responses/Error'
+
+  /statistics/{shortname}:
+    get:
+      summary: Get a statistic by its shortname
+      security: []
+      tags: [statistics]
+      parameters:
+        - name: shortname
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Statistic details with all its variants
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Statistic_details' }
+        default:
+          $ref: '#/components/responses/Error'
+    post:
+      summary: Create a new statistic
+      tags: [statistics]
+      parameters:
+        - name: shortname
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Statistic_create' }
+      responses:
+        '201':
+          description: Statistic details
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Statistic_details' }
+        default:
+          $ref: '#/components/responses/Error'
+    put:
+      summary: Update a statistic
+      tags: [statistics]
+      parameters:
+        - name: shortname
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Statistic_update' }
+      responses:
+        '200':
+          description: Updated statistic details with all its variants
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Statistic_details' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /statistics/{shortname}/variants/{id}/releases:
+    get:
+      summary: List all releases for one variant
+      security: []
+      tags: [statistics]
+      parameters:
+        - name: shortname
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - $ref: '#/components/parameters/Pagination_start'
+        - $ref: '#/components/parameters/Pagination_count'
+      responses:
+        '200':
+          description: List of releases based on variant
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                  releases:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Release_listing'
+        default:
+          $ref: '#/components/responses/Error'
+    post:
+      summary: Create a new release
+      tags: [statistics]
+      parameters:
+        - name: shortname
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Release_create' }
+      responses:
+        '201':
+          description: Release details
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Release_details' }
+        default:
+          $ref: '#/components/responses/Error'
+  /statistics/{shortname}/versions:
+    get:
+      summary: List all versions with changes and comment for a statistic
+      tags: [statistics]
+      parameters:
+        - name: shortname
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of versions for the statistic
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Version'
+        default:
+          $ref: '#/components/responses/Error'
+
+  /statistics/{shortname}/contacts:
+    put:
+      summary: Set contacts for a statistic
+      description: Replaces the entire contact list for the statistic with the supplied principal names.
+      tags: [statistics]
+      parameters:
+        - name: shortname
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              description: List of principal names to set as contacts for the statistic.
+              items:
+                type: string
+      responses:
+        '200':
+          description: The updated list of contacts for the statistic.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Contact' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /releases:
+    get:
+      summary: List all releases. Filter and sorting can be specified using query params
+      security: []
+      tags: [releases]
+      parameters:
+        - $ref: '#/components/parameters/Pagination_start'
+        - $ref: '#/components/parameters/Pagination_count'
+        - $ref: '#/components/parameters/Sort'
+        - $ref: '#/components/parameters/Shortname_filter'
+        - $ref: '#/components/parameters/Approval_status_filter'
+        - in: query
+          name: publish_time_after
+          description: Filter releases with publish_time after the specified time given in ISO format.
+          example: '2026-05-06T06:00:00Z'
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: publish_time_before
+          description: Filter releases with publish_time before the specified timestamp in ISO format.
+          example: '2026-05-06T06:00:00Z'
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: List of releases
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                  releases:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Release_listing'
+        default:
+          $ref: '#/components/responses/Error'
+
+  /releases/bulk-approve:
+    post:
+      summary: Bulk approve releases
+      tags: [releases]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  type: array
+                  description: The identifiers of the releases to approve.
+                  items:
+                    type: integer
+              required:
+                - ids
+            example:
+              ids: [1, 2, 3]
+      responses:
+        '207':
+          description: List of status codes for each processed release.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  releases:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          description: The identifier of the release to approve.
+                          type: integer
+                        status:
+                          description: HTTP status code for the approval request of a release.
+                          type: integer
+                        message:
+                          description: Error message if the approval request failed.
+                      required:
+                        - id
+                        - status
+                required:
+                  - releases
+              example:
+                releases:
+                  - id: 1
+                    status: 200
+                  - id: 2
+                    status: 404
+                  - id: 3
+                    status: 500
+        default:
+          $ref: '#/components/responses/Error'
+
+  /releases/{id}:
+    get:
+      summary: Get release by id
+      security: []
+      tags: [releases]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Release details
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Release_details' }
+        default:
+          $ref: '#/components/responses/Error'
+    put:
+      summary: Update a release
+      tags: [releases]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Release_update' }
+      responses:
+        '200':
+          description: Updated release details
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Release_details' }
+        default:
+          $ref: '#/components/responses/Error'
+  /releases/{id}/versions:
+    get:
+      summary: List all versions on a release with changes and comment
+      tags: [releases]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of versions for the release
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Version'
+        default:
+          $ref: '#/components/responses/Error'
+
+  /frequencies:
+    get:
+      summary: List all frequencies
+      tags: [frequencies]
+      responses:
+        '200':
+          description: List of frequencies
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Frequency' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /calendar:
+    get:
+      summary: Get status for all days in a period
+      security: []
+      tags: [calendar]
+      parameters:
+        - name: fromDate
+          in: query
+          schema:
+            type: string
+            format: date
+            description: 'Defaults to first day of current month'
+            example: '2025-04-01'
+        - name: toDate
+          in: query
+          schema:
+            type: string
+            format: date
+            description: 'Defaults to end of second next month'
+            example: '2025-04-27'
+      responses:
+        '200':
+          description: Object with days in range and their status
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Calender_date' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /calendar/blocked-release-days:
+    get:
+      summary: Get list of future blocked release days
+      tags: [calendar]
+      responses:
+        '200':
+          $ref: '#/components/responses/FutureBlockedReleaseDays'
+        default:
+          $ref: '#/components/responses/Error'
+  /calendar/blocked-release-days/{date}:
+    post:
+      summary: Manually block a day
+      tags: [calendar]
+      parameters:
+        - name: date
+          in: path
+          required: true
+          schema:
+            type: string
+            format: date
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                blocked_comment:
+                  type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/FutureBlockedReleaseDays'
+        default:
+          $ref: '#/components/responses/Error'
+    delete:
+      summary: Delete a manually blocked day
+      tags: [calendar]
+      parameters:
+        - name: date
+          in: path
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Updated list
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Blocked_release_date' }
+        default:
+          $ref: '#/components/responses/Error'
+  /auth/authenticate:
+    get:
+      summary: Check authentication status and information for current user. Used for controlling front-end behaviour, not security.
+      tags: [authentication]
+      responses:
+        '200':
+          description: Object with admin-status, user info
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isAdmin:
+                    type: boolean
+                    example: true
+                  email:
+                    type: string
+                    example: alice@example.com
+                  fullName:
+                    type: string
+                    example: Alice Examplesdottir

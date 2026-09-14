@@ -1,0 +1,48 @@
+.datepicker-container {
+  display: flex;
+  flex-direction: row;
+  gap: var(--ds-size-10);
+  align-items: center;
+
+  .datepicker-wrapper {
+    padding: 20px 16px;
+    box-shadow: var(--ds-shadow-md);
+    border-radius: 8px;
+
+    button.rdp-day {
+      &:active:not(:disabled) .rdp-day__inner {
+        color: inherit;
+        background: transparent;
+      }
+    }
+
+    .rdp-day_selected .rdp-day__inner {
+      width: 44px;
+      height: 44px;
+      color: inherit;
+      background: transparent;
+      outline: var(--ds-color-base-default) solid 3px;
+      border: var(--ds-color-accent-background-default) solid 2px;
+      border-radius: 8px;
+    }
+  }
+}
+
+.datepicker-explanation {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-size-2);
+
+  .datepicker-explanation-wrapper {
+    display: flex;
+    align-items: center;
+    gap: var(--ds-size-4);
+  }
+
+  .datepicker-explanation-colors {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    border-radius: 3px;
+  }
+}

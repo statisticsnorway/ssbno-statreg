@@ -1,0 +1,40 @@
+.pending-releases-tab {
+  width: 100%;
+
+  .pending-releases-tab-panel {
+    margin-top: var(--ds-size-8);
+    padding-left: 0;
+    padding-right: 0;
+  
+    .approved-releases-alert-wrapper {
+      display: flex;
+    }
+
+    .pending-releases-wrapper {
+      position: relative;
+      padding-bottom: var(--ds-size-18);
+    }
+
+    .pending-releases-buttons-wrapper {
+      position: absolute;
+      bottom: 0;
+      display: flex;
+      gap: var(--ds-size-2);
+    }
+  }
+}
+
+.approved-releases-alert {
+  animation: approval-alert-fade 250ms ease-out 5s forwards;
+  margin-bottom: var(--ds-size-9);
+}
+
+@keyframes approved-releases-alert-fade {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}

@@ -1,0 +1,122 @@
+import type { Request, Response, NextFunction, RequestHandler } from 'express'
+import { createRemoteJWKSet, jwtVerify, type JWTPayload } from 'jose'
+import { asyncLocalStorage } from '../src/lib/context'
+import { parseAdminGroupsFromEnv } from '@/lib/utils'
+
+export function unauthorized(res: Response, message: string) {
+  return res.status(401).json({ message })
+}
+
+export function forbidden(res: Response, message: string) {
+  return res.status(403).json({ message })
+}
+
+export function getBearerToken(req: Request): string | null {
+  const auth = req.header('authorization')
+  if (!auth) return null
+
+  const firstSpaceIndex = auth.indexOf(' ')
+  if (firstSpaceIndex < 0) return null
+
+  const scheme = auth.slice(0, firstSpaceIndex).toLowerCase()
+  if (scheme !== 'bearer') return null
+
+  const token = auth.slice(firstSpaceIndex + 1).trim()
+  return token
+}
+
+export function isAdmin(claims: JWTPayload | undefined): boolean {
+  const groups = (
+    claims as
+      | (JWTPayload & {
+          dapla?: {
+            groups?: string[]
+          }
+        })
+      | undefined
+  )?.dapla?.groups
+
+  if (!Array.isArray(groups)) return false
+  const adminGroups = parseAdminGroupsFromEnv()
+  return adminGroups.some((group) => groups.includes(group))
+}
+
+export const skipAuth: RequestHandler = (_req, _res, next) =>
+  asyncLocalStorage.run({ isAdmin: process.env.AUTH_ENABLED === 'false' }, next)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+;(skipAuth as any).__skipAuth = true
+
+export function createKeycloakAuthMiddleware(issuer: string, jwksUri: string, audience: string): RequestHandler {
+  const JWKS = createRemoteJWKSet(new URL(jwksUri))
+
+  return async (req: Request, res: Response, next: NextFunction) => {
+    const token = getBearerToken(req)
+    if (!token) return unauthorized(res, 'Missing Bearer token')
+
+    try {
+      const { payload } = await jwtVerify(token, JWKS, {
+        issuer,
+        audience,
+        algorithms: ['RS256'],
+      })
+
+      req.auth = {
+        claims: payload,
+        username: typeof payload.preferred_username === 'string' ? payload.preferred_username : undefined,
+        email: typeof payload.email === 'string' ? payload.email : undefined,
+        name: typeof payload.name === 'string' ? payload.name : undefined,
+      }
+
+      // Adding the auth to application context, this is isolated per request and thread so we can read the context in other parts of the application without passing props.
+      asyncLocalStorage.run({ auth: req.auth, isAdmin: isAdmin(payload) }, next)
+    } catch {
+      return unauthorized(res, 'Invalid or expired token')
+    }
+  }
+}
+
+export function keycloakAuth(): RequestHandler {
+  const issuer = process.env.KEYCLOAK_REALM_ISSUER
+
+  const jwksUri = process.env.KEYCLOAK_JWKS_URI
+
+  const audience = process.env.KEYCLOAK_TOKEN_AUDIENCE
+
+  if (!issuer || !jwksUri || !audience) {
+    throw new Error('AUTH_ENABLED=true but Keycloak configuration is missing')
+  }
+
+  return createKeycloakAuthMiddleware(issuer, jwksUri, audience)
+}
+
+export function requireAuthorization(): RequestHandler {
+  return process.env.AUTH_ENABLED === 'false' ? skipAuth : keycloakAuth()
+}
+
+export function requireAdminAuthorization(): RequestHandler {
+  if (process.env.AUTH_ENABLED === 'false') return skipAuth
+
+  return (req, res, next) => {
+    if (!req.auth) {
+      return unauthorized(res, 'Not authenticated')
+    }
+
+    const claims = req.auth.claims as JWTPayload & {
+      dapla?: {
+        groups?: string[]
+      }
+    }
+
+    const groups = claims.dapla?.groups
+
+    if (!Array.isArray(groups)) {
+      return forbidden(res, 'Missing authorization groups')
+    }
+
+    if (!isAdmin(claims)) {
+      return forbidden(res, 'Insufficient access')
+    }
+
+    return next()
+  }
+}
