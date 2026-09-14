@@ -67,6 +67,7 @@ export async function getReleases(
           revision: true,
           statistic: {
             select: {
+              id: true,
               language: true,
               name: true,
               name_en: true,
@@ -98,6 +99,7 @@ export async function getReleases(
           title_en: parseHumanReadableMeasuringPeriod(frequency.code, release.period_from, release.period_to, 'en'),
         },
         statistic: {
+          id: statistic.id,
           shortname: statistic.shortname.name,
           name: statistic.name,
           name_en: statistic.name_en ?? '',
@@ -443,6 +445,7 @@ export const ReleaseDetailsIncludes = {
       revision: true,
       statistic: {
         select: {
+          id: true,
           language: true,
           name: true,
           name_en: true,
@@ -478,6 +481,7 @@ export function mapToReleaseDetails(
       },
     },
     statistic: {
+      id: statistic.id,
       shortname: statistic.shortname.name,
       name: statistic.name,
       name_en: statistic.name_en ?? '',
