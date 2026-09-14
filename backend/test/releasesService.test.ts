@@ -916,6 +916,7 @@ const mockedReleasesPrismaResult = [
       },
       revision: 'I',
       statistic: {
+        id: 1,
         language: 'nb',
         name: 'Konsumprisindeks',
         name_en: 'Consumer Price Index',
@@ -939,6 +940,7 @@ const mockedReleasesPrismaResult = [
       },
       revision: 'E',
       statistic: {
+        id: 2,
         language: 'nb',
         name: 'Nasjonalregnskap',
         name_en: 'National Accounts',
@@ -962,6 +964,7 @@ const mockedReleasesPrismaResult = [
       },
       revision: 'F',
       statistic: {
+        id: 3,
         language: 'nb',
         name: 'Eksport av laks',
         name_en: 'Export of salmon',
@@ -991,6 +994,7 @@ const mockedSingleReleasePrismaResult = {
       code: 'M',
     },
     statistic: {
+      id: 1,
       language: 'nb',
       name: 'Konsumprisindeks',
       name_en: 'Consumer Price Index',
@@ -1015,6 +1019,7 @@ const mockedReleasesResult = [
     },
     revision: { code: 'I' },
     statistic: {
+      id: 1,
       shortname: 'KPI',
       name: 'Konsumprisindeks',
       name_en: 'Consumer Price Index',
@@ -1033,6 +1038,7 @@ const mockedReleasesResult = [
     },
     revision: { code: 'E' },
     statistic: {
+      id: 2,
       shortname: 'NR',
       name: 'Nasjonalregnskap',
       name_en: 'National Accounts',
@@ -1051,6 +1057,7 @@ const mockedReleasesResult = [
     },
     revision: { code: 'F' },
     statistic: {
+      id: 3,
       shortname: 'laks',
       name: 'Eksport av laks',
       name_en: 'Export of salmon',
@@ -1074,6 +1081,7 @@ const mockedSingleReleaseResult = {
     },
   },
   statistic: {
+    id: 1,
     shortname: 'KPI',
     name: 'Konsumprisindeks',
     name_en: 'Consumer Price Index',
