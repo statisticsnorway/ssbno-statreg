@@ -186,12 +186,12 @@ export default function EditStatistic() {
         division: division ?? '',
         main_language: nextStatistic.main_language ?? 'nb',
         first_released_at: nextStatistic.first_released_at?.slice(0, 4) ?? '',
-        comment: nextStatistic.comment ?? '',
+        comment: '',
       })
       setCreatedVariants(nextStatistic.variants ?? [])
       setRegionLevelValues(
         nextStatistic.statistic_region_levels?.flatMap((regionLevel) => (regionLevel.code ? [regionLevel.code] : [])) ??
-        []
+          []
       )
       setErrors({})
 
