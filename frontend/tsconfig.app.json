@@ -12,7 +12,8 @@
     "moduleResolution": "bundler",
     "baseUrl": ".",
     "paths": {
-      "@ssbno-statreg/shared": ["../shared/src/index.ts"]
+      "@ssbno-statreg/shared": ["../shared/src/index.ts"],
+      "@statisticsnorway/statreg-api-types": ["../api-types/src/index.ts"]
     },
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,

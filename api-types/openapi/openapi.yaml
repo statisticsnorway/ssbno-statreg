@@ -214,6 +214,7 @@ components:
             statistic:
               type: object
               properties:
+                id: { type: integer, readOnly: true }
                 shortname: { type: string, readOnly: true }
                 name: { type: string, readOnly: true }
                 name_en: { type: string, readOnly: true }

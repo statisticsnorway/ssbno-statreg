@@ -81,7 +81,7 @@ Run the minimum required checks for the files you changed.
 | `backend/**` | `pnpm run test:backend` |
 | `frontend/**` | `pnpm run test:frontend` |
 | `shared/**` | `pnpm run test` |
-| `shared/openapi/openapi.yaml` | `pnpm run generate:api-types` and then relevant tests |
+| `api-types/openapi/openapi.yaml` | `pnpm run generate:api-types` and then relevant tests |
 | `backend/prisma/schema.prisma` | `pnpm run generate`, apply Prisma workflow from docs, then backend tests |
 | Cross-cutting refactors | `pnpm run test` and `pnpm run lint` |
 

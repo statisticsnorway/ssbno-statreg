@@ -1,6 +1,6 @@
 export * from './enums.js'
 export * from './statistics.js'
-import type { components, paths } from './api-types'
+import type { components, paths } from '@statisticsnorway/statreg-api-types'
 
 export type BlockedReleaseDate = components['schemas']['Blocked_release_date']
 export type CalenderDate = components['schemas']['Calender_date']
