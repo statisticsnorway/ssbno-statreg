@@ -1,6 +1,7 @@
 {
   "name": "@statisticsnorway/statreg-api-types",
-  "version": "0.0.0",
+  "version": "0.0.1",
+  "description": "Types and api specification for the Statistikkregisteret application",
   "type": "module",
   "publishConfig": {
     "access": "public"
