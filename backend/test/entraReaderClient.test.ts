@@ -165,6 +165,32 @@ describe('entraReaderClient ', () => {
       ])
     })
 
+    test('formats displayName as first name middle name last name', async () => {
+      fetchMock.mockReturnValueOnce(
+        mockGraphSuccess({
+          value: [
+            {
+              displayName: 'Bergli, Carl Owen',
+              businessPhones: [],
+              mail: 'cob@ssb.no',
+              userPrincipalName: 'cob@ssb.no',
+            },
+          ],
+        }) as any
+      )
+
+      const users = await fetchAllUsers('token')
+
+      expect(users).toStrictEqual([
+        {
+          displayName: 'Carl Owen Bergli',
+          businessPhones: [],
+          mail: 'cob@ssb.no',
+          userPrincipalName: 'cob@ssb.no',
+        },
+      ])
+    })
+
     test('follows @odata.nextLink and merges paged Graph responses', async () => {
       fetchMock
         .mockReturnValueOnce(
