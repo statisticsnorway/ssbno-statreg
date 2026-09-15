@@ -145,6 +145,7 @@ export async function getStatistics(
     where,
     orderBy,
     select: {
+      id: true,
       language: true,
       status: true,
       name: true,
@@ -171,6 +172,7 @@ export async function getStatistics(
       })
 
       return {
+        id: statistic.id,
         shortname: statistic.shortname.name,
         main_language,
         status: {
@@ -357,6 +359,10 @@ export async function updateStatistic(
   }
 
   const parsedVariants = variants ? await parseVariantsInput(variants, status, prisma) : undefined
+
+  if (status === 'SA' && parsedVariants?.some((variant) => !variant.id)) {
+    throw new StatregError("A statistic with status 'Sammenslått' cannot have new variants.")
+  }
 
   if (parsedVariants) {
     for (const variant of parsedVariants) {
