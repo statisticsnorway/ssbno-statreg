@@ -60,6 +60,10 @@ type StatisticFormValues = {
   createdVariants: Variant[]
 }
 
+type EditStatisticFormErrors = StatisticFormErrors & {
+  relation_id?: string
+}
+
 function isEditStatisticFieldRequired(status: EditableStatisticStatus, field: StatisticFormField): boolean {
   return RequiredEditStatisticFieldsByStatus[status]?.includes(field) ?? false
 }
@@ -74,7 +78,6 @@ export default function EditStatistic() {
   const [selectedContacts, setSelectedContacts] = useState<string[]>([])
   const [relationStatistics, setRelationStatistics] = useState<StatisticListing[]>([])
   const [selectedRelation, setSelectedRelation] = useState<SuggestionItem | null>(null)
-  const [relationError, setRelationError] = useState('')
   const [relationOptionsStatus, setRelationOptionsStatus] = useState<'idle' | 'loading' | 'loaded'>('idle')
 
   const [createdVariants, setCreatedVariants] = useState<Variant[]>([])
@@ -108,13 +111,13 @@ export default function EditStatistic() {
 
   const [status, setStatus] = useState<EditableStatisticStatus | ''>('')
   const [values, setValues] = useState<StatisticPartialFormValues>(defaultValues)
-  const [errors, setErrors] = useState<StatisticFormErrors>({})
+  const [errors, setErrors] = useState<EditStatisticFormErrors>({})
   const [apiError, setApiError] = useState<string[]>([])
   const deferredRelationStatistics = useDeferredValue(relationStatistics, [])
   const relationOptions = useMemo(
     () =>
       deferredRelationStatistics.map((item) => (
-        <Suggestion.Option key={item.id} label={item.shortname} value={item.id!.toString()}>
+        <Suggestion.Option key={item.shortname} label={item.shortname} value={item.shortname}>
           {item.shortname}
           {item.name && <div>{item.name}</div>}
         </Suggestion.Option>
@@ -202,7 +205,7 @@ export default function EditStatistic() {
         typeof nextStatistic.relation?.id === 'number' && nextStatistic.relation.shortname
           ? {
               label: nextStatistic.relation.shortname,
-              value: nextStatistic.relation.id.toString(),
+              value: nextStatistic.relation.shortname,
             }
           : null
       )
@@ -221,7 +224,6 @@ export default function EditStatistic() {
           []
       )
       setErrors({})
-      setRelationError('')
 
       await Promise.all([fetchDivisions(), fetchContacts()])
     }
@@ -243,11 +245,8 @@ export default function EditStatistic() {
         return
       }
 
-      setRelationStatistics(
-        (data.statistics ?? []).filter(
-          (item) => typeof item.id === 'number' && item.shortname !== shortname
-        )
-      )
+      const statistics = data.statistics ?? []
+      setRelationStatistics(statistics.filter((item) => item.shortname !== shortname))
       setRelationOptionsStatus('loaded')
     }
 
@@ -302,14 +301,18 @@ export default function EditStatistic() {
     return ''
   }
 
-  function validateForm(validateInput = nextInputValues()): StatisticFormErrors {
-    const nextErrors: StatisticFormErrors = {}
+  function validateForm(validateInput = nextInputValues()): EditStatisticFormErrors {
+    const nextErrors: EditStatisticFormErrors = {}
     for (const field of fieldsToValidate) {
       const error = validateField(field, validateInput)
 
       if (error) {
         nextErrors[field] = error
       }
+    }
+
+    if (validateInput.status === 'SA' && !selectedRelation) {
+      nextErrors.relation_id = 'Velg statistikken denne videreføres av'
     }
 
     return nextErrors
@@ -337,19 +340,26 @@ export default function EditStatistic() {
     const validateInput = nextInputValues(values, nextStatus)
 
     setStatus(nextStatus)
-    if (nextStatus !== 'SA') setRelationError('')
     setErrors((currentErrors) => {
       const nextErrors = validateForm(validateInput)
 
       return Object.fromEntries(
-        Object.entries(nextErrors).filter(([field]) => currentErrors[field as StatisticFormField])
+        Object.entries(nextErrors).filter(([field]) => currentErrors[field as keyof EditStatisticFormErrors])
       )
     })
   }
 
   function handleRelationChange(nextRelation: SuggestionItem | null) {
     setSelectedRelation(nextRelation)
-    if (nextRelation) setRelationError('')
+    if (nextRelation) {
+      setErrors((currentErrors) => {
+        if (!currentErrors.relation_id) return currentErrors
+
+        const nextErrors = { ...currentErrors }
+        delete nextErrors.relation_id
+        return nextErrors
+      })
+    }
   }
 
   function handleVariantsChange(nextCreatedVariants: SetStateAction<Variant[]>) {
@@ -389,6 +399,28 @@ export default function EditStatistic() {
   }
 
   async function updateStatistic() {
+    let relationId: number | null = null
+
+    if (selectedRelation) {
+      if (
+        selectedRelation.value === statistic.relation?.shortname &&
+        typeof statistic.relation?.id === 'number'
+      ) {
+        relationId = statistic.relation.id
+      } else {
+        const relationStatistic = relationStatistics.find(
+          (item) => item.shortname === selectedRelation.value
+        ) as (StatisticListing & { id?: number }) | undefined
+
+        if (typeof relationStatistic?.id !== 'number') {
+          setApiError((prev) => [...prev, 'Kunne ikke finne id for valgt statistikk'])
+          return
+        }
+
+        relationId = relationStatistic.id
+      }
+    }
+
     const body: StatisticUpdate = {
       ...values,
       status: { code: status },
@@ -396,7 +428,7 @@ export default function EditStatistic() {
       statistic_region_levels: regionLevelValues.map((code: string) => ({ code })),
       approval_status: ApprovalStatus['ACCEPTED'],
       // Retain fields from the original statistic that are not part of the form
-      relation_id: status === 'SA' && selectedRelation ? Number(selectedRelation.value) : null,
+      relation_id: relationId,
       yearly_reporting: statistic.yearly_reporting,
       previous_topic_codes: statistic.previous_topic_codes,
       variants: createdVariants,
@@ -421,13 +453,11 @@ export default function EditStatistic() {
     e.preventDefault()
 
     const nextErrors = validateForm()
-    const nextRelationError = status === 'SA' && !selectedRelation ? 'Velg statistikken denne videreføres av' : ''
 
     setErrors(nextErrors)
-    setRelationError(nextRelationError)
     setApiError([])
 
-    if (Object.keys(nextErrors).length || nextRelationError) return
+    if (Object.keys(nextErrors).length) return
 
     updateStatistic()
   }
@@ -511,18 +541,18 @@ export default function EditStatistic() {
           </Select>
         </Field>
 
-        {status === 'SA' && (
+        {(status === 'SA' || selectedRelation || statistic.relation?.id) && (
           <Field>
             <Label>
               <div>
-                Videreføres av <Tag data-color='warning'>Må fylles ut</Tag>
+                Videreføres av {status === 'SA' && <Tag data-color='warning'>Må fylles ut</Tag>}
               </div>
             </Label>
             <Field.Description>Søk på kortnavn.</Field.Description>
             <Suggestion selected={selectedRelation} onSelectedChange={handleRelationChange}>
               <Suggestion.Input
                 id='relation_id'
-                aria-invalid={!!relationError}
+                aria-invalid={!!errors.relation_id}
                 onFocus={() => setRelationOptionsStatus((current) => (current === 'idle' ? 'loading' : current))}
               />
               <Suggestion.Clear aria-label='Tøm valgt statistikk' onClick={() => handleRelationChange(null)} />
@@ -539,7 +569,7 @@ export default function EditStatistic() {
                 )}
               </Suggestion.List>
             </Suggestion>
-            {relationError && <ValidationMessage>{relationError}</ValidationMessage>}
+            {errors.relation_id && <ValidationMessage>{errors.relation_id}</ValidationMessage>}
           </Field>
         )}
 
@@ -708,15 +738,10 @@ export default function EditStatistic() {
             Avbryt
           </Button>
         </div>
-        {(Object.values(errors).some(Boolean) || relationError) && (
+        {Object.values(errors).some(Boolean) && (
           <ErrorSummary>
             <ErrorSummary.Heading>For å gå videre må du rette opp følgende feil:</ErrorSummary.Heading>
             <ErrorSummary.List>
-              {relationError && (
-                <ErrorSummary.Item>
-                  <ErrorSummary.Link href='#relation_id'>{relationError}</ErrorSummary.Link>
-                </ErrorSummary.Item>
-              )}
               {Object.entries(errors).map(([key, message]) => {
                 if (message) {
                   return (

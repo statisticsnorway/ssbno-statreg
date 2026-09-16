@@ -431,7 +431,7 @@ export async function updateStatistic(
       status,
       comment,
       language: main_language,
-      ...(relation_id ? { related_statistic_id: relation_id } : {}),
+      ...(relation_id !== undefined ? { related_statistic_id: relation_id } : {}),
       legacy_topic_codes: previous_topic_codes,
       yearly_reporting,
       first_release: first_released_at,
@@ -775,7 +775,9 @@ export function parseUpdateStatisticInput(
     status: parseStatusCode(status?.code),
     previous_topic_codes: sanitize(previous_topic_codes!),
     yearly_reporting: Boolean(yearly_reporting),
-    ...(relation_id ? { relation_id: parseId(relation_id, 'relation') } : {}),
+    ...(relation_id !== undefined
+      ? { relation_id: relation_id === null ? null : parseId(relation_id, 'relation') }
+      : {}),
     comment: safeComment,
     ...(contacts ? { contacts } : {}),
     ...(variants ? { variants } : {}),
