@@ -16,12 +16,14 @@ const body = {
 }
 const shortname = 'energ'
 const variantId = 1
+const releaseCreateShortname = 'kpi'
+const releaseCreateVariantId = 5
 
 describe('release data is persisted when ', () => {
   test('client creates a new release', async () => {
     // POST release
     const created = await request(app)
-      .post(`/statistikkregisteret/api/statistics/${shortname}/variants/${variantId}/releases`)
+      .post(`/statistikkregisteret/api/statistics/${releaseCreateShortname}/variants/${releaseCreateVariantId}/releases`)
       .set(headers)
       .send(body)
     expect(created.status).toBe(200)
@@ -199,14 +201,14 @@ describe('/releases/bulk-approve', () => {
   test('can approve two newly created releases', async () => {
     // POST two identical releases and check that both have approval status FORSLAG
     const created1 = await request(app)
-      .post(`/statistikkregisteret/api/statistics/${shortname}/variants/${variantId}/releases`)
+      .post(`/statistikkregisteret/api/statistics/${releaseCreateShortname}/variants/${releaseCreateVariantId}/releases`)
       .set(headers)
       .send(body)
     expect(created1.status).toBe(200)
     expect(created1.body.approval_status).toBe('GODKJENT')
 
     const created2 = await request(app)
-      .post(`/statistikkregisteret/api/statistics/${shortname}/variants/${variantId}/releases`)
+      .post(`/statistikkregisteret/api/statistics/${releaseCreateShortname}/variants/${releaseCreateVariantId}/releases`)
       .set(headers)
       .send(body)
     expect(created2.status).toBe(200)
