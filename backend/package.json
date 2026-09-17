@@ -32,7 +32,7 @@
     "express": "5.2.1",
     "express-prom-bundle": "8.0.0",
     "helmet": "8.3.0",
-    "jose": "6.2.11",
+    "jose": "6.2.12",
     "lightship": "9.0.4",
     "prisma": "7.10.0",
     "swagger-ui-express": "5.0.1",
