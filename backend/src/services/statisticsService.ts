@@ -145,6 +145,7 @@ export async function getStatistics(
     where,
     orderBy,
     select: {
+      id: true,
       language: true,
       status: true,
       name: true,
@@ -171,6 +172,7 @@ export async function getStatistics(
       })
 
       return {
+        id: statistic.id,
         shortname: statistic.shortname.name,
         main_language,
         status: {
@@ -358,6 +360,10 @@ export async function updateStatistic(
 
   const parsedVariants = variants ? await parseVariantsInput(variants, status, prisma) : undefined
 
+  if (status === 'SA' && parsedVariants?.some((variant) => !variant.id)) {
+    throw new StatregError("A statistic with status 'Sammenslått' cannot have new variants.")
+  }
+
   if (parsedVariants) {
     for (const variant of parsedVariants) {
       if (variant.id && !existingStatistic.variants.some((existingVariant) => existingVariant.id === variant.id)) {
@@ -425,7 +431,7 @@ export async function updateStatistic(
       status,
       comment,
       language: main_language,
-      ...(relation_id ? { related_statistic_id: relation_id } : {}),
+      ...(relation_id !== undefined ? { related_statistic_id: relation_id } : {}),
       legacy_topic_codes: previous_topic_codes,
       yearly_reporting,
       first_release: first_released_at,
@@ -769,7 +775,9 @@ export function parseUpdateStatisticInput(
     status: parseStatusCode(status?.code),
     previous_topic_codes: sanitize(previous_topic_codes!),
     yearly_reporting: Boolean(yearly_reporting),
-    ...(relation_id ? { relation_id: parseId(relation_id, 'relation') } : {}),
+    ...(relation_id !== undefined
+      ? { relation_id: relation_id === null ? null : parseId(relation_id, 'relation') }
+      : {}),
     comment: safeComment,
     ...(contacts ? { contacts } : {}),
     ...(variants ? { variants } : {}),
