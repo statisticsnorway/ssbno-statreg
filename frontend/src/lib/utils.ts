@@ -53,8 +53,10 @@ export function parsePublishDateWithTime(publishTime: Date | undefined): string 
 
 export function formatVariant(variant?: Variant): string {
   const frequency = variant?.frequency?.name ?? '-'
-  const revisionCode = variant?.revision?.code as keyof typeof RevisionNames | undefined
-  const revisionName = variant?.revision?.name ?? (revisionCode ? RevisionNames[revisionCode] : undefined)
+
+  const RevisionCode = variant?.revision?.code as keyof typeof RevisionNames
+  const revisionName = variant?.revision?.name ?? RevisionNames[RevisionCode]
+
   const revision = revisionName?.toLowerCase() ?? '-'
   return [frequency, revision].join(', ')
 }
