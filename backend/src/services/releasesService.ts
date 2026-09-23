@@ -6,6 +6,7 @@ import {
   type ReleasesBulkApproveResponse,
   ApprovalStatus,
   RevisionNames,
+  RevisionNamesEN,
 } from '@ssbno-statreg/shared'
 import {
   dateToISOString,
@@ -112,7 +113,7 @@ export async function getReleases(
         revision: {
           code: release.variant.revision,
           name: RevisionNames[release.variant.revision as keyof typeof RevisionNames],
-          name_en: '',
+          name_en: RevisionNamesEN[release.variant.revision as keyof typeof RevisionNamesEN],
         },
       }
     }),
@@ -494,7 +495,7 @@ export function mapToReleaseDetails(
       revision: {
         code: prismaRelease.variant.revision,
         name: RevisionNames[prismaRelease.variant.revision as keyof typeof RevisionNames],
-        name_en: '',
+        name_en: RevisionNamesEN[prismaRelease.variant.revision as keyof typeof RevisionNamesEN],
       },
     },
     statistic: {

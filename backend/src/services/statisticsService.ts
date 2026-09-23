@@ -7,6 +7,7 @@ import {
   ApprovalStatus,
   StatisticStatus,
   RevisionNames,
+  RevisionNamesEN,
   StatisticListingResponse,
   RequiredCreateStatisticFieldsByStatus,
   RequiredEditStatisticFieldsByStatus,
@@ -237,7 +238,7 @@ export function parseStatisticVariants(
     revision: {
       code: variant.revision,
       name: RevisionNames[variant.revision as keyof typeof RevisionNames],
-      name_en: '',
+      name_en: RevisionNamesEN[variant.revision as keyof typeof RevisionNamesEN],
     },
   }))
 }

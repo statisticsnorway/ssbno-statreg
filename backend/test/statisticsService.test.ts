@@ -1038,7 +1038,7 @@ describe('statisticService', () => {
           revision: {
             code: 'I',
             name: 'Ingen',
-            name_en: '',
+            name_en: 'None',
           },
         },
       ])
@@ -1659,7 +1659,7 @@ const mockedStatisticDetailedResult = {
       revision: {
         code: 'I',
         name: 'Ingen',
-        name_en: '',
+        name_en: 'None',
       },
     },
     {
@@ -1678,7 +1678,7 @@ const mockedStatisticDetailedResult = {
       revision: {
         code: 'I',
         name: 'Ingen',
-        name_en: '',
+        name_en: 'None',
       },
     },
   ],

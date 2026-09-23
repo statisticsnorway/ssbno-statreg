@@ -23,6 +23,15 @@ export const RevisionNames = {
   IG: 'Integrert',
 } as const
 
+export const RevisionNamesEN = {
+  I: 'None',
+  B: 'Calculated',
+  E: 'Final',
+  F: 'Preliminary',
+  R: 'Revised',
+  IG: 'Integrated',
+} as const
+
 export const DayStatus = {
   BLOCKED: 'Sperret',
   NONE: 'Ledig',
