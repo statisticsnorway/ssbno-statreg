@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import './ContactSelection.css'
-import { EXPERIMENTAL_Suggestion as Suggestion, type SuggestionItem, Field } from '@statisticsnorway/design-react'
+import { EXPERIMENTAL_Suggestion as Suggestion, type SuggestionItem } from '@statisticsnorway/design-react'
 import type { Contact } from '@ssbno-statreg/shared'
 import { formatContact } from '../lib/utils'
 
@@ -56,20 +56,18 @@ export function ContactSelection({
   )
 
   return (
-    <Field>
-      <Suggestion
-        className='contact-selection'
-        multiple
-        onSelectedChange={(items) => setSelected(items.map((item) => item.value))}
-        selected={selectedItems}
-      >
-        <Suggestion.Input id={id} aria-invalid={ariaInvalid} onBlur={onBlur} autoFocus={autoFocus} />
-        <Suggestion.Clear aria-label='Tøm valgte kontakter' />
-        <Suggestion.List className='contact-selection-list'>
-          <Suggestion.Empty>Ingen treff</Suggestion.Empty>
-          {options}
-        </Suggestion.List>
-      </Suggestion>
-    </Field>
+    <Suggestion
+      className='contact-selection'
+      multiple
+      onSelectedChange={(items) => setSelected(items.map((item) => item.value))}
+      selected={selectedItems}
+    >
+      <Suggestion.Input id={id} aria-invalid={ariaInvalid} onBlur={onBlur} autoFocus={autoFocus} />
+      <Suggestion.Clear aria-label='Tøm valgte kontakter' />
+      <Suggestion.List className='contact-selection-list'>
+        <Suggestion.Empty>Ingen treff</Suggestion.Empty>
+        {options}
+      </Suggestion.List>
+    </Suggestion>
   )
 }

@@ -511,10 +511,6 @@ export default function EditStatistic() {
               </Popover>
             </Popover.TriggerContext>
           </div>
-          <Field.Description>
-            Statistikker som er nyopprettet får status «Kommende». For å sette den til «Aktiv» må du i tillegg fylle ut:
-            Engelsk navn, varianter og kontakter.
-          </Field.Description>
           <Select
             width='auto'
             value={status}
