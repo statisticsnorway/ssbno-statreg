@@ -355,8 +355,8 @@ export default function CreateStatistic() {
         first_released_at: values.first_released_at ? `${values.first_released_at}-12-31` : '',
         statistic_region_levels: regionLevelValues.length
           ? regionLevelValues.map((code: string) => ({
-            code,
-          }))
+              code,
+            }))
           : [],
         approval_status: ApprovalStatus['ACCEPTED'],
         contacts: selectedContacts,
