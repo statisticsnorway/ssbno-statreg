@@ -28,7 +28,7 @@ import client from '../api'
 
 import './CreateStatistic.css'
 
-import { RequiredCreateStatisticFieldsByStatus, ApprovalStatus, RevisionNames } from '@ssbno-statreg/shared'
+import { RequiredCreateStatisticFieldsByStatus, ApprovalStatus } from '@ssbno-statreg/shared'
 import type {
   CreatableStatisticStatus,
   Division,
@@ -355,8 +355,8 @@ export default function CreateStatistic() {
         first_released_at: values.first_released_at ? `${values.first_released_at}-12-31` : '',
         statistic_region_levels: regionLevelValues.length
           ? regionLevelValues.map((code: string) => ({
-            code,
-          }))
+              code,
+            }))
           : [],
         approval_status: ApprovalStatus['ACCEPTED'],
         contacts: selectedContacts,
@@ -507,10 +507,7 @@ export default function CreateStatistic() {
                       <Card.Block>
                         <div className='created-variant-heading-container'>
                           <Heading>
-                            {[
-                              variant.frequency!.name,
-                              RevisionNames[variant.revision!.code as keyof typeof RevisionNames].toLocaleLowerCase(),
-                            ].join(', ')}
+                            {[variant.frequency!.name, variant.revision!.name?.toLowerCase()].join(', ')}
                           </Heading>
                           <Button
                             variant='tertiary'

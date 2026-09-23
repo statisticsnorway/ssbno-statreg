@@ -30,12 +30,7 @@ import client from '../api'
 
 import './CreateStatistic.css'
 
-import {
-  RequiredEditStatisticFieldsByStatus,
-  ApprovalStatus,
-  StatisticStatus,
-  RevisionNames,
-} from '@ssbno-statreg/shared'
+import { RequiredEditStatisticFieldsByStatus, ApprovalStatus, StatisticStatus } from '@ssbno-statreg/shared'
 import type {
   EditableStatisticStatus,
   Contact,
@@ -402,15 +397,11 @@ export default function EditStatistic() {
     let relationId: number | null = null
 
     if (selectedRelation) {
-      if (
-        selectedRelation.value === statistic.relation?.shortname &&
-        typeof statistic.relation?.id === 'number'
-      ) {
+      if (selectedRelation.value === statistic.relation?.shortname && typeof statistic.relation?.id === 'number') {
         relationId = statistic.relation.id
       } else {
-        const relationStatistic = relationStatistics.find(
-          (item) => item.shortname === selectedRelation.value
-        ) as (StatisticListing & { id?: number }) | undefined
+        const relationStatistic = relationStatistics.find((item) => item.shortname === selectedRelation.value) as
+          (StatisticListing & { id?: number }) | undefined
 
         if (typeof relationStatistic?.id !== 'number') {
           setApiError((prev) => [...prev, 'Kunne ikke finne id for valgt statistikk'])
@@ -544,9 +535,7 @@ export default function EditStatistic() {
         {(status === 'SA' || selectedRelation || statistic.relation?.id) && (
           <Field>
             <Label>
-              <div>
-                Videreføres av {status === 'SA' && <Tag data-color='warning'>Må fylles ut</Tag>}
-              </div>
+              <div>Videreføres av {status === 'SA' && <Tag data-color='warning'>Må fylles ut</Tag>}</div>
             </Label>
             <Field.Description>Søk på kortnavn.</Field.Description>
             <Suggestion selected={selectedRelation} onSelectedChange={handleRelationChange}>
@@ -615,12 +604,7 @@ export default function EditStatistic() {
                 >
                   <Card.Block>
                     <div className='created-variant-heading-container'>
-                      <Heading>
-                        {[
-                          variant.frequency!.name,
-                          RevisionNames[variant.revision!.code as keyof typeof RevisionNames].toLocaleLowerCase(),
-                        ].join(', ')}
-                      </Heading>
+                      <Heading>{[variant.frequency!.name, variant.revision!.name?.toLowerCase()].join(', ')}</Heading>
                       <Button
                         variant='tertiary'
                         data-color='danger'

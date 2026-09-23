@@ -5,7 +5,6 @@ import {
   getFirstDayOfNthMonth,
   getDateOnlyAsString,
   parsePublishDateWithTime,
-  formatRevisionName,
   formatVariant,
   formatContacts,
   getPublishTimeFilterForDate,
@@ -123,25 +122,11 @@ describe('utils', () => {
     })
   })
 
-  describe('formatRevisionName', () => {
-    test('returns the correct revision name if valid', () => {
-      expect(formatRevisionName('F')).toBe('Foreløpige')
-    })
-
-    test('returns "-" if revision is undefined', () => {
-      expect(formatRevisionName(undefined)).toBe('-')
-    })
-
-    test('returns "-" if revision is not in RevisionNames', () => {
-      expect(formatRevisionName('X')).toBe('-')
-    })
-  })
-
   describe('formatVariant', () => {
     test('formats frequency and revision correctly', () => {
       const variant = {
         frequency: { name: 'Måned' },
-        revision: { code: 'I' },
+        revision: { code: 'I', name: 'Ingen', name_en: '' },
       }
 
       expect(formatVariant(variant)).toBe('Måned, ingen')
@@ -149,7 +134,7 @@ describe('utils', () => {
 
     test('handles missing frequency', () => {
       const variant = {
-        revision: { code: 'B' },
+        revision: { code: 'B', name: 'Beregnede', name_en: '' },
       }
 
       expect(formatVariant(variant)).toBe('-, beregnede')

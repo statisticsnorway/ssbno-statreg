@@ -28,7 +28,7 @@ import {
 } from '@ssbno-statreg/shared'
 
 import './ShowStatistic.css'
-import { formatContact, formatDateTime, formatRevisionName, formatVariant } from '../lib/utils'
+import { formatContact, formatDateTime, formatVariant } from '../lib/utils'
 import { ApprovalStatusBadge } from '../components/ApprovalStatus'
 import { useAuth } from '../context/AuthContext'
 import { ErrorAlert } from '../components/ErrorAlert'
@@ -102,7 +102,7 @@ function SimpleReleaseRow({ release }: ReleaseRowProps) {
     >
       <Table.Cell>{formatDateTime(release.publish_time)}</Table.Cell>
       <Table.Cell>
-        {release.frequency?.name ?? ''}, {formatRevisionName(release.revision?.code).toLocaleLowerCase()}
+        {release.frequency?.name ?? ''}, {release.revision?.name?.toLocaleLowerCase()}
       </Table.Cell>
       <Table.Cell className='status-column'>
         <ApprovalStatusBadge status={release.approval_status} />
