@@ -236,6 +236,8 @@ export function parseStatisticVariants(
     },
     revision: {
       code: variant.revision,
+      name: RevisionNames[variant.revision as keyof typeof RevisionNames],
+      name_en: '',
     },
   }))
 }
