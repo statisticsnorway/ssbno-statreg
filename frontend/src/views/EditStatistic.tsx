@@ -402,15 +402,11 @@ export default function EditStatistic() {
     let relationId: number | null = null
 
     if (selectedRelation) {
-      if (
-        selectedRelation.value === statistic.relation?.shortname &&
-        typeof statistic.relation?.id === 'number'
-      ) {
+      if (selectedRelation.value === statistic.relation?.shortname && typeof statistic.relation?.id === 'number') {
         relationId = statistic.relation.id
       } else {
-        const relationStatistic = relationStatistics.find(
-          (item) => item.shortname === selectedRelation.value
-        ) as (StatisticListing & { id?: number }) | undefined
+        const relationStatistic = relationStatistics.find((item) => item.shortname === selectedRelation.value) as
+          (StatisticListing & { id?: number }) | undefined
 
         if (typeof relationStatistic?.id !== 'number') {
           setApiError((prev) => [...prev, 'Kunne ikke finne id for valgt statistikk'])
@@ -520,10 +516,6 @@ export default function EditStatistic() {
               </Popover>
             </Popover.TriggerContext>
           </div>
-          <Field.Description>
-            Statistikker som er nyopprettet får status «Kommende». For å sette den til «Aktiv» må du i tillegg fylle ut:
-            Engelsk navn, varianter og kontakter.
-          </Field.Description>
           <Select
             width='auto'
             value={status}
@@ -544,9 +536,7 @@ export default function EditStatistic() {
         {(status === 'SA' || selectedRelation || statistic.relation?.id) && (
           <Field>
             <Label>
-              <div>
-                Videreføres av {status === 'SA' && <Tag data-color='warning'>Må fylles ut</Tag>}
-              </div>
+              <div>Videreføres av {status === 'SA' && <Tag data-color='warning'>Må fylles ut</Tag>}</div>
             </Label>
             <Field.Description>Søk på kortnavn.</Field.Description>
             <Suggestion selected={selectedRelation} onSelectedChange={handleRelationChange}>
