@@ -1029,7 +1029,7 @@ const mockedReleasesResult = [
       name: 'Måned',
       code: 'M',
     },
-    revision: { code: 'I', name: 'Ingen' },
+    revision: { code: 'I', name: 'Ingen', name_en: '' },
     statistic: {
       id: 1,
       shortname: 'KPI',
@@ -1048,7 +1048,7 @@ const mockedReleasesResult = [
       name: 'År',
       code: 'Y',
     },
-    revision: { code: 'E', name: 'Endelige' },
+    revision: { code: 'E', name: 'Endelige', name_en: '' },
     statistic: {
       id: 2,
       shortname: 'NR',
@@ -1067,7 +1067,7 @@ const mockedReleasesResult = [
       name: 'Halvår',
       code: 'H',
     },
-    revision: { code: 'F', name: 'Foreløpige' },
+    revision: { code: 'F', name: 'Foreløpige', name_en: '' },
     statistic: {
       id: 3,
       shortname: 'laks',
@@ -1091,6 +1091,7 @@ const mockedSingleReleaseResult = {
     revision: {
       code: 'I',
       name: 'Ingen',
+      name_en: '',
     },
   },
   statistic: {

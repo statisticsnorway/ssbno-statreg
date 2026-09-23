@@ -112,6 +112,7 @@ export async function getReleases(
         revision: {
           code: release.variant.revision,
           name: RevisionNames[release.variant.revision as keyof typeof RevisionNames],
+          name_en: '',
         },
       }
     }),
@@ -493,6 +494,7 @@ export function mapToReleaseDetails(
       revision: {
         code: prismaRelease.variant.revision,
         name: RevisionNames[prismaRelease.variant.revision as keyof typeof RevisionNames],
+        name_en: '',
       },
     },
     statistic: {
