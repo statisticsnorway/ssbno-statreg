@@ -257,6 +257,8 @@ components:
       type: object
       properties:
         code: { type: string }
+        name: { type: string }
+        name_en: { type: string }
 
     Statistic:
       type: object
