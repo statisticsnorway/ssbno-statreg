@@ -92,6 +92,9 @@ describe('statisticService', () => {
       responsiblePerson: {
         upsert: vi.fn(),
       },
+      release: {
+        count: vi.fn(() => Promise.resolve(0)),
+      },
     }
     statisticsAsserts.assertFilteredShortnamesExist = vi.fn(async () => true) as any
   })
@@ -592,6 +595,31 @@ describe('statisticService', () => {
           }),
         })
       )
+    })
+
+    test('throws error when discontinuing a variant that has upcoming publications', async () => {
+      setStatisticsResult({
+        id: 5,
+        status: 'A',
+        responsiblePersons: [{ principalName: 'bcd@ssb.no' }],
+        variants: [{ id: 1, cancelled: false }],
+        statistic_region_levels: [],
+      })
+      prismaMock.release.count.mockResolvedValue(1)
+
+      input.variants = [
+        {
+          id: 1,
+          cancelled: true,
+          revision: { code: 'I' },
+          frequency: { code: 'M' },
+        },
+      ]
+
+      await expect(() => updateStatistic('helse', input, prismaMock)).rejects.toMatchObject({
+        statregError: 'A variant cannot be discontinued while it has upcoming publications.',
+      })
+      expect(prismaMock.statistic.update).toHaveBeenCalledTimes(0)
     })
 
     test('rejects creating a new variant for a Sammenslått statistic', async () => {
