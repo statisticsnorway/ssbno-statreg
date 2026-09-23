@@ -384,12 +384,13 @@ export async function updateStatistic(
     }
 
     const variantIdsToDiscontinue = parsedVariants
-      .filter(
-        (variant) =>
-          variant.id &&
-          variant.cancelled &&
-          !existingStatistic.variants.find((existingVariant) => existingVariant.id === variant.id)?.cancelled
-      )
+      .filter((variant) => {
+        const existingVariantCancelled = existingStatistic.variants?.find(
+          (existingVariant) => existingVariant.id === variant.id
+        )?.cancelled
+
+        return variant.id && variant.cancelled && !existingVariantCancelled
+      })
       .map((variant) => variant.id!)
 
     if (variantIdsToDiscontinue.length) {

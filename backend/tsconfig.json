@@ -17,8 +17,7 @@
     "noUncheckedIndexedAccess": true,
     "noFallthroughCasesInSwitch": true,
     "isolatedModules": true,
-    "outDir": "dist",
-    "noEmit": false,
+    "noEmit": true,
     "forceConsistentCasingInFileNames": true
   },
   "include": ["src", "test", "plugins"],
