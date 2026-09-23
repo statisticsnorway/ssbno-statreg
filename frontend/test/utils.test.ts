@@ -160,6 +160,15 @@ describe('utils', () => {
 
       expect(formatVariant(variant)).toBe('Kvartal, -')
     })
+
+    test('falls back to revision code lookup when revision name is missing', () => {
+      const variant = {
+        frequency: { name: 'Måned' },
+        revision: { code: 'I' },
+      }
+
+      expect(formatVariant(variant)).toBe('Måned, ingen')
+    })
   })
 
   describe('formatContact', () => {

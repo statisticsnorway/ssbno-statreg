@@ -258,6 +258,7 @@ export function VariantModal({
         ...(isExistingVariant && editVariantValues?.id ? { id: editVariantValues.id } : {}),
         revision: {
           code: values.revision_code,
+          name: RevisionNames[values.revision_code as keyof typeof RevisionNames] ?? values.revision_code,
         },
         frequency: selectedFrequency,
         level_of_detail: {

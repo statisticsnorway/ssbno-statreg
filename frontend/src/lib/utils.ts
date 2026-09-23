@@ -1,4 +1,4 @@
-import { type Contact, type Variant } from '@ssbno-statreg/shared'
+import { RevisionNames, type Contact, type Variant } from '@ssbno-statreg/shared'
 
 export function formatDateTime(publishTime: string | undefined, timeZone?: string): string {
   if (!publishTime) return '-'
@@ -53,7 +53,9 @@ export function parsePublishDateWithTime(publishTime: Date | undefined): string 
 
 export function formatVariant(variant?: Variant): string {
   const frequency = variant?.frequency?.name ?? '-'
-  const revision = variant?.revision?.name?.toLowerCase() ?? '-'
+  const revisionCode = variant?.revision?.code as keyof typeof RevisionNames | undefined
+  const revisionName = variant?.revision?.name ?? (revisionCode ? RevisionNames[revisionCode] : undefined)
+  const revision = revisionName?.toLowerCase() ?? '-'
   return [frequency, revision].join(', ')
 }
 
