@@ -1,6 +1,3 @@
-# Template for prod. Deploy needs a Keycloak client in the prod realm
-# and these secrets/configmaps in the prod cluster:
-#   login-config-ssbno-statreg, statreg-secrets, statreg-config
 apiVersion: data.nais.io/v1
 kind: Postgres
 metadata:
