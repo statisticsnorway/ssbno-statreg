@@ -20,7 +20,7 @@ import { statisticsAsserts } from '@/lib/asserts'
 import { getAllUsersFromCache } from '@/lib/cache'
 import { StatregError } from '@/lib/statregError'
 
-export type StatisticPrisma = Pick<PrismaClient, 'statistic' | 'shortname' | 'responsiblePerson' | 'frequency'>
+export type StatisticPrisma = Pick<PrismaClient, 'statistic' | 'shortname' | 'responsiblePerson' | 'frequency' | 'release'>
 
 type StatisticStatusCode = keyof typeof StatisticStatus
 
@@ -319,7 +319,7 @@ export async function updateStatistic(
       id: true,
       status: true,
       responsiblePersons: { select: { principalName: true } },
-      variants: { select: { id: true } },
+      variants: { select: { id: true, cancelled: true } },
       statistic_region_levels: { select: { region_level: { select: { code: true, id: true } } } },
     },
   })
@@ -381,6 +381,30 @@ export async function updateStatistic(
           .map((variant) => variant.id)
           .join(', ')}.`
       )
+    }
+
+    const variantIdsToDiscontinue = parsedVariants
+      .filter((variant) => {
+        const existingVariantCancelled = existingStatistic.variants?.find(
+          (existingVariant) => existingVariant.id === variant.id
+        )?.cancelled
+
+        return variant.id && variant.cancelled && !existingVariantCancelled
+      })
+      .map((variant) => variant.id!)
+
+    if (variantIdsToDiscontinue.length) {
+      const upcomingPublications = await prisma.release.count({
+        where: {
+          variant_id: { in: variantIdsToDiscontinue },
+          archived: false,
+          publish_time: { gt: new Date() },
+        },
+      })
+
+      if (upcomingPublications > 0) {
+        throw new StatregError('A variant cannot be discontinued while it has upcoming publications.')
+      }
     }
   }
 
