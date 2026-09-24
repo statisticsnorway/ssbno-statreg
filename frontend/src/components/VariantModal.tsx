@@ -99,14 +99,21 @@ type SetVariantCancelledPopoverProps = {
   onError: (message: string) => void
 }
 
-async function variantHasUpcomingRelease(shortname?: string, variantId?: number): Promise<boolean> {
+async function variantHasUpcomingRelease(
+  shortname: string | undefined,
+  variantId: number | undefined,
+  onError: (message: string) => void
+): Promise<boolean | null> {
   if (!shortname || !variantId) return false
 
   const { data, error } = await client.GET('/statistics/{shortname}/variants/{id}/releases', {
     params: { path: { shortname, id: variantId }, query: { count: 1, sort: '-publish_time' } },
   })
 
-  if (error) throw new Error(error.message)
+  if (error) {
+    onError(error.message)
+    return null
+  }
 
   const publishTime = data.releases?.[0]?.publish_time
   return !!publishTime && new Date(publishTime) > new Date()
@@ -175,18 +182,17 @@ function SetVariantCancelledPopover({
 }: Readonly<SetVariantCancelledPopoverProps>) {
   const [hasUpcomingPublications, setHasUpcomingPublications] = useState(false)
 
-  async function handleClick() {
+  async function handleVariantCancelledClick() {
     if (isSetVariantCancelledPopoverOpen) {
       closeVariantCancelledAndReturnFocus()
       return
     }
 
-    try {
-      setHasUpcomingPublications(await variantHasUpcomingRelease(shortname, variantId))
-      setIsSetVariantCancelledPopoverOpen(true)
-    } catch (error) {
-      onError(error instanceof Error ? error.message : 'Kunne ikke sjekke kommende publiseringer')
-    }
+    const hasUpcoming = await variantHasUpcomingRelease(shortname, variantId, onError)
+    if (hasUpcoming === null) return
+
+    setHasUpcomingPublications(hasUpcoming)
+    setIsSetVariantCancelledPopoverOpen(true)
   }
 
   return (
@@ -195,12 +201,12 @@ function SetVariantCancelledPopover({
         ref={variantCancelledTriggerRef}
         variant='tertiary'
         data-color='danger'
-        onClick={() => void handleClick()}
+        onClick={handleVariantCancelledClick}
       >
         <ArchiveIcon aria-hidden /> Sett som opphørt
       </Popover.Trigger>
       <Popover
-        placement={hasUpcomingPublications ? 'right' : 'top-start'}
+        placement='right'
         autoPlacement={false}
         open={isSetVariantCancelledPopoverOpen}
         onClose={closeVariantCancelledAndReturnFocus}
