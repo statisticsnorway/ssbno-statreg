@@ -1,0 +1,103 @@
+# Template for prod. Deploy needs a Keycloak client in the prod realm
+# and these secrets/configmaps in the prod cluster:
+#   login-config-ssbno-statreg, statreg-secrets, statreg-config
+apiVersion: data.nais.io/v1
+kind: Postgres
+metadata:
+  name: statreg-api-prod-db
+  namespace: ssbno
+spec:
+  cluster:
+    audit:
+      enabled: true
+    majorVersion: '17'
+    resources:
+      cpu: 200m
+      diskSize: 2Gi
+      memory: 2Gi
+  database:
+    collation: nb_NO
+
+---
+apiVersion: nais.io/v1alpha1
+kind: Application
+metadata:
+  labels:
+    team: ssbno-developers
+  name: ssbno-statreg
+  namespace: ssbno
+
+spec:
+  ingresses:
+    - https://ssbno-statreg.intern.ssb.no
+  image: '{{ image }}' # Injected from the GitHub Action
+  port: 8080
+
+  envFrom:
+    - secret: login-config-ssbno-statreg
+    - secret: statreg-secrets
+    - configmap: statreg-config
+
+  env:
+    - name: NODE_ENV
+      value: production
+    - name: AUTH_ENABLED
+      value: 'true'
+    - name: KEYCLOAK_CLIENT_ID
+      value: ssbno-statreg
+    - name: KLASS_BASE_URL
+      value: https://data.ssb.no
+    - name: KEYCLOAK_REALM_ISSUER
+      value: https://auth.ssb.no/realms/ssb
+    - name: KEYCLOAK_JWKS_URI
+      value: https://auth.ssb.no/realms/ssb/protocol/openid-connect/certs
+    - name: KEYCLOAK_TOKEN_AUDIENCE
+      value: oauth2-proxy-ssbno-statreg
+
+  accessPolicy:
+    outbound:
+      external:
+        - host: auth.ssb.no
+        - host: data.ssb.no
+
+  login:
+    provider: openid
+    enforce:
+      enabled: true
+      excludePaths:
+        - /statistikkregisteret/docs
+        - /statistikkregisteret/docs/**
+        - /statistikkregisteret/api/**
+
+  postgres:
+    clusterName: statreg-api-prod-db
+
+  prometheus:
+    enabled: true
+    path: /metrics
+    port: '9000'
+
+  liveness:
+    path: /live
+    port: 9000
+    failureThreshold: 3
+    initialDelay: 10
+    periodSeconds: 30
+    timeout: 5
+
+  readiness:
+    path: /ready
+    port: 9000
+    failureThreshold: 1
+    initialDelay: 5
+    periodSeconds: 5
+    timeout: 5
+
+  startup:
+    path: /live
+    port: 9000
+    failureThreshold: 3
+    initialDelay: 10
+    periodSeconds: 30
+    timeout: 5
+status: {}
