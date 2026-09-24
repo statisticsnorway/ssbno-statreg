@@ -333,9 +333,7 @@ export default function ReleaseForm() {
 
   function validatePublishTime(): string | undefined {
     if (!values.publishTime) return 'Opprett en gyldig publiseringsdato'
-    if (values.periodTo && values.publishTime && values.periodTo > values.publishTime) {
-      return 'Publiseringsdato må være etter måleperiodeslutt'
-    }
+
     if (!isAdmin && values.publishTime && values.publishTime < inThreeMonths) {
       return 'Publiseringsdato tidligere enn tre måneder fra dags dato må opprettes av desken'
     }

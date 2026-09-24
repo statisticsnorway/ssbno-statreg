@@ -417,9 +417,6 @@ export async function parseReleaseInput(
   if (periodFromDate > periodToDate) {
     throw new StatregError('End of measuring period cannot be earlier than start of measuring period')
   }
-  if (periodToDate > publishTimeDate) {
-    throw new StatregError('Publish time cannot be earlier than end of measuring period')
-  }
 
   const isAdmin = isCurrentUserAdmin()
 
