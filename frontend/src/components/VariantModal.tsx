@@ -60,6 +60,7 @@ export function useVariantModal() {
 
 type VariantModalProps = {
   dialogId: string
+  shortname?: string
   setCreatedVariants: Dispatch<SetStateAction<Variant[]>>
   editVariantValues?: Variant
   editVariantIndex?: number | null
@@ -93,6 +94,29 @@ type SetVariantCancelledPopoverProps = {
   onActionClose?: () => void
   setVariantCancelled: () => void
   closeVariantCancelledAndReturnFocus: () => void
+  shortname?: string
+  variantId?: number
+  onError: (message: string) => void
+}
+
+async function variantHasUpcomingRelease(
+  shortname: string | undefined,
+  variantId: number | undefined,
+  onError: (message: string) => void
+): Promise<boolean | null> {
+  if (!shortname || !variantId) return false
+
+  const { data, error } = await client.GET('/statistics/{shortname}/variants/{id}/releases', {
+    params: { path: { shortname, id: variantId }, query: { count: 1, sort: '-publish_time' } },
+  })
+
+  if (error) {
+    onError(error.message)
+    return null
+  }
+
+  const publishTime = data.releases?.[0]?.publish_time
+  return !!publishTime && new Date(publishTime) > new Date()
 }
 
 function DeleteVariantPopover({
@@ -152,44 +176,76 @@ function SetVariantCancelledPopover({
   onActionClose,
   setVariantCancelled,
   closeVariantCancelledAndReturnFocus,
+  shortname,
+  variantId,
+  onError,
 }: Readonly<SetVariantCancelledPopoverProps>) {
+  const [hasUpcomingPublications, setHasUpcomingPublications] = useState(false)
+
+  async function handleVariantCancelledClick() {
+    if (isSetVariantCancelledPopoverOpen) {
+      closeVariantCancelledAndReturnFocus()
+      return
+    }
+
+    const hasUpcoming = await variantHasUpcomingRelease(shortname, variantId, onError)
+    if (hasUpcoming === null) return
+
+    setHasUpcomingPublications(hasUpcoming)
+    setIsSetVariantCancelledPopoverOpen(true)
+  }
+
   return (
     <Popover.TriggerContext>
       <Popover.Trigger
         ref={variantCancelledTriggerRef}
         variant='tertiary'
         data-color='danger'
-        onClick={() => setIsSetVariantCancelledPopoverOpen(!isSetVariantCancelledPopoverOpen)}
+        onClick={handleVariantCancelledClick}
       >
         <ArchiveIcon aria-hidden /> Sett som opphørt
       </Popover.Trigger>
       <Popover
-        placement='top-start'
+        placement='right'
         autoPlacement={false}
         open={isSetVariantCancelledPopoverOpen}
         onClose={closeVariantCancelledAndReturnFocus}
-        data-color='danger'
+        {...(hasUpcomingPublications ? {} : { 'data-color': 'danger' })}
       >
-        <Paragraph>
-          Varianten har tilknyttede publiseringer, og kan ikke slettes. Vil du sette den som opphørt i stedet?
-        </Paragraph>
-        <div className='variant-modal-delete-popover-buttons'>
-          <Button
-            command='close'
-            commandfor={dialogId}
-            data-color='danger'
-            onClick={() => {
-              onActionClose?.()
-              setIsSetVariantCancelledPopoverOpen(false)
-              setVariantCancelled()
-            }}
-          >
-            Ja, sett som opphørt
-          </Button>
-          <Button variant='tertiary' onClick={closeVariantCancelledAndReturnFocus}>
-            Avbryt
-          </Button>
-        </div>
+        {hasUpcomingPublications ? (
+          <>
+            <Paragraph>
+              Varianten har tilknyttede kommende publiseringer og kan derfor ikke settes til opphørt. Fjern de kommende
+              publiseringene før du kan sette varianten til opphørt.
+            </Paragraph>
+            <div className='variant-modal-delete-popover-buttons'>
+              <Button onClick={closeVariantCancelledAndReturnFocus}>OK</Button>
+            </div>
+          </>
+        ) : (
+          <>
+            <Paragraph>
+              Varianten har tilknyttede publiseringer, og kan ikke slettes. Vil du sette den som opphørt i stedet?
+            </Paragraph>
+            <div className='variant-modal-delete-popover-buttons'>
+              <Button
+                command='close'
+                commandfor={dialogId}
+                data-color='danger'
+                onClick={() => {
+                  onActionClose?.()
+                  setIsSetVariantCancelledPopoverOpen(false)
+                  setVariantCancelled()
+                }}
+              >
+                Ja, sett som opphørt
+              </Button>
+              <Button variant='tertiary' onClick={closeVariantCancelledAndReturnFocus}>
+                Avbryt
+              </Button>
+            </div>
+          </>
+        )}
       </Popover>
     </Popover.TriggerContext>
   )
@@ -197,6 +253,7 @@ function SetVariantCancelledPopover({
 
 export function VariantModal({
   dialogId,
+  shortname,
   setCreatedVariants,
   editVariantValues,
   editVariantIndex,
@@ -395,6 +452,9 @@ export function VariantModal({
                 onActionClose={onActionClose}
                 setVariantCancelled={setVariantCancelled}
                 closeVariantCancelledAndReturnFocus={closeVariantCancelledAndReturnFocus}
+                shortname={shortname}
+                variantId={editVariantValues?.id}
+                onError={(message) => setApiError((prev) => [...prev, message])}
               />
             )
           )}
