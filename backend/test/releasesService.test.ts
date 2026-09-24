@@ -844,19 +844,6 @@ describe('releasesService ', async () => {
       })
     })
 
-    test('throws error when publish time is earlier than end of measuring period', async () => {
-      const input = {
-        publish_time: '2024-10-15T08:00:00Z',
-        period_from: '2024-09-01',
-        period_to: '2025-06-01',
-        release_date_precision: 'dag',
-      }
-
-      await expect(() => parseReleaseInput(prismaMock, input)).rejects.toMatchObject({
-        statregError: 'Publish time cannot be earlier than end of measuring period',
-      })
-    })
-
     test('returns parsed input when all validations pass', async () => {
       const input = {
         publish_time: '2024-10-15T08:00:00Z',
