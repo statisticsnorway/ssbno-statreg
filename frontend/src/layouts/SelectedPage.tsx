@@ -7,15 +7,17 @@ type PageLink = ReactElement<{
   'aria-current'?: 'page'
 }>
 
-const SelectedPage = ({ children }: { children: PageLink | PageLink[] }) => {
-  const page = useLocation().pathname.split('/')[1] || 'publisering'
+const SelectedPage = ({ children }: { children: PageLink[] }) => {
+  const activePage = useLocation().pathname.split('/')[1] || 'publisering'
 
-  return Children.map(children, (link) =>
-    cloneElement(link, {
+  return Children.map(children, (link) => {
+    const selected = link.props.children.toLowerCase().startsWith(activePage)
+
+    return cloneElement(link, {
       className: 'header-menu-link',
-      'aria-current': link.props.children.toLowerCase().startsWith(page) ? 'page' : undefined,
+      'aria-current': selected ? 'page' : undefined,
     })
-  )
+  })
 }
 
 export default SelectedPage
