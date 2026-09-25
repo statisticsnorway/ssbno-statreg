@@ -4,6 +4,7 @@ import ssbLogo from '../assets/SSB_logo_black.svg'
 import { Outlet, Link as ReactRouterLink } from 'react-router'
 import { Link, Button, Avatar } from '@statisticsnorway/design-react'
 import { useAuth } from '../context/AuthContext'
+import SelectedPage from './SelectedPage'
 
 const Header = () => {
   const { auth } = useAuth()
@@ -18,8 +19,10 @@ const Header = () => {
       <div className='header-content' data-color='brand1' data-size='sm'>
         <img src={ssbLogo} className='logo' alt='SSB logo' />
         <div className='header-links'>
+        <SelectedPage>
           <Link href='/statistikkregisteret'>Publisering</Link>
           <Link href='/statistikkregisteret/statistikk'>Statistikker</Link>
+        </SelectedPage>
           {auth?.isAdmin ? (
             <Button variant='tertiary' asChild>
               <ReactRouterLink to='/oppgaver' reloadDocument>
