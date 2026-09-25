@@ -1,5 +1,8 @@
 .blocked-days-table {
+  width: 100%;
+  max-width: 90rem;
   table-layout: fixed;
+
   tr {
     height: 2.7rem;
   }
@@ -7,6 +10,12 @@
   td {
     padding: 0 16px;
   }
+
+  th:first-child,
+  td:first-child {
+    width: 10rem;
+  }
+
   .delete-column {
     width: 90px;
   }
