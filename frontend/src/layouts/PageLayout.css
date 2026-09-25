@@ -24,6 +24,22 @@
       flex-direction: row;
       align-items: center;
       column-gap: var(--ds-size-5);
+
+      .header-menu-link {
+        text-decoration: none;
+      }
+
+      .header-menu-link:hover:not([aria-current='page']) {
+        text-decoration-line: underline;
+        text-decoration-thickness: var(--dsc-link-text-decoration-thickness);
+        text-underline-offset: 0.27em;
+      }
+
+      .header-menu-link[aria-current='page'] {
+        text-decoration-line: underline;
+        text-decoration-thickness: var(--dsc-link-text-decoration-thickness--hover);
+        text-underline-offset: 0.27em;
+      }
     }
 
     .header-user-info {
