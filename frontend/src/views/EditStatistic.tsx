@@ -477,6 +477,7 @@ export default function EditStatistic() {
       <VariantModal
         key={[variantModalCloseCount, editVariantIndex ?? 'create'].join('-')}
         dialogId={variantDialogId}
+        shortname={shortname}
         setCreatedVariants={handleVariantsChange}
         editVariantIndex={editVariantIndex}
         editVariantValues={editVariantIndex !== null ? createdVariants[editVariantIndex] : undefined}
