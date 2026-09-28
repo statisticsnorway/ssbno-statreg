@@ -439,7 +439,7 @@ export default function ReleaseForm() {
           {isEditing ? 'Rediger publiseringsdato' : 'Meld publiseringsdato'}
         </Heading>
         <Heading data-size='xs' level={2}>
-          {statistic?.name} ({statistic?.shortname}), {frequencyName} og {revisionName}
+          {statistic?.name} ({statistic?.shortname}), {frequencyName}, {revisionName}
         </Heading>
         <ApprovalStatusTag status={approvalStatus} />
       </div>
@@ -593,7 +593,7 @@ export default function ReleaseForm() {
           </Tabs.Tab>
           <Tabs.Tab value='variant-releases'>
             Alle publiseringer på {statistic?.shortname}, {frequencyName}
-            {' og '}
+            {', '}
             {revisionName}
           </Tabs.Tab>
         </Tabs.List>
