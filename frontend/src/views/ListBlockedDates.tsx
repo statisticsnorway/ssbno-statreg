@@ -24,7 +24,7 @@ function BlockedDateRow({ day, onDelete }: BlockedDateRowProps) {
     <Table.Row>
       <Table.Cell>{day.date}</Table.Cell>
       <Table.Cell>{day.blocked_comment}</Table.Cell>
-      <Table.Cell className='delete-column'>
+      <Table.Cell className='delete-button-container'>
         {!day.automatically_blocked ? (
           <>
             <Button
@@ -64,7 +64,7 @@ function BlockedDateRow({ day, onDelete }: BlockedDateRowProps) {
             </Popover>
           </>
         ) : (
-          '-'
+          <span>-</span>
         )}
       </Table.Cell>
     </Table.Row>
