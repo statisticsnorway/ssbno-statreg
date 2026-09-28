@@ -1,7 +1,6 @@
 .blocked-days-table {
   width: 100%;
   max-width: 90rem;
-  table-layout: fixed;
 
   tr {
     height: 2.7rem;
