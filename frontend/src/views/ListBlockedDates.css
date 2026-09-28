@@ -27,3 +27,10 @@
     justify-content: center;
   }
 }
+
+.blocked-dates-header-container {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
