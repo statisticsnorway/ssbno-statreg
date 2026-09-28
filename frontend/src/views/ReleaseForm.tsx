@@ -40,6 +40,7 @@ import {
   type ReleaseCreate,
   type ReleaseDetails,
   type CalenderDate,
+  RevisionNames,
 } from '@ssbno-statreg/shared'
 
 import client from '../api'
@@ -246,7 +247,7 @@ export default function ReleaseForm() {
     submitButtonText = 'Lagre og godkjenn'
 
     if (!isAdmin) {
-      submitButtonText = 'Send endringsforslag'
+      submitButtonText = 'Send datoforslag'
     }
   }
 
@@ -427,6 +428,8 @@ export default function ReleaseForm() {
     return <ErrorPage type={ErrorType.NOTFOUND} />
   }
 
+  const revisionName = RevisionNames[variant?.revision?.code as keyof typeof RevisionNames]?.toLowerCase()
+
   return (
     <>
       {errorsCombined.length > 0 && <ErrorAlert message={errorsCombined} />}
@@ -435,7 +438,7 @@ export default function ReleaseForm() {
           {isEditing ? 'Rediger publiseringsdato' : 'Meld publiseringsdato'}
         </Heading>
         <Heading data-size='xs' level={2}>
-          {statistic?.name} ({statistic?.shortname}) og {variant?.frequency?.name?.toLowerCase()}
+          {statistic?.name} ({statistic?.shortname}), {revisionName} og {variant?.frequency?.name?.toLowerCase()}
         </Heading>
         <ApprovalStatusTag status={approvalStatus} />
       </div>
@@ -588,7 +591,9 @@ export default function ReleaseForm() {
             Publiseringer på valgt dato
           </Tabs.Tab>
           <Tabs.Tab value='variant-releases'>
-            Alle publiseringer på {statistic?.shortname}, {variant?.frequency?.name?.toLowerCase()}
+            Alle publiseringer på {statistic?.shortname}, {revisionName}
+            {' og '}
+            {variant?.frequency?.name?.toLowerCase()}
           </Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel className='p-0' value='selected-publish-date'>
