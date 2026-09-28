@@ -1,12 +1,11 @@
 .list-blocked-dates-container {
   width: 100%;
   max-width: 90rem;
-  row-gap: var(--ds-size-12);
 }
 
 .blocked-days-table {
   margin-top: var(--ds-size-12);
-  
+
   tr {
     height: 2.7rem;
   }
