@@ -1,19 +1,19 @@
-  .labelWithTag {
-    display: flex;
-    max-width: 15rem;
-    justify-content: space-between;
-    align-items: center;
-  }
+.labelWithTag {
+  display: flex;
+  max-width: 15rem;
+  justify-content: space-between;
+  align-items: center;
+}
 
-  .padded {
-    margin: 0.7rem 0
-  }
+.padded {
+  margin: 0.7rem 0
+}
 
-  .subtle {
-    color: var(--ds-color-text-subtle);
-  }
+.subtle {
+  color: var(--ds-color-text-subtle);
+}
 
-  .blocked-date-modal-buttons-container {
-    display: flex;
-    gap: var(--ds-size-6);
-  }
+.blocked-date-modal-buttons-container {
+  display: flex;
+  gap: var(--ds-size-6);
+}
