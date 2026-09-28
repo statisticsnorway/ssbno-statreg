@@ -135,28 +135,30 @@ export default function ListBlockedDates() {
           <ArrowLeftIcon /> Tilbake til publiseringsoversikten
         </ReactRouterLink>
       </Link>
-      <div>
-        <Heading data-size='sm' style={{ marginBottom: 'var(--ds-size-4)' }}>
-          Sperrede datoer
-        </Heading>
-        <Paragraph>Datoer som er automatisk lagt inn kan ikke redigeres eller slettes</Paragraph>
+      <div className='blocked-dates-header-container'>
+        <div>
+          <Heading data-size='sm' style={{ marginBottom: 'var(--ds-size-4)' }}>
+            Sperrede datoer
+          </Heading>
+          <Paragraph>Datoer som er automatisk lagt inn kan ikke redigeres eller slettes</Paragraph>
+        </div>
+        <Button
+          variant='tertiary'
+          data-color='neutral'
+          aria-label='Legg til ny sperret dato'
+          onClick={() => setShowCreateModal(true)}
+        >
+          <PlusCircleIcon aria-hidden /> Legg til ny sperret dato
+        </Button>
+        {showCreateModal && (
+          <BlockedDateModal
+            setOpenCreateReleaseModal={setShowCreateModal}
+            openCreateReleaseModal={showCreateModal}
+            onCreated={fetchBlockedDates}
+          />
+        )}
       </div>
       <BlockedDatesTable days={blockedDates} onDelete={deleteBlockedDate} />
-      <Button
-        variant='tertiary'
-        data-color='neutral'
-        aria-label='Legg til ny sperret dato'
-        onClick={() => setShowCreateModal(true)}
-      >
-        <PlusCircleIcon aria-hidden /> Legg til ny sperret dato
-      </Button>
-      {showCreateModal && (
-        <BlockedDateModal
-          setOpenCreateReleaseModal={setShowCreateModal}
-          openCreateReleaseModal={showCreateModal}
-          onCreated={fetchBlockedDates}
-        />
-      )}
     </>
   )
 }

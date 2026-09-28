@@ -1,14 +1,21 @@
- .labelWithTag {
-   display: flex;
-   max-width: 15rem;
-   justify-content: space-between;
-   align-items: center;
- }
+.labelWithTag {
+  display: flex;
+  max-width: 15rem;
+  justify-content: space-between;
+  align-items: center;
+}
 
- .padded {
-   margin: 0.7rem 0
- }
+.padded {
+  margin: 0.7rem 0
+}
 
- .subtle {
-   color: var(--ds-color-text-subtle);
- }
+.subtle {
+  color: var(--ds-color-text-subtle);
+}
+
+.blocked-dates-header-container {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
