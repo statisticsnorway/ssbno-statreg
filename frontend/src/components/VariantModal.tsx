@@ -145,7 +145,7 @@ function DeleteVariantPopover({
         onClose={closeDeletePopoverAndReturnFocus}
         data-color='danger'
       >
-        <Paragraph>Denne varianten har ikke publiseringer, og kan slettes. Vil du fortsatt slette varianten?</Paragraph>
+        <Paragraph>Varianten har ingen publiseringer og kan slettes. Vil du slette varianten?</Paragraph>
         <div className='variant-modal-delete-popover-buttons'>
           <Button
             command='close'
@@ -225,7 +225,7 @@ function SetVariantCancelledPopover({
         ) : (
           <>
             <Paragraph>
-              Varianten har tilknyttede publiseringer, og kan ikke slettes. Vil du sette den som opphørt i stedet?
+              Varianten har tilknyttede publiseringer og kan ikke slettes. Vil du sette den til opphørt i stedet?
             </Paragraph>
             <div className='variant-modal-delete-popover-buttons'>
               <Button

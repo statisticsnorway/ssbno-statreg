@@ -428,6 +428,7 @@ export default function ReleaseForm() {
     return <ErrorPage type={ErrorType.NOTFOUND} />
   }
 
+  const frequencyName = variant?.frequency?.name?.toLowerCase()
   const revisionName = RevisionNames[variant?.revision?.code as keyof typeof RevisionNames]?.toLowerCase()
 
   return (
@@ -438,7 +439,7 @@ export default function ReleaseForm() {
           {isEditing ? 'Rediger publiseringsdato' : 'Meld publiseringsdato'}
         </Heading>
         <Heading data-size='xs' level={2}>
-          {statistic?.name} ({statistic?.shortname}), {revisionName} og {variant?.frequency?.name?.toLowerCase()}
+          {statistic?.name} ({statistic?.shortname}), {frequencyName} og {revisionName}
         </Heading>
         <ApprovalStatusTag status={approvalStatus} />
       </div>
@@ -591,9 +592,9 @@ export default function ReleaseForm() {
             Publiseringer på valgt dato
           </Tabs.Tab>
           <Tabs.Tab value='variant-releases'>
-            Alle publiseringer på {statistic?.shortname}, {revisionName}
+            Alle publiseringer på {statistic?.shortname}, {frequencyName}
             {' og '}
-            {variant?.frequency?.name?.toLowerCase()}
+            {revisionName}
           </Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel className='p-0' value='selected-publish-date'>
