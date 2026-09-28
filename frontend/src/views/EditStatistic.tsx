@@ -601,7 +601,12 @@ export default function EditStatistic() {
               if (variant.cancelled) return null
               return (
                 <Card
-                  key={['created-variant', variant.frequency?.code ?? index, variant.revision?.code ?? index].join('-')}
+                  key={[
+                    'created-variant',
+                    variant.frequency?.code ?? 'missing-frequency',
+                    variant.revision?.code ?? 'missing-revision',
+                    index,
+                  ].join('-')}
                   variant='tinted'
                 >
                   <Card.Block>
