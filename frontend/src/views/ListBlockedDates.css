@@ -17,5 +17,13 @@
 
   .delete-column {
     width: 90px;
+    text-align: center;
+  }
+
+  .delete-button-container {
+    display: flex;
+    height: inherit;
+    align-items: center;
+    justify-content: center;
   }
 }

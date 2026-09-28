@@ -166,7 +166,7 @@ function SetVariantCancelledPopover({
         ) : (
           <>
             <Paragraph>
-              Varianten har tilknyttede publiseringer, og kan ikke slettes. Vil du sette den som opphørt i stedet?
+              Varianten har tilknyttede publiseringer og kan ikke slettes. Vil du sette den til opphørt i stedet?
             </Paragraph>
             <div className='variant-modal-delete-popover-buttons'>
               <Button
