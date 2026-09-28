@@ -43,13 +43,7 @@ function BlockedDateRow({ day, onDelete }: BlockedDateRowProps) {
               onClose={() => setOpen(false)}
             >
               <Paragraph>Er du sikker på at du vil slette sperredatoen?</Paragraph>
-              <div
-                style={{
-                  display: 'flex',
-                  gap: 'var(--ds-size-2)',
-                  marginTop: 'var(--ds-size-2)',
-                }}
-              >
+              <div className='blocked-date-popover-delete'>
                 <Button
                   data-size='sm'
                   aria-label={`Slett sperret dato: ${day.date}`}
@@ -135,30 +129,32 @@ export default function ListBlockedDates() {
           <ArrowLeftIcon /> Tilbake til publiseringsoversikten
         </ReactRouterLink>
       </Link>
-      <div className='blocked-dates-header-container'>
-        <div>
-          <Heading data-size='sm' style={{ marginBottom: 'var(--ds-size-4)' }}>
-            Sperrede datoer
-          </Heading>
-          <Paragraph>Datoer som er automatisk lagt inn kan ikke redigeres eller slettes</Paragraph>
+      <div className='list-blocked-dates-container'>
+        <div className='blocked-dates-header-container'>
+          <div>
+            <Heading data-size='sm' style={{ marginBottom: 'var(--ds-size-4)' }}>
+              Sperrede datoer
+            </Heading>
+            <Paragraph>Datoer som er automatisk lagt inn kan ikke redigeres eller slettes</Paragraph>
+          </div>
+          <Button
+            variant='tertiary'
+            data-color='neutral'
+            aria-label='Legg til ny sperret dato'
+            onClick={() => setShowCreateModal(true)}
+          >
+            <PlusCircleIcon aria-hidden /> Legg til ny sperret dato
+          </Button>
+          {showCreateModal && (
+            <BlockedDateModal
+              setOpenCreateReleaseModal={setShowCreateModal}
+              openCreateReleaseModal={showCreateModal}
+              onCreated={fetchBlockedDates}
+            />
+          )}
         </div>
-        <Button
-          variant='tertiary'
-          data-color='neutral'
-          aria-label='Legg til ny sperret dato'
-          onClick={() => setShowCreateModal(true)}
-        >
-          <PlusCircleIcon aria-hidden /> Legg til ny sperret dato
-        </Button>
-        {showCreateModal && (
-          <BlockedDateModal
-            setOpenCreateReleaseModal={setShowCreateModal}
-            openCreateReleaseModal={showCreateModal}
-            onCreated={fetchBlockedDates}
-          />
-        )}
+        <BlockedDatesTable days={blockedDates} onDelete={deleteBlockedDate} />
       </div>
-      <BlockedDatesTable days={blockedDates} onDelete={deleteBlockedDate} />
     </>
   )
 }
