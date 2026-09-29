@@ -27,7 +27,7 @@ metadata:
 spec:
   ingresses:
     - https://ssbno-statreg.intern.test.ssb.no
-    - https://i.qa.ssb.no/statistikkregisteret
+    # - https://i.qa.ssb.no/statistikkregisteret
   image: '{{ image }}' # Injected from the GitHub Action
   port: 8080
 
