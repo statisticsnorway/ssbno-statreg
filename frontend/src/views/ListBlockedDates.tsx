@@ -43,7 +43,7 @@ function BlockedDateRow({ day, onDelete }: BlockedDateRowProps) {
               onClose={() => setOpen(false)}
             >
               <Paragraph>Er du sikker på at du vil slette sperredatoen?</Paragraph>
-              <div className='blocked-date-popover-delete'>
+              <div className='blocked-date-popover-buttons'>
                 <Button
                   data-size='sm'
                   aria-label={`Slett sperret dato: ${day.date}`}
@@ -131,13 +131,10 @@ export default function ListBlockedDates() {
       </Link>
       <div className='list-blocked-dates-container'>
         <div className='blocked-dates-header-container'>
-          <div>
-            <Heading data-size='sm' style={{ marginBottom: 'var(--ds-size-4)' }}>
-              Sperrede datoer
-            </Heading>
-            <Paragraph>Datoer som er automatisk lagt inn kan ikke redigeres eller slettes</Paragraph>
-          </div>
+          <Heading data-size='sm'>Sperrede datoer</Heading>
+          <Paragraph>Datoer som er automatisk lagt inn kan ikke redigeres eller slettes</Paragraph>
           <Button
+            className='blocked-dates-header-button'
             variant='tertiary'
             data-color='neutral'
             aria-label='Legg til ny sperret dato'

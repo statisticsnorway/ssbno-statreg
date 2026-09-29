@@ -33,14 +33,18 @@
 }
 
 .blocked-dates-header-container {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--ds-size-4);
 }
 
-.blocked-date-popover-delete {
+.blocked-dates-header-button {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+}
+
+.blocked-date-popover-buttons {
   display: flex;
   gap: var(--ds-size-2);
   margin-top: var(--ds-size-2);
 }
-
