@@ -12,3 +12,8 @@
 .subtle {
   color: var(--ds-color-text-subtle);
 }
+
+.blocked-date-modal-buttons-container {
+  display: flex;
+  gap: var(--ds-size-6);
+}

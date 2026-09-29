@@ -76,16 +76,6 @@ type CreateVariantFormValues = {
   cancelled: boolean
 }
 
-type DeleteVariantPopoverProps = {
-  deleteTriggerRef: RefObject<HTMLButtonElement | null>
-  isDeletePopoverOpen: boolean
-  setIsDeletePopoverOpen: Dispatch<SetStateAction<boolean>>
-  dialogId: string
-  onActionClose?: () => void
-  deleteVariant: () => void
-  closeDeletePopoverAndReturnFocus: () => void
-}
-
 type SetVariantCancelledPopoverProps = {
   variantCancelledTriggerRef: RefObject<HTMLButtonElement | null>
   isSetVariantCancelledPopoverOpen: boolean
@@ -117,55 +107,6 @@ async function variantHasUpcomingRelease(
 
   const publishTime = data.releases?.[0]?.publish_time
   return !!publishTime && new Date(publishTime) > new Date()
-}
-
-function DeleteVariantPopover({
-  deleteTriggerRef,
-  isDeletePopoverOpen,
-  setIsDeletePopoverOpen,
-  dialogId,
-  onActionClose,
-  deleteVariant,
-  closeDeletePopoverAndReturnFocus,
-}: Readonly<DeleteVariantPopoverProps>) {
-  return (
-    <Popover.TriggerContext>
-      <Popover.Trigger
-        ref={deleteTriggerRef}
-        variant='tertiary'
-        data-color='danger'
-        onClick={() => setIsDeletePopoverOpen(!isDeletePopoverOpen)}
-      >
-        <TrashIcon aria-hidden /> Slett
-      </Popover.Trigger>
-      <Popover
-        placement='top-start'
-        autoPlacement={false}
-        open={isDeletePopoverOpen}
-        onClose={closeDeletePopoverAndReturnFocus}
-        data-color='danger'
-      >
-        <Paragraph>Varianten har ingen publiseringer og kan slettes. Vil du slette varianten?</Paragraph>
-        <div className='variant-modal-delete-popover-buttons'>
-          <Button
-            command='close'
-            commandfor={dialogId}
-            data-color='danger'
-            onClick={() => {
-              onActionClose?.()
-              setIsDeletePopoverOpen(false)
-              deleteVariant()
-            }}
-          >
-            Ja, slett
-          </Button>
-          <Button variant='tertiary' onClick={closeDeletePopoverAndReturnFocus}>
-            Avbryt
-          </Button>
-        </div>
-      </Popover>
-    </Popover.TriggerContext>
-  )
 }
 
 function SetVariantCancelledPopover({
@@ -270,23 +211,12 @@ export function VariantModal({
     cancelled: editVariantValues?.cancelled ?? false,
   })
 
-  const [isDeletePopoverOpen, setIsDeletePopoverOpen] = useState(false)
   const [isSetVariantCancelledPopoverOpen, setIsSetVariantCancelledPopoverOpen] = useState(false)
-
-  const deleteTriggerRef = useRef<HTMLButtonElement>(null)
-  const returnFocusToDeleteTriggerRef = useRef(false)
 
   const variantCancelledTriggerRef = useRef<HTMLButtonElement>(null)
   const returnFocusToVariantCancelledTriggerRef = useRef(false)
 
   const isExistingVariant = typeof editVariantIndex === 'number'
-
-  useEffect(() => {
-    if (!isDeletePopoverOpen && returnFocusToDeleteTriggerRef.current) {
-      returnFocusToDeleteTriggerRef.current = false
-      deleteTriggerRef.current?.focus()
-    }
-  }, [isDeletePopoverOpen])
 
   useEffect(() => {
     if (!isSetVariantCancelledPopoverOpen && returnFocusToVariantCancelledTriggerRef.current) {
@@ -340,14 +270,8 @@ export function VariantModal({
 
   function handleDialogClose() {
     setApiError([])
-    setIsDeletePopoverOpen(false)
     setIsSetVariantCancelledPopoverOpen(false)
     onAfterClose?.()
-  }
-
-  function closeDeletePopoverAndReturnFocus() {
-    returnFocusToDeleteTriggerRef.current = true
-    setIsDeletePopoverOpen(false)
   }
 
   function closeVariantCancelledAndReturnFocus() {
@@ -433,15 +357,18 @@ export function VariantModal({
             </Button>
           </div>
           {isNewVariant ? (
-            <DeleteVariantPopover
-              deleteTriggerRef={deleteTriggerRef}
-              isDeletePopoverOpen={isDeletePopoverOpen}
-              setIsDeletePopoverOpen={setIsDeletePopoverOpen}
-              dialogId={dialogId}
-              onActionClose={onActionClose}
-              deleteVariant={deleteVariant}
-              closeDeletePopoverAndReturnFocus={closeDeletePopoverAndReturnFocus}
-            />
+            <Button
+              variant='tertiary'
+              data-color='danger'
+              onClick={() => {
+                onActionClose?.()
+                deleteVariant()
+              }}
+              command='close'
+              commandfor={dialogId}
+            >
+              <TrashIcon aria-hidden /> Slett
+            </Button>
           ) : (
             isExistingVariant && (
               <SetVariantCancelledPopover
