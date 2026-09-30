@@ -242,13 +242,10 @@ export default function ReleaseForm() {
   const { auth } = useAuth()
   const isAdmin = auth?.isAdmin ?? false
 
-  let submitButtonText = 'Meld dato'
-  if (isEditing) {
-    submitButtonText = 'Lagre og godkjenn'
+  let submitButtonText = isAdmin ? 'Meld dato' : 'Send datoforslag'
 
-    if (!isAdmin) {
-      submitButtonText = 'Send datoforslag'
-    }
+  if (isEditing && isAdmin) {
+    submitButtonText = 'Lagre og godkjenn'
   }
 
   const selectedDateStatus =
