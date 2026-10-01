@@ -1153,7 +1153,10 @@ export interface components {
       /** Format: date-time */
       readonly created_at?: string
       variants?: components['schemas']['Variant'][]
-      contacts?: components['schemas']['Contact'][]
+      contacts?: ({
+        email?: string
+        phone?: string
+      } & components['schemas']['Contact'])[]
       statistic_region_levels?: components['schemas']['Region_level'][]
     } & components['schemas']['Statistic']
     Statistic_listing: {

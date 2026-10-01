@@ -20,7 +20,10 @@ import { statisticsAsserts } from '@/lib/asserts'
 import { getAllUsersFromCache } from '@/lib/cache'
 import { StatregError } from '@/lib/statregError'
 
-export type StatisticPrisma = Pick<PrismaClient, 'statistic' | 'shortname' | 'responsiblePerson' | 'frequency' | 'release'>
+export type StatisticPrisma = Pick<
+  PrismaClient,
+  'statistic' | 'shortname' | 'responsiblePerson' | 'frequency' | 'release'
+>
 
 type StatisticStatusCode = keyof typeof StatisticStatus
 
@@ -287,6 +290,8 @@ export async function mapStatisticDetails(statistic: StatisticPrismaResult): Pro
       return {
         name: user?.displayName ?? '',
         principalName: principalName,
+        email: user?.mail ?? '',
+        phone: user?.businessPhones?.[0] ?? '',
       }
     }),
     statistic_region_levels: statistic.statistic_region_levels?.map(({ region_level }) => {

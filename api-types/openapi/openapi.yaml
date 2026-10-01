@@ -379,7 +379,12 @@ components:
         contacts:
           type: array
           items:
-            $ref: '#/components/schemas/Contact'
+            allOf:
+              - $ref: '#/components/schemas/Contact'
+            type: object
+            properties:
+              email: { type: string }
+              phone: { type: string }
         statistic_region_levels:
           type: array
           items:
