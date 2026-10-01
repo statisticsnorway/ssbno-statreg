@@ -1099,7 +1099,7 @@ describe('statisticService', () => {
       })
 
       expectedResult = structuredClone(mockedStatisticDetailedResult)
-      expectedResult.contacts = [{ principalName: 'bcd@ssb.no', name: 'Bob' }]
+      expectedResult.contacts = [{ principalName: 'bcd@ssb.no', name: 'Bob', email: 'bob@ssb.no', phone: '11223344' }]
     })
 
     test('returns valid statisticDetails when all conditionals succeed', async () => {
@@ -1704,7 +1704,7 @@ const mockedStatisticDetailedResult = {
       },
     },
   ],
-  contacts: [{ principalName: 'bcd@ssb.no', name: 'Bob' }],
+  contacts: [{ principalName: 'bcd@ssb.no', name: 'Bob', email: 'bob@ssb.no', phone: '11223344' }],
   statistic_region_levels: [{ name: 'Bydel og krets', code: 'BD' }],
 }
 
