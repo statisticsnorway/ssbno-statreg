@@ -379,10 +379,10 @@ components:
         contacts:
           type: array
           items:
+            allOf:
+              - $ref: '#/components/schemas/Contact'
             type: object
             properties:
-              name: { type: string }
-              principalName: { type: string }
               email: { type: string }
               phone: { type: string }
         statistic_region_levels:
