@@ -1,9 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { Button, Heading, Dialog, Field, Input, Paragraph, ValidationMessage } from '@statisticsnorway/design-react'
 
 import client from '../api'
-import type { ShortnameListing } from '@ssbno-statreg/shared'
 import { useAuth } from '../context/AuthContext'
 import { ErrorAlert } from '../components/ErrorAlert'
 
@@ -14,54 +13,82 @@ type CreateShortnameModalProps = {
 export function CreateShortnameModal({ openCreateShortnameModal }: Readonly<CreateShortnameModalProps>) {
   const { auth } = useAuth()
 
-  const [shortnames, setShortnames] = useState<ShortnameListing['shortname'][]>([])
   const [apiError, setApiError] = useState<string[]>([])
 
   const [validationError, setValidationError] = useState('')
   const [shortnameInput, setShortnameInput] = useState('')
+  const [lastCheckedShortname, setLastCheckedShortname] = useState<string | null>(null)
+  const [isAvailable, setIsAvailable] = useState(false)
 
   const navigate = useNavigate()
   const isAdmin = auth?.isAdmin ?? false
+  const latestInputRef = useRef('')
 
   useEffect(() => {
-    if (!isAdmin) return
-    async function fetchShortnames() {
-      const { data, error } = await client.GET('/shortnames')
-      if (error) {
-        setApiError((prev) => [...prev, error.message])
+    const formatError = validateShortnameFormat(shortnameInput)
+
+    if (!isAdmin || !shortnameInput || formatError) return
+
+    const controller = new AbortController()
+    const currentShortname = shortnameInput
+
+    async function checkShortname() {
+      const { error, response } = await client.GET('/shortnames/{shortname}', {
+        params: { path: { shortname: currentShortname } },
+        signal: controller.signal,
+      })
+
+      if (controller.signal.aborted || latestInputRef.current !== currentShortname) {
         return
       }
-      setShortnames(data.map(({ shortname }) => shortname ?? '') ?? [])
-    }
-    fetchShortnames()
-  }, [isAdmin])
 
-  function validateShortname(value: string) {
+      if (!error) {
+        setValidationError('Dette kortnavnet er ikke ledig')
+        setLastCheckedShortname(currentShortname)
+        setIsAvailable(false)
+        return
+      }
+
+      if (response.status === 404) {
+        setLastCheckedShortname(currentShortname)
+        setValidationError('')
+        setIsAvailable(true)
+        return
+      }
+
+      setApiError([error.message])
+      setLastCheckedShortname(null)
+      setIsAvailable(false)
+    }
+
+    void checkShortname()
+
+    return () => {
+      controller.abort()
+    }
+  }, [isAdmin, shortnameInput])
+
+  function validateShortnameFormat(value: string) {
     if (!value) {
-      setValidationError('Fyll ut et kortnavn')
-      return false
+      return 'Fyll ut et kortnavn'
     }
 
     const invalidShortnameCharacters = value.match(/[^a-z_]/g)
     if (invalidShortnameCharacters) {
       const invalidChars = [...new Set(invalidShortnameCharacters)]
-      setValidationError(`Kortnavnet inneholder ugyldige tegn: ${invalidChars.join(', ')}`)
-      return false
+      return `Kortnavnet inneholder ugyldige tegn: ${invalidChars.join(', ')}`
     }
 
-    if (shortnames.includes(value)) {
-      setValidationError('Dette kortnavnet er ikke ledig')
-      return false
-    }
-
-    setValidationError('')
-    return true
+    return ''
   }
 
   function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
     const value = e.target.value
+    setApiError([])
     setShortnameInput(value)
-    validateShortname(value)
+    latestInputRef.current = value
+    const formatError = validateShortnameFormat(value)
+    setValidationError(formatError)
   }
 
   async function createShortname() {
@@ -80,7 +107,17 @@ export function CreateShortnameModal({ openCreateShortnameModal }: Readonly<Crea
   function handleOnSubmit(e: React.ChangeEvent<HTMLFormElement>) {
     e.preventDefault()
 
-    if (!validateShortname(shortnameInput)) return
+    const formatError = validateShortnameFormat(shortnameInput)
+    if (formatError) {
+      setValidationError(formatError)
+      return
+    }
+
+    if (lastCheckedShortname !== shortnameInput || !isAvailable) {
+      setValidationError('Dette kortnavnet er ikke ledig')
+      return
+    }
+
     createShortname()
   }
 
@@ -118,14 +155,11 @@ export function CreateShortnameModal({ openCreateShortnameModal }: Readonly<Crea
               autofocus='true'
             />
             <Paragraph data-limit='14' data-field='counter' />
-            {validationError ? (
-              <ValidationMessage data-field='validation'>{validationError}</ValidationMessage>
-            ) : (
-              shortnameInput && (
-                <ValidationMessage data-field='validation' data-color='success'>
-                  Kortnavn er ledig
-                </ValidationMessage>
-              )
+            {validationError && <ValidationMessage data-field='validation'>{validationError}</ValidationMessage>}
+            {lastCheckedShortname === shortnameInput && isAvailable && (
+              <ValidationMessage data-field='validation' data-color='success'>
+                Kortnavn er ledig
+              </ValidationMessage>
             )}
           </Field>
           <div style={{ display: 'flex', gap: 'var(--ds-size-2)', marginTop: 'var(--ds-size-3)' }}>
