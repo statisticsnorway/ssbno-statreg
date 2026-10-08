@@ -20,6 +20,6 @@ Using the the package in your own project can, as an example, be done like this:
 import createClient from "openapi-fetch";
 import type { paths } from "@statisticsnorway/statreg-api-types";
 
-const client = createClient<paths>({ baseUrl: "https://ssbno-statreg.intern.test.ssb.no/statistikkregisteret/api" });
+const client = createClient<paths>({ baseUrl: "https://statistikkregisteret.intern.test.ssb.no/api" });
 const { data, error } = await client.GET("/statistics", { params: { query: { count: 20 } } });
 ```
