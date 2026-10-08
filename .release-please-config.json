@@ -1,0 +1,64 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "release-type": "node",
+  "skip-github-release": false,
+  "draft": true,
+  "always-update": true,
+  "include-component-in-tag": false,
+  "label": "statreg-release",
+  "pull-request-title-pattern": "chore: bump version and create changelog for v${version}",
+  "pull-request-header": "New Statistikkregisteret release",
+  "pull-request-footer": ".",
+  "packages": {
+    ".": {
+      "package-name": "ssbno-statreg",
+      "changelog-sections": [
+        {
+          "type": "feat",
+          "section": "Features"
+        },
+        {
+          "type": "fix",
+          "section": "Bug Fixes"
+        },
+        {
+          "type": "perf",
+          "section": "Performance Improvements"
+        },
+        {
+          "type": "revert",
+          "section": "Reverts"
+        },
+        {
+          "type": "docs",
+          "section": "Documentation"
+        },
+        {
+          "type": "style",
+          "section": "Styles"
+        },
+        {
+          "type": "refactor",
+          "section": "Code Refactoring"
+        },
+        {
+          "type": "test",
+          "section": "Tests"
+        },
+        {
+          "type": "build",
+          "section": "Build System and dependencies"
+        },
+        {
+          "type": "ci",
+          "section": "Build System and dependencies"
+        },
+        {
+          "type": "chore",
+          "section": "Chores",
+          "hidden": true
+        }
+      ]
+    }
+  }
+}
