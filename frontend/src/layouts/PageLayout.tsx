@@ -20,8 +20,8 @@ const Header = () => {
         <img src={ssbLogo} className='logo' alt='SSB logo' />
         <div className='header-links'>
         <SelectedPage>
-          <Link href='/statistikkregisteret'>Publiseringsoversikt</Link>
-          <Link href='/statistikkregisteret/statistikk'>Statistikkoversikt</Link>
+          <Link href='/'>Publiseringsoversikt</Link>
+          <Link href='/statistikk'>Statistikkoversikt</Link>
         </SelectedPage>
           {auth?.isAdmin ? (
             <Button variant='tertiary' asChild>

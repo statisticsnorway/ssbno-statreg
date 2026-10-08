@@ -116,7 +116,7 @@ export default function ShowRelease() {
       </div>
       <div>
         <Heading data-size='xs'>Statistikk</Heading>
-        <Link href={`/statistikkregisteret/statistikk/${release.statistic?.shortname}`}>{statisticName}</Link>
+        <Link href={`/statistikk/${release.statistic?.shortname}`}>{statisticName}</Link>
       </div>
       <div>
         <Heading data-size='xs'>Variant</Heading>

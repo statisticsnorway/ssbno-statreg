@@ -63,7 +63,7 @@ export default function StatisticVersions() {
   return (
     <>
       {apiError.length > 0 && <ErrorAlert message={apiError} />}
-      <Link href={`/statistikkregisteret/statistikk/${shortname}`}>{`← Tilbake til (${shortname})`}</Link>
+      <Link href={`/statistikk/${shortname}`}>{`← Tilbake til (${shortname})`}</Link>
 
       <div>
         <Heading level={1}>Versjonshistorikk</Heading>
