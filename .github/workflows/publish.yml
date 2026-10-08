@@ -1,0 +1,33 @@
+name: Publish to npm
+
+on:
+  release:
+    # TODO: Consider whether this is the correct trigger
+    types: [created]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [22.x]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
+    permissions:
+      contents: read
+      id-token: write # Required for OIDC
+    environment: prod # Optional: match your npm config
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install and publish npmjs package
+        uses: pnpm/setup@84cb39b217b10273981911c288cd62326dc7c6d2 # v2.0.2
+        with:
+          runtime: node@${{ matrix.node-version }}
+          cache: true
+
+      - name: install dependencies
+        run: pnpm ci
+      - name: publish package
+        run: pnpm publish --provenance --dry-run # TODO: Remove dry-run parameter here
+        working-directory: ./api-types
