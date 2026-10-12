@@ -1,0 +1,53 @@
+name: Release
+
+# Manual run: open/update the release PR. Push to main: create the GitHub release once that PR is merged.
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: release-please
+  cancel-in-progress: false
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write # labels on the release PR
+      actions: write # dispatch tests on the release branch
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+        id: release
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          target-branch: main
+          config-file: .release-please-config.json
+          manifest-file: .release-please-manifest.json
+          skip-github-release: ${{ github.event_name == 'workflow_dispatch' }}
+          skip-github-pull-request: ${{ github.event_name == 'push' }}
+      # PRs created with GITHUB_TOKEN don't trigger pull_request workflows, but workflow_dispatch does.
+      - name: Run tests on release branch
+        if: ${{ steps.release.outputs.pr != '' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          PR: ${{ steps.release.outputs.pr }}
+        run: gh workflow run testOnPr.js.yml --ref "$(jq -r '.headBranchName' <<< "$PR")"
+
+  deploy-prod:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created == 'true' }}
+    permissions:
+      contents: read
+      id-token: write
+    uses: ./.github/workflows/deploy_nais_prod.yml
+    with:
+      tag: ${{ needs.release-please.outputs.tag_name }}
+    secrets: inherit
