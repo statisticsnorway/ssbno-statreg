@@ -44,9 +44,9 @@ spec:
     enforce:
       enabled: true
       excludePaths:
-        - /statistikkregisteret/docs
-        - /statistikkregisteret/docs/**
-        - /statistikkregisteret/api/**
+        - /docs
+        - /docs/**
+        - /api/**
 
   prometheus:
     enabled: true

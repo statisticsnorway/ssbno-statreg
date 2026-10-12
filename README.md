@@ -33,8 +33,8 @@ If new migrations: `pnpm run db:deploy`
 
 For plain local development run: `pnpm run dev`
 
-The app is now served on http://localhost:5173/statistikkregisteret
-Backend is now served on http://localhost:8080/statistikkregisteret
+The app is now served on http://localhost:5173
+Backend is now served on http://localhost:8080
 
 Or to run with local authentication flow run docker compose:
 ```
@@ -42,7 +42,7 @@ colima start
 pnpm run dev:auth
 ```
 
-The app is now served on http://localhost:8080/statistikkregisteret
+The app is now served on http://localhost:8080
 
 ### Typing, API-spec and publishing
 

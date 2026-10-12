@@ -247,9 +247,7 @@ export default function ShowStatistic() {
                 <>
                   <SimpleReleasesTable releases={releases} />
                   <p>
-                    <Link href={`/statistikkregisteret?shortname=${shortname}`}>
-                      Se alle publiseringsdatoene for denne statistikken
-                    </Link>
+                    <Link href={`/?shortname=${shortname}`}>Se alle publiseringsdatoene for denne statistikken</Link>
                   </p>
                 </>
               ) : (
@@ -402,9 +400,7 @@ export default function ShowStatistic() {
       <div>
         <Heading data-size='xs'>Endringer</Heading>
         <Paragraph>
-          <Link href={`/statistikkregisteret/statistikk/${shortname}/versjoner`}>
-            Se versjonshistorikken til statistikken
-          </Link>
+          <Link href={`/statistikk/${shortname}/versjoner`}>Se versjonshistorikken til statistikken</Link>
         </Paragraph>
       </div>
 

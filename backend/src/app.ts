@@ -13,7 +13,7 @@ import { getAllUsersFromCache } from './lib/cache'
 import * as dotenv from 'dotenv'
 dotenv.config()
 
-const APP_BASE_PATH = '/statistikkregisteret'
+const APP_BASE_PATH = '/'
 const DOCS_PATH = '/docs'
 
 function normalizeSwaggerAssetPaths(html: string, docsPath: string): string {
@@ -33,7 +33,7 @@ export async function createApp() {
   app.use(promBundleMetrics)
   app.use(express.json())
   const swaggerDocument = YAML.parse(fs.readFileSync('../api-types/openapi/openapi.yaml', 'utf8'))
-  const docsPath = `${APP_BASE_PATH}${DOCS_PATH}`
+  const docsPath = `${DOCS_PATH}`
   const docsHtml = normalizeSwaggerAssetPaths(swaggerUi.generateHTML(swaggerDocument), docsPath)
 
   app.get([docsPath, `${docsPath}/`], (_req, res) => res.send(docsHtml))
@@ -41,7 +41,7 @@ export async function createApp() {
 
   app.use(APP_BASE_PATH, createAuthRouter(auth))
 
-  // Ensure entire application is served on /statistikkregisteret
+  // Ensure entire application is served on /
   app.use(APP_BASE_PATH, controllerRouter(auth))
 
   await prisma.$connect()
