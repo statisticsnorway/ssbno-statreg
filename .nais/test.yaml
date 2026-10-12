@@ -65,6 +65,7 @@ spec:
         - /docs
         - /docs/**
         - /api/**
+        - /legacy/tbdesigner
 
   postgres:
     clusterName: statreg-api-test-db

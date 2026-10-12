@@ -47,6 +47,7 @@ spec:
         - /docs
         - /docs/**
         - /api/**
+        - /legacy/tbdesigner
 
   prometheus:
     enabled: true

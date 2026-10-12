@@ -7,6 +7,7 @@ import { requireAuthorization } from '../plugins/authMiddleware'
 import { promBundleMetrics } from '../plugins/promBundle'
 import createAuthRouter from './api/core/authRouter'
 import controllerRouter from './api/core/controllerRouter'
+import { legacyTbdesignerHandler } from './api/controllers/legacyTbdesignerController'
 import { prisma } from './lib/prisma'
 import { initializeDepartments } from './services/klassService'
 import { getAllUsersFromCache } from './lib/cache'
@@ -35,6 +36,8 @@ export async function createApp() {
 
   app.get([DOCS_PATH, `${DOCS_PATH}/`], (_req, res) => res.send(docsHtml))
   app.use(DOCS_PATH, swaggerUi.serveFiles(swaggerDocument))
+
+  app.get('/legacy/tbdesigner', legacyTbdesignerHandler())
 
   app.use(createAuthRouter(auth))
 
