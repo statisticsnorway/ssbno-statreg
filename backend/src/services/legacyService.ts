@@ -5,7 +5,10 @@ export async function getApprovedStatisticsXml(
   prisma: Pick<ExtendedPrismaClient, 'statistic'>,
 ): Promise<string> {
   const statistics = await prisma.statistic.findMany({
-    where: { dir_appoval_status: ApprovalStatus.ACCEPTED },
+    where: {
+      status: 'A',
+      desk_appoval_status: ApprovalStatus.ACCEPTED,
+    },
     select: {
       id: true,
       shortname: { select: { name: true } },
