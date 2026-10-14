@@ -16,7 +16,7 @@ jobs:
     permissions:
       contents: read
       id-token: write # Required for OIDC
-    environment: prod # Optional: match your npm config
+    environment: production # Optional: match your npm config
     steps:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
