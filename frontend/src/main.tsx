@@ -8,11 +8,11 @@ import { AuthProvider } from './context/AuthContext'
 import './index.css'
 import App from './App.tsx'
 
-export const BASE_ROUTE = '/statistikkregisteret'
+export const BASE_ROUTE = '/'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BrowserRouter basename='/statistikkregisteret'>
+    <BrowserRouter basename='/'>
       <AuthProvider>
         <App />
       </AuthProvider>

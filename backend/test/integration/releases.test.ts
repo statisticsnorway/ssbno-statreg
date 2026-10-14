@@ -23,13 +23,13 @@ describe('release data is persisted when ', () => {
   test('client creates a new release', async () => {
     // POST release
     const created = await request(app)
-      .post(`/statistikkregisteret/api/statistics/${releaseCreateShortname}/variants/${releaseCreateVariantId}/releases`)
+      .post(`/api/statistics/${releaseCreateShortname}/variants/${releaseCreateVariantId}/releases`)
       .set(headers)
       .send(body)
     expect(created.status).toBe(200)
 
     // GET release
-    const fetched = await request(app).get(`/statistikkregisteret/api/releases/${created.body.id}`)
+    const fetched = await request(app).get(`/api/releases/${created.body.id}`)
     expect(fetched.status).toBe(200)
 
     // test persistence
@@ -37,7 +37,7 @@ describe('release data is persisted when ', () => {
     assertEqualReleaseData(fetched.body, body)
 
     // GET versions to check that create event is registered in auditlog
-    const versions = await request(app).get(`/statistikkregisteret/api/releases/${created.body.id}/versions`)
+    const versions = await request(app).get(`/api/releases/${created.body.id}/versions`)
     expect(versions.status).toBe(200)
     expect(versions.body).toHaveLength(1)
     expect(versions.body[0].change_type).toBe('create')
@@ -46,9 +46,9 @@ describe('release data is persisted when ', () => {
   test('admin archives a release', async () => {
     // POST shortname and statistic with variant
     const newShortname = 'archive_test'
-    await request(app).post('/statistikkregisteret/api/shortnames').set(headers).send({ shortname: newShortname })
+    await request(app).post('/api/shortnames').set(headers).send({ shortname: newShortname })
     const statistic = await request(app)
-      .post(`/statistikkregisteret/api/statistics/${newShortname}`)
+      .post(`/api/statistics/${newShortname}`)
       .set(headers)
       .send({
         status: { code: 'K' },
@@ -62,37 +62,37 @@ describe('release data is persisted when ', () => {
     // POST release on a publish date that can be tested in isolation
     const createBody = { ...body, publish_time: '2099-11-17T08:00:00Z' }
     const created = await request(app)
-      .post(`/statistikkregisteret/api/statistics/${newShortname}/variants/${variantId}/releases`)
+      .post(`/api/statistics/${newShortname}/variants/${variantId}/releases`)
       .set(headers)
       .send(createBody)
     expect(created.status).toBe(200)
 
     // GET releases endpoints before archive to check that release is included
     const variantReleasesBefore = await request(app).get(
-      `/statistikkregisteret/api/statistics/${newShortname}/variants/${variantId}/releases`
+      `/api/statistics/${newShortname}/variants/${variantId}/releases`
     )
     expect(variantReleasesBefore.status).toBe(200)
     expect(variantReleasesBefore.body).toMatchObject({ total: 1, releases: [{ id: created.body.id }] })
 
     const filteredReleasesBefore = await request(app)
-      .get('/statistikkregisteret/api/releases')
+      .get('/api/releases')
       .query({ shortname: newShortname })
     expect(filteredReleasesBefore.status).toBe(200)
     expect(filteredReleasesBefore.body).toMatchObject({ total: 1, releases: [{ id: created.body.id }] })
 
-    const singleReleaseBefore = await request(app).get(`/statistikkregisteret/api/releases/${created.body.id}`)
+    const singleReleaseBefore = await request(app).get(`/api/releases/${created.body.id}`)
     expect(singleReleaseBefore.status).toBe(200)
 
     // GET calendar before archive to check that release is counted
     const calendarBefore = await request(app)
-      .get('/statistikkregisteret/api/calendar')
+      .get('/api/calendar')
       .query({ fromDate: '2099-11-17', toDate: '2099-11-17' })
     expect(calendarBefore.status).toBe(200)
     expect(calendarBefore.body['2099-11-17']).toStrictEqual({ status: 'FEW' })
 
     // PUT release to archive it
     const archived = await request(app)
-      .put(`/statistikkregisteret/api/releases/${created.body.id}`)
+      .put(`/api/releases/${created.body.id}`)
       .set(headers)
       .send({ ...createBody, comment: 'Archive release.', archived: true })
     expect(archived.status).toBe(200)
@@ -100,23 +100,23 @@ describe('release data is persisted when ', () => {
 
     // GET releases endpoints after archive to check that release is gone
     const variantReleasesAfter = await request(app).get(
-      `/statistikkregisteret/api/statistics/${newShortname}/variants/${variantId}/releases`
+      `/api/statistics/${newShortname}/variants/${variantId}/releases`
     )
     expect(variantReleasesAfter.status).toBe(200)
     expect(variantReleasesAfter.body).toStrictEqual({ total: 0, releases: [] })
 
     const filteredReleasesAfter = await request(app)
-      .get('/statistikkregisteret/api/releases')
+      .get('/api/releases')
       .query({ shortname: newShortname })
     expect(filteredReleasesAfter.status).toBe(200)
     expect(filteredReleasesAfter.body).toStrictEqual({ total: 0, releases: [] })
 
-    const singleReleaseAfter = await request(app).get(`/statistikkregisteret/api/releases/${created.body.id}`)
+    const singleReleaseAfter = await request(app).get(`/api/releases/${created.body.id}`)
     expect(singleReleaseAfter.status).toBe(410)
 
     // GET calendar after archive to check that release is not counted
     const calendarAfter = await request(app)
-      .get('/statistikkregisteret/api/calendar')
+      .get('/api/calendar')
       .query({ fromDate: '2099-11-17', toDate: '2099-11-17' })
     expect(calendarAfter.status).toBe(200)
     expect(calendarAfter.body['2099-11-17']).toStrictEqual({ status: 'NONE' })
@@ -132,14 +132,14 @@ describe('release data is persisted when ', () => {
 
     // 1. GET release listing and pick release
     const list = await request(app).get(
-      `/statistikkregisteret/api/statistics/${shortname}/variants/${variantId}/releases`
+      `/api/statistics/${shortname}/variants/${variantId}/releases`
     )
     expect(list.status).toBe(200)
     expect(list.body.total).toBeGreaterThan(1)
     const picked = list.body.releases[0]
 
     // 2. GET release to see full details of picked release
-    const pickedReleaseResponse = await request(app).get(`/statistikkregisteret/api/releases/${picked.id}`)
+    const pickedReleaseResponse = await request(app).get(`/api/releases/${picked.id}`)
     expect(pickedReleaseResponse.status).toBe(200)
     const pickedRelease = pickedReleaseResponse.body as ReleaseDetails
 
@@ -152,20 +152,20 @@ describe('release data is persisted when ', () => {
       comment: 'Postpone release date.',
     }
     const putResponse = await request(app)
-      .put(`/statistikkregisteret/api/releases/${picked.id}`)
+      .put(`/api/releases/${picked.id}`)
       .set(headers)
       .send(updateBody)
     expect(putResponse.status).toBe(200)
 
     // 4. GET release to check persistence of new values
-    const updatedReleaseResponse = await request(app).get(`/statistikkregisteret/api/releases/${picked.id}`)
+    const updatedReleaseResponse = await request(app).get(`/api/releases/${picked.id}`)
     expect(updatedReleaseResponse.status).toBe(200)
     expect(updatedReleaseResponse.body.id).toBe(picked.id)
     const updatedRelease = updatedReleaseResponse.body as ReleaseDetails
     assertEqualReleaseData(updatedRelease, updateBody)
 
     // 5. GET versions to check that change is registered
-    const versions = await request(app).get(`/statistikkregisteret/api/releases/${picked.id}/versions`)
+    const versions = await request(app).get(`/api/releases/${picked.id}/versions`)
     expect(versions.status).toBe(200)
     const lastVersion = versions.body[0]
     expect(lastVersion.change_type).toBe('update')
@@ -190,7 +190,7 @@ describe('release data is persisted when ', () => {
 
 describe('release listing can be filtered by approval status', () => {
   test('returns only releases with GODKJENT approval status', async () => {
-    const response = await request(app).get('/statistikkregisteret/api/releases?approval_status=GODKJENT')
+    const response = await request(app).get('/api/releases?approval_status=GODKJENT')
     expect(response.status).toBe(200)
     expect(response.body.total).toBeGreaterThan(0)
     expect(response.body.releases.every((release: ReleaseListing) => release.approval_status === 'GODKJENT')).toBe(true)
@@ -201,14 +201,14 @@ describe('/releases/bulk-approve', () => {
   test('can approve two newly created releases', async () => {
     // POST two identical releases and check that both have approval status FORSLAG
     const created1 = await request(app)
-      .post(`/statistikkregisteret/api/statistics/${releaseCreateShortname}/variants/${releaseCreateVariantId}/releases`)
+      .post(`/api/statistics/${releaseCreateShortname}/variants/${releaseCreateVariantId}/releases`)
       .set(headers)
       .send(body)
     expect(created1.status).toBe(200)
     expect(created1.body.approval_status).toBe('GODKJENT')
 
     const created2 = await request(app)
-      .post(`/statistikkregisteret/api/statistics/${releaseCreateShortname}/variants/${releaseCreateVariantId}/releases`)
+      .post(`/api/statistics/${releaseCreateShortname}/variants/${releaseCreateVariantId}/releases`)
       .set(headers)
       .send(body)
     expect(created2.status).toBe(200)
@@ -216,7 +216,7 @@ describe('/releases/bulk-approve', () => {
 
     // POST bulk approve the two releases
     const approveResponse = await request(app)
-      .post('/statistikkregisteret/api/releases/bulk-approve')
+      .post('/api/releases/bulk-approve')
       .set(headers)
       .send({ ids: [created1.body.id, created2.body.id] })
     expect(approveResponse.status).toBe(207)
@@ -226,11 +226,11 @@ describe('/releases/bulk-approve', () => {
     ])
 
     // GET verify that new status is persisted
-    const fetched1 = await request(app).get(`/statistikkregisteret/api/releases/${created1.body.id}`)
+    const fetched1 = await request(app).get(`/api/releases/${created1.body.id}`)
     expect(fetched1.status).toBe(200)
     expect(fetched1.body.approval_status).toBe('GODKJENT')
 
-    const fetched2 = await request(app).get(`/statistikkregisteret/api/releases/${created2.body.id}`)
+    const fetched2 = await request(app).get(`/api/releases/${created2.body.id}`)
     expect(fetched2.status).toBe(200)
     expect(fetched2.body.approval_status).toBe('GODKJENT')
   })

@@ -30,7 +30,7 @@ describe('statistics controller', () => {
 
     // POST /shortname
     const shortnameResponse = await request(app)
-      .post('/statistikkregisteret/api/shortnames')
+      .post('/api/shortnames')
       .set('content-type', 'application/json')
       .send({ shortname: newShortname })
     expect(shortnameResponse.status).toBe(201)
@@ -43,7 +43,7 @@ describe('statistics controller', () => {
       first_released_at: '2024-01-01',
     }
     const createResponse = await request(app)
-      .post(`/statistikkregisteret/api/statistics/${newShortname}`)
+      .post(`/api/statistics/${newShortname}`)
       .set('content-type', 'application/json')
       .send(createPayload)
 
@@ -62,7 +62,7 @@ describe('statistics controller', () => {
 
     // GET /statistics with shortname filter to verify persistence
     const listingResponse = await request(app)
-      .get('/statistikkregisteret/api/statistics')
+      .get('/api/statistics')
       .query(`shortname=${newShortname}`)
     expect(listingResponse.status).toBe(200)
     expect(listingResponse.body).toMatchObject({
@@ -71,7 +71,7 @@ describe('statistics controller', () => {
     })
 
     // GET /statistics/:shortname/versions to check that create event is registered in auditlog
-    const versionsResponse = await request(app).get(`/statistikkregisteret/api/statistics/${newShortname}/versions`)
+    const versionsResponse = await request(app).get(`/api/statistics/${newShortname}/versions`)
     expect(versionsResponse.status).toBe(200)
     expect(versionsResponse.body).toHaveLength(1)
     expect(versionsResponse.body[0].change_type).toBe('create')
@@ -82,7 +82,7 @@ describe('statistics controller', () => {
 
     // POST /shortnames
     const shortnameResponse = await request(app)
-      .post('/statistikkregisteret/api/shortnames')
+      .post('/api/shortnames')
       .set('content-type', 'application/json')
       .send({ shortname: newShortname })
     expect(shortnameResponse.status).toBe(201)
@@ -109,7 +109,7 @@ describe('statistics controller', () => {
     }
 
     const createResponse = await request(app)
-      .post(`/statistikkregisteret/api/statistics/${newShortname}`)
+      .post(`/api/statistics/${newShortname}`)
       .set('content-type', 'application/json')
       .send(createPayload)
 
@@ -137,7 +137,7 @@ describe('statistics controller', () => {
 
     // GET /statistics with shortname filter to verify persistence
     const listingResponse = await request(app)
-      .get('/statistikkregisteret/api/statistics')
+      .get('/api/statistics')
       .query(`shortname=${newShortname}`)
     expect(listingResponse.status).toBe(200)
     expect(listingResponse.body).toMatchObject({
@@ -146,7 +146,7 @@ describe('statistics controller', () => {
     })
 
     // GET /statistics/:shortname/versions to check that create event is registered in auditlog
-    const versionsResponse = await request(app).get(`/statistikkregisteret/api/statistics/${newShortname}/versions`)
+    const versionsResponse = await request(app).get(`/api/statistics/${newShortname}/versions`)
     expect(versionsResponse.status).toBe(200)
     expect(versionsResponse.body).toHaveLength(1)
     expect(versionsResponse.body[0].change_type).toBe('create')
@@ -157,14 +157,14 @@ describe('statistics controller', () => {
 
     // POST /shortnames
     const shortnameResponse = await request(app)
-      .post('/statistikkregisteret/api/shortnames')
+      .post('/api/shortnames')
       .set('content-type', 'application/json')
       .send({ shortname: newShortname })
     expect(shortnameResponse.status).toBe(201)
 
     // POST /statistics
     const createResponse = await request(app)
-      .post(`/statistikkregisteret/api/statistics/${newShortname}`)
+      .post(`/api/statistics/${newShortname}`)
       .set('content-type', 'application/json')
       .send({
         status: { code: 'K' },
@@ -198,7 +198,7 @@ describe('statistics controller', () => {
     }
 
     const updateResponse = await request(app)
-      .put(`/statistikkregisteret/api/statistics/${newShortname}`)
+      .put(`/api/statistics/${newShortname}`)
       .set('content-type', 'application/json')
       .send(updatePayload)
 
@@ -231,7 +231,7 @@ describe('statistics controller', () => {
 
     // GET /statistics with shortname filter to verify persistence
     const listingResponse = await request(app)
-      .get('/statistikkregisteret/api/statistics')
+      .get('/api/statistics')
       .query(`shortname=${newShortname}`)
     expect(listingResponse.status).toBe(200)
     expect(listingResponse.body).toMatchObject({
@@ -240,7 +240,7 @@ describe('statistics controller', () => {
     })
 
     // GET /statistics/:shortname/versions to check auditlog persistence including contacts and variants change
-    const versionsResponse = await request(app).get(`/statistikkregisteret/api/statistics/${newShortname}/versions`)
+    const versionsResponse = await request(app).get(`/api/statistics/${newShortname}/versions`)
     expect(versionsResponse.status).toBe(200)
     expect(versionsResponse.body).toHaveLength(2)
     expect(versionsResponse.body[0]).toMatchObject({
@@ -268,27 +268,27 @@ describe('statistics controller', () => {
     const shortnameA = 'filter_a'
     const shortnameB = 'filter_b'
     await request(app)
-      .post('/statistikkregisteret/api/shortnames')
+      .post('/api/shortnames')
       .set('content-type', 'application/json')
       .send({ shortname: shortnameA })
     await request(app)
-      .post('/statistikkregisteret/api/shortnames')
+      .post('/api/shortnames')
       .set('content-type', 'application/json')
       .send({ shortname: shortnameB })
 
     // POST /statistics
     await request(app)
-      .post(`/statistikkregisteret/api/statistics/${shortnameA}`)
+      .post(`/api/statistics/${shortnameA}`)
       .set('content-type', 'application/json')
       .send({ status: { code: 'K' }, division: '101', name: 'Filter test A' })
     await request(app)
-      .post(`/statistikkregisteret/api/statistics/${shortnameB}`)
+      .post(`/api/statistics/${shortnameB}`)
       .set('content-type', 'application/json')
       .send({ status: { code: 'K' }, division: '101', name: 'Filter test B' })
 
     // GET /statistics with shortname filter and sort, and assert response
     const listingResponse = await request(app)
-      .get('/statistikkregisteret/api/statistics')
+      .get('/api/statistics')
       .query(`shortname=${shortnameA},${shortnameB}&sort=-shortname`)
     expect(listingResponse.status).toBe(200)
     expect(listingResponse.body).toMatchObject({
@@ -302,39 +302,39 @@ describe('statistics controller', () => {
 
     // POST /shortnames
     const shortnameResponse = await request(app)
-      .post('/statistikkregisteret/api/shortnames')
+      .post('/api/shortnames')
       .set('content-type', 'application/json')
       .send({ shortname: newShortname })
     expect(shortnameResponse.status).toBe(201)
 
     // POST /statistics without contacts
     const createResponse = await request(app)
-      .post(`/statistikkregisteret/api/statistics/${newShortname}`)
+      .post(`/api/statistics/${newShortname}`)
       .set('content-type', 'application/json')
       .send({ status: { code: 'K' }, division: '101', name: 'Contact test', contacts: [] })
     expect(createResponse.status).toBe(200)
 
     // PUT /statistics/:shortname/contacts and assert response
     const updateContactsResponse = await request(app)
-      .put(`/statistikkregisteret/api/statistics/${newShortname}/contacts`)
+      .put(`/api/statistics/${newShortname}/contacts`)
       .set('content-type', 'application/json')
       .send(['bcd@ssb.no'])
     expect(updateContactsResponse.status).toBe(200)
     expect(updateContactsResponse.body).toMatchObject([{ name: 'Bob', principalName: 'bcd@ssb.no' }])
 
     // GET /statistics/:shortname to test persistence of new contacts
-    const getResponse = await request(app).get(`/statistikkregisteret/api/statistics/${newShortname}`)
+    const getResponse = await request(app).get(`/api/statistics/${newShortname}`)
     expect(getResponse.status).toBe(200)
     expect(getResponse.body).toMatchObject({ contacts: [{ name: 'Bob', principalName: 'bcd@ssb.no' }] })
 
     // GET /statistics with contact filter and assert that statistic is included
-    const filterResponse = await request(app).get('/statistikkregisteret/api/statistics').query(`contact=bcd@ssb.no`)
+    const filterResponse = await request(app).get('/api/statistics').query(`contact=bcd@ssb.no`)
     expect(filterResponse.status).toBe(200)
     const foundShortnames = (filterResponse.body as StatisticListingResponse).statistics?.map((s) => s.shortname)
     expect(foundShortnames).toContain('contacts_test')
 
     // GET /statistics/:shortname/versions to check auditlog persistence including contacts change
-    const versionsResponse = await request(app).get(`/statistikkregisteret/api/statistics/${newShortname}/versions`)
+    const versionsResponse = await request(app).get(`/api/statistics/${newShortname}/versions`)
     expect(versionsResponse.status).toBe(200)
     expect(versionsResponse.body).toHaveLength(2)
     expect(versionsResponse.body[0].change_type).toBe('update')
