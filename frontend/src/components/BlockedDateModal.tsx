@@ -85,6 +85,7 @@ export function BlockedDateModal({
 
   return (
     <Dialog
+      id='blocked-date-modal'
       aria-labelledby='release-modal-heading'
       open={openCreateReleaseModal}
       onClose={() => setOpenCreateReleaseModal(false)}
@@ -150,9 +151,14 @@ export function BlockedDateModal({
             {errors.comment && <ValidationMessage>{errors.comment}</ValidationMessage>}
             {apiError.length > 0 && <ErrorAlert message={[...apiError, datePickerError]} />}
           </Field>
-          <Button type='submit' variant='primary' className='padded'>
-            Legg til
-          </Button>
+          <div className='blocked-date-modal-buttons-container'>
+            <Button type='submit' variant='primary' className='padded'>
+              Legg til
+            </Button>
+            <Button variant='tertiary' className='padded' command='close' commandfor='blocked-date-modal'>
+              Avbryt
+            </Button>
+          </div>
         </form>
       </Dialog.Block>
     </Dialog>

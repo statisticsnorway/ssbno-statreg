@@ -214,6 +214,16 @@ export async function createRelease(
   const safeShortname = sanitize(shortname)
 
   await releaseAsserts.assertStatisticExists(safeShortname, prisma)
+
+  const statistic = await prisma.statistic.findFirst({
+    where: { shortname: { name: safeShortname } },
+    select: { status: true },
+  })
+
+  if (statistic?.status === 'SA') {
+    throw new StatregError("A statistic with status 'Sammenslått' cannot have new releases.")
+  }
+
   await releaseAsserts.assertVariantExists(parsedVariantId, prisma)
   await releaseAsserts.assertVariantMatchesShortname(parsedVariantId, safeShortname, prisma)
 
@@ -406,9 +416,6 @@ export async function parseReleaseInput(
 
   if (periodFromDate > periodToDate) {
     throw new StatregError('End of measuring period cannot be earlier than start of measuring period')
-  }
-  if (periodToDate > publishTimeDate) {
-    throw new StatregError('Publish time cannot be earlier than end of measuring period')
   }
 
   const isAdmin = isCurrentUserAdmin()

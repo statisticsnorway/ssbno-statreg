@@ -18,12 +18,12 @@ function App() {
       <Route path='' element={<PageLayout />}>
         <Route index element={<ListReleases />} />
 
-        <Route path='publisering'>
+        <Route path='publisering' handle={{ selectedPage: 'publisering' }}>
           <Route path=':id' element={<ShowRelease />} />
           <Route path=':id/rediger' element={<ReleaseForm />} />
         </Route>
 
-        <Route path='statistikk'>
+        <Route path='statistikk' handle={{ selectedPage: 'statistikk' }}>
           <Route index element={<ListStatistics />} />
           <Route path=':shortname' element={<ShowStatistic />} />
           <Route path=':shortname/versjoner' element={<StatisticVersions />} />

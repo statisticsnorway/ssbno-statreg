@@ -1,6 +1,6 @@
 import createClient from 'openapi-fetch'
 import type { paths } from '@statisticsnorway/statreg-api-types'
 
-const client = createClient<paths>({ baseUrl: '/statistikkregisteret/api' })
+const client = createClient<paths>({ baseUrl: '/api' })
 
 export default client

@@ -92,6 +92,9 @@ describe('statisticService', () => {
       responsiblePerson: {
         upsert: vi.fn(),
       },
+      release: {
+        count: vi.fn(() => Promise.resolve(0)),
+      },
     }
     statisticsAsserts.assertFilteredShortnamesExist = vi.fn(async () => true) as any
   })
@@ -593,6 +596,56 @@ describe('statisticService', () => {
         })
       )
     })
+
+    test('throws error when discontinuing a variant that has upcoming publications', async () => {
+      setStatisticsResult({
+        id: 5,
+        status: 'A',
+        responsiblePersons: [{ principalName: 'bcd@ssb.no' }],
+        variants: [{ id: 1, cancelled: false }],
+        statistic_region_levels: [],
+      })
+      prismaMock.release.count.mockResolvedValue(1)
+
+      input.variants = [
+        {
+          id: 1,
+          cancelled: true,
+          revision: { code: 'I' },
+          frequency: { code: 'M' },
+        },
+      ]
+
+      await expect(() => updateStatistic('helse', input, prismaMock)).rejects.toMatchObject({
+        statregError: 'A variant cannot be discontinued while it has upcoming publications.',
+      })
+      expect(prismaMock.statistic.update).toHaveBeenCalledTimes(0)
+    })
+
+    test('rejects creating a new variant for a Sammenslått statistic', async () => {
+      setStatisticsResult({
+        id: 5,
+        status: 'A',
+        responsiblePersons: [{ principalName: 'bcd@ssb.no' }],
+        variants: [],
+        statistic_region_levels: [],
+      })
+
+      input.status = { code: 'SA' }
+      input.relation_id = 3
+      input.variants = [
+        {
+          revision: { code: 'I' },
+          frequency: { code: 'M' },
+          level_of_detail: { name: 'Detaljnivå', name_en: 'Level of detail' },
+        },
+      ]
+
+      await expect(() => updateStatistic('helse', input, prismaMock)).rejects.toMatchObject({
+        statregError: "A statistic with status 'Sammenslått' cannot have new variants.",
+      })
+      expect(prismaMock.statistic.update).toHaveBeenCalledTimes(0)
+    })
   })
 
   describe('updateContacts ', async () => {
@@ -1046,7 +1099,7 @@ describe('statisticService', () => {
       })
 
       expectedResult = structuredClone(mockedStatisticDetailedResult)
-      expectedResult.contacts = [{ principalName: 'bcd@ssb.no', name: 'Bob' }]
+      expectedResult.contacts = [{ principalName: 'bcd@ssb.no', name: 'Bob', email: 'bob@ssb.no', phone: '11223344' }]
     })
 
     test('returns valid statisticDetails when all conditionals succeed', async () => {
@@ -1453,6 +1506,7 @@ describe('statisticService', () => {
 ////////////// MOCK DATA ////////////////////////////////
 const mockStatisticsPrismaResult = [
   {
+    id: 1,
     language: 'nb',
     status: 'SA',
     name: 'Energiregnskap og energibalanse',
@@ -1466,6 +1520,7 @@ const mockStatisticsPrismaResult = [
     ],
   },
   {
+    id: 2,
     language: 'nb',
     status: 'SA',
     name: 'Befolkning og demografi',
@@ -1562,6 +1617,7 @@ const mockStatisticsDetailedPrismaResult = {
 const mockedStatisticsResult = {
   statistics: [
     {
+      id: 1,
       shortname: 'energ',
       main_language: 'nb',
       status: { code: 'SA' },
@@ -1574,6 +1630,7 @@ const mockedStatisticsResult = {
       contacts: [{ principalName: 'abc@ssb.no', name: '' }],
     },
     {
+      id: 2,
       shortname: 'befolk',
       main_language: 'nb',
       status: { code: 'SA' },
@@ -1647,7 +1704,7 @@ const mockedStatisticDetailedResult = {
       },
     },
   ],
-  contacts: [{ principalName: 'bcd@ssb.no', name: 'Bob' }],
+  contacts: [{ principalName: 'bcd@ssb.no', name: 'Bob', email: 'bob@ssb.no', phone: '11223344' }],
   statistic_region_levels: [{ name: 'Bydel og krets', code: 'BD' }],
 }
 

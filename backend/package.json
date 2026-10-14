@@ -32,12 +32,12 @@
     "express": "5.2.1",
     "express-prom-bundle": "8.0.0",
     "helmet": "8.3.0",
-    "jose": "6.2.11",
+    "jose": "6.2.12",
     "lightship": "9.0.4",
     "prisma": "7.10.0",
     "swagger-ui-express": "5.0.1",
     "tsx": "4.23.13",
-    "yaml": "2.9.0"
+    "yaml": "2.9.1"
   },
   "devDependencies": {
     "@types/express": "5.0.6",
@@ -47,7 +47,7 @@
     "node-mocks-http": "1.18.1",
     "nodemon": "3.1.14",
     "pkgroll": "2.28.1",
-    "rollup": "4.63.1",
+    "rollup": "4.63.3",
     "supertest": "7.2.2"
   }
 }

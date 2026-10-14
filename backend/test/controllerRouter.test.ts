@@ -146,7 +146,7 @@ describe('controllerRouter', () => {
     let sendFile: ReturnType<typeof vi.fn>
 
     beforeEach(() => {
-      app = makeApp('/statistikkregisteret')
+      app = makeApp('/')
       res = createMockResponse()
       sendFile = vi.fn((filePath: string) => {
         res.statusCode = 200
@@ -157,7 +157,7 @@ describe('controllerRouter', () => {
     })
 
     test('serves frontend index for mounted base path without trailing slash', async () => {
-      await invoke(app, 'GET', '/statistikkregisteret', undefined, res)
+      await invoke(app, 'GET', '/', undefined, res)
 
       expect(res.statusCode).toBe(200)
       expect(sendFile).toHaveBeenCalledOnce()
@@ -167,7 +167,7 @@ describe('controllerRouter', () => {
     })
 
     test('serves frontend index for mounted base path with trailing slash', async () => {
-      await invoke(app, 'GET', '/statistikkregisteret/', undefined, res)
+      await invoke(app, 'GET', '/', undefined, res)
 
       expect(res.statusCode).toBe(200)
       expect(sendFile).toHaveBeenCalledOnce()
@@ -180,7 +180,7 @@ describe('controllerRouter', () => {
   // For now frontend serves startpage for all unknown paths
   // test('returns 404 for unknown routes with allowed method', async () => {
   //   const app = makeApp()
-  //   const res: MockResponse<any> = await invoke(app, 'GET', '/statistikkregisteret/api/unknown')
+  //   const res: MockResponse<any> = await invoke(app, 'GET', '/api/unknown')
 
   //   expect(res.statusCode).toBe(404)
   //   expect(res._getJSONData().error).toBe('Not Found')

@@ -58,13 +58,9 @@ export function DivisionSelection({
   )
 
   return (
-    <Suggestion
-      key={selected || 'empty'}
-      onSelectedChange={(item) => setSelected(item?.value ?? '')}
-      selected={selectedItem}
-    >
+    <Suggestion onSelectedChange={(item) => setSelected(item?.value ?? '')} selected={selectedItem}>
       <Suggestion.Input id={id} aria-invalid={ariaInvalid} />
-      <Suggestion.Clear aria-label='Tøm valgt seksjon' onClick={() => setSelected('')} />
+      <Suggestion.Clear aria-label='Tøm valgt seksjon' />
       <Suggestion.List>
         <Suggestion.Empty>Ingen treff</Suggestion.Empty>
         {options}

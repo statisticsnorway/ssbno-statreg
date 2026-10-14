@@ -40,6 +40,7 @@ import {
   type ReleaseCreate,
   type ReleaseDetails,
   type CalenderDate,
+  RevisionNames,
 } from '@ssbno-statreg/shared'
 
 import client from '../api'
@@ -241,13 +242,10 @@ export default function ReleaseForm() {
   const { auth } = useAuth()
   const isAdmin = auth?.isAdmin ?? false
 
-  let submitButtonText = 'Meld dato'
-  if (isEditing) {
-    submitButtonText = 'Lagre og godkjenn'
+  let submitButtonText = isAdmin ? 'Meld dato' : 'Send datoforslag'
 
-    if (!isAdmin) {
-      submitButtonText = 'Send endringsforslag'
-    }
+  if (isEditing && isAdmin) {
+    submitButtonText = 'Lagre og godkjenn'
   }
 
   const selectedDateStatus =
@@ -333,9 +331,7 @@ export default function ReleaseForm() {
 
   function validatePublishTime(): string | undefined {
     if (!values.publishTime) return 'Opprett en gyldig publiseringsdato'
-    if (values.periodTo && values.publishTime && values.periodTo > values.publishTime) {
-      return 'Publiseringsdato må være etter måleperiodeslutt'
-    }
+
     if (!isAdmin && values.publishTime && values.publishTime < inThreeMonths) {
       return 'Publiseringsdato tidligere enn tre måneder fra dags dato må opprettes av desken'
     }
@@ -429,6 +425,9 @@ export default function ReleaseForm() {
     return <ErrorPage type={ErrorType.NOTFOUND} />
   }
 
+  const frequencyName = variant?.frequency?.name?.toLowerCase()
+  const revisionName = RevisionNames[variant?.revision?.code as keyof typeof RevisionNames]?.toLowerCase()
+
   return (
     <>
       {errorsCombined.length > 0 && <ErrorAlert message={errorsCombined} />}
@@ -437,7 +436,7 @@ export default function ReleaseForm() {
           {isEditing ? 'Rediger publiseringsdato' : 'Meld publiseringsdato'}
         </Heading>
         <Heading data-size='xs' level={2}>
-          {statistic?.name} ({statistic?.shortname}) og {variant?.frequency?.name?.toLowerCase()}
+          {statistic?.name} ({statistic?.shortname}), {frequencyName}, {revisionName}
         </Heading>
         <ApprovalStatusTag status={approvalStatus} />
       </div>
@@ -590,7 +589,9 @@ export default function ReleaseForm() {
             Publiseringer på valgt dato
           </Tabs.Tab>
           <Tabs.Tab value='variant-releases'>
-            Alle publiseringer på {statistic?.shortname}, {variant?.frequency?.name?.toLowerCase()}
+            Alle publiseringer på {statistic?.shortname}, {frequencyName}
+            {', '}
+            {revisionName}
           </Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel className='p-0' value='selected-publish-date'>

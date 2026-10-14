@@ -355,8 +355,8 @@ export default function CreateStatistic() {
         first_released_at: values.first_released_at ? `${values.first_released_at}-12-31` : '',
         statistic_region_levels: regionLevelValues.length
           ? regionLevelValues.map((code: string) => ({
-            code,
-          }))
+              code,
+            }))
           : [],
         approval_status: ApprovalStatus['ACCEPTED'],
         contacts: selectedContacts,
@@ -499,9 +499,12 @@ export default function CreateStatistic() {
                 {createdVariants.map((variant, index) => {
                   return (
                     <Card
-                      key={['created-variant', variant.frequency?.code ?? index, variant.revision?.code ?? index].join(
-                        '-'
-                      )}
+                      key={[
+                        'created-variant',
+                        variant.frequency?.code ?? 'missing-frequency',
+                        variant.revision?.code ?? 'missing-revision',
+                        index,
+                      ].join('-')}
                       variant='tinted'
                     >
                       <Card.Block>

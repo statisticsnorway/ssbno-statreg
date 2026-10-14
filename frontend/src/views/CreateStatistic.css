@@ -26,10 +26,10 @@
     }
 
     .created-variants-container {
-      display: flex;
-      flex-direction: row;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
       gap: var(--ds-size-6);
-
+      
       .created-variant-heading-container {
         display: flex;
         align-items: center;
@@ -37,8 +37,7 @@
       }
 
       > * {
-        height: 180px;
-        min-width: 40%;
+        min-height: 180px;
       }
     }
 

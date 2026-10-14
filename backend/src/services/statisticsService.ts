@@ -20,7 +20,10 @@ import { statisticsAsserts } from '@/lib/asserts'
 import { getAllUsersFromCache } from '@/lib/cache'
 import { StatregError } from '@/lib/statregError'
 
-export type StatisticPrisma = Pick<PrismaClient, 'statistic' | 'shortname' | 'responsiblePerson' | 'frequency'>
+export type StatisticPrisma = Pick<
+  PrismaClient,
+  'statistic' | 'shortname' | 'responsiblePerson' | 'frequency' | 'release'
+>
 
 type StatisticStatusCode = keyof typeof StatisticStatus
 
@@ -145,6 +148,7 @@ export async function getStatistics(
     where,
     orderBy,
     select: {
+      id: true,
       language: true,
       status: true,
       name: true,
@@ -171,6 +175,7 @@ export async function getStatistics(
       })
 
       return {
+        id: statistic.id,
         shortname: statistic.shortname.name,
         main_language,
         status: {
@@ -285,6 +290,8 @@ export async function mapStatisticDetails(statistic: StatisticPrismaResult): Pro
       return {
         name: user?.displayName ?? '',
         principalName: principalName,
+        email: user?.mail ?? '',
+        phone: user?.businessPhones?.[0] ?? '',
       }
     }),
     statistic_region_levels: statistic.statistic_region_levels?.map(({ region_level }) => {
@@ -317,7 +324,7 @@ export async function updateStatistic(
       id: true,
       status: true,
       responsiblePersons: { select: { principalName: true } },
-      variants: { select: { id: true } },
+      variants: { select: { id: true, cancelled: true } },
       statistic_region_levels: { select: { region_level: { select: { code: true, id: true } } } },
     },
   })
@@ -358,6 +365,10 @@ export async function updateStatistic(
 
   const parsedVariants = variants ? await parseVariantsInput(variants, status, prisma) : undefined
 
+  if (status === 'SA' && parsedVariants?.some((variant) => !variant.id)) {
+    throw new StatregError("A statistic with status 'Sammenslått' cannot have new variants.")
+  }
+
   if (parsedVariants) {
     for (const variant of parsedVariants) {
       if (variant.id && !existingStatistic.variants.some((existingVariant) => existingVariant.id === variant.id)) {
@@ -375,6 +386,30 @@ export async function updateStatistic(
           .map((variant) => variant.id)
           .join(', ')}.`
       )
+    }
+
+    const variantIdsToDiscontinue = parsedVariants
+      .filter((variant) => {
+        const existingVariantCancelled = existingStatistic.variants?.find(
+          (existingVariant) => existingVariant.id === variant.id
+        )?.cancelled
+
+        return variant.id && variant.cancelled && !existingVariantCancelled
+      })
+      .map((variant) => variant.id!)
+
+    if (variantIdsToDiscontinue.length) {
+      const upcomingPublications = await prisma.release.count({
+        where: {
+          variant_id: { in: variantIdsToDiscontinue },
+          archived: false,
+          publish_time: { gt: new Date() },
+        },
+      })
+
+      if (upcomingPublications > 0) {
+        throw new StatregError('A variant cannot be discontinued while it has upcoming publications.')
+      }
     }
   }
 
@@ -425,7 +460,7 @@ export async function updateStatistic(
       status,
       comment,
       language: main_language,
-      ...(relation_id ? { related_statistic_id: relation_id } : {}),
+      ...(relation_id !== undefined ? { related_statistic_id: relation_id } : {}),
       legacy_topic_codes: previous_topic_codes,
       yearly_reporting,
       first_release: first_released_at,
@@ -769,7 +804,9 @@ export function parseUpdateStatisticInput(
     status: parseStatusCode(status?.code),
     previous_topic_codes: sanitize(previous_topic_codes!),
     yearly_reporting: Boolean(yearly_reporting),
-    ...(relation_id ? { relation_id: parseId(relation_id, 'relation') } : {}),
+    ...(relation_id !== undefined
+      ? { relation_id: relation_id === null ? null : parseId(relation_id, 'relation') }
+      : {}),
     comment: safeComment,
     ...(contacts ? { contacts } : {}),
     ...(variants ? { variants } : {}),

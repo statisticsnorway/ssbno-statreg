@@ -1,4 +1,4 @@
-import { RevisionNames, type Contact, type Variant } from '@ssbno-statreg/shared'
+import { RevisionNames, type StatisticDetails, type Contact, type Variant } from '@ssbno-statreg/shared'
 
 export function formatDateTime(publishTime: string | undefined, timeZone?: string): string {
   if (!publishTime) return '-'
@@ -62,7 +62,9 @@ export function formatVariant(variant?: Variant): string {
   return [frequency, revision].join(', ')
 }
 
-export function formatContact(contact: Contact): string {
+type ContactDisplay = Contact | NonNullable<StatisticDetails['contacts']>[number]
+
+export function formatContact(contact: ContactDisplay): string {
   const username = contact.principalName?.split('@')[0]
   return [contact.name ?? '', username ? `(${username})` : ''].filter(Boolean).join(' ')
 }

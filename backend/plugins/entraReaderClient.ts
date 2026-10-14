@@ -75,6 +75,17 @@ export async function getAccessToken(): Promise<string | null> {
   }
 }
 
+export function formatDisplayName(displayName: string): string {
+  const commaIndex = displayName.indexOf(',')
+
+  if (commaIndex === -1) return displayName
+
+  const lastName = displayName.slice(0, commaIndex).trim()
+  const firstAndMiddleNames = displayName.slice(commaIndex + 1).trim()
+
+  return `${firstAndMiddleNames} ${lastName}`
+}
+
 export async function fetchAllUsers(token: string): Promise<EntraUser[]> {
   if (!token) {
     throw new Error('Missing token')
@@ -98,7 +109,10 @@ export async function fetchAllUsers(token: string): Promise<EntraUser[]> {
     const body = (await response.json()) as GraphUsersResponse
 
     for (const user of body.value) {
-      users.push(user)
+      users.push({
+        ...user,
+        displayName: formatDisplayName(user.displayName),
+      })
     }
 
     // Microsoft Graph may return a paged result even when requesting $top=999 in the url query.

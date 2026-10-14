@@ -26,7 +26,7 @@ metadata:
 
 spec:
   ingresses:
-    - https://ssbno-statreg.intern.test.ssb.no
+    - https://statistikkregisteret.intern.test.ssb.no
   image: '{{ image }}' # Injected from the GitHub Action
   port: 8080
 
@@ -35,6 +35,11 @@ spec:
     - secret: statreg-secrets
     - configmap: statreg-config
 
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: nodejs
+      
   env:
     - name: NODE_ENV
       value: production
@@ -62,9 +67,9 @@ spec:
     enforce:
       enabled: true
       excludePaths:
-        - /statistikkregisteret/docs
-        - /statistikkregisteret/docs/**
-        - /statistikkregisteret/api/**
+        - /docs
+        - /docs/**
+        - /api/**
 
   postgres:
     clusterName: statreg-api-test-db

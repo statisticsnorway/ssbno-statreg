@@ -24,8 +24,8 @@ function BlockedDateRow({ day, onDelete }: BlockedDateRowProps) {
     <Table.Row>
       <Table.Cell>{day.date}</Table.Cell>
       <Table.Cell>{day.blocked_comment}</Table.Cell>
-      <Table.Cell className='delete-column'>
-        {!day.automatically_blocked && (
+      <Table.Cell className='delete-button-container'>
+        {!day.automatically_blocked ? (
           <>
             <Button
               variant='tertiary'
@@ -43,13 +43,7 @@ function BlockedDateRow({ day, onDelete }: BlockedDateRowProps) {
               onClose={() => setOpen(false)}
             >
               <Paragraph>Er du sikker på at du vil slette sperredatoen?</Paragraph>
-              <div
-                style={{
-                  display: 'flex',
-                  gap: 'var(--ds-size-2)',
-                  marginTop: 'var(--ds-size-2)',
-                }}
-              >
+              <div className='blocked-date-popover-buttons'>
                 <Button
                   data-size='sm'
                   aria-label={`Slett sperret dato: ${day.date}`}
@@ -63,6 +57,8 @@ function BlockedDateRow({ day, onDelete }: BlockedDateRowProps) {
               </div>
             </Popover>
           </>
+        ) : (
+          <span>-</span>
         )}
       </Table.Cell>
     </Table.Row>
@@ -133,28 +129,29 @@ export default function ListBlockedDates() {
           <ArrowLeftIcon /> Tilbake til publiseringsoversikten
         </ReactRouterLink>
       </Link>
-      <div>
-        <Heading data-size='sm' style={{ marginBottom: 'var(--ds-size-4)' }}>
-          Sperrede datoer
-        </Heading>
-        <Paragraph>Datoer som er automatisk lagt inn kan ikke redigeres eller slettes</Paragraph>
+      <div className='list-blocked-dates-container'>
+        <div className='blocked-dates-header-container'>
+          <Heading data-size='sm'>Sperrede datoer</Heading>
+          <Paragraph>Datoer som er automatisk lagt inn kan ikke redigeres eller slettes</Paragraph>
+          <Button
+            className='blocked-dates-header-button'
+            variant='tertiary'
+            data-color='neutral'
+            aria-label='Legg til ny sperret dato'
+            onClick={() => setShowCreateModal(true)}
+          >
+            <PlusCircleIcon aria-hidden /> Legg til ny sperret dato
+          </Button>
+          {showCreateModal && (
+            <BlockedDateModal
+              setOpenCreateReleaseModal={setShowCreateModal}
+              openCreateReleaseModal={showCreateModal}
+              onCreated={fetchBlockedDates}
+            />
+          )}
+        </div>
+        <BlockedDatesTable days={blockedDates} onDelete={deleteBlockedDate} />
       </div>
-      <BlockedDatesTable days={blockedDates} onDelete={deleteBlockedDate} />
-      <Button
-        variant='tertiary'
-        data-color='neutral'
-        aria-label='Legg til ny sperret dato'
-        onClick={() => setShowCreateModal(true)}
-      >
-        <PlusCircleIcon aria-hidden /> Legg til ny sperret dato
-      </Button>
-      {showCreateModal && (
-        <BlockedDateModal
-          setOpenCreateReleaseModal={setShowCreateModal}
-          openCreateReleaseModal={showCreateModal}
-          onCreated={fetchBlockedDates}
-        />
-      )}
     </>
   )
 }

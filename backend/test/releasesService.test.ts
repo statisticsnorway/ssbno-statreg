@@ -43,7 +43,7 @@ describe('releasesService ', async () => {
         update: vi.fn(() => Promise.resolve({ ...releasesResult })),
         count: vi.fn(() => Promise.resolve(releasesResult ? (releasesResult as any).length : 0)),
       },
-      statistic: { findFirst: vi.fn(() => Promise.resolve({ id: 1 })) },
+      statistic: { findFirst: vi.fn(() => Promise.resolve({ id: 1, status: 'A' })) },
       shortname: { findMany: vi.fn(() => Promise.resolve([{ name: 'laks' }, { name: 'KPI' }])) },
       variant: {
         findUnique: vi.fn(() => Promise.resolve({ id: 1 })),
@@ -671,6 +671,18 @@ describe('releasesService ', async () => {
       now = new Date('2026-03-23T08:00:00Z')
     })
 
+    test('rejects creating a release for a Sammenslått statistic', async () => {
+      prismaMock.statistic.findFirst.mockResolvedValueOnce({ id: 1, status: 'SA' })
+
+      await expect(() => createRelease(prismaMock, 'kpi', '1', mockCreateReleaseInput, now)).rejects.toMatchObject({
+        statregError: "A statistic with status 'Sammenslått' cannot have new releases.",
+      })
+
+      expect(prismaMock.release.create).toHaveBeenCalledTimes(0)
+      expect(releaseAsserts.assertVariantExists).not.toHaveBeenCalled()
+      expect(releaseAsserts.assertVariantMatchesShortname).not.toHaveBeenCalled()
+    })
+
     test('creates a new release when input data is correct', async () => {
       setPrismaResult({
         ...mockedSingleReleasePrismaResult,
@@ -829,19 +841,6 @@ describe('releasesService ', async () => {
 
       await expect(() => parseReleaseInput(prismaMock, input)).rejects.toMatchObject({
         statregError: 'End of measuring period cannot be earlier than start of measuring period',
-      })
-    })
-
-    test('throws error when publish time is earlier than end of measuring period', async () => {
-      const input = {
-        publish_time: '2024-10-15T08:00:00Z',
-        period_from: '2024-09-01',
-        period_to: '2025-06-01',
-        release_date_precision: 'dag',
-      }
-
-      await expect(() => parseReleaseInput(prismaMock, input)).rejects.toMatchObject({
-        statregError: 'Publish time cannot be earlier than end of measuring period',
       })
     })
 
