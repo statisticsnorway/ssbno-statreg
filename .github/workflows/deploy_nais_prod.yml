@@ -1,42 +1,59 @@
 name: Deploy to PROD
+# Promotes the image already built by "Deploy to TEST" for the release tag's commit; nothing is rebuilt.
 on:
-  push:
-    branches:
-      - main
+  workflow_call:
+    inputs:
+      tag:
+        description: Release tag to deploy
+        type: string
+        required: true
   workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to deploy, e.g. v0.1.2 (for rollback/redeploy)
+        type: string
+        required: true
+
+concurrency:
+  group: deploy-prod
+  cancel-in-progress: false
 
 jobs:
-  build_and_deploy:
-    name: Build, push and deploy
+  deploy:
+    name: Deploy ${{ inputs.tag }}
     runs-on: ubuntu-latest
-    environment: prod
+    environment: production
     permissions:
       contents: read
       id-token: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Generate vulnerability report
-        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
-          scan-type: "fs"
-          format: "cyclonedx"
-          output: "dependency-results.sbom.json"
-          scan-ref: "."
-      - name: Build and push image and SBOM to OCI registry
-        uses: nais/docker-build-push@423a915c9b72edf2ba848b88171ccb0489e2a40a # v0
-        id: docker-build-push
+          ref: refs/tags/${{ inputs.tag }}
+      - name: Login to Nais registry
+        uses: nais/login@40b72a35a18ddf2ad74b632461139ab838cc2a2f # v0
+        id: login
         with:
           team: ssbno
-          tag: latest
-          byosbom: "dependency-results.sbom.json"
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
           project_id: ${{ secrets.NAIS_MANAGEMENT_PROJECT_ID }}
+      - name: Resolve image built for this commit
+        id: image
+        env:
+          REGISTRY: ${{ steps.login.outputs.registry }}
+          REPO_NAME: ${{ github.event.repository.name }}
+        run: |
+          image="$REGISTRY/$REPO_NAME:$(git rev-parse HEAD)"
+          if ! digest=$(docker buildx imagetools inspect "$image" --format '{{.Manifest.Digest}}'); then
+            echo "::error ::$image not found. Wait for 'Deploy to TEST' to finish for this commit, then re-run."
+            exit 1
+          fi
+          echo "image=$image@$digest" >> "$GITHUB_OUTPUT"
       - name: Deploy to Nais
         uses: nais/deploy/actions/deploy@849e900e3cfa7faf7ad1532bb3a3e6499c932199 # v2
         env:
           TEAM: ssbno
           CLUSTER: prod
           RESOURCE: .nais/prod.yaml
-          VAR: image=${{ steps.docker-build-push.outputs.image }}
-          TELEMETRY: ${{ steps.docker-build-push.outputs.telemetry }}
+          VAR: image=${{ steps.image.outputs.image }}
           DEPLOY_SERVER: deploy.ssb.cloud.nais.io:443

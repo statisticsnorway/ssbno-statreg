@@ -1,7 +1,8 @@
 name: Build and test
 on:
   pull_request:
-    branches: ["develop", "main"]
+    branches: ["main"]
+  workflow_dispatch: # used by release.yaml for the release PR
 jobs:
   build:
     runs-on: ubuntu-latest
