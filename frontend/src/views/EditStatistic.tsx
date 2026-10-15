@@ -420,7 +420,7 @@ export default function EditStatistic() {
     const body: StatisticUpdate = {
       ...values,
       status: { code: status },
-      first_released_at: values.first_released_at ? `${values.first_released_at}-12-31` : undefined,
+      first_released_at: values.first_released_at ? `${values.first_released_at}-01-01` : undefined,
       statistic_region_levels: regionLevelValues.map((code: string) => ({ code })),
       approval_status: ApprovalStatus['ACCEPTED'],
       // Retain fields from the original statistic that are not part of the form
