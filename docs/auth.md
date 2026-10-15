@@ -48,7 +48,7 @@ And keycloak provides the SSO login page if unauthenticated
 |statreg-api express app|The actual app including token validation + authorization|
 
 #### Authentication Flow (for docker-compose.yaml)
-1. Browser sends request to localhost:5173
+1. Browser sends request to localhost:8080
 2. Wonderwall checks cookie: `io.nais.wonderwall.session`
 3. If missing or invalid: Redirects to Keycloak PLAY
 4. User login
