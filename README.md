@@ -42,7 +42,7 @@ colima start
 pnpm run dev:auth
 ```
 
-The app is now served on http://localhost:8080
+The app is now served on http://localhost:5173
 
 ### Typing, API-spec and publishing
 
