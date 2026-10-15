@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/statisticsnorway/ssbno-statreg/compare/v0.1.0...v0.1.1) (2026-10-15)
+
+
+### Bug Fixes
+
+* corrected first release - [#644](https://github.com/statisticsnorway/ssbno-statreg/issues/644) ([48dd73d](https://github.com/statisticsnorway/ssbno-statreg/commit/48dd73dee3cde0a56bbd61df58f1e9647c393473))
+
 ## [0.1.0](https://github.com/statisticsnorway/ssbno-statreg/compare/v0.0.2...v0.1.0) (2026-10-14)
 
 
