@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { vi, describe, test, expect, beforeEach } from 'vitest'
+import { asyncLocalStorage } from '@/lib/context'
 import { ApprovalStatus, StatisticStatus, type StatisticUpdate } from '@ssbno-statreg/shared'
 import { statisticsAsserts } from '@/lib/asserts'
 import {
@@ -470,6 +471,35 @@ describe('statisticService', () => {
       })
     })
 
+    test('sets desk approval to godkjent when the user is admin', async () => {
+      setStatisticsResult({
+        id: 5,
+        division_code: '105',
+        name: 'Helse',
+        status: 'K',
+        main_language: 'nb',
+        statistic_region_levels: [
+          {
+            region_level: {
+              id: 1,
+              code: 'K',
+            },
+          },
+        ],
+      })
+      setUpdateStatisticsResult(mockStatisticsDetailedPrismaResult)
+
+      await asyncLocalStorage.run({ isAdmin: true }, () => updateStatistic('helse', input, prismaMock))
+
+      expect(prismaMock.statistic.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            desk_appoval_status: ApprovalStatus.ACCEPTED,
+          }),
+        })
+      )
+    })
+
     test('throws Error when shortname is not found', async () => {
       setStatisticsResult(null)
 
@@ -748,7 +778,8 @@ describe('statisticService', () => {
         statistic_region_levels: [],
       })
 
-      await createStatistic(
+      await asyncLocalStorage.run({ isAdmin: true }, () =>
+        createStatistic(
         prismaMock,
         'kpi',
         {
@@ -770,6 +801,7 @@ describe('statisticService', () => {
           ],
         },
         now
+        )
       )
 
       expect(prismaMock.frequency.findUnique).toHaveBeenCalledWith({
@@ -827,7 +859,8 @@ describe('statisticService', () => {
       })
       prismaMock.responsiblePerson.upsert.mockResolvedValueOnce({ id: 2 })
 
-      await createStatistic(
+      await asyncLocalStorage.run({ isAdmin: true }, () =>
+        createStatistic(
         prismaMock,
         'kpi',
         {
@@ -850,6 +883,7 @@ describe('statisticService', () => {
           ],
         },
         now
+        )
       )
 
       expect(prismaMock.frequency.findUnique).toHaveBeenCalledWith({

@@ -18,6 +18,7 @@ import { getDivisionFromCode } from '@/services/klassService'
 import { ExtendedPrismaClient as PrismaClient } from '@/lib/prisma'
 import { statisticsAsserts } from '@/lib/asserts'
 import { getAllUsersFromCache } from '@/lib/cache'
+import { isCurrentUserAdmin } from '@/lib/context'
 import { StatregError } from '@/lib/statregError'
 
 export type StatisticPrisma = Pick<
@@ -456,7 +457,7 @@ export async function updateStatistic(
       name,
       name_en,
       division_code: division,
-      desk_appoval_status: ApprovalStatus.PENDING,
+      desk_appoval_status: isCurrentUserAdmin() ? ApprovalStatus.ACCEPTED : ApprovalStatus.PENDING,
       status,
       comment,
       language: main_language,
@@ -611,7 +612,7 @@ export async function createStatistic(
       priority: 1,
       yearly_reporting: false,
       status: createStatisticStatus,
-      desk_appoval_status: ApprovalStatus.ACCEPTED,
+      desk_appoval_status: isCurrentUserAdmin() ? ApprovalStatus.ACCEPTED : ApprovalStatus.PENDING,
       language: main_language,
       date_created: now,
       last_updated: now,
