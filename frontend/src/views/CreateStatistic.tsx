@@ -352,7 +352,7 @@ export default function CreateStatistic() {
       body: {
         ...values,
         status: { code: status },
-        first_released_at: values.first_released_at ? `${values.first_released_at}-12-31` : '',
+        first_released_at: values.first_released_at ? `${values.first_released_at}-01-01` : '',
         statistic_region_levels: regionLevelValues.length
           ? regionLevelValues.map((code: string) => ({
               code,
