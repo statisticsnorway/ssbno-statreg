@@ -17,8 +17,8 @@
     "@navikt/ds-react": "8.16.2",
     "@statisticsnorway/statreg-api-types": "workspace:*",
     "@ssbno-statreg/shared": "workspace:*",
-    "@statisticsnorway/design-css": "^0.2.3",
-    "@statisticsnorway/design-react": "^0.2.3",
+    "@statisticsnorway/design-css": "^0.2.4",
+    "@statisticsnorway/design-react": "^0.2.4",
     "openapi-fetch": "0.17.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",
@@ -33,6 +33,6 @@
     "eslint-plugin-react-refresh": "0.5.7",
     "globals": "17.12.0",
     "lightningcss": "1.33.0",
-    "vite": "8.3.0"
+    "vite": "8.3.3"
   }
 }
