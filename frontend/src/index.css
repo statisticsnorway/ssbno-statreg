@@ -8,15 +8,19 @@ body {
 }
 
 .selectable-row {
-  position: relative;
-    /* Safari doesn't treat position: relative on <tr> as a containing block for absolutely
-     positioned descendants, so the stretched link below escapes the row bounds (e.g. covering
-     unrelated elements higher up the page). A transform forces Safari to establish one correctly. */
-  transform: translate(0);
+  /* Safari does not use <tr> as the containing block for an absolutely positioned
+     link, so the stretched link escapes the row and sits on top of the pagination.
+     The cell is a containing block Safari does honor. clip-path drops any part
+     that still paints outside the row, including over the page numbers. */
+  clip-path: inset(0);
 
   &:hover {
     background-color: var(--ds-color-surface-hover);
     cursor: pointer;
+  }
+
+  td {
+    position: relative;
   }
 
   /* Stretch the row link to cover the whole row so the entire row is clickable
@@ -28,9 +32,17 @@ body {
     &::after {
       content: '';
       position: absolute;
-      inset: 0;
+      z-index: 1;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: 100cqi;
     }
   }
+}
+
+table:has(.row-link) {
+  overflow: clip;
 }
 
 .status-column {
