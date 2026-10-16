@@ -94,7 +94,6 @@ export function CreateShortnameModal({ openCreateShortnameModal }: Readonly<Crea
       aria-labelledby='create-shortname-modal-heading'
       open={openCreateShortnameModal}
       onClose={handleCloseModal}
-      closedby='any'
     >
       <Dialog.Block>
         <Heading id='create-shortname-modal-heading' data-size='xs'>

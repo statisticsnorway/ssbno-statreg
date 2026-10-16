@@ -291,7 +291,7 @@ export function VariantModal({
   const isNewVariant = isExistingVariant && !editVariantValues?.id
 
   return (
-    <Dialog id={dialogId} aria-labelledby='variant-modal-heading' onClose={handleDialogClose} closedby='any'>
+    <Dialog id={dialogId} aria-labelledby='variant-modal-heading' onClose={handleDialogClose}>
       <Dialog.Block>
         <Heading id='variant-modal-heading' data-size='xs'>
           {isExistingVariant ? 'Rediger variant' : 'Legg til variant'}
