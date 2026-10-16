@@ -18,6 +18,7 @@ import { useState } from 'react'
 import { ErrorAlert } from './ErrorAlert'
 import './BlockedDateModal.css'
 import type { CalenderDate } from '@ssbno-statreg/shared'
+import ErrorDisplayer from './ErrorDisplayer'
 
 type BlockedDateProps = {
   openCreateReleaseModal: boolean
@@ -109,7 +110,7 @@ export function BlockedDateModal({
             <div>
               <Field.Description>dd.mm.åååå</Field.Description>
             </div>
-            <Input id='publishTime' {...inputProps} size={10} className='padded' />
+            <Input id='date' {...inputProps} size={10} className='padded' />
             {errors.date && <ValidationMessage>{errors.date}</ValidationMessage>}
             {calendarDates[getDateOnlyAsString(selectedDay)]?.status.match('FULL|MANY|FEW') && (
               <Alert data-color='warning' className='padded'>
@@ -142,14 +143,13 @@ export function BlockedDateModal({
               Skriv hvorfor må denne datoen sperres. F.eks. Helligdag eller planlagt vedlikehold.
             </Field.Description>
             <Textarea
-              id='publishComment'
+              id='comment'
               onChange={(e) => {
                 setComment(e.target.value)
                 setErrors((err) => ({ ...err, comment: '' }))
               }}
             />
             {errors.comment && <ValidationMessage>{errors.comment}</ValidationMessage>}
-            {apiError.length > 0 && <ErrorAlert message={[...apiError, datePickerError]} />}
           </Field>
           <div className='blocked-date-modal-buttons-container'>
             <Button type='submit' variant='primary' className='padded'>
@@ -159,6 +159,8 @@ export function BlockedDateModal({
               Avbryt
             </Button>
           </div>
+          {apiError.length > 0 && <ErrorAlert message={[...apiError, datePickerError]} />}
+          <ErrorDisplayer errors={errors} />
         </form>
       </Dialog.Block>
     </Dialog>
