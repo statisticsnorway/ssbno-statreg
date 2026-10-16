@@ -7,9 +7,7 @@ export function VariantCard({ shortname, variant }: { shortname: string; variant
     <Card variant='tinted' style={{ height: '180px' }}>
       <Card.Block>
         <Heading>
-          <Link href={`/statistikk/${shortname}/${variant.id}/opprett`}>
-            {formatVariant(variant)}
-          </Link>
+          <Link href={`/statistikk/${shortname}/${variant.id}/opprett`}>{formatVariant(variant)}</Link>
         </Heading>
         <Paragraph>
           Detaljnivå: {variant.level_of_detail?.name} <br />

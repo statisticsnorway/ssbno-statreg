@@ -22,9 +22,7 @@ describe('calendarController ', () => {
   })
 
   test('retrieves date status for days in range', async () => {
-    const response = await request(app)
-      .get('/api/calendar')
-      .query({ fromDate: '2026-05-25', toDate: '2026-05-31' })
+    const response = await request(app).get('/api/calendar').query({ fromDate: '2026-05-25', toDate: '2026-05-31' })
     expect(response.status).toBe(200)
     expect(response.body).toStrictEqual({
       '2026-05-25': { status: 'BLOCKED' },
@@ -48,9 +46,7 @@ describe('calendarController ', () => {
     expect(created.status).toBe(200)
 
     // GET calendar before delete to check that date is blocked
-    const calendarBefore = await request(app)
-      .get('/api/calendar')
-      .query({ fromDate: date, toDate: date })
+    const calendarBefore = await request(app).get('/api/calendar').query({ fromDate: date, toDate: date })
     expect(calendarBefore.status).toBe(200)
     expect(calendarBefore.body[date]).toStrictEqual({ status: 'BLOCKED' })
 
@@ -60,15 +56,11 @@ describe('calendarController ', () => {
     expect(blockedBefore.body).toContainEqual(expect.objectContaining({ date }))
 
     // DELETE blocked date
-    const deleted = await request(app)
-      .delete(`/api/calendar/blocked-release-days/${date}`)
-      .set(headers)
+    const deleted = await request(app).delete(`/api/calendar/blocked-release-days/${date}`).set(headers)
     expect(deleted.status).toBe(200)
 
     // GET calendar after delete to check that date is not blocked
-    const calendarAfter = await request(app)
-      .get('/api/calendar')
-      .query({ fromDate: date, toDate: date })
+    const calendarAfter = await request(app).get('/api/calendar').query({ fromDate: date, toDate: date })
     expect(calendarAfter.status).toBe(200)
     expect(calendarAfter.body[date]).toStrictEqual({ status: 'NONE' })
 

@@ -19,10 +19,10 @@ const Header = () => {
       <div className='header-content' data-color='brand1' data-size='sm'>
         <img src={ssbLogo} className='logo' alt='SSB logo' />
         <div className='header-links'>
-        <SelectedPage>
-          <Link href='/'>Publiseringsoversikt</Link>
-          <Link href='/statistikk'>Statistikkoversikt</Link>
-        </SelectedPage>
+          <SelectedPage>
+            <Link href='/'>Publiseringsoversikt</Link>
+            <Link href='/statistikk'>Statistikkoversikt</Link>
+          </SelectedPage>
           {auth?.isAdmin ? (
             <Button variant='tertiary' asChild>
               <ReactRouterLink to='/oppgaver' reloadDocument>

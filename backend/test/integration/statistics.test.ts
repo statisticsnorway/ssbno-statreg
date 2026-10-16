@@ -61,9 +61,7 @@ describe('statistics controller', () => {
     })
 
     // GET /statistics with shortname filter to verify persistence
-    const listingResponse = await request(app)
-      .get('/api/statistics')
-      .query(`shortname=${newShortname}`)
+    const listingResponse = await request(app).get('/api/statistics').query(`shortname=${newShortname}`)
     expect(listingResponse.status).toBe(200)
     expect(listingResponse.body).toMatchObject({
       total: 1,
@@ -136,9 +134,7 @@ describe('statistics controller', () => {
     })
 
     // GET /statistics with shortname filter to verify persistence
-    const listingResponse = await request(app)
-      .get('/api/statistics')
-      .query(`shortname=${newShortname}`)
+    const listingResponse = await request(app).get('/api/statistics').query(`shortname=${newShortname}`)
     expect(listingResponse.status).toBe(200)
     expect(listingResponse.body).toMatchObject({
       total: 1,
@@ -230,9 +226,7 @@ describe('statistics controller', () => {
     })
 
     // GET /statistics with shortname filter to verify persistence
-    const listingResponse = await request(app)
-      .get('/api/statistics')
-      .query(`shortname=${newShortname}`)
+    const listingResponse = await request(app).get('/api/statistics').query(`shortname=${newShortname}`)
     expect(listingResponse.status).toBe(200)
     expect(listingResponse.body).toMatchObject({
       total: 1,
@@ -267,14 +261,8 @@ describe('statistics controller', () => {
     // POST /shortnames
     const shortnameA = 'filter_a'
     const shortnameB = 'filter_b'
-    await request(app)
-      .post('/api/shortnames')
-      .set('content-type', 'application/json')
-      .send({ shortname: shortnameA })
-    await request(app)
-      .post('/api/shortnames')
-      .set('content-type', 'application/json')
-      .send({ shortname: shortnameB })
+    await request(app).post('/api/shortnames').set('content-type', 'application/json').send({ shortname: shortnameA })
+    await request(app).post('/api/shortnames').set('content-type', 'application/json').send({ shortname: shortnameB })
 
     // POST /statistics
     await request(app)
