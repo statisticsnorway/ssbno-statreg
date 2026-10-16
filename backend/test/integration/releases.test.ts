@@ -74,9 +74,7 @@ describe('release data is persisted when ', () => {
     expect(variantReleasesBefore.status).toBe(200)
     expect(variantReleasesBefore.body).toMatchObject({ total: 1, releases: [{ id: created.body.id }] })
 
-    const filteredReleasesBefore = await request(app)
-      .get('/api/releases')
-      .query({ shortname: newShortname })
+    const filteredReleasesBefore = await request(app).get('/api/releases').query({ shortname: newShortname })
     expect(filteredReleasesBefore.status).toBe(200)
     expect(filteredReleasesBefore.body).toMatchObject({ total: 1, releases: [{ id: created.body.id }] })
 
@@ -105,9 +103,7 @@ describe('release data is persisted when ', () => {
     expect(variantReleasesAfter.status).toBe(200)
     expect(variantReleasesAfter.body).toStrictEqual({ total: 0, releases: [] })
 
-    const filteredReleasesAfter = await request(app)
-      .get('/api/releases')
-      .query({ shortname: newShortname })
+    const filteredReleasesAfter = await request(app).get('/api/releases').query({ shortname: newShortname })
     expect(filteredReleasesAfter.status).toBe(200)
     expect(filteredReleasesAfter.body).toStrictEqual({ total: 0, releases: [] })
 
@@ -131,9 +127,7 @@ describe('release data is persisted when ', () => {
     // 5. User opens version history to check that change is registered
 
     // 1. GET release listing and pick release
-    const list = await request(app).get(
-      `/api/statistics/${shortname}/variants/${variantId}/releases`
-    )
+    const list = await request(app).get(`/api/statistics/${shortname}/variants/${variantId}/releases`)
     expect(list.status).toBe(200)
     expect(list.body.total).toBeGreaterThan(1)
     const picked = list.body.releases[0]
@@ -151,10 +145,7 @@ describe('release data is persisted when ', () => {
       release_date_precision: 'month',
       comment: 'Postpone release date.',
     }
-    const putResponse = await request(app)
-      .put(`/api/releases/${picked.id}`)
-      .set(headers)
-      .send(updateBody)
+    const putResponse = await request(app).put(`/api/releases/${picked.id}`).set(headers).send(updateBody)
     expect(putResponse.status).toBe(200)
 
     // 4. GET release to check persistence of new values

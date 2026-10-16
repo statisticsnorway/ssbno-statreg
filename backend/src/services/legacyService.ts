@@ -1,9 +1,7 @@
 import type { ExtendedPrismaClient } from '@/lib/prisma'
 import { ApprovalStatus } from '@ssbno-statreg/shared'
 
-export async function getApprovedStatisticsXml(
-  prisma: Pick<ExtendedPrismaClient, 'statistic'>,
-): Promise<string> {
+export async function getApprovedStatisticsXml(prisma: Pick<ExtendedPrismaClient, 'statistic'>): Promise<string> {
   const statistics = await prisma.statistic.findMany({
     where: {
       status: 'A',
@@ -16,9 +14,7 @@ export async function getApprovedStatisticsXml(
     orderBy: { shortname: { name: 'asc' } },
   })
 
-  const rows = statistics.map(
-    ({ id, shortname }) => `<statistikk id="${id}" kortnavn="${shortname.name}"/>`,
-  )
+  const rows = statistics.map(({ id, shortname }) => `<statistikk id="${id}" kortnavn="${shortname.name}"/>`)
 
   return `<statistikker antall="${statistics.length}" dato="${formatLegacyDate()}">
 ${rows.join('\n')}
