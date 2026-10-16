@@ -12,7 +12,6 @@ import {
   Label,
   Input,
   ValidationMessage,
-  ErrorSummary,
   Textarea,
   Link,
 } from '@statisticsnorway/design-react'
@@ -49,6 +48,7 @@ import './ReleaseForm.css'
 import { useAuth } from '../context/AuthContext'
 import { ErrorAlert } from '../components/ErrorAlert'
 import ErrorPage, { ErrorType } from './ErrorPage'
+import ErrorDisplayer from '../components/ErrorDisplayer'
 
 type Statistic = ReleaseByIdResponse['statistic'] & {
   approval_status?: ReleaseByIdResponse['approval_status']
@@ -555,23 +555,7 @@ export default function ReleaseForm() {
             </ReactRouterLink>
           </Button>
         </div>
-
-        {Object.values(errors).some(Boolean) && (
-          <ErrorSummary>
-            <ErrorSummary.Heading>For å gå videre må du rette opp følgende feil:</ErrorSummary.Heading>
-            <ErrorSummary.List>
-              {Object.entries(errors).map(([key, message]) => {
-                if (message) {
-                  return (
-                    <ErrorSummary.Item key={message}>
-                      <ErrorSummary.Link href={`#${key}`}>{message}</ErrorSummary.Link>
-                    </ErrorSummary.Item>
-                  )
-                }
-              })}
-            </ErrorSummary.List>
-          </ErrorSummary>
-        )}
+        <ErrorDisplayer errors={errors} />
       </form>
 
       <ReleaseFormModal

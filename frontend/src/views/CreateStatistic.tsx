@@ -17,7 +17,6 @@ import {
   useCheckboxGroup,
   ValidationMessage,
   Tag,
-  ErrorSummary,
   Textarea,
   Link,
   Card,
@@ -43,6 +42,7 @@ import { CreateShortnameModal } from '../components/CreateShortnameModal'
 import { ContactSelection } from '../components/ContactSelection'
 import { VariantModal, useVariantModal } from '../components/VariantModal'
 import { DivisionSelection } from '../components/DivisionSelection'
+import ErrorDisplayer from '../components/ErrorDisplayer'
 
 export type StatisticFormField = keyof StatisticPartialFormValues | 'variants' | 'contacts'
 export type StatisticFormErrors = Partial<Record<StatisticFormField, string>>
@@ -355,8 +355,8 @@ export default function CreateStatistic() {
         first_released_at: values.first_released_at ? `${values.first_released_at}-01-01` : '',
         statistic_region_levels: regionLevelValues.length
           ? regionLevelValues.map((code: string) => ({
-              code,
-            }))
+            code,
+          }))
           : [],
         approval_status: ApprovalStatus['ACCEPTED'],
         contacts: selectedContacts,
@@ -635,22 +635,7 @@ export default function CreateStatistic() {
                 Avbryt
               </Button>
             </div>
-            {Object.values(errors).some(Boolean) && (
-              <ErrorSummary>
-                <ErrorSummary.Heading>For å gå videre må du rette opp følgende feil:</ErrorSummary.Heading>
-                <ErrorSummary.List>
-                  {Object.entries(errors).map(([key, message]) => {
-                    if (message) {
-                      return (
-                        <ErrorSummary.Item key={message}>
-                          <ErrorSummary.Link href={`#${key}`}>{message}</ErrorSummary.Link>
-                        </ErrorSummary.Item>
-                      )
-                    }
-                  })}
-                </ErrorSummary.List>
-              </ErrorSummary>
-            )}
+            <ErrorDisplayer errors={errors} />
           </form>
         </div>
       )}

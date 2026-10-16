@@ -9,7 +9,6 @@ import {
   Textarea,
   ValidationMessage,
   Alert,
-  ErrorSummary,
 } from '@statisticsnorway/design-react'
 import { useDatepicker } from '@navikt/ds-react/DatePicker'
 import client from '../api'
@@ -19,6 +18,7 @@ import { useState } from 'react'
 import { ErrorAlert } from './ErrorAlert'
 import './BlockedDateModal.css'
 import type { CalenderDate } from '@ssbno-statreg/shared'
+import ErrorDisplayer from './ErrorDisplayer'
 
 type BlockedDateProps = {
   openCreateReleaseModal: boolean
@@ -160,22 +160,7 @@ export function BlockedDateModal({
             </Button>
           </div>
           {apiError.length > 0 && <ErrorAlert message={[...apiError, datePickerError]} />}
-          {Object.values(errors).some(Boolean) && (
-            <ErrorSummary>
-              <ErrorSummary.Heading>For å gå videre må du rette opp følgende feil:</ErrorSummary.Heading>
-              <ErrorSummary.List>
-                {Object.entries(errors).map(([key, message]) => {
-                  if (message) {
-                    return (
-                      <ErrorSummary.Item key={message}>
-                        <ErrorSummary.Link href={`#${key}`}>{message}</ErrorSummary.Link>
-                      </ErrorSummary.Item>
-                    )
-                  }
-                })}
-              </ErrorSummary.List>
-            </ErrorSummary>
-          )}
+          <ErrorDisplayer errors={errors} />
         </form>
       </Dialog.Block>
     </Dialog>

@@ -11,7 +11,6 @@ import {
   Card,
   Table,
   ValidationMessage,
-  ErrorSummary,
   Field,
 } from '@statisticsnorway/design-react'
 import { PencilWritingIcon } from '@navikt/aksel-icons'
@@ -33,6 +32,7 @@ import { ApprovalStatusBadge } from '../components/ApprovalStatus'
 import { useAuth } from '../context/AuthContext'
 import { ErrorAlert } from '../components/ErrorAlert'
 import { ContactSelection } from '../components/ContactSelection'
+import ErrorDisplayer from '../components/ErrorDisplayer'
 
 type ReleaseRowProps = {
   release: ReleaseListing
@@ -247,9 +247,7 @@ export default function ShowStatistic() {
                 <>
                   <SimpleReleasesTable releases={releases} />
                   <p>
-                    <Link href={`/?shortname=${shortname}`}>
-                      Se alle publiseringsdatoene for denne statistikken
-                    </Link>
+                    <Link href={`/?shortname=${shortname}`}>Se alle publiseringsdatoene for denne statistikken</Link>
                   </p>
                 </>
               ) : (
@@ -332,16 +330,7 @@ export default function ShowStatistic() {
                 )}
               </Field>
               {contactValidationError && selectedContacts.length === 0 && (
-                <div className='show-statistic-contacts-error-summary'>
-                  <ErrorSummary>
-                    <ErrorSummary.Heading>For å gå videre må du rette opp følgende feil:</ErrorSummary.Heading>
-                    <ErrorSummary.List>
-                      <ErrorSummary.Item>
-                        <ErrorSummary.Link href='#contact-selection'>Legg til minst én kontakt</ErrorSummary.Link>
-                      </ErrorSummary.Item>
-                    </ErrorSummary.List>
-                  </ErrorSummary>
-                </div>
+                <ErrorDisplayer errors={{ 'contact-selection': 'Legg til minst én kontakt' }} />
               )}
               <div className='show-statistic-contacts-button-wrapper'>
                 <Button type='submit'>Lagre</Button>
@@ -402,9 +391,7 @@ export default function ShowStatistic() {
       <div>
         <Heading data-size='xs'>Endringer</Heading>
         <Paragraph>
-          <Link href={`/statistikk/${shortname}/versjoner`}>
-            Se versjonshistorikken til statistikken
-          </Link>
+          <Link href={`/statistikk/${shortname}/versjoner`}>Se versjonshistorikken til statistikken</Link>
         </Paragraph>
       </div>
 

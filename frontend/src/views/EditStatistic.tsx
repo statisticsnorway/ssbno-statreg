@@ -16,7 +16,6 @@ import {
   useCheckboxGroup,
   ValidationMessage,
   Tag,
-  ErrorSummary,
   Textarea,
   Link,
   Card,
@@ -52,6 +51,7 @@ import { DivisionSelection } from '../components/DivisionSelection'
 import { VariantModal, useVariantModal } from '../components/VariantModal'
 import { ContactSelection } from '../components/ContactSelection'
 import type { StatisticFormErrors, StatisticFormField, StatisticPartialFormValues } from './CreateStatistic'
+import ErrorDisplayer from '../components/ErrorDisplayer'
 
 type StatisticFormValues = {
   status: keyof typeof StatisticStatus | ''
@@ -204,9 +204,9 @@ export default function EditStatistic() {
       setSelectedRelation(
         typeof nextStatistic.relation?.id === 'number' && nextStatistic.relation.shortname
           ? {
-              label: nextStatistic.relation.shortname,
-              value: nextStatistic.relation.shortname,
-            }
+            label: nextStatistic.relation.shortname,
+            value: nextStatistic.relation.shortname,
+          }
           : null
       )
       setStatus((nextStatistic.status?.code as EditableStatisticStatus) ?? '')
@@ -221,7 +221,7 @@ export default function EditStatistic() {
       setCreatedVariants(nextStatistic.variants ?? [])
       setRegionLevelValues(
         nextStatistic.statistic_region_levels?.flatMap((regionLevel) => (regionLevel.code ? [regionLevel.code] : [])) ??
-          []
+        []
       )
       setErrors({})
 
@@ -734,22 +734,7 @@ export default function EditStatistic() {
             Avbryt
           </Button>
         </div>
-        {Object.values(errors).some(Boolean) && (
-          <ErrorSummary>
-            <ErrorSummary.Heading>For å gå videre må du rette opp følgende feil:</ErrorSummary.Heading>
-            <ErrorSummary.List>
-              {Object.entries(errors).map(([key, message]) => {
-                if (message) {
-                  return (
-                    <ErrorSummary.Item key={message}>
-                      <ErrorSummary.Link href={`#${key}`}>{message}</ErrorSummary.Link>
-                    </ErrorSummary.Item>
-                  )
-                }
-              })}
-            </ErrorSummary.List>
-          </ErrorSummary>
-        )}
+        <ErrorDisplayer errors={errors} />
       </form>
     </div>
   )
