@@ -15,7 +15,15 @@ export function Pagination({ start, count, total, setCurrentPage }: PaginationPr
     showPages: 6,
   })
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', marginTop: 'var(--ds-size-18)', position: 'relative', zIndex: 1 }}>
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'center',
+        marginTop: 'var(--ds-size-18)',
+        position: 'relative',
+        zIndex: 1,
+      }}
+    >
       <DsPagination aria-label='pagineringsmeny'>
         <DsPagination.List>
           <DsPagination.Item>
