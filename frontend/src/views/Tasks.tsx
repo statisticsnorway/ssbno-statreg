@@ -70,7 +70,7 @@ function PendingReleaseRow({ pendingRelease, getCheckboxProps }: Readonly<Pendin
 
   return (
     <Table.Row key={`${pendingRelease.publish_time}-${pendingRelease.id}`} className='selectable-row'>
-      <Table.Cell>
+      <Table.Cell className='pending-release-checkbox-cell'>
         <Checkbox aria-label={selectLabel} {...getCheckboxProps(pendingRelease.id?.toString())} />
       </Table.Cell>
       <Table.Cell>
