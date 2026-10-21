@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
-import { useSearchParams } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 import {
   Heading,
   Divider,
@@ -24,7 +24,7 @@ import './Tasks.css'
 import { formatDateTime, formatDate, toggleSort, getSortDirection } from '../lib/utils'
 import { useAuth } from '../context/AuthContext'
 import { RowCountSelect } from '../components/RowCountSelect'
-import { PaginatedReleasesTable, TruncatedTableCell } from '../components/ReleasesTable'
+import { PaginatedReleasesTable } from '../components/ReleasesTable'
 import { ErrorAlert } from '../components/ErrorAlert'
 import ErrorPage, { ErrorType } from './ErrorPage'
 
@@ -67,13 +67,18 @@ const TABLE_HEADER_CELLS = [
 function PendingReleaseRow({ pendingRelease, getCheckboxProps }: Readonly<PendingReleaseRowProps>) {
   const statisticsShortname = pendingRelease.statistic?.shortname ?? ''
   const selectLabel = `Velg publisering for godkjenning: ${pendingRelease.statistic?.name ?? ''}, publiseres ${formatDateTime(pendingRelease.publish_time)}`
+
   return (
     <Table.Row key={`${pendingRelease.publish_time}-${pendingRelease.id}`} className='selectable-row'>
-      <Table.Cell>
+      <Table.Cell className='pending-release-checkbox-cell'>
         <Checkbox aria-label={selectLabel} {...getCheckboxProps(pendingRelease.id?.toString())} />
       </Table.Cell>
-      <Table.Cell>{statisticsShortname}</Table.Cell>
-      <TruncatedTableCell value={pendingRelease.statistic?.name} />
+      <Table.Cell>
+        <Link className='row-link' to={`/publisering/${pendingRelease.id}`} target='_blank' rel='noopener noreferrer'>
+          {statisticsShortname}
+        </Link>
+      </Table.Cell>
+      <Table.Cell title={pendingRelease.statistic?.name}>{pendingRelease.statistic?.name}</Table.Cell>
       <Table.Cell>{pendingRelease.frequency?.name ?? ''}</Table.Cell>
       <Table.Cell>{formatDate(pendingRelease.period_from)}</Table.Cell>
       <Table.Cell>{formatDate(pendingRelease.period_to)}</Table.Cell>

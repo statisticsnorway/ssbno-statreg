@@ -21,8 +21,14 @@
       display: flex;
       gap: var(--ds-size-2);
     }
+    
+    .pending-release-checkbox-cell {
+      position: relative;
+      z-index: 1;
+    }
   }
 }
+
 
 .approved-releases-alert {
   animation: approval-alert-fade 250ms ease-out 5s forwards;
