@@ -2,7 +2,7 @@
 # depend on having a shell, as well as other OS functions available.
 # We want this because we need to run pnpm commands on startup, inside the container.
 # Pnpm version 11.22: https://github.com/pnpm/pnpm/pkgs/container/pnpm/versions?filters%5Bversion_type%5D=tagged
-FROM ghcr.io/pnpm/pnpm@sha256:eba76954b37ec1ba6187f0adb39caee1e31733194857eedd01319da0af3fa00d
+FROM ghcr.io/pnpm/pnpm@sha256:d6148daf3ad2af8fa4ecd1aa06db73da32b2e37f63088987eea2fb375ee7f320
 
 RUN pnpm runtime set node 24 -g
 
