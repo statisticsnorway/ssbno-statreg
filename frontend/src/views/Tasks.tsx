@@ -231,6 +231,7 @@ function ListReleasesTable({ isAdmin, setApiError, approvedReleasesCount }: List
         setCurrentPage={setCurrentPage}
         sortBy={sortBy}
         setSortBy={setSortBy}
+        openInNewTab
       />
     </>
   )
