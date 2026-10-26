@@ -48,6 +48,10 @@ spec:
         - /docs/**
         - /api/**
 
+  uses:
+    postgres:
+      - name: statreg-api-db
+
   prometheus:
     enabled: true
     path: /metrics

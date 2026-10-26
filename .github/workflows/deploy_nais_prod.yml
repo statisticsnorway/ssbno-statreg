@@ -30,6 +30,11 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: refs/tags/${{ inputs.tag }}
+      - uses: nais/setup@fb8692f65df9c904e2cdac5d395630ac876abdcf # v1.0.3
+        with:
+          team: ssbno
+      - name: Apply Postgres
+        run: nais apply .nais/postgres.yaml --environment prod
       - name: Login to Nais registry
         uses: nais/login@40b72a35a18ddf2ad74b632461139ab838cc2a2f # v0
         id: login
