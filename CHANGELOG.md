@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.3](https://github.com/statisticsnorway/ssbno-statreg/compare/v0.2.2...v0.2.3) (2026-10-30)
+
+
+### Build System and dependencies
+
+* attempt to create ssl setup ([#671](https://github.com/statisticsnorway/ssbno-statreg/issues/671)) ([74226ea](https://github.com/statisticsnorway/ssbno-statreg/commit/74226ea92209fed638d807728a48fad6a59710c5))
+
 ## [0.2.2](https://github.com/statisticsnorway/ssbno-statreg/compare/v0.2.1...v0.2.2) (2026-10-30)
 
 
