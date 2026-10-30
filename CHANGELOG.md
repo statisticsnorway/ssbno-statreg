@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/statisticsnorway/ssbno-statreg/compare/v0.2.0...v0.2.1) (2026-10-30)
+
+
+### Build System and dependencies
+
+* Remove db-deploy script from container startup ([846f150](https://github.com/statisticsnorway/ssbno-statreg/commit/846f150bc55c063d2486efa033070787ac5670b9))
+
 ## [0.2.0](https://github.com/statisticsnorway/ssbno-statreg/compare/v0.1.2...v0.2.0) (2026-10-30)
 
 
