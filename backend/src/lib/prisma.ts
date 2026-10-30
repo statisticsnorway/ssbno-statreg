@@ -11,7 +11,7 @@ export type Snapshot = Record<string, unknown> & { id?: number; version: number;
 const adapter = new PrismaPg({
   connectionString:
     process.env.PGURL ||
-    `postgresql://${process.env.PGUSER}@${process.env.PGHOST}:${process.env.PGPORT}/${process.env.PGDATABASE}?sslmode=disable`,
+    `postgresql://${process.env.PGUSER}@${process.env.PGHOST}:${process.env.PGPORT}/${process.env.PGDATABASE}?sslmode=disable&sslcert=${process.env.PGSSLCERT}`,
   // SSL settings need to be disabled for local development
   ssl:
     process.env.NODE_ENV === 'development'
