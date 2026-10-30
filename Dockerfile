@@ -36,5 +36,8 @@ EXPOSE 9000
 EXPOSE 8080
 
 # Command to start the application
+
+RUN chmod +x backend/entrypoint.sh
+
 ENTRYPOINT [ "backend/entrypoint.sh" ]
 CMD [ "sh", "-c", "pnpm run db:deploy && pnpm run start" ]
