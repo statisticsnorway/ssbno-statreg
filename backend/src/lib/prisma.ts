@@ -9,7 +9,7 @@ import { RevisionNames } from '@ssbno-statreg/shared'
 export type Snapshot = Record<string, unknown> & { id?: number; version: number; date_created?: Date }
 
 const adapter = new PrismaPg({
-  connectionString: process.env.PGURL!,
+  connectionString: process.env.PGJDBCURL!,
   // SSL settings need to be disabled for local development
   ssl:
     process.env.NODE_ENV === 'development'
