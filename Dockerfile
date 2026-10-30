@@ -36,4 +36,5 @@ EXPOSE 9000
 EXPOSE 8080
 
 # Command to start the application
-CMD [ "sh", "-c", "pnpm run db:deploy && pnpm run start" ]
+# CMD [ "sh", "-c", "pnpm run db:deploy && pnpm run start" ]
+CMD [ "sh", "-c", "pnpm run start" ]
