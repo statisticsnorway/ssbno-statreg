@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://github.com/statisticsnorway/ssbno-statreg/compare/v0.1.2...v0.2.0) (2026-10-30)
+
+
+### Features
+
+* Update PGURL for prod [MIM-3136] ([#665](https://github.com/statisticsnorway/ssbno-statreg/issues/665)) ([4145cff](https://github.com/statisticsnorway/ssbno-statreg/commit/4145cff514e709feb47bebf158c634dd050df903))
+
 ## [0.1.2](https://github.com/statisticsnorway/ssbno-statreg/compare/v0.1.1...v0.1.2) (2026-10-30)
 
 
