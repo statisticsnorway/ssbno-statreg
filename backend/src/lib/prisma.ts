@@ -1,4 +1,3 @@
-import fs from 'node:fs'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { PrismaClient } from '../generated/prisma/client'
 import process from 'node:process'
@@ -10,16 +9,14 @@ import { RevisionNames } from '@ssbno-statreg/shared'
 export type Snapshot = Record<string, unknown> & { id?: number; version: number; date_created?: Date }
 
 const adapter = new PrismaPg({
-  connectionString:
-    process.env.PGURL ||
-    `postgresql://${process.env.PGUSER}@${process.env.PGHOST}:${process.env.PGPORT}/${process.env.PGDATABASE}`,
-  ssl: process.env.PGSSLROOTCERT
-    ? {
-        ca: fs.readFileSync(process.env.PGSSLROOTCERT, 'utf8'),
-        cert: fs.readFileSync(process.env.PGSSLCERT!, 'utf8'),
-        key: fs.readFileSync(process.env.PGSSLKEY!, 'utf8'),
-      }
-    : undefined,
+  connectionString: process.env.PGURL,
+  // SSL settings need to be disabled for local development
+  ssl:
+    process.env.NODE_ENV === 'development'
+      ? undefined
+      : {
+          rejectUnauthorized: false,
+        },
 })
 
 const prisma = new PrismaClient({ adapter })
