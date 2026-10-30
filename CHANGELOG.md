@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2](https://github.com/statisticsnorway/ssbno-statreg/compare/v0.2.1...v0.2.2) (2026-10-30)
+
+
+### Bug Fixes
+
+* Fix connectString for Prod ([#669](https://github.com/statisticsnorway/ssbno-statreg/issues/669)) ([9f1f198](https://github.com/statisticsnorway/ssbno-statreg/commit/9f1f19848d285bb8b50dc9bdc71aa5ddecb9b8be))
+
 ## [0.2.1](https://github.com/statisticsnorway/ssbno-statreg/compare/v0.2.0...v0.2.1) (2026-10-30)
 
 
