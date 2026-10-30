@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.1.2](https://github.com/statisticsnorway/ssbno-statreg/compare/v0.1.1...v0.1.2) (2026-10-30)
+
+
+### Bug Fixes
+
+* Add link to releases for PendngTasks table [MIM-3211] ([#654](https://github.com/statisticsnorway/ssbno-statreg/issues/654)) ([c4c33f3](https://github.com/statisticsnorway/ssbno-statreg/commit/c4c33f3f1b5de84165ef3ea4dccffc02d3016fa5))
+* Auto desk approval status when admin ([#649](https://github.com/statisticsnorway/ssbno-statreg/issues/649)) ([9508d1c](https://github.com/statisticsnorway/ssbno-statreg/commit/9508d1cca496a547d59416bbcc9bc71b26f4b200))
+* Error messages in blocked-date form is now read by screen reader ([#652](https://github.com/statisticsnorway/ssbno-statreg/issues/652)) ([fd8b602](https://github.com/statisticsnorway/ssbno-statreg/commit/fd8b602ee1ec97afa2f9892227a24d65183f84d2))
+* Paging number click open stat in safari ([#651](https://github.com/statisticsnorway/ssbno-statreg/issues/651)) ([e0e2f9b](https://github.com/statisticsnorway/ssbno-statreg/commit/e0e2f9baf36adfa07bb99897fa1883d8a81ce17b))
+* Remove closedby any for Modal components ([#653](https://github.com/statisticsnorway/ssbno-statreg/issues/653)) ([ab7d95a](https://github.com/statisticsnorway/ssbno-statreg/commit/ab7d95a37ff0e9192581cee9d0c8f25c87ef7402))
+* Set openInNewTab prop for PaginatedReleasesTable in Tasks view ([#658](https://github.com/statisticsnorway/ssbno-statreg/issues/658)) ([a69ff39](https://github.com/statisticsnorway/ssbno-statreg/commit/a69ff3939844d8c6c53f47533c4b9925774abdad))
+
+
+### Build System and dependencies
+
+* bump nais/docker-build-push ([#648](https://github.com/statisticsnorway/ssbno-statreg/issues/648)) ([d8de662](https://github.com/statisticsnorway/ssbno-statreg/commit/d8de66299fce98084600dc05a4fcbf3070a6ee99))
+* bump the dependencies-patch-updates group across 1 directory with 6 updates ([#640](https://github.com/statisticsnorway/ssbno-statreg/issues/640)) ([16dbbae](https://github.com/statisticsnorway/ssbno-statreg/commit/16dbbaee1f024548fc7a8c24a8835d204c32e61d))
+* Create postgres db for prod ([#659](https://github.com/statisticsnorway/ssbno-statreg/issues/659)) ([6ab4f75](https://github.com/statisticsnorway/ssbno-statreg/commit/6ab4f75bb0da28fd95ba6a839213aa4acf235566))
+
 ## [0.1.1](https://github.com/statisticsnorway/ssbno-statreg/compare/v0.1.0...v0.1.1) (2026-10-15)
 
 
