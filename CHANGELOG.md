@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.4](https://github.com/statisticsnorway/ssbno-statreg/compare/v0.2.3...v0.2.4) (2026-10-30)
+
+
+### Build System and dependencies
+
+* MIM 3136 create entrypoint and ssl key ([#673](https://github.com/statisticsnorway/ssbno-statreg/issues/673)) ([288af26](https://github.com/statisticsnorway/ssbno-statreg/commit/288af26150af3fa4fab7b99a1d7748ef2098f6a7))
+
 ## [0.2.3](https://github.com/statisticsnorway/ssbno-statreg/compare/v0.2.2...v0.2.3) (2026-10-30)
 
 
