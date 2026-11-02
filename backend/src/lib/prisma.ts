@@ -12,15 +12,14 @@ export type Snapshot = Record<string, unknown> & { id?: number; version: number;
 const adapter = new PrismaPg({
   connectionString: process.env.PGURL,
   // SSL settings need to be disabled for local development
-  ssl:
-    process.env.NODE_ENV === 'development'
-      ? undefined
-      : {
-          ca: readFileSync(process.env.PGSSLROOTCERT!, 'utf8'),
-          cert: readFileSync(process.env.PGSSLCERT!, 'utf8'),
-          key: readFileSync(process.env.PGSSLKEY!, 'utf8'),
-          rejectUnauthorized: true,
-        },
+  ssl: process.env.PGSSLROOTCERT
+    ? {
+        ca: readFileSync(process.env.PGSSLROOTCERT!, 'utf8'),
+        cert: readFileSync(process.env.PGSSLCERT!, 'utf8'),
+        key: readFileSync(process.env.PGSSLKEY!, 'utf8'),
+        rejectUnauthorized: true,
+      }
+    : undefined,
 })
 
 const prisma = new PrismaClient({ adapter })
