@@ -71,8 +71,12 @@ spec:
         - /docs/**
         - /api/**
 
+  # postgres:
+  #   clusterName: statreg-api-test-db
+
+  uses:
   postgres:
-    clusterName: statreg-api-test-db
+    - name: statreg-api-db
 
   prometheus:
     enabled: true
