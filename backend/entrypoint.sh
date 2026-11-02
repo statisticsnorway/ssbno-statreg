@@ -15,6 +15,6 @@ openssl pkcs12 -export -out /tmp/pkcs12key.p12 -inkey "$PGSSLKEY" -in "$PGSSLCER
 export PGURL="postgresql://${PGUSER}@${PGHOST}:${PGPORT}/${PGDATABASE}"
 
 # Prisma CLI: TLS is configured through connection parameters.
-export PRISMA_DATABASE_URL="${PGURL}?sslrootcert=${PGSSLROOTCERT}&sslcert=${PGSSLCERT}&sslidentity=/tmp/pkcs12key.p12&sslaccept=strict"
+export PRISMA_DATABASE_URL="${PGURL}?sslmode=require&sslcert=${PGSSLROOTCERT}&sslidentity=/tmp/pkcs12key.p12&sslaccept=strict"
 
 exec "$@"
