@@ -5,6 +5,7 @@ import 'dotenv/config'
 import { asyncLocalStorage } from './context'
 import { getAllUsersFromCache } from './cache'
 import { RevisionNames } from '@ssbno-statreg/shared'
+import { readFileSync } from 'node:fs'
 
 export type Snapshot = Record<string, unknown> & { id?: number; version: number; date_created?: Date }
 
@@ -15,7 +16,10 @@ const adapter = new PrismaPg({
     process.env.NODE_ENV === 'development'
       ? undefined
       : {
-          rejectUnauthorized: false,
+          ca: readFileSync(process.env.PGSSLROOTCERT!, 'utf8'),
+          cert: readFileSync(process.env.PGSSLCERT!, 'utf8'),
+          key: readFileSync(process.env.PGSSLKEY!, 'utf8'),
+          rejectUnauthorized: true,
         },
 })
 
