@@ -3,3 +3,7 @@ type: Postgres
 name: statreg-api-db
 spec:
   majorVersion: '18'
+  resources:
+    cpu: 500m
+    memory: 4Gi
+    diskSize: 40Gi
