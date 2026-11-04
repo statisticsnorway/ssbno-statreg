@@ -78,14 +78,6 @@ spec:
     postgres:
       - name: statreg-api-db
 
-  resources:
-    requests:
-      cpu: 500m
-      memory: 4Gi
-    limits:
-      cpu: 500m
-      memory: 4Gi
-
   prometheus:
     enabled: true
     path: /metrics
