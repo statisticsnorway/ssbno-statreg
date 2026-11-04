@@ -4,6 +4,6 @@ name: statreg-api-db
 spec:
   majorVersion: '18'
   resources:
-    cpu: 500m
-    memory: 4Gi
-    diskSize: 40Gi
+    cpu: 100m
+    memory: 512Mi
+    diskSize: 10Gi
