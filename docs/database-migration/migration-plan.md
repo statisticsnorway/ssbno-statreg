@@ -74,9 +74,19 @@ Before performing the migration, we need to allow the prisma methods deleteMany 
 
 ### Run migration scripts
 
-11. `cd` into the `backend` directory and complete the remaining steps from there.
+11. Update the following environment variables:
 
-12. Delete all existing data in the database and load data from JSON files into PostgreSQL:
+    ```sh
+    export PGURL="postgresql://${PGUSER}@${PGHOST}:${PGPORT}/${PGDATABASE}"
+    ```
+
+    ```sh
+    export PRISMA_DATABASE_URL="${PGURL}?sslmode=require&sslcert=${PGSSLROOTCERT}&sslidentity=/tmp/pkcs12key.p12&sslaccept=strict"
+    ```
+
+12. `cd` into the `backend` directory and complete the remaining steps from there.
+
+13. Delete all existing data in the database and load data from JSON files into PostgreSQL:
 
     ```
     pnpm --filter backend exec tsx ./src/scripts/import-data-to-postgres.ts /tmp/STATREG_TABLES_JSON
@@ -87,7 +97,7 @@ Before performing the migration, we need to allow the prisma methods deleteMany 
     - sets the correct serial counter for all tables to ensure that autoincrement works.
     - transforms dates to the correct format and timezone.
 
-13. Verify each table in PostgreSQL against the JSON validation files:
+14. Verify each table in PostgreSQL against the JSON validation files:
 
     ```
     pnpm --filter backend exec tsx ./src/scripts/validate-import.ts /tmp/tableStatsExample.json
@@ -95,40 +105,44 @@ Before performing the migration, we need to allow the prisma methods deleteMany 
 
     This checks the number of rows and the highest and lowest IDs.
 
-14. Fill in missing division codes:
+15. Fill in missing division codes:
 
     ```
     pnpm --filter backend exec tsx ./src/scripts/addDivisionCodeToStatistic.ts
     ```
 
-15. (Optional) Update the approval status field(s) for Releases and Statistics if new statuses should be applied or we get any new status column. No script generated since current migration supports existing data fields. Double check that this still applies before running migration.
+16. (Optional) Update the approval status field(s) for Releases and Statistics if new statuses should be applied or we get any new status column. No script generated since current migration supports existing data fields. Double check that this still applies before running migration.
 
-16. Fill the new ResponsiblePerson table, deriving data from the existing Contact relation:
+17. Fill the new ResponsiblePerson table, deriving data from the existing Contact relation:
 
     ```
     pnpm --filter backend exec tsx ./src/scripts/addResponsiblePersonFromOldContact.ts
     ```
 
-17. Set consistent class_names in audit_log table:
+18. Set consistent class_names in audit_log table:
 
     ```
     pnpm --filter backend exec tsx ./src/scripts/rewriteAuditLogClassNames.ts
     ```
 
-18. Set consistent event_names in audit_log table:
+19. Set consistent event_names in audit_log table:
 
     ```
     pnpm --filter backend exec tsx ./src/scripts/rewriteAuditLogEventNames.ts
     ```
 
-19. Drop legacy tables that are no longer needed e.g. Division and Contacts. Drop assosiated columns with dropped tables as well. This can be done in a PR with an adjustment of Prisma schema a while after data migration.
+20. Drop legacy tables that are no longer needed e.g. Division and Contacts. Drop assosiated columns with dropped tables as well. This can be done in a PR with an adjustment of Prisma schema a while after data migration.
 
 **👌Nais cleanup:**
 
-20. Remove the temporary JSON files:
+21. Remove the temporary JSON files:
 
     ```sh
     rm -r /tmp/STATREG_TABLES_JSON
     ```
 
-21. Revert Nais manifest and `backend/src/lib/prisma.ts`. Remove the installed packages from `backend/package.json`. Open and merge a PR to revert the changes in Nais.
+    ```sh
+    rm -r /tmp/tableStatsExample.json
+    ```
+
+22. Revert Nais manifest and `backend/src/lib/prisma.ts`. Remove the installed packages from `backend/package.json`. Open and merge a PR to revert the changes in Nais.
