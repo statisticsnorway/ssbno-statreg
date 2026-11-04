@@ -3,6 +3,7 @@ set -eu
 
 : "${PGSSLKEY:?PGSSLKEY must be set}"
 : "${PGSSLCERT:?PGSSLCERT must be set}"
+: "${PGSSLROOTCERT:?PGSSLROOTCERT must be set}"
 : "${PGUSER:?PGUSER must be set}"
 : "${PGHOST:?PGHOST must be set}"
 : "${PGPORT:?PGPORT must be set}"
@@ -10,6 +11,10 @@ set -eu
 
 openssl pkcs12 -export -out /tmp/pkcs12key.p12 -inkey "$PGSSLKEY" -in "$PGSSLCERT" -passout pass:
 
-export PGURL="postgresql://${PGUSER}@${PGHOST}:${PGPORT}/${PGDATABASE}?sslcert=${PGSSLCERT}&sslidentity=/tmp/pkcs12key.p12&sslaccept=accept_invalid_certs"
+# node-postgres: TLS is configured explicitly in prisma.ts.
+export PGURL="postgresql://${PGUSER}@${PGHOST}:${PGPORT}/${PGDATABASE}"
+
+# Prisma CLI: TLS is configured through connection parameters.
+export PRISMA_DATABASE_URL="${PGURL}?sslmode=require&sslcert=${PGSSLROOTCERT}&sslidentity=/tmp/pkcs12key.p12&sslaccept=strict"
 
 exec "$@"
