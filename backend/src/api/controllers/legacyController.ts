@@ -1,6 +1,8 @@
 import { prisma } from '@/lib/prisma'
 import { handleErrors } from '@/lib/prismaErrors'
-import { getApprovedStatisticsXml, listReleasedPublications, listReleasedStatistics } from '@/services/legacyService'
+import { getApprovedStatisticsXml } from '@/services/legacy/approvedStatisticsXml'
+import { listReleasedPublications } from '@/services/legacy/releasedPublications'
+import { listReleasedStatistics } from '@/services/legacy/releasedStatistics'
 import { Router } from 'express'
 import { skipAuth } from '@/../plugins/authMiddleware'
 
