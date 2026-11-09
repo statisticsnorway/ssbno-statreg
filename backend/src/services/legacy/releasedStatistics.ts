@@ -35,7 +35,7 @@ export async function listReleasedStatistics(
       shortname: { select: { name: true } },
       division: { select: { code: true, name: true } },
       statistic_region_levels: {
-        select: { region_level: { select: { code: true } } },
+        select: { region_level: { select: { name: true } } },
       },
       variants: {
         orderBy: { id: 'asc' },
@@ -90,11 +90,7 @@ export async function listReleasedStatistics(
         ownerCode: owner.ownerCode,
         owner: owner.owner,
         status: statistic.status,
-        regionalLevels: LEGACY_REGIONS.filter((region) =>
-          statistic.statistic_region_levels.some(({ region_level }) => region_level.code === region.code)
-        )
-          .map((region) => region.name)
-          .join(';'),
+        regionalLevels: statistic.statistic_region_levels.map(({ region_level }) => region_level.name).join(';'),
         variants: statistic.variants
           .map((variant) => legacyVariantLabel(variant.frequency.name, variant.revision, variant.level_of_detail))
           .join(';'),
@@ -106,14 +102,6 @@ export async function listReleasedStatistics(
     }),
   }
 }
-
-const LEGACY_REGIONS = [
-  { code: 'L', name: 'Land' },
-  { code: 'K', name: 'Kommune' },
-  { code: 'F', name: 'Fylke' },
-  { code: 'LD', name: 'Landsdel' },
-  { code: 'BD', name: 'Bydel og krets' },
-]
 
 function legacyVariantLabel(frequency: string, revisionCode: string, detail: string | null) {
   if (detail?.trim()) return `${detail}, ${frequency.toLowerCase()}`
