@@ -86,7 +86,10 @@ export async function listReleasedPublications(
 }
 
 function toPublicationChanges(entries: LegacyAuditLog[]) {
-  const erEndret = entries.filter((entry) => entry.property_name === 'erEndret').at(-1)
+  const erEndret = entries.reduce<LegacyAuditLog | undefined>(
+    (latest, entry) => (entry.property_name === 'erEndret' ? entry : latest),
+    undefined
+  )
   const changes = [
     ...toChangeList(entries, 'tidspunkt'),
     ...toChangeList(
