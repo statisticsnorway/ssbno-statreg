@@ -11,11 +11,8 @@ export type LegacyChange = {
   comment: string
 }
 
-const OSLO = 'Europe/Oslo'
-
-// Timestamps are stored as Oslo local time without a zone. Convert that clock to UTC.
-export function toUtcDateString(date: Date): string {
-  return fromZonedTime(date.toISOString().split('.')[0]!, OSLO).toISOString().split('.')[0] + 'Z'
+export function toLegacyOsloDateString(date: Date): string {
+  return fromZonedTime(date.toISOString().slice(0, 19), 'Europe/Oslo').toISOString().split('.')[0]! + 'Z'
 }
 
 // Loads version history for many ids in one query, parsed like GET /versions.
@@ -51,7 +48,7 @@ export function toChangeList(versions: Version[], fields: Record<string, string>
           propertyName,
           oldValue: changed.old_value,
           newValue: changed.new_value,
-          modifiedDate: toUtcDateString(new Date(version.changed_at)),
+          modifiedDate: toLegacyOsloDateString(new Date(version.changed_at)),
           comment: version.comment || '',
         },
       ]
