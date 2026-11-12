@@ -1,8 +1,6 @@
 import type { ExtendedPrismaClient } from '@/lib/prisma'
 import { auditlogEntryToVersion } from '@/services/versionService'
 import type { Version } from '@ssbno-statreg/shared'
-import { fromZonedTime } from 'date-fns-tz'
-
 export type LegacyChange = {
   propertyName: string
   oldValue: string
@@ -12,7 +10,7 @@ export type LegacyChange = {
 }
 
 export function toLegacyOsloDateString(date: Date): string {
-  return fromZonedTime(date.toISOString().slice(0, 19), 'Europe/Oslo').toISOString().split('.')[0]! + 'Z'
+  return date.toISOString().slice(0, 19) + 'Z'
 }
 
 // Loads version history for many ids in one query, parsed like GET /versions.
