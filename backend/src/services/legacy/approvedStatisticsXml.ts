@@ -1,6 +1,7 @@
 import type { ExtendedPrismaClient } from '@/lib/prisma'
 import { ApprovalStatus } from '@ssbno-statreg/shared'
 
+//Legacy endpoint for TBML dropdown
 export async function getApprovedStatisticsXml(prisma: Pick<ExtendedPrismaClient, 'statistic'>): Promise<string> {
   const statistics = await prisma.statistic.findMany({
     where: {
