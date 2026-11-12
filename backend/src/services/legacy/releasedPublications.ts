@@ -1,7 +1,7 @@
 import type { ExtendedPrismaClient } from '@/lib/prisma'
 import { getDivisionFromCode } from '@/services/klassService'
 import { ApprovalStatus, RevisionNames } from '@ssbno-statreg/shared'
-import { getVersionsByObjectIds, toChangeList, toLegacyOsloDateString } from '@/services/legacy/legacyFormat'
+import { getVersionsByObjectIds, toChangeList, toLegacyUTCDateString } from '@/services/legacy/legacyFormat'
 
 export async function listReleasedPublications(prisma: Pick<ExtendedPrismaClient, 'release' | 'auditLog'>) {
   const releases = await prisma.release.findMany({
@@ -49,10 +49,10 @@ export async function listReleasedPublications(prisma: Pick<ExtendedPrismaClient
         id: release.id,
         frequency: release.variant.frequency.name,
         revision: RevisionNames[release.variant.revision as keyof typeof RevisionNames] ?? release.variant.revision,
-        publishTime: toLegacyOsloDateString(release.publish_time),
-        periodFrom: toLegacyOsloDateString(release.period_from),
-        periodTo: toLegacyOsloDateString(release.period_to),
-        dateCreated: toLegacyOsloDateString(release.date_created),
+        publishTime: toLegacyUTCDateString(release.publish_time),
+        periodFrom: toLegacyUTCDateString(release.period_from),
+        periodTo: toLegacyUTCDateString(release.period_to),
+        dateCreated: toLegacyUTCDateString(release.date_created),
         erEndretDesk: false,
         shortName: statistic.shortname.name,
         statisticId: statistic.id,

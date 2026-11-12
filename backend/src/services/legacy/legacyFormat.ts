@@ -9,7 +9,7 @@ export type LegacyChange = {
   comment: string
 }
 
-export function toLegacyOsloDateString(date: Date): string {
+export function toLegacyUTCDateString(date: Date): string {
   return date.toISOString().slice(0, 19) + 'Z'
 }
 
@@ -46,7 +46,7 @@ export function toChangeList(versions: Version[], fields: Record<string, string>
           propertyName,
           oldValue: changed.old_value,
           newValue: changed.new_value,
-          modifiedDate: toLegacyOsloDateString(new Date(version.changed_at)),
+          modifiedDate: toLegacyUTCDateString(new Date(version.changed_at)),
           comment: version.comment || '',
         },
       ]

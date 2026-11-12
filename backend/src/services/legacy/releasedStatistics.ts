@@ -1,7 +1,7 @@
 import type { ExtendedPrismaClient } from '@/lib/prisma'
 import { getDivisionFromCode } from '@/services/klassService'
 import { ApprovalStatus, RevisionNames } from '@ssbno-statreg/shared'
-import { getVersionsByObjectIds, toChangeList, toLegacyOsloDateString } from '@/services/legacy/legacyFormat'
+import { getVersionsByObjectIds, toChangeList, toLegacyUTCDateString } from '@/services/legacy/legacyFormat'
 
 export async function listReleasedStatistics(prisma: Pick<ExtendedPrismaClient, 'statistic' | 'auditLog'>) {
   const statistics = await prisma.statistic.findMany({
@@ -54,7 +54,7 @@ export async function listReleasedStatistics(prisma: Pick<ExtendedPrismaClient, 
         shortName: statistic.shortname.name,
         name: statistic.name,
         nameEN: statistic.name_en || null,
-        dateCreated: toLegacyOsloDateString(statistic.date_created),
+        dateCreated: toLegacyUTCDateString(statistic.date_created),
         lang: statistic.language,
         ownerCode,
         owner: getDivisionFromCode(ownerCode)?.name || '',
@@ -65,7 +65,7 @@ export async function listReleasedStatistics(prisma: Pick<ExtendedPrismaClient, 
           .join(';'),
         annualReporting: statistic.yearly_reporting,
         startYear: statistic.first_release ? statistic.first_release.toISOString().slice(0, 4) : '',
-        firstReleaseStatistic: firstCms ? toLegacyOsloDateString(firstCms) : null,
+        firstReleaseStatistic: firstCms ? toLegacyUTCDateString(firstCms) : null,
         changes: toChangeList(versionsById.get(statistic.id) ?? [], {
           name: 'statistikknavn',
           status: 'status',
