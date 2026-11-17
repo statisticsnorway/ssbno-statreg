@@ -25,9 +25,9 @@ export default function legacyController(router: Router) {
     }
   })
 
-  router.get('/legacy/publisering/listAllReleasedAsJson', skipAuth, async (_req, res) => {
+  router.get('/legacy/publisering/listAllReleasedAsJson', skipAuth, async (req, res) => {
     try {
-      const json = await listReleasedPublications(prisma)
+      const json = await listReleasedPublications(prisma, req.query.from?.toString(), req.query.to?.toString())
       res.json(json)
     } catch (error) {
       handleErrors(error, res)
