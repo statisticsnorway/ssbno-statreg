@@ -2,10 +2,10 @@
   {
     "old_table_name": "AUDIT_LOG",
     "new_table_name": "AuditLog",
-    "num_rows": 73036,
+    "num_rows": 76354,
     "old_id_column_name": "id",
     "id_low_value": 3664,
-    "id_high_value": 210490
+    "id_high_value": 220753
   },
   {
     "old_table_name": "FREKVENS",
@@ -18,34 +18,34 @@
   {
     "old_table_name": "KALENDER_DATO",
     "new_table_name": "Calender_date",
-    "num_rows": 20,
+    "num_rows": 27,
     "old_id_column_name": "id",
     "id_low_value": 196415,
-    "id_high_value": 207423
+    "id_high_value": 215624
   },
   {
     "old_table_name": "KONTAKT",
     "new_table_name": "Contact_DoNotUse",
-    "num_rows": 801,
+    "num_rows": 793,
     "old_id_column_name": "id",
     "id_low_value": 6163,
-    "id_high_value": 210362
+    "id_high_value": 220666
   },
   {
     "old_table_name": "KORTNAVN",
     "new_table_name": "Shortname",
-    "num_rows": 619,
+    "num_rows": 622,
     "old_id_column_name": "id",
     "id_low_value": 3662,
-    "id_high_value": 207923
+    "id_high_value": 216924
   },
   {
     "old_table_name": "PUBLISERING",
     "new_table_name": "Release",
-    "num_rows": 22811,
+    "num_rows": 23738,
     "old_id_column_name": "id",
     "id_low_value": 11159,
-    "id_high_value": 210444
+    "id_high_value": 220752
   },
   {
     "old_table_name": "REGIONALT_NIVA",
@@ -66,23 +66,23 @@
   {
     "old_table_name": "STATISTIKK",
     "new_table_name": "Statistic",
-    "num_rows": 619,
+    "num_rows": 622,
     "old_id_column_name": "id",
     "id_low_value": 3663,
-    "id_high_value": 207924
+    "id_high_value": 216926
   },
   {
     "old_table_name": "STATISTIKK_KONTAKTER",
     "new_table_name": "Statistic_contacts",
-    "num_rows": 957,
+    "num_rows": 1000,
     "old_id_column_name": "statistikk_id",
     "id_low_value": 3663,
-    "id_high_value": 207924
+    "id_high_value": 216926
   },
   {
     "old_table_name": "STATISTIKK_REGIONALE_NIVAER",
     "new_table_name": "Statistic_region_level",
-    "num_rows": 1090,
+    "num_rows": 1094,
     "old_id_column_name": "regionalt_niva_id",
     "id_low_value": 7,
     "id_high_value": 11
@@ -90,9 +90,9 @@
   {
     "old_table_name": "VARIANT",
     "new_table_name": "Variant",
-    "num_rows": 722,
+    "num_rows": 727,
     "old_id_column_name": "id",
     "id_low_value": 7783,
-    "id_high_value": 210487
+    "id_high_value": 216941
   }
 ]
