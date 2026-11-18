@@ -1,14 +1,23 @@
+import { parseDateOnly } from '@/lib/utils'
 import type { ExtendedPrismaClient } from '@/lib/prisma'
 import { getDivisionFromCode } from '@/services/klassService'
 import { ApprovalStatus, RevisionNames } from '@ssbno-statreg/shared'
 import { getVersionsByObjectIds, toChangeList, toLegacyUTCDateString } from '@/services/legacy/legacyFormat'
 
-export async function listReleasedPublications(prisma: Pick<ExtendedPrismaClient, 'release' | 'auditLog'>) {
+export async function listReleasedPublications(
+  prisma: Pick<ExtendedPrismaClient, 'release' | 'auditLog'>, 
+  from?: string,
+  to?: string
+) {
   const releases = await prisma.release.findMany({
     where: {
       desk_appoval_status: ApprovalStatus.ACCEPTED,
       archived: false,
       cancelled: false,
+      publish_time: {
+        gt: from ? parseDateOnly(from) : undefined,
+        lt: to ? parseDateOnly(to) : undefined,
+      },
     },
     select: {
       id: true,
