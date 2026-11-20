@@ -919,6 +919,25 @@ paths:
         default:
           $ref: '#/components/responses/Error'
 
+  /ping:
+    get:
+      summary: Check service and database availability
+      description: Returns success only when the database can be reached.
+      security: []
+      responses:
+        '200':
+          description: The service and database are available
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, message]
+                properties:
+                  status: { type: string }
+                  message: { type: string }
+        '503':
+          $ref: '#/components/responses/Error'
+
   /calendar:
     get:
       summary: Get status for all days in a period
