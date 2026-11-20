@@ -788,49 +788,6 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  '/ping': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /**
-     * Check service and database availability
-     * @description Returns success only when the database can be reached.
-     */
-    get: {
-      parameters: {
-        query?: never
-        header?: never
-        path?: never
-        cookie?: never
-      }
-      requestBody?: never
-      responses: {
-        /** @description The service and database are available */
-        200: {
-          headers: {
-            [name: string]: unknown
-          }
-          content: {
-            'application/json': {
-              status: string
-              message: string
-            }
-          }
-        }
-        503: components['responses']['Error']
-      }
-    }
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
   '/calendar': {
     parameters: {
       query?: never
