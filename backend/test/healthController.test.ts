@@ -39,7 +39,7 @@ describe('healthController', () => {
 
   test.each([
     new Error('database connection failed'),
-    new Prisma.PrismaClientKnownRequestError('database connection failed', { code: 'P2010', clientVersion: 'test' }),
+    new Prisma.PrismaClientKnownRequestError('database connection failed', { code: 'P2010', clientVersion: '1.0.0' }),
   ])('returns service unavailable without exposing database errors: %s', async (error) => {
     vi.mocked(prisma.$queryRaw).mockRejectedValue(error)
     const app = createHealthApp()
