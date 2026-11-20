@@ -9,6 +9,7 @@ import contactsController from '../controllers/contactsController'
 import divisionsController from '../controllers/divisionController'
 import frequenciesController from '../controllers/frequenciesController'
 import legacyController from '../controllers/legacyController'
+import healthCheckController from '../controllers/healthCheckController'
 
 const API_PREFIX = '/api'
 const ROUTE_METHODS = ['get', 'post', 'put', 'delete'] as const
@@ -24,6 +25,7 @@ const CONTROLLERS = [
   divisionsController,
   frequenciesController,
   legacyController,
+  healthCheckController,
 ]
 
 type PublicRouteRule = {
