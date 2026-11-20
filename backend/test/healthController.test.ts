@@ -2,7 +2,7 @@ import express, { Router } from 'express'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { Prisma } from '@/generated/prisma/client'
 import { prisma } from '@/lib/prisma'
-import healthController from '@/api/controllers/healthController'
+import healthController from '@/api/controllers/healthCheckController'
 import { invoke } from './helpers'
 
 vi.mock('@/lib/prisma', () => ({
