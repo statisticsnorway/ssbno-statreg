@@ -2,7 +2,7 @@ import express, { Router } from 'express'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { Prisma } from '@/generated/prisma/client'
 import { prisma } from '@/lib/prisma'
-import healthController from '@/api/controllers/healthCheckController'
+import healthCheckController from '@/api/controllers/healthCheckController'
 import { invoke } from './helpers'
 
 vi.mock('@/lib/prisma', () => ({
@@ -13,11 +13,11 @@ vi.mock('@/lib/prisma', () => ({
 
 function createHealthApp() {
   const router = Router()
-  healthController(router)
+  healthCheckController(router)
   return express().use('/api', router)
 }
 
-describe('healthController', () => {
+describe('healthCheckController', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })

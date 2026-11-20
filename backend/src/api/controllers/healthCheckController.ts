@@ -4,7 +4,7 @@ import { Router } from 'express'
 import { skipAuth } from '@/../plugins/authMiddleware'
 import { checkDatabaseHealth } from '@/services/healthService'
 
-export default function healthController(router: Router) {
+export default function healthCheckController(router: Router) {
   router.get('/ping', skipAuth, async (_req, res) => {
     try {
       await checkDatabaseHealth(prisma)
