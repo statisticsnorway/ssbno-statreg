@@ -33,7 +33,7 @@ We use [Nais Postgres](https://docs.ssb.cloud.nais.io/persistence/postgres/) in 
 
 ### Self-Service Backup
 
-Restoring to a previously backed-up database copy is a self service feature in Nais. It is [descibed and detailed in the Nais Postgres documentation](https://docs.ssb.cloud.nais.io/persistence/postgres/how-to/restore-point-in-time/), with examples and a [complete CLI overview](https://cli.nais.io/nais_postgres.html). Follow the Nais instruction to perform a restore. The process is, in short, to specify a database, environment and a timestamp, and a clone of the database will be created which you can switch the application spec over to. The process is non-destructive and relatively quick. In addition to the continous timeline snapshots, daily snaptshots of the database are created as well.
+Restoring to a previously backed-up database copy is a self service feature in Nais. It is [described and detailed in the Nais Postgres documentation](https://docs.ssb.cloud.nais.io/persistence/postgres/how-to/restore-point-in-time/), with examples and a [complete CLI overview](https://cli.nais.io/nais_postgres.html). Follow the Nais instruction to perform a restore. The process is, in short, to specify a database, environment and a timestamp, and a clone of the database will be created which you can switch the application spec over to. The process is non-destructive and relatively quick. In addition to the continuos timeline snapshots, daily snapshots of the database are created as well.
 
 ### Neat tricks
 
