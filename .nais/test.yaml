@@ -76,9 +76,7 @@ spec:
 
   uses:
     postgres:
-      # - name: statreg-api-db 
-      # This will be reverted as soon as it has been verified to work. 
-      - name: statreg-api-restored-db
+      - name: statreg-api-db 
 
   prometheus:
     enabled: true
