@@ -11,7 +11,7 @@ spec:
     resources:
       cpu: 200m
       diskSize: 2Gi
-      memory: 2Gi
+      memory: 5Gi
   database:
     collation: nb_NO
 
