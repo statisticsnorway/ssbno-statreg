@@ -13,6 +13,23 @@ export function toLegacyUTCDateString(date: Date): string {
   return date.toISOString().slice(0, 19) + 'Z'
 }
 
+export function toLegacyUTCDateOnlyString(date: Date): string {
+  const [day, month, year] = new Intl.DateTimeFormat('nb-NO', {
+    timeZone: 'Europe/Oslo',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  })
+    .format(date)
+    .split('.')
+
+  if (!year || !month || !day) {
+    throw new RangeError('Unable to format release period date')
+  }
+
+  return `${year}-${month}-${day}T00:00:00Z`
+}
+
 // Loads version history for many ids in one query, parsed like GET /versions.
 export async function getVersionsByObjectIds(
   className: string,
