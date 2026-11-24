@@ -1,6 +1,7 @@
 import type { ExtendedPrismaClient } from '@/lib/prisma'
 import { auditlogEntryToVersion } from '@/services/versionService'
 import type { Version } from '@ssbno-statreg/shared'
+import { formatInTimeZone, fromZonedTime } from 'date-fns-tz'
 export type LegacyChange = {
   propertyName: string
   oldValue: string
@@ -14,20 +15,8 @@ export function toLegacyUTCDateString(date: Date): string {
 }
 
 export function toLegacyUTCDateOnlyString(date: Date): string {
-  const [day, month, year] = new Intl.DateTimeFormat('nb-NO', {
-    timeZone: 'Europe/Oslo',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  })
-    .format(date)
-    .split('.')
-
-  if (!year || !month || !day) {
-    throw new RangeError('Unable to format release period date')
-  }
-
-  return `${year}-${month}-${day}T00:00:00Z`
+  const osloDate = formatInTimeZone(date, 'Europe/Oslo', 'yyyy-MM-dd')
+  return toLegacyUTCDateString(fromZonedTime(`${osloDate}T00:00:00`, 'Europe/Oslo'))
 }
 
 // Loads version history for many ids in one query, parsed like GET /versions.
