@@ -11,7 +11,7 @@ spec:
     resources:
       cpu: 200m
       diskSize: 2Gi
-      memory: 5Gi
+      memory: 2Gi
   database:
     collation: nb_NO
 
@@ -29,6 +29,12 @@ spec:
     - https://statistikkregisteret.intern.test.ssb.no
   image: '{{ image }}' # Injected from the GitHub Action
   port: 8080
+  resources:
+    requests:
+      cpu: 104m
+      memory: 512Mi
+    limits:
+      memory: 1376Mi
 
   envFrom:
     - secret: login-config-ssbno-statreg
