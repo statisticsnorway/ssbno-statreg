@@ -36,7 +36,8 @@ export async function listReleasedStatistics(prisma: Pick<ExtendedPrismaClient, 
   const versionsById = await getVersionsByObjectIds(
     'Statistic',
     statistics.map((statistic) => statistic.id),
-    prisma
+    prisma,
+    ['name', 'status']
   )
 
   return {

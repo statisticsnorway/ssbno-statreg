@@ -29,12 +29,6 @@ spec:
     - https://statistikkregisteret.intern.test.ssb.no
   image: '{{ image }}' # Injected from the GitHub Action
   port: 8080
-  resources:
-    requests:
-      cpu: 104m
-      memory: 512Mi
-    limits:
-      memory: 1376Mi
 
   envFrom:
     - secret: login-config-ssbno-statreg

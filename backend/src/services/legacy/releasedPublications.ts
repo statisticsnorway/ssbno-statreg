@@ -51,7 +51,8 @@ export async function listReleasedPublications(
   const versionsById = await getVersionsByObjectIds(
     'Release',
     releases.map((release) => release.id),
-    prisma
+    prisma,
+    ['publish_time']
   )
 
   return {

@@ -2,6 +2,9 @@ import type { ExtendedPrismaClient } from '@/lib/prisma'
 import { auditlogEntryToVersion } from '@/services/versionService'
 import type { Version } from '@ssbno-statreg/shared'
 import { formatInTimeZone, fromZonedTime } from 'date-fns-tz'
+
+const BATCH_SIZE = 250
+
 export type LegacyChange = {
   propertyName: string
   oldValue: string
@@ -19,24 +22,44 @@ export function toLegacyUTCDateOnlyString(date: Date): string {
   return toLegacyUTCDateString(fromZonedTime(`${osloDate}T00:00:00`, 'Europe/Oslo'))
 }
 
-// Loads version history for many ids in one query, parsed like GET /versions.
 export async function getVersionsByObjectIds(
   className: string,
   ids: number[],
-  prisma: Pick<ExtendedPrismaClient, 'auditLog'>
+  prisma: Pick<ExtendedPrismaClient, 'auditLog'>,
+  fields: string[]
 ) {
-  if (!ids.length) return new Map<number, Version[]>()
-
-  const entries = await prisma.auditLog.findMany({
-    where: { class_name: className, persisted_object_id: { in: ids } },
-    orderBy: { last_updated: 'desc' },
-  })
-
   const versionsById = new Map<number, Version[]>()
-  for (const entry of entries) {
-    const versions = versionsById.get(entry.persisted_object_id) ?? []
-    versions.push(auditlogEntryToVersion(entry))
-    versionsById.set(entry.persisted_object_id, versions)
+
+  for (let i = 0; i < ids.length; i += BATCH_SIZE) {
+    const batchIds = ids.slice(i, i + BATCH_SIZE)
+    let cursor: number | undefined
+
+    do {
+      const entries = await prisma.auditLog.findMany({
+        where: {
+          class_name: className,
+          persisted_object_id: { in: batchIds },
+          event_name: { notIn: ['create', 'delete'] },
+        },
+        orderBy: [{ last_updated: 'desc' }, { id: 'desc' }],
+        take: BATCH_SIZE,
+        cursor: cursor === undefined ? undefined : { id: cursor },
+        skip: cursor === undefined ? 0 : 1,
+      })
+
+      for (const entry of entries) {
+        const version = auditlogEntryToVersion(entry)
+        const changes = version.changed_values?.filter((change) => fields.includes(change.field_name))
+
+        if (!changes?.length) continue
+
+        const versions = versionsById.get(entry.persisted_object_id) ?? []
+        versions.push({ ...version, changed_values: changes })
+        versionsById.set(entry.persisted_object_id, versions)
+      }
+
+      cursor = entries.length === BATCH_SIZE ? entries.at(-1)?.id : undefined
+    } while (cursor !== undefined)
   }
   return versionsById
 }
