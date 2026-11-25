@@ -88,7 +88,6 @@ function getAuditLogBatches(
 function toReleaseVersion(entry: Prisma.AuditLogGetPayload<null>): Version {
   const version = auditlogEntryToVersion(entry)
 
-  // Historical publication changes are stored as individual audit entries.
   if (
     entry.property_name === 'tidspunkt' &&
     entry.old_value !== null &&
@@ -194,7 +193,6 @@ export async function getVersionsByObjectIds(
   return versionsById
 }
 
-// Turns version history into the dashboard changes list, using the old field names.
 export function toChangeList(versions: Version[], fields: Record<string, string>): LegacyChange[] {
   return versions.flatMap((version) =>
     (version.changed_values ?? []).flatMap((changed) => {
