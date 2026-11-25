@@ -1,4 +1,5 @@
 import type { ExtendedPrismaClient } from '@/lib/prisma'
+import type { Prisma } from '@/generated/prisma/client'
 import { auditlogEntryToVersion } from '@/services/versionService'
 import type { Version } from '@ssbno-statreg/shared'
 import { formatInTimeZone, fromZonedTime } from 'date-fns-tz'
@@ -22,6 +23,49 @@ export function toLegacyUTCDateOnlyString(date: Date): string {
   return toLegacyUTCDateString(fromZonedTime(`${osloDate}T00:00:00`, 'Europe/Oslo'))
 }
 
+function getAuditLogBatches(
+  className: string,
+  ids: number[],
+  prisma: Pick<ExtendedPrismaClient, 'auditLog'>
+): AsyncIterable<Prisma.AuditLogGetPayload<null>[]> {
+  return {
+    [Symbol.asyncIterator]() {
+      let offset = 0
+      let cursor: number | undefined
+
+      return {
+        async next() {
+          if (offset >= ids.length) {
+            return { done: true, value: undefined }
+          }
+
+          const entries = await prisma.auditLog.findMany({
+            where: {
+              class_name: className,
+              persisted_object_id: {
+                in: ids.slice(offset, offset + BATCH_SIZE),
+              },
+              event_name: { notIn: ['create', 'delete'] },
+            },
+            orderBy: [{ last_updated: 'desc' }, { id: 'desc' }],
+            take: BATCH_SIZE,
+            cursor: cursor === undefined ? undefined : { id: cursor },
+            skip: cursor === undefined ? 0 : 1,
+          })
+
+          cursor = entries.length === BATCH_SIZE ? entries.at(-1)?.id : undefined
+
+          if (cursor === undefined) {
+            offset += BATCH_SIZE
+          }
+
+          return { done: false, value: entries }
+        },
+      }
+    },
+  }
+}
+
 export async function getVersionsByObjectIds(
   className: string,
   ids: number[],
@@ -30,36 +74,17 @@ export async function getVersionsByObjectIds(
 ) {
   const versionsById = new Map<number, Version[]>()
 
-  for (let i = 0; i < ids.length; i += BATCH_SIZE) {
-    const batchIds = ids.slice(i, i + BATCH_SIZE)
-    let cursor: number | undefined
+  for await (const entries of getAuditLogBatches(className, ids, prisma)) {
+    for (const entry of entries) {
+      const version = auditlogEntryToVersion(entry)
+      const changes = version.changed_values?.filter((change) => fields.includes(change.field_name))
 
-    do {
-      const entries = await prisma.auditLog.findMany({
-        where: {
-          class_name: className,
-          persisted_object_id: { in: batchIds },
-          event_name: { notIn: ['create', 'delete'] },
-        },
-        orderBy: [{ last_updated: 'desc' }, { id: 'desc' }],
-        take: BATCH_SIZE,
-        cursor: cursor === undefined ? undefined : { id: cursor },
-        skip: cursor === undefined ? 0 : 1,
-      })
+      if (!changes?.length) continue
 
-      for (const entry of entries) {
-        const version = auditlogEntryToVersion(entry)
-        const changes = version.changed_values?.filter((change) => fields.includes(change.field_name))
-
-        if (!changes?.length) continue
-
-        const versions = versionsById.get(entry.persisted_object_id) ?? []
-        versions.push({ ...version, changed_values: changes })
-        versionsById.set(entry.persisted_object_id, versions)
-      }
-
-      cursor = entries.length === BATCH_SIZE ? entries.at(-1)?.id : undefined
-    } while (cursor !== undefined)
+      const versions = versionsById.get(entry.persisted_object_id) ?? []
+      versions.push({ ...version, changed_values: changes })
+      versionsById.set(entry.persisted_object_id, versions)
+    }
   }
   return versionsById
 }
