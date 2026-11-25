@@ -93,7 +93,7 @@ export async function fetchAllUsers(token: string): Promise<EntraUser[]> {
 
   const users: EntraUser[] = []
   let nextUrl: string | null =
-    `${GRAPH_BASE_URL}/users?$filter=accountEnabled eq true and userType eq 'Member'&$select=displayName,businessPhones,mail,userPrincipalName&$top=999`
+    `${GRAPH_BASE_URL}/users?$filter=userType eq 'Member'&$select=displayName,businessPhones,mail,userPrincipalName&$top=999`
 
   while (nextUrl) {
     const response = await fetch(nextUrl, {
