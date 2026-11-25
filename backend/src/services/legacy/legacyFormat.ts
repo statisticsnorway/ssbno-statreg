@@ -85,6 +85,48 @@ function getAuditLogBatches(
   }
 }
 
+function toReleaseVersion(entry: Prisma.AuditLogGetPayload<null>): Version {
+  const version = auditlogEntryToVersion(entry)
+
+  // Historical publication changes are stored as individual audit entries.
+  if (
+    entry.property_name === 'tidspunkt' &&
+    entry.old_value !== null &&
+    entry.new_value !== null
+  ) {
+    return {
+      ...version,
+      changed_values: [
+        {
+          field_name: 'publish_time',
+          old_value: entry.old_value,
+          new_value: entry.new_value,
+        },
+      ],
+    }
+  }
+
+  return {
+    ...version,
+    changed_values: version.changed_values?.map((change) => ({
+      ...change,
+      field_name: change.field_name === 'tidspunkt' ? 'publish_time' : change.field_name,
+    })),
+  }
+}
+
+function attachReleaseComments(
+  versionsById: Map<number, Version[]>,
+  commentsByChange: Map<string, string>
+) {
+  for (const [objectId, versions] of versionsById) {
+    for (const version of versions) {
+      const key = `${objectId}:${version.changed_at}`
+      version.comment = version.comment || commentsByChange.get(key) || ''
+    }
+  }
+}
+
 export async function getVersionsByObjectIds(
   className: string,
   ids: number[],
@@ -92,12 +134,27 @@ export async function getVersionsByObjectIds(
   fields: string[]
 ) {
   const versionsById = new Map<number, Version[]>()
+  const commentsByChange = new Map<string, string>()
   const objectIds = new Set(ids)
+  const isRelease = className === 'Release'
+  const toVersion = isRelease ? toReleaseVersion : auditlogEntryToVersion
 
   for await (const entries of getAuditLogBatches(className, ids, prisma)) {
     for (const entry of entries) {
       if (!objectIds.has(entry.persisted_object_id)) continue
-      const version = auditlogEntryToVersion(entry)
+
+      // Historical comments are stored separately from publication date changes.
+      if (isRelease && entry.property_name === 'internKommentar') {
+        const key = `${entry.persisted_object_id}:${entry.last_updated.toISOString()}`
+
+        if (entry.new_value && !commentsByChange.has(key)) {
+          commentsByChange.set(key, entry.new_value)
+        }
+
+        continue
+      }
+
+      const version = toVersion(entry)
       const changes = version.changed_values?.filter(
         (change) => fields.includes(change.field_name)
       )
@@ -108,6 +165,9 @@ export async function getVersionsByObjectIds(
       versions.push({ ...version, changed_values: changes })
       versionsById.set(entry.persisted_object_id, versions)
     }
+  }
+  if (isRelease) {
+    attachReleaseComments(versionsById, commentsByChange)
   }
 
   for (const versions of versionsById.values()) {
