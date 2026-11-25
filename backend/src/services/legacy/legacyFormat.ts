@@ -127,6 +127,38 @@ function attachReleaseComments(
   }
 }
 
+function collectAuditVersion(
+  entry: Prisma.AuditLogGetPayload<null>,
+  fields: string[],
+  versionsById: Map<number, Version[]>,
+  commentsByChange: Map<string, string>,
+  isRelease: boolean
+) {
+  if (isRelease && entry.property_name === 'internKommentar') {
+    const key = `${entry.persisted_object_id}:${entry.last_updated.toISOString()}`
+
+    if (entry.new_value && !commentsByChange.has(key)) {
+      commentsByChange.set(key, entry.new_value)
+    }
+
+    return
+  }
+
+  const version = isRelease
+    ? toReleaseVersion(entry)
+    : auditlogEntryToVersion(entry)
+
+  const changes = version.changed_values?.filter(
+    (change) => fields.includes(change.field_name)
+  )
+
+  if (!changes?.length) return
+
+  const versions = versionsById.get(entry.persisted_object_id) ?? []
+  versions.push({ ...version, changed_values: changes })
+  versionsById.set(entry.persisted_object_id, versions)
+}
+
 export async function getVersionsByObjectIds(
   className: string,
   ids: number[],
@@ -137,35 +169,21 @@ export async function getVersionsByObjectIds(
   const commentsByChange = new Map<string, string>()
   const objectIds = new Set(ids)
   const isRelease = className === 'Release'
-  const toVersion = isRelease ? toReleaseVersion : auditlogEntryToVersion
 
   for await (const entries of getAuditLogBatches(className, ids, prisma)) {
     for (const entry of entries) {
       if (!objectIds.has(entry.persisted_object_id)) continue
 
-      // Historical comments are stored separately from publication date changes.
-      if (isRelease && entry.property_name === 'internKommentar') {
-        const key = `${entry.persisted_object_id}:${entry.last_updated.toISOString()}`
-
-        if (entry.new_value && !commentsByChange.has(key)) {
-          commentsByChange.set(key, entry.new_value)
-        }
-
-        continue
-      }
-
-      const version = toVersion(entry)
-      const changes = version.changed_values?.filter(
-        (change) => fields.includes(change.field_name)
+      collectAuditVersion(
+        entry,
+        fields,
+        versionsById,
+        commentsByChange,
+        isRelease
       )
-
-      if (!changes?.length) continue
-
-      const versions = versionsById.get(entry.persisted_object_id) ?? []
-      versions.push({ ...version, changed_values: changes })
-      versionsById.set(entry.persisted_object_id, versions)
     }
   }
+
   if (isRelease) {
     attachReleaseComments(versionsById, commentsByChange)
   }
