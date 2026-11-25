@@ -8,6 +8,14 @@ import {
   toLegacyUTCDateString,
 } from '@/services/legacy/legacyFormat'
 
+const REGIONAL_LEVEL_ORDER: Record<string, number> = {
+  Land: 0,
+  Fylke: 1,
+  Landsdel: 2,
+  'Bydel og krets': 3,
+  Kommune: 4,
+}
+
 async function loadReleasedStatistics(prisma: Pick<ExtendedPrismaClient, 'statistic' | 'auditLog'>) {
   const statistics = await prisma.statistic.findMany({
     where: { desk_appoval_status: ApprovalStatus.ACCEPTED },
@@ -18,6 +26,12 @@ async function loadReleasedStatistics(prisma: Pick<ExtendedPrismaClient, 'statis
       language: true,
       status: true,
       division_code: true,
+      division: {
+        select: {
+          code: true,
+          name: true,
+        },
+      },
       yearly_reporting: true,
       first_release: true,
       date_created: true,
@@ -54,6 +68,7 @@ async function loadReleasedStatistics(prisma: Pick<ExtendedPrismaClient, 'statis
         return earliest
       }, null)
       const ownerCode = statistic.division_code || ''
+      const legacyOwner = statistic.division?.code === ownerCode ? statistic.division.name : ''
 
       return {
         id: statistic.id,
@@ -63,9 +78,11 @@ async function loadReleasedStatistics(prisma: Pick<ExtendedPrismaClient, 'statis
         dateCreated: toLegacyUTCDateString(statistic.date_created),
         lang: statistic.language,
         ownerCode,
-        owner: getDivisionFromCode(ownerCode)?.name || '',
+        owner: getDivisionFromCode(ownerCode)?.name || legacyOwner || '',
         status: statistic.status,
-        regionalLevels: statistic.statistic_region_levels.map(({ region_level }) => region_level.name).join(';'),
+        regionalLevels: statistic.statistic_region_levels
+          .map(({ region_level }) => region_level.name)
+          .sort((a, b) => (REGIONAL_LEVEL_ORDER[a] ?? Infinity) - (REGIONAL_LEVEL_ORDER[b] ?? Infinity))          .join(';'),
         variants: statistic.variants
           .map((variant) => legacyVariantLabel(variant.frequency.name, variant.revision, variant.level_of_detail))
           .join(';'),
