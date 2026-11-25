@@ -3,13 +3,14 @@ import type { ExtendedPrismaClient } from '@/lib/prisma'
 import { getDivisionFromCode } from '@/services/klassService'
 import { ApprovalStatus, RevisionNames } from '@ssbno-statreg/shared'
 import {
+  deduplicateLegacyRequests,
   getVersionsByObjectIds,
   toChangeList,
   toLegacyUTCDateOnlyString,
   toLegacyUTCDateString,
 } from '@/services/legacy/legacyFormat'
 
-export async function listReleasedPublications(
+async function loadReleasedPublications(
   prisma: Pick<ExtendedPrismaClient, 'release' | 'auditLog'>,
   from?: string,
   to?: string
@@ -79,3 +80,8 @@ export async function listReleasedPublications(
     }),
   }
 }
+
+export const listReleasedPublications = deduplicateLegacyRequests(
+  loadReleasedPublications,
+  (from, to) => JSON.stringify([from || null, to || null])
+)

@@ -1,9 +1,14 @@
 import type { ExtendedPrismaClient } from '@/lib/prisma'
 import { getDivisionFromCode } from '@/services/klassService'
 import { ApprovalStatus, RevisionNames } from '@ssbno-statreg/shared'
-import { getVersionsByObjectIds, toChangeList, toLegacyUTCDateString } from '@/services/legacy/legacyFormat'
+import {
+  deduplicateLegacyRequests,
+  getVersionsByObjectIds,
+  toChangeList,
+  toLegacyUTCDateString,
+} from '@/services/legacy/legacyFormat'
 
-export async function listReleasedStatistics(prisma: Pick<ExtendedPrismaClient, 'statistic' | 'auditLog'>) {
+async function loadReleasedStatistics(prisma: Pick<ExtendedPrismaClient, 'statistic' | 'auditLog'>) {
   const statistics = await prisma.statistic.findMany({
     where: { desk_appoval_status: ApprovalStatus.ACCEPTED },
     select: {
@@ -81,3 +86,8 @@ function legacyVariantLabel(frequency: string, revisionCode: string, detail: str
   const revision = RevisionNames[revisionCode as keyof typeof RevisionNames] ?? revisionCode
   return !revision || revision === 'Ingen' ? frequency : `${frequency}, ${revision.toLowerCase()}`
 }
+
+export const listReleasedStatistics = deduplicateLegacyRequests(
+  loadReleasedStatistics,
+  () => 'statistics'
+)

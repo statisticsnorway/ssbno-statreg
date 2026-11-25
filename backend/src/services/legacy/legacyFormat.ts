@@ -4,7 +4,7 @@ import { auditlogEntryToVersion } from '@/services/versionService'
 import type { Version } from '@ssbno-statreg/shared'
 import { formatInTimeZone, fromZonedTime } from 'date-fns-tz'
 
-const BATCH_SIZE = 250
+const BATCH_SIZE = 1000
 
 export type LegacyChange = {
   propertyName: string
@@ -12,6 +12,31 @@ export type LegacyChange = {
   newValue: string
   modifiedDate: string
   comment: string
+}
+
+export function deduplicateLegacyRequests<P extends object, A extends unknown[], T>(
+  load: (prisma: P, ...args: A) => Promise<T>,
+  getKey: (...args: A) => string
+) {
+  const requests = new WeakMap<P, Map<string, Promise<T>>>()
+
+  return (prisma: P, ...args: A): Promise<T> => {
+    const key = getKey(...args)
+    const pending = requests.get(prisma) ?? new Map<string, Promise<T>>()
+
+    requests.set(prisma, pending)
+
+    const existing = pending.get(key)
+    if (existing) return existing
+
+    const request = load(prisma, ...args).finally(() => {
+      pending.delete(key)
+    })
+
+    pending.set(key, request)
+
+    return request
+  }
 }
 
 export function toLegacyUTCDateString(date: Date): string {
@@ -30,34 +55,28 @@ function getAuditLogBatches(
 ): AsyncIterable<Prisma.AuditLogGetPayload<null>[]> {
   return {
     [Symbol.asyncIterator]() {
-      let offset = 0
       let cursor: number | undefined
+      let finished = ids.length === 0
 
       return {
         async next() {
-          if (offset >= ids.length) {
+          if (finished) {
             return { done: true, value: undefined }
           }
 
           const entries = await prisma.auditLog.findMany({
             where: {
               class_name: className,
-              persisted_object_id: {
-                in: ids.slice(offset, offset + BATCH_SIZE),
-              },
               event_name: { notIn: ['create', 'delete'] },
+              persisted_object_id: ids.length <= 5000 ? { in: ids } : undefined,
+              id: cursor === undefined ? undefined : { lt: cursor },
             },
-            orderBy: [{ last_updated: 'desc' }, { id: 'desc' }],
+            orderBy: { id: 'desc' },
             take: BATCH_SIZE,
-            cursor: cursor === undefined ? undefined : { id: cursor },
-            skip: cursor === undefined ? 0 : 1,
           })
 
-          cursor = entries.length === BATCH_SIZE ? entries.at(-1)?.id : undefined
-
-          if (cursor === undefined) {
-            offset += BATCH_SIZE
-          }
+          finished = entries.length < BATCH_SIZE
+          cursor = entries.at(-1)?.id
 
           return { done: false, value: entries }
         },
@@ -73,11 +92,15 @@ export async function getVersionsByObjectIds(
   fields: string[]
 ) {
   const versionsById = new Map<number, Version[]>()
+  const objectIds = new Set(ids)
 
   for await (const entries of getAuditLogBatches(className, ids, prisma)) {
     for (const entry of entries) {
+      if (!objectIds.has(entry.persisted_object_id)) continue
       const version = auditlogEntryToVersion(entry)
-      const changes = version.changed_values?.filter((change) => fields.includes(change.field_name))
+      const changes = version.changed_values?.filter(
+        (change) => fields.includes(change.field_name)
+      )
 
       if (!changes?.length) continue
 
@@ -85,6 +108,10 @@ export async function getVersionsByObjectIds(
       versions.push({ ...version, changed_values: changes })
       versionsById.set(entry.persisted_object_id, versions)
     }
+  }
+
+  for (const versions of versionsById.values()) {
+    versions.sort((a, b) => b.changed_at.localeCompare(a.changed_at))
   }
   return versionsById
 }
