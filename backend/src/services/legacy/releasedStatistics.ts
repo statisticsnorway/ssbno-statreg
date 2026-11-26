@@ -1,9 +1,22 @@
 import type { ExtendedPrismaClient } from '@/lib/prisma'
 import { getDivisionFromCode } from '@/services/klassService'
 import { ApprovalStatus, RevisionNames } from '@ssbno-statreg/shared'
-import { getVersionsByObjectIds, toChangeList, toLegacyUTCDateString } from '@/services/legacy/legacyFormat'
+import {
+  deduplicateLegacyRequests,
+  getVersionsByObjectIds,
+  toChangeList,
+  toLegacyUTCDateString,
+} from '@/services/legacy/legacyFormat'
 
-export async function listReleasedStatistics(prisma: Pick<ExtendedPrismaClient, 'statistic' | 'auditLog'>) {
+const REGIONAL_LEVEL_ORDER: Record<string, number> = {
+  Land: 0,
+  Fylke: 1,
+  Landsdel: 2,
+  'Bydel og krets': 3,
+  Kommune: 4,
+}
+
+async function loadReleasedStatistics(prisma: Pick<ExtendedPrismaClient, 'statistic' | 'auditLog'>) {
   const statistics = await prisma.statistic.findMany({
     where: { desk_appoval_status: ApprovalStatus.ACCEPTED },
     select: {
@@ -13,6 +26,12 @@ export async function listReleasedStatistics(prisma: Pick<ExtendedPrismaClient, 
       language: true,
       status: true,
       division_code: true,
+      division: {
+        select: {
+          code: true,
+          name: true,
+        },
+      },
       yearly_reporting: true,
       first_release: true,
       date_created: true,
@@ -36,7 +55,8 @@ export async function listReleasedStatistics(prisma: Pick<ExtendedPrismaClient, 
   const versionsById = await getVersionsByObjectIds(
     'Statistic',
     statistics.map((statistic) => statistic.id),
-    prisma
+    prisma,
+    ['name', 'status']
   )
 
   return {
@@ -48,6 +68,7 @@ export async function listReleasedStatistics(prisma: Pick<ExtendedPrismaClient, 
         return earliest
       }, null)
       const ownerCode = statistic.division_code || ''
+      const legacyOwner = statistic.division?.code === ownerCode ? statistic.division.name : ''
 
       return {
         id: statistic.id,
@@ -57,9 +78,11 @@ export async function listReleasedStatistics(prisma: Pick<ExtendedPrismaClient, 
         dateCreated: toLegacyUTCDateString(statistic.date_created),
         lang: statistic.language,
         ownerCode,
-        owner: getDivisionFromCode(ownerCode)?.name || '',
+        owner: getDivisionFromCode(ownerCode)?.name || legacyOwner || '',
         status: statistic.status,
-        regionalLevels: statistic.statistic_region_levels.map(({ region_level }) => region_level.name).join(';'),
+        regionalLevels: statistic.statistic_region_levels
+          .map(({ region_level }) => region_level.name)
+          .sort((a, b) => (REGIONAL_LEVEL_ORDER[a] ?? Infinity) - (REGIONAL_LEVEL_ORDER[b] ?? Infinity))          .join(';'),
         variants: statistic.variants
           .map((variant) => legacyVariantLabel(variant.frequency.name, variant.revision, variant.level_of_detail))
           .join(';'),
@@ -80,3 +103,8 @@ function legacyVariantLabel(frequency: string, revisionCode: string, detail: str
   const revision = RevisionNames[revisionCode as keyof typeof RevisionNames] ?? revisionCode
   return !revision || revision === 'Ingen' ? frequency : `${frequency}, ${revision.toLowerCase()}`
 }
+
+export const listReleasedStatistics = deduplicateLegacyRequests(
+  loadReleasedStatistics,
+  () => 'statistics'
+)

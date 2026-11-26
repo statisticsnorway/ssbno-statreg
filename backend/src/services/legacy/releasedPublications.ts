@@ -2,10 +2,16 @@ import { parseDateOnly } from '@/lib/utils'
 import type { ExtendedPrismaClient } from '@/lib/prisma'
 import { getDivisionFromCode } from '@/services/klassService'
 import { ApprovalStatus, RevisionNames } from '@ssbno-statreg/shared'
-import { getVersionsByObjectIds, toChangeList, toLegacyUTCDateString } from '@/services/legacy/legacyFormat'
+import {
+  deduplicateLegacyRequests,
+  getVersionsByObjectIds,
+  toChangeList,
+  toLegacyUTCDateOnlyString,
+  toLegacyUTCDateString,
+} from '@/services/legacy/legacyFormat'
 
-export async function listReleasedPublications(
-  prisma: Pick<ExtendedPrismaClient, 'release' | 'auditLog'>, 
+async function loadReleasedPublications(
+  prisma: Pick<ExtendedPrismaClient, 'release' | 'auditLog'>,
   from?: string,
   to?: string
 ) {
@@ -46,7 +52,8 @@ export async function listReleasedPublications(
   const versionsById = await getVersionsByObjectIds(
     'Release',
     releases.map((release) => release.id),
-    prisma
+    prisma,
+    ['publish_time']
   )
 
   return {
@@ -59,8 +66,8 @@ export async function listReleasedPublications(
         frequency: release.variant.frequency.name,
         revision: RevisionNames[release.variant.revision as keyof typeof RevisionNames] ?? release.variant.revision,
         publishTime: toLegacyUTCDateString(release.publish_time),
-        periodFrom: toLegacyUTCDateString(release.period_from),
-        periodTo: toLegacyUTCDateString(release.period_to),
+        periodFrom: toLegacyUTCDateOnlyString(release.period_from),
+        periodTo: toLegacyUTCDateOnlyString(release.period_to),
         dateCreated: toLegacyUTCDateString(release.date_created),
         erEndretDesk: false,
         shortName: statistic.shortname.name,
@@ -73,3 +80,8 @@ export async function listReleasedPublications(
     }),
   }
 }
+
+export const listReleasedPublications = deduplicateLegacyRequests(
+  loadReleasedPublications,
+  (from, to) => JSON.stringify([from || null, to || null])
+)
