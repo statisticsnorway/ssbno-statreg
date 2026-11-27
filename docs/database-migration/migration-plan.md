@@ -24,13 +24,20 @@ Before performing the migration, we need to allow the prisma methods deleteMany 
 
 4.  In `backend/src/lib/prisma.ts`, comment out the overrides that block `createMany`, `updateMany`, and `deleteMany`, so the migration scripts can use these operations.
 
-5.  Install additional dependencies required by the migration scripts:
+5.  Install the migration-only JSON parser:
 
     ```bash
     cd backend
     pnpm add JSONStream
-    pnpm add date-fns-tz
     ```
+
+    Before deploying, run the batch-writer regression tests from the repository root:
+
+    ```bash
+    pnpm exec vitest run --project backend backend/test/import-data-to-postgres.test.ts
+    ```
+
+    These tests cover the 1,000-row batch boundary, including 1,001 rows and a final partial batch. They use standard Node.js streams and require neither JSONStream nor a database.
 
 **👌Nais preparation (6-10):**
 
@@ -145,4 +152,4 @@ Before performing the migration, we need to allow the prisma methods deleteMany 
     rm -r /tmp/tableStatsExample.json
     ```
 
-22. Revert Nais manifest and `backend/src/lib/prisma.ts`. Remove the installed packages from `backend/package.json`. Open and merge a PR to revert the changes in Nais.
+22. Revert Nais manifest and `backend/src/lib/prisma.ts`. Remove the migration-only JSONStream package from `backend/package.json` and update the lockfile. Open and merge a PR to revert the changes in Nais.
