@@ -31,10 +31,10 @@ Before performing the migration, we need to allow the prisma methods deleteMany 
     pnpm add JSONStream
     ```
 
-    Before deploying, run the batch-writer regression tests from the repository root:
+    Before deploying, run the batch-writer regression tests (works from any directory in the repo):
 
     ```bash
-    pnpm exec vitest run --project backend backend/test/import-data-to-postgres.test.ts
+    pnpm -w run test:backend --run import-data-to-postgres
     ```
 
     These tests cover the 1,000-row batch boundary, including 1,001 rows and a final partial batch. They use standard Node.js streams and require neither JSONStream nor a database.
