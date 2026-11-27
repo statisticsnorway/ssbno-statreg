@@ -1,8 +1,84 @@
-import { describe, test, expect } from 'vitest'
+import { afterEach, beforeEach, describe, test, expect, vi } from 'vitest'
+import { Readable } from 'node:stream'
+import { pipeline } from 'node:stream/promises'
+import { setTimeout } from 'node:timers/promises'
+import { createImportBatchWriter } from '../src/scripts/create-import-batch-writer'
 // import { parseDateOnly, parseOldOsloDateStringAsUTC } from '../src/scripts/import-data-to-postgres'
 
-// Tests for database migration util. Commented out since code uses not currently installed npm packages
+describe('createImportBatchWriter()', () => {
+  type StatisticContact = { statistic_id: number; contact_id: number }
 
+  beforeEach(() => {
+    vi.spyOn(console, 'log').mockImplementation(() => {})
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  test.each([
+    { rows: 0, batchSizes: [] },
+    { rows: 999, batchSizes: [999] },
+    { rows: 1000, batchSizes: [1000] },
+    { rows: 1001, batchSizes: [1000, 1] },
+    { rows: 2000, batchSizes: [1000, 1000] },
+    { rows: 2001, batchSizes: [1000, 1000, 1] },
+    { rows: 10001, batchSizes: [...Array<number>(10).fill(1000), 1] },
+  ])('imports $rows rows exactly once in order', async ({ rows, batchSizes }) => {
+    const items = Array.from({ length: rows }, (_, index) => ({ statistikk_id: index + 1, kontakt_id: index + 2 }))
+
+    const batches: StatisticContact[][] = []
+    let activeWrites = 0
+    let maxActiveWrites = 0
+
+    const writer = createImportBatchWriter<StatisticContact>(
+      'STATISTIKK_KONTAKTER.json',
+      async (batch) => {
+        activeWrites++
+        maxActiveWrites = Math.max(maxActiveWrites, activeWrites)
+        // Simulate an asynchronous database insert before reading the batch.
+        await setTimeout(1)
+        batches.push([...batch])
+        activeWrites--
+      },
+      (raw) => ({ statistic_id: Number(raw.statistikk_id), contact_id: Number(raw.kontakt_id) })
+    )
+    await pipeline(Readable.from(items), writer)
+
+    expect(batches.map((batch) => batch.length)).toEqual(batchSizes)
+    expect(batches.flat()).toEqual(
+      items.map((item) => ({ statistic_id: item.statistikk_id, contact_id: item.kontakt_id }))
+    )
+    expect(maxActiveWrites).toBe(rows === 0 ? 0 : 1)
+    expect(activeWrites).toBe(0)
+  })
+
+  test.each([1, 2])('propagates an insert failure in batch %i', async (failingBatch) => {
+    const items = Array.from({ length: 1001 }, (_, id) => ({ id }))
+    const error = new Error('Database insert failed')
+    const pushBatch = vi.fn(async () => {
+      await setTimeout(1)
+      if (pushBatch.mock.calls.length === failingBatch) throw error
+    })
+
+    const writer = createImportBatchWriter('STATISTIKK_KONTAKTER.json', pushBatch, (raw) => raw)
+    await expect(pipeline(Readable.from(items), writer)).rejects.toBe(error)
+    expect(pushBatch).toHaveBeenCalledTimes(failingBatch)
+  })
+
+  test('propagates a mapping error without flushing a partial batch', async () => {
+    const error = new Error('Invalid row')
+    const pushBatch = vi.fn(async () => {})
+    const writer = createImportBatchWriter('STATISTIKK_KONTAKTER.json', pushBatch, () => {
+      throw error
+    })
+
+    await expect(pipeline(Readable.from([{ id: 1 }]), writer)).rejects.toBe(error)
+    expect(pushBatch).not.toHaveBeenCalled()
+  })
+})
+
+// Date parser tests remain disabled because importing the CLI also starts the migration.
 describe('parseOldOsloDateStringAsUTC()', () => {
   test('dummy test to be able to comment out all tests', () => {
     expect(true).toBeTruthy()

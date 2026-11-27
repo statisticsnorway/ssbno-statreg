@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 // Run with: npm exec tsx ./src/scripts/import-data-to-postgres.ts ~/Documents/STATREG_TABLES_JSON
-// Remember to install required packages JSONStream and date-fns-tz in advance
+// Install the migration-only JSONStream package before running.
 
 import { prisma } from '../lib/prisma'
 import fs from 'node:fs'
@@ -9,8 +9,7 @@ import path from 'node:path'
 import { pipeline } from 'node:stream/promises'
 import JSONStream from 'JSONStream'
 import { fromZonedTime } from 'date-fns-tz'
-
-const BATCH_SIZE = 1000
+import { createImportBatchWriter } from './create-import-batch-writer'
 
 // ---- Utilities --------------------------------------------------------------
 
@@ -98,32 +97,17 @@ export function parseDateOnly(dateString: string): Date | undefined {
   return new Date(isoDateGMT)
 }
 
-async function runImportStream<T extends Record<string, any>>(
+async function runImportStream<T>(
   filePath: string,
-  pushBatch: (batch: T[]) => Promise<any>,
-  mapFn: (raw: any) => T
+  pushBatch: (batch: T[]) => Promise<unknown>,
+  mapFn: (raw: Record<string, unknown>) => T
 ) {
-  const batch: T[] = []
-  let count = 0
-
-  await pipeline(fs.createReadStream(filePath), JSONStream.parse('results.*.items.*'), async function (source: any) {
-    for await (const value of source) {
-      const mapped = mapFn(value)
-      batch.push(mapped)
-      count++
-
-      if (batch.length >= BATCH_SIZE) {
-        await pushBatch(batch)
-        console.log(`Inserted ${batch.length} from ${path.basename(filePath)} (total: ${count})`)
-        batch.length = 0
-      }
-    }
-  })
-
-  if (batch.length > 0) {
-    await pushBatch(batch)
-    console.log(`Inserted final ${batch.length} from ${path.basename(filePath)} (total: ${count})`)
-  }
+  // JSONStream is a legacy stream; use a writable sink rather than async iteration.
+  await pipeline(
+    fs.createReadStream(filePath),
+    JSONStream.parse('results.*.items.*'),
+    createImportBatchWriter(filePath, pushBatch, mapFn)
+  )
 }
 
 // ============================================================================
